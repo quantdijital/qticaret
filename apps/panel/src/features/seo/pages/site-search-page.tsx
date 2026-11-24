@@ -5,9 +5,9 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
-import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCan } from "@/features/auth/api/staff"
@@ -18,22 +18,23 @@ import {
   useDeleteSynonym,
 } from "@/features/seo/api/synonyms"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
-import type { SiteSearchSearch } from "@/features/seo/search"
+import type { SeoSearch, SiteSearchSearch } from "@/features/seo/search"
 import { SynonymDialog } from "@/features/seo/site-search/synonym-dialog"
 import { useSynonymText } from "@/features/seo/site-search/synonym-text"
 import { SynonymsTable } from "@/features/seo/site-search/synonyms-table"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 
-const route = getRouteApi("/_auth/seo/search")
+const route = getRouteApi("/_auth/settings/seo")
 const S = "seo.siteSearch"
 
 /**
- * Site search (adr/0056): the shop's synonym groups, any term of which
- * finds the others in the storefront's search. The owner and admins keep
- * them (`searchSynonyms`, as the API decides); the other roles read them.
+ * Settings > SEO's site search tab (adr/0056): the shop's synonym groups,
+ * any term of which finds the others in the storefront's search. The owner
+ * and admins keep them (`searchSynonyms`, as the API decides); the other
+ * roles read them.
  */
-export function SiteSearchPage() {
+export function SiteSearchTab() {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
@@ -52,10 +53,11 @@ export function SiteSearchPage() {
 
   const setSearch = (next: Partial<SiteSearchSearch>) => {
     void navigate({
-      to: "/seo/search",
-      search: (previous: SiteSearchSearch) => {
+      to: "/settings/seo",
+      search: (previous: SeoSearch) => {
         const merged = { ...previous, ...next }
         return {
+          part: "site-search",
           q: merged.q === "" ? undefined : merged.q,
           page: merged.page && merged.page > 1 ? merged.page : undefined,
         }
@@ -71,21 +73,21 @@ export function SiteSearchPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        back={{ to: "/seo", label: t("nav.seo") }}
+    <>
+      <SectionCard
         title={t(`${S}.title`)}
         description={t(`${S}.description`)}
+        className="overflow-hidden"
+        flush
         action={
           canWrite ? (
-            <Button onClick={add}>
+            <Button size="sm" onClick={add}>
               <Plus />
               {t(`${S}.add`)}
             </Button>
           ) : undefined
         }
-      />
-      <section className="overflow-hidden rounded-lg border bg-card shadow-card">
+      >
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
           <SearchInput
             value={q}
@@ -145,7 +147,7 @@ export function SiteSearchPage() {
             }}
           />
         ) : null}
-      </section>
+      </SectionCard>
       <SynonymDialog
         open={dialog.open}
         onOpenChange={(open) => {
@@ -174,6 +176,6 @@ export function SiteSearchPage() {
           setDeleting(null)
         }}
       />
-    </div>
+    </>
   )
 }

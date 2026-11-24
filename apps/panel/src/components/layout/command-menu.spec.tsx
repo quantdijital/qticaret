@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { STAFF_KEY } from "@/features/auth/api/staff"
 import type { GlobalSearch } from "@/features/search/api"
 import { CommandMenu } from "./command-menu"
 
@@ -30,8 +31,10 @@ const FOUND: GlobalSearch = {
   ],
 }
 
-function renderMenu(onOpenChange = vi.fn()) {
+function renderMenu(onOpenChange = vi.fn(), can: Record<string, boolean> = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  // What the shell asked already: the menu only reads it
+  client.setQueryData(STAFF_KEY, { user_id: "user_1", role: "owner", can })
   render(
     <QueryClientProvider client={client}>
       <CommandMenu open onOpenChange={onOpenChange} />
@@ -73,6 +76,55 @@ describe("CommandMenu search", () => {
 
     expect(screen.getByText("Siparişler")).toBeInTheDocument()
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("CommandMenu SEO tabs (Settings > SEO, the owner, 2026-11-23)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    fetchMock.mockResolvedValue(FOUND)
+    vi.clearAllMocks()
+  })
+
+  it("offers none before anything is typed, and SEO is no page of its own", () => {
+    renderMenu()
+
+    expect(screen.queryByText(/^SEO · /)).toBeNull()
+    expect(screen.queryByText("SEO")).toBeNull()
+  })
+
+  it("finds a tab by its name and opens it", async () => {
+    const user = userEvent.setup()
+    const onOpenChange = renderMenu()
+
+    await user.type(screen.getByRole("combobox"), "yönlendir")
+    await user.click(await screen.findByText("SEO · Yönlendirmeler"))
+
+    expect(navigate).toHaveBeenCalledWith({ to: "/settings/seo", search: { part: "redirects" } })
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+  })
+
+  it("lists every tab under SEO, its settings only for a role that may change them", async () => {
+    const user = userEvent.setup()
+    renderMenu()
+
+    await user.type(screen.getByRole("combobox"), "seo")
+
+    expect(await screen.findByText("SEO · Genel bakış")).toBeInTheDocument()
+    for (const name of ["Öneriler", "Denetim", "Yönlendirmeler", "Site araması"]) {
+      expect(screen.getByText(`SEO · ${name}`)).toBeInTheDocument()
+    }
+    expect(screen.queryByText("SEO · Adresler")).toBeNull()
+  })
+
+  it("adds the settings tabs for the owner", async () => {
+    const user = userEvent.setup()
+    renderMenu(vi.fn(), { settings: true })
+
+    await user.type(screen.getByRole("combobox"), "seo")
+
+    expect(await screen.findByText("SEO · Adresler")).toBeInTheDocument()
+    expect(screen.getByText("SEO · Arama motorları")).toBeInTheDocument()
   })
 })
 

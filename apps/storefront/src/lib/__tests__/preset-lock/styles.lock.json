@@ -62,6 +62,10 @@
       "file": "header-catalog.css"
     },
     {
+      "sha256": "253b3bdeef09b79a141e9b6176e8b68b593b7d30f190704ae76b91c3d3f31479",
+      "file": "hero-full.css"
+    },
+    {
       "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
       "file": "listing-text.css"
     },
@@ -142,7 +146,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "6c795284e62dfc4c46d9dff5cbee9ca387e0444743a1480dc1ea4c240381cf87",
+      "sha256": "b3227a0594c620548d9489fc9def28923aeae446a913f6e753f91e51a757f3b1",
       "file": "styles.css"
     },
     {

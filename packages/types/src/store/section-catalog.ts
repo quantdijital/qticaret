@@ -13,6 +13,7 @@
 
 import type { StoreLayoutImage, StoreLayoutLink } from "./layout.js"
 import type { SliderSettings } from "./section-scroller.js"
+import type { StoreHeroFull } from "./section-hero-full.js"
 
 /**
  * H17's own parts: the category list's rows (shown at most), the tiles
@@ -134,7 +135,8 @@ export function bandsRise(bands: readonly BandBounds[]): boolean {
  * buttons and a picture; drawn as today's graphite stage (`standard`, and
  * absent from a backend before variants) or, as `category_list` (H17,
  * adr/0049 Ek 2026-11-14 §3.2), beside the shop's category list and two
- * category tiles, with quick links under it. A reader takes a variant it
+ * category tiles, with quick links under it; or, as `full_image`
+ * (adr/0077 §9), the photograph as the whole opening. A reader takes a variant it
  * does not know as `standard` and leaves the other's fields unread.
  */
 export type StoreHeroSection = {
@@ -146,7 +148,7 @@ export type StoreHeroSection = {
   text: string | null
   links: StoreLayoutLink[]
   image: StoreLayoutImage | null
-} & ({ variant?: "standard" } | StoreHeroCatalog)
+} & ({ variant?: "standard" } | StoreHeroCatalog | StoreHeroFull)
 
 /** H17's own fields; the categories' names, pictures and counts are the storefront's to fetch. */
 export interface StoreHeroCatalog {

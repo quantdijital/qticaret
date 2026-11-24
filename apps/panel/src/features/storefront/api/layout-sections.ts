@@ -33,6 +33,7 @@ import type {
   CategoriesIconsFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
+import type { StoreHeroFull } from "@qticaret/types"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { StripGallerySection } from "@/features/storefront/api/layout-strips"
@@ -100,8 +101,8 @@ interface HeroBase extends BodySectionBase {
   image: LayoutImage | null
 }
 
-/** Today's graphite opening, or H17's category list with its own fields. */
-export type HeroSection = HeroBase & ({ variant: "standard" } | HeroCatalogFields)
+/** Today's graphite opening, H17's category list or the full image (adr/0077 §9), each with its own fields. */
+export type HeroSection = HeroBase & ({ variant: "standard" } | HeroCatalogFields | StoreHeroFull)
 
 /** The price bands strip: 2–4 rising bands, each band's products picked on the server. */
 export interface PriceBandsSection extends BodySectionBase {

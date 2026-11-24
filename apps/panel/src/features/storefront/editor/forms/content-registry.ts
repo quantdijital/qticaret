@@ -9,6 +9,7 @@ import {
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { heroFullFields } from "./hero-full-registry"
 import { iconFields } from "./icon-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
 import { kitDefaultsOf, turnsAsSlider } from "./slider-kit"
@@ -66,6 +67,12 @@ export type ContentField =
   | "collage_layout"
   | "collage_phone"
   | "departures_layout"
+  | "action"
+  | "search_position"
+  | "show_trust"
+  | "align"
+  | "scrim"
+  | "edge"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -238,7 +245,7 @@ export function contentFields(section: AnySection): RegistryField[] {
               ? sliderFields(section.id, section, kitDefaultsOf(section))
               : []),
           ]
-        : []
+        : heroFullFields(section, CONTENT_IDS.content)
     case "google_rating":
       return [
         entry(section, "excerpts", `${G}.excerpts`),
