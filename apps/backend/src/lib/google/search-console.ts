@@ -4,6 +4,7 @@ import type { HttpClient, HttpClientOptions } from "../clients"
 import { isProviderError } from "../errors"
 import { parseEnv } from "../env"
 import { GOOGLE_PROVIDER, googleHosts } from "./oauth"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * Search Console and CrUX for the shop's SEO (F10.11, docs/13 §10),
@@ -222,6 +223,10 @@ export function createSearchConsoleApi(
 export type SearchConsoleApi = ReturnType<typeof createSearchConsoleApi>
 
 let shared: { key: string; api: SearchConsoleApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per set of hosts (a fake server's in tests). */
 export function searchConsoleApi(): SearchConsoleApi {

@@ -1,3 +1,4 @@
+import { measureGrowth } from "@qticaret/testing"
 import { excerpt, plainText, priceSentence, resolveSeoPayload } from "../resolve"
 import type { SeoShop, SeoSubject } from "../resolve"
 
@@ -325,11 +326,23 @@ describe("text helpers", () => {
   })
 
   it("reads a long run of openings in one pass", () => {
-    const started = performance.now()
-    plainText("<!-- ".repeat(50_000))
-    plainText("<script>".repeat(50_000))
-    plainText(`${"<!-- a --> ".repeat(50_000)}<style `.repeat(2))
-    expect(performance.now() - started).toBeLessThan(1000)
+    // By how the time grows with the input (8× the input: ~8× when linear,
+    // ~64× when quadratic), not a wall-clock budget (adr/0081)
+    for (const input of [
+      (n: number) => "<!-- ".repeat(n),
+      (n: number) => "<script>".repeat(n),
+      (n: number) => `${"<!-- a --> ".repeat(n)}<style `.repeat(2),
+    ]) {
+      const growth = measureGrowth(
+        (n) => {
+          const text = input(n)
+          return () => plainText(text)
+        },
+        6_250,
+        { rounds: 3 }
+      )
+      expect(growth).toMatchObject({ linear: true })
+    }
   })
 
   it("says one price or where a range starts", () => {

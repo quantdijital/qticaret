@@ -11,8 +11,11 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 
-// The order of the jobs, and the backend's tests cut in three (ci-unit.sh)
-const GROUPS = ["backend 1/3", "backend 2/3", "backend 3/3", "panel", "storefront", "packages"]
+// The order of the jobs. The backend's tests ran as three shards while they
+// ran in one process; with three jest workers a job (ci-unit.sh) one job
+// holds them in about the time a shard took (adr/0081 Ek 2026-11-25).
+// "backend 1/2", "backend 2/2" here cuts them again (ci-unit.sh reads it)
+const GROUPS = ["backend", "panel", "storefront", "packages"]
 const OWN_GROUP = {
   "@qticaret/backend": "backend",
   "@qticaret/panel": "panel",

@@ -24,6 +24,7 @@ import { challengePassed, demandChallenge } from "./challenge"
 import { clientBucket, sharedRateLimitStore } from "./rate-limit"
 import { clientIp } from "./client-ip"
 import { rejectRequest } from "./reject"
+import { registerProcessCache } from "../../lib/cache/process-caches"
 
 /**
  * Cloudflare Turnstile at the risky gates (adr/0044 Ek 2026-11-24). The
@@ -43,6 +44,11 @@ const TOKEN_TTL_MS = 5 * 60 * 1000
 
 let client: HttpClient | undefined
 let keys: TurnstileKeys | null | undefined
+// A new client (and circuit breaker) and keys per spec file of a bundled test run
+registerProcessCache(() => {
+  client = undefined
+  keys = undefined
+})
 
 /** Tests give a client of their own, and change the environment between runs. */
 export function resetTurnstile(given?: HttpClient): void {

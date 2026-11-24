@@ -2,12 +2,17 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { controlPlaneConfig } from "../lib/control-plane/config"
 import { sendUsageReport } from "../lib/control-plane/report"
 import { errorSummary, logger } from "../lib/logging"
+import { registerProcessCache } from "../lib/cache/process-caches"
 
 /** The report's rhythm (adr/0061 §5.4): every hour, and once shortly after boot. */
 export const REPORT_EVERY_MS = 60 * 60 * 1000
 
 // This process's last report; none yet after a boot, so the first run reports
 let lastReport: number | null = null
+// A bundled test run's next spec file starts as after a boot
+registerProcessCache(() => {
+  lastReport = null
+})
 
 /** Whether a run at `now` reports: the first after boot, then hourly (a minute's slack). */
 export function reportDue(last: number | null, now: number): boolean {

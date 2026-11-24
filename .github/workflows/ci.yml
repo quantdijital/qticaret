@@ -143,7 +143,7 @@ jobs:
 
   # The unit tests, a group to a job, side by side (they took 19 minutes one
   # after another inside one job, adr/0081). Only the groups the push reaches
-  # open (scripts/ci-unit-groups.mjs; all six on dev, main and a full run):
+  # open (scripts/ci-unit-groups.mjs; all four on dev, main and a full run):
   # none reached, the job is skipped, which the gate counts as green
   unit:
     name: Unit tests (${{ matrix.group }})
@@ -337,27 +337,22 @@ jobs:
           fi
 
   e2e:
-    name: Panel e2e (smoke, accessibility ${{ matrix.shard }})
+    name: Panel e2e (smoke, accessibility ${{ matrix.group }}/2)
     needs: changes
     # Skipped on a branch that touches only the storefront and its theme packages
     if: needs.changes.outputs.e2e == 'true'
     runs-on: ubuntu-24.04
-    # In one job the 132 tests took 11.6 minutes on two workers after ~2 minutes
-    # of setup, the longest link of a full run (adr/0081 Ek). Playwright's
-    # --shard splits by whole files (fullyParallel is off) in equal test
-    # counts: 1/2 is a11y.e2e.ts alone (106 tests, 6.8 minutes on one worker),
-    # 2/2 every other file (24 tests). Each job signs its own temporary admin
-    # in and out (the setup and teardown projects run in both).
+    # In one job the 132 tests took 11.6 minutes on two workers after ~3 minutes
+    # of setup, the longest link of a full run (adr/0081 Ek). Two jobs, the
+    # files split by measured time (E2E_GROUP, apps/panel/e2e/playwright.config.ts:
+    # group 1 the files named there, group 2 every other file; an even count,
+    # as --shard cuts, left one job at 6 minutes and the other at 11 to 14).
+    # Each job signs its own temporary admin in and out (setup and teardown).
     timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # id: the shard in an artifact's name, which cannot hold a "/"
-          - shard: "1/2"
-            id: "1-2"
-          - shard: "2/2"
-            id: "2-2"
+        group: ["1", "2"]
     # A real backend on a fresh database with the demo shop; the panel, built and
     # served by `vite preview`, proxies to it (apps/panel/e2e)
     services:
@@ -493,12 +488,14 @@ jobs:
           done
           tail -n 100 panel.log
           exit 1
-      - run: pnpm --filter @qticaret/panel test:e2e --shard=${{ matrix.shard }}
+      - run: pnpm --filter @qticaret/panel test:e2e
+        env:
+          E2E_GROUP: ${{ matrix.group }}
       - name: Keep the report of a failed run
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: e2e-report-${{ matrix.id }}
+          name: e2e-report-${{ matrix.group }}
           # The report and traces live in dot directories, which are left out by default.
           # Not the backend's log: the artifact is public and nothing proves every line
           # of a dev server's log (Medusa's own included) goes through our redaction

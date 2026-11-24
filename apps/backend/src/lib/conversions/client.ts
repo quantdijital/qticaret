@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../clients"
 import type { HttpClient, HttpClientOptions } from "../clients"
 import { parseEnv } from "../env"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * Meta's Conversions API and GA4's Measurement Protocol (F10.9, adr/0038
@@ -135,6 +136,10 @@ export function createConversionsApi(
 export type ConversionsApi = ReturnType<typeof createConversionsApi>
 
 let shared: { key: string; api: ConversionsApi } | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per set of hosts; a fake server's in tests (`META_GRAPH_BASE_URL`, `GA4_BASE_URL`). */
 export function conversionsApi(): ConversionsApi {

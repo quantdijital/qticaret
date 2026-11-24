@@ -1,4 +1,4 @@
-import { fakeSecret } from "@qticaret/testing"
+import { fakeSecret, measureGrowth } from "@qticaret/testing"
 import { isProviderError } from "../../errors/errors"
 import { openAiCompatibleText } from "../connectors/openai-compatible"
 import {
@@ -18,6 +18,23 @@ import { TEST_TASK } from "../registry/tasks"
 
 // Generous for a slow CI machine, far below what a quadratic scan of these inputs takes
 const QUICK_MS = 1_000
+
+// A scan of the whole input is judged by how its time grows (eight times the
+// input, about eight times as long when linear, sixty-four when quadratic),
+// not by a wall-clock budget a loaded CI runner can miss (adr/0081). The
+// largest input is the one the old budget timed. A refusal before any scan
+// keeps QUICK_MS.
+function linear(work: (text: string) => unknown, input: (size: number) => string, size: number) {
+  const growth = measureGrowth(
+    (n) => {
+      const text = input(n)
+      return () => work(text)
+    },
+    size,
+    { rounds: 3 }
+  )
+  expect(growth).toMatchObject({ linear: true })
+}
 
 function timed<T>(run: () => T): { result: T; ms: number } {
   const start = performance.now()
@@ -57,9 +74,8 @@ describe("model output bounds (O1, O2, D4)", () => {
     expect(withoutThinking("Sonuç<think>never closed")).toBe("Sonuç")
     expect(withoutThinking("plain")).toBe("plain")
 
-    const { result, ms } = timed(() => withoutThinking("<think>".repeat(200_000)))
-    expect(result).toBe("")
-    expect(ms).toBeLessThan(QUICK_MS)
+    expect(withoutThinking("<think>".repeat(200_000))).toBe("")
+    linear(withoutThinking, (n) => "<think>".repeat(n), 25_000)
     // Under the ceiling, thinking that never closes leaves nothing to offer
     expect(readCompletion(bodyOf("<think>".repeat(100)))).toMatchObject({
       ok: false,
@@ -69,15 +85,14 @@ describe("model output bounds (O1, O2, D4)", () => {
 
   it("cleans long runs of newlines, spaces and fences quickly", () => {
     for (const hostile of [
-      "\n".repeat(200_000),
-      `${" ".repeat(200_000)}x`,
-      " \n".repeat(100_000),
-      "```\n".repeat(50_000),
-      "<a".repeat(100_000),
+      (n: number) => "\n".repeat(n),
+      (n: number) => `${" ".repeat(n)}x`,
+      (n: number) => " \n".repeat(n / 2),
+      (n: number) => "```\n".repeat(n / 4),
+      (n: number) => "<a".repeat(n / 2),
     ]) {
-      const { result, ms } = timed(() => suggestionText(hostile))
-      expect(ms).toBeLessThan(QUICK_MS)
-      expect(result.length).toBeLessThanOrEqual(MAX_SUGGESTION_CHARS)
+      expect(suggestionText(hostile(200_000)).length).toBeLessThanOrEqual(MAX_SUGGESTION_CHARS)
+      linear(suggestionText, hostile, 25_000)
     }
     expect(suggestionText("Bir\n\n\n   \nİki")).toBe("Bir\nİki")
   })
@@ -88,9 +103,12 @@ describe("model output bounds (O1, O2, D4)", () => {
     expect(suggestionProblems(TEST_TASK, long)).toEqual(["length"])
     expect(suggestionProblems(TEST_TASK, "a".repeat(TEST_TASK.maxLength + 1))).toEqual(["length"])
 
-    const huge = timed(() => suggestionProblems(TEST_TASK, "a@".repeat(100_000)))
-    expect(huge.result).toEqual(["length"])
-    expect(huge.ms).toBeLessThan(QUICK_MS)
+    expect(suggestionProblems(TEST_TASK, "a@".repeat(100_000))).toEqual(["length"])
+    linear(
+      (text) => suggestionProblems(TEST_TASK, text),
+      (n) => "a@".repeat(n),
+      12_500
+    )
   })
 
   it("refuses what is left of a tag that never closed", () => {
@@ -138,8 +156,12 @@ describe("counts and cost (D1)", () => {
 describe("prompt bounds (D2, D3)", () => {
   it("filters a very long value quickly, and still filters before the final cut", () => {
     const hostile = `${"a.".repeat(500_000)}@`
-    const { result, ms } = timed(() => promptData({ name: hostile, description: hostile }))
-    expect(ms).toBeLessThan(QUICK_MS)
+    const result = promptData({ name: hostile, description: hostile })
+    linear(
+      (text) => promptData({ name: text, description: text }),
+      (n) => `${"a.".repeat(n)}@`,
+      62_500
+    )
     expect(Array.from(result["name"] as string).length).toBeLessThanOrEqual(301)
 
     const edge = promptData({ name: `${"x".repeat(295)} 0532 123 45 67` })

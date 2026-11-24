@@ -5,12 +5,20 @@
 # group only the packages the push can reach run (scripts/ci-changes.sh).
 set -euo pipefail
 
-# "backend 2/3": the backend's tests are many (760 files, one at a time for
-# the Redis they share), so they are cut into shards, a job each
+# "backend 2/3": the backend's tests can be cut (scripts/ci-unit-groups.mjs)
+# into shards, a job each; today they are one job
 group="${1%% *}"
 shard=""
 [ "$1" != "$group" ] && shard="${1#* }"
 filter="${TURBO_FILTER:-}"
+
+# In each shard, three jest workers on the runner's four cores (apps/backend
+# test:unit; unset, as on a laptop, it keeps one process, --runInBand). The
+# unit tests that reach Redis key it by a random prefix, servers listen on
+# port 0 and files go to mkdtemp folders: nothing shared between workers
+if [ "$group" = "backend" ]; then
+  export TEST_UNIT_WORKERS="${TEST_UNIT_WORKERS:-3}"
+fi
 
 # shellcheck disable=SC2086
 all="$(pnpm --silent turbo run test $filter --dry=json | node -e '

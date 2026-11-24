@@ -8,6 +8,7 @@ import type { SmtpTransport } from "./smtp"
 import { smtpAccountOf } from "./smtp-account"
 import type { SmtpAccount } from "./smtp-account"
 import type { EmailTransport } from "./transports"
+import { registerProcessCache } from "../../cache/process-caches"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -27,6 +28,10 @@ export async function shopSmtpAccount(container: Container): Promise<SmtpAccount
 }
 
 let built: { key: string; transport: SmtpTransport } | undefined
+// A new transport per spec file of a bundled test run
+registerProcessCache(() => {
+  built = undefined
+})
 
 /** One transport per account as saved: a changed account (or password) builds a new one. */
 export function smtpTransportFor(account: SmtpAccount): SmtpTransport {
