@@ -2,7 +2,7 @@
   "note": "Digests of packages/themes/atolye/src/**/*.css; written by `pnpm lock:presets`",
   "files": [
     {
-      "sha256": "dc3cb7473aa09dc50c4d45a274690ce124cf9d094e615055175c994911a327bf",
+      "sha256": "35c6bc23beaafdb21a1874516eeaa3c90838f3a1ac12ede968843c88fa44adff",
       "file": "banner.css"
     },
     {

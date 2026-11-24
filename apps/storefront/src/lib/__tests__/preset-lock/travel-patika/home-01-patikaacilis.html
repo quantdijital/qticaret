@@ -52,7 +52,7 @@
       <form
         role="search"
         aria-label="Ürün ara"
-        class="rounded-tile border border-rule bg-field text-left text-text shadow-float-edged w-full max-w-5xl"
+        class="rounded-tile border border-rule bg-field text-left text-text shadow-float-edged w-full"
         action="/arama"
         method="get"
       >
@@ -131,9 +131,11 @@
           </label>
         </fieldset>
         <div class="flex flex-col gap-2 p-2 md:flex-row md:items-center">
-          <div class="flex min-w-0 flex-1 flex-col md:flex-row md:items-stretch">
+          <div
+            class="grid min-w-0 grid-cols-2 gap-2 md:flex md:flex-1 md:flex-row md:items-stretch md:gap-0"
+          >
             <label
-              class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+              class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 md:gap-3 md:border-0 md:border-l md:px-3 md:py-2.5 md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus col-span-2"
             >
               <svg
                 width="24"
@@ -171,10 +173,10 @@
             <div
               role="group"
               aria-label="Tarih"
-              class="flex min-w-0 flex-col border-t border-rule md:flex-[2.4] md:flex-row md:border-t-0 md:border-l"
+              class="flex min-w-0 max-md:contents md:flex-[2.4] md:flex-row md:border-l md:border-rule lg:flex-[3]"
             >
               <label
-                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 md:gap-3 md:border-0 md:border-l md:px-3 md:py-2.5 md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
               >
                 <svg
                   width="24"
@@ -198,7 +200,7 @@
                 </span>
               </label>
               <label
-                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 md:gap-3 md:border-0 md:border-l md:px-3 md:py-2.5 md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
               >
                 <svg
                   width="24"
@@ -222,7 +224,7 @@
                 </span>
               </label>
               <label
-                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 md:gap-3 md:border-0 md:border-l md:px-3 md:py-2.5 md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
               >
                 <svg
                   width="24"
@@ -283,7 +285,7 @@
               </label>
             </div>
             <label
-              class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+              class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 md:gap-3 md:border-0 md:border-l md:px-3 md:py-2.5 md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
             >
               <svg
                 width="24"

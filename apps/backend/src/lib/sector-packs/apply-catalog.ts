@@ -9,7 +9,8 @@ import type { ApplyContext } from "./context"
  * parent is there before its children. Made through Medusa's workflow, so
  * the catalog's own hook claims each one's address (docs/13 §2); made
  * **hidden** (`is_active: false`): the storefront shows a category with
- * its image, and the shop decides which it sells. A handle already here is
+ * its image, and the shop decides which it sells; one the pack marks
+ * `visible` (its presets lean on it) is made shown. A handle already here is
  * the shop's category, kept; a child whose parent is gone is skipped.
  */
 export async function applyCategories(context: ApplyContext): Promise<void> {
@@ -41,7 +42,7 @@ export async function applyCategories(context: ApplyContext): Promise<void> {
             {
               name: category.name,
               handle: category.handle,
-              is_active: false,
+              is_active: category.visible === true,
               ...(parentId ? { parent_category_id: parentId } : {}),
               ...(category.description ? { description: category.description } : {}),
             },

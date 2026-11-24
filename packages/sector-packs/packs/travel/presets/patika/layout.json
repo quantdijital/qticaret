@@ -317,8 +317,8 @@
       "ends_at": null,
       "variant": "strip",
       "title": "Yol notları e-postanızda",
-      "text": "Yeni rotalar ve kalkışlar, ayda birkaç kez.",
-      "description": null,
+      "text": null,
+      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
       "joined": true
     }
   ]

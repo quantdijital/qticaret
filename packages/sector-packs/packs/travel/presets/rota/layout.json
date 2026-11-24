@@ -70,7 +70,7 @@
       "starts_at": null,
       "ends_at": null,
       "title": "Yaklaşan kalkışlar",
-      "intro": "Önümüzdeki haftaların kalkışları ve kalan yerler. Tarihinizi seçip yerinizi ayırtın.",
+      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
       "source": { "kind": "all" },
       "limit": 6,
       "layout": "list"

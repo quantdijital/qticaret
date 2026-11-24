@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
 import type { ShopMarkView, TrustBadgeView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import { deliveryFacts, productShipping } from "../product-shipping"
+import { deliveryFacts, productShipping, promisesFor } from "../product-shipping"
 import type { ProductShippingInput } from "../product-shipping"
 
 /*
@@ -150,5 +150,18 @@ describe("the product's shipping card", () => {
     expect(productShipping(input({ product: product({ kind: "digital" }) }))).toBeNull()
     expect(productShipping(input({ product: product({ kind: "service" }) }))).toBeNull()
     expect(productShipping(input({ product: product({ is_gift_card: true }) }))).toBeNull()
+  })
+})
+
+describe("the shop's promises on a product's page", () => {
+  it("keeps every promise on a shipped product", () => {
+    expect(promisesFor(product(), BADGES)).toEqual(BADGES)
+  })
+
+  it("says no delivery or return promise on a product that is not shipped", () => {
+    const kept = BADGES.filter((badge) => badge.icon === "award" || badge.icon === "shield")
+    expect(promisesFor(product({ kind: "service" }), BADGES)).toEqual(kept)
+    expect(promisesFor(product({ kind: "digital" }), BADGES)).toEqual(kept)
+    expect(promisesFor(product({ is_gift_card: true }), BADGES)).toEqual(kept)
   })
 })

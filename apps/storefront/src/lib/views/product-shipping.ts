@@ -85,6 +85,18 @@ export const isShipped = (product: StoreProduct): boolean => {
   return (extension?.kind ?? "physical") === "physical" && extension?.is_gift_card !== true
 }
 
+/**
+ * The shop's promises as a product's page says them: all of them on a
+ * product the shop ships; on one it does not (a dated tour, a service, a
+ * download, a gift card) none of delivery and returns, no shipping
+ * promise where nothing is shipped.
+ */
+export const promisesFor = (
+  product: StoreProduct,
+  badges: readonly TrustBadgeView[]
+): TrustBadgeView[] =>
+  isShipped(product) ? [...badges] : badges.filter((badge) => !SHIPPING_ICONS.has(badge.icon))
+
 export interface ProductShippingInput {
   product: StoreProduct
   /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */

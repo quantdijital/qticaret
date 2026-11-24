@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: tur görünümleri ekran denetimi düzeltmeleri (#312)
+
+- **Dal:** `oguzhan/seyahat-paketi-v2` (`dev` birleştirildi). Kargolanmayan üründe kargo/teslimat/iade vaadi yok (`promisesFor`, ücretsiz kargo satırı da); kapakta yandaki görsel taşan kartların başladığı yerde biter, güven kutusu varken arama kutusu aynı genişlikte; arama kutusu telefonda iki sütunlu ızgara, tarih alanları 1024 px'ten en az 10rem; ikonlu kategori sırası 4 ve altı öğede ortada; görsel üstü kartta fiyat başlığın altında; yaklaşan kalkışlar telefonda sıkı satır, Rota alt yazısı veriye uygun; bant `medium` örtüde bulut yumuşadı; tarihli sonuçta "Yalnızca stokta olanlar" yok, aramada "N sonuç"; paket kategorilerinde `visible` (travel'da dört ana tür açık); Patika/Vadi e-bülten metinleri; Ayder görselinin koyu sağ kenarı kırpıldı; tur görünümlerinde `hover_image` açık (sahip 2026-11-18).
+- **Açık:** kapak güven şeridinde tura uygun rozetler (rozetler mağazanın, adr/0063 §4; paket varsayılanı tasarım belgesine taslak/yayın yazımı ister); galeri oranı ayarı yok; kuruşsuz fiyat ayarı yok.
+
 ## 2026-11-24: adr/0077 PR11, `travel` paketi v2 ve "Rota", "Vadi", "Patika"
 
 - **Dal:** `oguzhan/seyahat-paketi-v2` (#290 departures + #309 Hero full_image üstüne; taban `dev`). Paket sürüm 2: "Tur bilgileri" şablonuna seçim niteliği `gidilecek_yer` (filtrelenebilir, 9 bölge değeri; önceki sürümü almış mağazaya yalnız bu nitelik eklenir). Üç hazır görünüm (yalnız veri): Rota (tam ekran kapak + arama, popüler turlar, yaklaşan kalkışlar, koyu rakam şeridi, adımlar, yorum kaydırıcı, kolaj, koyu `brand_columns` + e-bülten, Playfair), Vadi (yanda dalgalı görsel, taşan arama ve güven kutusu, görsel üstü yazılı kart, ikonlu kategoriler, tanıtım paneli, bölünmüş bant, ikonlu rakamlar), Patika (duyuru şeridi, sola hizalı kapak + sekmeli arama, rota kartları kolajı, ikonlu "neden biz", oklu tur kartları, geniş bant, yorumlar, yazılar, iletişim sütunlu alt bilgi). Görseller Commons CC0/CC BY, atıf `preset.json` `credits`.

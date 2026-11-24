@@ -28,7 +28,7 @@ import { shopMarks } from "@/lib/views/card-extras"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { isVatExclusive, shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
-import { productShipping } from "@/lib/views/product-shipping"
+import { isShipped, productShipping, promisesFor } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
 import { sharedSettingsOf } from "@/lib/views/shared-settings"
@@ -117,7 +117,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     brandPath: product.brand ? (brandPaths[product.brand.id] ?? null) : null,
     requestedVariant: url.searchParams.get("variant"),
     t,
-    trustBadges: shared.trust_badges,
+    trustBadges: promisesFor(product, shared.trust_badges),
     swatchOf: swatchLookup(shared.color_swatches),
     descriptionHtml: texts.description,
     summaryHtml: texts.summary,
@@ -145,7 +145,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
       : {}),
     signedIn: customer !== null,
     shippingNote:
-      free_shipping_threshold && free_shipping_threshold > 0
+      isShipped(product) && free_shipping_threshold && free_shipping_threshold > 0
         ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
         : null,
     // "Kargo ve Teslimat" beside the specs (owner 2026-11-05): only what the shop set and wrote
