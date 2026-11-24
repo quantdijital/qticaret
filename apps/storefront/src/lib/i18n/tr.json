@@ -1035,6 +1035,8 @@
   "cart.payment_link_code_misused": "Bu indirim kodu yalnızca kendi ödeme bağlantısının sepetinde geçerlidir. Kodu sepetinizden kaldırın.",
   "cart.payment_link_no_cod": "Ödeme bağlantısıyla gelen siparişte kapıda ödeme kullanılamaz; başka bir ödeme yöntemi seçin.",
   "product.few_left": "Az kaldı",
+  "product.badge_new": "Yeni",
+  "product.badge_best_seller": "Çok satan",
   "product.quick_add": "Sepete ekle",
   "product.quick_add_label": "{title} ürününü sepete ekle",
   "product.quick_added": "Sepete eklendi",

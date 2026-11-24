@@ -74,6 +74,18 @@ export interface ProductCardView {
    * today's card. A theme without it draws today's.
    */
   look?: CardLookView
+  /**
+   * The one small badge on the photo while the shop has one on: the
+   * product's own line ("Sınırlı"), "Çok satan" or "Yeni", its words
+   * already said. None: today's card, not a mark more.
+   */
+  badge?: CardBadgeView | null
+}
+
+/** A card's badge (`ProductCardView.badge`): its words and which kind, for a theme's colour. */
+export interface CardBadgeView {
+  text: string
+  kind: "manual" | "new" | "best_seller"
 }
 
 /**
