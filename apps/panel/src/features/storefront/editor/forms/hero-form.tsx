@@ -2,9 +2,11 @@ import { useTranslation } from "react-i18next"
 import { RowActions } from "@/features/settings/components/storefront-rows"
 import type { HeroSection, LayoutLink } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { heroFullSettingsOf } from "@qticaret/types"
 import { NamedGroup } from "../named-group"
 import { F, TextField } from "./fields"
 import { HeroCatalogFields } from "./hero-catalog-fields"
+import { HeroAccentField, HeroFullAction } from "./hero-full-fields"
 import { HeroSlidesField } from "./hero-slides-field"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -22,12 +24,16 @@ type HeroFields = Pick<HeroSection, "eyebrow" | "heading" | "text" | "links" | "
  * short line, the heading, a sentence and the image, "Düğmeler" its
  * buttons. The catalogue opening's words, buttons and pictures are its
  * slides' (adr/0049 Ek 2026-11-15): "İçerik" the line and the slides, its
- * own parts in their groups after (`HeroCatalogFields`).
+ * own parts in their groups after (`HeroCatalogFields`). The full image
+ * (adr/0077 §9) adds its accent line under the heading and, after the
+ * picture, what stands under the words; its buttons only while it shows them.
  */
 export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
   const catalog = section.variant === "category_list" ? section : null
+  const full = section.variant === "full_image" ? section : null
+  const searching = full !== null && heroFullSettingsOf(full).action === "search"
   const set = (next: Partial<HeroFields>, field?: string) => {
     onChange({ ...section, ...next }, field)
   }
@@ -73,6 +79,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
             set({ heading }, "heading")
           }}
         />
+        {full ? <HeroAccentField section={full} problems={problems} onChange={onChange} /> : null}
         <TextField
           id={PREVIEW_IDS.text(section.id, "text")}
           label={t(`${F}.text`)}
@@ -96,10 +103,13 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
             set({ image }, image && section.image ? "image" : undefined)
           }}
         />
+        {full ? <HeroFullAction section={full} onChange={onChange} /> : null}
       </NamedGroup>
-      <NamedGroup name="buttons" hint={t(`${H}.buttonsHint`, { max: L.heroLinks })}>
-        <HeroButtons section={section} problems={problems} onChange={set} />
-      </NamedGroup>
+      {searching ? null : (
+        <NamedGroup name="buttons" hint={t(`${H}.buttonsHint`, { max: L.heroLinks })}>
+          <HeroButtons section={section} problems={problems} onChange={set} />
+        </NamedGroup>
+      )}
     </>
   )
 }

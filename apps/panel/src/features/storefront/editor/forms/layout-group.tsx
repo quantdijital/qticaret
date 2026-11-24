@@ -5,6 +5,7 @@ import { BANNER_LAYOUT_SETTINGS, bannerSettingsFor } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
 import { BannerEdgeField } from "./banner-split-fields"
 import { FeaturedGroups } from "./featured-groups"
+import { HeroFullGroups } from "./hero-full-fields"
 import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
@@ -54,6 +55,10 @@ export function SectionLayoutGroup({
     (section.type === "categories" && section.variant === "icons")
   ) {
     return <IconGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  // The full image opening's height, sides, veil and edge (adr/0077 §9)
+  if (section.type === "hero" && section.variant === "full_image") {
+    return <HeroFullGroups section={section} reveal={reveal} onChange={onChange} />
   }
   if (section.type !== "banner") {
     return null

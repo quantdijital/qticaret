@@ -205,12 +205,24 @@ function HeroCategoryList() {
   )
 }
 
+/** The full image (adr/0077 §9): the photograph edge to edge, the words centred over it. */
+function HeroFullImage() {
+  return (
+    <>
+      <rect x={1} y={3} width={110} height={26} rx={4} className="fill-current opacity-50" />
+      <rect x={36} y={9} width={40} height={4} rx={1} className="fill-background" />
+      <rect x={42} y={15} width={28} height={3} rx={1} className="fill-background opacity-70" />
+      <rect x={47} y={21} width={18} height={5} rx={2.5} className="fill-background opacity-90" />
+    </>
+  )
+}
+
 // A type with one variant offers no choice and has no sketch
 const SKETCHES: {
   readonly [T in VariantSectionType]?: Readonly<Record<SectionVariant<T>, () => ReactElement>>
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined, card: TrustCard },
-  hero: { standard: HeroStandard, category_list: HeroCategoryList },
+  hero: { standard: HeroStandard, category_list: HeroCategoryList, full_image: HeroFullImage },
   categories: {
     tiles: CategoriesTiles,
     linked: CategoriesLinked,
