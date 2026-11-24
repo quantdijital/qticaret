@@ -36,6 +36,8 @@
     "@qticaret/sector-packs": "workspace:*",
     "@qticaret/server-kit": "workspace:*",
     "@qticaret/types": "workspace:*",
+    "dotenv": "17.4.2",
+    "pg-connection-string": "2.14.1",
     "zod": "4.6.6"
   },
   "devDependencies": {
