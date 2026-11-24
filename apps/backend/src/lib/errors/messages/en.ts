@@ -228,6 +228,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.tags_too_many": "A post can have at most 50 tags.",
   "content.term_description_invalid":
     "The description must be at most 1000 characters, without disallowed characters.",
+  "content.term_description_too_long": "The description's text may be at most 5000 characters.",
   "content.term_handle_taken":
     "Another category or tag uses this address; write a different name or address.",
   "content.term_name_invalid":
@@ -1197,6 +1198,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The row's columns do not match its layout; refresh the page and try again.",
   "storefront_layout.footer_block_invalid":
     "A footer block could not be saved; check its fields (a text block takes no headings, pictures or tables; app links must be App Store or Google Play addresses).",
+  "storefront_layout.faq_answer_invalid":
+    "An FAQ answer could not be saved; it cannot be empty, holds up to 1500 characters and takes only paragraphs, lists, bold, italic and links.",
   "storefront_layout.footer_newsletter_twice":
     "The footer cannot show two newsletter forms; remove or hide the newsletter block or the footer group's newsletter section.",
   // adr/0073: content pages' own sections

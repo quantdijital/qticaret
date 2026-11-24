@@ -4,7 +4,7 @@ import { banner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
 import { posts } from "./sections/posts"
-import { faq } from "./sections/faq"
+import { pageFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { marquee } from "./sections/marquee"
@@ -71,7 +71,7 @@ export const contentPageSection = z.discriminatedUnion(
     pageRichText,
     banner,
     stripGallery,
-    faq,
+    pageFaq,
     trustBadges,
     worded("help"),
     newsletter,

@@ -130,7 +130,7 @@ describe("content pages' own sections (adr/0073 §1)", () => {
     const faq = (id: string) => ({
       id,
       type: "faq",
-      items: Array.from({ length: LAYOUT_LIMITS.faq }, (_, n) => ({
+      items: Array.from({ length: 12 }, (_, n) => ({
         question: `Soru ${String(n + 1)}?`,
         answer,
       })),

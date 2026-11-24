@@ -5,6 +5,7 @@ import type {
   ContentPageSectionView,
   HomeSectionView,
   PageArticleView,
+  PageFaqView,
   PagePaymentFactsView,
   PageShippingFactsView,
   PageTextSectionView,
@@ -34,7 +35,9 @@ export const isPageText = (section: ContentPageSectionView): section is PageText
   section.type === "contact" ||
   section.type === "payment_facts" ||
   section.type === "shipping_facts" ||
-  (section.type === "rich_text" && section.variant === "article")
+  (section.type === "rich_text" && section.variant === "article") ||
+  // The questions page (adr/0073 Ek 2026-11-24 (2)): the home page's FAQ view carries no variant
+  (section.type === "faq" && "variant" in section)
 
 /** Whether a page's section is one of the home page's types (drawn by `Blocks`). */
 export const isHomeSection = (section: ContentPageSectionView): section is HomeSectionView =>
@@ -80,7 +83,13 @@ export function textParts(sections: readonly PageTextSectionView[]): TextPart[] 
 }
 
 /** The text's own heading, when the shop gave it one: an h2 under the page's one h1. */
-function Titled({ article, children }: { article: PageArticleView; children: ReactNode }) {
+function Titled({
+  article,
+  children,
+}: {
+  article: PageArticleView | PageFaqView
+  children: ReactNode
+}) {
   if (!article.title) {
     return children
   }
@@ -213,6 +222,20 @@ function Alone({
   suffix: string
 }) {
   switch (section.type) {
+    case "faq":
+      // The shop's own questions (adr/0073 Ek 2026-11-24 (2)), drawn as a text of questions was
+      return (
+        <Titled article={section}>
+          <FaqBody
+            faq={section.faq}
+            help={section.help}
+            t={t}
+            suffix={suffix}
+            settings={section.settings}
+            sectionId={section.id}
+          />
+        </Titled>
+      )
     case "contact":
       return <ContactBody section={section} t={t} actions={actions} suffix={suffix} />
     case "shipping_facts":

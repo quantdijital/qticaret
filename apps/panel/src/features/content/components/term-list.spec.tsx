@@ -14,6 +14,10 @@ vi.mock("@/lib/sdk", () => ({
   sdk: { client: { fetch: fetchMock }, admin: { store: { list: storeList } } },
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+// ProseMirror cannot lay out in jsdom: the description tab's editor as its label alone
+vi.mock("@/features/content/editor/rich-editor", () => ({
+  RichEditor: (props: { label: string }) => <output aria-label={props.label} />,
+}))
 
 interface Init {
   method?: string
@@ -28,6 +32,7 @@ const term = (more: Partial<Term>): Term => ({
   handle: "bicak-bakimi",
   path: "/blog/kategori/bicak-bakimi",
   description: null,
+  description_doc: null,
   rank: 0,
   post_count: 3,
   live_post_count: 2,
@@ -139,12 +144,18 @@ describe("blog categories", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Bıçak bakımı" }))
     const sheet = await screen.findByRole("dialog", { name: "Bıçak bakımı" })
 
-    const description = within(sheet).getByRole("textbox", { name: "Açıklama" })
-    await userEvent.type(description, "Bileme ve saklama üzerine yazılar.")
+    // Its text is on a tab of its own (adr/0075 Ek 2026-11-24), not a field of this form
+    expect(within(sheet).queryByRole("textbox", { name: "Açıklama" })).toBeNull()
+    expect(within(sheet).getByRole("tab", { name: "Açıklama" })).toBeInTheDocument()
     const rank = within(sheet).getByRole("spinbutton", { name: "Sıra" })
     await userEvent.clear(rank)
     await userEvent.type(rank, "5")
-    await userEvent.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    // The general tab's own Save (the description tab, kept mounted, has its own)
+    const form = rank.closest("form")
+    if (!form) {
+      throw new Error("no form")
+    }
+    await userEvent.click(within(form).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(calls("/admin/content/terms/cterm_1", "POST")).toEqual([
@@ -152,7 +163,7 @@ describe("blog categories", () => {
           "/admin/content/terms/cterm_1",
           {
             method: "POST",
-            body: { description: "Bileme ve saklama üzerine yazılar.", rank: 5 },
+            body: { rank: 5 },
           },
         ],
       ])

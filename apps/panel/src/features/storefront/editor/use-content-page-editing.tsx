@@ -4,7 +4,8 @@ import { contentQuery } from "@/features/content/api/content"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { pageLayoutOf } from "@/features/storefront/layout/page-layouts"
-import { idsOf, newPageText, newSectionId } from "@/features/storefront/layout/sections"
+import { isFaqTitle } from "@/features/storefront/layout/faq-rows"
+import { idsOf, newPageFaq, newPageText, newSectionId } from "@/features/storefront/layout/sections"
 import type { TreeContentPage } from "./editor-page"
 import { ContentPagePicker } from "./content-page-picker"
 import { forgetJustMade } from "./just-made-page"
@@ -41,10 +42,12 @@ export function useContentPageEditing({
   const synth = usePageSynth(doc, place.contentPage.id, act)
   const [adding, setAdding] = useState(false)
   const pages = useContentPages(place.page === "content").data?.pages ?? []
-  // Its text, empty, as its first section: written in place
-  const addText = (id: string) => {
+  // Its text, empty, as its first section: written in place; a questions page's first
+  // question instead (adr/0073 Ek 2026-11-24 (2)), the shop writing each one itself
+  const addText = (id: string, title: string) => {
     const sectionId = newSectionId(idsOf(synth.view))
-    synth.act({ type: "add", group: "pages", page: id, section: newPageText(sectionId) })
+    const section = isFaqTitle(title) ? newPageFaq(sectionId) : newPageText(sectionId)
+    synth.act({ type: "add", group: "pages", page: id, section })
     setOpened({ kind: "section", id: sectionId })
   }
   const added = useRef(false)
@@ -60,7 +63,7 @@ export function useContentPageEditing({
     // Still new: a draft page, no text written, no layout of its own
     const blank = page.kind === "page" && (page.body.content?.length ?? 0) === 0
     if (page.status === "draft" && blank && !pageLayoutOf(doc, fresh)) {
-      addText(fresh)
+      addText(fresh, page.title)
     }
   })
   const contentPage: TreeContentPage = {
@@ -89,9 +92,9 @@ export function useContentPageEditing({
           <NewPageDialog
             open={adding}
             onOpenChange={setAdding}
-            onCreated={(id) => {
+            onCreated={(id, title) => {
               place.chooseContent(id)
-              addText(id)
+              addText(id, title)
             }}
           />
         </>

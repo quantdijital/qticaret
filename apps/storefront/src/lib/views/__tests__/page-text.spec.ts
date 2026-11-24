@@ -75,6 +75,30 @@ describe("a content page's text sections", () => {
     expect(off).toMatchObject({ faq: null, help: null })
   })
 
+  it("reads the shop's own questions page as the text of questions it replaced (adr/0073 Ek 2026-11-24 (2))", async () => {
+    const faq = {
+      id: "sss",
+      type: "faq",
+      variant: "page",
+      title: null,
+      items: [
+        { heading: "Kargo" },
+        { question: "Ne zaman gelir?", html: "<p>1-4 gün.</p>" },
+        { question: "Ücreti ne?", html: "<p>Ücretsiz.</p>" },
+        { question: "Takip edilir mi?", answer: "Evet." },
+      ],
+      open_first: "on",
+    } satisfies StorePageText
+    const view = await pageTextView(faq, t, opening())
+    const text = await pageTextView(article({ html: QUESTIONS }), t, opening())
+    if (view?.type !== "faq" || text?.type !== "rich_text") throw new Error("not a questions page")
+    expect(view.faq).toEqual(text.faq)
+    expect(view.help).toEqual(text.help)
+    expect(view.settings).toEqual({ open_first: "on", single_open: "off" })
+    // Only headings: nothing to draw
+    expect(await pageTextView({ ...faq, items: [{ heading: "Kargo" }] }, t, opening())).toBeNull()
+  })
+
   it("anchors a long text's headings for its contents, unless the shop switched them off", async () => {
     const view = await pageTextView(article({ html: LONG, title: "Rehber" }), t, opening())
     expect(view).toMatchObject({

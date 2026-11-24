@@ -9,7 +9,7 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
-import type { FaqSettings } from "./section-faq.js"
+import type { FaqSettings, StoreFaqItem } from "./section-faq.js"
 import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
@@ -32,6 +32,7 @@ import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js
 import type { StorePhotoCollageSection } from "./section-collage.js"
 import type {
   CardVariant,
+  FaqVariant,
   RelatedProductsVariant,
   ReviewsVariant,
   TrustBadgesVariant,
@@ -265,15 +266,21 @@ export type StoreFeaturedProductSection = {
 } & Partial<FeaturedProductSettings>
 
 /**
- * Questions and answers in plain text, the answers' `{tokens}` already
- * filled (adr/0049 Ek 2026-11-03). Its settings (bilesen-denetimi (b) 8)
- * are printed only when on: one absent reads as its default (`faqSettingsOf`).
+ * Questions and answers (adr/0049 Ek 2026-11-03; adr/0073 Ek 2026-11-24
+ * (2)): each row a question with its answer (the backend's HTML, or a
+ * plain answer saved before rich answers, its `{tokens}` filled) or a
+ * group's heading. Its settings (bilesen-denetimi (b) 8) are printed only
+ * when on: one absent reads as its default (`faqSettingsOf`). `variant`
+ * only off the default (`standard`), so a section from before variants
+ * prints as it did.
  */
 export type StoreFaqSection = {
   id: string
   type: "faq"
   title: string | null
-  items: { question: string; answer: string }[]
+  items: StoreFaqItem[]
+  /** Absent: `standard`. */
+  variant?: FaqVariant
 } & Partial<FaqSettings>
 
 /**

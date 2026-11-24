@@ -15,6 +15,8 @@ const KIND_TEXT: Readonly<Record<LinkRow["kind"], string>> = {
   category: "Kategori açıklaması",
   brand: "Marka açıklaması",
   collection: "Koleksiyon açıklaması",
+  post_category: "Blog kategorisi açıklaması",
+  post_tag: "Blog etiketi açıklaması",
 }
 
 const REASON_TEXT: Readonly<Record<NonNullable<LinkRow["reason"]>, string>> = {
