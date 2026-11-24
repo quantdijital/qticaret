@@ -3209,6 +3209,7 @@
     "placeholder": "Order number, customer, product, SKU, tracking number or page…",
     "empty": "No results.",
     "pages": "Pages",
+    "screens": "Screens",
     "actions": "Actions",
     "appearance": "Appearance settings",
     "trigger": "Search or jump to…",

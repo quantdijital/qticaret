@@ -39,6 +39,7 @@
     "./section-collage": "./src/store/section-collage.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
+    "./panel-map": "./src/panel-map/index.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"
