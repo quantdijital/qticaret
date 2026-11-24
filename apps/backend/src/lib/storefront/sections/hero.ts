@@ -2,6 +2,8 @@ import { z } from "@medusajs/framework/zod"
 import { image, optional, recordId, shopText, text } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
+import { HERO_FULL_DEFAULTS, HERO_FULL_LIMITS, HERO_FULL_SETTINGS } from "./hero-full"
+import type { HeroFullSetting, HeroFullStep } from "./hero-full"
 import { heroCatalogScroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -11,7 +13,8 @@ import type { SectionVariant, VariantBranch } from "./variants"
  * and a picture, in every variant (adr/0049 Ek 2026-11-14 §2, option B).
  * `standard` is today's graphite stage; `category_list` (H17, §3.2) sets
  * the same opening as a tile between the shop's category list (with
- * product counts) and two category tiles, with quick links under it.
+ * product counts) and two category tiles, with quick links under it;
+ * `full_image` (adr/0077 §9) draws the picture as the whole opening.
  *
  * Mirrors `@qticaret/types`' `HERO_CATALOG_LIMITS` (the backend reads no
  * runtime value from that package); a unit test keeps them equal.
@@ -108,15 +111,52 @@ const categoryList = z
   })
   .strict()
 
+/** A closed list's step: one off it refused with the error key (`banner.ts`), none the default. */
+const fullStep = <S extends HeroFullSetting>(name: S) => {
+  const listed: readonly unknown[] = HERO_FULL_SETTINGS[name]
+  return z
+    .custom<HeroFullStep<S>>((value) => listed.includes(value), VARIANT_ERROR)
+    .default(HERO_FULL_DEFAULTS[name])
+}
+
+/**
+ * adr/0077 §9, "Tam görsel": the picture as the whole opening (none: the
+ * graphite stage), the words over it or (`image_side: end`) beside it; a
+ * second heading line in the shop's colour, the buttons or the shop's one
+ * search box (its fields the theme's), and the design's trust badges when
+ * `show_trust`. The section holds neither the box's fields nor the badges.
+ */
+const fullImage = z
+  .object({
+    ...common,
+    variant: z.literal("full_image"),
+    title_accent: optional(shopText(HERO_FULL_LIMITS.title_accent)),
+    action: fullStep("action"),
+    search_position: fullStep("search_position"),
+    height: fullStep("height"),
+    scrim: fullStep("scrim"),
+    align: fullStep("align"),
+    image_side: fullStep("image_side"),
+    edge: fullStep("edge"),
+    show_trust: z.boolean().default(false),
+  })
+  .strict()
+
 export const HERO_BRANCHES: Readonly<Record<SectionVariant<"hero">, VariantBranch>> = {
   standard,
   category_list: categoryList,
+  full_image: fullImage,
 }
 
-export const hero = z.discriminatedUnion("variant", [standard, categoryList], VARIANT_ERROR)
+export const hero = z.discriminatedUnion(
+  "variant",
+  [standard, categoryList, fullImage],
+  VARIANT_ERROR
+)
 
 export type HeroSection = z.infer<typeof hero>
 export type HeroCatalogSection = Extract<HeroSection, { variant: "category_list" }>
+export type HeroFullSection = Extract<HeroSection, { variant: "full_image" }>
 
 /** H17's own slides (none for today's opening or one saved before them). */
 export const catalogSlides = (section: HeroSection): HeroCatalogSlide[] =>

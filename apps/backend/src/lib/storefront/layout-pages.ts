@@ -14,6 +14,7 @@ import { products } from "./sections/products"
 import { pageRichText } from "./sections/rich-text"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
+import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
 import { stripGallery } from "./sections/strip-gallery"
@@ -51,6 +52,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "google_rating",
   "stats",
   "steps",
+  "search_box",
   "photo_collage",
   "contact",
   "payment_facts",
@@ -81,6 +83,7 @@ export const contentPageSection = z.discriminatedUnion(
     googleRating,
     stats,
     steps,
+    searchBox,
     photoCollage,
     contact,
     paymentFacts,

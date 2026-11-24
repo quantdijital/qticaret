@@ -36,6 +36,17 @@ Alanlar tek bir **tema ayarından** gelir: `search_form { attribute_key, show_ca
 
 Form **JavaScript olmadan çalışan bir GET formudur**; sonuç adresi §2'deki parametrelerle kurulur. Tarih seçici (takvim) sonradan gelen bir iyileştirmedir ve yalnız açılınca yüklenir (§6).
 
+**Uygulama notu (PR3, 2026-11-23):**
+
+- **Form alan adları.** JavaScript'siz GET formu `tarih=A_B` yazamadığı için iki gün alanı `tarih_baslangic` ve `tarih_bitis` adıyla gider; vitrin bu "form adresini" tek bir geçici yönlendirmeyle (307) temiz adrese çevirir: iki gün tek `tarih` olur, boş alanlar ve `kisi=1` atılır. Backend'in başka biçimde okuduğu sorgu (`canonical_query`) ise §2'deki gibi tek 301 ile kanonik adrese gider. Takvim (PR6) bu alan adlarını değiştirmez; JavaScript açıkken de aynı adları doldurur.
+- **Tema ayarı.** `search_form`'a beşinci alan olarak `category_style` (`select` açılır liste, varsayılan; `tabs` sekmeler) eklendi; panelde "Tema › Arama kutusu" grubu. Tarih ve kişi anahtarları yalnız `catalog.booking` açıkken görünür; kategori görünüşü yalnız kategori alanı açıkken. "Nereye" listesi filtrelenebilir, herkese açık, seçimli nitelikleri gösterir; ayrılmış adlar (§2) backend şemasında reddedilir, panelde listelenmez.
+- **"Grafit'e dön" arama kutusu alanlarını korur.** Bu düğme görünüşü sıfırlar; arama kutusunun alanları görünüş değil, mağazanın sorduğu sorulardır (işlev). Bu yüzden sıfırlama `search_form`'a dokunmaz ve "zaten Grafit mi" denetimi onu karşılaştırmaz.
+- **`left` yalnız az yer kalınca gönderilir.** §4'teki `left?: number | null` yerine sözleşmede `left?: number` var: vitrin alanı yalnız kalan yer 1–5 iken (`FEW_LEFT`) doldurur, aksi hâlde hiç yazmaz. "Bilinmiyor" ile "çok yer var" ayrımını temaya taşımaya gerek yok; tema yalnız "Son N yer" yazıp yazmayacağını bilir, `null` dalı olmadığından her tema aynı eşiği kullanır.
+- **"Nereye" değerleri** `/magaza` listesinin süzgeç (facet) değerlerinden gelir; yalnız satılan ürünlerde geçen değerler listelenir.
+- **Nitelikle sözcüksüz arama (görev dışı eklendi).** `/store/listings/products` artık `q` yokken yalnız bir nitelik süzgeciyle de cevap verir; "Nereye" seçilip başka hiçbir şey yazılmayan form boş sayfa yerine sonuç gösterir. §2'deki "`q` yokken de sonuç" kuralının nitelik süzgecine genişletilmesidir.
+- **Sıralama.** Tarihli aramada "En yakın tarih" (`sirala=kalkis`) seçeneği sunulur.
+- **Kilit etkisi yok.** Atölye'de form ve bölüm yalnız var olan Tailwind sınıflarıyla çizildi; yeni CSS yok, kilitli görünümlerin HTML'i ve stil özeti (`styles.lock.json`) aynı kaldı.
+
 ### 2. URL parametreleri (docs/13 §7'nin devamı)
 
 | Parametre | Biçim | Kural |
@@ -132,6 +143,17 @@ Yeni biçim `full_image`; `standard` ve `category_list` **dokunulmaz** (adr/0066
 - `align`: `center` | `start`.
 
 Görsel yoksa koyu zemin. Başlık `h1` kalır. Kapak görseli LCP adayıdır; önden yüklenir (preload).
+
+**Ek (2026-11-24, PR8; "Vadi" ve "Patika" kapakları için):** aynı biçime, hepsi kapalı liste ve varsayılanı yukarıdaki kapak olan ayarlar eklendi (`packages/types/src/store/section-hero-full.ts`, backend aynası `lib/storefront/sections/hero-full.ts`):
+
+- `search_position`: `inside` | `overlap` (arama kutusu kapağın içinde ya da alt kenarına taşan kart); yalnız `action: search` iken okunur.
+- `image_side`: `full` | `end`. `end`: yazı sayfa zemininde ve kendi mürekkebiyle, görsel 1024 px'ten itibaren yanda ekran kenarına kadar (telefonda yazının üstünde); karartma bu yerleşimde çizilmez. Görsel yokken `end`, `full` gibi çizilir (grafit sahne, yazı üstünde; boş görsel kutusu yok).
+- `edge`: `straight` | `wave` (görselin kenarı dalgalı; tema stil dosyasında maske, `hero-full.css`).
+- `title_accent`: başlığın isteğe bağlı ikinci satırı, ana renkte; aynı `h1` içinde bir satırdır.
+- `show_trust`: tasarımın ortak güven rozetleri (en çok 4) kapağın alt kenarına taşan beyaz kutuda; varsayılan kapalı. Rozetler bölümün değil tasarımın verisidir (`settings.trust_badges`).
+- İkinci düğme yeni alan değildir: her kapakta zaten duran `links` (en çok 2) dizisinin ikincisi sessiz düğme olarak çizilir. Arama seçiliyken düğmeler çizilmez (kayıtta durur).
+- Görsel yokken ürün fotoğrafına düşülmez (standart kapaktan farklı): tam ekran zemin için ürün fotoğrafı uygun değildir; grafit sahne çizilir.
+- Arama kutusu ve güven kutusu sahnenin (`gf-stage`) dışında çizilir; beyaz zeminlerinde sayfanın kendi mürekkebini korurlar.
 
 ### 10. Yeni bölümler
 

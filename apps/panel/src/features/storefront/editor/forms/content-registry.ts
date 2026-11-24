@@ -8,6 +8,7 @@ import {
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { heroFullFields } from "./hero-full-registry"
 import { iconFields } from "./icon-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
 import { kitDefaultsOf, turnsAsSlider } from "./slider-kit"
@@ -64,6 +65,12 @@ export type ContentField =
   | "icons_phone"
   | "collage_layout"
   | "collage_phone"
+  | "action"
+  | "search_position"
+  | "show_trust"
+  | "align"
+  | "scrim"
+  | "edge"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -236,7 +243,7 @@ export function contentFields(section: AnySection): RegistryField[] {
               ? sliderFields(section.id, section, kitDefaultsOf(section))
               : []),
           ]
-        : []
+        : heroFullFields(section, CONTENT_IDS.content)
     case "google_rating":
       return [
         entry(section, "excerpts", `${G}.excerpts`),
@@ -290,6 +297,9 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "stats":
     case "steps":
       return [...pointsFields(section), ...iconFields(section, CONTENT_IDS.content)]
+    // The box's fields are the theme's (adr/0077 §1), not the section's
+    case "search_box":
+      return []
     // The picture's side beside the text, while the variant has one (adr/0073 §3)
     case "rich_text":
       return section.variant === "with_image"

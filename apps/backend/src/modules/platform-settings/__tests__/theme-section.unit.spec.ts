@@ -3,6 +3,7 @@ import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
   LISTING_TEXT_DEFAULTS,
+  SEARCH_FORM_DEFAULTS,
   RADIUS_STEPS,
   SECTION_SPACINGS,
   STYLE_KIT_DEFAULTS,
@@ -71,6 +72,14 @@ describe("theme section", () => {
       surface_style: "filled",
       // adr/0075: a listing page's own text at its foot, normal size, a reading measure, folded
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
+      search_form: {
+        attribute_key: null,
+        show_category: true,
+        show_dates: true,
+        show_people: true,
+        category_style: "select",
+      },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",
       shadow: "float",
@@ -291,11 +300,14 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       ...STYLE_KIT_DEFAULTS,
       // and before the listing text (adr/0075): its defaults
       listing_text: LISTING_TEXT_DEFAULTS,
+      // and before the search form (adr/0077): its defaults
+      search_form: SEARCH_FORM_DEFAULTS,
     })
     const framed = {
       ...stored,
       ...STYLE_KIT_DEFAULTS,
       listing_text: { ...LISTING_TEXT_DEFAULTS, size: "lg" },
+      search_form: { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" },
       section_spacing: "compact",
       surface_style: "lined",
       product_card: { ...defaults.product_card, variant: "framed" },

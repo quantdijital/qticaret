@@ -19,6 +19,7 @@ import type {
   CategoryPanelsView,
 } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
+import type { HeroFullView } from "./hero-full-views"
 import type {
   FeaturedProductSectionView,
   GoogleRatingSectionView,
@@ -32,6 +33,7 @@ import type { ContentPageSectionView } from "./page-text-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ProductsSectionView } from "./shelf-views"
 import type { StatsSectionView, StepsSectionView } from "./points-views"
+import type { SearchBoxSectionView } from "./search-form-views"
 import type { CategoryIconsView } from "./icon-views"
 import type { PhotoCollageSectionView } from "./collage-views"
 import type { StripGallerySectionView } from "./strip-views"
@@ -100,6 +102,8 @@ export type HomeSectionView = {
       variant?: HeroVariant
       /** `category_list`'s own parts (H17); a theme without that drawing leaves them unread. */
       catalog?: HeroCatalogView | null
+      /** `full_image`'s own parts (adr/0077 §9); a theme without that drawing leaves them unread. */
+      full?: HeroFullView | null
     }
   | PriceBandsSectionView
   | HeroSliderSectionView
@@ -109,6 +113,7 @@ export type HomeSectionView = {
   | StripGallerySectionView
   | StatsSectionView
   | StepsSectionView
+  | SearchBoxSectionView
   | PhotoCollageSectionView
   | {
       id: string

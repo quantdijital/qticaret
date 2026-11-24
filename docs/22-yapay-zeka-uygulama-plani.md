@@ -119,9 +119,19 @@ ADR eki + F16 ile birlikte. Kapsam: `ai.platform_credits` bayrağı, `ai_free_cr
 
 Müşterinin vitrinde yazdığı cümleyi ("ağustosta iki kişi Kapadokya") arama süzgecine çeviren `search_intent` işi. Kiracı bayrağı `ai.storefront_search`, varsayılan kapalı; yalnız mağazanın kendi anahtarıyla. Çıktı katı Zod, yalnız süzgeç (kategori ve nitelik değeri mağazanın kapalı listesinden, tarih/ay, kişi); sonuçları normal arama üretir, etiketler sunucunun doğrulanmış süzgecinden kurulur. Metin `redactPersonalData`'dan geçer, saklanmaz, `ai_usage`'a yazılmaz (isteyen `"vitrin"`). Sınır: IP başına dakikada 5 / günde 30, mağaza başına günde 500, 24 saat önbellek; servis düşerse `q` aramasına döner. Bu, adr/0071 §10'daki "müşteri verisi gitmez" kuralının tek istisnasıdır (adr/0077 §7). PR'lar: backend (uç `api/store/search/interpret`, `security-reviewer` zorunlu) ve arayüz ("Kendi cümlenle ara", panelde anahtar).
 
+## Panel yardımcısı (adr/0079)
+
+Panelin sağında açılan doğal dil yardımcısı: kapalı araç listesi, kullanıcının kendi rolü, yazan her işlem önizleme + "Uygula". Bayrak `ai.assistant` (kiracı, varsayılan kapalı). PR tablosu, dosyalar ve testler adr/0079 "Uygulama sırası"nda; özet:
+
+- **Y1-0:** panel haritası (`packages/types/src/panel-map`) + komut menüsünde anahtar kelimeyle arama (yapay zekâsız; bayrak kapalıyken de).
+- **Y1-1 (güvenlik incelemesi):** bağlayıcıya araçlı çağrı (`converse`), servis kaydında `toolCalls` belgeden doğrulanır; döngü, Redis'te geçici konuşma (istem metni saklanmaz), `find_screen` / `explain_screen`, uç `POST /admin/ai/assistant/turns`, günlük grup `assistant`, KVKK envanter satırları. **Y1-2:** panel yan paneli. **Y1-3:** eval seti (CI'da sahte modelle; gerçek modelle elle `ai:eval`).
+- **Y2-1 (güvenlik incelemesi):** okuma araçları (satış özeti, stoğu azalan, sipariş bul, SEO bulguları, düşük dönüşüm); sonuç `model` (maskeli) ve `ui` (yalnız panel) yüzleri. **Y2-2:** kartlar.
+- **Y3-1, Y3-2 (güvenlik incelemesi, migration `ai_assistant_action`):** onaylı yazma (indirim, ürün gizle/göster, stok, toplu fiyat kuralı, taslak yazı, taslak düzene bölüm). **Y3-3:** eylem kartı.
+- **Y4-1 (güvenlik incelemesi):** plan kartı ve geri alma.
+
 ## Aşama 10–13
 
-Akıllı arama (`embedding`; adr/0056 ile), görünüm asistanı, toplu komut, 3D ve ajan ticareti: her biri kendi ADR'siyle. Bu çekirdek onlara yalnız servis kaydı, seçim, kota ve kullanım kaydını verir.
+Akıllı arama (`embedding`; adr/0056 ile), görünüm asistanı, toplu komut, 3D ve ajan ticareti: her biri kendi ADR'siyle. Toplu komutun panel kısmı panel yardımcısıdır (adr/0079, yukarıda). Bu çekirdek onlara yalnız servis kaydı, seçim, kota ve kullanım kaydını verir.
 
 ## Doğrulanacak servis bilgileri (ilgili PR'ın ilk işi)
 

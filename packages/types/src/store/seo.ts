@@ -38,7 +38,8 @@ export interface SeoPayload {
   hreflang: { locale: string; url: string }[]
 }
 
-export type ListingSort = "yeni" | "fiyat-artan" | "fiyat-azalan"
+/** `kalkis`: the nearest departure first (adr/0077 §2), only while the shop sells dated products. */
+export type ListingSort = "yeni" | "fiyat-artan" | "fiyat-azalan" | "kalkis"
 
 /** A listing page's query as the backend read it (docs/13 §7). */
 export interface ListingView {

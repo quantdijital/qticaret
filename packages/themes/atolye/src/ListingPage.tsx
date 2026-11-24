@@ -9,6 +9,7 @@ import { Empty, SearchHelp } from "./listing/SearchHelp"
 import { Toolbar } from "./listing/Toolbar"
 import { Container } from "./parts/Container"
 import { ProductGrid } from "./parts/ProductCard"
+import { SearchForm } from "./parts/SearchForm"
 import { Trail } from "./parts/Trail"
 import { Blocks, type Subscribe } from "./sections/Blocks"
 import { Look } from "./sections/Look"
@@ -28,7 +29,7 @@ const RESULTS = "sonuclar"
  * over the grid, the filters on as dark pills; the home page's cards, the
  * pages under them. An empty list says why and offers a way on. A
  * category's, brand's or collection's own text follows its first page's
- * list (adr/0075). The shop's category page sections (adr/0049) sit above
+ * list (adr/0075). A site search's box stands under its title (adr/0077 §1). The shop's category page sections (adr/0049) sit above
  * the list and below it, under that text.
  */
 export function ListingPage({
@@ -66,6 +67,8 @@ export function ListingPage({
             </div>
           )}
         </header>
+        {/* A site search's box, its values those asked (adr/0077 §1) */}
+        {view.searchForm && <SearchForm form={view.searchForm} className="mt-4 lg:mt-6" />}
         {banner && (
           <div className="gf-stage relative mt-6 aspect-[16/9] overflow-hidden rounded-tile sm:aspect-[3/1] lg:mt-8">
             <ResponsiveImage

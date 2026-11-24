@@ -99,7 +99,7 @@ describe("TemplateDialog: the attributes tab", () => {
     renderDialog()
     expect(within(itemOf("Genişlik")).queryByText("Zorunlu")).toBeNull()
     const material = itemOf("Malzeme")
-    expect(within(material).getByText("Tek seçim")).toBeInTheDocument()
+    expect(within(material).getByText("Listeden bir tane")).toBeInTheDocument()
     expect(within(material).getByText("Zorunlu")).toBeInTheDocument()
     expect(within(material).getByText("Filtre")).toBeInTheDocument()
     expect(within(itemOf("İç not")).getByText("Vitrinde gizli")).toBeInTheDocument()
@@ -125,14 +125,14 @@ describe("TemplateDialog: the attributes tab", () => {
     expect(screen.queryByText("Ahşap türü")).toBeNull()
     await userEvent.click(advanced)
     expect(screen.getByText("Ahşap türü")).toBeInTheDocument()
-    expect(screen.getByRole("switch", { name: "Arama başlığında öne çıkar" })).not.toBeChecked()
+    expect(screen.getByRole("switch", { name: "Google başlığında kullan" })).not.toBeChecked()
   })
 
   it("turning off the shop's view turns off its filter too", async () => {
     renderDialog()
     await userEvent.click(row("Malzeme"))
     await userEvent.click(screen.getByRole("switch", { name: "Vitrinde göster" }))
-    expect(screen.getByRole("switch", { name: "Mağazada filtre olsun" })).toBeDisabled()
+    expect(screen.getByRole("switch", { name: "Filtrede göster" })).toBeDisabled()
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
     const [, material] = await sentDefinitions()
@@ -194,7 +194,9 @@ describe("TemplateDialog: the attributes tab", () => {
     await userEvent.click(await screen.findByRole("menuitem", { name: "Özelliği kaldır" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
-    expect(await screen.findByText(/Malzeme özelliği ürünlerde değer taşıyor/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/Malzeme: ürünlere girilmiş değerleri de silinir/)
+    ).toBeInTheDocument()
     expect(fetchMock).not.toHaveBeenCalled()
     await userEvent.click(screen.getByRole("button", { name: "Kaldır ve kaydet" }))
     await waitFor(() => {
@@ -213,25 +215,57 @@ describe("TemplateDialog: a new template", () => {
     vi.mocked(toast.error).mockClear()
   })
 
-  it("opens on its name and will not save without one", async () => {
+  it("opens on its name above its attributes and will not save without one", async () => {
     renderDialog(null)
-    expect(screen.getByRole("tab", { name: "Şablon bilgisi" })).toHaveAttribute(
+    // The name and the attributes on one screen: no tab to find either
+    expect(screen.getByRole("textbox", { name: /Grup adı/ })).toBeInTheDocument()
+    expect(screen.getByRole("tab", { name: "Özellikler (0)" })).toHaveAttribute(
       "aria-selected",
       "true"
     )
-    await userEvent.click(screen.getByRole("tab", { name: "Özellikler (0)" }))
-    expect(screen.getByText("Bu şablonda henüz özellik yok.")).toBeInTheDocument()
+    expect(screen.queryByRole("textbox", { name: /Kısa ad/ })).toBeNull()
+    expect(screen.getByText("Henüz özellik yok.")).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Özellik ekle" }))
     await userEvent.type(screen.getByRole("textbox", { name: /Özellik adı/ }), "Renk")
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
-    expect(toast.error).toHaveBeenCalledWith("Şablona bir ad verin.")
+    expect(toast.error).toHaveBeenCalledWith("Gruba bir ad verin.")
     expect(fetchMock).not.toHaveBeenCalled()
-    // Back to the name, the caret in it
-    expect(screen.getByRole("tab", { name: "Şablon bilgisi" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    )
-    expect(screen.getByRole("textbox", { name: /Şablon adı/ })).toHaveFocus()
+    expect(screen.getByRole("textbox", { name: /Grup adı/ })).toHaveFocus()
+  })
+
+  it("picks a new attribute's type from cards with examples, and sends it", async () => {
+    fetchMock.mockResolvedValue({ attribute_template: { id: "tpl_new", addon_template_ids: [] } })
+    renderDialog(null)
+    await userEvent.type(screen.getByRole("textbox", { name: /Grup adı/ }), "Bıçak")
+    await userEvent.click(screen.getByRole("button", { name: "Özellik ekle" }))
+    await userEvent.type(screen.getByRole("textbox", { name: /Özellik adı/ }), "Çelik")
+    expect(screen.getByRole("radio", { name: /Yazı/ })).toBeChecked()
+    expect(screen.getByText("Örn. Ağırlık: 120 g")).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("radio", { name: /Listeden bir tane/ }))
+    const values = screen.getByRole("textbox", { name: "Değerler" })
+    await userEvent.type(values, "Paslanmaz, Karbon{Enter}")
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled()
+    })
+    const [url, init] = fetchMock.mock.calls[0] as [string, { body: Record<string, unknown> }]
+    expect(url).toBe("/admin/attribute-templates")
+    expect(init.body).toMatchObject({
+      name: "Bıçak",
+      handle: "bicak",
+      definitions: [
+        {
+          key: "celik",
+          label: "Çelik",
+          type: "select",
+          options: [
+            { value: "paslanmaz", label: "Paslanmaz" },
+            { value: "karbon", label: "Karbon" },
+          ],
+        },
+      ],
+    })
   })
 })

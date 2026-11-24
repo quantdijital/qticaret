@@ -27,6 +27,7 @@ import type { CardVariant, StyleKitField } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections } from "@/features/storefront/layout/sections"
 import { STYLE_KIT_READY } from "./style-kit-ready"
+import { SEARCH_FORM_META } from "./theme-registry-search"
 import { TOUR_CARD_META } from "./theme-registry-tour"
 
 /**
@@ -42,7 +43,15 @@ const C = "storefront.editor.theme"
 
 /** The theme panel's groups, in its order. */
 export type ThemeGroupName =
-  "colors" | "fonts" | "shapes" | "spacing" | "surfaces" | "card" | "framed" | "listingText"
+  | "colors"
+  | "fonts"
+  | "shapes"
+  | "spacing"
+  | "surfaces"
+  | "card"
+  | "framed"
+  | "listingText"
+  | "searchForm"
 
 /** Each group's title (i18n key), as the panel and a hit's second line show it. */
 export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
@@ -54,6 +63,7 @@ export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
   card: `${C}.card`,
   framed: `${C}.framed`,
   listingText: `${C}.listingTextTitle`,
+  searchForm: `${C}.searchFormTitle`,
 }
 
 /** Every field of the theme's choices by its path: `colors.primary`, `product_card.variant`, `radius`. */
@@ -264,6 +274,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   "listing_text.align": listingText("align", LISTING_TEXT_ALIGNS),
   "listing_text.width": listingText("width", LISTING_TEXT_WIDTHS),
   "listing_text.collapse": listingText("collapse"),
+  // The search box's fields (adr/0077 §1)
+  ...SEARCH_FORM_META,
   "header.layout": null,
   "header.sticky": null,
 }

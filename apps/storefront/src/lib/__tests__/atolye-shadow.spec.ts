@@ -22,6 +22,8 @@ const EDGED = [
   "frame/CategoryMenu.tsx",
   "frame/WhatsApp.tsx",
   "listing/Menu.tsx",
+  // adr/0077 §1: the one search box, ruled all round
+  "parts/SearchForm.tsx",
   "product/BuyBar.tsx",
 ]
 /** The surfaces with no edge: `none` draws a 1 px rule in the shadow's place. */
@@ -35,6 +37,8 @@ const BARE = [
   "parts/QuickViewButton.tsx",
   "product/Installments.tsx",
   "product/Write.tsx",
+  // adr/0077 §9: the full image opening's trust box, no border of its own
+  "sections/HeroFull.tsx",
   // adr/0077 §10 Ek: the trust badges' floating card, no border of its own
   "sections/PromiseCard.tsx",
 ]

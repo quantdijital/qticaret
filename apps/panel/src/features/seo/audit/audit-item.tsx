@@ -153,7 +153,7 @@ function ItemAction({ ruleId, item }: { ruleId: AuditRuleId; item: AuditItem }) 
       <RedirectButton source={item.subject} target={item.target} />
     ) : (
       <GoTo>
-        <Link to="/seo/redirects" search={{ tab: "missing", q: item.subject }}>
+        <Link to="/settings/seo" search={{ part: "redirects", tab: "missing", q: item.subject }}>
           <ActionLabel action="chooseTarget" />
         </Link>
       </GoTo>
@@ -162,7 +162,7 @@ function ItemAction({ ruleId, item }: { ruleId: AuditRuleId; item: AuditItem }) 
   if (ruleId === "S-HOST-01" || ruleId === "S-ROBOTS-01") {
     return (
       <GoTo>
-        <Link to="/settings/seo">
+        <Link to="/settings/seo" search={{ part: ruleId === "S-HOST-01" ? "addresses" : "search" }}>
           <ActionLabel action="openSettings" />
         </Link>
       </GoTo>
@@ -173,7 +173,7 @@ function ItemAction({ ruleId, item }: { ruleId: AuditRuleId; item: AuditItem }) 
   }
   return ruleId === "S-REDIR-01" ? (
     <GoTo>
-      <Link to="/seo/redirects" search={{ q: item.subject }}>
+      <Link to="/settings/seo" search={{ part: "redirects", q: item.subject }}>
         <ActionLabel action="openRule" />
       </Link>
     </GoTo>

@@ -20,8 +20,7 @@ import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
 import { GuidesPanel } from "./GuidesPanel"
 import { Help } from "./Help"
-import { Hero } from "./Hero"
-import { HERO_VARIANTS, HeroCatalog } from "./HeroCatalog"
+import { HeroBlock } from "./HeroBlock"
 import { HeroSlider } from "./HeroSlider"
 import { Look } from "./Look"
 import { Marquee } from "./Marquee"
@@ -30,6 +29,7 @@ import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
+import { SearchBoxSection } from "./SearchBoxSection"
 import { ReviewsCarousel } from "./ReviewsCarousel"
 import { PhotoCollage } from "./PhotoCollage"
 import { Shelf } from "./Shelf"
@@ -89,22 +89,10 @@ function BlockView({
   }
   const { section } = block
   switch (section.type) {
-    case "hero": {
-      const product = first ? context.opening : null
-      // H17 when the shop chose it and its parts came; else today's opening (`drawnVariant`)
-      return drawnVariant("hero", section.variant, HERO_VARIANTS) === "category_list" &&
-        section.catalog ? (
-        <HeroCatalog
-          hero={section}
-          catalog={section.catalog}
-          product={product}
-          first={first}
-          t={t}
-        />
-      ) : (
-        <Hero hero={section} product={product} first={first} />
+    case "hero":
+      return (
+        <HeroBlock section={section} product={first ? context.opening : null} first={first} t={t} />
       )
-    }
     case "price_bands":
       return <PriceBands section={section} />
     case "hero_slider":
@@ -235,6 +223,8 @@ function BlockView({
       return <Stats section={section} />
     case "steps":
       return <Steps section={section} />
+    case "search_box":
+      return <SearchBoxSection section={section} />
     case "photo_collage":
       return <PhotoCollage section={section} first={first} />
     case "marquee":

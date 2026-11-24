@@ -575,7 +575,7 @@
     },
     "seo": {
       "title": "SEO",
-      "subtitle": "General settings for how your shop shows up in search engines.",
+      "subtitle": "How your shop shows up in search engines and AI search: suggestions, audit, redirects and settings.",
       "addresses": "Domain",
       "addressesHint": "Permanent addresses and share links use this domain.",
       "host": "Main domain",
@@ -684,9 +684,19 @@
         "descriptionHint": "When empty, no description is written and search engines pick a passage from the page. About 155 characters show."
       },
       "tabs": {
+        "overview": "Overview",
+        "advisor": "Suggestions",
+        "audit": "Audit",
+        "redirects": "Redirects",
+        "siteSearch": "Site search",
         "addresses": "Addresses",
         "pages": "Titles and image",
         "search": "Search engines"
+      },
+      "summary": {
+        "critical_one": "{{products}} product misses something critical",
+        "critical_other": "{{products}} products miss something critical",
+        "clean": "Nothing critical missing"
       }
     },
     "features": {
@@ -970,7 +980,7 @@
         "accounting_package": "Accounting package",
         "api_access": "API access",
         "async_job": "Background job",
-        "attribute_template": "Attribute template",
+        "attribute_template": "Attribute group",
         "audit_log": "Audit log",
         "auth_identity": "Login",
         "brand": "Brand",
@@ -2054,8 +2064,8 @@
     "sectionHints": {
       "store": "Shop name and logo, contact details and opening hours, legal identity, social accounts",
       "appearance": "The panel's brand colour, corners and density",
-      "seo": "Domain and address style, title templates, search engines",
-      "attributes": "Attribute templates for products",
+      "seo": "Suggestions, audit, redirects, site search, addresses, titles and search engines",
+      "attributes": "Attribute groups and add-on groups",
       "payments": "Card payments, installments, bank transfer and cash on delivery",
       "shipping": "Carriers, options and rates, returns, warehouses and stock",
       "locations": "Warehouses that hold stock, and their addresses",
@@ -3030,7 +3040,7 @@
             "attributes": "Attributes",
             "notMoved": "Not moved"
           },
-          "attributesNote": "Attributes not used for variations (e.g. steel type) are not moved; they can be written once an attribute template is set up.",
+          "attributesNote": "Attributes not used for variations (e.g. steel type) are not moved; they can be written once an attribute group is set up.",
           "attributesInFile": "Products and values per attribute are on the report's Notlar (notes) sheet.",
           "noAttributes": "No attributes left behind.",
           "columns": {
@@ -3297,7 +3307,7 @@
       "optionTitle": "Give the option a name.",
       "optionValues": "Add at least one value to each option.",
       "tooManyVariants": "A product can have at most 100 variants.",
-      "attributeRequired": "The template requires this attribute; fill it in or remove the template.",
+      "attributeRequired": "This attribute is required; fill it in or remove the attribute group.",
       "optionRequired": "Add at least one option, or turn options off.",
       "optionDuplicate": "An option with this name already exists.",
       "cost": "The cost must be between 0 and 10,000,000 ₺.",
@@ -3584,9 +3594,9 @@
       "aiCategories": "Suggest categories"
     },
     "sections": {
-      "noTemplate": "No template chosen",
-      "template": "{{name}} template · {{filled}}/{{total}} fields filled",
-      "templateOnly": "{{name}} template",
+      "noTemplate": "No attribute group chosen",
+      "template": "{{name}} · {{filled}}/{{total}} attributes filled",
+      "templateOnly": "{{name}}",
       "requiredEmpty_one": "{{count}} required field empty",
       "requiredEmpty_other": "{{count}} required fields empty",
       "noCategory": "No category chosen",
@@ -4041,7 +4051,7 @@
         "seo_template": "Apply SEO template",
         "alt_text": "Fill missing alt texts",
         "cost": "Change cost",
-        "addon_template": "Assign / remove add-on template"
+        "addon_template": "Add / remove add-on group"
       },
       "price": {
         "mode": "Price change",
@@ -4112,7 +4122,7 @@
         "category": "Choose a category.",
         "seoFields": "Choose at least one field.",
         "cost": "Enter a cost between 0 and 10,000,000 ₺.",
-        "addonTemplate": "Choose an add-on template."
+        "addonTemplate": "Choose an add-on group."
       },
       "cost": {
         "mode": "Cost change",
@@ -4134,12 +4144,12 @@
           "add": "Assign",
           "remove": "Remove"
         },
-        "label": "Add-on template",
+        "label": "Add-on group",
         "hints": {
-          "add": "The template is linked to the selected products. Products it would take past 5 add-ons are skipped and listed in the report.",
-          "remove": "The template is unlinked from the selected products; templates from an attribute template are not affected."
+          "add": "The group is added to the selected products. Products it would take past 5 add-ons are skipped.",
+          "remove": "The group is removed from the selected products; those from an attribute group stay."
         },
-        "none": "No add-on templates yet."
+        "none": "No add-on groups yet."
       }
     },
     "priceHistory": {
@@ -4305,73 +4315,73 @@
       }
     },
     "addonTemplates": {
-      "title": "Add-on templates",
-      "subtitle": "Define add-ons once and link them to products. Changing a template changes every linked product.",
-      "create": "Create template",
-      "new": "New add-on template",
-      "dialogHint": "The template's add-ons show on linked products' pages beside the product's own add-ons.",
-      "empty": "No add-on templates yet. Define an add-on such as \"Name engraving, +150 TL\" once and link it to many products.",
+      "title": "Add-on groups",
+      "subtitle": "Set up once, add to many products.",
+      "create": "Add add-on group",
+      "new": "New add-on group",
+      "dialogHint": "This group's add-ons show on the linked products.",
+      "empty": "No add-on groups yet.",
       "columns": {
-        "name": "Template",
+        "name": "Add-on group",
         "used": "Used by"
       },
       "productCount_one": "{{count}} product",
       "productCount_other": "{{count}} products",
-      "carriedCount_one": "{{count}} attribute template",
-      "carriedCount_other": "{{count}} attribute templates",
-      "name": "Template name",
+      "carriedCount_one": "{{count}} attribute group",
+      "carriedCount_other": "{{count}} attribute groups",
+      "name": "Group name",
       "nameHint": "Shown in the panel only; at most {{max}} characters.",
       "addons": "Add-ons",
-      "addonsHint": "The template's add-ons count toward a product's {{max}} add-ons.",
-      "noAddons": "No add-ons in the template yet. Add at least one.",
-      "addonNote": "The change applies when the template is saved.",
-      "delete": "Delete template",
+      "addonsHint": "Counts towards the product's {{max}} add-ons.",
+      "noAddons": "No add-ons yet.",
+      "addonNote": "Changes apply once saved.",
+      "delete": "Delete group",
       "deleteTitle": "Delete \"{{name}}\"?",
-      "deleteDescription_one": "The template leaves {{count}} product and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
-      "deleteDescription_other": "The template leaves {{count}} products and the attribute templates carrying it. Shoppers with these add-ons in their cart must change them before paying.",
-      "deleted": "Template deleted.",
-      "saved": "Template saved.",
+      "deleteDescription_one": "It is removed from {{count}} product and from attribute groups. Customers with these add-ons in their cart change their choice before paying.",
+      "deleteDescription_other": "It is removed from {{count}} products and from attribute groups. Customers with these add-ons in their cart change their choice before paying.",
+      "deleted": "Group deleted.",
+      "saved": "Group saved.",
       "errors": {
-        "name": "The template name must be 1-60 characters.",
+        "name": "The group name must be 1-60 characters.",
         "tooMany": "This change would give some products more than 5 add-ons; remove add-ons from them first.",
-        "idUnknown": "An add-on id the template does not have was sent. Reload the page and try again."
+        "idUnknown": "An add-on not in the group was sent. Reload the page and try again."
       },
-      "add": "Add template",
-      "pickTitle": "Add an add-on template",
-      "pickDescription": "The template's add-ons are linked to this product; when the template changes, so does this product.",
-      "link": "Link",
-      "noneToPick": "No template to link.",
-      "openSettings": "Create one under product attributes",
+      "add": "Add group",
+      "pickTitle": "Add an add-on group",
+      "pickDescription": "The group's add-ons are added to this product; changing the group changes it too.",
+      "link": "Add",
+      "noneToPick": "No groups to add.",
+      "openSettings": "Create an add-on group",
       "doesNotFit_one": "{{count}} add-on: does not fit within this product's 5.",
       "doesNotFit_other": "{{count}} add-ons: do not fit within this product's 5.",
-      "viaProduct": "Template",
-      "viaAttribute": "From attribute template",
-      "editInSettings": "Edit template",
-      "unlink": "Unlink",
-      "hidden_one": "{{count}} add-on is past the limit of 5 and not shown in the store; remove a template or an add-on.",
-      "hidden_other": "{{count}} add-ons are past the limit of 5 and not shown in the store; remove a template or an add-on.",
+      "viaProduct": "Group",
+      "viaAttribute": "From attribute group",
+      "editInSettings": "Edit group",
+      "unlink": "Remove",
+      "hidden_one": "{{count}} add-on is over the limit of 5 and not shown in the shop; remove a group or one of the product's add-ons.",
+      "hidden_other": "{{count}} add-ons are over the limit of 5 and not shown in the shop; remove a group or one of the product's add-ons.",
       "usage": "Usage",
-      "usageHint": "Changing the template changes all of these products at once; placed orders stay as they are.",
-      "linkedProducts": "Linked products",
-      "carriedBy": "Carried by attribute templates",
+      "usageHint": "Changing the group changes these products at once; placed orders do not change.",
+      "linkedProducts": "Products",
+      "carriedBy": "Attribute groups",
       "carriedByNone": "None",
-      "createHint": "Create the template by its name; add its add-ons on the page that opens.",
-      "carryHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store. You can save; removing a template or an add-on is advised.",
-      "carryHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store. You can save; removing a template or an add-on is advised.",
-      "carryRequiredHidden_one": "With this attribute template the product has more than 5 add-ons: {{count}} add-on is not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
-      "carryRequiredHidden_other": "With this attribute template the product has more than 5 add-ons: {{count}} add-ons are not shown in the store, a required one among them. You can save; removing a template or an add-on first is advised.",
+      "createHint": "Name it; add its add-ons on the next page.",
+      "carryHidden_one": "With this attribute group the product has more than 5 add-ons; {{count}} is not shown in the shop.",
+      "carryHidden_other": "With this attribute group the product has more than 5 add-ons; {{count}} are not shown in the shop.",
+      "carryRequiredHidden_one": "With this attribute group the product has more than 5 add-ons; {{count}} is not shown in the shop, a required one among them.",
+      "carryRequiredHidden_other": "With this attribute group the product has more than 5 add-ons; {{count}} are not shown in the shop, a required one among them.",
       "apply": {
         "action": "Apply to products",
         "title": "Apply to products",
-        "description": "Link the \"{{name}}\" template to products or remove it from them.",
+        "description": "Add the \"{{name}}\" group to products or remove it from them.",
         "mode": "Action",
         "modes": {
-          "add": "Link",
+          "add": "Add",
           "remove": "Remove"
         },
         "modeHints": {
-          "add": "The template is linked to the products chosen; those already linked stay as they are. Products it would take past 5 add-ons are skipped and listed in the report.",
-          "remove": "The template's direct link is removed from the products chosen; those it reaches through an attribute template stay."
+          "add": "The group is added to the chosen products. Products it would take past 5 add-ons are skipped.",
+          "remove": "The group is removed from the chosen products; those from an attribute group stay."
         },
         "target": "Products",
         "targets": {
@@ -4379,7 +4389,7 @@
           "category": "Category",
           "products": "Chosen products"
         },
-        "allHint": "Applied to every product in the shop, gift card products excepted. Each product is checked on its own.",
+        "allHint": "Every product except gift cards.",
         "category": "Category",
         "categoryHint": "Products in its subcategories are included.",
         "categoryPlaceholder": "Search categories",
@@ -4389,7 +4399,7 @@
         "noProducts": "No product found.",
         "removeProduct": "{{name}}: remove from the list",
         "submit": {
-          "add": "Link",
+          "add": "Add",
           "remove": "Remove"
         },
         "errors": {
@@ -4402,11 +4412,11 @@
       "title": "Scope",
       "hints": {
         "product": "The add-on is saved on this product only.",
-        "template": "The add-on is saved as a new template and linked to the products chosen. Changing the template changes every linked product; products it would take past 5 add-ons are skipped and listed in the report."
+        "template": "The add-on is saved as a new group and added to the chosen products. Changing the group changes all of them."
       },
       "modes": {
         "product": "This product only",
-        "template": "Save as a template and apply"
+        "template": "Save as a group and apply"
       },
       "target": "Apply to",
       "targetHint": "A category includes the products in its subcategories. Gift card products are left out.",
@@ -4417,9 +4427,9 @@
         "product": "This product"
       },
       "nameHint": "Left empty, the add-on's name is used. Shown in the panel only; at most {{max}} characters.",
-      "note": "Saving creates the template and links it to the products chosen.",
-      "linked": "Template saved and linked to this product.",
-      "notApplied": "The template was saved but not applied to products; try again with \"Apply to products\" on its page."
+      "note": "Saving creates the group and adds it to the chosen products.",
+      "linked": "Group saved and added to this product.",
+      "notApplied": "The group was saved but not applied to products; try again with \"Apply to products\" on its page."
     }
   },
   "orders": {
@@ -6430,7 +6440,6 @@
     }
   },
   "seo": {
-    "description": "How your shop shows up in search engines and AI search",
     "editSettings": "SEO settings",
     "search": "In search results",
     "searchHint": "With your templates, a product page looks like this.",
@@ -7217,18 +7226,17 @@
   },
   "attributes": {
     "title": "Product attributes",
-    "subtitle": "Choose which attributes each kind of product fills in; each product picks a template.",
-    "createTemplate": "Create template",
-    "newTemplate": "New attribute template",
-    "templateHint": "The attributes products with this template fill in.",
-    "empty": "No templates yet. Create the first one; for knives, say, steel type and blade length.",
+    "subtitle": "Set up attribute groups for your products and fill them on the product page.",
+    "createTemplate": "Add attribute group",
+    "newTemplate": "New attribute group",
+    "empty": "No attribute groups yet.",
     "count_one": "{{count}} attribute",
     "count_other": "{{count}} attributes",
-    "templateName": "Template name",
+    "templateName": "Group name",
     "handle": "Short name",
     "handleHint": "Made from the name; fixed once saved.",
-    "description": "Description",
-    "noDefinitions": "This template has no attributes yet.",
+    "description": "Note",
+    "noDefinitions": "No attributes yet.",
     "add": "Add attribute",
     "untitled": "Untitled attribute",
     "label": "Attribute name",
@@ -7237,31 +7245,31 @@
       "text": "Text",
       "number": "Number",
       "boolean": "Yes / no",
-      "select": "Single choice",
-      "multi_select": "Multiple choice"
+      "select": "One from a list",
+      "multi_select": "Several from a list"
     },
     "unit": "Unit",
-    "unitHint": "e.g. cm, g, HRC",
-    "options": "Options",
+    "unitHint": "E.g. cm, g",
+    "options": "Values",
     "optionsHint": "Type and press Enter.",
-    "optionsPlaceholder": "e.g. Stainless steel, Carbon steel",
-    "removeOption": "Remove {{option}}",
+    "optionsPlaceholder": "E.g. Stainless, Carbon",
+    "removeOption": "Remove the value {{option}}",
     "flags": {
       "is_public": "Show in the shop",
       "is_required": "Required",
-      "is_filterable": "Filter in the shop",
-      "is_seo_highlight": "Highlight in search titles"
+      "is_filterable": "Show in filters",
+      "is_seo_highlight": "Use in the Google title"
     },
-    "scope": "Where it lives",
-    "scopeHint": "What changes with the shopper's choice, like size or colour, becomes a product option.",
+    "scope": "Use",
+    "scopeHint": "What the customer picks, such as size or colour, becomes a product option.",
     "scopes": {
-      "product": "On the product",
-      "variant": "On the variant (product option)"
+      "product": "Product detail",
+      "variant": "Product option (size, colour)"
     },
     "optionTitle": "Option name",
-    "optionTitleHint": "The product option's name, e.g. Size.",
+    "optionTitleHint": "E.g. Size",
     "variesBy": "Google equivalent",
-    "variesByHint": "So Google can group the variants.",
+    "variesByHint": "For Google to group the options.",
     "variesByNone": "None",
     "variesByOptions": {
       "color": "Colour",
@@ -7274,40 +7282,38 @@
     "moveUp": "Move up",
     "moveDown": "Move down",
     "remove": "Remove attribute",
-    "nameRequired": "Give the template a name.",
-    "saved": "Template saved.",
-    "removeValuesTitle": "Delete the removed attributes' values?",
-    "removeValuesDescription": "Products may hold values for {{names}}. Saving deletes those values.",
+    "nameRequired": "Give the group a name.",
+    "saved": "Attribute group saved.",
+    "removeValuesTitle": "Remove the attributes?",
+    "removeValuesDescription": "{{names}}: the values entered on products are deleted too.",
     "removeValuesConfirm": "Remove and save",
-    "deleteTemplate": "Delete template",
+    "deleteTemplate": "Delete group",
     "deleteTitle": "Delete {{name}}?",
-    "deleteDescription": "Only templates no product uses can be deleted.",
-    "deleted": "Template deleted.",
+    "deleteDescription": "Only a group no product uses can be deleted.",
+    "deleted": "Attribute group deleted.",
     "productCard": "Attributes",
-    "productHint": "Used on the product page, in filters and in search results.",
-    "template": "Attribute template",
-    "templatePickHint": "The template sets which attributes this product fills in.",
-    "noTemplate": "No template",
-    "noTemplates": "No attribute templates yet.",
-    "openSettings": "Create one in Settings > Product attributes.",
+    "template": "Attribute group",
+    "noTemplate": "None",
+    "noTemplates": "No attribute groups yet.",
+    "openSettings": "Create an attribute group",
     "noValue": "Not set",
     "productSaved": "Attributes saved.",
-    "changeTemplateTitle": "Change the template?",
-    "changeTemplateDescription": "The product's current attribute values are deleted when you save.",
+    "changeTemplateTitle": "Change the attribute group?",
+    "changeTemplateDescription": "The attribute values entered on this product are deleted.",
     "changeTemplateConfirm": "Change",
     "groups": {
-      "hint": "Splits the product page's spec table under headings. Optional; without groups it is one list.",
-      "newName": "New group name",
+      "hint": "No sections; the attributes show as one list.",
+      "newName": "New section name",
       "newPlaceholder": "E.g. Dimensions",
-      "add": "Add group",
-      "item": "Group {{number}}",
-      "nameOf": "Name of group {{number}}",
-      "nameRequired": "Give the group a name.",
-      "full": "At most {{max}} groups.",
-      "field": "Group",
-      "fieldHint": "Shown under this group in the spec table.",
-      "none": "No group",
-      "unnamed": "Unnamed group"
+      "add": "Add section",
+      "item": "Section {{number}}",
+      "nameOf": "Name of section {{number}}",
+      "nameRequired": "Give the section a name.",
+      "full": "Up to {{max}} sections.",
+      "field": "Section",
+      "fieldHint": "Shows under this heading on the product page.",
+      "none": "No section",
+      "unnamed": "Unnamed section"
     },
     "aliases": "Other names",
     "aliasesHint": "Other names descriptions use for this attribute; e.g. Made in for Origin.",
@@ -7329,36 +7335,36 @@
       "no": "No"
     },
     "facts": {
-      "action": "Bring over facts from the description",
+      "action": "Import from description",
       "title": "Bring over facts from the description",
-      "description_one": "Facts read from the tables and lists in the product's description are written to its template's fields. The description does not change.",
-      "description_other": "Facts read from the tables and lists in the descriptions of the {{formatted}} selected products are written to their templates' fields. The descriptions do not change.",
-      "empty": "No facts to bring over were found. Tables, definition lists and “Name: value” lines under a heading such as “Specifications” are read.",
+      "description_one": "The description's tables and lists are written to the attributes. The description does not change.",
+      "description_other": "The tables and lists in the {{formatted}} selected products' descriptions are written to the attributes. The descriptions do not change.",
+      "empty": "No attributes to import were found in the description.",
       "found_one": "{{rows}} rows found in {{formatted}} product; {{values}} values will be written.",
       "found_other": "{{rows}} rows found in {{formatted}} products; {{values}} values will be written.",
       "foundLeft": "{{left}} rows will not be written; the reasons are under the products.",
-      "templateFor_one": "Template for the {{formatted}} product without one",
-      "templateFor_other": "Template for the {{formatted}} products without one",
-      "templateForHint": "These products are given the chosen template and their facts are written to it.",
-      "noTemplateChoice": "No template (these products are skipped)",
+      "templateFor_one": "Group for the {{formatted}} product without an attribute group",
+      "templateFor_other": "Group for the {{formatted}} products without an attribute group",
+      "templateForHint": "These products get the chosen group.",
+      "noTemplateChoice": "No group (these products are skipped)",
       "overwrite": "Write over filled fields",
       "overwriteHint_one": "{{formatted}} field holds another value on the product; unticked, the product's value stays.",
       "overwriteHint_other": "{{formatted}} fields hold another value on the products; unticked, the products' values stay.",
-      "suggestionsTitle": "Labels the template has no field for",
-      "suggestionsHint": "Add them as fields or link them to a field you have; a linked label is saved as that field's other name. Unticked ones are not brought over.",
+      "suggestionsTitle": "Attributes not in the group",
+      "suggestionsHint": "Add them as new attributes or link them to an existing one. Unticked ones are not imported.",
       "suggestionLine_one": "{{formatted}} product · {{values}}",
       "suggestionLine_other": "{{formatted}} products · {{values}}",
-      "addField": "Add as a field",
-      "fieldType": "Field type",
-      "fieldGroup": "Field section",
+      "addField": "Add as attribute",
+      "fieldType": "Type",
+      "fieldGroup": "Section",
       "noGroup": "No section",
-      "aliasOf": "Existing field for “{{label}}”",
-      "noAlias": "Do not link to a field",
+      "aliasOf": "Existing attribute for “{{label}}”",
+      "noAlias": "Do not link",
       "aliasTo": "Link to {{field}}",
-      "templateName": "Template {{name}}",
+      "templateName": "{{name}} group",
       "productsTitle": "Products",
       "productLine": "{{ready}} of {{rows}} rows to write",
-      "noTemplateBadge": "No template",
+      "noTemplateBadge": "No group",
       "moreProducts_one": "{{formatted}} more product; all are brought over.",
       "moreProducts_other": "{{formatted}} more products; all are brought over.",
       "withoutFacts_one": "No facts were found in {{formatted}} product's description.",
@@ -7371,8 +7377,8 @@
         "overwrite": "To write over",
         "unparsed": "Unreadable",
         "conflict": "Conflicting",
-        "ambiguous": "Several fields",
-        "unmatched": "No field"
+        "ambiguous": "Several attributes",
+        "unmatched": "Not in the group"
       },
       "reasons": {
         "number": "no number read",
@@ -7391,37 +7397,35 @@
       "jobFailed": "Bringing over could not finish.",
       "written_one": "{{values}} values written to {{formatted}} product.",
       "written_other": "{{values}} values written to {{formatted}} products.",
-      "templateChanged": "{{fields}} fields and {{aliases}} other names added to the template.",
+      "templateChanged": "{{fields}} attributes and {{aliases}} other names added to the group.",
       "unchanged_one": "{{formatted}} product had no change.",
       "unchanged_other": "{{formatted}} products had no change.",
       "left_one": "{{formatted}} product was skipped or could not be written; the reasons are in the report.",
       "left_other": "{{formatted}} products were skipped or could not be written; the reasons are in the report.",
       "report": "Download the report"
     },
-    "previousTemplate": "Previous template",
-    "nextTemplate": "Next template",
+    "previousTemplate": "Previous group",
+    "nextTemplate": "Next group",
     "columns": {
-      "name": "Template",
+      "name": "Attribute group",
       "definitions": "Attributes"
     },
     "tabs": {
       "definitions_one": "Attributes ({{count}})",
       "definitions_other": "Attributes ({{count}})",
-      "groups_one": "Groups ({{count}})",
-      "groups_other": "Groups ({{count}})",
-      "info": "Template details",
+      "groups_one": "Sections ({{count}})",
+      "groups_other": "Sections ({{count}})",
       "addons_one": "Add-ons ({{count}})",
       "addons_other": "Add-ons ({{count}})"
     },
     "tabError": "A field on this tab needs fixing",
     "descriptionHint": "Shown in the panel only.",
-    "definitionsHint": "Shown on the product page in this order. Drag to reorder.",
     "typeFixed": "A saved attribute's type does not change.",
     "textUnitHint": "Written beside the value, e.g. HRC.",
     "badges": {
       "required": "Required",
       "filter": "Filter",
-      "variant": "Variant",
+      "variant": "Option",
       "hidden": "Hidden in the shop"
     },
     "advanced": {
@@ -7429,13 +7433,26 @@
       "changed_one": "{{count}} setting on",
       "changed_other": "{{count}} settings on"
     },
-    "seoHint": "Its value may be used in the product's title on Google.",
     "drag": "Drag to move",
     "actions": "{{name}}: actions",
     "addonTemplates": {
-      "hint": "The add-on templates you tick are added to every product using this attribute template, after the product's own add-ons, in this order.",
-      "none": "No add-on templates yet. Create one in the Add-on templates section of this page."
-    }
+      "hint": "Added to every product in this group.",
+      "none": "No add-on groups yet."
+    },
+    "templateNamePlaceholder": "E.g. Knife",
+    "more": "More settings",
+    "labelPlaceholder": "E.g. Steel type",
+    "typeExamples": {
+      "text": "E.g. Origin: Turkey",
+      "number": "E.g. Weight: 120 g",
+      "boolean": "E.g. Dishwasher safe",
+      "select": "E.g. Steel: Stainless",
+      "multi_select": "E.g. Use: Meat, Vegetables"
+    },
+    "newValue": "Add a new value",
+    "newValueName": "New value for {{label}}",
+    "addValue": "Add",
+    "valueAdded": "{{value}} added."
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -8985,6 +9002,10 @@
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
         },
+        "search_box": {
+          "name": "Search box",
+          "description": "The shop's search box, with an optional title and short intro. Its fields are chosen in Theme › Search box."
+        },
         "photo_collage": {
           "name": "Photo collage",
           "description": "3–7 photos together: the first large or all even; optionally a title, an intro and a caption and link per photo."
@@ -9016,7 +9037,8 @@
         "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one.",
         "hero": {
           "standard": "Single image",
-          "category_list": "Category list"
+          "category_list": "Category list",
+          "full_image": "Full image"
         },
         "products": {
           "grid": "Grid",
@@ -9799,6 +9821,36 @@
             "hint": "A long text shows its first lines, the rest opens with a button. The whole text stays in the page; search engines read all of it."
           },
           "words": "description text category brand collection read more fold"
+        },
+        "searchFormTitle": "Search box",
+        "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",
+        "searchForm": {
+          "attribute_key": {
+            "label": "Where field",
+            "hint": "The attribute a visitor picks (e.g. region, city). Only filterable attributes with choices are listed.",
+            "none": "Word box (no attribute)"
+          },
+          "show_category": {
+            "label": "Category field",
+            "hint": "Lets the visitor pick one of the top categories."
+          },
+          "category_style": {
+            "label": "How categories show",
+            "hint": "A drop-down takes no room; tabs stand side by side above the box.",
+            "steps": {
+              "select": "Drop-down",
+              "tabs": "Tabs"
+            }
+          },
+          "show_dates": {
+            "label": "Date fields",
+            "hint": "A start and an end date; products departing in the range are found."
+          },
+          "show_people": {
+            "label": "People field",
+            "hint": "How many people; dates with enough room come first."
+          },
+          "words": "search box where date people category tabs"
         }
       },
       "faq": {
@@ -11129,12 +11181,79 @@
           "plain": "1, 2"
         }
       },
+      "searchBox": {
+        "titleHint": "Left empty, the box shows without a title.",
+        "intro": "Intro"
+      },
       "posts": {
         "eyebrowPlaceholder": "E.g. Need inspiration?",
         "intro": "Intro",
         "link": "Button",
         "linkTerm": "button",
         "linkHint": "Left empty, the button leads to every post."
+      },
+      "heroFull": {
+        "accent": {
+          "label": "Accent line",
+          "term": "accent",
+          "placeholder": "E.g. Find your escape.",
+          "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
+        },
+        "action": {
+          "label": "Under the heading",
+          "term": "action",
+          "hint": "The cover holds buttons or your shop's search box.",
+          "button": "Buttons",
+          "search": "Search box"
+        },
+        "searchNote": "Choose the search box's fields under Theme settings › Search box. The buttons are not drawn while the search box is chosen.",
+        "search_position": {
+          "label": "Search box position",
+          "term": "position",
+          "hint": "The box stands inside the cover or as a card over its bottom edge.",
+          "inside": "Inside the cover",
+          "overlap": "Card over the bottom edge"
+        },
+        "show_trust": {
+          "label": "Show trust icons",
+          "term": "trust badges",
+          "hint": "Your shop's trust badges (four at most) show in a white box at the cover's bottom edge."
+        },
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "hint": "How much of the screen the cover takes.",
+          "screen": "Full screen",
+          "tall": "Tall"
+        },
+        "align": {
+          "label": "Text alignment",
+          "term": "align",
+          "hint": "Where the heading, the text and the buttons stand.",
+          "center": "Centre",
+          "start": "Left"
+        },
+        "image_side": {
+          "label": "Image position",
+          "term": "image",
+          "hint": "The image fills the cover behind the text, or stands beside it on a light ground.",
+          "full": "Behind the text",
+          "end": "Beside the text"
+        },
+        "scrim": {
+          "label": "Image overlay",
+          "term": "overlay",
+          "hint": "The dark veil over the image, so the text reads on any picture.",
+          "light": "Light",
+          "strong": "Strong"
+        },
+        "edge": {
+          "label": "Image edge",
+          "term": "edge",
+          "hint": "The image ends straight or in a soft wave.",
+          "straight": "Straight",
+          "wave": "Wavy"
+        }
       },
       "trustCard": {
         "lift": {

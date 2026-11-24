@@ -4,7 +4,6 @@ import { ArrowRight, CircleCheck, Globe, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
-import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { spanOf } from "@qticaret/admin-ui/lib/page-spans"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
@@ -13,8 +12,6 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
 import { insightsQuery } from "@/features/seo/api/insights"
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
-import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
-import { AuditCard } from "@/features/seo/audit/audit-card"
 import { SearchConsoleCard } from "@/features/seo/components/search-console-card"
 import { SetupChecklistCard } from "@/features/seo/components/setup-checklist-card"
 import { SiteSearchCard } from "@/features/seo/components/site-search-card"
@@ -88,7 +85,7 @@ function RedirectsCard({ className }: { className?: string }) {
       className={className}
       action={
         <Button asChild variant="outline" size="sm">
-          <Link to="/seo/redirects">
+          <Link to="/settings/seo" search={{ part: "redirects" }}>
             {t("seo.redirectsCard.open")}
             <ArrowRight />
           </Link>
@@ -99,8 +96,8 @@ function RedirectsCard({ className }: { className?: string }) {
         {items.map(({ key, tab }) => (
           <li key={key}>
             <Link
-              to="/seo/redirects"
-              search={tab ? { tab } : {}}
+              to="/settings/seo"
+              search={tab ? { part: "redirects", tab } : { part: "redirects" }}
               className="flex flex-col gap-1 px-4 py-3 transition-colors hover:bg-muted/50"
             >
               <span
@@ -122,11 +119,12 @@ function RedirectsCard({ className }: { className?: string }) {
 }
 
 /**
- * SEO (docs/13, docs/14): what setup still lacks, how the shop looks in
- * search today, what its catalog still lacks, its redirects, site search's
- * synonyms and sitemap, the advisor's score and the store-wide audit.
+ * Settings > SEO's overview tab (docs/13, docs/14): what setup still lacks,
+ * how the shop looks in search today, what its catalog still lacks, its
+ * redirects, site search's synonyms and sitemap, and how Google sees it.
+ * The advisor's score and the store-wide audit are tabs of their own.
  */
-export function SeoOverviewPage() {
+export function SeoOverview() {
   const { t } = useTranslation()
   const seo = useQuery(sectionQuery<SeoSettings>("seo"))
   const insights = useQuery(insightsQuery())
@@ -136,56 +134,39 @@ export function SeoOverviewPage() {
   const webVitals = insights.data?.insights.web_vitals !== false
   const storeName = useStoreName() ?? t("app.name")
   return (
-    <div className="flex flex-col gap-[var(--grid-gap)]">
-      <PageHeader
-        title={t("nav.seo")}
-        description={t("seo.description")}
-        action={
-          <Button asChild variant="outline">
-            <Link to="/settings/seo">{t("seo.editSettings")}</Link>
-          </Button>
-        }
-      />
-      <PageGrid>
-        <SetupChecklistCard className={spanOf(12)} />
-        <SectionCard
-          title={t("seo.search")}
-          description={t("seo.searchHint")}
-          className={spanOf(7)}
-        >
-          {seo.data ? (
-            <div className="flex flex-col gap-4">
-              <SearchPreview seo={seo.data.values} storeName={storeName} />
-              <ul className="flex flex-col divide-y">
-                <Check ok={seo.data.values.canonical_host !== null}>
-                  {seo.data.values.canonical_host
-                    ? t("seo.checks.host", { host: seo.data.values.canonical_host })
-                    : t("seo.checks.noHost")}
-                </Check>
-                <Check ok>{t(`seo.checks.urls.${seo.data.values.url_style.product}`)}</Check>
-                <Check ok={seo.data.values.ai_crawler_preset !== "none"}>
-                  {t(`settings.seo.presets.${seo.data.values.ai_crawler_preset}.title`)}
-                </Check>
-              </ul>
-            </div>
-          ) : seo.isError ? (
-            <ErrorState text={errorText(t, seo.error)} onRetry={() => void seo.refetch()} />
-          ) : (
-            <Skeleton className="h-56" />
-          )}
-        </SectionCard>
-        <CatalogHealthCard className={spanOf(5)} />
-        {/* Site search's synonyms under the redirects: the two short cards stand level with the sitemap */}
-        <PageColumn span={6}>
-          <RedirectsCard />
-          <SiteSearchCard />
-        </PageColumn>
-        <SitemapCard className={spanOf(6)} />
-        {searchConsole ? <SearchConsoleCard className={spanOf(webVitals ? 7 : 12)} /> : null}
-        {webVitals ? <WebVitalsCard className={spanOf(searchConsole ? 5 : 12)} /> : null}
-        <AdvisorSummaryCard className={spanOf(12)} />
-        <AuditCard className={spanOf(12)} />
-      </PageGrid>
-    </div>
+    <PageGrid>
+      <SetupChecklistCard className={spanOf(12)} />
+      <SectionCard title={t("seo.search")} description={t("seo.searchHint")} className={spanOf(7)}>
+        {seo.data ? (
+          <div className="flex flex-col gap-4">
+            <SearchPreview seo={seo.data.values} storeName={storeName} />
+            <ul className="flex flex-col divide-y">
+              <Check ok={seo.data.values.canonical_host !== null}>
+                {seo.data.values.canonical_host
+                  ? t("seo.checks.host", { host: seo.data.values.canonical_host })
+                  : t("seo.checks.noHost")}
+              </Check>
+              <Check ok>{t(`seo.checks.urls.${seo.data.values.url_style.product}`)}</Check>
+              <Check ok={seo.data.values.ai_crawler_preset !== "none"}>
+                {t(`settings.seo.presets.${seo.data.values.ai_crawler_preset}.title`)}
+              </Check>
+            </ul>
+          </div>
+        ) : seo.isError ? (
+          <ErrorState text={errorText(t, seo.error)} onRetry={() => void seo.refetch()} />
+        ) : (
+          <Skeleton className="h-56" />
+        )}
+      </SectionCard>
+      <CatalogHealthCard className={spanOf(5)} />
+      {/* Site search's synonyms under the redirects: the two short cards stand level with the sitemap */}
+      <PageColumn span={6}>
+        <RedirectsCard />
+        <SiteSearchCard />
+      </PageColumn>
+      <SitemapCard className={spanOf(6)} />
+      {searchConsole ? <SearchConsoleCard className={spanOf(webVitals ? 7 : 12)} /> : null}
+      {webVitals ? <WebVitalsCard className={spanOf(searchConsole ? 5 : 12)} /> : null}
+    </PageGrid>
   )
 }

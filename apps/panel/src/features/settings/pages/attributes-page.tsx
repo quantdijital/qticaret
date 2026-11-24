@@ -38,9 +38,15 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
           >
             {template.name}
           </button>
-          {template.description ? (
+          {/* What it holds tells it apart better than any note */}
+          {template.definitions.length > 0 || template.description ? (
             <span className="max-w-full truncate text-xs text-muted-foreground">
-              {template.description}
+              {template.definitions.length > 0
+                ? [...template.definitions]
+                    .sort((a, b) => a.rank - b.rank)
+                    .map((definition) => definition.label)
+                    .join(", ")
+                : template.description}
             </span>
           ) : null}
         </div>
@@ -60,9 +66,10 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
 }
 
 /**
- * Settings > Product attributes (adr/0013): templates that say which
- * attributes a kind of product carries, one row each; a row opens its
- * template. Sector needs live here as data, never as code (CLAUDE.md).
+ * Settings > Product attributes (adr/0013): attribute groups (the API's
+ * templates) that say which attributes a kind of product carries, one row
+ * each with its attributes' names; a row opens its group. Add-on groups
+ * follow below. Sector needs live here as data, never as code (CLAUDE.md).
  */
 export function AttributesPage() {
   const { t } = useTranslation()

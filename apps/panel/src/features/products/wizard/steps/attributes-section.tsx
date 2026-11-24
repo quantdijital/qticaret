@@ -12,6 +12,8 @@ import {
 } from "@qticaret/admin-ui/ui/select"
 import { templatesQuery } from "@/features/attributes/api"
 import { AttributeInput } from "@/features/attributes/components/attribute-input"
+import { isSelectType } from "@/features/attributes/types"
+import { useAddOption } from "@/features/attributes/use-add-option"
 import type { WizardValues } from "../schema"
 import { productDefinitions, useWizardTemplate } from "../wizard-template"
 
@@ -31,21 +33,14 @@ export function AttributesSection({ className }: { className?: string }) {
   const templates = useQuery(templatesQuery())
   const [templateId, values] = useWatch({ control, name: ["template_id", "attributes"] })
   const template = useWizardTemplate()
+  const addOption = useAddOption(template)
   if (!templates.data || templates.data.length === 0) {
     return null
   }
   return (
-    <SectionCard
-      title={t("attributes.productCard")}
-      description={t("attributes.productHint")}
-      className={className}
-    >
+    <SectionCard title={t("attributes.productCard")} className={className}>
       <div className="flex flex-col gap-4">
-        <Field
-          label={t("attributes.template")}
-          htmlFor="wizard-attributes-template"
-          hint={t("attributes.templatePickHint")}
-        >
+        <Field label={t("attributes.template")} htmlFor="wizard-attributes-template">
           <Select
             value={templateId || NONE}
             onValueChange={(next) => {
@@ -75,6 +70,11 @@ export function AttributesSection({ className }: { className?: string }) {
                 key={definition.key}
                 definition={definition}
                 value={values[definition.key]}
+                addOption={
+                  addOption && isSelectType(definition.type)
+                    ? (label) => addOption(definition.key, label)
+                    : undefined
+                }
                 error={
                   fieldErrors?.[definition.key]?.message
                     ? t(fieldErrors[definition.key]?.message ?? "")

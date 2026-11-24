@@ -20,6 +20,7 @@ import { categoryCounts } from "@/lib/store-api/extras"
 import { picturedCategories } from "./category-tiles"
 import { productImages } from "./image"
 import { currentMenus, layoutImage, layoutLink, layoutLinks } from "./layout"
+import { heroFullView } from "./hero-full"
 import { heroCatalogSlides } from "./hero-slides"
 import { hrefOf } from "./listing"
 import { isVatExclusive, shownAmount } from "./price"
@@ -160,7 +161,7 @@ export async function heroCatalogView(
 /**
  * The opening (adr/0049): the shop's heading (else its name), line,
  * buttons and picture; drawn as H17 with its own parts when the shop chose
- * the category list.
+ * the category list, as the full image with its own (adr/0077 §9).
  */
 export async function heroView(section: StoreHeroSection, t: Translate): Promise<HomeSectionView> {
   const site = await siteSeo()
@@ -175,6 +176,9 @@ export async function heroView(section: StoreHeroSection, t: Translate): Promise
     image: section.image ? layoutImage(section.image, heading) : null,
     ...(section.variant === "category_list"
       ? { variant: section.variant, catalog: await heroCatalogView(section, t) }
+      : {}),
+    ...(section.variant === "full_image"
+      ? { variant: section.variant, full: await heroFullView(section, t) }
       : {}),
   }
 }
