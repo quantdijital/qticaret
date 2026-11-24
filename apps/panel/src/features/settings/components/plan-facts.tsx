@@ -16,7 +16,7 @@ const FEATURE_NAMES: Record<string, string> = {
 
 /** The package's features the page names, in the order the backend gives them. */
 const namedFeatures = (features: readonly PackageFeature[] | undefined): PackageFeature[] =>
-  (features ?? []).filter((feature) => feature.key in FEATURE_NAMES)
+  (features ?? []).filter((feature) => Object.hasOwn(FEATURE_NAMES, feature.key))
 
 function Fact({
   icon: Icon,

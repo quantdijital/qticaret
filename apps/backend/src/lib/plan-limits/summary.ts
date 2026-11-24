@@ -11,6 +11,7 @@ import type {
   PlanBillingSummary,
   TenantStatus,
 } from "@qticaret/types/control-plane"
+import type { PlanState } from "../../modules/control-plane/service"
 import { turkishMonth } from "../control-plane/usage"
 import { planStateOf } from "./check"
 import { cachedUsage } from "./usage"
@@ -38,16 +39,22 @@ export interface PackageFeature {
 /**
  * The package's features as Settings > Abonelik lists them: every
  * platform flag but the test-only ones, as the signed document sets it
- * (its default where the document names none, and unmanaged).
+ * (its default where the document names none, and unmanaged). Managed
+ * without a verified document (`serial` null: before the first one, or a
+ * stored row not believed, `RESTRICTED_UNTRUSTED`) there is no package to
+ * describe: none, rather than defaults that may not be what is applied.
  */
 export const packageFeatures = (
-  managed: boolean,
-  flags: Readonly<Record<string, boolean>>
-): PackageFeature[] =>
-  PLATFORM_FLAGS.filter((flag) => flag.testOnly !== true).map((flag) => ({
+  state: Pick<PlanState, "managed" | "serial" | "platform_flags">
+): PackageFeature[] => {
+  if (state.managed && state.serial === null) {
+    return []
+  }
+  return PLATFORM_FLAGS.filter((flag) => flag.testOnly !== true).map((flag) => ({
     key: flag.key,
-    enabled: managed ? (flags[flag.key] ?? flag.default) : flag.default,
+    enabled: (state.managed ? state.platform_flags[flag.key] : undefined) ?? flag.default,
   }))
+}
 
 type Terms = "period" | "price" | "trial_started_on" | "trial_ends_on"
 
@@ -128,7 +135,7 @@ export async function readPlanSummary(
     period: turkishMonth(now),
     warning_ratio: LIMIT_WARNING_RATIO,
     limits,
-    features: packageFeatures(state.managed, state.platform_flags),
+    features: packageFeatures(state),
     billing: state.billing
       ? ({
           ...billing,

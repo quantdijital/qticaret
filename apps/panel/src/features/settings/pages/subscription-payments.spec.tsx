@@ -184,6 +184,34 @@ describe("SubscriptionPage: terms and payments (adr/0061 Ek C20)", () => {
     expect(screen.queryByText("future.flag")).toBeNull()
   })
 
+  it("has no includes block when the backend lists no features (an untrusted document)", async () => {
+    serve(planOf({ billing: billingOf({}), features: [] }), {
+      payments: { state: "ok", records: [] },
+    })
+    renderPage()
+
+    await screen.findByText("Standart")
+    expect(packageCard().queryByRole("list", { name: "Pakete dahil" })).toBeNull()
+    expect(packageCard().queryByText("Pakete dahil")).toBeNull()
+  })
+
+  it("names no feature from a key on the object prototype", async () => {
+    serve(
+      planOf({
+        billing: billingOf({}),
+        features: [
+          { key: "toString", enabled: true },
+          { key: "constructor", enabled: true },
+        ],
+      }),
+      { payments: { state: "ok", records: [] } }
+    )
+    renderPage()
+
+    await screen.findByText("Standart")
+    expect(packageCard().queryByRole("list", { name: "Pakete dahil" })).toBeNull()
+  })
+
   it("lists the payments latest first: period, day, amount, status and the invoice", async () => {
     serve(planOf({ billing: billingOf({}) }), {
       payments: {
