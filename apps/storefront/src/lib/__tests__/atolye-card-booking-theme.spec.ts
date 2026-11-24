@@ -79,4 +79,18 @@ describe("the theme's dated product card", () => {
     expect(textOf(plain)).not.toContain("itibaren")
     expect(plain).not.toBe(dated)
   })
+
+  it("strikes the price before an automatic promotion through only when the card has one", () => {
+    const booking = { next: null, nextAt: null }
+    const [promoted = ""] = cardsOf([
+      card("a", {
+        booking,
+        price: { current: "1.400,40 TL", before: "1.750,50 TL", from: true, discount: 20 },
+      }),
+    ])
+    const [plain = ""] = cardsOf([card("a", { booking })])
+    expect(textOf(promoted)).toContain("1.400,40 TL'den itibaren")
+    expect(promoted).toMatch(/<s class="[^"]*">[\s\S]*1\.750,50 TL<\/s>/)
+    expect(plain).not.toContain("</s>")
+  })
 })

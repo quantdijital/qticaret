@@ -9,6 +9,8 @@ import type { Kurus, MedusaAmount } from "../../lib/money"
 import { offerOf } from "../../lib/pricing/offers"
 import type { CartOffer, Offer, PriceOffer, PromotionRow } from "../../lib/pricing/offers"
 
+type Resolver = Pick<MedusaContainer, "resolve">
+
 /** What the automatic promotions make of a variant's price before the cart (adr/0023 Ek 2026-11-05). */
 export interface VariantOffers {
   /** The offers that are the price, each from its start. */
@@ -44,7 +46,7 @@ const RULE = ["attribute", "operator", "values.value"]
 const ANY_CART = 1_000_000_000
 
 /** The shop's automatic promotions that may show before the cart, by code. */
-async function shownOffers(container: MedusaContainer, currency: string) {
+async function shownOffers(container: Resolver, currency: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "promotion",
     fields: [
@@ -85,7 +87,7 @@ async function shownOffers(container: MedusaContainer, currency: string) {
  * is not in the answer.
  */
 export async function automaticOffers(
-  container: MedusaContainer,
+  container: Resolver,
   prices: ReadonlyMap<string, Kurus>,
   currency: string
 ): Promise<Map<string, VariantOffers>> {

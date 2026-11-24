@@ -229,5 +229,67 @@ medusaIntegrationTestRunner({
       expect(past.status).toBe(400)
       expect(far.status).toBe(400)
     })
+
+    // adr/0076 Ek "kart fiyatı promosyonlu": the card, the index and a date search agree
+    it("prices a card, the index and a date search with an automatic promotion, never a code's", async () => {
+      const promoted = await tour([{ days: 8, capacity: 10 }])
+      const coded = await tour([{ days: 8, capacity: 10 }])
+      const category = await staff("/admin/product-categories", {
+        name: "Ege turları",
+        handle: "ege-turlari",
+        is_active: true,
+      })
+      const categoryId = (category.data as { product_category: { id: string } }).product_category.id
+      for (const { productId } of [promoted, coded]) {
+        await staff(`/admin/products/${productId}`, { categories: [{ id: categoryId }] })
+      }
+      const offer = (code: string, automatic: boolean, value: number, productId: string) =>
+        staff("/admin/promotions", {
+          code,
+          type: "standard",
+          status: "active",
+          is_automatic: automatic,
+          is_tax_inclusive: true,
+          application_method: {
+            type: "percentage",
+            target_type: "items",
+            allocation: "across",
+            value,
+            target_rules: [{ attribute: "items.product.id", operator: "in", values: [productId] }],
+          },
+        })
+      expect((await offer("TUR20", true, 20, promoted.productId)).status).toBe(200)
+      expect((await offer("TURKOD30", false, 30, coded.productId)).status).toBe(200)
+      // Dates no other test asks: a date search's products and prices are kept 30 seconds
+      const tarih = `${dayAhead(3)}_${dayAhead(19)}`
+      const cards = async (extra: string) =>
+        (
+          await settle(
+            http.get<{ facts: Record<string, Fact> }>(
+              `/store/card-facts?id=${promoted.productId}&id=${coded.productId}&region_id=${shop.regionId}${extra}`,
+              { headers: store.headers }
+            )
+          )
+        ).data.facts
+
+      const plain = await cards("")
+      const ranged = await cards(`&from=${dayAhead(3)}&to=${dayAhead(19)}&pax=1`)
+      const indexed = await search({ kategori: "ege-turlari", fiyat: "1100-1300" })
+      const dated = await search({ kategori: "ege-turlari", tarih, fiyat: "1100-1300" })
+
+      // 1.500 less 20%, the price before it struck through
+      expect(plain[promoted.productId]?.booking).toMatchObject({ from_price: 1200, before: 1500 })
+      expect(ranged[promoted.productId]?.booking).toMatchObject({
+        from_price: 1200,
+        before: 1500,
+        in_range: true,
+      })
+      // A code's promotion stays in the cart: the card is as it was
+      expect(plain[coded.productId]?.booking).toMatchObject({ from_price: 1500 })
+      expect(plain[coded.productId]?.booking).not.toHaveProperty("before")
+      // The index and the date search filter by the price the card says
+      expect(indexed.data.product_ids).toEqual([promoted.productId])
+      expect(dated.data.product_ids).toEqual([promoted.productId])
+    })
   },
 })
