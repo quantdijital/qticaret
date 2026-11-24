@@ -77,8 +77,11 @@ gh run view <run id> --repo quantdijital/qticaret --log > run.log && node integr
 ```
 
 Several runs' logs (`run-1.log run-2.log`) give each file its median. A
-file's seconds depend on what runs beside it (three workers on four cores),
-so one run is a noisy measure. A new spec file needs no entry: it weighs
+file's seconds depend on what runs beside it (three workers on four cores)
+and on the runner (the same files took up to 1.6 times as long in one job
+as in another run), so one run is a noisy measure. A failed bundle's files
+and a failed lone file are left out: a failure cuts a file short or
+stretches it. A new spec file needs no entry: it weighs
 the median until the next refresh. To see a split: `--listTests
 --shard=k/N` with `QT_IT_BUNDLE=8` lists a job's files.
 

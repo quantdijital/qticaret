@@ -55,6 +55,18 @@ describe("measure", () => {
     expect(measure([LOG, other]).weights["a.spec.ts"]).toBe(40)
     expect(measure([other]).weights["b.spec.ts"]).toBe(1)
   })
+
+  it("leaves out a failed bundle's files and a failed lone file", () => {
+    const failed = LOG.replace("a.spec.ts 30.4 s", "a.spec.ts 3 s")
+      .replace("PASS integration-tests/.bundles", "FAIL integration-tests/.bundles")
+      .replace("PASS integration-tests/http/alone", "FAIL integration-tests/http/alone")
+    expect(parseLog(failed).failed).toEqual(new Set(["bundle-plain-001.spec.js", "alone.spec.ts"]))
+    const { weights, boot, skipped } = measure([LOG, failed])
+    expect(skipped).toBe(3)
+    expect(boot).toBe(20)
+    expect(weights).toEqual({ "a.spec.ts": 30, "alone.spec.ts": 26, "b.spec.ts": 10 })
+    expect(measure([failed]).weights).toEqual({})
+  })
 })
 
 describe("weigher", () => {

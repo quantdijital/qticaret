@@ -24,7 +24,7 @@ const BOOT_SECONDS = 17
 const TIMESTAMP = /^(?:[^\t]*\t[^\t]*\t)?\S+Z /
 const FILE_LINE = /^\[bundle\] ([\w.-]+\.spec\.[jt]s) ([\d.]+) s$/
 const BUNDLE_LINE = /^\[bundle\] (bundle-[\w-]+\.spec\.js) \((?:plain|strict)\): (.+)$/
-const RESULT_LINE = /^(?:PASS|FAIL) integration-tests\/(http|\.bundles)\/([\w.-]+) \(([\d.]+) s\)/
+const RESULT_LINE = /^(PASS|FAIL) integration-tests\/(http|\.bundles)\/([\w.-]+) \(([\d.]+) s\)/
 
 const median = (values) => {
   const sorted = [...values].sort((a, b) => a - b)
@@ -32,11 +32,15 @@ const median = (values) => {
   return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
 }
 
-/** What one job's log says: each bundled file's, each bundle's and each lone file's seconds. */
+/**
+ * What one job's log says: each bundled file's, each bundle's and each lone
+ * file's seconds, and which bundles and lone files failed.
+ */
 function parseLog(text) {
   const files = new Map()
   const bundles = new Map()
   const alone = new Map()
+  const failed = new Set()
   for (const raw of text.split("\n")) {
     const line = raw.replace(TIMESTAMP, "").trimEnd()
     let match = FILE_LINE.exec(line)
@@ -51,32 +55,51 @@ function parseLog(text) {
       continue
     }
     match = RESULT_LINE.exec(line)
-    if (match && match[1] === "http") {
-      alone.set(match[2], Number(match[3]))
-    } else if (match) {
-      const entry = bundles.get(match[2]) ?? {}
-      bundles.set(match[2], { ...entry, total: Number(match[3]) })
+    if (!match) {
+      continue
+    }
+    if (match[1] === "FAIL") {
+      failed.add(match[3])
+    }
+    if (match[2] === "http") {
+      alone.set(match[3], Number(match[4]))
+    } else {
+      const entry = bundles.get(match[3]) ?? {}
+      bundles.set(match[3], { ...entry, total: Number(match[4]) })
     }
   }
-  return { files, bundles, alone }
+  return { files, bundles, alone, failed }
 }
 
 /**
  * Each spec file's seconds without the boot (a lone file's measured time less
  * the median bundle's own time), whole seconds, at least 1, in name order;
  * and that measured boot. A file seen in several logs gets its median.
+ * A failed bundle's files and a failed lone file are left out: a failure
+ * cuts a file short or stretches it (a hook timing out, a test tried again),
+ * so its seconds are no measure (`skipped` counts them).
  */
 function measure(texts) {
   const seen = new Map()
   const boots = []
+  let skipped = 0
   const note = (name, seconds) => seen.set(name, [...(seen.get(name) ?? []), seconds])
   const parsed = texts.map(parseLog)
   for (const log of parsed) {
+    const left = new Set(
+      [...log.bundles]
+        .filter(([bundle]) => log.failed.has(bundle))
+        .flatMap(([, bundle]) => bundle.names ?? [])
+    )
     for (const [name, seconds] of log.files) {
-      note(name, seconds)
+      if (left.has(name)) {
+        skipped += 1
+      } else {
+        note(name, seconds)
+      }
     }
-    for (const bundle of log.bundles.values()) {
-      if (bundle.names && typeof bundle.total === "number") {
+    for (const [name, bundle] of log.bundles) {
+      if (bundle.names && typeof bundle.total === "number" && !log.failed.has(name)) {
         const timed = bundle.names.filter((name) => log.files.has(name))
         if (timed.length === bundle.names.length) {
           const files = timed.reduce((sum, name) => sum + log.files.get(name), 0)
@@ -88,14 +111,18 @@ function measure(texts) {
   const boot = boots.length > 0 ? median(boots) : BOOT_SECONDS
   for (const log of parsed) {
     for (const [name, seconds] of log.alone) {
-      note(name, seconds - boot)
+      if (log.failed.has(name)) {
+        skipped += 1
+      } else {
+        note(name, seconds - boot)
+      }
     }
   }
   const weights = {}
   for (const name of [...seen.keys()].sort()) {
     weights[name] = Math.max(1, Math.round(median(seen.get(name))))
   }
-  return { weights, boot, bundles: boots.length }
+  return { weights, boot, bundles: boots.length, skipped }
 }
 
 /**
@@ -118,12 +145,15 @@ if (require.main === module) {
     process.stderr.write("usage: node weights.js <CI log of an HTTP job>...\n")
     process.exit(2)
   }
-  const { weights, boot, bundles } = measure(logs.map((log) => fs.readFileSync(log, "utf8")))
+  const { weights, boot, bundles, skipped } = measure(
+    logs.map((log) => fs.readFileSync(log, "utf8"))
+  )
   fs.writeFileSync(WEIGHTS_FILE, `${JSON.stringify(weights, null, 2)}\n`)
   const total = Object.values(weights).reduce((sum, seconds) => sum + seconds, 0)
   process.stdout.write(
     `${Object.keys(weights).length} files, ${total} s of tests; a bundle's own time ` +
-      `${boot.toFixed(1)} s (median of ${bundles}; BOOT_SECONDS is ${BOOT_SECONDS})\n`
+      `${boot.toFixed(1)} s (median of ${bundles}; BOOT_SECONDS is ${BOOT_SECONDS}); ` +
+      `${skipped} measures of failed files left out\n`
   )
 }
 
