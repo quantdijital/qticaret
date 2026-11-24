@@ -8,7 +8,7 @@ import {
 import { StorePostBookingRequest } from "../store/booking-requests/validators"
 import { StorePostContactMessage } from "../store/contact-messages/validators"
 import { StorePostNewsletter } from "../store/newsletter/validators"
-import { challengeOver } from "./challenge"
+import { turnstileOver } from "./turnstile"
 import { requireMailDomain } from "./mail-domain"
 import { optionalCustomer } from "./order-access"
 import { rateLimit } from "./rate-limit"
@@ -31,7 +31,7 @@ const byPhone = (req: { body?: unknown }) => {
 /**
  * The storefront's contact form and its panel list (F18 D10, adr/0047),
  * and its newsletter box (double opt-in, adr/0038 §2).
- * A message is counted per address and per sender, a proof of work after
+ * A message is counted per address and per sender, Turnstile after
  * the first in an hour, and the sender's domain must take mail: the shop
  * answers by e-mail.
  */
@@ -42,14 +42,14 @@ export const CONTACT_ROUTES = [
     middlewares: [
       optionalCustomer,
       rateLimit(() => RATE_LIMIT_PROFILES.contact_message, { identity: byEmail }),
-      challengeOver("contact", { max: 1, windowMs: HOUR }),
+      turnstileOver("contact", { max: 1, windowMs: HOUR }),
       validateAndTransformBody(StorePostContactMessage),
       requireMailDomain(),
     ],
   },
   {
     // adr/0076 Ek 2026-11-23: a dated product's call-me request, kept as a
-    // contact message; the contact form's limits, its proof of work shared
+    // contact message; the contact form's limits, its Turnstile counter shared
     matcher: "/store/booking-requests",
     methods: ["POST" as const],
     middlewares: [
@@ -58,7 +58,7 @@ export const CONTACT_ROUTES = [
       // Per address and per e-mail as the contact form; the phone always counted too (D1)
       rateLimit(() => RATE_LIMIT_PROFILES.contact_message, { identity: byEmail }),
       rateLimit(() => RATE_LIMIT_PROFILES.booking_request_phone, { identity: byPhone }),
-      challengeOver("contact", { max: 1, windowMs: HOUR }),
+      turnstileOver("contact", { max: 1, windowMs: HOUR }),
       validateAndTransformBody(StorePostBookingRequest),
       requireMailDomain(),
     ],
@@ -69,7 +69,7 @@ export const CONTACT_ROUTES = [
     middlewares: [
       optionalCustomer,
       rateLimit(() => RATE_LIMIT_PROFILES.newsletter, { identity: byEmail }),
-      challengeOver("newsletter", { max: 3, windowMs: HOUR }),
+      turnstileOver("newsletter", { max: 3, windowMs: HOUR }),
       validateAndTransformBody(StorePostNewsletter),
       requireMailDomain(),
     ],

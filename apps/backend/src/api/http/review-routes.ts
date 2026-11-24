@@ -27,13 +27,18 @@ import {
 } from "../store/products/[id]/reviews/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
+import { turnstileOver } from "./turnstile"
+
+const HOUR = 60 * 60 * 1000
 
 /** A signed-in customer writing on the storefront, within one budget for reviews, questions and answers. */
-const customerWrites = () => [
+// Past three in an hour from one address, Turnstile (adr/0044 Ek 2026-11-24)
+const customerWrites = (gate: "review" | "question") => [
   authenticate("customer", ["session", "bearer"]),
   rateLimit(() => RATE_LIMIT_PROFILES.review_write, {
     identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
   }),
+  turnstileOver(gate, { max: 3, windowMs: HOUR }),
 ]
 
 /**
@@ -56,7 +61,7 @@ export const REVIEW_ROUTES = [
   {
     matcher: "/store/products/:id/reviews",
     methods: ["POST" as const],
-    middlewares: [...customerWrites(), validateAndTransformBody(StorePostReview)],
+    middlewares: [...customerWrites("review"), validateAndTransformBody(StorePostReview)],
   },
   // adr/0046 Ek 2026-11-04: the newest customer photos, for the home page
   {
@@ -92,12 +97,12 @@ export const REVIEW_ROUTES = [
   {
     matcher: "/store/products/:id/questions",
     methods: ["POST" as const],
-    middlewares: [...customerWrites(), validateAndTransformBody(StorePostQaText)],
+    middlewares: [...customerWrites("question"), validateAndTransformBody(StorePostQaText)],
   },
   {
     matcher: "/store/product-questions/:id/answers",
     methods: ["POST" as const],
-    middlewares: [...customerWrites(), validateAndTransformBody(StorePostQaText)],
+    middlewares: [...customerWrites("question"), validateAndTransformBody(StorePostQaText)],
   },
   {
     matcher: "/admin/product-questions",

@@ -12,6 +12,7 @@ import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
 import { isFeeLine } from "../../lib/payments/cod"
 import type { FeeCart } from "../../lib/payments/cod"
 import { guardCheckout, guardPaymentStart } from "./checkout-guard"
+import { requireTurnstile } from "./turnstile"
 import { holdFloodingCheckoutSms } from "./checkout-sms"
 import { requireMailDomain } from "./mail-domain"
 import { refuseSuspendedCartWrite, refuseSuspendedCheckout } from "./plan-guard"
@@ -151,10 +152,12 @@ export const PAYMENT_ROUTES = [
     methods: ["POST" as const],
     // F15.6 (adr/0044): every way to pay starts here, a hosted card form too:
     // the block list and checkout velocity are counted on starting. adr/0061 Ek C15: a
-    // suspended shop starts no payment (one started before settles through its hook)
+    // suspended shop starts no payment (one started before settles through its hook).
+    // adr/0044 Ek 2026-11-24: Turnstile on every start, a bot's card testing first
     middlewares: [
       refuseSuspendedCheckout,
       checkoutLimit,
+      requireTurnstile("checkout"),
       validateAndTransformBody(StorePostCartPaymentSession),
       guardPaymentStart,
     ],

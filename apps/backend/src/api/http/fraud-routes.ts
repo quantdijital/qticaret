@@ -17,6 +17,7 @@ import {
 import { challengeAfterAttempts, challengeOver } from "./challenge"
 import { rejectRequest } from "./reject"
 import { clientIp } from "./client-ip"
+import { requireTurnstile, turnstileOver } from "./turnstile"
 
 const MINUTE = 60 * 1000
 const HOUR = 60 * MINUTE
@@ -97,18 +98,36 @@ function refuseBlocked(answer: "refused" | "sign_in") {
 /**
  * F15.6 (adr/0044): proofs of work past each scope's soft limit, the held
  * orders' queue and the block list. The checkout's guard sits in the
- * payment chain (payment-routes).
+ * payment chain (payment-routes). Ek 2026-11-24: Cloudflare Turnstile on
+ * every sign-in, registration and password reset, before the block list
+ * (whose answer must not tell a bot without a token who is on it), and
+ * past the soft limit on the order lookup and stock alerts.
  */
 export const FRAUD_ROUTES = [
   {
     matcher: "/auth/customer/emailpass/register",
-    middlewares: [refuseBlocked("refused"), challengeOver("register", { max: 3, windowMs: HOUR })],
+    middlewares: [
+      requireTurnstile("register"),
+      refuseBlocked("refused"),
+      challengeOver("register", { max: 3, windowMs: HOUR }),
+    ],
+  },
+  {
+    matcher: "/auth/customer/emailpass/reset-password",
+    methods: ["POST" as const],
+    middlewares: [requireTurnstile("password_reset")],
+  },
+  {
+    matcher: "/auth/user/emailpass/reset-password",
+    methods: ["POST" as const],
+    middlewares: [requireTurnstile("staff_password_reset")],
   },
   // `methods`: a matcher without them takes every path below it, registration included
   {
     matcher: "/auth/customer/emailpass",
     methods: ["POST" as const],
     middlewares: [
+      requireTurnstile("login"),
       refuseBlocked("sign_in"),
       challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE }),
     ],
@@ -118,7 +137,10 @@ export const FRAUD_ROUTES = [
   {
     matcher: "/auth/user/emailpass",
     methods: ["POST" as const],
-    middlewares: [challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE }, "staff_login")],
+    middlewares: [
+      requireTurnstile("staff_login"),
+      challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE }, "staff_login"),
+    ],
   },
   // An account made after a sign-in elsewhere (Google) names its address here
   {
@@ -129,12 +151,12 @@ export const FRAUD_ROUTES = [
   {
     matcher: "/store/order-lookup",
     methods: ["POST" as const],
-    middlewares: [challengeOver("order_lookup", { max: 5, windowMs: HOUR })],
+    middlewares: [turnstileOver("order_lookup", { max: 5, windowMs: HOUR })],
   },
   {
     matcher: "/store/stock-alerts",
     methods: ["POST" as const],
-    middlewares: [challengeOver("stock_alert", { max: 5, windowMs: HOUR })],
+    middlewares: [turnstileOver("stock_alert", { max: 5, windowMs: HOUR })],
   },
   { matcher: "/admin/orders/:id/fulfillments", middlewares: [refuseHeldOrder] },
   { matcher: "/admin/fulfillments", middlewares: [refuseHeldOrder] },

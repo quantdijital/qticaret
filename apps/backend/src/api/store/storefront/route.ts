@@ -24,6 +24,7 @@ import type { PageRole, RolePage } from "../../../lib/storefront/page-roles"
 import { storefrontRolePages } from "../../../workflows/storefront/page-roles"
 import { shopMarks } from "../../../workflows/storefront/shop-marks"
 import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
+import { turnstilePublic } from "../../../lib/security/turnstile/public"
 
 /**
  * GET /store/storefront (F18 D3, docs/19 §4): the storefront's frame as the
@@ -137,5 +138,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     features: { gift_cards: giftCards, product_addons: addons, booking, collections },
     // The footer's ways to pay and carriers, as the shop has them set up (adr/0046 Ek 2026-11-04)
     marks,
+    // adr/0044 Ek 2026-11-24: the widget's public site key for the risky forms
+    turnstile: turnstilePublic(),
   })
 }

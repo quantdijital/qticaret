@@ -3,7 +3,7 @@ import { hashPii, parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../lib/env"
 import { BASE_BITS, checkChallenge, issueChallenge } from "../../lib/security/challenge"
 import { perIpScale } from "../../lib/security/rate-limit"
-import type { ChallengeScope } from "../../lib/security/challenge"
+import type { AnyChallengeScope, ChallengeScope } from "../../lib/security/challenge"
 import { clientBucket, sharedRateLimitStore } from "./rate-limit"
 import { rejectRequest } from "./reject"
 
@@ -26,10 +26,12 @@ export interface SoftLimit {
 /** Whether the request carries a good, unused solution for the scope, as hard as `minBits` at least. */
 export async function challengePassed(
   req: MedusaRequest,
-  scope: ChallengeScope,
-  minBits?: number
+  scope: AnyChallengeScope,
+  minBits?: number,
+  // Turnstile's fallback answers in its own header (api/http/turnstile.ts)
+  name: "x-challenge" | "x-turnstile-fallback" = "x-challenge"
 ): Promise<boolean> {
-  const header = req.headers["x-challenge"]
+  const header = req.headers[name]
   if (typeof header !== "string") {
     return false
   }
@@ -49,8 +51,10 @@ export async function challengePassed(
 export function demandChallenge(
   req: MedusaRequest,
   res: MedusaResponse,
-  scope: ChallengeScope,
-  bits: number = BASE_BITS
+  scope: AnyChallengeScope,
+  bits: number = BASE_BITS,
+  // Said beside it: why it is asked (`fallback: "turnstile_unavailable"`)
+  extra: Record<string, string> = {}
 ): void {
   rejectRequest(
     req,
@@ -60,6 +64,7 @@ export function demandChallenge(
       type: "not_allowed",
       message: "fraud.challenge_required",
       challenge: issueChallenge(scope, keyOf(), bits),
+      ...extra,
     },
     "challenge_required"
   )
