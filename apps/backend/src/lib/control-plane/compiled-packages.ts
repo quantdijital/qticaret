@@ -12,6 +12,8 @@ import { sep } from "node:path"
 export const COMPILED_PACKAGES = [
   "@qticaret/server-kit",
   "@qticaret/types/control-plane",
+  // adr/0079 §4: the panel's map the assistant searches
+  "@qticaret/types/panel-map",
   // C12: the sector packs' loader (the packs themselves are data beside it)
   "@qticaret/sector-packs",
 ] as const

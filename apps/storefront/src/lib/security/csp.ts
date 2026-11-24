@@ -1,8 +1,8 @@
 /**
  * The storefront's Content Security Policy (docs/04, adr/0046 §4): scripts
  * only with this request's nonce (and what they load, `strict-dynamic`),
- * nothing framed but a card provider's form and YouTube's privacy-enhanced
- * player, no plugins, forms only to ourselves. Pictures may come
+ * nothing framed but a card provider's form, YouTube's privacy-enhanced
+ * player and Vimeo's player, no plugins, forms only to ourselves. Pictures may come
  * from any HTTPS host: product images live on the file storage or a CDN;
  * a product's videos likewise (`media-src`, adr/0069 §5).
  * Development relaxes what Next's dev server needs (eval, inline styles,
@@ -32,6 +32,15 @@ export const RADIX_STYLE_HASHES = [
  * own policy: nothing of YouTube's is opened in ours but this frame.
  */
 export const YOUTUBE_PLAYER_SOURCE = "https://www.youtube-nocookie.com/embed/"
+
+/**
+ * Vimeo's player: the full image opening's video button may play a Vimeo
+ * video (`@qticaret/types/hero-video`), framed from its `/video/` path
+ * alone and only once the visitor presses the button. As with YouTube's,
+ * the player's own requests are its own document's: nothing else of
+ * Vimeo's is opened in ours.
+ */
+export const VIMEO_PLAYER_SOURCE = "https://player.vimeo.com/video/"
 
 /**
  * Cloudflare Turnstile (adr/0044 Ek 2026-11-24): its script, loaded by our
@@ -113,9 +122,9 @@ export function contentSecurityPolicy(
     `media-src 'self' https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${tagConnects}${development ? " ws: http://localhost:*" : ""}`,
-    // A product's YouTube video (adr/0069 §8), framed only once pressed; Turnstile's widget; the
-    // card providers' forms
-    `frame-src ${[YOUTUBE_PLAYER_SOURCE, TURNSTILE_ORIGIN, ...frameOrigins].join(" ")}`,
+    // A product's YouTube video (adr/0069 §8) and the opening's video (YouTube or Vimeo), framed
+    // only once pressed; Turnstile's widget; the card providers' forms
+    `frame-src ${[YOUTUBE_PLAYER_SOURCE, VIMEO_PLAYER_SOURCE, TURNSTILE_ORIGIN, ...frameOrigins].join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     `form-action 'self'${formOrigins.length > 0 ? ` ${formOrigins.join(" ")}` : ""}`,

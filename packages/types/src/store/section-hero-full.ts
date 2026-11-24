@@ -85,4 +85,11 @@ export interface StoreHeroFull extends Partial<HeroFullSettings> {
   title_accent?: string | null
   /** The shop's trust badges in the opening (at most `HERO_FULL_LIMITS.trust`). */
   show_trust?: boolean
+  /**
+   * A YouTube or Vimeo link (`hero-video.ts`): a button under the words
+   * plays it in a lightbox; none, or one the parser refuses: no button.
+   */
+  video_url?: string | null
+  /** The video button's words (at most `HERO_VIDEO_LIMITS.label`); none: the theme's own. */
+  video_label?: string | null
 }

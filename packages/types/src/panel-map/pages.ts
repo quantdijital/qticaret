@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** The screens under a menu item: reports, order queues, customer and promotion pages. */
 export const PAGE_ENTRIES = [

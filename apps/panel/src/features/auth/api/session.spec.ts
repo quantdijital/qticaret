@@ -11,8 +11,11 @@ import { STAFF_KEY } from "./staff"
 const sdkFetch = vi.hoisted(() => vi.fn())
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch }, auth: { logout: vi.fn() } } }))
+vi.mock("@/lib/sdk", () => ({
+  sdk: { client: { fetch: sdkFetch }, auth: { logout: vi.fn(() => Promise.resolve()) } },
+}))
 
+const ASSISTANT_SESSION = "qt.assistant.session"
 const USER = { id: "user_1", email: "elif@ornek.com", first_name: "Elif", last_name: "Kaya" }
 const STAFF = {
   user_id: "user_1",
@@ -68,6 +71,26 @@ describe("the signed-in guard", () => {
       search: { redirect: "/orders" },
     })
     expect(queryClient.getQueryData(["other"])).toBeUndefined()
+  })
+
+  it("forgets the assistant's conversation in the tab when the session ran out (review O1)", async () => {
+    window.sessionStorage.setItem(ASSISTANT_SESSION, '{"userId":"user_1","messages":[]}')
+    fetchMock.mockResolvedValue(answer(401))
+    expect(isRedirect(await guard(client()))).toBe(true)
+    expect(window.sessionStorage.getItem(ASSISTANT_SESSION)).toBeNull()
+  })
+
+  it("forgets it too when 2FA is required and this session has not passed it", async () => {
+    window.sessionStorage.setItem(ASSISTANT_SESSION, '{"userId":"user_1","messages":[]}')
+    fetchMock.mockResolvedValue(answer(200))
+    sdkFetch.mockImplementation((path: string) =>
+      path === "/admin/staff/me"
+        ? Promise.resolve({ ...STAFF, mfa: { ...STAFF.mfa, passed: false } })
+        : Promise.reject(new Error("none"))
+    )
+    const thrown = await guard(client())
+    expect((thrown as { options: { to: string } }).options.to).toBe("/login")
+    expect(window.sessionStorage.getItem(ASSISTANT_SESSION)).toBeNull()
   })
 
   it("keeps the user read lately on a 429 and says too many requests, not sign-in", async () => {

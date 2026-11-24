@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query"
 import { redirect } from "@tanstack/react-router"
-import { loadCurrentUser, loadStaff } from "@/features/auth/api/session"
+import { forgetSession, loadCurrentUser, loadStaff } from "@/features/auth/api/session"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { sdk } from "@/lib/sdk"
 import { applyAppearance, rememberAppearance } from "@qticaret/admin-ui/theme"
@@ -35,7 +35,7 @@ export async function requireStaff({
       throw redirect({ to: "/security/setup" })
     }
     await sdk.auth.logout().catch(() => undefined)
-    context.queryClient.clear()
+    forgetSession(context.queryClient)
     throw redirect({ to: "/login", search: { redirect: location.href } })
   }
   // The remembered colours painted the first frame; the stored ones win

@@ -6,6 +6,7 @@ import {
   PackageMinus,
   PackagePlus,
   Palette,
+  Sparkles,
   Truck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -20,11 +21,13 @@ import {
   CommandList,
   CommandSeparator,
 } from "@qticaret/admin-ui/ui/command"
+import { useAssistant } from "@/features/assistant/assistant-state"
 import { useLogout } from "@/features/auth/api/me"
 import { panelScreen } from "@/features/panel-map/map"
 import type { PanelScreen } from "@/features/panel-map/map"
 import { ScreenResults } from "@/features/panel-map/screen-results"
 import { SearchResults } from "@/features/search/search-results"
+import { useRecordSearch } from "@/features/search/use-record-search"
 import { ALL_NAV_ITEMS } from "./navigation"
 import { useNavAccess } from "./use-nav-access"
 
@@ -51,6 +54,7 @@ interface CommandMenuProps {
  * (F12.9), jump to a page or run a common action. Typed words also find
  * the panel's screens by their everyday names (adr/0079 Y1-0): "kargo
  * ücreti" opens Ayarlar › Kargo ve teslimat › Seçenekler ve ücretler.
+ * With the shop's assistant on, the last line puts the typed words in its box.
  */
 export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const { t } = useTranslation()
@@ -59,7 +63,10 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const [search, setSearch] = useState("")
   // What the menu beside it offers: the shell has asked already
   const allowed = useNavAccess({ fetch: false })
-  const typing = search.trim() !== ""
+  const assistant = useAssistant()
+  const records = useRecordSearch(search)
+  const typed = search.trim()
+  const typing = typed !== ""
   // Closed, it forgets what was typed: a new opening starts empty
   const change = (next: boolean) => {
     if (!next) {
@@ -183,6 +190,27 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
             {t("nav.logout")}
           </CommandItem>
         </CommandGroup>
+        {/*
+         * Last, whatever matched above: the words go into the assistant's box, unsent
+         * (adr/0079 §9; review O2). While records are still being looked up it is not
+         * the line Enter picks by itself: a customer's name is typed here.
+         */}
+        {typing && assistant.enabled ? (
+          <CommandGroup heading={t("ai.assistant.title")}>
+            <CommandItem
+              value={`${typed} assistant`}
+              disabled={records.busy}
+              onSelect={() => {
+                run(() => {
+                  assistant.ask(typed)
+                })
+              }}
+            >
+              <Sparkles />
+              <span className="truncate">{t("command.ask", { text: typed })}</span>
+            </CommandItem>
+          </CommandGroup>
+        ) : null}
       </CommandList>
     </CommandDialog>
   )

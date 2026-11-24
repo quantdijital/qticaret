@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** Settings › Mağaza: the shop's profile, look, product attributes and legal texts. */
 export const SETTINGS_SHOP_ENTRIES = [

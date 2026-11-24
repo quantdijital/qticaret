@@ -27,7 +27,7 @@ export const findScreenTool: AssistantTool<z.infer<typeof FindScreenInput>> = {
     "Search the shop admin panel for the screens where a task is done. Give the person's need in a few words (any language). Returns at most 5 screens as {key, label, help}.",
   input: FindScreenInput,
   run: (context, input) => {
-    const found = searchScreens(input.query, context.screens)
+    const found = searchScreens(input.query, context.screens, context.locale)
     return {
       model: { screens: found.map((screen) => screenView(screen, context)) },
       ui: { screens: found.map((screen) => ({ key: screen.key, label: screen.label })) },

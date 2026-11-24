@@ -1,4 +1,4 @@
-import type { HeroFullSettings } from "@qticaret/types"
+import type { HeroFullSettings, HeroVideoSource } from "@qticaret/types"
 import type { SearchFormView } from "./search-form-views"
 import type { TrustBadgeView } from "./views"
 
@@ -18,4 +18,11 @@ export interface HeroFullView {
   search: SearchFormView | null
   /** The shop's trust badges, at most four; empty: none shown. */
   trust: TrustBadgeView[]
+  /** The video button's video (its host and id only, never the pasted link); null: no button. */
+  video: HeroVideoView | null
+}
+
+/** The opening's video: whose player and the id there, and the button's own words (null: the theme's). */
+export interface HeroVideoView extends HeroVideoSource {
+  label: string | null
 }

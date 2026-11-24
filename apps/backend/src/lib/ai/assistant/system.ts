@@ -1,3 +1,4 @@
+import { PANEL_RECORD_ID, PANEL_RECORD_TYPES } from "@qticaret/types/panel-map"
 import type { AssistantLocale } from "./tools/types"
 
 /**
@@ -9,21 +10,14 @@ import type { AssistantLocale } from "./tools/types"
  * screens and a record's checked type and id at most.
  */
 
-/** The kinds of record a panel screen opens; any other is refused at the route. */
-export const ASSISTANT_RECORD_TYPES = [
-  "product",
-  "order",
-  "category",
-  "collection",
-  "customer",
-  "customer_group",
-  "promotion",
-  "campaign",
-  "return",
-] as const
+/**
+ * The kinds of record a panel screen opens (the panel's map's records,
+ * one list with the panel's); any other is refused at the route.
+ */
+export const ASSISTANT_RECORD_TYPES = PANEL_RECORD_TYPES
 
 /** A Medusa record id: a lowercase prefix and a ULID (`prod_01J…`). */
-export const ASSISTANT_RECORD_ID = /^[a-z]+_[0-9A-Z]{26}$/
+export const ASSISTANT_RECORD_ID = PANEL_RECORD_ID
 
 export interface ScreenContext {
   /** A key of the screens this person sees. */

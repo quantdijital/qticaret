@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** Settings › İletişim ve pazarlama: e-mail and SMS, and the marketing settings. */
 export const SETTINGS_MESSAGES_ENTRIES = [

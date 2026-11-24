@@ -41,6 +41,7 @@ import { VISIBILITY_IDS, visibilityFields } from "./visibility-registry"
 export type FieldGroupName =
   | "content"
   | "buttons"
+  | "video"
   | "categoryList"
   | "tiles"
   | "chips"

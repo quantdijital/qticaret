@@ -1,29 +1,12 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { Loader2, Package, ShoppingBag, Truck, User } from "lucide-react"
-import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { CommandGroup, CommandItem } from "@qticaret/admin-ui/ui/command"
-import { SEARCH_MIN, globalSearchQuery } from "@/features/search/api"
+import { SEARCH_MIN } from "@/features/search/api"
+import { useRecordSearch } from "@/features/search/use-record-search"
 import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const S = "command.search"
-
-// Asks once typing pauses, not at every key
-const PAUSE_MS = 250
-
-function useSettled(value: string): string {
-  const [settled, setSettled] = useState(value)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSettled(value)
-    }, PAUSE_MS)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [value])
-  return settled
-}
 
 /**
  * What the command menu's search finds (F12.9): orders, customers,
@@ -33,13 +16,7 @@ function useSettled(value: string): string {
 export function SearchResults({ search, onPick }: { search: string; onPick: () => void }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const typed = search.trim()
-  const settled = useSettled(typed)
-  const query = useQuery({
-    ...globalSearchQuery(settled),
-    enabled: settled.length >= SEARCH_MIN,
-    placeholderData: keepPreviousData,
-  })
+  const { typed, settled, query } = useRecordSearch(search)
   if (typed.length < SEARCH_MIN) {
     return null
   }

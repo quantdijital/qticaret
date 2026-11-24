@@ -1207,6 +1207,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_layout.token_unknown":
     "Metinde tanınmayan bir {…} bilgisi var. Kullanılabilenler: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "storefront_layout.target_invalid": "Seçilen kayıt geçerli değil.",
+  "storefront_layout.video_invalid":
+    "Video adresi bir YouTube ya da Vimeo video bağlantısı olmalı (ör. https://youtu.be/… ya da https://vimeo.com/…).",
   "storefront_layout.target_unknown":
     "Bölümlerden birinin gösterdiği kayıt artık yok; onu yeniden seçin.",
   "storefront_layout.image_invalid": "Görsel mağazanın medya kütüphanesinden seçilmeli.",

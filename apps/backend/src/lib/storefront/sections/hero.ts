@@ -3,6 +3,8 @@ import { image, optional, recordId, shopText, text } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { HERO_FULL_DEFAULTS, HERO_FULL_LIMITS, HERO_FULL_SETTINGS } from "./hero-full"
+import { isCleanText } from "../../security/text"
+import { HERO_VIDEO_LIMITS, heroVideoLinkOf } from "./hero-video"
 import type { HeroFullSetting, HeroFullStep } from "./hero-full"
 import { heroCatalogScroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
@@ -119,12 +121,33 @@ const fullStep = <S extends HeroFullSetting>(name: S) => {
     .default(HERO_FULL_DEFAULTS[name])
 }
 
+const VIDEO_ERROR = { message: "storefront_layout.video_invalid" }
+
+/**
+ * A YouTube or Vimeo video's link (`hero-video.ts`): one longer than
+ * `HERO_VIDEO_LIMITS.url`, with a control character (a NUL jsonb would
+ * refuse) or naming no video refused; kept as the host's own short link
+ * built from the id (docs/04: the pasted link itself is not kept, nothing
+ * of it but the id is served). The storefront takes the id alone again.
+ */
+const videoUrl = z
+  .string()
+  .trim()
+  // One refusal for one link: a check that fails stops the ones after it
+  .max(HERO_VIDEO_LIMITS.url, { ...VIDEO_ERROR, abort: true })
+  .refine((value) => isCleanText(value), { ...VIDEO_ERROR, abort: true })
+  .refine((value) => heroVideoLinkOf(value) !== null, VIDEO_ERROR)
+  // Only a link the refinements let through gets here: it names a video
+  .transform((value) => heroVideoLinkOf(value) ?? value)
+
 /**
  * adr/0077 §9, "Tam görsel": the picture as the whole opening (none: the
  * graphite stage), the words over it or (`image_side: end`) beside it; a
  * second heading line in the shop's colour, the buttons or the shop's one
  * search box (its fields the theme's), and the design's trust badges when
  * `show_trust`. The section holds neither the box's fields nor the badges.
+ * A YouTube or Vimeo link (`video_url`) adds a button that plays it in a
+ * lightbox, under its own words (`video_label`; none: the theme's).
  */
 const fullImage = z
   .object({
@@ -139,6 +162,8 @@ const fullImage = z
     image_side: fullStep("image_side"),
     edge: fullStep("edge"),
     show_trust: z.boolean().default(false),
+    video_url: optional(videoUrl),
+    video_label: optional(text(HERO_VIDEO_LIMITS.label)),
   })
   .strict()
 

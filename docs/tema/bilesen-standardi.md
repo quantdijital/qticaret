@@ -239,6 +239,9 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
     bilerek konmayanlar.
 12. **Tarayıcı doğrulaması:** panel önizlemesi ve `localhost:8000`'de telefon (390 px) ve masaüstü
     (1440 px); her basamak bir kez; azaltılmış hareket açıkken.
+13. **Gömülü oynatıcı:** tema oynatıcı adresini yalnız `heroVideoPlayerSrc` (`@qticaret/types/hero-video`)
+    ile videonun kimliğinden kurar; ham `video_url` hiçbir zaman `src`/`href` olmaz. Çerçeve yalnız
+    ziyaretçi bastıktan sonra eklenir; yeni bir oynatıcı CSP `frame-src`'e yalnız kendi yoluyla girer.
 
 ## 6. Ad verme kuralları
 
