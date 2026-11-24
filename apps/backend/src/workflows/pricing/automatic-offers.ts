@@ -82,17 +82,25 @@ export async function shownOffers(
   return offers
 }
 
+/** A unit to price: its variant, and what it sells at (a departure's place: its base plus the difference). */
+export interface PricedUnit {
+  variant_id: string
+  amount: Kurus
+}
+
 /**
- * The automatic promotions on each variant at its selling price now, for
- * a shopper with no customer and a cart holding one of it: Medusa's own
+ * The automatic promotions on each unit at its selling price now, for a
+ * shopper with no customer and a cart holding one of it: Medusa's own
  * promotion module decides which apply (status, dates, limits, budget,
- * target products), as it will in the cart. A variant no offer touches
- * is not in the answer. `read` gives the shown promotions when the caller
- * prices in parts (`shownOffers`, read once); left out, they are read here.
+ * target products), as it will in the cart. Units are keyed as the caller
+ * likes (a variant's id, or a departure's place: one variant at several
+ * prices); each is a line of its variant. A unit no offer touches is not
+ * in the answer. `read` gives the shown promotions when the caller prices
+ * in parts (`shownOffers`, read once); left out, they are read here.
  */
 export async function automaticOffers(
   container: Resolver,
-  prices: ReadonlyMap<string, Kurus>,
+  prices: ReadonlyMap<string, PricedUnit>,
   currency: string,
   read: () => Promise<ReadonlyMap<string, Offer>> = () => shownOffers(container, currency)
 ): Promise<Map<string, VariantOffers>> {
@@ -115,19 +123,19 @@ export async function automaticOffers(
       "product.categories.id",
       "product.tags.id",
     ],
-    filters: { id: [...prices.keys()] },
+    filters: { id: [...new Set([...prices.values()].map((unit) => unit.variant_id))] },
   })
-  const items = (data as VariantRow[]).flatMap((variant): ComputeActionItemLine[] => {
-    const price = prices.get(variant.id)
-    const product = variant.product
-    if (price === undefined || !product) {
+  const variants = new Map((data as VariantRow[]).map((variant) => [variant.id, variant]))
+  const items = [...prices].flatMap(([id, unit]): ComputeActionItemLine[] => {
+    const product = variants.get(unit.variant_id)?.product
+    if (!product) {
       return []
     }
-    const amount = toMedusaAmount(price)
+    const amount = toMedusaAmount(unit.amount)
     return [
       {
-        id: variant.id,
-        variant_id: variant.id,
+        id,
+        variant_id: unit.variant_id,
         quantity: 1,
         unit_price: amount,
         subtotal: amount,

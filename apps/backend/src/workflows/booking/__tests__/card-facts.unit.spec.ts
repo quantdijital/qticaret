@@ -169,7 +169,7 @@ describe("bookingCardFactOf", () => {
       "try",
       NOW,
       false,
-      new Map([["adult", { current: kurus(120_000), before: kurus(150_000) }]])
+      new Map([["adult:0", { current: kurus(120_000), before: kurus(150_000) }]])
     )
     expect(promoted).toMatchObject({ from_price: 1200, before: 1500 })
     // A discount the price-before rule does not show: the price, nothing struck through
@@ -180,7 +180,7 @@ describe("bookingCardFactOf", () => {
       "try",
       NOW,
       true,
-      new Map([["adult", { current: kurus(120_000), before: null }]])
+      new Map([["adult:0", { current: kurus(120_000), before: null }]])
     )
     expect(hidden).toMatchObject({ from_price: 1200, in_range: true })
     expect(hidden).not.toHaveProperty("before")
@@ -192,7 +192,7 @@ describe("bookingCardFactOf", () => {
       "try",
       NOW,
       false,
-      new Map([["adult", { current: kurus(150_000), before: null }]])
+      new Map([["adult:0", { current: kurus(150_000), before: null }]])
     )
     expect(plain).toEqual(bookingCardFactOf(tour, bases, slots, "try", NOW))
     expect(plain).not.toHaveProperty("before")

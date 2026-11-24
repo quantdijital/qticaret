@@ -25,8 +25,13 @@ export interface StoreBookingSlot {
   ends_at: string | null
   status: "open" | "closed"
   available: number
-  /** In the currency's major unit (lira), worked out on the server. */
-  prices: { variant_id: string; amount: number }[]
+  /**
+   * In the currency's major unit (lira), worked out on the server, the
+   * automatic promotions taken off (adr/0076 Ek "kalkış fiyatı
+   * promosyonlu"); `before`: struck through only when the price-before
+   * rule allows and the departure has no difference, absent otherwise.
+   */
+  prices: { variant_id: string; amount: number; before?: number }[]
 }
 
 /** `GET /store/products/:id/booking`. */
