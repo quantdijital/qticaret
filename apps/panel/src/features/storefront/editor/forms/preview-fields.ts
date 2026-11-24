@@ -124,6 +124,10 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   if (parts.length === 1 && (first === "heading" || first === "text" || first === "image")) {
     return content(PREVIEW_IDS.text(section.id, first))
   }
+  // The full image's accent line, a line of its heading (adr/0077 §9)
+  if (parts.length === 1 && first === "title_accent" && section.variant === "full_image") {
+    return content(PREVIEW_IDS.text(section.id, first))
+  }
   const link =
     parts.length === 2 && first === "links" ? placeOf(second, section.links.length) : null
   // The opening's buttons stand in their own group, "Düğmeler"

@@ -9,6 +9,7 @@ import {
   FOOTER_ROWS_DEFAULTS,
   FOOTER_ROWS_START,
   HERO_CATALOG_LIMITS,
+  HERO_FULL_DEFAULTS,
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
   SHELF_PHONE_DEFAULT,
@@ -68,6 +69,8 @@ export const VARIANT_FIELDS: {
       picks: [],
       show_price: true,
     },
+    // The full image starts from the contract's defaults: buttons, no accent line, no badges (adr/0077 §9)
+    full_image: { ...HERO_FULL_DEFAULTS, title_accent: null, show_trust: false },
   },
   // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
   categories: {

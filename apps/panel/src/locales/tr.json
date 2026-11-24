@@ -9021,7 +9021,8 @@
         "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer.",
         "hero": {
           "standard": "Tek görsel",
-          "category_list": "Kategori listesi"
+          "category_list": "Kategori listesi",
+          "full_image": "Tam görsel"
         },
         "products": {
           "grid": "Izgara",
@@ -11178,6 +11179,69 @@
         "link": "Düğme",
         "linkTerm": "button",
         "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
+      },
+      "heroFull": {
+        "accent": {
+          "label": "Vurgulu satır",
+          "term": "accent",
+          "placeholder": "Örn. Kaçışını bul.",
+          "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
+        },
+        "action": {
+          "label": "Başlığın altında",
+          "term": "action",
+          "hint": "Kapakta düğmeler ya da mağazanızın arama kutusu durur.",
+          "button": "Düğmeler",
+          "search": "Arama kutusu"
+        },
+        "searchNote": "Arama kutusunun alanlarını Tema ayarları › Arama kutusu bölümünden seçersiniz. Arama kutusu seçiliyken düğmeler çizilmez.",
+        "search_position": {
+          "label": "Arama kutusunun yeri",
+          "term": "position",
+          "hint": "Kutu kapağın içinde durur ya da alt kenarına taşan bir kart olur.",
+          "inside": "Kapağın içinde",
+          "overlap": "Alt kenara taşan kart"
+        },
+        "show_trust": {
+          "label": "Güven ikonlarını göster",
+          "term": "trust badges",
+          "hint": "Mağazanızın güven rozetleri (en çok 4) kapağın alt kenarında beyaz bir kutuda görünür."
+        },
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "hint": "Kapağın ekranda kapladığı yer.",
+          "screen": "Tam ekran",
+          "tall": "Yüksek"
+        },
+        "align": {
+          "label": "Yazı hizası",
+          "term": "align",
+          "hint": "Başlık, metin ve düğmelerin hizası.",
+          "center": "Ortada",
+          "start": "Solda"
+        },
+        "image_side": {
+          "label": "Görselin yeri",
+          "term": "image",
+          "hint": "Görsel yazının arkasında bütün kapağı kaplar ya da açık zeminde yazının yanında durur.",
+          "full": "Yazının arkasında",
+          "end": "Yazının yanında"
+        },
+        "scrim": {
+          "label": "Görsel karartması",
+          "term": "overlay",
+          "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
+          "light": "Hafif",
+          "strong": "Güçlü"
+        },
+        "edge": {
+          "label": "Görselin kenarı",
+          "term": "edge",
+          "hint": "Görselin kenarı düz biter ya da yumuşak bir dalgayla.",
+          "straight": "Düz",
+          "wave": "Dalgalı"
+        }
       },
       "trustCard": {
         "lift": {
