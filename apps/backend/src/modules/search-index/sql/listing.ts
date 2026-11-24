@@ -142,7 +142,10 @@ function relatedOf(plan: ListingPlan, sql: Statement): { cte: string; select: st
 /** The plan as one statement and its bound values. */
 export function listingStatement(plan: ListingPlan): { sql: string; params: unknown[] } {
   const sql = new Statement()
-  const priceKey = sql.param(plan.price.key)
+  // A date search prices each product over its departures inside the dates (adr/0077 §5 Ek)
+  const price = plan.price.by_product
+    ? `(${sql.param(JSON.stringify(plan.price.by_product))}::jsonb ->> d.product_id)::numeric`
+    : `(d.prices ->> ${sql.param(plan.price.key)})::numeric`
   const rank = ranking(plan, sql)
   const scope = scopeOf(plan, sql)
   const conditions = conditionsOf(plan, sql)
@@ -184,7 +187,7 @@ export function listingStatement(plan: ListingPlan): { sql: string; params: unkn
   const text = `WITH m AS MATERIALIZED (
       SELECT d.product_id, d.brand_id, d.brand_handle, d.brand_name, d.options, d.in_stock,
              d.categories, d.product_created_at AS created_at,
-             (d.prices ->> ${priceKey})::numeric AS price, ${rank.score} AS score
+             ${price} AS price, ${rank.score} AS score
         FROM search_document d ${rank.lateral}
        WHERE d.published ${scope}
     ), f AS MATERIALIZED (

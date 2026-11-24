@@ -3,6 +3,7 @@ import type {
   BodySection,
   BodySectionType,
   CategorySection,
+  FaqSection,
   FooterNewsletter,
   HeaderMarquee,
   HomeSection,
@@ -12,6 +13,8 @@ import type {
   RichTextSection,
 } from "@/features/storefront/api/layout"
 import type { JSONContent } from "@tiptap/react"
+import type { PageTextSwitch } from "@qticaret/types"
+import { newQuestion } from "./faq-rows"
 import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
@@ -19,6 +22,8 @@ import {
   PHOTO_COLLAGE_DEFAULTS,
   STATS_DEFAULTS,
   STEPS_DEFAULTS,
+  DEPARTURES_DEFAULTS,
+  DEPARTURES_LIMITS,
   SLIDER_DEFAULTS,
   STRIP_GALLERY_DEFAULTS,
   defaultVariant,
@@ -39,7 +44,8 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
   const base = { id, ...ALWAYS }
   switch (type) {
     case "faq":
-      return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
+      // adr/0073 Ek 2026-11-24 (2): one question to write, its answer a short rich text
+      return { ...base, type, title: null, items: [newQuestion()], variant: defaultVariant(type) }
     case "hero":
       return {
         ...base,
@@ -152,6 +158,17 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         items: [0, 1, 2, 3, 4].map(() => ({ image: null, caption: null, link: null })),
         ...PHOTO_COLLAGE_DEFAULTS,
       }
+    // Every dated product's nearest departures, as a list (adr/0077 §10)
+    case "departures":
+      return {
+        ...base,
+        type,
+        title: null,
+        intro: null,
+        source: { kind: "all" },
+        limit: DEPARTURES_LIMITS.limit.default,
+        ...DEPARTURES_DEFAULTS,
+      }
   }
 }
 
@@ -189,8 +206,18 @@ export function newBodySection(
   return group === "category" ? ({ ...section, placement } as CategorySection) : section
 }
 
-/** A content page's own text (K2, "Sayfa metni"): its outline and questions drawn as before. */
-export const newPageText = (id: string, body: JSONContent = emptyBody()): RichTextSection => ({
+/**
+ * A content page's own text (K2, "Sayfa metni"): its outline as before. A
+ * new text is never read as questions (adr/0073 Ek 2026-11-24 (2): the
+ * shop's questions are an FAQ's rows); a page's text shown as the
+ * storefront draws it (`page-synth.ts`) keeps `auto`, as the backend's
+ * synthesis does.
+ */
+export const newPageText = (
+  id: string,
+  body: JSONContent = emptyBody(),
+  questions: PageTextSwitch = "off"
+): RichTextSection => ({
   id,
   ...ALWAYS,
   type: "rich_text",
@@ -198,7 +225,17 @@ export const newPageText = (id: string, body: JSONContent = emptyBody()): RichTe
   body,
   variant: "article",
   outline: "auto",
-  questions: "auto",
+  questions,
+})
+
+/** A content page's questions page ("Sayfa SSS'si"): one question to write. */
+export const newPageFaq = (id: string): FaqSection => ({
+  id,
+  ...ALWAYS,
+  type: "faq",
+  title: null,
+  items: [newQuestion()],
+  variant: "page",
 })
 
 /**

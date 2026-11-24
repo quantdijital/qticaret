@@ -1,0 +1,46 @@
+{
+  "format": "quant-storefront-preset",
+  "code": "patika",
+  "version": 1,
+  "theme": "atolye",
+  "name": "Patika",
+  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, sola hizalı tam görsel kapak, sekmeli arama kutusu ve güven rozetleri; beş rota kartı, ikonlu neden biz şeridi, oklu tur kartları, geniş yayla bandı, yorum kaydırıcı, yol notları ve iletişim sütunlu koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "tone": "light",
+  "credits": [
+    {
+      "file": "images/kapak-likya.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:2023-11-04_Lycian_Way_near_Kaş.jpg",
+      "license": "CC BY 4.0, Alexkom000 (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/rota-kapadokya.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Cappadocia_Landscape_At_Sunset_(135658433).jpeg",
+      "license": "CC BY 3.0, James Farnham Long (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/rota-oludeniz.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Oludeniz.jpg",
+      "license": "CC BY 2.0, Dan Taylor (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/rota-karadeniz.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Uzungöl,_Trabzon_2014.jpg",
+      "license": "CC0, Hamdigumus (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/rota-pamukkale.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Pamukkale_Travertines_-_2014.10_-_panoramio.jpg",
+      "license": "CC BY 3.0, rheins (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/rota-agri.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Mount_Ararat,_Ararat_Plain,_Armenia-Turkey_border,_Armenia.jpg",
+      "license": "CC BY 4.0, Vyacheslav Argenberg (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bant-ayder.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Ayder_Yayla_-_panoramio.jpg",
+      "license": "CC BY 3.0, Hüseyin Öcal (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
+}

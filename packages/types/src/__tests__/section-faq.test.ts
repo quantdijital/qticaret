@@ -3,7 +3,9 @@ import {
   FAQ_DEFAULTS,
   FAQ_SETTINGS,
   FAQ_SETTING_NAMES,
+  faqOffPages,
   faqSettingsOf,
+  isFaqHeading,
 } from "../store/section-faq.js"
 
 describe("the FAQ section's settings (bilesen-denetimi (b) 8)", () => {
@@ -20,5 +22,13 @@ describe("the FAQ section's settings (bilesen-denetimi (b) 8)", () => {
       open_first: "on",
       single_open: "off",
     })
+  })
+
+  // adr/0073 Ek 2026-11-24 (2): the questions page is a content page's only; a row a heading or a question
+  it("keeps the questions page to content pages and tells a heading row", () => {
+    expect(faqOffPages("standard")).toBe(true)
+    expect(faqOffPages("page")).toBe(false)
+    expect(isFaqHeading({ heading: "Kargo" })).toBe(true)
+    expect(isFaqHeading({ question: "Ne zaman?", html: "<p>Yarın.</p>" })).toBe(false)
   })
 })

@@ -221,6 +221,10 @@ export function eventOf(
   signal: ShopEvent,
   page: PageContext | null = context
 ): AnalyticsEvent | null {
+  if (signal.type === "popup") {
+    // A pop-up's own (adr/0080 §7): what it is, never what the visitor typed into it
+    return { name: `popup_${signal.action}`, popupId: signal.popupId, popupType: signal.popupType }
+  }
   if (signal.type !== "add_payment_info") {
     return null
   }

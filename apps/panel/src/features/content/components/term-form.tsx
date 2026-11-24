@@ -7,7 +7,6 @@ import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { TERM_PREFIX, useUpdateTerm } from "@/features/content/api/terms"
 import type { Term, TermInput } from "@/features/content/api/terms"
 import { errorText } from "@/lib/errors"
@@ -21,14 +20,12 @@ const RANK_MAX = 100_000
 interface Values {
   name: string
   handle: string
-  description: string
   rank: string
 }
 
 const valuesOf = (term: Term): Values => ({
   name: term.name,
   handle: term.handle,
-  description: term.description ?? "",
   rank: String(term.rank),
 })
 
@@ -38,12 +35,11 @@ function bodyOf(values: Values, dirty: Partial<Record<keyof Values, boolean>>): 
   return {
     ...(dirty.name ? { name: values.name.trim() } : {}),
     ...(dirty.handle && values.handle.trim() !== "" ? { handle: values.handle.trim() } : {}),
-    ...(dirty.description ? { description: values.description.trim() || null } : {}),
     ...(dirty.rank && Number.isFinite(rank) ? { rank: Math.max(0, Math.min(RANK_MAX, rank)) } : {}),
   }
 }
 
-/** A term's name, address, text and place in the shop's order. */
+/** A term's name, address and place in the shop's order; its text has a tab of its own. */
 export function TermForm({
   term,
   onDirtyChange,
@@ -104,18 +100,6 @@ export function TermForm({
             {...form.register("handle")}
           />
         </div>
-      </Field>
-      <Field
-        label={t(`${T}.fields.description`)}
-        htmlFor={id("description")}
-        hint={t(`${T}.descriptionHint`)}
-      >
-        <Textarea
-          id={id("description")}
-          maxLength={1000}
-          className="min-h-24"
-          {...form.register("description")}
-        />
       </Field>
       <Field label={t(`${T}.fields.rank`)} htmlFor={id("rank")} hint={t(`${T}.rankHint`)}>
         <NumberField

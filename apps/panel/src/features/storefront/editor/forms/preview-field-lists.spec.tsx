@@ -79,7 +79,8 @@ describe("a list row named by the preview", () => {
         { question: "İade?", answer: "14 gün." },
       ],
     }
-    expect(focusedAt(faq, "items.1.answer")).toHaveValue("14 gün.")
+    // The answer's button (its dialog holds the editor), its start shown
+    expect(focusedAt(faq, "items.1.answer")).toHaveTextContent("14 gün.")
   })
 
   it("lands on a strip item's second line", () => {

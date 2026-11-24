@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto"
 import { EMPTY_DOC, contentDoc } from "../content"
 import type { Block, ContentDoc } from "../content"
+import { faqDoc } from "./faq-text"
 import { contentPageSection } from "./layout-pages"
 import type { ContentPageSection } from "./layout-pages"
 import type { PageRole } from "./page-roles"
@@ -19,9 +20,15 @@ export type PageTextSection = Extract<ContentPageSection, { type: "rich_text" | 
 export const isPageText = (section: ContentPageSection): section is PageTextSection =>
   section.type === "rich_text" || section.type === "contact"
 
-/** Whether a page's sections hold any of its text. */
+/** A page's questions page (`faq` as `page`, adr/0073 Ek 2026-11-24 (2)): its text, as rows. */
+export type PageFaqSection = Extract<ContentPageSection, { type: "faq"; variant: "page" }>
+
+export const isPageFaq = (section: ContentPageSection): section is PageFaqSection =>
+  section.type === "faq" && section.variant === "page"
+
+/** Whether a page's sections hold any of its text: a text section, or its questions page. */
 export const hasPageText = (sections: readonly ContentPageSection[]): boolean =>
-  sections.some(isPageText)
+  sections.some((section) => isPageText(section) || isPageFaq(section))
 
 /** What a page's text sections are made from: the page's id and text, and its roles. */
 export interface PageTextSource {
@@ -115,19 +122,24 @@ const fits = (doc: ContentDoc): boolean => contentDoc.safeParse(doc).success
 export function pageMirror(sections: readonly ContentPageSection[]): ContentDoc {
   // Only text shown at all times: a scheduled section (`starts_at`/`ends_at`) would reach the
   // page's description, dates and advisor before it shows, or after it ends (security review S6)
+  // A questions page's rows written out as a text (adr/0073 Ek 2026-11-24 (2))
   const texts = sections
-    .filter(isPageText)
     .filter((section) => section.visible && !section.starts_at && !section.ends_at)
+    .flatMap((section) => {
+      if (isPageText(section)) {
+        return [{ title: section.type === "rich_text" ? section.title : null, body: section.body }]
+      }
+      return isPageFaq(section) ? [{ title: section.title, body: faqDoc(section.items) }] : []
+    })
   const [only] = texts
-  if (texts.length === 1 && only && (only.type === "contact" || only.title === null)) {
+  if (texts.length === 1 && only?.title === null) {
     return only.body
   }
   let mirror: ContentDoc = EMPTY_DOC
-  for (const section of texts) {
-    const title = section.type === "rich_text" ? section.title : null
+  for (const { title, body } of texts) {
     const next: ContentDoc = {
       type: "doc",
-      content: [...mirror.content, ...(title ? [heading(title)] : []), ...section.body.content],
+      content: [...mirror.content, ...(title ? [heading(title)] : []), ...body.content],
     }
     if (!fits(next)) {
       break

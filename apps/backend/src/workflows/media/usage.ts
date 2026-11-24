@@ -6,6 +6,8 @@ import type BrandsModuleService from "../../modules/brands/service"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import { POPUPS_MODULE } from "../../modules/popups"
+import type PopupsModuleService from "../../modules/popups/service"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
 /** Where a library image can be in use; the panel names each. */
@@ -30,6 +32,8 @@ export type MediaUseKind =
   | "storefront_design"
   // A collection's picture (Ürünler > Koleksiyonlar)
   | "collection"
+  // adr/0080: a storefront pop-up's picture (its id; `label` its name)
+  | "popup"
 
 export interface MediaUse {
   kind: MediaUseKind
@@ -191,6 +195,14 @@ async function collections(container: Container, target: MediaTarget): Promise<M
   )
 }
 
+/** Pop-ups showing it (adr/0080), by name; a deleted one holds nothing. */
+async function popups(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const rows = await container
+    .resolve<PopupsModuleService>(POPUPS_MODULE)
+    .listPopups({ image_url: target.url }, { select: ["id", "name"], take: LIMIT })
+  return uses("popup", rows)
+}
+
 /**
  * Documents holding the address as one of their values: pages and posts,
  * landing pages, bulk messages, the storefront's design (draft and live), its
@@ -289,6 +301,7 @@ export async function mediaUses(container: Container, target: MediaTarget): Prom
     settings(container, target),
     categories(container, target),
     collections(container, target),
+    popups(container, target),
     orders(container, target),
   ])
   return found.flat()

@@ -1,4 +1,7 @@
-import type { FaqGroupView } from "@qticaret/ui"
+import type { StoreFaqItem } from "@qticaret/types"
+import { isFaqHeading } from "@qticaret/types/section-faq"
+import type { FaqGroupView, FaqView } from "@qticaret/ui"
+import { escapeHtml } from "../security/html"
 import { anchorOf, freeAnchor, wordsOf } from "./legal-outline"
 
 /**
@@ -141,4 +144,39 @@ export function faqOf(
     }
   }
   return { intro, groups: groups.filter((each) => each.items.length > 0 || each.lead !== "") }
+}
+
+/** A row's answer as HTML: the backend's, or a plain answer saved before rich answers in a paragraph. */
+export const answerHtml = (item: Exclude<StoreFaqItem, { heading: string }>): string =>
+  "html" in item ? item.html : `<p>${escapeHtml(item.answer)}</p>`
+
+/**
+ * An FAQ's rows by group (adr/0073 Ek 2026-11-24 (2)), as `faqOf` groups a
+ * text of questions, so a questions page drawn from the shop's own rows
+ * comes out as one read from its text did: the rows before the first
+ * heading in a group with none, each heading's after it, a heading with
+ * no question after it left out (its anchor still taken, as `faqOf`'s).
+ */
+export function faqOfRows(
+  items: readonly StoreFaqItem[],
+  taken: Set<string> = new Set<string>()
+): FaqView {
+  const groups: FaqGroupView[] = []
+  const group = (title: string | null): FaqGroupView => {
+    const anchor = title ? anchorOf(title) : ""
+    const id = freeAnchor(anchor !== "" ? anchor : `sorular-${String(groups.length + 1)}`, taken)
+    const made: FaqGroupView = { id, title, lead: "", items: [] }
+    groups.push(made)
+    return made
+  }
+  let current: FaqGroupView | null = null
+  for (const item of items) {
+    if (isFaqHeading(item)) {
+      current = group(item.heading)
+      continue
+    }
+    current ??= group(null)
+    current.items.push({ question: item.question, html: answerHtml(item) })
+  }
+  return { intro: "", groups: groups.filter((each) => each.items.length > 0) }
 }

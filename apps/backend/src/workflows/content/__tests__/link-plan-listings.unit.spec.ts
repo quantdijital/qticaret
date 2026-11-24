@@ -66,6 +66,23 @@ function containerOf() {
     },
     { id: "pcol_plain", title: "Düz", collection_extension: null },
   ]
+  // A blog category's live document (adr/0075 Ek 2026-11-24) and a tag's stale one
+  const terms = [
+    {
+      id: "cterm_1",
+      kind: "category",
+      name: "Rehberler",
+      description: "Bakım rehberi",
+      description_doc: docOf("Bakım rehberi", "/urun/eski-kupa"),
+    },
+    {
+      id: "cterm_stale",
+      kind: "tag",
+      name: "Eski",
+      description: "Başka metin",
+      description_doc: docOf("Eski metin", "/urun/eski-kupa"),
+    },
+  ]
   const graph = jest.fn(({ entity, filters }: { entity: string; filters: { id?: string[] } }) =>
     Promise.resolve({
       data:
@@ -83,7 +100,12 @@ function containerOf() {
       getSection: jest.fn().mockResolvedValue({ canonical_host: "magaza.example.com" }),
     },
     [MIGRATION_MODULE]: { listMigrationItems: jest.fn().mockResolvedValue([]) },
-    [CONTENT_MODULE]: { listContentEntries: jest.fn().mockResolvedValue([]) },
+    [CONTENT_MODULE]: {
+      listContentEntries: jest.fn().mockResolvedValue([]),
+      listContentTerms: jest.fn((filter: { id?: string[] }) =>
+        Promise.resolve(terms.filter((row) => !filter.id || filter.id.includes(row.id)))
+      ),
+    },
     [ContainerRegistrationKeys.QUERY]: { graph },
     [CATALOG_EXTENSION_MODULE]: {
       listCategoryExtensions: jest.fn((filter: { category_id?: string[] }) =>
@@ -108,17 +130,18 @@ function containerOf() {
 }
 
 describe("planContentLinks: listing descriptions (adr/0075)", () => {
-  it("reads categories', brands' and collections' current documents and plans their writes", async () => {
+  it("reads categories', brands', collections' and blog terms' current documents and plans their writes", async () => {
     const container = containerOf()
 
     const plan = await planContentLinks(container, {})
 
-    // The category, the live brand and the collection; never the orphan or the stale brand
-    expect(plan.documents).toBe(3)
+    // The category, the live brand, the collection and the blog category; never the orphan or a stale one
+    expect(plan.documents).toBe(4)
     expect(plan.writes.listings).toEqual([
       { kind: "category", id: "pcat_1" },
       { kind: "brand", id: "brand_1" },
     ])
+    expect(plan.writes.terms).toEqual(["cterm_1"])
     expect(plan.writes.entries).toEqual([])
     expect(plan.writes.products).toEqual([])
     expect(plan.next).toEqual({
@@ -128,6 +151,7 @@ describe("planContentLinks: listing descriptions (adr/0075)", () => {
     expect(plan.changed.map((row) => [row.kind, row.id, row.title])).toEqual([
       ["category", "pcat_1", "Bıçaklar"],
       ["brand", "brand_1", "Usta"],
+      ["post_category", "cterm_1", "Rehberler"],
     ])
     expect(plan.unresolved).toEqual([
       {
@@ -143,6 +167,7 @@ describe("planContentLinks: listing descriptions (adr/0075)", () => {
     expect(linkRows(plan).changed.map((row) => row[0])).toEqual([
       "Kategori açıklaması",
       "Marka açıklaması",
+      "Blog kategorisi açıklaması",
     ])
     expect(linkRows(plan).unresolved[0]?.[0]).toBe("Koleksiyon açıklaması")
   })
@@ -151,10 +176,24 @@ describe("planContentLinks: listing descriptions (adr/0075)", () => {
     const container = containerOf()
 
     const named = await planContentLinks(container, {
-      scope: { entries: [], products: [], categories: [], brands: ["brand_1"], collections: [] },
+      scope: {
+        entries: [],
+        products: [],
+        categories: [],
+        brands: ["brand_1"],
+        collections: [],
+        terms: [],
+      },
     })
     const none = await planContentLinks(containerOf(), {
-      scope: { entries: [], products: [], categories: [], brands: [], collections: [] },
+      scope: {
+        entries: [],
+        products: [],
+        categories: [],
+        brands: [],
+        collections: [],
+        terms: ["cterm_1"],
+      },
     })
 
     expect(named.documents).toBe(1)
@@ -163,6 +202,8 @@ describe("planContentLinks: listing descriptions (adr/0075)", () => {
       (container.services[CATALOG_EXTENSION_MODULE] as { listCategoryExtensions: jest.Mock })
         .listCategoryExtensions
     ).not.toHaveBeenCalled()
-    expect(none.documents).toBe(0)
+    // A named blog category is read alone
+    expect(none.documents).toBe(1)
+    expect(none.writes.terms).toEqual(["cterm_1"])
   })
 })

@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./catalog": "./src/store/catalog.ts",
     "./storefront": "./src/store/storefront.ts",
+    "./popups": "./src/store/popups.ts",
     "./style-kit": "./src/store/style-kit.ts",
     "./listing-text": "./src/store/listing-text.ts",
     "./search-form": "./src/store/search-form.ts",
@@ -37,6 +38,7 @@
     "./section-search-box": "./src/store/section-search-box.ts",
     "./section-hero-full": "./src/store/section-hero-full.ts",
     "./section-collage": "./src/store/section-collage.ts",
+    "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
     "./control-plane": {

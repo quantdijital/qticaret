@@ -18,6 +18,8 @@ export interface SearchFormSettings {
   show_dates: boolean
   show_people: boolean
   category_style: (typeof SEARCH_FORM_CATEGORY_STYLES)[number]
+  /** The words field's hint before a search; null: the storefront's own. */
+  placeholder: string | null
 }
 
 /** Every field on, no attribute named, categories in a drop-down. */
@@ -27,10 +29,14 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   show_dates: true,
   show_people: true,
   category_style: "select",
+  placeholder: null,
 }
 
 // An attribute key as the listing reads one in its address (adr/0013)
 const ATTRIBUTE_KEY = /^[a-z][a-z0-9_]{0,63}$/
+
+/** The longest hint the shop may write (`@qticaret/types`' `SEARCH_FORM_PLACEHOLDER_MAX`). */
+export const SEARCH_FORM_PLACEHOLDER_MAX = 60
 
 /**
  * The group's schema, every field present. A key a listing never reads in
@@ -50,6 +56,8 @@ export const searchFormSchema = z
     show_dates: z.boolean(),
     show_people: z.boolean(),
     category_style: z.enum(SEARCH_FORM_CATEGORY_STYLES),
+    // Trimmed, never empty: no hint is null (the storefront's own words)
+    placeholder: z.string().trim().min(1).max(SEARCH_FORM_PLACEHOLDER_MAX).nullable(),
   })
   .strict()
 

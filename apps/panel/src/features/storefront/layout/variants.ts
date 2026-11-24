@@ -18,6 +18,7 @@ import {
   SHELF_STRIPS_DEFAULTS,
   RICH_TEXT_IMAGE_SIDE_DEFAULT,
   SECTION_VARIANTS,
+  faqOffPages,
   hasVariants,
   newsletterOnPage,
   richTextInFooter,
@@ -129,10 +130,13 @@ export const VARIANT_FIELDS: {
   rich_text: {
     pane: {},
     with_image: { image: null, image_side: RICH_TEXT_IMAGE_SIDE_DEFAULT },
-    // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline and questions as today
-    article: { outline: "auto", questions: "auto" },
+    // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline as today; never read as
+    // questions once switched (Ek 2026-11-24 (2): the shop's questions are an FAQ's rows)
+    article: { outline: "auto", questions: "off" },
   },
   // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
+  // adr/0073 Ek 2026-11-24 (2): the rows and switches are every variant's and stay as written
+  faq: { standard: {}, page: {} },
   posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
   // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
   banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0] } },
@@ -151,8 +155,19 @@ const OPTIONAL_FIELDS: {
   >
 } = {
   hero: { category_list: ["slides", "scroller"] },
+  // A preset's icons by handle (adr/0077 §10 Ek): the icon row's, dropped with it
+  categories: { icons: ["category_icons_by_handle"] },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
   newsletter: { split: ["joined"], image_card: ["joined"], strip: ["joined"] },
+}
+
+/**
+ * Fields every variant of a type holds though one starts them among its
+ * own: carried over a switch as written. The header's action button is
+ * every header's (the catalog header's highlighted link before).
+ */
+const SHARED_FIELDS: Readonly<Partial<Record<VariantSectionType, readonly string[]>>> = {
+  header_bar: ["highlight_link"],
 }
 
 /**
@@ -183,6 +198,10 @@ export function offeredVariants<S extends VariantSection>(
   const listed: readonly SectionVariant<S["type"]>[] = SECTION_VARIANTS[section.type]
   if (section.type === "newsletter" && !inFooter) {
     return listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
+  }
+  // The questions page (adr/0073 Ek 2026-11-24 (2)) on a content page only
+  if (section.type === "faq" && !onContentPage) {
+    return listed.filter((each) => faqOffPages(each as SectionVariant<"faq">))
   }
   if (section.type === "rich_text") {
     const variants = onContentPage
@@ -224,6 +243,13 @@ export function switchVariant<S extends VariantSection>(
     ...Object.keys(fields[section.variant] ?? {}),
     ...(optional[section.variant] ?? []),
   ])
+  const shared: readonly string[] = SHARED_FIELDS[section.type] ?? []
+  // A shared field one variant starts with a default stays once written (none: the default)
+  const carried = Object.fromEntries(
+    Object.entries(section).filter(
+      ([key, value]) => shared.includes(key) && value !== null && value !== undefined
+    )
+  )
   const kept = Object.fromEntries(Object.entries(section).filter(([key]) => !own.has(key)))
-  return { ...kept, ...structuredClone(fields[next] ?? {}), variant: next } as S
+  return { ...kept, ...structuredClone(fields[next] ?? {}), ...carried, variant: next } as S
 }

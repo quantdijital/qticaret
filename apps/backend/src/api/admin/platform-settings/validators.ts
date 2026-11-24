@@ -31,6 +31,7 @@ const SECTION_VALIDATORS = {
   ai_guidance: validateAndTransformBody(SECTIONS.ai_guidance.patch),
   catalog: validateAndTransformBody(SECTIONS.catalog.patch),
   booking: validateAndTransformBody(SECTIONS.booking.patch),
+  product_badges: validateAndTransformBody(SECTIONS.product_badges.patch),
   // The fake programs are for the tests only: never a live shop, nor an owner trying it locally
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {

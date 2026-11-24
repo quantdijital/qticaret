@@ -44,27 +44,42 @@ export function BookingPrice({
   if (!product.price) {
     return null
   }
-  const from = t("booking.card_from", { price: product.price.current })
-  if (!product.look?.perPerson) {
-    return (
-      <p
-        className={withClass(
-          "tabular text-md font-extrabold tracking-[-0.01em] lg:@min-[16rem]:text-lg",
-          className
-        )}
-      >
-        {from}
-      </p>
-    )
-  }
+  const [amount, rest] = fromParts(product.price.current, t)
   return (
     <p className={withClass("flex flex-wrap items-baseline gap-x-1.5", className)}>
-      <span className="tabular text-md font-extrabold tracking-[-0.01em] lg:@min-[16rem]:text-lg">
-        {from}
-      </span>
-      <span className="text-xs font-medium text-text-2">{t("booking.card_per_person")}</span>
+      <span className={`${PRICE_TYPE} whitespace-nowrap`}>{amount}</span>
+      {rest && <span className={`${PRICE_TYPE} ${NARROW_REST}`}>{rest}</span>}
+      {product.look?.perPerson && (
+        <span className="text-xs font-medium text-text-2">{t("booking.card_per_person")}</span>
+      )}
     </p>
   )
+}
+
+/** The card price's own type: heavy, a step up on a card 256 px wide or more. */
+const PRICE_TYPE = "tabular text-md font-extrabold tracking-[-0.01em] lg:@min-[16rem]:text-lg"
+
+/**
+ * On a card narrower than 13rem (two to a phone's row) the words after the
+ * price ("itibaren") drop to their own line in the small type of "kişi
+ * başı" beside them: the break is always there, never inside the amount.
+ */
+const NARROW_REST =
+  "@max-[13rem]:text-xs @max-[13rem]:font-medium @max-[13rem]:tracking-normal @max-[13rem]:text-text-2"
+
+/**
+ * "1.750,00 TL'den itibaren" as two parts: the amount with the ending
+ * joined to it ("1.750,00 TL'den", never broken) and the words after it
+ * ("itibaren"); a phrase that does not start with the amount stays whole.
+ */
+function fromParts(price: string, t: Translate): [string, string] {
+  const words = t("booking.card_from", { price })
+  if (!words.startsWith(price)) {
+    return [words, ""]
+  }
+  const after = words.slice(price.length)
+  const space = after.search(/\s/)
+  return space < 0 ? [words, ""] : [price + after.slice(0, space), after.slice(space).trim()]
 }
 
 /**

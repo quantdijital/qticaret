@@ -57,9 +57,20 @@ const lengthOf = (text: ListingTextView) =>
  * about them. Above it a hairline closes the list. The shop's look
  * (`look`) picks its size, alignment and measure; a long text folds to
  * six lines behind "Devamını oku" when the shop asks (`collapse`), every
- * word still in the HTML.
+ * word still in the HTML. A blog category's or tag's archive draws it the
+ * same way at its foot (adr/0075 Ek 2026-11-24), inside the page's own
+ * container (`bare`: no second one, so no second gutter).
  */
-export function ListingText({ text, t }: { text: ListingTextView; t: Translate }) {
+export function ListingText({
+  text,
+  t,
+  bare = false,
+}: {
+  text: ListingTextView
+  t: Translate
+  /** Already in a container: the block alone, its rule as close as the page's gaps put it. */
+  bare?: boolean
+}) {
   const { look } = text
   const words =
     text.html !== null ? (
@@ -75,33 +86,36 @@ export function ListingText({ text, t }: { text: ListingTextView; t: Translate }
         ))}
       </div>
     )
-  return (
-    <Container className="pt-12 lg:pt-16">
-      <div className="border-t border-rule pt-8 lg:pt-10">
-        <div
-          data-listing-text=""
-          className={cn(
-            "flex flex-col",
-            LISTING_TEXT_SIZE[look.size],
-            LISTING_TEXT_WIDTH[look.width],
-            LISTING_TEXT_ALIGN[look.align]
-          )}
-        >
-          {look.collapse ? (
-            <TextMore
-              id="liste-metni"
-              long={lengthOf(text) > LONG}
-              more={t("listing.text_more")}
-              less={t("listing.text_less")}
-              center={look.align === "center"}
-            >
-              {words}
-            </TextMore>
-          ) : (
-            words
-          )}
-        </div>
+  const block = (
+    <div className="border-t border-rule pt-8 lg:pt-10">
+      <div
+        data-listing-text=""
+        className={cn(
+          "flex flex-col",
+          LISTING_TEXT_SIZE[look.size],
+          LISTING_TEXT_WIDTH[look.width],
+          LISTING_TEXT_ALIGN[look.align]
+        )}
+      >
+        {look.collapse ? (
+          <TextMore
+            id="liste-metni"
+            long={lengthOf(text) > LONG}
+            more={t("listing.text_more")}
+            less={t("listing.text_less")}
+            center={look.align === "center"}
+          >
+            {words}
+          </TextMore>
+        ) : (
+          words
+        )}
       </div>
-    </Container>
+    </div>
+  )
+  return bare ? (
+    <div className="pt-4 lg:pt-6">{block}</div>
+  ) : (
+    <Container className="pt-12 lg:pt-16">{block}</Container>
   )
 }

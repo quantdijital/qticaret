@@ -9,6 +9,7 @@ import type {
   SectionLookView,
   ShippingFactsView,
 } from "./content-views"
+import type { FaqSettings } from "@qticaret/types"
 import type { ContactView } from "./views"
 
 /**
@@ -52,6 +53,25 @@ export interface PageArticleView extends PageTextParts {
 }
 
 /**
+ * A content page's questions page ("Sayfa SSS'si", `faq` as `page`, adr/0073
+ * Ek 2026-11-24 (2)): the shop's own questions and answers drawn as a text
+ * of questions was before (`PageArticleView.faq`), the groups by their
+ * headings, the ways to reach the shop beside them.
+ */
+export interface PageFaqView extends PageTextParts {
+  type: "faq"
+  variant: "page"
+  /** The section's own heading, an h2 above the questions; null: none. */
+  title: string | null
+  /** The questions by group; `intro` and each group's `lead` empty (an FAQ holds rows only). */
+  faq: FaqView
+  /** The ways to reach the shop beside the questions. */
+  help: ContactView | null
+  /** The first question open, one open at a time (bilesen-denetimi (b) 8); absent: off. */
+  settings?: FaqSettings
+}
+
+/**
  * The contact page's body as a section ("İletişim", adr/0047, adr/0048):
  * its own words, how to reach the shop, the form and the imprint, each as
  * the shop switched it; at most one on a page (its anchors are the page's).
@@ -86,7 +106,7 @@ export interface PageShippingFactsView extends PageTextParts {
  * the facts right after an `article` beside it.
  */
 export type PageTextSectionView =
-  PageArticleView | PageContactView | PagePaymentFactsView | PageShippingFactsView
+  PageArticleView | PageFaqView | PageContactView | PagePaymentFactsView | PageShippingFactsView
 
 /** A content page's section: one of the page's own, or one of the home page's types. */
 export type ContentPageSectionView = HomeSectionView | PageTextSectionView

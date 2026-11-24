@@ -14,7 +14,8 @@ export const initialOf = (name: string): string =>
 /**
  * The categories' icon row (adr/0077 §10 Ek): the categories the section
  * names (else the top ones), each with the icon the shop picked for it in
- * the section (an unknown one, from a newer backend, read as none), its own
+ * the section by its id, else by its handle (a preset's; an unknown one,
+ * from a newer backend, read as none), its own
  * picture (never a product's photo: the disc is small and quiet) and its
  * initial; its count while the shop shows counts. The tiles' cards ride
  * along for a theme without the drawing. No category: no section.
@@ -23,7 +24,7 @@ export async function iconCategoriesView(
   section: StoreCategoriesSection & StoreCategoriesIcons,
   t: Translate
 ): Promise<HomeSectionView | null> {
-  const [{ named }, counts] = await Promise.all([
+  const [{ categories: all, named }, counts] = await Promise.all([
     namedCategories(section.category_ids),
     section.show_count === true
       ? categoryCounts()
@@ -33,12 +34,24 @@ export async function iconCategoriesView(
     return null
   }
   const picked: Readonly<Record<string, unknown>> = section.category_icons
+  // A preset's icons by handle: read only where no id's icon is (id > handle > picture > initial)
+  const byHandle: Readonly<Record<string, unknown>> = section.category_icons_by_handle ?? {}
+  const handles = new Map(all.map((category) => [category.id, category.handle]))
+  const iconOf = (id: string) => {
+    const handle = handles.get(id)
+    return (
+      sectionIconOf(picked[id]) ??
+      (handle !== undefined && Object.hasOwn(byHandle, handle)
+        ? sectionIconOf(byHandle[handle])
+        : null)
+    )
+  }
   const counted = (id: string) =>
     section.show_count === true ? { count: counts.get(id) ?? 0 } : {}
   const items = named.map(({ id, card }): CategoryIconView => ({
     label: card.label,
     path: card.path,
-    icon: sectionIconOf(picked[id]),
+    icon: iconOf(id),
     image: card.image ?? null,
     initial: initialOf(card.label),
     ...counted(id),

@@ -4,7 +4,7 @@ import { banner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
 import { posts } from "./sections/posts"
-import { faq } from "./sections/faq"
+import { pageFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { marquee } from "./sections/marquee"
@@ -17,6 +17,7 @@ import { steps } from "./sections/steps"
 import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
+import { departures } from "./sections/departures"
 import { stripGallery } from "./sections/strip-gallery"
 import { trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -54,6 +55,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "steps",
   "search_box",
   "photo_collage",
+  "departures",
   "contact",
   "payment_facts",
   "shipping_facts",
@@ -69,7 +71,7 @@ export const contentPageSection = z.discriminatedUnion(
     pageRichText,
     banner,
     stripGallery,
-    faq,
+    pageFaq,
     trustBadges,
     worded("help"),
     newsletter,
@@ -85,6 +87,7 @@ export const contentPageSection = z.discriminatedUnion(
     steps,
     searchBox,
     photoCollage,
+    departures,
     contact,
     paymentFacts,
     shippingFacts,

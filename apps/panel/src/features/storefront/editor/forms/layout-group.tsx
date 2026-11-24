@@ -11,6 +11,7 @@ import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
 import { PointsGroups } from "./points-groups"
 import { CollageGroups, ReviewsGroups } from "./collage-groups"
+import { DeparturesGroups } from "./departures-groups"
 import { StripGalleryGroups } from "./strip-gallery-groups"
 
 /**
@@ -48,6 +49,9 @@ export function SectionLayoutGroup({
   }
   if (section.type === "stats" || section.type === "steps") {
     return <PointsGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  if (section.type === "departures") {
+    return <DeparturesGroups section={section} reveal={reveal} onChange={onChange} />
   }
   // The trust card's lift, the icon row's disc and phone row (adr/0077 §10 Ek)
   if (

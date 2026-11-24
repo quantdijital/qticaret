@@ -14,6 +14,8 @@ export const ContentTerm = model
     name: model.text(),
     handle: model.text(),
     description: model.text().nullable(),
+    // The description as a content document (adr/0075 Ek 2026-11-24); `description` keeps its plain text
+    description_doc: model.json().nullable(),
     // The shop's order in lists (a category menu); then by name
     rank: model.number().default(0),
   })

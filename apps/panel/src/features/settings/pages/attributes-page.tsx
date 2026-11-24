@@ -14,6 +14,7 @@ import { useFeatureState } from "@/features/settings/api/features"
 import { AddonTemplatesSection } from "@/features/products/addon-templates/addon-templates-section"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
 import { CatalogDefaultsCard } from "@/features/settings/components/catalog-defaults-card"
+import { ProductBadgesCard } from "@/features/settings/components/product-badges-card"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 
@@ -24,13 +25,15 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
   return [
     {
       key: "name",
+      // Long names and attribute lists wrap onto new lines; the table never scrolls sideways
+      className: "whitespace-normal",
       header: t(`${A}.columns.name`),
       cell: (template) => (
         <div className="flex min-w-0 flex-col items-start">
           {/* The row opens it too; this is the keyboard's way in */}
           <button
             type="button"
-            className="max-w-full truncate text-left font-medium hover:underline"
+            className="max-w-full text-left font-medium wrap-anywhere hover:underline"
             onClick={(event) => {
               event.stopPropagation()
               onOpen(template)
@@ -40,7 +43,7 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
           </button>
           {/* What it holds tells it apart better than any note */}
           {template.definitions.length > 0 || template.description ? (
-            <span className="max-w-full truncate text-xs text-muted-foreground">
+            <span className="max-w-full text-xs text-muted-foreground wrap-anywhere">
               {template.definitions.length > 0
                 ? [...template.definitions]
                     .sort((a, b) => a.rank - b.rank)
@@ -117,6 +120,8 @@ export function AttributesPage() {
       <AddonTemplatesSection />
       {/* adr/0076 §12: what a new product starts as, beside the attribute groups */}
       <CatalogDefaultsCard />
+      {/* The small badge on a product card's photo, each kind on its own switch */}
+      <ProductBadgesCard />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}
