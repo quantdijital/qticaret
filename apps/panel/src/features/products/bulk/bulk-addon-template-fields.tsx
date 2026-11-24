@@ -54,6 +54,7 @@ export function BulkAddonTemplateFields({ form, onChange, error }: FieldsProps) 
             onValueChange={(addonTemplateId) => {
               onChange({ addonTemplateId })
             }}
+            data-scroll-area="y"
             className="flex max-h-60 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5"
           >
             {rows.map((template) => (

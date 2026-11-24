@@ -15,7 +15,8 @@ import type { EditorLayout, EditorView } from "./editor-layout"
 
 const E = "storefront.editor"
 
-// A column of the editor: its own scroll, the card surface, a line to its right
+// A column of the editor: its own scroll (`data-scroll-area`, e2e/support/scroll.ts), the card
+// surface, a line to its right
 const COLUMN = "flex min-h-0 shrink-0 flex-col overflow-y-auto overscroll-contain bg-card"
 
 interface EditorShellProps {
@@ -91,6 +92,7 @@ export function EditorShell({
           {wide ? (
             <div
               data-editor-column="parts"
+              data-scroll-area="y"
               className={cn(COLUMN, "w-[clamp(17rem,20vw,20rem)] border-r")}
             >
               {tree}
@@ -100,6 +102,7 @@ export function EditorShell({
             <div
               key={formKey}
               data-editor-column="settings"
+              data-scroll-area="y"
               className={cn(COLUMN, "w-[clamp(24rem,30vw,30rem)] border-r")}
             >
               {form}
@@ -109,6 +112,7 @@ export function EditorShell({
             <div
               key={formKey ?? "parts"}
               data-editor-column="settings"
+              data-scroll-area="y"
               className={cn(COLUMN, narrow ? "w-full" : "w-[clamp(22rem,36vw,26rem)] border-r")}
             >
               {open ? form : tree}
@@ -146,7 +150,9 @@ export function EditorShell({
                 {t(`${E}.drawer.description`)}
               </SheetDescription>
             </SheetHeader>
-            <div className="min-h-0 flex-1 overflow-y-auto">{tree}</div>
+            <div data-scroll-area="y" className="min-h-0 flex-1 overflow-y-auto">
+              {tree}
+            </div>
           </SheetContent>
         </Sheet>
       )}

@@ -24,7 +24,7 @@ function Attributes({ attributes }: { attributes: Report["attributes"] }) {
           {t(`${W}.noAttributes`)}
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-md border">
+        <div data-scroll-area="x" className="overflow-x-auto rounded-md border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-left text-[13px] text-muted-foreground">
               <tr>

@@ -203,6 +203,7 @@ export function TravelerRequestResults({
       >
         <ul
           aria-label={t(`${R}.eraseList`)}
+          data-scroll-area="y"
           className="max-h-56 overflow-y-auto rounded-md border text-sm"
         >
           {chosen.map((row) => (

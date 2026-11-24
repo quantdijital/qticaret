@@ -13,10 +13,15 @@ interface FilterTabsProps<K extends string> {
   label: string
 }
 
-/** Quick views of a list (all, published, drafts…): an underlined tab row with counts. */
+/**
+ * Quick views of a list (all, published, drafts…): an underlined tab row
+ * with counts. The tabs wrap on a narrow screen rather than scroll
+ * sideways (as PageTabs): a scrolling row showed a scrollbar for the
+ * underline's one pixel below the line (the owner, 2026-11-24).
+ */
 export function FilterTabs<K extends string>({ tabs, value, onChange, label }: FilterTabsProps<K>) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b px-3">
+    <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 border-b px-3">
       {tabs.map((tab) => {
         const selected = tab.key === value
         return (

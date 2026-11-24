@@ -100,6 +100,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
                 its lines are paragraphs, shown apart as the editor will show them */}
             <div
               tabIndex={0}
+              data-scroll-area="y"
               className="flex max-h-[40vh] flex-col gap-2 overflow-y-auto rounded-md border bg-muted/40 px-3 py-2 text-sm break-words focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
             >
               {several ? (
