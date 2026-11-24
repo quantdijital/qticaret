@@ -66,7 +66,16 @@ medusaIntegrationTestRunner({
 
     it("finds the shipping rates, keeps the conversation for its asker and no text anywhere else", async () => {
       await settings().setFeature(AI_ASSISTANT, true, null)
+      const before = await settle(
+        http.get<{ assistant_services: string[] }>("/admin/ai/services", { headers: owner.headers })
+      )
+      expect(before.data.assistant_services).toEqual([])
       await connectFake(http, owner.headers, key)
+      // The panel's switch knows there is a service to run on
+      const after = await settle(
+        http.get<{ assistant_services: string[] }>("/admin/ai/services", { headers: owner.headers })
+      )
+      expect(after.data.assistant_services).toEqual(["fake"])
 
       const first = await turn(owner.headers, {
         message: "kargo ücreti nereden değişir 0532 123 45 67",

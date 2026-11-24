@@ -8,6 +8,7 @@ describe("the shared packages a deployed shop loads (adr/0061 Ek C10)", () => {
     expect(uncompiledPackages(at("src"))).toEqual([
       "@qticaret/server-kit",
       "@qticaret/types/control-plane",
+      "@qticaret/types/panel-map",
       "@qticaret/sector-packs",
     ])
     expect(uncompiledPackages(at("dist"))).toEqual([])
@@ -24,6 +25,6 @@ describe("the shared packages a deployed shop loads (adr/0061 Ek C10)", () => {
       assertCompiledPackages(true, at("src"))
     }).not.toThrow()
     // The test run itself loads the source, as development does
-    expect(uncompiledPackages()).toHaveLength(3)
+    expect(uncompiledPackages()).toHaveLength(4)
   })
 })

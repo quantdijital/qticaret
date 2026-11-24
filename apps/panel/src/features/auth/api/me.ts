@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { z } from "zod"
+import { clearSession } from "@/features/assistant/storage"
 import { responseFailure } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 import { signInWithProof } from "./proof-login"
@@ -112,6 +113,8 @@ export function useLogout(onDone: () => void) {
     mutationFn: () => sdk.auth.logout(),
     onSettled: () => {
       client.clear()
+      // The assistant's conversation leaves with the session (adr/0079 §6)
+      clearSession()
       onDone()
     },
   })

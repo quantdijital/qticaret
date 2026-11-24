@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** Settings › Satış ve teslimat: payments, invoices and shipping, each with its tabs. */
 export const SETTINGS_SELLING_ENTRIES = [

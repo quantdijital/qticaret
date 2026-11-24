@@ -1,17 +1,18 @@
 {
-  // The control-plane contract compiled for a backend built with `medusa
-  // build` (adr/0061 Ek C10): CommonJS in dist/control-plane, reached
-  // through the `qt-compiled` export condition. Everything else keeps
-  // reading src/.
+  // The control-plane contract (adr/0061 Ek C10) and the panel's map the
+  // assistant searches (adr/0079 §4), compiled for a backend built with
+  // `medusa build`: CommonJS in dist/control-plane and dist/panel-map,
+  // reached through the `qt-compiled` export condition. Everything else
+  // keeps reading src/.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "rootDir": "src/control-plane",
-    "outDir": "dist/control-plane",
+    "rootDir": "src",
+    "outDir": "dist",
     "declaration": false,
     "sourceMap": false,
     "types": ["node"]
   },
-  "include": ["src/control-plane"],
-  "exclude": ["src/control-plane/testing.ts"]
+  "include": ["src/control-plane", "src/panel-map"],
+  "exclude": ["src/control-plane/testing.ts", "src/**/__tests__"]
 }

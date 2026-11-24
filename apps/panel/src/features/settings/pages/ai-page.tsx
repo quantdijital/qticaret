@@ -7,6 +7,7 @@ import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { Alert, AlertAction, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { aiServicesQuery } from "@/features/ai/api/ai"
+import { AssistantSetting } from "@/features/assistant/assistant-setting"
 import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountAlert } from "@/features/settings/components/account-form"
@@ -84,6 +85,7 @@ function AiServicesTab() {
             keyConfigured={keyConfigured}
           />
           <AiReviewsCard />
+          <AssistantSetting />
           <AiScenesCard />
           <AiUsageCard />
           <AiAcceptanceCard />

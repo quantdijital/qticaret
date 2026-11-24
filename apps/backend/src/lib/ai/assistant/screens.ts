@@ -1,36 +1,21 @@
+import { PANEL_MAP, searchPanelMap } from "@qticaret/types/panel-map"
+import type { PanelMapEntry } from "@qticaret/types/panel-map"
 import { capabilitiesOf } from "../../staff/permissions"
 import type { StaffRole } from "../../staff/permissions"
-import { INTERIM_SCREENS } from "./screen-list"
 
 /**
  * The panel's screens as the assistant sees them (adr/0079 §4): the
- * shape of the panel map's entry (`packages/types/src/panel-map`
- * `PanelMapEntry`), searched on the server by word, never by the model,
+ * panel's own map (`@qticaret/types/panel-map`), searched on the server
+ * with the very search of the panel's command menu, never by the model,
  * and narrowed to what the person's role and the shop's flags show.
  */
 
-export interface PanelScreen {
-  /** Unique; the panel builds the link from it, never from a model's text. */
-  readonly key: string
-  /** The entry it sits under (`settings.shipping`); its gates hold for this one too. */
-  readonly parent?: string
-  /** Shown only while this tenant flag is on (adr/0012). */
-  readonly feature?: string
-  /** Shown only to a role with this capability (`capabilitiesOf`, adr/0040). */
-  readonly needs?: string
-  /** Its name: an i18n key of the panel. */
-  readonly label: string
-  readonly keywords: { readonly tr: readonly string[]; readonly en: readonly string[] }
-  /** What is done there, at most three sentences. */
-  readonly help: { readonly tr: string; readonly en: string }
-}
+export type PanelScreen = PanelMapEntry
 
-/** The map the assistant searches; the panel map's `PANEL_MAP` once it is in `dev`. */
-export const PANEL_SCREENS: readonly PanelScreen[] = INTERIM_SCREENS
+/** The map the assistant searches: the panel's, one list for both. */
+export const PANEL_SCREENS: readonly PanelScreen[] = PANEL_MAP
 
 export const MAX_SCREEN_RESULTS = 5
-const MAX_QUERY_CHARS = 200
-const MAX_QUERY_WORDS = 20
 
 /** The tenant flags the map names: read once a turn to narrow it. */
 export const screenFeatures = (screens: readonly PanelScreen[] = PANEL_SCREENS): string[] => [
@@ -68,62 +53,32 @@ export function visibleScreens(
   return screens.filter((screen) => shown(screen, 0))
 }
 
-const FOLD: Readonly<Record<string, string>> = {
-  ı: "i",
-  ş: "s",
-  ğ: "g",
-  ü: "u",
-  ö: "o",
-  ç: "c",
-  â: "a",
-  î: "i",
-  û: "u",
-}
-
-/** Lower case, Turkish letters folded, anything but letters and digits a space. */
-export function wordsOf(text: string): string[] {
-  return text
-    .slice(0, MAX_QUERY_CHARS)
-    .toLocaleLowerCase("tr")
-    .replace(/[ışğüöçâîû]/g, (letter) => FOLD[letter] ?? letter)
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .split(" ")
-    .filter((word) => word !== "")
-    .slice(0, MAX_QUERY_WORDS)
-}
-
-// A word of the query takes a keyword's word with a suffix ("ücretini" for "ücret")
-const takes = (queryWord: string, keywordWord: string): boolean =>
-  queryWord === keywordWord || (keywordWord.length >= 3 && queryWord.startsWith(keywordWord))
+/*
+ * The server holds no panel text: a name's key stands for its words
+ * ("settings.shipping.tabs.options" reads "settings shipping tabs
+ * options"), the keywords and the help in both languages carry the rest.
+ */
+const keyWords = (key: string): string => key.replace(/[._]/g, " ")
 
 /**
- * How well a screen's keywords fit the query: a keyword whose every word
- * is in the query counts three a word (longer phrases are surer), a
- * keyword met in part one a word met.
+ * The best fitting screens among these (already the person's own), at
+ * most five, ties in the map's order. The panel's search first, every
+ * word needed; a model's sentence that so finds none is read loosely
+ * (some words, a suffix allowed).
  */
-function scoreOf(screen: PanelScreen, query: readonly string[]): number {
-  let score = 0
-  for (const keyword of [...screen.keywords.tr, ...screen.keywords.en]) {
-    const words = wordsOf(keyword)
-    const met = words.filter((word) => query.some((each) => takes(each, word))).length
-    if (met === 0) {
-      continue
-    }
-    score += met === words.length ? 3 * words.length : met
+export function searchScreens(
+  query: string,
+  screens: readonly PanelScreen[],
+  language: "tr" | "en" = "tr"
+): PanelScreen[] {
+  const options = {
+    text: keyWords,
+    language,
+    allowed: () => true,
+    limit: MAX_SCREEN_RESULTS,
   }
-  return score
-}
-
-/** The best fitting screens for the query, at most five, ties in the map's order. */
-export function searchScreens(query: string, screens: readonly PanelScreen[]): PanelScreen[] {
-  const words = wordsOf(query)
-  if (words.length === 0) {
-    return []
-  }
-  return screens
-    .map((screen, index) => ({ screen, index, score: scoreOf(screen, words) }))
-    .filter((each) => each.score > 0)
-    .sort((a, b) => b.score - a.score || a.index - b.index)
-    .slice(0, MAX_SCREEN_RESULTS)
-    .map((each) => each.screen)
+  const strict = searchPanelMap(query, screens, options)
+  const hits =
+    strict.length > 0 ? strict : searchPanelMap(query, screens, { ...options, loose: true })
+  return hits.map((hit) => hit.screen)
 }

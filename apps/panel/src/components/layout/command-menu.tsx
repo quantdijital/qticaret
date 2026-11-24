@@ -6,6 +6,7 @@ import {
   PackageMinus,
   PackagePlus,
   Palette,
+  Sparkles,
   Truck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -20,6 +21,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@qticaret/admin-ui/ui/command"
+import { useAssistant } from "@/features/assistant/assistant-state"
 import { useLogout } from "@/features/auth/api/me"
 import { panelScreen } from "@/features/panel-map/map"
 import type { PanelScreen } from "@/features/panel-map/map"
@@ -51,6 +53,7 @@ interface CommandMenuProps {
  * (F12.9), jump to a page or run a common action. Typed words also find
  * the panel's screens by their everyday names (adr/0079 Y1-0): "kargo
  * ücreti" opens Ayarlar › Kargo ve teslimat › Seçenekler ve ücretler.
+ * With the shop's assistant on, the last line asks it the typed words.
  */
 export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const { t } = useTranslation()
@@ -59,7 +62,9 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const [search, setSearch] = useState("")
   // What the menu beside it offers: the shell has asked already
   const allowed = useNavAccess({ fetch: false })
-  const typing = search.trim() !== ""
+  const assistant = useAssistant()
+  const typed = search.trim()
+  const typing = typed !== ""
   // Closed, it forgets what was typed: a new opening starts empty
   const change = (next: boolean) => {
     if (!next) {
@@ -183,6 +188,22 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
             {t("nav.logout")}
           </CommandItem>
         </CommandGroup>
+        {/* Last, whatever matched above: the words go to the assistant (adr/0079 §9) */}
+        {typing && assistant.enabled ? (
+          <CommandGroup heading={t("ai.assistant.title")}>
+            <CommandItem
+              value={`${typed} assistant`}
+              onSelect={() => {
+                run(() => {
+                  assistant.ask(typed)
+                })
+              }}
+            >
+              <Sparkles />
+              <span className="truncate">{t("command.ask", { text: typed })}</span>
+            </CommandItem>
+          </CommandGroup>
+        ) : null}
       </CommandList>
     </CommandDialog>
   )

@@ -1,7 +1,9 @@
 import { AdminPostAssistantTurn } from "../../../../api/admin/ai/assistant/validators"
 import { MAX_REPLY_SCREENS, replyOf } from "../reply"
-import { PANEL_SCREENS, searchScreens, visibleScreens, wordsOf } from "../screens"
-import { assistantSystem, screenContextBlock } from "../system"
+import { PANEL_MAP, PANEL_RECORDS } from "@qticaret/types/panel-map"
+import { capabilitiesOf } from "../../../staff/permissions"
+import { PANEL_SCREENS, searchScreens, screenFeatures, visibleScreens } from "../screens"
+import { ASSISTANT_RECORD_TYPES, assistantSystem, screenContextBlock } from "../system"
 import { ASSISTANT_TOOLS, specOf, toolsFor } from "../tools"
 import { explainScreenTool, findScreenTool } from "../tools/navigate"
 
@@ -23,7 +25,7 @@ describe("find_screen", () => {
   })
 
   it("reads folded Turkish and English alike", () => {
-    expect(wordsOf("Kargo ÜCRETİ!")).toEqual(["kargo", "ucreti"])
+    expect(searchScreens("Kargo ÜCRETİ!", PANEL_SCREENS)[0]?.key).toBe("settings.shipping.options")
     expect(searchScreens("shipping rate", PANEL_SCREENS)[0]?.key).toBe("settings.shipping.options")
     expect(searchScreens("havale hesabı", PANEL_SCREENS)[0]?.key).toBe("settings.payments.other")
     expect(searchScreens("   ", PANEL_SCREENS)).toEqual([])
@@ -55,6 +57,36 @@ describe("find_screen", () => {
       key: "settings.shipping",
       help: expect.stringMatching(/Carriers/) as string,
     })
+  })
+})
+
+describe("the panel's map, as the assistant reads it", () => {
+  it("is the panel's own map, searched with the panel's search", () => {
+    expect(PANEL_SCREENS).toBe(PANEL_MAP)
+    // The panel's every-word search finds it; a model's sentence is read loosely
+    expect(searchScreens("kargo ücreti", PANEL_SCREENS)[0]?.key).toBe("settings.shipping.options")
+    expect(searchScreens("where do I change the shipping rates", PANEL_SCREENS, "en")[0]?.key).toBe(
+      "settings.shipping.options"
+    )
+    expect(searchScreens("qzx wvq", PANEL_SCREENS)).toEqual([])
+  })
+
+  it("names only capabilities the backend knows, so no screen is hidden by a typo", () => {
+    const known = Object.keys(capabilitiesOf("owner"))
+    for (const screen of PANEL_MAP) {
+      if (screen.needs !== undefined) {
+        expect(known).toContain(screen.needs)
+      }
+    }
+    expect(screenFeatures()).toEqual(expect.arrayContaining(["orders.payment_links"]))
+  })
+
+  it("takes the open record's kinds from the map's records, each under a screen of the map (review D4)", () => {
+    expect(ASSISTANT_RECORD_TYPES).toEqual(PANEL_RECORDS.map((record) => record.type))
+    const keys = new Set(PANEL_MAP.map((screen) => screen.key))
+    for (const record of PANEL_RECORDS) {
+      expect(keys.has(record.screen)).toBe(true)
+    }
   })
 })
 

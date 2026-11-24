@@ -1,4 +1,4 @@
-import type { PanelMapEntry } from "./types.js"
+import type { PanelMapEntry } from "./types"
 
 /** The side menu's items (`navigation.ts` draws them), keyed as the menu keys them. */
 export const MENU_ENTRIES = [
