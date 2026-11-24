@@ -147,7 +147,7 @@ describe("every portal of the theme goes through its layers", () => {
     expect(bare).toEqual([])
   })
 
-  it("draws the eight layers through LayerPortal", () => {
+  it("draws the nine layers through LayerPortal", () => {
     const users = sourceFiles(THEME_SRC)
       .filter((file) => readFileSync(file, "utf8").includes("<LayerPortal>"))
       .map((file) => relative(THEME_SRC, file))
@@ -163,6 +163,8 @@ describe("every portal of the theme goes through its layers", () => {
       "product/Installments.tsx",
       "product/Write.tsx",
       "product/Zoom.tsx",
+      // The full image opening's video, in its light box
+      "sections/HeroVideo.tsx",
     ])
   })
 })
