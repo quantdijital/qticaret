@@ -1,6 +1,27 @@
+import type * as Jsdom from "jsdom"
 import { SVG_MAX_BYTES, looksLikeSvg } from "../svg"
 import { SvgRefusal, cleanSvg } from "../svg-clean"
 import { prescan } from "../svg-scan"
+
+// Every parse through a jsdom window's DOMParser (DOMPurify's too), counted:
+// a refusal before parsing shows as none, with no clock (adr/0081)
+const mockParses = { count: 0 }
+jest.mock("jsdom", () => {
+  const actual = jest.requireActual<typeof Jsdom>("jsdom")
+  class CountedJsdom extends actual.JSDOM {
+    constructor(...args: ConstructorParameters<typeof actual.JSDOM>) {
+      super(...args)
+      class CountedParser extends this.window.DOMParser {
+        override parseFromString(...input: Parameters<DOMParser["parseFromString"]>): Document {
+          mockParses.count += 1
+          return super.parseFromString(...input)
+        }
+      }
+      this.window.DOMParser = CountedParser
+    }
+  }
+  return { ...actual, JSDOM: CountedJsdom }
+})
 
 // The cleaner itself, as the worker runs it (svg-worker.unit.spec.ts covers the worker)
 const sanitizeSvg = (bytes: Buffer) => cleanSvg(bytes, SVG_MAX_BYTES)
@@ -209,14 +230,20 @@ describe("sanitizeSvg: a logo as it may be stored", () => {
     ["4,000 nested unknown elements", "<x>".repeat(4_000)],
     ["5,001 shallow elements", "<rect/>".repeat(5_001)],
     ["a tree too deep for a recursive walk", "<g>".repeat(4_900)],
-  ])("refuses %s within a second, before DOMPurify reads it", (_name, body) => {
-    // The text's read refuses it, with no clock; the second (a refusal takes
-    // milliseconds, a parse of the nested trees 1.3 s and up) shows the
-    // cleaner asks that read before it parses
+  ])("refuses %s before it is parsed, by DOMPurify or anyone", (_name, body) => {
+    // The text's read refuses it, and the cleaner asks that read first: no
+    // parse at all (counted, not timed: a parse of the nested trees takes
+    // 1.3 s and up, a loaded CI runner can pause a refusal near a second)
     expect(prescan(svg(body).toString())).toBe("upload.svg_too_complex")
-    const started = Date.now()
+    mockParses.count = 0
     expect(refusal(svg(body))).toBe("upload.svg_too_complex")
-    expect(Date.now() - started).toBeLessThan(1_000)
+    expect(mockParses.count).toBe(0)
+  })
+
+  it("counts the parses it would refuse before: a kept logo is parsed", () => {
+    mockParses.count = 0
+    expect(refusal(svg('<rect width="1" height="1"/>'))).toBeNull()
+    expect(mockParses.count).toBeGreaterThan(0)
   })
 
   it("tells an SVG by its content", () => {

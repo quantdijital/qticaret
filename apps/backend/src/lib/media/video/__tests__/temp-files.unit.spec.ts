@@ -59,6 +59,8 @@ describe("waiting for a file to close (security review B-2)", () => {
   it("gives up after its time on a file that never closes", async () => {
     const started = Date.now()
     await expect(fileClosed(writer(false), 50)).resolves.toBe(false)
-    expect(Date.now() - started).toBeLessThan(1_000)
+    // Its own 50 ms, not the default 5 s: the bound leaves a loaded
+    // CI runner seconds of slack (adr/0081)
+    expect(Date.now() - started).toBeLessThan(3_000)
   })
 })

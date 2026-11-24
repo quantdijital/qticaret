@@ -82,8 +82,10 @@ describe("a clip's job watched", () => {
     })
     await wait(25)
     expect(hanging.beat).toHaveBeenCalledTimes(1)
+    // Its own 50 ms, not the hanging beat (never) nor the default 5 s: the
+    // bound leaves a loaded CI runner seconds of slack (adr/0081)
     const started = Date.now()
     await watch.stop()
-    expect(Date.now() - started).toBeLessThan(1000)
+    expect(Date.now() - started).toBeLessThan(3_000)
   })
 })
