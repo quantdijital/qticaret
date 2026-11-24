@@ -281,6 +281,12 @@ export interface StorefrontAnswer {
     product_addons: boolean
     booking?: boolean
     collections?: boolean
+    /**
+     * Search in the shopper's own words (`ai.storefront_search`, adr/0077 §7):
+     * `/arama` reads a sentence into filters, the search box says not to
+     * write personal details; absent from a backend before it: off.
+     */
+    natural_search?: boolean
   }
   /**
    * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived

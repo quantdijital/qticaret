@@ -2,6 +2,11 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: adr/0077 PR9, doğal dille arama arayüzü ve panel anahtarı
+
+- **Dal:** `oguzhan/dogal-dil-arayuz`. Vitrin: `/arama?q=<≥3 sözcük>` bayrak açıkken `POST /store/search/interpret` ile süzgece çevrilir, işaretli kanonik adrese 307 (`_anlam=1`), orada "Anladığım:" çipleri (nofollow, kaldırılabilir); hata/kapalıda düz `q` araması. Kutunun altında KVKK ipucu (yalnız bayrak açıkken). Backend: `features.natural_search`, bayrak yazımı yalnız sahip. Panel: Ayarlar › Yapay zekâ anahtarı + onay penceresi (Özellikler sayfasında da). ADR'ye PR9 notu.
+- **Sıradaki işler:** `security-reviewer` (public uç tüketimi, KVKK); üst bilgi canlı aramasına ipucu (takip).
+
 ## 2026-11-22: adr/0076 D7b, rezervasyon e-postaları, hatırlatma, voucher
 
 - **Dal:** `oguzhan/rezervasyon-bildirim`. Backend: dört düzenlenebilir ileti (onay, hatırlatma, iptal, mağazanın kalkış iptali; onay ve iptaller zorunlu), rezervasyon "sayfası" okuyucusu (kalkış ürünün saat diliminde, `kalkis_yeri` niteliği, kişi sayısı, satış anındaki kademeler + paket tur tabanı; katılımcı yok). Onay `order.placed` onayından ve uzlaştırmadan, iptaller `booking.cancelled` olayından (`by: shop` → kalkış iptali şablonu); hata iptali/onayı bozmaz. Saatlik `booking-reminders` işi (`reminder_days`, varsayılan 2, 0 kapalı; `reminded_at` işareti). Voucher: rezervasyon başına 80 bit Crockford kod (düz + benzersiz indeks, karar ADR'de), `GET /store/orders/:id/voucher` (yalnız siparişin sahibi), `POST /admin/booking-vouchers/check` (her rol, hız sınırı, denetim kaydı). Migration `Migration20261123010000`. Panel: Siparişler'de "Voucher doğrula", rezervasyon ayarında "Hatırlatma (gün önce)", ileti adları. Vitrin: `/siparis/:id/voucher` temanın içerik sayfasıyla (tema değişmedi). ADR Ek "D7b".

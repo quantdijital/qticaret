@@ -207,7 +207,7 @@ export async function ListingContent({
   breadcrumbs: (title: string) => BreadcrumbView[]
   jsonLd: Parameters<typeof JsonLd>[0]["blocks"]
   /** A search's help and box, a page's own words for an empty list. */
-  extra?: Pick<ListingPageView, "search" | "empty" | "searchForm">
+  extra?: Pick<ListingPageView, "search" | "empty" | "searchForm" | "searchHint" | "understood">
   /** A date search's dates and party: its dated cards are told them (adr/0077 §4). */
   cardDates?: Record<string, string | number> | null
 }) {

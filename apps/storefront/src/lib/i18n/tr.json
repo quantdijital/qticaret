@@ -109,6 +109,8 @@
   "search.form_people": "Kişi",
   "search.form_people_count": "{count} kişi",
   "search.sort_departure": "En yakın tarih",
+  "search.natural_hint": "Aradığınızı kendi cümlenizle de yazabilirsiniz. Kişisel bilgi (ad, telefon, adres) yazmayın.",
+  "search.understood": "Anladığım:",
   "product.discount": "%{percent} indirim",
   "listing.more_pages": "Diğer sayfalar",
   "listing.page_n": "Sayfa {page}",

@@ -3,6 +3,7 @@ import type { BreadcrumbView, SearchFormView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { isNotFound, isStoreApiError } from "@/lib/store-api/errors"
 import { searchPage } from "@/lib/store-api/listings"
+import { interpretSentence } from "@/lib/store-api/search-interpret"
 import type { ListingAnswer } from "@/lib/store-api/listings"
 import { allCategories, pathsOf } from "@/lib/store-api/requests"
 import { hrefOf, priceAsked, withPrice } from "@/lib/views/listing"
@@ -14,6 +15,14 @@ import {
   isDated,
   isFormAddress,
 } from "@/lib/views/dated-search"
+import {
+  asksReading,
+  isUnderstood,
+  understoodPath,
+  understoodView,
+  withoutMark,
+} from "@/lib/views/natural-search"
+import { naturalHintOf, naturalSearchOn } from "@/lib/views/natural-search-on"
 import { EMPTY_VALUES } from "@/lib/views/search-form"
 import { currentSearchForm } from "@/lib/views/search-form-data"
 import {
@@ -38,10 +47,12 @@ async function SearchMessage({
   title,
   words,
   form,
+  hint,
 }: {
   title: string
   words: string
   form: SearchFormView
+  hint: string | null
 }) {
   // The shop's categories to start from instead (adr/0046 Ek 2026-11-05)
   const popular = await categoryTiles([])
@@ -51,6 +62,7 @@ async function SearchMessage({
       view={{
         search: { suggestions: [], categories: [], brands: [], popular },
         searchForm: form,
+        searchHint: hint,
         title,
         description: [words],
         breadcrumbs: breadcrumbs(),
@@ -102,15 +114,30 @@ function queryOf(search: URLSearchParams): string {
  * query the backend reads in another form moves once (301) to its
  * canonical one. Words the search cannot read show the empty page with a
  * hint, never an error. The backend counts the first, unfiltered page for
- * the search report (F11.8). Never indexed.
+ * the search report (F11.8). Never indexed. While the shop reads
+ * sentences (adr/0077 §7), words alone that make a sentence are read into
+ * filters and the page moves once (307) to them, marked, where the parts
+ * read show as "Anladığım:" chips; whatever fails, the words are searched
+ * as they are.
  */
 export async function SearchScreen({ query }: { query: Query }) {
-  const search = toSearch(query)
+  const given = toSearch(query)
+  const understood = isUnderstood(given)
+  // The mark is the page's own: never a filter, never sent to the backend
+  const search = withoutMark(given)
   // The price form's two fields become one `fiyat`, the box's two days one `tarih`
   const asked = priceAsked(search)
   if (asked !== undefined || isFormAddress(search)) {
     const read = { ...searchStateOf(search), dated: datedFromForm(search) }
     redirect(hrefOf(SEARCH_PATH, asked === undefined ? read : withPrice(read, asked)))
+  }
+  const natural = await naturalSearchOn()
+  if (asksReading(search, natural)) {
+    const reading = await interpretSentence(search.get("q") ?? "")
+    const path = reading ? understoodPath(reading) : null
+    if (path) {
+      redirect(path)
+    }
   }
   const state = searchStateOf(search)
   const { q } = state
@@ -118,7 +145,14 @@ export async function SearchScreen({ query }: { query: Query }) {
   const values = { q, filters: state.filters, dated }
   if (!q && !isDated(dated) && state.filters.length === 0) {
     const form = await currentSearchForm(EMPTY_VALUES, t)
-    return <SearchMessage title={t("search.title")} words={t("search.prompt")} form={form} />
+    return (
+      <SearchMessage
+        title={t("search.title")}
+        words={t("search.prompt")}
+        form={form}
+        hint={naturalHintOf(natural, form, t)}
+      />
+    )
   }
   const answer = await answerOf(q || null, queryOf(search))
   if (answer?.canonical_query !== undefined) {
@@ -129,8 +163,9 @@ export async function SearchScreen({ query }: { query: Query }) {
     allCategories().catch(() => []),
   ])
   const title = searchTitle(state, categories, answer?.facets.attributes ?? [], t)
+  const hint = naturalHintOf(natural, form, t)
   if (!answer) {
-    return <SearchMessage title={title} words={t("search.invalid")} form={form} />
+    return <SearchMessage title={title} words={t("search.invalid")} form={form} hint={hint} />
   }
   const related = answer.search?.related.categories ?? []
   // The related categories as picture tiles; nothing found: the shop's own categories to start from
@@ -156,6 +191,10 @@ export async function SearchScreen({ query }: { query: Query }) {
       extra={{
         search: withTiles(help, tiles, popular),
         searchForm: form,
+        searchHint: hint,
+        understood: understood
+          ? understoodView(state, categories, answer.facets.attributes, t)
+          : null,
         empty: q ? t("search.none", { q }) : t("search.dated_none"),
       }}
     />

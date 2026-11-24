@@ -35,8 +35,7 @@ import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { collageView, statsView, stepsView } from "./points"
-import { EMPTY_VALUES } from "./search-form"
-import { currentSearchForm } from "./search-form-data"
+import { searchBoxParts } from "./natural-search-on"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 
@@ -206,13 +205,13 @@ async function sectionView(
     case "steps":
       return stepsView(section, t)
     case "search_box":
-      // The shop's one search box, its fields the theme's (adr/0077 §1)
+      // The shop's one search box, its fields the theme's (adr/0077 §1); its hint while sentences are read (§7)
       return {
         id,
         type: "search_box",
         title: section.title,
         intro: section.intro,
-        form: await currentSearchForm(EMPTY_VALUES, t),
+        ...(await searchBoxParts(t)),
       }
     case "help": {
       const contact = contactOf(await legalIdentity(), t)

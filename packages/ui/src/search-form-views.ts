@@ -82,4 +82,9 @@ export interface SearchBoxSectionView {
   title: string | null
   intro: string | null
   form: SearchFormView
+  /**
+   * Words under the box while the shop reads sentences (adr/0077 §7): a
+   * sentence may be written, personal details may not; none: nothing.
+   */
+  hint?: string | null
 }

@@ -135,6 +135,26 @@ export interface ListingPageView {
    * those asked; none on other lists, and a theme without it draws none.
    */
   searchForm?: SearchFormView | null
+  /**
+   * Words under the search box while the shop reads sentences (adr/0077
+   * §7): a sentence may be written, personal details may not; none: nothing.
+   */
+  searchHint?: string | null
+  /** A search read from the shopper's sentence: what was understood; none: nothing. */
+  understood?: UnderstoodView | null
+}
+
+/**
+ * A search read from the shopper's own sentence (adr/0077 §7): "Anladığım:"
+ * and each part read by the shop's names, a link that takes it away (a
+ * filter, so nofollow). Built from the filters the server checked, never
+ * from what the AI service wrote.
+ */
+export interface UnderstoodView {
+  /** "Anladığım:" */
+  title: string
+  /** Each part; `remove` names its link for a screen reader ("Filtreyi kaldır: Kapadokya"). */
+  parts: (LinkView & { remove: string })[]
 }
 
 /** A site search's help (`/arama`, adr/0046 ek 2026-11-03): every item already a link. */
