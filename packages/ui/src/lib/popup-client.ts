@@ -127,16 +127,18 @@ export function forgetPopupPage(): void {
  * when neither took it, so the theme can say "select and copy".
  */
 export async function copyText(text: string): Promise<boolean> {
+  // Missing on an insecure origin, whatever the DOM's types say
+  const clipboard = (navigator as Partial<Navigator>).clipboard
   try {
-    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text)
+    if (typeof clipboard?.writeText === "function") {
+      await clipboard.writeText(text)
       return true
     }
   } catch {
     // On to the old way
   }
+  const field = document.createElement("textarea")
   try {
-    const field = document.createElement("textarea")
     field.value = text
     field.setAttribute("readonly", "")
     field.style.position = "fixed"
@@ -145,10 +147,10 @@ export async function copyText(text: string): Promise<boolean> {
     field.select()
     // The only way left where the Clipboard API is missing
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    const done = document.execCommand("copy")
-    field.remove()
-    return done
+    return document.execCommand("copy")
   } catch {
     return false
+  } finally {
+    field.remove()
   }
 }

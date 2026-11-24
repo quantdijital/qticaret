@@ -15,9 +15,10 @@ const MODE_CLASS: Record<PopupMode, string> = {
   // A wide screen's dialog in the middle, the page behind the scrim
   modal:
     "inset-0 m-auto h-fit max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-120 rounded-tile motion-safe:data-[state=open]:zoom-in-95",
-  // A card in the corner the page's floating buttons leave free; the page stays in use
+  // A card in the corner the page's floating buttons leave free, above a tablet's bottom bar;
+  // the page stays in use
   corner:
-    "bottom-6 left-6 max-h-[calc(100dvh-3rem)] w-[calc(100%-3rem)] max-w-96 rounded-tile motion-safe:data-[state=open]:slide-in-from-bottom-4",
+    "bottom-[calc(5rem+env(safe-area-inset-bottom))] left-6 max-h-[calc(100dvh-7rem)] w-[calc(100%-3rem)] max-w-96 rounded-tile motion-safe:data-[state=open]:slide-in-from-bottom-4 lg:bottom-6 lg:max-h-[calc(100dvh-3rem)]",
   // A phone's sheet from the bottom, two fifths of the screen at most: never a full-screen interstitial
   sheet:
     "inset-x-0 bottom-0 max-h-[40dvh] rounded-t-tile motion-safe:data-[state=closed]:slide-out-to-bottom motion-safe:data-[state=open]:slide-in-from-bottom",
