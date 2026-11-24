@@ -65,8 +65,8 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 ## Yapı
 ```
 apps/
-  backend/   Medusa v2.21.2 — API, worker, admin (adr/0001); storefront F18'de gelir
-  control-plane/ üst panel arka ucu, ayrı Medusa 2.21.2 (adr/0061)
+  backend/   Medusa v2.22.6 — API, worker, admin (adr/0001); storefront F18'de gelir
+  control-plane/ üst panel arka ucu, ayrı Medusa 2.22.6 (adr/0061)
 packages/
   config/    paylaşılan tsconfig (strict), ESLint flat config, Prettier
   types/     paylaşılan tipler ve Store API sözleşmeleri

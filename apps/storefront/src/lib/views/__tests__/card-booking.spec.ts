@@ -65,6 +65,35 @@ describe("withCardBooking", () => {
   it("leaves any other card as it was", () => {
     expect(withCardBooking(card("a"), undefined)).toEqual(card("a"))
   })
+
+  // adr/0077 §4: a date search's card
+  it("says the departure is inside the dates asked and its places left when few", () => {
+    const read = withCardBooking(card("a"), { ...booking, left: 3, in_range: true })
+    expect(read.booking).toEqual({
+      next: "12 Ara",
+      nextAt: "2026-12-11T23:30:00.000Z",
+      left: 3,
+      inRange: true,
+    })
+    // At the threshold still; above it, none
+    expect(withCardBooking(card("a"), { ...booking, left: 5 }).booking?.left).toBe(5)
+    expect(withCardBooking(card("a"), { ...booking, left: 6 }).booking).not.toHaveProperty("left")
+  })
+
+  it("says no places left without a departure, nor a full or unknown one", () => {
+    const none = withCardBooking(card("a"), {
+      ...booking,
+      next_departure: null,
+      left: 2,
+      in_range: true,
+    })
+    expect(none.booking).toEqual({ next: null, nextAt: null })
+    expect(withCardBooking(card("a"), { ...booking, left: 0 }).booking).not.toHaveProperty("left")
+    expect(withCardBooking(card("a"), { ...booking, left: null }).booking).toEqual({
+      next: "12 Ara",
+      nextAt: "2026-12-11T23:30:00.000Z",
+    })
+  })
 })
 
 describe("withCardFacts with a dated product", () => {

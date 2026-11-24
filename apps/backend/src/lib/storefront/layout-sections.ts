@@ -20,6 +20,7 @@ import { posts } from "./sections/posts"
 import { priceBands } from "./sections/price-bands"
 import { stats } from "./sections/stats"
 import { steps } from "./sections/steps"
+import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
 import { departures } from "./sections/departures"
@@ -64,6 +65,7 @@ export const pageSection = z.discriminatedUnion(
     googleRating,
     stats,
     steps,
+    searchBox,
     photoCollage,
     departures,
     richText,

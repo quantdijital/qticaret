@@ -27,6 +27,7 @@ interface Frame {
     density: string
     motion: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
+    search_form: Record<string, unknown>
   }
 }
 
@@ -42,6 +43,15 @@ const KIT = {
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */
 const LISTING_TEXT = { size: "md", align: "start", width: "narrow", collapse: true }
+
+/** The search box's fields at their defaults (adr/0077 §1). */
+const SEARCH_FORM = {
+  attribute_key: null,
+  show_category: true,
+  show_dates: true,
+  show_people: true,
+  category_style: "select",
+}
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
 const CARD = {
@@ -134,6 +144,7 @@ medusaIntegrationTestRunner({
         ...KIT,
         // and before the listing text, its defaults (adr/0075)
         listing_text: LISTING_TEXT,
+        search_form: SEARCH_FORM,
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
@@ -156,6 +167,7 @@ medusaIntegrationTestRunner({
         menu_style: "plain",
         shadow: "none",
         listing_text: { ...LISTING_TEXT, size: "lg" },
+        search_form: SEARCH_FORM,
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -197,6 +209,7 @@ medusaIntegrationTestRunner({
         surface_style: "filled",
         ...KIT,
         listing_text: LISTING_TEXT,
+        search_form: SEARCH_FORM,
       }
 
       const read = await section()

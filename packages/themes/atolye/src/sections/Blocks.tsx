@@ -30,6 +30,7 @@ import { type Block, blocksOf, headingId } from "./plan"
 import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
+import { SearchBoxSection } from "./SearchBoxSection"
 import { ReviewsCarousel } from "./ReviewsCarousel"
 import { PhotoCollage } from "./PhotoCollage"
 import { Shelf } from "./Shelf"
@@ -236,6 +237,8 @@ function BlockView({
       return <Stats section={section} />
     case "steps":
       return <Steps section={section} />
+    case "search_box":
+      return <SearchBoxSection section={section} />
     case "photo_collage":
       return <PhotoCollage section={section} first={first} />
     case "departures":

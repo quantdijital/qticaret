@@ -38,7 +38,7 @@ export async function POST(
   if (youtubeId === null) {
     throw new ValidationError("video.youtube_invalid", { field: "url" })
   }
-  await precheck(req.scope as MedusaContainer, productId)
+  await precheck(req.scope, productId)
   const found = await checkYoutubeVideo(youtubeId)
   const { result } = await addYoutubeVideoWorkflow(req.scope).run({
     input: {

@@ -37,6 +37,11 @@ export interface ListingAnswer {
     }
     took_ms: number
   }
+  /**
+   * The listing's query in canonical form (adr/0077 §2), when the one
+   * asked was not: the page moves there with one 301.
+   */
+  canonical_query?: string
 }
 
 /** The listings the listing route answers by id (`sale`: the products on sale now, its id `sale`). */
@@ -61,14 +66,16 @@ export async function listingPage(
 
 /**
  * A site search as a listing (`/arama`): the catalogue weighed against
- * `q`, the listing's own query beside it. Once per request: the backend
- * counts the first, unfiltered page for the search report (F11.8).
+ * `q`, the listing's own query beside it. Without words (`null`) the
+ * query's category, dates or filters narrow the whole catalogue (adr/0077
+ * §2). Once per request: the backend counts the first, unfiltered page
+ * for the search report (F11.8).
  */
-export const searchPage = cache(async (q: string, query: string): Promise<ListingAnswer> => {
+export const searchPage = cache(async (q: string | null, query: string): Promise<ListingAnswer> => {
   const region = await liraRegion()
   return storeGet<ListingAnswer>("/store/listings/products", {
     type: "search",
-    q,
+    ...(q ? { q } : {}),
     region_id: region.id,
     currency_code: region.currency_code,
     query,

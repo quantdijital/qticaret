@@ -77,7 +77,7 @@ describe("Settings > Migration: a WordPress run's report", () => {
     render(<RunResult job={job({ wordpress })} source="wordpress" />)
     await userEvent.click(screen.getByRole("tab", { name: "Özellikler" }))
 
-    expect(screen.getByText(/özellik şablonu kurulunca yazılabilir/)).toBeVisible()
+    expect(screen.getByText(/özellik grubu kurulunca yazılabilir/)).toBeVisible()
     const table = screen.getByRole("table")
     const steel = within(table).getByText("Çelik").closest("tr") as HTMLElement
     expect(within(steel).getByText("pa_celik")).toBeVisible()

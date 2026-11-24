@@ -22,6 +22,8 @@ const EDGED = [
   "frame/CategoryMenu.tsx",
   "frame/WhatsApp.tsx",
   "listing/Menu.tsx",
+  // adr/0077 §1: the one search box, ruled all round
+  "parts/SearchForm.tsx",
   "product/BuyBar.tsx",
 ]
 /** The surfaces with no edge: `none` draws a 1 px rule in the shadow's place. */

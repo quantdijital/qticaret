@@ -122,6 +122,9 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       }
     case "help":
       return { ...base, type, title: null, text: null }
+    // The box itself is the theme's (adr/0077 §1): only a heading and an intro to write
+    case "search_box":
+      return { ...base, type, title: null, intro: null }
     // Three figures and three steps to write (adr/0077 §10): a row as most shops fill it
     case "stats":
       return {

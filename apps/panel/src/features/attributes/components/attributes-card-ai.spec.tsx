@@ -210,7 +210,7 @@ describe("AttributesCard's AI fill (adr/0074 §5 madde 3)", () => {
     await user.click(await screen.findByRole("button", { name: BUTTON }))
     await screen.findByText("Öneri: Türkiye")
 
-    await user.click(screen.getByRole("combobox", { name: "Özellik şablonu" }))
+    await user.click(screen.getByRole("combobox", { name: "Özellik grubu" }))
     await user.click(await screen.findByRole("option", { name: "Bıçak" }))
 
     expect(await screen.findByLabelText("Üretim yeri")).toHaveValue("")

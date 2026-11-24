@@ -69,6 +69,13 @@ describe("themeSettings", () => {
       section_spacing: "compact",
       surface_style: "lined",
       listing_text: { size: "lg", align: "center", width: "wide", collapse: false },
+      search_form: {
+        attribute_key: "gidilecek_yer",
+        show_category: false,
+        show_dates: true,
+        show_people: false,
+        category_style: "tabs",
+      },
       menu_style: "underline",
       shadow: "none",
       chip_style: "lined",
@@ -119,6 +126,14 @@ describe("themeSettings", () => {
       surface_style: "filled",
       // adr/0075 §6: the listing text's defaults
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
+      search_form: {
+        attribute_key: null,
+        show_category: true,
+        show_dates: true,
+        show_people: true,
+        category_style: "select",
+      },
       // adr/0067 §1: the style kit at today's drawing
       menu_style: "filled",
       shadow: "float",

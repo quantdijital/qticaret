@@ -129,14 +129,14 @@ describe("add-on templates on the product's card (adr/0052 Ek 2026-11-23)", () =
     const linked = await screen.findByRole("region", { name: "Kazıma" })
     const carried = screen.getByRole("region", { name: "Bıçak ekleri" })
     expect(within(linked).getByText("Bıçağa isim kazıma")).toBeTruthy()
-    expect(within(linked).getByText("Şablon")).toBeTruthy()
-    expect(within(carried).getByText("Özellik şablonundan")).toBeTruthy()
+    expect(within(linked).getByText("Grup")).toBeTruthy()
+    expect(within(carried).getByText("Özellik grubundan")).toBeTruthy()
     // Read-only: no edit buttons on a template's add-on, only on the product's own
     expect(within(linked).queryByRole("button", { name: /düzenle$/ })).toBeNull()
     expect(screen.getByRole("button", { name: "Kılıf yazısı: düzenle" })).toBeTruthy()
     // Only one linked here can be unlinked here
-    expect(within(linked).getByRole("button", { name: "Bağlantıyı kaldır" })).toBeTruthy()
-    expect(within(carried).queryByRole("button", { name: "Bağlantıyı kaldır" })).toBeNull()
+    expect(within(linked).getByRole("button", { name: "Kaldır" })).toBeTruthy()
+    expect(within(carried).queryByRole("button", { name: "Kaldır" })).toBeNull()
   })
 
   it("unlinks a template, sending the rest of the list", async () => {
@@ -147,7 +147,7 @@ describe("add-on templates on the product's card (adr/0052 Ek 2026-11-23)", () =
       </QueryClientProvider>
     )
     const linked = await screen.findByRole("region", { name: "Kazıma" })
-    await user.click(within(linked).getByRole("button", { name: "Bağlantıyı kaldır" }))
+    await user.click(within(linked).getByRole("button", { name: "Kaldır" }))
     await waitFor(() => {
       expect(posts()).toHaveLength(1)
     })
@@ -164,14 +164,14 @@ describe("add-on templates on the product's card (adr/0052 Ek 2026-11-23)", () =
         <AddonsCard productId="prod_1" />
       </QueryClientProvider>
     )
-    await user.click(await screen.findByRole("button", { name: "Şablon ekle" }))
+    await user.click(await screen.findByRole("button", { name: "Grup ekle" }))
     const dialog = await screen.findByRole("dialog")
     // Three used of five: a template of four does not fit
     const big = await within(dialog).findByRole("radio", { name: /Paket/ })
     expect(big).toHaveProperty("disabled", true)
     expect(within(dialog).queryByRole("radio", { name: /Kazıma/ })).toBeNull()
     await user.click(within(dialog).getByRole("radio", { name: /Hediye/ }))
-    await user.click(within(dialog).getByRole("button", { name: "Bağla" }))
+    await user.click(within(dialog).getByRole("button", { name: "Ekle" }))
     await waitFor(() => {
       expect(posts()).toHaveLength(1)
     })
@@ -231,7 +231,7 @@ describe("the add-on template's page", () => {
         <AddonTemplatePage />
       </QueryClientProvider>
     )
-    const name = await screen.findByLabelText(/Şablon adı/)
+    const name = await screen.findByLabelText(/Grup adı/)
     await user.clear(name)
     await user.type(name, "İsim kazıma")
     const [nameSave] = screen.getAllByRole("button", { name: "Kaydet" })

@@ -1,5 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS } from "@qticaret/types"
+import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
 import { LAYOUT_LIMITS as L, MARQUEE_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
@@ -115,6 +115,11 @@ function fieldsOf(section: AnySection): Found[] {
       return statsProblems(section)
     case "steps":
       return stepsProblems(section)
+    case "search_box":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["intro", textProblem(section.intro, SEARCH_BOX_LIMITS.intro, true)],
+      ]
     case "photo_collage":
       return collageProblems(section)
     // Upcoming departures: their category or collection chosen, the intro's length (adr/0077 §10)

@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import type { UserEvent } from "@testing-library/user-event"
 import { vi } from "vitest"
 import type { Mock } from "vitest"
-import { FOOTER_BAR_DEFAULTS } from "@qticaret/types"
+import { FOOTER_BAR_DEFAULTS, SEARCH_FORM_DEFAULTS } from "@qticaret/types"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -57,6 +57,7 @@ export const THEME: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+  search_form: { ...SEARCH_FORM_DEFAULTS },
   menu_style: "filled",
   shadow: "float",
   chip_style: "filled",

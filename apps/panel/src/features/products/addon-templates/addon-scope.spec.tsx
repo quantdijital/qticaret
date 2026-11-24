@@ -165,13 +165,13 @@ describe("a new add-on's scope on the product page (2026-11-23)", () => {
     const user = userEvent.setup()
     wrap(<AddonsCard productId="prod_1" />)
     const dialog = await openNewAddon(user)
-    await user.click(within(dialog).getByRole("radio", { name: "Şablon olarak kaydet ve uygula" }))
+    await user.click(within(dialog).getByRole("radio", { name: "Grup olarak kaydet ve uygula" }))
     expect(within(dialog).getByRole("radio", { name: "Tüm ürünler" })).toBeChecked()
     // No category on the product: that target is not offered
     expect(
       within(dialog).getByRole("radio", { name: "Bu ürünün kategorisindeki ürünler" })
     ).toBeDisabled()
-    expect(within(dialog).getByLabelText("Şablon adı")).toHaveAttribute(
+    expect(within(dialog).getByLabelText("Grup adı")).toHaveAttribute(
       "placeholder",
       "Bıçağa isim kazıma"
     )
@@ -220,13 +220,13 @@ describe("a new add-on's scope on the product page (2026-11-23)", () => {
     const user = userEvent.setup()
     wrap(<AddonsCard productId="prod_1" />)
     const dialog = await openNewAddon(user)
-    await user.click(within(dialog).getByRole("radio", { name: "Şablon olarak kaydet ve uygula" }))
+    await user.click(within(dialog).getByRole("radio", { name: "Grup olarak kaydet ve uygula" }))
     await user.click(
       within(dialog).getByRole("radio", {
         name: "Bu ürünün kategorisindeki ürünler (Bıçaklar)",
       })
     )
-    await user.type(within(dialog).getByLabelText("Şablon adı"), "Kazıma hizmeti")
+    await user.type(within(dialog).getByLabelText("Grup adı"), "Kazıma hizmeti")
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
@@ -242,7 +242,7 @@ describe("a new add-on's scope on the product page (2026-11-23)", () => {
     const user = userEvent.setup()
     wrap(<AddonsCard productId="prod_1" />)
     const dialog = await openNewAddon(user)
-    await user.click(within(dialog).getByRole("radio", { name: "Şablon olarak kaydet ve uygula" }))
+    await user.click(within(dialog).getByRole("radio", { name: "Grup olarak kaydet ve uygula" }))
     await user.click(within(dialog).getByRole("radio", { name: "Bu ürün" }))
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
@@ -308,11 +308,11 @@ describe("'Ürünlere uygula' on a template's page (2026-11-23)", () => {
     wrap(<AddonTemplatePage />)
     await user.click(await screen.findByRole("button", { name: "Ürünlere uygula" }))
     const dialog = screen.getByRole("dialog", { name: "Ürünlere uygula" })
-    expect(within(dialog).getByRole("radio", { name: "Bağla" })).toBeChecked()
+    expect(within(dialog).getByRole("radio", { name: "Ekle" })).toBeChecked()
     await user.click(within(dialog).getByRole("radio", { name: "Seçili ürünler" }))
     await user.click(within(dialog).getByRole("combobox", { name: "Ürünler" }))
     await user.click(await screen.findByRole("option", { name: "Şef bıçağı" }))
-    await user.click(within(dialog).getByRole("button", { name: "Bağla" }))
+    await user.click(within(dialog).getByRole("button", { name: "Ekle" }))
 
     await waitFor(() => {
       expect(postTo("/admin/async-jobs")?.body).toEqual({

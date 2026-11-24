@@ -94,13 +94,19 @@ export const categoryDescription = cache(async (id: string): Promise<string | nu
 // The card facts route takes a hundred products at a time
 const FACTS_CHUNK = 100
 
+/** A date search's dates and party for its cards (adr/0077 §4), as the card facts route reads them. */
+export type CardFactsDates = Readonly<Record<"from" | "to" | "months" | "pax", string | number>>
+
 /**
  * A page of cards' stock buckets and quick-add variants, by product id;
  * never cached (stock). A dated product's from price is asked in the
- * lira region (adr/0076 §10); without it, the backend's lira.
+ * lira region (adr/0076 §10); without it, the backend's lira. A date
+ * search's page gives its dates: a dated card then says the nearest
+ * departure inside them and its places left (adr/0077 §4).
  */
 export async function cardFacts(
-  productIds: readonly string[]
+  productIds: readonly string[],
+  dates: Partial<CardFactsDates> | null = null
 ): Promise<Record<string, StoreCardFacts>> {
   const unique = [...new Set(productIds)]
   const found: Record<string, StoreCardFacts> = {}
@@ -114,6 +120,7 @@ export async function cardFacts(
         storeGet<{ facts: Record<string, StoreCardFacts> }>("/store/card-facts", {
           id: unique.slice(start, start + FACTS_CHUNK),
           ...(region ? { region_id: region.id } : {}),
+          ...dates,
         }),
       { facts: {} }
     )

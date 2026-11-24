@@ -307,6 +307,9 @@ export function contentFields(section: AnySection): RegistryField[] {
           term: `${E}.departures.layout.term`,
         },
       ]
+    // The box's fields are the theme's (adr/0077 §1), not the section's
+    case "search_box":
+      return []
     // The picture's side beside the text, while the variant has one (adr/0073 §3)
     case "rich_text":
       return section.variant === "with_image"
