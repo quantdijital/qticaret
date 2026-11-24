@@ -19,11 +19,14 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { followPath } from "../seo/redirects/resolve"
 import { draftPageTexts } from "./link-layout"
+import { brandDocuments, categoryDocuments, collectionDocuments } from "./link-listings"
+import type { ListingWrite } from "./link-listings"
 
 /**
  * What a link rewrite would do (adr/0042 Ek 2026-11-05): every content
  * document read (pages, as their text sections stand in the theme
- * editor's draft; posts; products' descriptions), each link to the
+ * editor's draft; posts; products' descriptions; categories', brands'
+ * and collections' descriptions, adr/0075), each link to the
  * shop resolved once as the storefront would resolve it, the links that
  * move and those that answer nothing listed. Reads only.
  */
@@ -32,7 +35,7 @@ type Container = Pick<MedusaContainer, "resolve">
 
 const PAGE = 200
 
-export type LinkDocKind = "page" | "post" | "product"
+export type LinkDocKind = "page" | "post" | "product" | "category" | "brand" | "collection"
 
 /** One link of one document: where it goes now, or why it goes nowhere. */
 export interface LinkRow {
@@ -49,6 +52,9 @@ export interface LinkRow {
 export interface LinkScope {
   entries?: string[] | null
   products?: string[] | null
+  categories?: string[] | null
+  brands?: string[] | null
+  collections?: string[] | null
 }
 
 export interface LinkPlan {
@@ -57,12 +63,17 @@ export interface LinkPlan {
   /** Each changed link's new address, by its old one (the same wherever it stands). */
   next: Record<string, string>
   /** The documents with a link to change. */
-  writes: { entries: string[]; products: { product_id: string; extension_id: string }[] }
+  writes: {
+    entries: string[]
+    products: { product_id: string; extension_id: string }[]
+    /** Categories, brands and collections: saved through their own saves. */
+    listings: ListingWrite[]
+  }
   changed: LinkRow[]
   unresolved: LinkRow[]
 }
 
-interface LinkDocument {
+export interface LinkDocument {
   kind: LinkDocKind
   id: string
   extension_id?: string
@@ -193,6 +204,9 @@ async function* productDocuments(
   }
 }
 
+const isListing = (kind: LinkDocKind): kind is ListingWrite["kind"] =>
+  kind === "category" || kind === "brand" || kind === "collection"
+
 /**
  * The plan for the documents in `scope`: each distinct link resolved once
  * (a link elsewhere never), `progress` told every page of documents.
@@ -219,13 +233,16 @@ export async function planContentLinks(
   const plan: LinkPlan = {
     documents: 0,
     next: {},
-    writes: { entries: [], products: [] },
+    writes: { entries: [], products: [], listings: [] },
     changed: [],
     unresolved: [],
   }
   const sources = [
     contentDocuments(container, input.scope?.entries ?? null),
     productDocuments(container, input.scope?.products ?? null),
+    categoryDocuments(container, input.scope?.categories ?? null),
+    brandDocuments(container, input.scope?.brands ?? null),
+    collectionDocuments(container, input.scope?.collections ?? null),
   ]
   for (const documents of sources) {
     for await (const document of documents) {
@@ -247,6 +264,8 @@ export async function planContentLinks(
       }
       if (moves && document.kind === "product" && document.extension_id) {
         plan.writes.products.push({ product_id: document.id, extension_id: document.extension_id })
+      } else if (moves && isListing(document.kind)) {
+        plan.writes.listings.push({ kind: document.kind, id: document.id })
       } else if (moves) {
         plan.writes.entries.push(document.id)
       }

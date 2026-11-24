@@ -10,7 +10,7 @@ import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
-import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
@@ -26,10 +26,15 @@ import {
 import type { AuditEntry, AuditSearch } from "@/features/settings/api/audit"
 import { AuditDetailDialog } from "@/features/settings/components/audit-detail-dialog"
 import { AuditFilters } from "@/features/settings/components/audit-filters"
+import { JobsList } from "@/features/settings/components/jobs-list"
+import { SettingsTabs } from "@/features/settings/components/settings-tabs"
+import { staffQuery, useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/settings/audit")
+/** The jobs tab's key (`?part=jobs`): old /settings/jobs links land on it. */
+const JOBS = "jobs"
 
 const TONE: Record<AuditEntry["kind"], StatusTone> = {
   mutation: "info",
@@ -114,20 +119,92 @@ function useColumns(staff: Map<string, string> | undefined): Column<AuditEntry>[
   ]
 }
 
+/** The export runs as a job with the log's filters; its file waits in the Jobs tab. */
+function ExportButton({ search }: { search: AuditSearch }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const exportJob = useStartJob()
+  const filtered = Object.keys(auditFilters(search)).length > 0
+  const startExport = () => {
+    exportJob.mutate(
+      { type: "audit_log.export", input: auditFilters(search) },
+      {
+        onSuccess: () =>
+          toast.success(t("settings.audit.exportStarted"), {
+            action: {
+              label: t("settings.audit.openJobs"),
+              onClick: () => {
+                void navigate({ to: "/settings/audit", search: { part: JOBS } })
+              },
+            },
+          }),
+        onError: (failure) => toast.error(errorText(t, failure)),
+      }
+    )
+  }
+  return (
+    <Button variant="outline" disabled={exportJob.isPending} onClick={startExport}>
+      <FileDown />
+      {t(filtered ? "settings.audit.exportFiltered" : "settings.audit.export")}
+    </Button>
+  )
+}
+
 /**
- * Settings > Audit log (adr/0011, F12.5): who changed what and who read
- * personal data, newest first, by person, resource and day; an entry opens
- * in full in a dialog. Reading this page is recorded too; the export
- * runs as a job with the same filters and its file waits on the Jobs page.
+ * Settings > Audit log, in tabs (the owner, 2026-11-23): the log (adr/0040)
+ * first, the long jobs (adr/0014) beside it, both for those who may read
+ * the log. Any other role sees neither (the owner, 2026-11-23): one
+ * sentence says so, as on the other screens a role may not open.
  */
 export function AuditPage() {
   const { t } = useTranslation()
   const search = route.useSearch()
+  // Until the role is known nothing is said about it
+  const staff = useQuery(staffQuery())
+  const audit = useCan("audit")
+  if (!audit) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("settings.audit.title")} />
+        {staff.isPending ? (
+          <LoadingRows rows={6} />
+        ) : (
+          <EmptyState text={t("settings.audit.noAccess")} />
+        )}
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t("settings.audit.title")}
+        description={t("settings.audit.subtitle")}
+        action={search.part === JOBS ? undefined : <ExportButton search={search} />}
+      />
+      <SettingsTabs
+        label={t("settings.audit.title")}
+        tabs={[
+          { key: "log", label: t("settings.audit.tabs.log"), content: <AuditLog /> },
+          { key: JOBS, label: t("settings.jobs.title"), content: <JobsList /> },
+        ]}
+      />
+    </div>
+  )
+}
+
+/**
+ * The audit log (adr/0011, F12.5): who changed what and who read personal
+ * data, newest first, by person, resource and day; an entry opens in full
+ * in a dialog. Reading it is recorded too.
+ */
+function AuditLog() {
+  const { t } = useTranslation()
+  // The open tab is not a filter: going to the jobs and back keeps the page read
+  const search: AuditSearch = { ...route.useSearch(), part: undefined }
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
   const log = useQuery(auditQuery(search, page))
   const walk = useRecordWalk(log.data?.audit_entries, (entry) => entry.id)
-  const exportJob = useStartJob()
   const actorIds = [
     ...new Set(
       (log.data?.audit_entries ?? []).flatMap((entry) =>
@@ -148,36 +225,8 @@ export function AuditPage() {
     })
   }
 
-  const startExport = () => {
-    exportJob.mutate(
-      { type: "audit_log.export", input: auditFilters(search) },
-      {
-        onSuccess: () =>
-          toast.success(t("settings.audit.exportStarted"), {
-            action: {
-              label: t("settings.audit.openJobs"),
-              onClick: () => {
-                void navigate({ to: "/settings/jobs" })
-              },
-            },
-          }),
-        onError: (failure) => toast.error(errorText(t, failure)),
-      }
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("settings.audit.title")}
-        description={t("settings.audit.subtitle")}
-        action={
-          <Button variant="outline" disabled={exportJob.isPending} onClick={startExport}>
-            <FileDown />
-            {t(filtered ? "settings.audit.exportFiltered" : "settings.audit.export")}
-          </Button>
-        }
-      />
+    <>
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("settings.audit.views")}
@@ -226,7 +275,7 @@ export function AuditPage() {
       </section>
       <p className="text-xs text-muted-foreground">
         {t("settings.audit.retention")}{" "}
-        <Link to="/settings/jobs" className="underline">
+        <Link to="/settings/audit" search={{ part: JOBS }} className="underline">
           {t("settings.audit.openJobs")}
         </Link>
       </p>
@@ -236,6 +285,6 @@ export function AuditPage() {
         steps={walk.steps}
         onClose={walk.close}
       />
-    </div>
+    </>
   )
 }

@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { lineAddonsOf, storedAddonsOf } from "../../lib/catalog/addons"
+import { lineAddonsOf } from "../../lib/catalog/addons"
+import { productAddonsAmong } from "./effective"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -40,7 +41,6 @@ export async function addonLineView(container: Container, cartId: string, lineId
 interface ProductRow {
   status?: string | null
   sales_channels?: ({ id: string } | null)[] | null
-  product_extension?: { addons?: unknown } | null
 }
 
 /**
@@ -56,7 +56,7 @@ export async function storeProductAddons(
 ) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
-    fields: ["id", "status", "sales_channels.id", "product_extension.addons"],
+    fields: ["id", "status", "sales_channels.id"],
     filters: { id: productId },
   })
   const product = data[0] as ProductRow | undefined
@@ -66,5 +66,6 @@ export async function storeProductAddons(
   if (product?.status !== "published" || !listed) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.product_unknown")
   }
-  return storedAddonsOf(product.product_extension?.addons ?? null)
+  // Its own and its templates' (adr/0052 Ek 2026-11-23): the shape is the same
+  return (await productAddonsAmong(container, [productId])).get(productId) ?? []
 }

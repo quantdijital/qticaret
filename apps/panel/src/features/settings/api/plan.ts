@@ -26,6 +26,15 @@ export interface BillingSummary {
   /** Kuruş. */
   amount: number | null
   currency: "TRY"
+  /**
+   * The subscription's terms (adr/0061 Ek C20): a period's length and price
+   * (kuruş), the trial's first and next-paid day. Null from an older
+   * control plane's document; absent from an older backend.
+   */
+  period?: "monthly" | "yearly" | null
+  price?: number | null
+  trial_started_on?: string | null
+  trial_ends_on?: string | null
 }
 
 /** `GET /admin/plan` (adr/0061 §5.6, Ek C14): the package, its limits and use, billing. */
@@ -69,6 +78,45 @@ export function usePlan(): PlanSummary | null | undefined {
   const allowed = useCan("settings")
   return useQuery({ ...planQuery(), enabled: allowed }).data
 }
+
+/** One payment to the platform (adr/0061 Ek C20), as the control plane signs it. */
+export interface PaymentRecord {
+  id: string
+  period: "monthly" | "yearly"
+  period_start: string
+  period_end: string
+  due_on: string
+  /** Kuruş. */
+  amount: number
+  currency: "TRY"
+  status: "open" | "paid" | "waived"
+  paid_on: string | null
+  invoice_number: string | null
+  /** An https link to the invoice's PDF, when our invoicing made one. */
+  invoice_url: string | null
+}
+
+/** `GET /admin/plan/payments`: `unavailable` when the control plane could not be read now. */
+export interface PaymentHistory {
+  state: "ok" | "unmanaged" | "unavailable"
+  records: PaymentRecord[]
+}
+
+const isHistory = (value: unknown): value is { payments: PaymentHistory } => {
+  const payments = (value as { payments?: { records?: unknown; state?: unknown } } | null)?.payments
+  return Array.isArray(payments?.records) && typeof payments.state === "string"
+}
+
+export const planPaymentsQuery = () =>
+  queryOptions({
+    queryKey: [...PLAN_KEY, "payments"] as const,
+    queryFn: async (): Promise<PaymentHistory> => {
+      const answer: unknown = await sdk.client.fetch("/admin/plan/payments")
+      // An older backend without the route answers another shape: no history to show
+      return isHistory(answer) ? answer.payments : { state: "unavailable", records: [] }
+    },
+    staleTime: 60_000,
+  })
 
 /** One limit's standing, when the plan has it. */
 export const standingOf = (

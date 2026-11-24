@@ -90,6 +90,8 @@ function ApplyContent({
             saved_name: result.auto_saved?.name ?? null,
             skipped: result.skipped,
             kept: result.kept ?? [],
+            made_pages: result.made_pages ?? [],
+            texts_kept: result.texts_kept ?? [],
           }
           client.setQueryData(REPORT_KEY, report)
           sayDroppedPages(t, result.dropped_pages ?? 0)

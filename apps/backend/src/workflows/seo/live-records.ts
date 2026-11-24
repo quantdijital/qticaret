@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../lib/catalog"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
+import { collectionsOn } from "../catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 
@@ -18,7 +19,13 @@ export interface LiveSpec {
    */
   fields?: readonly string[]
   keep?: (row: Record<string, unknown>) => boolean
+  /** Whether the kind has pages at all (a flag: collections off, none is live). */
+  enabled?: (container: MedusaContainer) => Promise<boolean>
 }
+
+/** Whether `spec`'s kind has pages now; a kind without a switch always does. */
+export const kindEnabled = (container: MedusaContainer, spec: LiveSpec): Promise<boolean> =>
+  spec.enabled ? spec.enabled(container) : Promise.resolve(true)
 
 /** The fields to read for `spec`'s rows, and the rows it keeps. */
 export const liveFieldsOf = (spec: LiveSpec): string[] => ["id", ...(spec.fields ?? [])]
@@ -46,6 +53,7 @@ export const LIVE_RECORDS: readonly LiveSpec[] = [
     filters: fixed({}),
     fields: COLLECTION_LIVE_FIELDS,
     keep: isCollectionShown,
+    enabled: collectionsOn,
   },
   {
     entity: "content_entry",
@@ -80,6 +88,9 @@ export async function liveOwnerKeys(
     const ids = owners
       .filter((owner) => owner.entity_type === spec.type)
       .map((owner) => owner.entity_id)
+    if (ids.length > 0 && !(await kindEnabled(container, spec))) {
+      continue
+    }
     const filters = ids.length > 0 ? await spec.filters(container) : {}
     for (const chunk of chunksOf(ids)) {
       const { data } = await query.graph({

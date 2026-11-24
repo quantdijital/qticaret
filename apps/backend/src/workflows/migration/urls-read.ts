@@ -4,6 +4,7 @@ import { isBackendPath, normalizePath } from "../../lib/seo/redirects"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import { actionOf, askedAs, stateOf } from "./urls"
+import { categoryStyleHint } from "./urls-category-style"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -89,6 +90,8 @@ export async function urlSummary(container: Container) {
     unsupported: await count("unsupported"),
     top: { checked: top.length, unanswered },
     ready: top.length > 0 && unanswered.length === 0,
+    // A category URL style that would keep more old category addresses unchanged (adr/0017 Ek 2026-11-23)
+    category_style: await categoryStyleHint(container),
   }
 }
 

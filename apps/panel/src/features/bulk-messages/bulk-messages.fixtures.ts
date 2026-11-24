@@ -133,6 +133,7 @@ const CAN_ALL = {
   customers: true,
   abandonedCarts: true,
   resendMessages: true,
+  looks: true,
   wholesale: true,
 }
 
@@ -153,6 +154,7 @@ export const staff = (role: "owner" | "operations"): StaffMe => ({
           orderExport: false,
           migration: false,
           team: false,
+          looks: false,
           wholesale: false,
         },
   mfa: { available: true, required: false, enabled: true, passed: true },

@@ -15,6 +15,7 @@ import {
   recordPresetImagesStep,
   storePresetImagesStep,
 } from "./preset-images"
+import { openPresetPagesStep } from "./preset-pages"
 import { composePresetDraftStep, loadPresetStep, resolvePresetStep } from "./preset-steps"
 import type { ApplyPresetInput } from "./preset-steps"
 
@@ -37,15 +38,17 @@ const PRESET_LOCK = { timeout: 30, ttl: 120 }
  * the same preset again writes the same draft and uploads nothing.
  *
  * What the shop has no record for is left out and named in `skipped`,
- * never stood in for: a content page the preset lays out and the shop has
- * not made (adr/0073 §4) too, the preset never making it. A header or
- * footer the preset leaves empty keeps the shop's sections, and every
- * content page the preset does not lay out keeps the shop's layout, named
- * in `kept`. The draft it replaces is kept first as
+ * never stood in for. A content page the preset lays out and the shop has
+ * not made is opened as a draft (adr/0073 Ek 2026-11-19 (2) K6, named in
+ * `made_pages`; its address another record's: left out, `skipped`), and a
+ * page the preset lays out keeps the shop's own text (`texts_kept`). A
+ * header or footer the preset leaves empty keeps the shop's sections, and
+ * every content page the preset does not lay out keeps the shop's layout,
+ * named in `kept`. The draft it replaces is kept first as
  * a saved look (adr/0064 Ek 2026-11-17 §1: `save_as` names it, else an
  * automatic one unless nothing new would be kept), named in `auto_saved`.
- * Any step failing undoes the uploads, their records, that save and the
- * draft. Two locks, always in this order: the pack's
+ * Any step failing undoes the uploads, their records, that save, the
+ * pages opened and the draft. Two locks, always in this order: the pack's
  * (`presetLockKey`) from the ledger's read to the draft's write, so two
  * applies never both upload an image the shop deleted and one of them
  * leaves it unrecorded in the library; the
@@ -105,14 +108,26 @@ export const applyPresetWorkflow = createWorkflow(
         reason: "preset_apply" as const,
       }))
     )
-    const draft = composePresetDraftStep(
-      transform({ preset, resolution, recorded }, ({ preset, resolution, recorded }) => ({
-        preset,
-        resolution,
-        images: recorded.images,
-      }))
+    // The pages it lays out that the shop has not made, opened as drafts (adr/0073 Ek 2026-11-19 (2) K6)
+    const opened = openPresetPagesStep(
+      transform({ resolution }, ({ resolution }) => resolution.open_pages)
     )
-    const saved = saveDraftSteps(transform({ draft }, ({ draft }) => draft.document))
+    const draft = composePresetDraftStep(
+      transform(
+        { preset, resolution, recorded, opened },
+        ({ preset, resolution, recorded, opened }) => ({
+          preset,
+          resolution,
+          images: recorded.images,
+          opened,
+        })
+      )
+    )
+    const saved = saveDraftSteps(
+      transform({ draft }, ({ draft }) => draft.document),
+      // The shop's page text kept is its own, not the apply's new work (K2, K6)
+      transform({ draft }, ({ draft }) => draft.carried)
+    )
     releaseLockStep({ key: LAYOUT_LOCK.key })
     // Held until the draft names the images: an apply waiting on it then finds them recorded
     releaseLockStep(
@@ -137,6 +152,8 @@ export const applyPresetWorkflow = createWorkflow(
             skipped: draft.skipped.length,
             dropped: draft.dropped.length,
             kept: draft.kept.length,
+            made_pages: draft.made_pages.map((page) => page.page_id),
+            texts_kept: draft.texts_kept.map((page) => page.ref),
             images_added: recorded.added,
             auto_saved: autoSaved?.id ?? null,
           },
@@ -145,6 +162,34 @@ export const applyPresetWorkflow = createWorkflow(
     )
     when("storefront-preset-audit-system", entry, ({ actor }) => actor === null).then(() => {
       recordAuditEntryStep(transform({ entry }, ({ entry }) => entry.audit))
+    })
+    // Through the panel the admin log records the apply; the pages it opened and the texts it
+    // kept are the workflow's to say (security review S9): ids and references only
+    const pagesEntry = transform({ input, preset, draft }, ({ input, preset, draft }) => ({
+      actor: input.actor,
+      touched: draft.made_pages.length + draft.texts_kept.length,
+      audit: {
+        kind: "mutation" as const,
+        action: "storefront_layout.preset_pages",
+        actor_type: "user",
+        actor_id: input.actor,
+        resource_type: "storefront_layout",
+        resource_id: `${preset.pack}/${preset.code}`,
+        outcome: 200,
+        changes: {
+          made_pages: draft.made_pages.map((page) => page.page_id),
+          texts_kept: draft.texts_kept.map((page) => page.ref),
+        },
+      },
+    }))
+    when(
+      "storefront-preset-audit-pages",
+      pagesEntry,
+      ({ actor, touched }) => actor !== null && touched > 0
+    ).then(() => {
+      recordAuditEntryStep(transform({ pagesEntry }, ({ pagesEntry }) => pagesEntry.audit)).config({
+        name: "storefront-preset-audit-pages-record",
+      })
     })
     return new WorkflowResponse(
       transform(
@@ -164,6 +209,13 @@ export const applyPresetWorkflow = createWorkflow(
           images: { added: recorded.added, kept: recorded.kept },
           // Demo records come with work item 2.4 (adr/0063 §5)
           demo: { added: 0, kept: 0 },
+          /**
+           * The pages the look laid out that the shop had not made, opened as
+           * drafts (adr/0073 Ek 2026-11-19 (2) K6): `{ ref, page_id, name }`.
+           */
+          made_pages: draft.made_pages,
+          /** The pages the look laid out whose own text the shop kept (K6): `{ ref, name }`. */
+          texts_kept: draft.texts_kept,
           /** The draft kept before (adr/0064 Ek 2026-11-17); null: nothing new to keep. */
           auto_saved: autoSaved,
           /** The shop's content page layouts left out for pages deleted since (adr/0073 §1). */

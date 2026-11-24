@@ -12,6 +12,7 @@ import {
   productIdsOf,
 } from "@/lib/store-api/requests"
 import { picturedCategories } from "../category-tiles"
+import { collectionsOn } from "../collections-on"
 import { productCards } from "../product"
 import { productsInOrder } from "../section-data"
 import { stripSources } from "../strip-sources"
@@ -27,6 +28,7 @@ vi.mock("@/lib/store-api/requests", () => ({
 }))
 vi.mock("@/lib/store-api/extras", () => ({ categoryCounts: vi.fn(), collectionDetails: vi.fn() }))
 vi.mock("../category-tiles", () => ({ picturedCategories: vi.fn() }))
+vi.mock("../collections-on", () => ({ collectionsOn: vi.fn(() => Promise.resolve(true)) }))
 vi.mock("../section-data", () => ({ productsInOrder: vi.fn() }))
 vi.mock("../theme-settings", () => ({ cardOptions: vi.fn(() => Promise.resolve({})) }))
 vi.mock("../product", () => ({ productCards: vi.fn(), variantIdsOf: () => ["variant_1"] }))
@@ -138,6 +140,26 @@ describe("a strip gallery's sources, fetched live (adr/0049 Ek 2026-11-16)", () 
     expect(found.get("collection:pcol_2")?.image).toEqual(photo("/prod_9.webp"))
     // No live page here: not in the map, so its strip is left out
     expect(found.has("collection:pcol_gone")).toBe(false)
+  })
+
+  it("finds no collection while the shop has collections off, so its items are left out", async () => {
+    vi.mocked(collectionsOn).mockResolvedValueOnce(false)
+    vi.mocked(collectionById).mockClear()
+    vi.mocked(brandById).mockResolvedValue({
+      brand: { id: "brand_1", name: "Marka", handle: "marka", description: null },
+    })
+    vi.mocked(productIdsOf).mockResolvedValue({ product_ids: [], count: 0 })
+    vi.mocked(productsInOrder).mockResolvedValue([])
+    const found = await stripSources(
+      [
+        { kind: "collection", target: "pcol_1" },
+        { kind: "brand", target: "brand_1" },
+      ],
+      t
+    )
+    expect(found.has("collection:pcol_1")).toBe(false)
+    expect(found.has("brand:brand_1")).toBe(true)
+    expect(collectionById).not.toHaveBeenCalled()
   })
 
   it("stands a brand's newest product photo for it, never its logo", async () => {

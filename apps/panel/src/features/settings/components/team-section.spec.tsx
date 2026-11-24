@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { Team } from "@/features/settings/api/team"
-import { TeamPage } from "./team-page"
+import { TeamSection } from "./team-section"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const staff = vi.hoisted(() => ({ manage: true }))
@@ -56,12 +56,12 @@ function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <TeamPage />
+      <TeamSection />
     </QueryClientProvider>
   )
 }
 
-describe("TeamPage", () => {
+describe("TeamSection", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })

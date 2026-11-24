@@ -6,7 +6,9 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { emitEventStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { docStats } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { readStoredLayout } from "../../lib/storefront/layout"
@@ -124,7 +126,7 @@ export const replacePageTextWorkflow = createWorkflow(
   "storefront-page-text-replace",
   (input: ReplacePageTextInput) => {
     const keys = [LAYOUT_LOCK.key, CONTENT_LOCK.key]
-    acquireLockStep({ ...LAYOUT_LOCK, key: keys })
+    const held = acquireLocksStep({ ...LAYOUT_LOCK, key: keys })
     const checked = checkPageTextStep(input)
     const layout = replaceLayoutTextStep(
       transform({ checked }, ({ checked }) => ({ page_id: checked.page_id, doc: checked.doc }))
@@ -142,7 +144,7 @@ export const replacePageTextWorkflow = createWorkflow(
     emitEventStep({ eventName: CONTENT_SAVED, data: mirrored }).config({
       name: "storefront-page-text-content-saved",
     })
-    releaseLockStep({ key: keys })
+    releaseLocksStep(held)
     // The live design changed in place: the storefront forgets it as on a publication
     refreshStorefrontStep(
       transform({ mirrored, layout }, ({ mirrored, layout }) => [

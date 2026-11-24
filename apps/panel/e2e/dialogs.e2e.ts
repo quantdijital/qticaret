@@ -99,7 +99,7 @@ const CASES: Case[] = [
   { name: "command menu", path: "/", open: click(/Ara ya da bir sayfaya git/) },
   { name: "product import", path: "/products", open: click("İçe aktar") },
   { name: "new segment", path: "/customers/groups", open: click("Yeni segment") },
-  { name: "team invite", path: "/settings/team", open: click("Davet et") },
+  { name: "team invite", path: "/settings/security?part=team", open: click("Davet et") },
   { name: "new API key", path: "/settings/api", open: click("Yeni anahtar") },
   { name: "new redirect", path: "/seo/redirects", open: click("Yönlendirme ekle") },
   { name: "new menu", path: "/storefront/menus", open: click("Menü ekle") },

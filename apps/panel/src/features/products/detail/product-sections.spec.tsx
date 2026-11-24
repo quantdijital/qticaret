@@ -252,7 +252,7 @@ describe("ProductSections", () => {
     expect(part("Arama motoru görünümü")).toHaveAccessibleDescription(
       "Başlık 21/60 · Açıklama (otomatik) 15/155"
     )
-    expect(part("Özellikler")).toHaveAccessibleDescription("Bıçak şablonu · 2/2 alan dolu")
+    expect(part("Özellikler")).toHaveAccessibleDescription("Bıçak · 2/2 özellik dolu")
   })
 
   it("opens a part with a required field empty", async () => {
@@ -262,9 +262,7 @@ describe("ProductSections", () => {
     })
     expect(part("Arama motoru görünümü")).toHaveAttribute("aria-expanded", "false")
     // Open, the facts button is in its header
-    expect(
-      screen.getByRole("button", { name: "Açıklamadaki özellikleri aktar" })
-    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Açıklamadan aktar" })).toBeInTheDocument()
   })
 
   it("adds the parts the shop uses: add-ons, with its line", async () => {

@@ -7,13 +7,11 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   beginReceiveReturnWorkflow,
   confirmReturnReceiveWorkflow,
   dismissItemReturnRequestWorkflow,
   emitEventStep,
   receiveItemReturnRequestWorkflow,
-  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
@@ -32,6 +30,8 @@ import {
   returnRequestOrderStep,
   updateReturnRequestStep,
 } from "./steps/return-request"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 /** Fired when a return's money is given back: the return invoice hangs off it (F8). */
 export const RETURN_REFUNDED = "return.refunded"
@@ -76,7 +76,7 @@ const asMedusaLines = (lines: readonly ReturnLine[]) =>
 export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: ReceiveInput) => {
   const orderId = returnRequestOrderStep({ id: input.id })
   const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
-  acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+  const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
   const request = readReturnRequestStep({ id: input.id, status: "approved" })
   const rules = readReceiptRulesStep(
     transform({ input, request }, ({ input, request }) => ({
@@ -148,7 +148,7 @@ export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: R
       name: "returns-emit-refused",
     })
   })
-  releaseLockStep({ key: lockKey })
+  releaseLocksStep(held)
   return new WorkflowResponse(received)
 })
 

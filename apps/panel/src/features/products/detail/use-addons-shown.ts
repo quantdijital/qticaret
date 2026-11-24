@@ -5,7 +5,7 @@ import { featuresQuery, useFeatureState } from "@/features/settings/api/features
 
 /**
  * Whether the product's page shows its add-ons: while the shop's add-ons
- * are on, or while this product still has some; undefined until both are
+ * are on, or while this product still has some (its own or a template's); undefined until both are
  * known (a tab that appears and goes would shift the page).
  */
 export function useAddonsShown(productId: string): boolean | undefined {
@@ -17,5 +17,5 @@ export function useAddonsShown(productId: string): boolean | undefined {
   if (!catalog.data || flagOn === undefined) {
     return undefined
   }
-  return flagOn || catalog.data.addons.length > 0
+  return flagOn || catalog.data.addons.length > 0 || (catalog.data.addon_templates ?? []).length > 0
 }

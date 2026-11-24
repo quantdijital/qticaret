@@ -273,8 +273,15 @@ export interface StorefrontAnswer {
    * codes (F4.8) and product add-ons (adr/0052); their routes answer 404 while off.
    * `booking`: dated products (`catalog.booking`, adr/0076), the sections that
    * need it drawn only while on (adr/0077 §8); absent from a backend before it.
+   * `collections`: product collections (`catalog.collections`), on by default;
+   * `false` only when the shop turned them off (absent: on).
    */
-  features?: { gift_cards: boolean; product_addons: boolean; booking?: boolean }
+  features?: {
+    gift_cards: boolean
+    product_addons: boolean
+    booking?: boolean
+    collections?: boolean
+  }
   /**
    * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived
    * from what the shop set up; absent from a backend before it: none.

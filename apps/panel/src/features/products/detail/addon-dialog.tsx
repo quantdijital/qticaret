@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import type { ReactNode } from "react"
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
 import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -74,6 +75,10 @@ interface AddonDialogProps {
   onClose: () => void
   /** Saves the product's add-ons with this one in its place. */
   onSave: (value: AddonValue) => void
+  /** What saving does, under the form; left out, the product's whole list is saved. */
+  note?: string
+  /** Below the add-on's fields, inside its form (the product's "Kapsam" for a new one). */
+  children?: ReactNode
 }
 
 /**
@@ -91,6 +96,8 @@ export function AddonDialog({
   failure,
   onClose,
   onSave,
+  note,
+  children,
 }: AddonDialogProps) {
   const { t } = useTranslation()
   const addon = index === null ? null : (items[index] ?? null)
@@ -145,7 +152,9 @@ export function AddonDialog({
       onSubmit={() => void submit()}
       guard={guard}
       footerStart={
-        <span className="self-center text-xs text-muted-foreground">{t(`${A}.savesAll`)}</span>
+        <span className="self-center text-xs text-muted-foreground">
+          {note ?? t(`${A}.savesAll`)}
+        </span>
       }
     >
       <FormProvider {...form}>
@@ -222,6 +231,7 @@ export function AddonDialog({
             hint={t(`${A}.nonWithdrawableHint`)}
             error={undefined}
           />
+          {children}
           {failure ? <AddonNotice tone="danger" {...failure} /> : null}
         </DialogBody>
       </FormProvider>

@@ -218,6 +218,8 @@ export interface ServeOptions {
   storefront?: Partial<StorefrontSettings>
   /** The draft's theme settings (adr/0063 §3), over the defaults. */
   theme?: Partial<ThemeSettings>
+  /** Who is signed in: the owner unless told (the looks are the owner's alone, 2026-11-23). */
+  role?: "owner" | "admin"
 }
 
 /** A theme save over the stored one: the groups sent replace theirs, field by field. */
@@ -272,6 +274,10 @@ export function serve(
     const answer = (next: AdminLayout) => {
       current = next
       return Promise.resolve({ layout: next })
+    }
+    if (url === "/admin/staff/me") {
+      const role = options.role ?? "owner"
+      return Promise.resolve({ user_id: "user_1", role, can: { looks: role === "owner" } })
     }
     if (url === PATH && init?.method === "POST") {
       const refused = options.refuse?.()

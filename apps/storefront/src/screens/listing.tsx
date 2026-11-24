@@ -32,6 +32,7 @@ import { withCardFacts } from "@/lib/views/card-extras"
 import { imageView } from "@/lib/views/image"
 import { subcategoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
+import { collectionsOn } from "@/lib/views/collections-on"
 import { filterViews } from "@/lib/views/facets"
 import { currentLayout, currentShared } from "@/lib/views/layout"
 import {
@@ -110,6 +111,10 @@ async function headingOf(page: Entity, first: boolean): Promise<Heading> {
       return { title: landing.title, description: paragraphsOf(landing.html), subcategories: [] }
     }
     case "product_collection": {
+      // Collections off: no page, even from a resolve answer cached across the change
+      if (!(await collectionsOn())) {
+        notFound()
+      }
       // Its intro and picture are the shop's own (Ürünler > Koleksiyonlar)
       const [{ collection }, details] = await Promise.all([
         collectionById(page.entity_id),

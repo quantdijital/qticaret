@@ -3,6 +3,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { MAX_REVISION } from "../../../../../../lib/storefront/designs/limits"
 import { replaceDraftWorkflow } from "../../../../../../workflows/storefront/draft-replace"
 import { draftSource } from "../../../../../../workflows/storefront/layout"
+import { ownsLooks } from "../../../owns-looks"
 import { adminLayout } from "../../../read"
 import type { AdminPostStorefrontLayoutRestoreType } from "../../../validators"
 
@@ -28,6 +29,7 @@ export async function POST(
       text_at: source.text_at,
       actor: req.auth_context.actor_id,
       reason: "restore",
+      evict: await ownsLooks(req),
     },
   })
   res.json({

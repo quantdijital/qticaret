@@ -87,7 +87,7 @@ describe("CategoriesPage", () => {
           path === "/admin/category-images"
             ? { images: [{ category_id: "mutfak", url: "https://cdn.example/m.webp", alt: null }] }
             : path === "/admin/platform-settings/seo"
-              ? { values: { url_style: { category: "nested" } } }
+              ? { values: { url_style: { category: "prefixed" } } }
               : {}
         )
       )

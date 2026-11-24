@@ -13,6 +13,8 @@ vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/settings">{children}</a>,
+  // adr/0052 Ek 2026-11-23: an add-on template's row opens its page
+  useNavigate: () => vi.fn(),
 }))
 
 const template = (more: Partial<AttributeTemplate>): AttributeTemplate => ({
@@ -62,7 +64,7 @@ describe("AttributesPage", () => {
     fetchMock.mockResolvedValue({ attribute_templates: [], count: 0 })
     renderPage()
 
-    expect(await screen.findByText(/Henüz şablon yok/)).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: "Şablon oluştur" })).toHaveLength(2)
+    expect(await screen.findByText(/Henüz özellik grubu yok/)).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Özellik grubu ekle" })).toHaveLength(2)
   })
 })

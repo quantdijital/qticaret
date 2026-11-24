@@ -1,10 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { chunksOf } from "../../../lib/catalog"
+import { templateSourceOf } from "../../../lib/catalog/addons"
 import { ValidationError } from "../../../lib/errors"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { SheetCell } from "../../../lib/sheets"
+import { requireAddonsFlag } from "../../addon-templates/usage"
 import { publishGate } from "../../seo/advisor/publish-gate"
 import { writeErrorText } from "../write-error"
 import type { BulkAction, BulkChange, BulkEditInput } from "./change"
@@ -13,12 +14,14 @@ import type { BulkDiff, BulkPlan, PlanContext } from "./plan"
 import { bulkProducts } from "./products"
 import type { BulkProduct } from "./products"
 import { bulkRow } from "./report"
+import { runProducts } from "./scope"
+import type { RunProducts } from "./scope"
 import { writeBulkChange } from "./write"
 import type { WriteOrigin } from "./write"
 
 export interface BulkEditSummary {
   action: BulkAction
-  /** Products named; those gone are `skipped`. */
+  /** Products named (or found in the scope); those gone are `skipped`. */
   products: number
   changed: number
   unchanged: number
@@ -54,6 +57,26 @@ async function planContext(container: MedusaContainer, change: BulkChange): Prom
     if (data.length === 0) {
       throw new ValidationError("bulk_edit.category_unknown", { field: "category_id" })
     }
+  }
+  if (change.action === "addon_template") {
+    // Linking needs the shop's add-ons on: said once for the run, not per product
+    if (change.mode === "add") {
+      await requireAddonsFlag(container)
+    }
+    const { data } = await query.graph({
+      entity: "addon_template",
+      fields: ["id", "name", "addons"],
+    })
+    const templates = new Map(
+      (data as { id: string; name: string; addons?: unknown }[]).map((row) => [
+        row.id,
+        templateSourceOf(row),
+      ])
+    )
+    if (!templates.has(change.template_id)) {
+      throw new ValidationError("bulk_edit.addon_template_unknown", { field: "template_id" })
+    }
+    return { locationId: null, addonTemplates: templates }
   }
   if (change.action !== "stock") {
     return { locationId: null }
@@ -111,16 +134,16 @@ async function auditWritten(hooks: BulkEditHooks, productId: string, diff: BulkD
 /** Every product named, a chunk at a time; a row each, in the order named. */
 async function applyAll(
   container: MedusaContainer,
-  input: BulkEditInput,
+  change: BulkChange,
+  products: RunProducts,
   hooks: BulkEditHooks,
   context: PlanContext & { isBlocked: IsBlocked }
 ) {
-  const { change } = input
   const counts: Counts = { changed: 0, unchanged: 0, skipped: 0, failed: 0 }
   const rows: SheetCell[][] = []
   const changed: string[] = []
   let done = 0
-  for (const chunk of chunksOf(input.product_ids, PRODUCT_CHUNK)) {
+  for await (const chunk of products.chunks) {
     const found = new Map(
       (await bulkProducts(container, chunk, change.action)).map((product) => [product.id, product])
     )
@@ -146,16 +169,19 @@ async function applyAll(
       }
     }
     done += chunk.length
-    await hooks.progress(5 + Math.floor((done / input.product_ids.length) * 95))
+    // A scope's count is read as it starts: a product made meanwhile may pass it
+    await hooks.progress(5 + Math.floor(Math.min(1, done / Math.max(1, products.total)) * 95))
   }
-  return { counts, rows, changed }
+  return { counts, rows, changed, done }
 }
 
 /**
  * Applies one change to the products named (F3.10), one product at a time,
  * each in its own run: a product the change cannot take costs that product,
  * not the rest. Each product written has its own audit entry; the run's
- * entry as it ends names them all (a run takes at most 1,000).
+ * entry as it ends names them all. Named products are at most 1,000; an
+ * add-on template's scope (the whole catalogue, a category) is read a
+ * page at a time and has no cap (2026-11-23).
  */
 export async function runBulkEdit(
   container: MedusaContainer,
@@ -164,21 +190,26 @@ export async function runBulkEdit(
 ): Promise<{ summary: BulkEditSummary; rows: SheetCell[][] }> {
   const { change } = input
   const context = await planContext(container, change)
+  const products = await runProducts(container, input, PRODUCT_CHUNK)
   const isBlocked =
     change.action === "status" && change.status === "published"
       ? await publishGate(container)
       : null
   await hooks.progress(5)
-  await hooks.audit("started", { change, products: input.product_ids.length })
+  await hooks.audit("started", {
+    change,
+    products: products.total,
+    ...(input.scope ? { scope: input.scope } : {}),
+  })
   let finished: Record<string, unknown> = { interrupted: true }
   try {
-    const { counts, rows, changed } = await applyAll(container, input, hooks, {
+    const { counts, rows, changed, done } = await applyAll(container, change, products, hooks, {
       ...context,
       isBlocked,
     })
     finished = { ...counts, product_ids: changed }
     return {
-      summary: { action: change.action, products: input.product_ids.length, ...counts },
+      summary: { action: change.action, products: done, ...counts },
       rows,
     }
   } finally {

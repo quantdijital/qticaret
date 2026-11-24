@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { PlanBillingSummary } from "@qticaret/types/control-plane"
 import { billingIn } from "../../workflows/modules"
 import { billingSummary, graceOf } from "./rules"
+import { subscriptionTerms } from "./terms"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -18,7 +19,7 @@ const NOTHING_DUE = {
  * The plan document's billing summary for a shop (adr/0061 §3.2, §5.6, Ek
  * C16): its subscription's state, the oldest open charge (or the next
  * renewal at the package's price now), the package's name and the
- * platform's payment instruction. Read from what is stored, never from
+ * platform's payment instruction, the subscription's terms (Ek C20). Read from what is stored, never from
  * the clock: the document changes only when billing does.
  */
 export async function billingSummaryOf(
@@ -31,7 +32,12 @@ export async function billingSummaryOf(
     billing.subscriptionOf(tenantId),
     billing.paymentInstruction(),
   ])
-  const extra = { package_name: plan.name, payment_instruction: instruction.value ?? null }
+  // Ek C20: what a period costs, how long it is, the trial
+  const extra = {
+    package_name: plan.name,
+    payment_instruction: instruction.value ?? null,
+    ...subscriptionTerms(sub),
+  }
   if (!sub) {
     return { ...NOTHING_DUE, ...extra }
   }

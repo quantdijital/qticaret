@@ -4,8 +4,10 @@ import {
   emptyDefinition,
   keyFromLabel,
   optionValue,
+  carriedChanged,
   removedDefinitions,
   templateForm,
+  withAdded,
 } from "./form"
 import type { AttributeTemplate } from "./types"
 
@@ -100,5 +102,25 @@ describe("attribute template form", () => {
     const form = templateForm(template)
     form.definitions = form.definitions.filter((definition) => definition.key !== "uzunluk")
     expect(removedDefinitions(template, form).map((definition) => definition.id)).toEqual(["def_b"])
+  })
+})
+
+describe("carried add-on templates (adr/0052 Ek 2026-11-23)", () => {
+  it("starts from the saved list and tells a change, order included", () => {
+    const saved = { ...template, addon_template_ids: ["adtpl_1", "adtpl_2"] } as AttributeTemplate
+    const form = templateForm(saved)
+    expect(form.addonTemplateIds).toEqual(["adtpl_1", "adtpl_2"])
+    expect(carriedChanged(saved, form)).toBe(false)
+    expect(carriedChanged(saved, { ...form, addonTemplateIds: ["adtpl_2", "adtpl_1"] })).toBe(true)
+    expect(carriedChanged(null, templateForm(null))).toBe(false)
+  })
+})
+
+describe("withAdded", () => {
+  it("shows values added from a product until the saved group has them, once each", () => {
+    const steel = { value: "steel", label: "Çelik" }
+    const bamboo = { value: "bambu", label: "Bambu" }
+    expect(withAdded([steel], [bamboo])).toEqual([steel, bamboo])
+    expect(withAdded([steel, bamboo], [bamboo])).toEqual([steel, bamboo])
   })
 })

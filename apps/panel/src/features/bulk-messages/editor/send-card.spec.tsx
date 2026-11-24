@@ -150,7 +150,7 @@ describe("SendCard (adr/0050 §6–7)", () => {
   it("says an audience that reaches no one in the backend's words, for a send and a schedule", async () => {
     const user = userEvent.setup()
     const EMPTY =
-      "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+      "Bu kitlede mesajı alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
     fetchMock.mockRejectedValue(refused(400, EMPTY))
     renderCard()
 

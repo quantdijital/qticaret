@@ -40,6 +40,8 @@ export const auditSearchSchema = z.object({
   resource: z.string().min(1).max(256).optional().catch(undefined),
   from: z.string().regex(DAY).optional().catch(undefined),
   to: z.string().regex(DAY).optional().catch(undefined),
+  /** The page's open tab (`SettingsTabs`): the log, or the long jobs. */
+  part: z.string().min(1).max(64).optional().catch(undefined),
 })
 export type AuditSearch = z.infer<typeof auditSearchSchema>
 

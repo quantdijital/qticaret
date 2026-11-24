@@ -17,6 +17,7 @@ import type { SheetJob } from "@/features/products/api/sheets"
 import { jobResultUrl } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 const E = "orders.export"
 
@@ -28,6 +29,7 @@ const E = "orders.export"
  */
 export function OrderExportButton({ filters }: { filters: OrderFilters }) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const allowed = useCan("orderExport")
   const [running, setRunning] = useState(false)
   if (!allowed) {
@@ -44,7 +46,7 @@ export function OrderExportButton({ filters }: { filters: OrderFilters }) {
       if (job.status === "succeeded") {
         window.location.assign(new URL(await jobResultUrl(job.id), window.location.origin).href)
       } else if (job.status === "queued" || job.status === "running") {
-        toast.info(t(`${E}.later`))
+        toast.info(t(jobs(`${E}.later`)))
       } else {
         toast.error(job.error_message ?? t(`${E}.failed`))
       }

@@ -4,7 +4,8 @@ import { z } from "@medusajs/framework/zod"
  * One change applied to many products at once (F3.10): the base TRY price,
  * stock at the default warehouse, the status, a category, the SEO texts
  * given back to the shop's templates, the images' missing alt texts, or
- * the variants' unit cost (F11.4).
+ * the variants' unit cost (F11.4), or an add-on template (adr/0052 Ek
+ * 2026-11-23).
  */
 
 /** Products one run takes; the panel selects at most this many. */
@@ -94,18 +95,57 @@ const cost = z
         : value !== undefined && value !== 0 && value >= MIN_PERCENT && value <= MAX_PERCENT
   )
 
-export const BulkChange = z.union([price, stock, status, category, seoTemplate, altText, cost])
+// adr/0052 Ek 2026-11-23: an add-on template linked to or unlinked from each product
+const addonTemplate = z
+  .object({
+    action: z.literal("addon_template"),
+    mode: z.enum(["add", "remove"]),
+    template_id: id,
+  })
+  .strict()
+
+export const BulkChange = z.union([
+  price,
+  stock,
+  status,
+  category,
+  seoTemplate,
+  altText,
+  cost,
+  addonTemplate,
+])
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]
 
+/**
+ * Products the server finds itself, for an add-on template (2026-11-23):
+ * the whole catalogue or a category with those below it. Read a page at
+ * a time, with no cap on how many; gift card products are left out.
+ */
+export const BulkScope = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("all") }).strict(),
+  z.object({ kind: z.literal("category"), category_id: id }).strict(),
+])
+export type BulkScope = z.infer<typeof BulkScope>
+
+/** The products named, or (an add-on template only) a scope the server reads. */
 export const BulkEditInput = z
   .object({
     product_ids: z
       .array(id)
       .min(1)
       .max(MAX_BULK_PRODUCTS)
-      .refine((ids) => new Set(ids).size === ids.length),
+      .refine((ids) => new Set(ids).size === ids.length)
+      .optional(),
+    scope: BulkScope.optional(),
     change: BulkChange,
   })
   .strict()
+  .refine(
+    ({ product_ids, scope, change }) =>
+      scope === undefined
+        ? product_ids !== undefined
+        : product_ids === undefined && change.action === "addon_template",
+    { path: ["scope"] }
+  )
 export type BulkEditInput = z.infer<typeof BulkEditInput>

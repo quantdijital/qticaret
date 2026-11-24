@@ -4,14 +4,11 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import {
-  acquireLockStep,
-  authorizePaymentSessionStep,
-  capturePaymentWorkflow,
-  releaseLockStep,
-} from "@medusajs/medusa/core-flows"
+import { authorizePaymentSessionStep, capturePaymentWorkflow } from "@medusajs/medusa/core-flows"
 import { bankTransferLockKey } from "../../lib/payments/bank-transfer"
 import { markBankTransferConfirmedStep, readBankTransferOrderStep } from "./steps/bank-transfer"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 
 export interface ConfirmBankTransferInput {
   order_id: string
@@ -30,7 +27,7 @@ export const confirmBankTransferWorkflow = createWorkflow(
   "payments-confirm-bank-transfer",
   (input: ConfirmBankTransferInput) => {
     const lockKey = transform({ input }, ({ input }) => bankTransferLockKey(input.order_id))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
+    const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 60 })
     const order = readBankTransferOrderStep(input.order_id)
     markBankTransferConfirmedStep(order)
     when("payments-bank-transfer-capture", { order }, ({ order }) => !order.done).then(() => {
@@ -47,7 +44,7 @@ export const confirmBankTransferWorkflow = createWorkflow(
         })),
       })
     })
-    releaseLockStep({ key: lockKey })
+    releaseLocksStep(held)
     return new WorkflowResponse(
       transform({ order, input }, ({ order, input }) => ({
         order_id: input.order_id,

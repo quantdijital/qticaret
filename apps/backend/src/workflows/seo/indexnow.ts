@@ -12,7 +12,7 @@ import type SeoSitemapsModuleService from "../../modules/seo-sitemaps/service"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_LOCALE } from "../catalog/entity-paths"
-import { LIVE_RECORDS, keptRows, liveFieldsOf, liveOwnerKeys } from "./live-records"
+import { LIVE_RECORDS, keptRows, kindEnabled, liveFieldsOf, liveOwnerKeys } from "./live-records"
 import type { LiveSpec } from "./live-records"
 import { shopOf } from "./payload-sources"
 
@@ -39,8 +39,11 @@ async function changedOf(
 ): Promise<string[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
-  const filters = { ...(await spec.filters(container)), updated_at: { $gt: since } }
   const paths: string[] = []
+  if (!(await kindEnabled(container, spec))) {
+    return paths
+  }
+  const filters = { ...(await spec.filters(container)), updated_at: { $gt: since } }
   for (let skip = 0; paths.length < room; skip += PAGE) {
     const { data } = await query.graph({
       entity: spec.entity,

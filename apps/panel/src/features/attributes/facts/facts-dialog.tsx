@@ -26,6 +26,7 @@ import { FactsOverview } from "./facts-overview"
 import { FactsProducts } from "./facts-products"
 import { FactsResult } from "./facts-result"
 import { FactsSuggestions } from "./facts-suggestions"
+import { useJobsMessage } from "@/features/settings/use-jobs-message"
 
 const F = "attributes.facts"
 
@@ -38,7 +39,7 @@ interface FactsDialogProps {
 }
 
 /**
- * "Açıklamadaki özellikleri aktar" (adr/0013 Ek 2026-11-05): what the
+ * "Açıklamadan aktar" (adr/0013 Ek 2026-11-05): what the
  * products' descriptions state as facts, the field each goes to and its
  * value, the labels no field names (to add as fields, or as another name
  * of one), then the run that writes them, its progress and its report.
@@ -48,6 +49,7 @@ interface FactsDialogProps {
  */
 export function FactsDialog({ productIds, onClose, onDone }: FactsDialogProps) {
   const { t } = useTranslation()
+  const jobs = useJobsMessage()
   const client = useQueryClient()
   const open = productIds.length > 0
   // undefined: not chosen, the template the first reading suggests for products without one
@@ -78,7 +80,7 @@ export function FactsDialog({ productIds, onClose, onDone }: FactsDialogProps) {
   const input = data ? runInput(productIds, data, choices, { overwrite, templateId }) : null
   const close = () => {
     if (job && !finished) {
-      toast.info(t(`${F}.background`))
+      toast.info(t(jobs(`${F}.background`)))
     }
     if (job) {
       void client.invalidateQueries({ queryKey: ["products"] })

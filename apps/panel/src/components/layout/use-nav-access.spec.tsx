@@ -33,7 +33,7 @@ function accessFor({ role, flag }: { role?: "owner" | "operations"; flag?: boole
 describe("the menu's items behind a flag and a capability", () => {
   const bulk = navItem("bulkMessages")
 
-  it("offers Toplu ileti to the owner while the shop has it on", () => {
+  it("offers Toplu mesaj to the owner while the shop has it on", () => {
     expect(accessFor({ role: "owner", flag: true })(bulk)).toBe(true)
   })
 
@@ -64,6 +64,27 @@ describe("the menu's items behind a flag and a capability", () => {
     expect(client("owner", false)(links)).toBe(false)
   })
 
+  it("offers Koleksiyonlar to every role while collections are on, none while off", () => {
+    const collections = navItem("collections")
+    const client = (role: "owner" | "operations", flag: boolean) => {
+      const query = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      })
+      query.setQueryData(STAFF_KEY, staff(role))
+      query.setQueryData(featuresQuery().queryKey, [
+        { key: "catalog.collections", default: true, owner: "tenant", enabled: flag },
+      ])
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      )
+      return renderHook(() => useNavAccess(), { wrapper }).result.current
+    }
+    expect(collections).toMatchObject({ to: "/collections", feature: "catalog.collections" })
+    expect(client("owner", true)(collections)).toBe(true)
+    expect(client("operations", true)(collections)).toBe(true)
+    expect(client("owner", false)(collections)).toBe(false)
+  })
+
   it("offers Toptancılar to owner and admin only while the shop sells wholesale", () => {
     const wholesale = navItem("wholesale")
     const client = (role: "owner" | "operations", flag: boolean) => {
@@ -83,6 +104,32 @@ describe("the menu's items behind a flag and a capability", () => {
     expect(client("owner", false)(wholesale)).toBe(false)
     expect(client("operations", true)(wholesale)).toBe(false)
     expect(accessFor({})(wholesale)).toBe(false)
+  })
+
+  it("offers Görünümler to the owner alone (2026-11-23)", () => {
+    const looks = navItem("looks")
+    expect(looks).toMatchObject({ to: "/storefront/looks", needs: "looks" })
+    const as = (role: "owner" | "admin" | "operations") => {
+      const query = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      })
+      // An admin: everything the owner has but the owner's own, the looks among them
+      const me = staff(role === "admin" ? "owner" : role)
+      query.setQueryData(
+        STAFF_KEY,
+        role === "admin" ? { ...me, role, can: { ...me.can, looks: false } } : me
+      )
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      )
+      return renderHook(() => useNavAccess(), { wrapper }).result.current
+    }
+    expect(as("owner")(looks)).toBe(true)
+    expect(as("admin")(looks)).toBe(false)
+    expect(as("operations")(looks)).toBe(false)
+    expect(accessFor({})(looks)).toBe(false)
+    // The theme editor stays every role's
+    expect(as("admin")(navItem("themeEditor"))).toBe(true)
   })
 
   it("leaves items with neither alone", () => {

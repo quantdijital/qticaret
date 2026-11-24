@@ -6,7 +6,8 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { planContentLinks } from "./link-plan"
 import type { LinkPlan, LinkRow, LinkScope } from "./link-plan"
@@ -14,6 +15,7 @@ import { rewriteEntryLinksStep, rewriteProductLinksStep } from "./steps/rewrite-
 import { LAYOUT_LOCK } from "../storefront/layout"
 import { recordSystemLayoutStep } from "../storefront/layout-system"
 import { rewriteLayoutLinksStep } from "./link-layout"
+import { rewriteListingLinksStep } from "./link-listings"
 import { CONTENT_LOCK } from "./workflows"
 
 /**
@@ -49,7 +51,8 @@ const planContentLinksStep = createStep(
 /**
  * Every document written takes the lock its own saves take: content's, the
  * design's (a page's text is its sections', adr/0073 Ek 2026-11-19 (2)
- * K7), each product's.
+ * K7), each product's. A category's, brand's or collection's save takes
+ * its own lock itself (adr/0075), so none of theirs is held here.
  */
 const lockKeys = (plan: LinkPlan): string[] => [
   ...(plan.writes.entries.length > 0 ? [LAYOUT_LOCK.key, CONTENT_LOCK.key] : []),
@@ -65,7 +68,7 @@ export const rewriteContentLinksWorkflow = createWorkflow(
       // A plan with nothing to write still takes one lock of its own, never none
       return keys.length > 0 ? keys : ["content-links"]
     })
-    acquireLockStep({ key, timeout: 30, ttl: 300 })
+    const held = acquireLocksStep({ key, timeout: 30, ttl: 300 })
     const layout = rewriteLayoutLinksStep(
       transform({ plan }, ({ plan }) => ({ ids: plan.writes.entries, next: plan.next }))
     )
@@ -76,6 +79,10 @@ export const rewriteContentLinksWorkflow = createWorkflow(
     const products = rewriteProductLinksStep(
       transform({ plan }, ({ plan }) => ({ products: plan.writes.products, next: plan.next }))
     )
+    // Categories', brands' and collections' descriptions, each through its own save (adr/0075)
+    const listings = rewriteListingLinksStep(
+      transform({ plan }, ({ plan }) => ({ listings: plan.writes.listings, next: plan.next }))
+    )
     // Recorded last: a failing record undoes the writes (ids and the revision only)
     recordSystemLayoutStep(
       transform({ layout }, ({ layout }) => ({
@@ -84,7 +91,7 @@ export const rewriteContentLinksWorkflow = createWorkflow(
         pages: layout.pages,
       }))
     )
-    releaseLockStep({ key })
+    releaseLocksStep(held)
     // Pages and posts the storefront shows (its menus and lists); a product's text is read fresh
     refreshStorefrontStep(
       transform({ entries, layout }, ({ entries, layout }) => [
@@ -93,9 +100,9 @@ export const rewriteContentLinksWorkflow = createWorkflow(
       ])
     )
     return new WorkflowResponse(
-      transform({ plan, entries, products }, ({ plan, entries, products }) => ({
+      transform({ plan, entries, products, listings }, ({ plan, entries, products, listings }) => ({
         documents: plan.documents,
-        rewritten: entries + products,
+        rewritten: entries + products + listings,
         changed: plan.changed,
         unresolved: plan.unresolved,
       }))
@@ -112,7 +119,8 @@ export async function rewriteContentLinks(
     const plan = await planContentLinks(container, input)
     return {
       documents: plan.documents,
-      rewritten: plan.writes.entries.length + plan.writes.products.length,
+      rewritten:
+        plan.writes.entries.length + plan.writes.products.length + plan.writes.listings.length,
       changed: plan.changed,
       unresolved: plan.unresolved,
     }

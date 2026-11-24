@@ -124,6 +124,10 @@ export const OWNER_ONLY: readonly Rule[] = [
   // the panel has its own, Medusa Admin is off (the F15 audit)
   { methods: WRITES, path: "/admin/layouts*" },
   { methods: WRITES, path: "/admin/views*" },
+  // The storefront's looks (adr/0064): the ready-made and saved ones, read, applied into the
+  // draft, kept, renamed, deleted (the owner, 2026-11-23: "yalnızca sahiplere açık")
+  { methods: "*", path: "/admin/storefront-designs*" },
+  { methods: "*", path: "/admin/storefront-presets*" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },
@@ -157,6 +161,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/fraud/blocks*" },
   // The package, its use and what the shop owes the platform (adr/0061 Ek C14): owner and admin
   { methods: "*", path: "/admin/plan" },
+  // Its payments to the platform (Ek C20): the same roles
+  { methods: "*", path: "/admin/plan/payments" },
   // The AI core's use and estimated cost (adr/0071 §6): owner and admin; the services list is everyone's
   { methods: "*", path: "/admin/ai/usage" },
   // How often each task's suggestions are taken (adr/0074 §4): beside the usage, the same roles

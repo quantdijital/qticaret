@@ -124,5 +124,8 @@ describe("the tenant API's route table (adr/0061 §3.4, Ek C9)", () => {
     expect(matchTenantApi("HEAD", "/tenant-api/v1/plan")).not.toBeNull()
     expect(matchTenantApi("POST", "/tenant-api/v1/plan")).toBeNull()
     expect(matchTenantApi("GET", "/tenant-api/v1/usage")).toBeNull()
+    // Ek C20: the payment history is read only, and takes no body
+    expect(matchTenantApi("GET", "/tenant-api/v1/billing")?.maxBodyBytes).toBe(0)
+    expect(matchTenantApi("POST", "/tenant-api/v1/billing")).toBeNull()
   })
 })

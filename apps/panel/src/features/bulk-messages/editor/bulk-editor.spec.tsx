@@ -92,7 +92,7 @@ describe("BulkEditor (adr/0050 §10)", () => {
     const user = userEvent.setup()
     renderEditor(mocks)
 
-    await user.clear(screen.getByLabelText(/İletinin adı/))
+    await user.clear(screen.getByLabelText(/Mesajın adı/))
     await user.click(screen.getByRole("button", { name: "Kaydet" }))
 
     expect(await screen.findByText("İletiye bir ad verin.")).toBeInTheDocument()
@@ -148,7 +148,7 @@ describe("BulkEditor (adr/0050 §10)", () => {
     const user = userEvent.setup()
     renderEditor(mocks)
 
-    await user.type(screen.getByLabelText(/İletinin adı/), " 2")
+    await user.type(screen.getByLabelText(/Mesajın adı/), " 2")
     await user.click(screen.getByRole("tab", { name: "Deneme ve gönderim" }))
 
     expect(screen.getByRole("button", { name: "Bana gönder" })).toBeDisabled()

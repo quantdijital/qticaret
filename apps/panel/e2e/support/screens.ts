@@ -96,8 +96,9 @@ export const SETTINGS = [
   "/settings/seo",
   "/settings/attributes",
   "/settings/features",
-  "/settings/jobs",
+  // The audit log, and the long jobs as its tab (the owner, 2026-11-23)
   "/settings/audit",
+  "/settings/audit?part=jobs",
   "/settings/einvoice?part=accounting",
   "/settings/einvoice?part=vat",
   "/settings/einvoice",
@@ -109,11 +110,11 @@ export const SETTINGS = [
   "/settings/marketing?part=bulk",
   "/settings/marketing/meta",
   "/settings/marketing/ga4",
-  // Opens on the member's own account (Hesabım); the team's two-step and the fraud rules beside
+  // Opens on the member's own account (Hesabım); the team (members, invitations, two-step)
+  // and the fraud rules beside
   "/settings/security",
   "/settings/security?part=team",
   "/settings/security?part=fraud",
-  "/settings/team",
   "/settings/legal",
   "/settings/legal/distance_sales",
 ]

@@ -34,17 +34,13 @@ function ScrollBar({
     <ScrollAreaPrimitive.ScrollAreaScrollbar
       data-slot="scroll-area-scrollbar"
       orientation={orientation}
-      className={cn(
-        "flex touch-none p-px transition-colors select-none",
-        orientation === "vertical" && "h-full w-2.5 border-l border-l-transparent",
-        orientation === "horizontal" && "h-2.5 flex-col border-t border-t-transparent",
-        className
-      )}
+      // The panel's scrollbar look (theme/scrollbar.css): size, shape, colours, hover
+      className={cn("qt-scrollbar", className)}
       {...props}
     >
       <ScrollAreaPrimitive.ScrollAreaThumb
         data-slot="scroll-area-thumb"
-        className="relative flex-1 rounded-full bg-border"
+        className="qt-scrollbar-thumb"
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )

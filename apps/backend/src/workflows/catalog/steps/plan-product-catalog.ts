@@ -233,7 +233,7 @@ export const planProductCatalogStep = createStep(
       currentMode,
       kind ?? extension?.kind ?? "physical"
     )
-    const addons = await addonsToWrite(container, input.addons)
+    const addons = await addonsToWrite(container, input.addons, product.id)
     const description = descriptionChanges(input.description_doc, {
       doc: extension?.description_doc ?? null,
       description: product.description ?? null,

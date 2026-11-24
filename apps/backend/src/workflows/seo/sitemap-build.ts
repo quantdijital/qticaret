@@ -10,6 +10,7 @@ import type ContentModuleService from "../../modules/content/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
+import { collectionsOn } from "../catalog/collections-flag"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
@@ -48,6 +49,8 @@ interface KindSpec {
   keep?: (row: Record<string, unknown>) => boolean
   /** The fields whose date is the page's last meaningful change, first set first; else `updated_at`. */
   changed?: readonly ("revised_at" | "published_at")[]
+  /** Whether the kind has pages at all (collections off: none listed). */
+  enabled?: (container: MedusaContainer) => Promise<boolean>
 }
 
 const KINDS: readonly KindSpec[] = [
@@ -80,6 +83,7 @@ const KINDS: readonly KindSpec[] = [
     // A collection the shop hid is no page (Ürünler > Koleksiyonlar)
     fields: COLLECTION_LIVE_FIELDS,
     keep: isCollectionShown,
+    enabled: collectionsOn,
     images: false,
   },
   // F3.16
@@ -117,6 +121,14 @@ const KINDS: readonly KindSpec[] = [
 
 const filtersOf = async (container: MedusaContainer, spec: KindSpec) =>
   spec.filtersOf ? spec.filtersOf(container) : spec.filters
+
+/** The kinds that have pages now (a switched-off kind lists none). */
+async function kindsOn(container: MedusaContainer): Promise<KindSpec[]> {
+  const on = await Promise.all(
+    KINDS.map((spec) => (spec.enabled ? spec.enabled(container) : Promise.resolve(true)))
+  )
+  return KINDS.filter((_, index) => on[index])
+}
 
 // A page that asks not to be indexed, or names another page as canonical, stays out
 const listed = (row: Row): boolean =>
@@ -198,7 +210,7 @@ export async function sitemapCounts(
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const counts = { expected: 0, pathless: 0 }
-  for (const spec of KINDS) {
+  for (const spec of await kindsOn(container)) {
     const filters = await filtersOf(container, spec)
     for (let skip = 0; ; skip += PAGE) {
       const { data } = await query.graph({
@@ -282,7 +294,7 @@ export async function buildSitemap(container: MedusaContainer): Promise<BuiltSit
   }
   const origin = `https://${shop.canonicalHost}`
   const files: SitemapFile[] = [...urlsetFiles("site", await siteEntries(container, origin))]
-  for (const spec of KINDS) {
+  for (const spec of await kindsOn(container)) {
     files.push(...urlsetFiles(spec.kind, await entriesOf(container, spec, origin)))
   }
   // The blog's archives and authors (adr/0019 ek 2026-11-03, adr/0060); no date: posts change them

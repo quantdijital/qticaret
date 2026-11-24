@@ -145,9 +145,9 @@ describe("BulkMessagesPage", () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(await screen.findByRole("button", { name: "Yeni ileti" }))
+    await user.click(await screen.findByRole("button", { name: "Yeni mesaj" }))
     const dialog = await screen.findByRole("dialog")
-    await user.type(within(dialog).getByLabelText(/İletinin adı/), "Hafta sonu")
+    await user.type(within(dialog).getByLabelText(/Mesajın adı/), "Hafta sonu")
     await user.click(within(dialog).getByRole("radio", { name: /SMS/ }))
     await user.click(within(dialog).getByRole("button", { name: "Taslağı oluştur" }))
 
@@ -165,7 +165,7 @@ describe("BulkMessagesPage", () => {
 
     expect(screen.getByText(/Toplu e-posta ve SMS bu mağazada kapalı/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Özelliklerden aç" })).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: "Yeni ileti" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Yeni mesaj" })).toBeNull()
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
@@ -173,7 +173,7 @@ describe("BulkMessagesPage", () => {
     renderPage(clientWith({ role: "operations" }))
 
     expect(screen.getByText(/yalnız mağaza sahibi ve yöneticiler/)).toBeInTheDocument()
-    expect(screen.queryByRole("button", { name: "Yeni ileti" })).toBeNull()
+    expect(screen.queryByRole("button", { name: "Yeni mesaj" })).toBeNull()
     expect(fetchMock).not.toHaveBeenCalled()
   })
 })

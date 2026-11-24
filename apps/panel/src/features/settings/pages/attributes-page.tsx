@@ -9,6 +9,9 @@ import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { templatesQuery } from "@/features/attributes/api"
+import { ADDONS_FLAG } from "@/features/products/api/addons"
+import { useFeatureState } from "@/features/settings/api/features"
+import { AddonTemplatesSection } from "@/features/products/addon-templates/addon-templates-section"
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
@@ -34,9 +37,15 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
           >
             {template.name}
           </button>
-          {template.description ? (
+          {/* What it holds tells it apart better than any note */}
+          {template.definitions.length > 0 || template.description ? (
             <span className="max-w-full truncate text-xs text-muted-foreground">
-              {template.description}
+              {template.definitions.length > 0
+                ? [...template.definitions]
+                    .sort((a, b) => a.rank - b.rank)
+                    .map((definition) => definition.label)
+                    .join(", ")
+                : template.description}
             </span>
           ) : null}
         </div>
@@ -56,9 +65,10 @@ function useColumns(onOpen: (template: AttributeTemplate) => void): Column<Attri
 }
 
 /**
- * Settings > Product attributes (adr/0013): templates that say which
- * attributes a kind of product carries, one row each; a row opens its
- * template. Sector needs live here as data, never as code (CLAUDE.md).
+ * Settings > Product attributes (adr/0013): attribute groups (the API's
+ * templates) that say which attributes a kind of product carries, one row
+ * each with its attributes' names; a row opens its group. Add-on groups
+ * follow below. Sector needs live here as data, never as code (CLAUDE.md).
  */
 export function AttributesPage() {
   const { t } = useTranslation()
@@ -66,6 +76,7 @@ export function AttributesPage() {
   const walk = useRecordWalk(query.data, (template) => template.id)
   const columns = useColumns(walk.show)
   const [creating, setCreating] = useState(false)
+  const addonsOn = useFeatureState(ADDONS_FLAG) === true
   const add = (
     <Button
       onClick={() => {
@@ -101,17 +112,21 @@ export function AttributesPage() {
           />
         )}
       </section>
+      {/* adr/0052 Ek 2026-11-23: add-ons defined once, beside the attribute templates */}
+      <AddonTemplatesSection />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}
           steps={walk.steps}
           templateAt={(index) => query.data?.[index]}
           onClose={walk.close}
+          addonsOn={addonsOn}
         />
       ) : null}
       {creating ? (
         <TemplateDialog
           template={null}
+          addonsOn={addonsOn}
           onClose={() => {
             setCreating(false)
           }}

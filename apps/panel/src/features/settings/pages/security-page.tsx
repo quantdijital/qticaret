@@ -10,16 +10,19 @@ import { MyMfaCard } from "@/features/settings/components/my-mfa-card"
 import { MyProfileCard } from "@/features/settings/components/my-profile-card"
 import { MySignInCard } from "@/features/settings/components/my-sign-in-card"
 import { TeamMfaCard } from "@/features/settings/components/team-mfa-card"
+import { TeamSection } from "@/features/settings/components/team-section"
 
 /**
  * Settings > Security (F12.6, adr/0040; F15.6, adr/0044), in tabs (the
  * owner, 2026-10-31): one's own account (profile, sign-in address and
- * password, sessions, 2FA; the owner, 2026-11-06); whether the team must use it; when
+ * password, sessions, 2FA; the owner, 2026-11-06); the team, its members and
+ * invitations (the owner, 2026-11-23: Ekip is a tab here) and whether it must use 2FA; when
  * an order is held for review and who the shop turns away (owner and admin).
  */
 export function SecurityPage() {
   const { t } = useTranslation()
   const fraud = useCan("fraud")
+  const team = useCan("team")
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -40,7 +43,17 @@ export function SecurityPage() {
               </PageGrid>
             ),
           },
-          { key: "team", label: t("settings.security.tabs.team"), content: <TeamMfaCard /> },
+          {
+            key: "team",
+            label: t("settings.security.tabs.team"),
+            // The members and invitations for those who may see them (adr/0040), as Ekip was
+            content: (
+              <>
+                {team ? <TeamSection /> : null}
+                <TeamMfaCard />
+              </>
+            ),
+          },
           {
             key: "fraud",
             label: t("settings.security.tabs.fraud"),

@@ -22,6 +22,7 @@ import { storeGet } from "@/lib/store-api/server"
 import { categoryCard, customerPhotos, reviewPhotos, withCardFacts } from "./card-extras"
 import { brandLogo } from "./brands"
 import { childrenOf } from "./categories"
+import { collectionsOn } from "./collections-on"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
 
@@ -74,6 +75,10 @@ export async function railProducts({
         await listProducts({ limit, order: "-created_at", categoryIds: [source.category_id] })
       ).products
     case "collection":
+      // Collections off: the rail has nothing to show (its products are not the shop's choice)
+      if (!(await collectionsOn())) {
+        return []
+      }
       return (
         await listProducts({ limit, order: "-created_at", collectionIds: [source.collection_id] })
       ).products
@@ -120,6 +125,9 @@ export async function relatedProducts(
       return othersThan(products, product.id, limit)
     }
     case "collection": {
+      if (!(await collectionsOn())) {
+        return []
+      }
       const { products } = await listProducts({
         limit: limit + 1,
         order: "-created_at",

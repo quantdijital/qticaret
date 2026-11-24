@@ -58,8 +58,9 @@
     "groups": {
       "sales": "Satış",
       "catalog": "Katalog",
-      "growth": "Büyüme",
-      "storefront": "Vitrin"
+      "storefront": "Vitrin",
+      "content": "İçerik",
+      "marketing": "Pazarlama"
     },
     "categories": "Kategoriler",
     "inventory": "Stok",
@@ -71,9 +72,9 @@
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
-    "bulkMessages": "Toplu ileti",
+    "bulkMessages": "Toplu mesaj",
     "paymentLinks": "Ödeme bağlantıları",
-    "media": "Ortam kütüphanesi",
+    "media": "Medya kütüphanesi",
     "collections": "Koleksiyonlar",
     "looks": "Görünümler",
     "pages": "Sayfalar"
@@ -644,7 +645,17 @@
         "moving": "Adresler taşınıyor… %{{percent}}",
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
-        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > İşler'de."
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > Denetim kaydı > İşler'de.",
+        "failedNoJobs": "Adresler taşınamadı; kontrolü yeniden çalıştırın.",
+        "option": {
+          "prefixed": "Önekli",
+          "flat": "Öneksiz, kökte"
+        },
+        "category": {
+          "prefixed": "Önekli, üst kategorilerle",
+          "nested": "Öneksiz, üst kategorilerle",
+          "flat": "Öneksiz, yalnız kendi adı"
+        }
       },
       "searchConsole": {
         "title": "Search Console",
@@ -684,83 +695,158 @@
       "list": "Özellikler",
       "empty": "Şu an açıp kapatılabilecek bir özellik yok. Kapıda ödeme gibi özellikler eklendikçe burada görünecek.",
       "locked": "Paketinizle birlikte gelir; buradan değiştirilemez.",
+      "search": "Özellik ara",
+      "noMatch": "Aramanızla eşleşen özellik yok.",
+      "lockedBadge": "Paketinizde",
+      "requires": "Çalışması için “{{name}}” özelliğinin de açık olması gerekir.",
+      "groups": {
+        "catalog": {
+          "title": "Katalog ve ürün",
+          "description": "Ürün türleri, tarihli ürünler ve ürün sayfasının parçaları."
+        },
+        "customers": {
+          "title": "Müşteriler ve pazarlama",
+          "description": "Toptancılar ve izinli müşterilere toplu mesaj."
+        },
+        "seo": {
+          "title": "Arama motorları (SEO)",
+          "description": "Yayın denetimi ve arama motorlarına bildirim."
+        },
+        "sales": {
+          "title": "Satış ve ödeme",
+          "description": "Ödeme yolları, hediye kartı ve stoksuz satış."
+        },
+        "restricted": {
+          "title": "Yaş sınırlı ürünler",
+          "description": "Yaş sınırlı ürünlerin işaretlenmesi ve ödemede yaş beyanı."
+        },
+        "ai": {
+          "title": "Yapay zekâ",
+          "description": "Kendi servis anahtarınız ve müşteri metinleriyle çalışan görevler."
+        },
+        "other": {
+          "title": "Diğer",
+          "description": "Henüz bir gruba yerleşmemiş özellikler."
+        }
+      },
       "flags": {
         "ai": {
           "reviews": {
             "label": "Yorum ve sorularda yapay zekâ",
+            "summary": "Yorumları özetler, yorum ve sorulara yanıt taslağı hazırlar.",
             "description": "Ürün yorumları özetlenir; yorumlara ve sorulara yanıt taslağı hazırlanır. Müşterilerin yazdığı metin, yazar adı ve iletişim bilgisi ayıklanarak bağlı servise gider."
+          },
+          "own_keys": {
+            "label": "Kendi yapay zekâ anahtarınız",
+            "summary": "Yapay zekâ servislerine mağazanın kendi anahtarıyla bağlanılır.",
+            "description": "Yapay zekâ servislerine mağazanın kendi hesabının anahtarıyla bağlanılır; kullanım ücretini servis doğrudan mağazaya yansıtır. Bağlantılar Ayarlar > Yapay zekâ'da."
+          },
+          "storefront_search": {
+            "label": "Kendi cümlesiyle arama",
+            "summary": "Müşteri vitrinde aradığını kendi cümlesiyle yazabilir.",
+            "description": "Müşteri vitrinde aradığını cümleyle yazar (ör. \"500 liranın altında kamp bıçağı\"); cümle mağazanın kendi yapay zekâ anahtarıyla arama filtrelerine çevrilir. Müşterinin yazdığı metin bağlı servise gider."
           }
         },
         "catalog": {
           "non_physical": {
             "label": "Dijital ve hizmet ürünleri",
+            "summary": "Kargo gerektirmeyen ürünler: e-kitap, hediye kodu, kurs, hizmet.",
             "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
           },
           "restricted": {
             "label": "Kısıtlı ürünler",
+            "summary": "Ürün ve kategoriler yaş sınırlı olarak işaretlenebilir.",
             "description": "Ürün ve kategoriler yaş sınırlı (silah ve kesici alet, alkol, tütün, yetişkin içeriği) işaretlenebilir. İşaretli ürünler arama motorlarına yetişkinlere yönelik olarak bildirilir ve ürün feed'lerine girmez."
           },
           "addons": {
             "label": "Ürün ek seçenekleri",
+            "summary": "Ürünlere ücretli ya da ücretsiz ek seçenek eklenebilir.",
             "description": "Ürünler ücretli ya da ücretsiz ek seçenek sunabilir: müşterinin yazdığı bir metin ya da birkaç seçenekten biri. Ek seçeneğin ücreti sunucuda hesaplanır ve satır fiyatına eklenir; ayarları ürün sayfasındaki Ek seçenekler kartında."
           },
           "booking": {
             "label": "Tarihli ürünler",
+            "summary": "Tur, etkinlik, kurs gibi kalkış tarihli ve kontenjanlı hizmetler.",
             "description": "Kalkış tarihli hizmetler (tur, etkinlik, kurs, atölye) satılabilir: her kalkışın kendi kontenjanı olur, sepette yer süreli tutulur. Dijital ve hizmet ürünlerinin de açık olması gerekir."
+          },
+          "product_videos": {
+            "label": "Ürün videoları",
+            "summary": "Ürün sayfalarında yüklenen videolar ve YouTube bağlantıları.",
+            "description": "Ürün sayfalarında mağazanın yüklediği videolar ve YouTube bağlantıları gösterilir. Yüklenen videolar paketin depolama sınırından düşer."
+          },
+          "collections": {
+            "label": "Koleksiyonlar",
+            "summary": "Ürünleri bir tema altında toplayan, kendi sayfası olan listeler.",
+            "description": "Koleksiyonlar ürünleri bir tema altında toplar (yaz seçkisi, hediye fikirleri); her birinin kendi sayfası olur ve menülerde, vitrin bölümlerinde kullanılabilir. Kapatınca koleksiyon sayfaları ve bağlantıları vitrinden kalkar, koleksiyonlar silinmez; yeniden açınca her şey geri gelir."
           }
         },
         "marketing": {
           "campaigns": {
             "label": "Toplu e-posta ve SMS",
+            "summary": "İzinli müşterilere panelden toplu e-posta ve SMS gönderilir.",
             "description": "İzin vermiş müşterilere panelden toplu e-posta ve SMS kampanyası gönderilebilir."
           }
         },
         "seo": {
           "indexnow": {
             "label": "Değişen sayfaları IndexNow ile bildir",
+            "summary": "Değişen sayfalar Bing ve Yandex'e hemen bildirilir.",
             "description": "Ürün, kategori ve marka sayfası eklenince, değişince ya da kalkınca Bing, Yandex ve diğer IndexNow arama motorlarına haber verilir. Mağazanın ana alan adı gerekir; Google bu protokole katılmıyor."
           },
           "publish_gate": {
             "label": "SEO yayın kapısı",
+            "summary": "Kritik eksiği olan ya da puanı düşük ürün yayına alınmaz.",
             "description": "Kritik eksiği olan (fiyat ya da görsel yok) ya da SEO puanı 50'nin altındaki ürün yayına alınamaz. Kapalıyken danışman yalnızca öneri verir."
           }
         },
         "stock": {
           "preorder": {
             "label": "Stoksuz satış (ön sipariş)",
+            "summary": "Stoku biten varyant ön siparişle satılmaya devam eder.",
             "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
           }
         },
         "promotions": {
           "gift_cards": {
             "label": "Hediye kartı ve mağaza kredisi",
+            "summary": "Hediye kartı verilir; iade ve iyi niyet tutarı hesaba yazılır.",
             "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
           }
         },
         "payments": {
           "cash_on_delivery": {
             "label": "Kapıda ödeme",
+            "summary": "Müşteri ödemeyi teslimatta kuryeye yapar.",
             "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
           }
         },
         "compliance": {
           "age_verification": {
             "label": "Yaş doğrulama",
+            "summary": "Yaş sınırlı ürünlü sepette ödemeden önce yaş beyanı istenir.",
             "description": "Sepette yaş sınırlı ürün varsa müşteri ödemeden önce doğum tarihini girerek yaşını beyan eder; sınırın altındaysa ödeme alınmaz. Doğum tarihi saklanmaz. Sınır Ayarlar > Yasal metinler'de."
           }
         },
         "orders": {
           "payment_links": {
             "label": "Ödeme bağlantısıyla sipariş",
+            "summary": "Ekip siparişi hazırlar, müşteri bağlantıyla öder.",
             "description": "Ekip panelden sipariş hazırlar; müşteri vitrindeki ödeme bağlantısıyla öder."
           }
         },
         "customers": {
           "wholesale": {
             "label": "Toptancı müşteriler",
+            "summary": "Toptancılar kendi fiyatlarını KDV hariç görür ve sipariş verir.",
             "description": "Panelden toptancı açılır; toptancı giriş yaptığında ürünleri toptan seviyesinin ya da kendine özel fiyatlarla, KDV hariç görür ve sipariş verir. Herkese açık fiyatlar değişmez. Kapatılırsa toptancılar perakende fiyat görür; kayıtları ve fiyatları silinmez."
           }
         }
+      },
+      "collectionsOff": {
+        "title": "Koleksiyonlar kapatılsın mı?",
+        "description": "Koleksiyon sayfaları, menülerdeki ve vitrin bölümlerindeki koleksiyon bağlantıları kalkar. Koleksiyonlar silinmez; yeniden açınca hepsi geri gelir.",
+        "confirm": "Koleksiyonları kapat",
+        "live_one": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir.",
+        "live_other": "{{count}} koleksiyon sayfası yayında. Adresleri 404 olur; arama motorlarındaki sıralamalarını kaybedebilir."
       }
     },
     "jobs": {
@@ -826,9 +912,13 @@
       },
       "empty": "Bu türde kayıt yok.",
       "export": "CSV olarak dışa aktar",
-      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sayfasından indirebilirsiniz.",
-      "openJobs": "İşler sayfasına git",
-      "retention": "Dışa aktarılan dosyalar İşler sayfasında bir hafta saklanır.",
+      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sekmesinden indirebilirsiniz.",
+      "openJobs": "İşler sekmesine git",
+      "retention": "Dışa aktarılan dosyalar İşler sekmesinde bir hafta saklanır.",
+      "noAccess": "Denetim kaydını ve işleri yalnız mağaza sahibi ve yöneticiler görebilir.",
+      "tabs": {
+        "log": "Denetim kaydı"
+      },
       "exportFiltered": "Süzülenleri CSV olarak dışa aktar",
       "emptyFiltered": "Bu süzgeçlere uyan kayıt yok.",
       "filters": {
@@ -880,7 +970,7 @@
         "accounting_package": "Muhasebe paketi",
         "api_access": "API erişimi",
         "async_job": "Arka plan işi",
-        "attribute_template": "Özellik şablonu",
+        "attribute_template": "Özellik grubu",
         "audit_log": "Denetim kaydı",
         "auth_identity": "Giriş kaydı",
         "brand": "Marka",
@@ -1662,7 +1752,7 @@
           },
           "marketing": {
             "announcement": "Kampanya duyurusu",
-            "campaign": "Toplu ileti"
+            "campaign": "Toplu mesaj"
           },
           "staff": {
             "new_order": "Ekip: yeni sipariş",
@@ -1965,7 +2055,7 @@
       "store": "Mağaza adı ve logosu, iletişim bilgileri ve çalışma saatleri, yasal kimlik, sosyal hesaplar",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
       "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
-      "attributes": "Ürünlerde kullanılan özellik şablonları",
+      "attributes": "Özellik grupları ve ek seçenek grupları",
       "payments": "Kartla ödeme, taksit, havale ve kapıda ödeme",
       "shipping": "Kargo firmaları, seçenekler ve ücretler, iade, depolar ve stok",
       "locations": "Stoğun tutulduğu depolar ve adresleri",
@@ -1974,13 +2064,11 @@
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
       "ai": "Metin taslağı yazan servisler, anahtarları ve bu ayki kullanım",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
-      "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
-      "audit": "Panelde kim neyi ne zaman değiştirdi",
+      "audit": "Panelde kim neyi ne zaman değiştirdi, dışa aktarma gibi uzun süren işler ve dosyaları",
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
-      "team": "Panele kimlerin hangi rolle girdiği ve davetler",
-      "security": "İki adımlı doğrulama, ekip için zorunluluk, sahtekârlık önleme",
+      "security": "Hesabınız ve iki adımlı doğrulama, ekip üyeleri ve davetler, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
       "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
@@ -2138,19 +2226,19 @@
         "feeds": "Ürün akışları",
         "conversions": "Dönüşüm ölçümü",
         "carts": "Terk edilen sepet",
-        "bulk": "Toplu ileti"
+        "bulk": "Toplu mesaj"
       },
       "bulk": {
-        "title": "Toplu ileti kuralları",
-        "description": "Büyüme > Toplu ileti'den gönderilen e-posta ve SMS kampanyalarının sınırları.",
-        "cap": "Bir kişiye 24 saatte en çok bir toplu ileti",
-        "capHint": "Son 24 saatte başka bir toplu ileti almış kişi yeni iletinin kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
+        "title": "Toplu mesaj kuralları",
+        "description": "Pazarlama > Toplu mesaj'dan gönderilen e-posta ve SMS kampanyalarının sınırları.",
+        "cap": "Bir kişiye 24 saatte en çok bir toplu mesaj",
+        "capHint": "Son 24 saatte başka bir toplu mesaj almış kişi yeni mesajın kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
         "hours": "Toplu SMS saatleri",
         "hoursHint": "Toplu SMS'ler yalnız bu saatler arasında gider (Türkiye saati). Saat dışında kalan gönderim bekler, saat gelince kendiliğinden sürer.",
         "start": "Başlangıç",
         "end": "Bitiş",
         "hoursInvalid": "Bitiş saati başlangıç saatinden sonra olmalı.",
-        "saved": "Toplu ileti kuralları kaydedildi."
+        "saved": "Toplu mesaj kuralları kaydedildi."
       }
     },
     "accounting": {
@@ -2167,7 +2255,8 @@
         "privacy": "Bireysel müşterilerin adı pakette yer almaz; kurumsal müşterilerin unvanı ve VKN'si yer alır. Her paket denetim kaydına düşer.",
         "month": "Ay",
         "download": "Paketi indir",
-        "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
+        "later": "Paket hazırlanıyor; bitince Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+        "laterNoJobs": "Paket arka planda hazırlanıyor.",
         "failed": "Paket hazırlanamadı."
       }
     },
@@ -2941,7 +3030,7 @@
             "attributes": "Özellikler",
             "notMoved": "Taşınmayanlar"
           },
-          "attributesNote": "Varyasyonda kullanılmayan özellikler (ör. çelik türü) taşınmaz; özellik şablonu kurulunca yazılabilir.",
+          "attributesNote": "Varyasyonda kullanılmayan özellikler (ör. çelik türü) taşınmaz; özellik grubu kurulunca yazılabilir.",
           "attributesInFile": "Özellik başına ürün ve değer sayısı raporun Notlar sayfasında.",
           "noAttributes": "Taşınmayan özellik yok.",
           "columns": {
@@ -2994,6 +3083,8 @@
         "notReady": "Kesime hazır değil",
         "noTraffic": "Search Console verisi yok: en çok trafik alan sayfaları yükleyin.",
         "unanswered": "En çok trafik alan adreslerden {{count}} tanesi henüz yanıt vermiyor.",
+        "categoryStyle": "Eski sitenin {{total}} kategori adresinden {{kept}} tanesi “{{style}}” kategori adres biçimiyle aynen korunur (şu anki biçimde {{now}}). Biçimi değiştirirseniz diğer kategori adresleri 301 ile yenilerine gider.",
+        "categoryStyleLink": "Adres biçimini aç",
         "counts": {
           "total": "Adres",
           "matched": "Eşleşen",
@@ -3206,7 +3297,7 @@
       "optionTitle": "Seçeneğe bir ad verin.",
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
-      "attributeRequired": "Bu özellik şablonda zorunlu; doldurun ya da şablonu kaldırın.",
+      "attributeRequired": "Bu özellik zorunlu; doldurun ya da özellik grubunu kaldırın.",
       "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
       "optionDuplicate": "Bu adla bir seçenek zaten var.",
       "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı.",
@@ -3493,9 +3584,9 @@
       "aiCategories": "Kategori öner"
     },
     "sections": {
-      "noTemplate": "Şablon seçilmedi",
-      "template": "{{name}} şablonu · {{filled}}/{{total}} alan dolu",
-      "templateOnly": "{{name}} şablonu",
+      "noTemplate": "Özellik grubu seçilmedi",
+      "template": "{{name}} · {{filled}}/{{total}} özellik dolu",
+      "templateOnly": "{{name}}",
       "requiredEmpty_one": "{{count}} zorunlu alan boş",
       "requiredEmpty_other": "{{count}} zorunlu alan boş",
       "noCategory": "Kategori seçilmedi",
@@ -3915,7 +4006,8 @@
       "apply_one": "{{formatted}} ürüne uygula",
       "apply_other": "{{formatted}} ürüne uygula",
       "working": "Ürünler güncelleniyor…",
-      "background": "Toplu düzenleme arka planda sürüyor; Ayarlar › İşler'den izleyebilirsiniz.",
+      "background": "Toplu düzenleme arka planda sürüyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "backgroundNoJobs": "Toplu düzenleme arka planda sürüyor.",
       "jobFailed": "Toplu düzenleme tamamlanamadı.",
       "changed_one": "{{formatted}} ürün güncellendi.",
       "changed_other": "{{formatted}} ürün güncellendi.",
@@ -3932,7 +4024,8 @@
         "category": "Kategoriyi düzenle",
         "seo_template": "SEO şablonunu uygula",
         "alt_text": "Eksik alt metinleri doldur",
-        "cost": "Maliyeti değiştir"
+        "cost": "Maliyeti değiştir",
+        "addon_template": "Ek seçenek grubu ekle / kaldır"
       },
       "price": {
         "mode": "Fiyat değişikliği",
@@ -4002,7 +4095,8 @@
         "adjust": "Sıfırdan büyük bir tam sayı girin.",
         "category": "Bir kategori seçin.",
         "seoFields": "En az bir alan seçin.",
-        "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin."
+        "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin.",
+        "addonTemplate": "Bir ek seçenek grubu seçin."
       },
       "cost": {
         "mode": "Maliyet değişikliği",
@@ -4017,6 +4111,19 @@
           "percent": "Yalnızca maliyeti girilmiş varyantlar değişir."
         },
         "clearHint": "Seçilen ürünlerin varyantlarındaki maliyet silinir; stok değerine katılmazlar."
+      },
+      "addonTemplate": {
+        "mode": "İşlem",
+        "modes": {
+          "add": "Ata",
+          "remove": "Kaldır"
+        },
+        "label": "Ek seçenek grubu",
+        "hints": {
+          "add": "Grup seçili ürünlere eklenir. 5 ek seçenek sınırını aşan ürünler atlanır.",
+          "remove": "Grup seçili ürünlerden kalkar; özellik grubundan gelenler kalır."
+        },
+        "none": "Henüz ek seçenek grubu yok."
       }
     },
     "priceHistory": {
@@ -4180,6 +4287,123 @@
         "not_a_question": "Soru, soru işaretiyle bitmeli.",
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
       }
+    },
+    "addonTemplates": {
+      "title": "Ek seçenek grupları",
+      "subtitle": "Bir kez kurun, birçok ürüne ekleyin.",
+      "create": "Ek seçenek grubu ekle",
+      "new": "Yeni ek seçenek grubu",
+      "dialogHint": "Bu gruptaki ek seçenekler bağlı ürünlerde görünür.",
+      "empty": "Henüz ek seçenek grubu yok.",
+      "columns": {
+        "name": "Ek seçenek grubu",
+        "used": "Kullanım"
+      },
+      "productCount_one": "{{count}} ürün",
+      "productCount_other": "{{count}} ürün",
+      "carriedCount_one": "{{count}} özellik grubu",
+      "carriedCount_other": "{{count}} özellik grubu",
+      "name": "Grup adı",
+      "nameHint": "Yalnız panelde görünür; en çok {{max}} karakter.",
+      "addons": "Ek seçenekler",
+      "addonsHint": "Ürünün en çok {{max}} ek seçeneğine dahildir.",
+      "noAddons": "Henüz ek seçenek yok.",
+      "addonNote": "Değişiklik kaydedince geçerli olur.",
+      "delete": "Grubu sil",
+      "deleteTitle": "\"{{name}}\" silinsin mi?",
+      "deleteDescription_one": "{{count}} üründen ve özellik gruplarından kalkar. Sepetinde bu ek seçenekler olan müşteriler ödemeden önce seçimini değiştirir.",
+      "deleteDescription_other": "{{count}} üründen ve özellik gruplarından kalkar. Sepetinde bu ek seçenekler olan müşteriler ödemeden önce seçimini değiştirir.",
+      "deleted": "Grup silindi.",
+      "saved": "Grup kaydedildi.",
+      "errors": {
+        "name": "Grup adı 1-60 karakter olmalı.",
+        "tooMany": "Bu değişiklikle bazı ürünlerde 5 ek seçenek sınırı aşılır; önce o ürünlerden ek seçenek kaldırın.",
+        "idUnknown": "Grupta olmayan bir ek seçenek gönderildi. Sayfayı yenileyip yeniden deneyin."
+      },
+      "add": "Grup ekle",
+      "pickTitle": "Ek seçenek grubu ekle",
+      "pickDescription": "Grubun ek seçenekleri bu ürüne eklenir; grup değişince bu ürün de değişir.",
+      "link": "Ekle",
+      "noneToPick": "Eklenecek grup yok.",
+      "openSettings": "Ek seçenek grubu oluşturun",
+      "doesNotFit_one": "{{count}} ek seçenek: bu üründe 5 sınırına sığmaz.",
+      "doesNotFit_other": "{{count}} ek seçenek: bu üründe 5 sınırına sığmaz.",
+      "viaProduct": "Grup",
+      "viaAttribute": "Özellik grubundan",
+      "editInSettings": "Grubu düzenle",
+      "unlink": "Kaldır",
+      "hidden_one": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir grubu ya da ürünün ek seçeneğini kaldırın.",
+      "hidden_other": "{{count}} ek seçenek 5 sınırını aştığı için vitrinde görünmüyor; bir grubu ya da ürünün ek seçeneğini kaldırın.",
+      "usage": "Kullanım",
+      "usageHint": "Grubu değiştirince bu ürünler hemen değişir; verilmiş siparişler değişmez.",
+      "linkedProducts": "Ürünler",
+      "carriedBy": "Özellik grupları",
+      "carriedByNone": "Yok",
+      "createHint": "Adını verin; ek seçenekleri sonraki sayfada ekleyin.",
+      "carryHidden_one": "Bu özellik grubuyla üründe 5'ten fazla ek seçenek olur; {{count}} tanesi vitrinde görünmez.",
+      "carryHidden_other": "Bu özellik grubuyla üründe 5'ten fazla ek seçenek olur; {{count}} tanesi vitrinde görünmez.",
+      "carryRequiredHidden_one": "Bu özellik grubuyla üründe 5'ten fazla ek seçenek olur; {{count}} tanesi vitrinde görünmez, aralarında zorunlu biri de var.",
+      "carryRequiredHidden_other": "Bu özellik grubuyla üründe 5'ten fazla ek seçenek olur; {{count}} tanesi vitrinde görünmez, aralarında zorunlu biri de var.",
+      "apply": {
+        "action": "Ürünlere uygula",
+        "title": "Ürünlere uygula",
+        "description": "\"{{name}}\" grubunu ürünlere ekleyin ya da ürünlerden kaldırın.",
+        "mode": "İşlem",
+        "modes": {
+          "add": "Ekle",
+          "remove": "Kaldır"
+        },
+        "modeHints": {
+          "add": "Grup seçilen ürünlere eklenir. 5 ek seçenek sınırını aşan ürünler atlanır.",
+          "remove": "Grup seçilen ürünlerden kalkar; özellik grubundan gelenler kalır."
+        },
+        "target": "Ürünler",
+        "targets": {
+          "all": "Tüm ürünler",
+          "category": "Kategori",
+          "products": "Seçili ürünler"
+        },
+        "allHint": "Hediye kartları hariç bütün ürünler.",
+        "category": "Kategori",
+        "categoryHint": "Alt kategorilerdeki ürünler de dahildir.",
+        "categoryPlaceholder": "Kategori arayın",
+        "noCategories": "Kategori bulunamadı.",
+        "products": "Ürünler",
+        "productPlaceholder": "Ürün arayıp ekleyin",
+        "noProducts": "Ürün bulunamadı.",
+        "removeProduct": "{{name}}: listeden çıkar",
+        "submit": {
+          "add": "Ekle",
+          "remove": "Kaldır"
+        },
+        "errors": {
+          "category": "Bir kategori seçin.",
+          "products": "En az bir ürün seçin."
+        }
+      }
+    },
+    "addonScope": {
+      "title": "Kapsam",
+      "hints": {
+        "product": "Ek seçenek yalnız bu ürüne kaydedilir.",
+        "template": "Ek seçenek yeni bir grup olarak kaydedilir ve seçilen ürünlere eklenir. Grubu değiştirince bütün bu ürünler değişir."
+      },
+      "modes": {
+        "product": "Yalnız bu ürün",
+        "template": "Grup olarak kaydet ve uygula"
+      },
+      "target": "Uygulanacak ürünler",
+      "targetHint": "Kategori, alt kategorilerdeki ürünleri de kapsar. Hediye kartı ürünlerine uygulanmaz.",
+      "targets": {
+        "all": "Tüm ürünler",
+        "category": "Bu ürünün kategorisindeki ürünler",
+        "categoryOf": "Bu ürünün kategorisindeki ürünler ({{name}})",
+        "product": "Bu ürün"
+      },
+      "nameHint": "Boş bırakırsanız ek seçeneğin adı kullanılır. Yalnız panelde görünür; en çok {{max}} karakter.",
+      "note": "Kaydedince grup oluşturulur ve seçilen ürünlere eklenir.",
+      "linked": "Grup kaydedildi ve bu ürüne eklendi.",
+      "notApplied": "Grup kaydedildi ama ürünlere uygulanamadı; grubun sayfasından \"Ürünlere uygula\" ile yeniden deneyin."
     }
   },
   "orders": {
@@ -5016,7 +5240,8 @@
       "button": "Dışa aktar",
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Sipariş dosyası hazırlanamadı."
     },
     "addons": {
@@ -5872,7 +6097,8 @@
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
-      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Rapor dosyası hazırlanamadı."
     },
     "daily": {
@@ -6449,7 +6675,8 @@
       "title": "Site haritası",
       "hint": "Arama motorları sayfalarınızı bu dosyalardan bulur; değişikliklerden birkaç dakika sonra kendiliğinden yenilenir.",
       "refresh": "Şimdi yenile",
-      "queued": "Site haritası yenileniyor; Ayarlar > İşler'den izleyebilirsiniz.",
+      "queued": "Site haritası yenileniyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "queuedNoJobs": "Site haritası yenileniyor.",
       "hostMissing": "Ana alan adı girilmeden site haritası oluşmaz; adresler tam olmalı.",
       "noIndexing": "Bu ortam arama motorlarına kapalı: robots.txt tüm tarayıcıları engelliyor, sayfalar noindex.",
       "generated": "{{when}} oluşturuldu",
@@ -6974,51 +7201,50 @@
   },
   "attributes": {
     "title": "Ürün özellikleri",
-    "subtitle": "Her ürün türü için hangi özelliklerin doldurulacağını belirleyin; her ürün bir şablon seçer.",
-    "createTemplate": "Şablon oluştur",
-    "newTemplate": "Yeni özellik şablonu",
-    "templateHint": "Bu şablonu seçen ürünlerin dolduracağı özellikler.",
-    "empty": "Henüz şablon yok. Ürünleriniz için ilk şablonu oluşturun; örneğin bıçaklar için çelik türü ve ağız uzunluğu.",
+    "subtitle": "Ürünleriniz için özellik grupları kurun, ürün sayfasında doldurun.",
+    "createTemplate": "Özellik grubu ekle",
+    "newTemplate": "Yeni özellik grubu",
+    "empty": "Henüz özellik grubu yok.",
     "count_one": "{{count}} özellik",
     "count_other": "{{count}} özellik",
-    "templateName": "Şablon adı",
+    "templateName": "Grup adı",
     "handle": "Kısa ad",
     "handleHint": "Addan oluşur; kaydedince değişmez.",
-    "description": "Açıklama",
-    "noDefinitions": "Bu şablonda henüz özellik yok.",
+    "description": "Not",
+    "noDefinitions": "Henüz özellik yok.",
     "add": "Özellik ekle",
     "untitled": "Adsız özellik",
     "label": "Özellik adı",
     "type": "Tür",
     "types": {
-      "text": "Metin",
+      "text": "Yazı",
       "number": "Sayı",
       "boolean": "Evet / hayır",
-      "select": "Tek seçim",
-      "multi_select": "Çoklu seçim"
+      "select": "Listeden bir tane",
+      "multi_select": "Listeden birkaç tane"
     },
     "unit": "Birim",
-    "unitHint": "Örn. cm, g, HRC",
-    "options": "Seçenekler",
+    "unitHint": "Örn. cm, g",
+    "options": "Değerler",
     "optionsHint": "Yazıp Enter'a basın.",
-    "optionsPlaceholder": "Örn. Paslanmaz çelik, Karbon çelik",
-    "removeOption": "{{option}} seçeneğini kaldır",
+    "optionsPlaceholder": "Örn. Paslanmaz, Karbon",
+    "removeOption": "{{option}} değerini kaldır",
     "flags": {
       "is_public": "Vitrinde göster",
       "is_required": "Zorunlu",
-      "is_filterable": "Mağazada filtre olsun",
-      "is_seo_highlight": "Arama başlığında öne çıkar"
+      "is_filterable": "Filtrede göster",
+      "is_seo_highlight": "Google başlığında kullan"
     },
-    "scope": "Nerede tutulur",
-    "scopeHint": "Beden, renk gibi seçime göre değişenler ürün seçeneği olur.",
+    "scope": "Kullanım",
+    "scopeHint": "Beden, renk gibi müşterinin seçtikleri ürün seçeneği olur.",
     "scopes": {
-      "product": "Ürünün kendisinde",
-      "variant": "Varyantta (ürün seçeneği)"
+      "product": "Ürün bilgisi",
+      "variant": "Ürün seçeneği (beden, renk)"
     },
     "optionTitle": "Seçenek adı",
-    "optionTitleHint": "Ürün seçeneğinin adı, örn. Beden.",
-    "variesBy": "Google'a göre karşılığı",
-    "variesByHint": "Google'ın varyantları gruplaması için.",
+    "optionTitleHint": "Örn. Beden",
+    "variesBy": "Google karşılığı",
+    "variesByHint": "Google'ın seçenekleri gruplaması için.",
     "variesByNone": "Yok",
     "variesByOptions": {
       "color": "Renk",
@@ -7031,43 +7257,41 @@
     "moveUp": "Yukarı taşı",
     "moveDown": "Aşağı taşı",
     "remove": "Özelliği kaldır",
-    "nameRequired": "Şablona bir ad verin.",
-    "saved": "Şablon kaydedildi.",
-    "removeValuesTitle": "Kaldırılan özelliklerin değerleri silinsin mi?",
-    "removeValuesDescription": "{{names}} özelliği ürünlerde değer taşıyor olabilir. Kaydederseniz bu değerler silinir.",
+    "nameRequired": "Gruba bir ad verin.",
+    "saved": "Özellik grubu kaydedildi.",
+    "removeValuesTitle": "Özellikler kaldırılsın mı?",
+    "removeValuesDescription": "{{names}}: ürünlere girilmiş değerleri de silinir.",
     "removeValuesConfirm": "Kaldır ve kaydet",
-    "deleteTemplate": "Şablonu sil",
+    "deleteTemplate": "Grubu sil",
     "deleteTitle": "{{name}} silinsin mi?",
-    "deleteDescription": "Yalnızca hiçbir ürünün kullanmadığı şablonlar silinebilir.",
-    "deleted": "Şablon silindi.",
+    "deleteDescription": "Yalnız hiçbir ürünün kullanmadığı grup silinebilir.",
+    "deleted": "Özellik grubu silindi.",
     "productCard": "Özellikler",
-    "productHint": "Ürün sayfasında, filtrelerde ve arama sonuçlarında kullanılır.",
-    "template": "Özellik şablonu",
-    "templatePickHint": "Şablon, bu üründe hangi özelliklerin doldurulacağını belirler.",
-    "noTemplate": "Şablon yok",
-    "noTemplates": "Henüz özellik şablonu yok.",
-    "openSettings": "Ayarlar > Ürün özellikleri'nden oluşturun.",
+    "template": "Özellik grubu",
+    "noTemplate": "Seçilmedi",
+    "noTemplates": "Henüz özellik grubu yok.",
+    "openSettings": "Özellik grubu oluşturun",
     "noValue": "Seçilmedi",
     "productSaved": "Özellikler kaydedildi.",
-    "changeTemplateTitle": "Şablon değiştirilsin mi?",
-    "changeTemplateDescription": "Ürünün mevcut özellik değerleri kaydettiğinizde silinecek.",
+    "changeTemplateTitle": "Özellik grubu değişsin mi?",
+    "changeTemplateDescription": "Bu ürüne girilmiş özellik değerleri silinir.",
     "changeTemplateConfirm": "Değiştir",
     "groups": {
-      "hint": "Ürün sayfasındaki özellik tablosunu başlıklara ayırır. İsteğe bağlı; grup yoksa tek liste görünür.",
-      "newName": "Yeni grup adı",
+      "hint": "Bölüm yok; özellikler tek liste görünür.",
+      "newName": "Yeni bölüm adı",
       "newPlaceholder": "Örn. Ölçüler",
-      "add": "Grup ekle",
-      "item": "{{number}}. grup",
-      "nameOf": "{{number}}. grubun adı",
-      "nameRequired": "Gruba bir ad verin.",
-      "full": "En çok {{max}} grup eklenebilir.",
-      "field": "Grup",
-      "fieldHint": "Özellik tablosunda bu grubun altında görünür.",
-      "none": "Grup yok",
-      "unnamed": "Adsız grup"
+      "add": "Bölüm ekle",
+      "item": "{{number}}. bölüm",
+      "nameOf": "{{number}}. bölümün adı",
+      "nameRequired": "Bölüme bir ad verin.",
+      "full": "En çok {{max}} bölüm eklenebilir.",
+      "field": "Bölüm",
+      "fieldHint": "Ürün sayfasında bu başlığın altında görünür.",
+      "none": "Bölüm yok",
+      "unnamed": "Adsız bölüm"
     },
     "aliases": "Başka adları",
-    "aliasesHint": "Açıklamalarda bu özellik için geçen başka adlar; örn. Menşei için Üretim yeri.",
+    "aliasesHint": "Açıklamalarda geçen başka adı; örn. Menşei için Üretim yeri.",
     "aliasesPlaceholder": "Ad yazıp Enter'a basın",
     "removeAlias": "“{{name}}” adını kaldır",
     "ai": {
@@ -7086,36 +7310,36 @@
       "no": "Hayır"
     },
     "facts": {
-      "action": "Açıklamadaki özellikleri aktar",
+      "action": "Açıklamadan aktar",
       "title": "Açıklamadaki özellikleri aktar",
-      "description_one": "Ürün açıklamasındaki tablo ve listelerden okunan özellikler şablonun alanlarına yazılır. Açıklama değişmez.",
-      "description_other": "Seçili {{formatted}} ürünün açıklamasındaki tablo ve listelerden okunan özellikler şablonlarının alanlarına yazılır. Açıklamalar değişmez.",
-      "empty": "Açıklamada aktarılacak özellik bulunamadı. Tablolar, tanım listeleri ve “Teknik Özellikler” gibi bir başlığın altındaki “Ad: değer” satırları okunur.",
+      "description_one": "Açıklamadaki tablo ve listeler özelliklere yazılır. Açıklama değişmez.",
+      "description_other": "Seçili {{formatted}} ürünün açıklamasındaki tablo ve listeler özelliklere yazılır. Açıklamalar değişmez.",
+      "empty": "Açıklamada aktarılacak özellik bulunamadı.",
       "found_one": "{{formatted}} üründe {{rows}} satır bulundu; {{values}} değer yazılacak.",
       "found_other": "{{formatted}} üründe {{rows}} satır bulundu; {{values}} değer yazılacak.",
       "foundLeft": "{{left}} satır yazılmayacak; nedenleri ürünlerin altında.",
-      "templateFor_one": "Şablonu olmayan {{formatted}} ürün için şablon",
-      "templateFor_other": "Şablonu olmayan {{formatted}} ürün için şablon",
-      "templateForHint": "Bu ürünlere seçilen şablon verilir ve özellikleri ona yazılır.",
-      "noTemplateChoice": "Şablon verme (bu ürünler atlanır)",
+      "templateFor_one": "Özellik grubu olmayan {{formatted}} ürün için grup",
+      "templateFor_other": "Özellik grubu olmayan {{formatted}} ürün için grup",
+      "templateForHint": "Bu ürünlere seçilen grup verilir.",
+      "noTemplateChoice": "Grup verme (bu ürünler atlanır)",
       "overwrite": "Dolu alanların üzerine yaz",
-      "overwriteHint_one": "{{formatted}} alanda üründe başka bir değer var; işaretlemezseniz ürünün değeri kalır.",
-      "overwriteHint_other": "{{formatted}} alanda üründe başka bir değer var; işaretlemezseniz ürünlerin değeri kalır.",
-      "suggestionsTitle": "Şablonda alanı olmayanlar",
-      "suggestionsHint": "Alan olarak ekleyin ya da var olan bir alana bağlayın; bağlanan ad o alanın başka adı olarak kaydedilir. İşaretlenmeyenler aktarılmaz.",
+      "overwriteHint_one": "{{formatted}} özellik üründe başka değer taşıyor; işaretlemezseniz ürünün değeri kalır.",
+      "overwriteHint_other": "{{formatted}} özellik üründe başka değer taşıyor; işaretlemezseniz ürünlerin değeri kalır.",
+      "suggestionsTitle": "Grupta olmayan özellikler",
+      "suggestionsHint": "Yeni özellik olarak ekleyin ya da var olana bağlayın. İşaretlenmeyenler aktarılmaz.",
       "suggestionLine_one": "{{formatted}} ürün · {{values}}",
       "suggestionLine_other": "{{formatted}} ürün · {{values}}",
-      "addField": "Alan olarak ekle",
-      "fieldType": "Alanın türü",
-      "fieldGroup": "Alanın bölümü",
+      "addField": "Özellik olarak ekle",
+      "fieldType": "Türü",
+      "fieldGroup": "Bölümü",
       "noGroup": "Bölümsüz",
-      "aliasOf": "“{{label}}” için var olan alan",
-      "noAlias": "Var olan alana bağlama",
-      "aliasTo": "{{field}} alanına bağla",
-      "templateName": "{{name}} şablonu",
+      "aliasOf": "“{{label}}” için var olan özellik",
+      "noAlias": "Var olana bağlama",
+      "aliasTo": "{{field}} özelliğine bağla",
+      "templateName": "{{name}} grubu",
       "productsTitle": "Ürünler",
       "productLine": "{{rows}} satırdan {{ready}} yazılacak",
-      "noTemplateBadge": "Şablonu yok",
+      "noTemplateBadge": "Grubu yok",
       "moreProducts_one": "{{formatted}} ürün daha; hepsi aktarılır.",
       "moreProducts_other": "{{formatted}} ürün daha; hepsi aktarılır.",
       "withoutFacts_one": "{{formatted}} ürünün açıklamasında özellik bulunamadı.",
@@ -7128,14 +7352,14 @@
         "overwrite": "Üzerine yazılacak",
         "unparsed": "Okunamadı",
         "conflict": "Çelişiyor",
-        "ambiguous": "Birden çok alan",
-        "unmatched": "Alanı yok"
+        "ambiguous": "Birden çok özellik",
+        "unmatched": "Grupta yok"
       },
       "reasons": {
         "number": "sayı okunamadı",
         "range": "iki sayılı aralık",
-        "unit": "birimi alanın birimine çevrilemiyor",
-        "option": "alanın seçeneklerinde yok",
+        "unit": "birimi çevrilemiyor",
+        "option": "değerlerde yok",
         "boolean": "evet ya da hayır değil",
         "text": "metin çok uzun"
       },
@@ -7143,39 +7367,40 @@
       "no": "Hayır",
       "apply": "Aktar",
       "working": "Özellikler aktarılıyor…",
-      "background": "Aktarma arka planda sürüyor; Ayarlar › İşler'den izleyebilirsiniz.",
+      "background": "Aktarma arka planda sürüyor; Ayarlar > Denetim kaydı > İşler'den izleyebilirsiniz.",
+      "backgroundNoJobs": "Aktarma arka planda sürüyor.",
       "jobFailed": "Aktarma tamamlanamadı.",
       "written_one": "{{formatted}} ürüne {{values}} değer yazıldı.",
       "written_other": "{{formatted}} ürüne {{values}} değer yazıldı.",
-      "templateChanged": "Şablona {{fields}} alan ve {{aliases}} başka ad eklendi.",
+      "templateChanged": "Gruba {{fields}} özellik ve {{aliases}} başka ad eklendi.",
       "unchanged_one": "{{formatted}} üründe değişiklik olmadı.",
       "unchanged_other": "{{formatted}} üründe değişiklik olmadı.",
       "left_one": "{{formatted}} ürün atlandı ya da yazılamadı; nedenleri raporda.",
       "left_other": "{{formatted}} ürün atlandı ya da yazılamadı; nedenleri raporda.",
       "report": "Raporu indir"
     },
-    "previousTemplate": "Önceki şablon",
-    "nextTemplate": "Sonraki şablon",
+    "previousTemplate": "Önceki grup",
+    "nextTemplate": "Sonraki grup",
     "columns": {
-      "name": "Şablon",
+      "name": "Özellik grubu",
       "definitions": "Özellikler"
     },
     "tabs": {
       "definitions_one": "Özellikler ({{count}})",
       "definitions_other": "Özellikler ({{count}})",
-      "groups_one": "Gruplar ({{count}})",
-      "groups_other": "Gruplar ({{count}})",
-      "info": "Şablon bilgisi"
+      "groups_one": "Bölümler ({{count}})",
+      "groups_other": "Bölümler ({{count}})",
+      "addons_one": "Ek seçenekler ({{count}})",
+      "addons_other": "Ek seçenekler ({{count}})"
     },
     "tabError": "Bu sekmede düzeltilecek bir alan var",
     "descriptionHint": "Yalnızca panelde görünür.",
-    "definitionsHint": "Ürün sayfasında bu sırayla görünür. Tutup sürükleyerek sıralayın.",
     "typeFixed": "Kaydedilen özelliğin türü değişmez.",
     "textUnitHint": "Değerin yanında yazılır, örn. HRC.",
     "badges": {
       "required": "Zorunlu",
       "filter": "Filtre",
-      "variant": "Varyant",
+      "variant": "Seçenek",
       "hidden": "Vitrinde gizli"
     },
     "advanced": {
@@ -7183,9 +7408,26 @@
       "changed_one": "{{count}} ayar açık",
       "changed_other": "{{count}} ayar açık"
     },
-    "seoHint": "Değeri, ürünün Google'da görünen başlığında kullanılabilir.",
     "drag": "Sürükleyerek taşı",
-    "actions": "{{name}}: işlemler"
+    "actions": "{{name}}: işlemler",
+    "addonTemplates": {
+      "hint": "Bu gruptaki bütün ürünlere eklenir.",
+      "none": "Henüz ek seçenek grubu yok."
+    },
+    "templateNamePlaceholder": "Örn. Bıçak",
+    "more": "Diğer ayarlar",
+    "labelPlaceholder": "Örn. Çelik türü",
+    "typeExamples": {
+      "text": "Örn. Menşei: Türkiye",
+      "number": "Örn. Ağırlık: 120 g",
+      "boolean": "Örn. Bulaşık makinesinde yıkanır",
+      "select": "Örn. Çelik: Paslanmaz",
+      "multi_select": "Örn. Kullanım: Et, Sebze"
+    },
+    "newValue": "Yeni değer ekle",
+    "newValueName": "{{label}} için yeni değer",
+    "addValue": "Ekle",
+    "valueAdded": "{{value}} eklendi."
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
@@ -7283,6 +7525,10 @@
       "noMatch": "Aramanızla eşleşen ürün yok.",
       "removeOf": "{{name}}: koleksiyondan çıkar",
       "removed": "Ürün koleksiyondan çıkarıldı."
+    },
+    "gate": {
+      "off": "Koleksiyonlar bu mağazada kapalı. Koleksiyonlarınız silinmedi; açınca burada yeniden yönetilir.",
+      "turnOn": "Özelliklere git"
     }
   },
   "address": {
@@ -8479,6 +8725,7 @@
         "open": "Yayın geçmişi",
         "title": "Yayın geçmişi",
         "description": "Son 20 yayın kendiliğinden tutulur. Kalıcı saklamak istediğinizi 'Kayıtlı görünümlerim'e ekleyin.",
+        "descriptionKept": "Son 20 yayın kendiliğinden tutulur; istediğinizi taslağa geri yükleyebilirsiniz.",
         "empty": "Henüz yayın yok; ilk yayından sonra burada görünür.",
         "item": "{{revision}}. yayın",
         "live": "Yayında",
@@ -9167,7 +9414,7 @@
         "notePlaceholder": "Ayda birkaç e-posta · İstediğiniz an ayrılın",
         "noteHint": "Tutabileceğiniz bir söz yazın. Boş bırakırsanız vitrin kendi metnini kullanır.",
         "image": "Görsel",
-        "imageHint": "Ortam kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
+        "imageHint": "Medya kütüphanesinden bir görsel; kartın solunda durur. Görsel seçilmezse kutu yan yana bant olarak çizilir.",
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
@@ -10568,7 +10815,7 @@
           },
           "image": {
             "name": "Resim",
-            "description": "Ortam kütüphanesinden bir resim, isterseniz bağlantılı."
+            "description": "Medya kütüphanesinden bir resim, isterseniz bağlantılı."
           },
           "app_badges": {
             "name": "Uygulama mağazası rozetleri",
@@ -11073,6 +11320,7 @@
       "title": "Görünümler",
       "description": "Mağazanızın görünümünü seçin, kaydedin ve istediğiniz zaman geri dönün. Değişiklikler siz yayınlayana kadar ziyaretçilere görünmez.",
       "openEditor": "Tema düzenleyiciyi aç",
+      "noAccess": "Görünümleri yalnız mağaza sahibi açabilir.",
       "thumbAlt": "{{name}} görünümünün küçük resmi",
       "sections_one": "{{count}} bölüm",
       "sections_other": "{{count}} bölüm",
@@ -11187,6 +11435,10 @@
         "pageMissingAddress": "Adresi ‘{{handle}}’ olan sayfa olmadığı için sayfa düzeni eklenmedi. Bu adresle bir sayfa açıp görünümü yeniden uygulayın.",
         "pageLimit": "{{name}} sayfasının düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
         "pageLimitAddress": "Adresi ‘{{handle}}’ olan sayfanın düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
+        "pageMade": "{{name}} sayfası taslak olarak açıldı; yayına almak için sayfa ayarlarından Yayında'yı seçin.",
+        "pageTaken": "{{name}} sayfası açılamadı: ‘{{handle}}’ adresini başka bir kayıt kullanıyor. Sayfa düzeni eklenmedi.",
+        "pageTakenAddress": "‘{{handle}}’ adresinde sayfa açılamadı: adresi başka bir kayıt kullanıyor. Sayfa düzeni eklenmedi.",
+        "textKept": "{{name}} sayfasının kendi metni korundu; görünüm yalnız düzeni değiştirdi.",
         "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu.",
         "featureOff_one": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
         "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı."
@@ -11207,18 +11459,18 @@
     }
   },
   "bulkMessages": {
-    "title": "Toplu ileti",
+    "title": "Toplu mesaj",
     "description": "İzinli müşterilerinize ve bülten abonelerinize toplu e-posta ya da SMS gönderin.",
-    "new": "Yeni ileti",
-    "empty": "Henüz toplu ileti yok. İlk iletinizi hazırlayın.",
-    "emptyFiltered": "Bu süzgece uyan ileti yok.",
-    "views": "İleti durumları",
+    "new": "Yeni mesaj",
+    "empty": "Henüz toplu mesaj yok. İlk mesajınızı hazırlayın.",
+    "emptyFiltered": "Bu süzgece uyan mesaj yok.",
+    "views": "Mesaj durumları",
     "allStatuses": "Tümü",
     "channelFilter": "Kanal",
     "allChannels": "Tüm kanallar",
-    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya iletisi gönderebilirsiniz.",
+    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya mesajı gönderebilirsiniz.",
     "turnOn": "Özelliklerden aç",
-    "noAccess": "Toplu iletileri yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
+    "noAccess": "Toplu mesajları yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
     "columns": {
       "name": "Ad",
       "channel": "Kanal",
@@ -11255,8 +11507,8 @@
       "channel_off": "Gönderen alan adı ya da SMS hesabı şu an kullanılamıyor. Kanal yeniden çalışınca kendiliğinden sürer."
     },
     "failure": {
-      "generic": "Gönderim başlatılamadı. İletiyi kopyalayıp yeniden deneyin.",
-      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. İletiyi kopyalayıp kitleyi yeniden seçin."
+      "generic": "Gönderim başlatılamadı. Mesajı kopyalayıp yeniden deneyin.",
+      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. Mesajı kopyalayıp kitleyi yeniden seçin."
     },
     "scheduledFor": "{{when}} için zamanlandı.",
     "sourceCount_one": "{{count}} kaynak",
@@ -11270,16 +11522,16 @@
       "finished": "Bitti"
     },
     "create": {
-      "title": "Yeni toplu ileti",
+      "title": "Yeni toplu mesaj",
       "hint": "Ad ve kanalı seçin; kitleyi ve içeriği sonraki sayfada hazırlarsınız. Kitle önce bütün izinli müşteriler olarak gelir.",
       "submit": "Taslağı oluştur",
       "created": "Taslak oluşturuldu."
     },
     "fields": {
-      "name": "İletinin adı",
+      "name": "Mesajın adı",
       "nameHint": "Yalnız panelde görünür.",
       "channel": "Kanal",
-      "channelHint": "Her ileti tek kanaldan gider.",
+      "channelHint": "Her mesaj tek kanaldan gider.",
       "utm": "Kampanya kodu",
       "utmHint": "Mağaza bağlantılarına utm_campaign olarak eklenir; rapor satışları bununla bulur.",
       "subject": "Konu",
@@ -11297,13 +11549,13 @@
     },
     "editor": {
       "general": "Genel",
-      "parts": "İletinin bölümleri",
+      "parts": "Mesajın bölümleri",
       "tabs": {
         "audience": "Kitle",
         "content": "İçerik",
         "send": "Deneme ve gönderim"
       },
-      "saved": "İleti kaydedildi.",
+      "saved": "Mesaj kaydedildi.",
       "invalid": "Bazı alanlar eksik ya da hatalı; işaretli yerleri düzeltin.",
       "unsaved": "Kaydedilmemiş değişiklikler var; denemeden ve göndermeden önce kaydedin.",
       "incomplete": "Önce şunları yazın: {{fields}}.",
@@ -11312,11 +11564,11 @@
         "body": "e-posta metni",
         "sms_text": "SMS metni"
       },
-      "emptyAudience": "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+      "emptyAudience": "Bu kitlede mesajı alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
     },
     "audience": {
       "title": "Kimlere gidecek",
-      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek ileti alır; yalnız bu kanalda izni olanlara gider.",
+      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek mesaj alır; yalnız bu kanalda izni olanlara gider.",
       "all_consented": "Bütün izinli müşteriler",
       "all_consentedHint": "Bu kanalda ticari ileti izni veren bütün müşteri hesapları.",
       "newsletter": "Bülten aboneleri",
@@ -11349,7 +11601,7 @@
       "no_consent": "Bu kanalda izni yok",
       "suppressed": "Gönderim engeli listesinde",
       "iys_pending": "İzni İYS'ye henüz bildirilmedi",
-      "recent": "Son 24 saatte başka bir toplu ileti aldı",
+      "recent": "Son 24 saatte başka bir toplu mesaj aldı",
       "invalid_recipient": "Adresi ya da numarası geçersiz",
       "over_quota": "Günlük sınıra takıldı"
     },
@@ -11880,7 +12132,7 @@
         "brand": "Marka logosu",
         "content": "Sayfa ya da yazı",
         "landing": "Açılış sayfası",
-        "bulk_message": "Toplu ileti",
+        "bulk_message": "Toplu mesaj",
         "storefront": "Vitrin",
         "logo": "Logo",
         "share_image": "Paylaşım görseli",
@@ -11923,8 +12175,8 @@
   },
   "plan": {
     "title": "Abonelik",
-    "description": "Paketiniz, limitleriniz ve kullanımınız, ödeme durumunuz. Bu sayfa bilgi içindir; paket değişikliği için bizimle iletişime geçebilirsiniz.",
-    "unmanaged": "Bu mağazada paket limiti yok: ürün, ekip, depolama ve içerik taslakları sınırsızdır.",
+    "description": "Paket, ödeme ve kullanım.",
+    "unmanaged": "Paket limiti yok",
     "loadFailed": "Abonelik bilgileri yüklenemedi.",
     "view": "Aboneliği gör",
     "strip": {
@@ -11938,31 +12190,60 @@
       "howToPay": "Ödeme bilgileri"
     },
     "package": {
-      "title": "Paket",
-      "text": "Mağazanızın paketi ve durumu.",
-      "name": "Paket",
-      "status": "Mağaza durumu",
-      "period": "Bu dönem",
+      "label": "Paket",
       "none": "Paket tanımlı değil"
     },
-    "statuses": {
-      "provisioning": "Kuruluyor",
-      "active": "Etkin",
-      "restricted": "Kısıtlı",
-      "suspended": "Askıda",
-      "closing": "Kapanıyor",
-      "closed": "Kapalı"
+    "hero": {
+      "amount": {
+        "due": "Sonraki ödeme",
+        "trial": "İlk ödeme",
+        "late": "Geciken ödeme"
+      },
+      "nothingDue": "Bekleyen ödeme yok",
+      "date": {
+        "due": "Son ödeme günü",
+        "trial": "Deneme bitişi",
+        "late": "Son ödeme günü"
+      },
+      "graceEnds": "Ek süre sonu",
+      "countdown": {
+        "trial_one": "{{count}} gün kaldı",
+        "trial_other": "{{count}} gün kaldı",
+        "due_one": "{{count}} gün kaldı",
+        "due_other": "{{count}} gün kaldı",
+        "grace_one": "Ek süre: {{count}} gün",
+        "grace_other": "Ek süre: {{count}} gün",
+        "overdue_one": "{{count}} gün gecikti",
+        "overdue_other": "{{count}} gün gecikti",
+        "today": "Bugün"
+      },
+      "ring": {
+        "trial": "Deneme",
+        "due": "Ödemeye",
+        "grace": "Ek süre",
+        "overdue": "Gecikme",
+        "day": "gün",
+        "trialUsed": "Deneme: {{used}} / {{total}} gün"
+      },
+      "period": "Dönem",
+      "periodHint": "Aylık limitler her ayın başında sıfırlanır.",
+      "per": {
+        "monthly": "/ ay",
+        "yearly": "/ yıl"
+      },
+      "price": "Paket ücreti"
     },
     "usage": {
       "title": "Limitler ve kullanım",
-      "text": "Toplam ve bu ayki kullanımınız. Limitin %80'inden itibaren sarı, yeni kaydı durduran bir limitte kırmızı görünür.",
-      "listLabel": "Limitler ve kullanım",
+      "hint": "%80'den sarı, limitte kırmızı.",
+      "monthly": "Bu ay",
+      "unlimited": "Sınırsız",
       "barLabel": "{{name}}: {{value}}",
-      "of": "{{used}} / {{max}}",
-      "unlimited": "{{used}} · sınırsız",
-      "pending_one": "{{count}} bekleyen davet dahil",
-      "pending_other": "{{count}} bekleyen davet dahil",
-      "ordersNote": "Uyarı, engellenmez",
+      "left": "{{value}} kaldı",
+      "over": "{{value}} fazla",
+      "pending_one": "{{count}} davet bekliyor",
+      "pending_other": "{{count}} davet bekliyor",
+      "ordersNote": "Siparişler hiçbir zaman durdurulmaz.",
       "tone": {
         "warn": "Limite yaklaştı",
         "full": "Limitte",
@@ -11971,30 +12252,11 @@
     },
     "keys": {
       "products": "Ürünler",
-      "orders_per_month": "Bu ayki siparişler",
+      "orders_per_month": "Siparişler",
       "staff": "Ekip",
       "storage_mb": "Depolama",
-      "llm_credits_per_month": "Bu ayki içerik taslakları",
+      "llm_credits_per_month": "İçerik taslakları",
       "custom_domains": "Özel alan adları"
-    },
-    "mb": "{{value}} MB",
-    "billing": {
-      "title": "Ödeme",
-      "text": "Abonelik ödemenizin durumu ve sıradaki ödeme.",
-      "status": "Ödeme durumu",
-      "nextDue": "Sonraki ödeme günü",
-      "graceEnds": "Ek süre bitişi",
-      "amount": "Tutar",
-      "none": "—",
-      "instruction": "Ödeme talimatı",
-      "noInstruction": "Ödeme talimatı, ödeme günü yaklaştığında burada görünür.",
-      "statuses": {
-        "trialing": "Deneme süresinde",
-        "active": "Güncel",
-        "past_due": "Gecikmiş",
-        "restricted": "Kısıtlı",
-        "cancelled": "Sona erdi"
-      }
     },
     "notice": {
       "products": {
@@ -12019,7 +12281,62 @@
       }
     },
     "createBlocked": "Ürün limitinize ulaştığınız için yeni ürün eklenemez.",
-    "inviteBlocked": "Ekip limitinize ulaştığınız için yeni davet gönderilemez."
+    "inviteBlocked": "Ekip limitinize ulaştığınız için yeni davet gönderilemez.",
+    "loading": "Abonelik bilgileri yükleniyor",
+    "state": {
+      "provisioning": "Kuruluyor",
+      "trialing": "Deneme süresinde",
+      "active": "Etkin",
+      "due_soon": "Ödeme yaklaşıyor",
+      "past_due": "Ödeme gecikti",
+      "restricted": "Kısıtlı",
+      "suspended": "Askıda",
+      "cancelled": "Sona erdi",
+      "closing": "Kapanıyor",
+      "closed": "Kapalı"
+    },
+    "stateText": {
+      "provisioning": "Mağazanız kuruluyor; paketiniz kurulum bitince etkinleşir.",
+      "trialing": "Deneme süreniz devam ediyor. Süre bitince ilk ödemeniz başlar.",
+      "active": "Aboneliğiniz güncel.",
+      "due_soon": "Ödeme gününüz yaklaşıyor. Ödeme bilgileri yanda.",
+      "past_due": "Ödemeniz gecikti. Ek süre bitmeden ödenirse hiçbir şey kısıtlanmaz; vitrininiz satışa devam ediyor.",
+      "restricted": "Ödeme gecikti, panel salt okunur. Ödeme alınınca kısıtlama kalkar; vitrininiz satışa devam ediyor.",
+      "suspended": "Mağazanız askıda: vitrin ziyaretçilere kapalı. Ayrıntılar için bizimle iletişime geçin.",
+      "cancelled": "Aboneliğiniz sona erdi. Yeniden başlatmak için bizimle iletişime geçin.",
+      "closing": "Mağazanız kapanıyor.",
+      "closed": "Mağazanız kapalı."
+    },
+    "payment": {
+      "title": "Ödeme bilgileri",
+      "none": "Ödeme bilgisi yok",
+      "copy": "Kopyala",
+      "copied": "Ödeme bilgileri kopyalandı.",
+      "copyFailed": "Kopyalanamadı; metni seçip kopyalayabilirsiniz.",
+      "change": "Paket değişikliği",
+      "changeHint": "Paketinizi yükseltmek ya da değiştirmek için bizimle iletişime geçin."
+    },
+    "history": {
+      "title": "Ödemeler",
+      "loading": "Ödemeler yükleniyor",
+      "empty": "Henüz ödeme yok",
+      "unavailable": "Ödemeler şu an alınamadı",
+      "period": "Dönem",
+      "day": "Tarih",
+      "amount": "Tutar",
+      "status": "Durum",
+      "invoice": "Fatura",
+      "invoiceOf": "{{period}} faturası",
+      "noInvoice": "Fatura yok",
+      "showAll_one": "Tümünü göster ({{count}})",
+      "showAll_other": "Tümünü göster ({{count}})",
+      "state": {
+        "paid": "Ödendi",
+        "waived": "Bağışlandı",
+        "open": "Bekliyor",
+        "late": "Gecikti"
+      }
+    }
   },
   "wholesale": {
     "gate": {

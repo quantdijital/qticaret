@@ -38,6 +38,8 @@ export interface TemplateForm {
   description: string
   groups: GroupForm[]
   definitions: DefinitionForm[]
+  /** Add-on templates its products get, in order (adr/0052 Ek 2026-11-23); saved on their own. */
+  addonTemplateIds: string[]
 }
 
 export const emptyDefinition = (): DefinitionForm => ({
@@ -89,8 +91,13 @@ export const templateForm = (template?: AttributeTemplate | null): TemplateForm 
     definitions: [...(template?.definitions ?? [])]
       .sort((a, b) => a.rank - b.rank)
       .map((definition) => definitionForm(definition, keys)),
+    addonTemplateIds: [...(template?.addon_template_ids ?? [])],
   }
 }
+
+/** Whether the carried add-on templates changed: they are saved by their own route. */
+export const carriedChanged = (saved: AttributeTemplate | null, form: TemplateForm): boolean =>
+  JSON.stringify(saved?.addon_template_ids ?? []) !== JSON.stringify(form.addonTemplateIds)
 
 const orNull = (text: string): string | null => (text.trim() === "" ? null : text.trim())
 
@@ -102,6 +109,15 @@ export function keyFromLabel(label: string): string {
 
 /** An option's value from its label: the slug facet URLs use (F3.17). */
 export const optionValue = (label: string): string => toSlug(label).slice(0, 100)
+
+/** A field's options with the ones just added from a product that the saved group lacks yet. */
+export const withAdded = (
+  options: readonly AttributeOption[],
+  added: readonly AttributeOption[]
+): AttributeOption[] => [
+  ...options,
+  ...added.filter((each) => !options.some((option) => option.value === each.value)),
+]
 
 /**
  * The definitions as the API takes them; list order becomes `rank`. Given

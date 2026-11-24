@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
-import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
@@ -86,46 +85,47 @@ function useColumns(): Column<AsyncJob>[] {
   ]
 }
 
-/** Settings > Jobs (adr/0014): exports and other long tasks, with their files for a week. */
-export function JobsPage() {
+/**
+ * Settings > Audit log > Jobs (adr/0014; the owner, 2026-11-23: a tab of
+ * the audit log, no page of its own): exports and other long tasks, with
+ * their files for a week.
+ */
+export function JobsList() {
   const { t } = useTranslation()
   const [page, setPage] = useState(0)
   const jobs = useQuery(jobsQuery(page))
   const columns = useColumns()
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader title={t("settings.jobs.title")} description={t("settings.jobs.subtitle")} />
-      <section className="overflow-hidden rounded-lg border bg-card shadow-card">
-        {jobs.isError ? (
-          <div className="p-5">
-            <ErrorState text={errorText(t, jobs.error)} onRetry={() => void jobs.refetch()} />
-          </div>
-        ) : (
-          <>
-            <DataTable
-              columns={columns}
-              rows={jobs.data?.async_jobs}
-              rowKey={(job) => job.id}
-              loading={jobs.isPending}
-              stale={jobs.isPlaceholderData}
-              empty={
-                <div className="flex flex-col items-center gap-3 text-center">
-                  <FileClock className="size-8 text-muted-foreground" aria-hidden="true" />
-                  <p className="text-sm text-muted-foreground">{t("settings.jobs.empty")}</p>
-                </div>
-              }
+    <section className="overflow-hidden rounded-lg border bg-card shadow-card">
+      {jobs.isError ? (
+        <div className="p-5">
+          <ErrorState text={errorText(t, jobs.error)} onRetry={() => void jobs.refetch()} />
+        </div>
+      ) : (
+        <>
+          <DataTable
+            columns={columns}
+            rows={jobs.data?.async_jobs}
+            rowKey={(job) => job.id}
+            loading={jobs.isPending}
+            stale={jobs.isPlaceholderData}
+            empty={
+              <div className="flex flex-col items-center gap-3 text-center">
+                <FileClock className="size-8 text-muted-foreground" aria-hidden="true" />
+                <p className="text-sm text-muted-foreground">{t("settings.jobs.empty")}</p>
+              </div>
+            }
+          />
+          {jobs.data && jobs.data.count > 0 ? (
+            <Pagination
+              page={page}
+              pageSize={JOB_PAGE_SIZE}
+              count={jobs.data.count}
+              onPageChange={setPage}
             />
-            {jobs.data && jobs.data.count > 0 ? (
-              <Pagination
-                page={page}
-                pageSize={JOB_PAGE_SIZE}
-                count={jobs.data.count}
-                onPageChange={setPage}
-              />
-            ) : null}
-          </>
-        )}
-      </section>
-    </div>
+          ) : null}
+        </>
+      )}
+    </section>
   )
 }

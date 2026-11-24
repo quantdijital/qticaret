@@ -116,11 +116,8 @@ export function DefinitionAdvanced({ index }: { index: number }) {
               </Field>
             </div>
           ) : null}
-          <div className="flex flex-col gap-2">
-            <div className="sm:w-1/2">
-              <FlagSwitch index={index} flag="is_seo_highlight" />
-            </div>
-            <p className="text-xs text-muted-foreground">{t(`${A}.seoHint`)}</p>
+          <div className="sm:w-1/2">
+            <FlagSwitch index={index} flag="is_seo_highlight" />
           </div>
           {definition.type === "text" ? (
             <Field label={t(`${A}.unit`)} htmlFor={`${base}-unit`} hint={t(`${A}.textUnitHint`)}>

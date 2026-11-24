@@ -27,18 +27,18 @@
     "cp:tenant": "medusa exec ./src/scripts/tenant.ts"
   },
   "dependencies": {
-    "@medusajs/caching": "2.21.2",
-    "@medusajs/cli": "2.21.2",
-    "@medusajs/draft-order": "2.21.2",
-    "@medusajs/framework": "2.21.2",
-    "@medusajs/medusa": "2.21.2",
+    "@medusajs/caching": "2.22.6",
+    "@medusajs/cli": "2.22.6",
+    "@medusajs/draft-order": "2.22.6",
+    "@medusajs/framework": "2.22.6",
+    "@medusajs/medusa": "2.22.6",
     "@qticaret/sector-packs": "workspace:*",
     "@qticaret/server-kit": "workspace:*",
     "@qticaret/types": "workspace:*",
     "zod": "4.6.6"
   },
   "devDependencies": {
-    "@medusajs/test-utils": "2.21.2",
+    "@medusajs/test-utils": "2.22.6",
     "@qticaret/config": "workspace:*",
     "@swc/core": "1.16.13",
     "@swc/jest": "0.2.39",

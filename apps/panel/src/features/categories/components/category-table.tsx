@@ -19,7 +19,7 @@ import {
   siblingFor,
   treeRows,
 } from "@/features/categories/tree"
-import { useCategoryPathPrefix } from "@/features/categories/use-category-path"
+import { useCategoryPath } from "@/features/categories/use-category-path"
 import { errorText } from "@/lib/errors"
 import { CategoryThumb } from "./category-thumb"
 
@@ -48,7 +48,7 @@ interface CategoryTableProps {
 export function CategoryTable({ categories, loading, query, empty }: CategoryTableProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const prefix = useCategoryPathPrefix()
+  const pathOf = useCategoryPath()
   const images = useQuery(categoryImagesQuery())
   const update = useUpdateCategory()
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
@@ -93,10 +93,10 @@ export function CategoryTable({ categories, loading, query, empty }: CategoryTab
       header: t("categories.columns.category"),
       cell: ({ category, depth, hasChildren, parents }) => {
         const open = !collapsed.has(category.id)
-        const path = [
+        const path = pathOf([
           ...ancestorHandles(all, category.parent_category_id ?? null),
           category.handle,
-        ].join("/")
+        ])
         return (
           <div className="flex min-w-0 items-center gap-2" style={{ paddingLeft: depth * 24 }}>
             {parents ? null : (
@@ -133,10 +133,7 @@ export function CategoryTable({ categories, loading, query, empty }: CategoryTab
                   {parents.length > 0 ? parents.join(" › ") : t("categories.topLevel")}
                 </span>
               ) : (
-                <span className="truncate font-mono text-xs text-muted-foreground">
-                  {prefix}
-                  {path}
-                </span>
+                <span className="truncate font-mono text-xs text-muted-foreground">{path}</span>
               )}
             </div>
           </div>

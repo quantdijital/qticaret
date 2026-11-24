@@ -6,7 +6,9 @@ import { movePaths, planUrlStyle } from "../../seo/url-style"
 import type { JobType } from "./types"
 
 const style = z.enum(["prefixed", "flat"])
-const input = z.object({ product: style, category: style, brand: style }).strict()
+// A category's tree without the prefix too (adr/0017 Ek 2026-11-23)
+const categoryStyle = z.enum(["prefixed", "nested", "flat"])
+const input = z.object({ product: style, category: categoryStyle, brand: style }).strict()
 
 /**
  * Moves the shop to another URL style (docs/13 §2.2): plans again (the
