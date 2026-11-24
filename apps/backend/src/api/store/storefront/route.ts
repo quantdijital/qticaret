@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import {
+  AI_STOREFRONT_SEARCH,
   CATALOG_BOOKING,
   CATALOG_COLLECTIONS,
   GIFT_CARDS,
@@ -90,6 +91,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     addons,
     booking,
     collections,
+    naturalSearch,
     popups,
     values,
     marks,
@@ -103,6 +105,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     settings.isFeatureEnabled(PRODUCT_ADDONS),
     settings.isFeatureEnabled(CATALOG_BOOKING),
     settings.isFeatureEnabled(CATALOG_COLLECTIONS),
+    settings.isFeatureEnabled(AI_STOREFRONT_SEARCH),
     settings.isFeatureEnabled(MARKETING_POPUPS),
     shopInfoValues(req.scope),
     shopMarks(req.scope),
@@ -112,6 +115,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     PromotionSettings,
     ShippingSettings,
     MarketingSettings,
+    boolean,
     boolean,
     boolean,
     boolean,
@@ -139,8 +143,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
     // Dated products (adr/0076): the sections that need them drawn only while on (adr/0077 §8)
     // Collections (`catalog.collections`): their sections' products and links drawn only while on
-    // Pop-ups (`marketing.popups`, adr/0080 §5): `/store/popups` is read only while on
-    features: { gift_cards: giftCards, product_addons: addons, booking, collections, popups },
+    // Search in the shopper's own words (adr/0077 §7): the box's privacy hint drawn only while on
+    features: {
+      gift_cards: giftCards,
+      product_addons: addons,
+      booking,
+      collections,
+      natural_search: naturalSearch,
+      // Pop-ups (`marketing.popups`, adr/0080 §5): `/store/popups` is read only while on
+      popups,
+    },
     // The footer's ways to pay and carriers, as the shop has them set up (adr/0046 Ek 2026-11-04)
     marks,
     // adr/0044 Ek 2026-11-24: the widget's public site key for the risky forms

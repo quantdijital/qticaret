@@ -15,6 +15,8 @@ import { AiAcceptanceCard } from "@/features/settings/components/ai-acceptance-c
 import { AiGuidanceTab } from "@/features/settings/components/ai-guidance-tab"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
 import { AiScenesCard } from "@/features/settings/components/ai-scenes-card"
+import { hasOwnTextKey } from "@/features/settings/ai-own-key"
+import { AiStorefrontSearchCard } from "@/features/settings/components/ai-storefront-search-card"
 import { AiServicesTable } from "@/features/settings/components/ai-services-table"
 import { AiUsageCard } from "@/features/settings/components/ai-usage-card"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
@@ -23,7 +25,8 @@ import { errorText } from "@/lib/errors"
 /**
  * Settings > Yapay zekâ (adr/0071 §13): the AI services the shop can
  * connect with its own key in one compact table, the switch for AI on
- * reviews and questions (Aşama 9) in a line, the shop's own scenes for
+ * reviews and questions (Aşama 9) and the one for search in the shopper's
+ * own words (adr/0077 §7) in a line each, the shop's own scenes for
  * "Sahneye yerleştir" (Aşama 7), and this month's use under
  * them. The longer words sit behind (i). Which service does which work
  * is the server's, the choice is made where the work is. A second tab
@@ -86,6 +89,7 @@ function AiServicesTab() {
           />
           <AiReviewsCard />
           <AssistantSetting />
+          <AiStorefrontSearchCard ownKey={hasOwnTextKey(data.services, ownKeys)} />
           <AiScenesCard />
           <AiUsageCard />
           <AiAcceptanceCard />

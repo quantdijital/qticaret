@@ -45,6 +45,7 @@ export function searchOf(
       found: t("search.suggest.found"),
       priceBefore: t("price.before"),
       from: t("price.from"),
+      ...(shop.searchHint ? { hint: shop.searchHint } : {}),
     },
     suggest: searchSuggest,
     // A search that finds nothing offers the shop's own top categories
