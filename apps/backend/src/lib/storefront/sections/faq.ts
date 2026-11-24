@@ -83,7 +83,19 @@ export function hasWords(doc: ContentDoc): boolean {
  * words in it, its `{belirteç}`s the shop's details.
  */
 export const faqAnswer = z.unknown().transform((value, ctx): ContentDoc => {
-  const parsed = contentDoc.safeParse(value)
+  // The answer's own bounds first, on the raw value: a page-sized document is refused before
+  // the full parse (security review L1); an odd node there throws and is refused the same way
+  let small: boolean
+  try {
+    small = fitsBare(value as ContentDoc, FAQ_ANSWER_LIMITS)
+  } catch {
+    small = false
+  }
+  const parsed = small ? contentDoc.safeParse(value) : null
+  if (!parsed) {
+    ctx.addIssue({ code: "custom", message: "storefront_layout.faq_answer_invalid" })
+    return z.NEVER
+  }
   if (!parsed.success || !fitsBare(parsed.data, FAQ_ANSWER_LIMITS) || !hasWords(parsed.data)) {
     ctx.addIssue({ code: "custom", message: "storefront_layout.faq_answer_invalid" })
     return z.NEVER
