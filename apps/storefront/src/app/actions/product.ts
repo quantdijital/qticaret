@@ -2,10 +2,10 @@
 
 import { z } from "zod"
 import type { ActionResult, PlaceOrderResult } from "@qticaret/ui"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated } from "@/lib/store-api/gate"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { reviewPhotoFiles } from "@/lib/reviews/photos"
-import { storeCall, storePost } from "@/lib/store-api/server"
+import { storeCall } from "@/lib/store-api/server"
 
 const PRODUCT_ID = z.string().regex(/^prod_[0-9A-Za-z]{10,64}$/)
 
@@ -41,7 +41,9 @@ const Review = z.object({
  * up first, one by one as their bytes; the review then names them.
  */
 export async function writeReview(_state: ActionResult, form: FormData): Promise<ActionResult> {
-  const parsed = Review.safeParse(Object.fromEntries([...form].filter(([key]) => key !== "photos")))
+  const parsed = Review.safeParse(
+    Object.fromEntries([...form].filter(([key]) => key !== "photos" && key !== "photo_ids"))
+  )
   if (!parsed.success) {
     const field = String(parsed.error.issues[0]?.path[0] ?? "")
     return {
@@ -49,13 +51,18 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       error: field === "rating" ? "product.rating_required" : "product.review_too_short",
     }
   }
-  const photos = reviewPhotoFiles(form)
+  // Uploaded by this form's first send, which a bot check stopped: not sent again
+  const kept = keptPhotoIds(form)
+  if (kept === null) {
+    return { ok: false, error: "product.review_photos_invalid" }
+  }
+  const photos = kept.length > 0 ? [] : reviewPhotoFiles(form)
   if (photos === null) {
     return { ok: false, error: "product.review_photos_invalid" }
   }
   const { product_id, title, ...rest } = parsed.data
+  const photoIds: string[] = [...kept]
   try {
-    const photoIds: string[] = []
     for (const photo of photos) {
       const { photo: uploaded } = await storeCall<{ photo: { id: string } }>(
         `/store/products/${encodeURIComponent(product_id)}/reviews/photos`,
@@ -67,15 +74,39 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       )
       photoIds.push(uploaded.id)
     }
-    await storePost(`/store/products/${encodeURIComponent(product_id)}/reviews`, {
-      ...rest,
-      ...(title?.trim() ? { title: title.trim() } : {}),
-      ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
+    await storeCall(`/store/products/${encodeURIComponent(product_id)}/reviews`, {
+      method: "POST",
+      body: {
+        ...rest,
+        ...(title?.trim() ? { title: title.trim() } : {}),
+        ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
+      },
+      // Past a few an hour, Turnstile (adr/0044 Ek 2026-11-24)
+      ...gated(form),
     })
   } catch (error) {
+    const asked = gateAsk(error)
+    if (asked) {
+      // The form sends again with the ids in place of the files (adr/0044 Ek 2026-11-24)
+      return photoIds.length > 0 ? { ...asked, resume: { photo_ids: photoIds, photos: [] } } : asked
+    }
     return { ok: false, error: failure(error, "product.review_failed") }
   }
   return { ok: true, error: null }
+}
+
+// The backend's photo ids (`revph_…`): at most three, of their shape; the backend checks they are the customer's
+const PHOTO_ID = /^[A-Za-z0-9_-]{1,64}$/
+const MAX_PHOTOS = 3
+
+/** The photo ids a send again carries; null when they are not ids. */
+function keptPhotoIds(form: FormData): string[] | null {
+  const ids = form.getAll("photo_ids")
+  if (ids.length > MAX_PHOTOS) {
+    return null
+  }
+  const valid = ids.filter((id): id is string => typeof id === "string" && PHOTO_ID.test(id))
+  return valid.length === ids.length ? valid : null
 }
 
 const Question = z.object({ product_id: PRODUCT_ID, body: z.string().trim().min(5).max(1000) })
@@ -87,11 +118,13 @@ export async function askQuestion(_state: ActionResult, form: FormData): Promise
     return { ok: false, error: "product.question_too_short" }
   }
   try {
-    await storePost(`/store/products/${encodeURIComponent(parsed.data.product_id)}/questions`, {
-      body: parsed.data.body,
+    await storeCall(`/store/products/${encodeURIComponent(parsed.data.product_id)}/questions`, {
+      method: "POST",
+      body: { body: parsed.data.body },
+      ...gated(form),
     })
   } catch (error) {
-    return { ok: false, error: failure(error, "product.question_failed") }
+    return gateAsk(error) ?? { ok: false, error: failure(error, "product.question_failed") }
   }
   return { ok: true, error: null }
 }
@@ -123,17 +156,17 @@ export async function stockAlert(
   if (!parsed.success) {
     return { ok: false, error: "checkout.email_invalid", challenge: null }
   }
-  const { variant_id, email, challenge } = parsed.data
+  const { variant_id, email } = parsed.data
   try {
     await storeCall("/store/stock-alerts", {
       method: "POST",
       body: { variant_id, ...(email ? { email } : {}) },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
-    const asked = challengeOf(error)
+    const asked = gateAsk(error)
     if (asked) {
-      return { ok: false, error: null, challenge: asked }
+      return asked
     }
     const key = isStoreApiError(error) ? error.messageKey : null
     return {

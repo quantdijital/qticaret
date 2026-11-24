@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 import type { PlaceOrderResult } from "@qticaret/ui"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated } from "@/lib/store-api/gate"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 
@@ -44,17 +44,17 @@ export async function subscribeNewsletter(
       challenge: null,
     }
   }
-  const { email, challenge } = parsed.data
+  const { email } = parsed.data
   try {
     await storeCall("/store/newsletter", {
       method: "POST",
       body: { email, text_version: NEWSLETTER_TEXT_VERSION },
-      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+      ...gated(form),
     })
   } catch (error) {
-    const asked = challengeOf(error)
+    const asked = gateAsk(error)
     if (asked) {
-      return { ok: false, error: null, challenge: asked }
+      return asked
     }
     if (isStoreApiError(error) && error.status === 429) {
       return { ok: false, error: "newsletter.rate_limited", challenge: null }

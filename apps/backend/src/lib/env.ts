@@ -14,6 +14,7 @@ import { CONTROL_PLANE_ENV, checkControlPlaneEnv } from "./control-plane/env"
 import { CREDENTIALS_KEYS_ENV, checkCredentialKeysEnv } from "./integrations/credential-keys"
 import { parseDsn } from "./error-tracking/dsn"
 import { LOG_LEVELS } from "./logging/levels"
+import { TURNSTILE_ENV, checkTurnstileEnv } from "./security/turnstile/env"
 
 /**
  * Environment schema validated once at startup (docs/04): a missing or
@@ -205,6 +206,8 @@ const envSchema = z.object({
   FFPROBE_PATH: programPath.optional(),
   // adr/0061 Ek C9: the control plane's plan documents (lib/control-plane/env.ts)
   ...CONTROL_PLANE_ENV,
+  // adr/0044 Ek 2026-11-24: Cloudflare Turnstile's keys, the trusted CF-Connecting-IP
+  ...TURNSTILE_ENV,
 })
 
 // Without these the file provider cannot work; the endpoint is only for
@@ -288,6 +291,11 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging",
     })
   }
+  // Bots at the risky gates (adr/0044 Ek 2026-11-24): the pair, never a test key
+  // live; the keys themselves are required at boot (assertTurnstileConfigured)
+  checkTurnstileEnv(env, (path, message) => {
+    ctx.addIssue({ code: "custom", path: [path], message })
+  })
   // Unsigned, every shopper the storefront serves would count as its server's
   // one address (rate limits, booking's per-address share, consent proof):
   // compulsory where the shop runs (adr/0076 Ek D5, security review D-1)

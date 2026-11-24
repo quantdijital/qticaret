@@ -105,6 +105,7 @@ import { GIFT_CARD_SALE_ROUTES, STORE_GIFT_PRODUCT_FIELDS } from "./http/gift-ca
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
 import { PAYMENT_ROUTES } from "./http/payment-routes"
 import { FRAUD_ROUTES } from "./http/fraud-routes"
+import { TURNSTILE_ROUTES } from "./http/turnstile-routes"
 import { INTEGRATION_ROUTES } from "./http/integration-routes"
 import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
@@ -204,6 +205,9 @@ export default defineMiddlewares({
         auditMutations,
       ],
     },
+    // adr/0044 Ek 2026-11-24: Cloudflare Turnstile at the risky gates, right after the
+    // rate limits: a bot is turned away before anything works for it
+    ...TURNSTILE_ROUTES,
     // `catalog.collections` off: collection writes and the Store API's collections are missing
     ...COLLECTION_GATES,
     // F3.1: handles are storefront slugs. Without `methods` this runs before

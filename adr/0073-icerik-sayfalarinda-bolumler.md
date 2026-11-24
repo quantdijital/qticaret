@@ -416,6 +416,10 @@ Sıra bağımlılığa göre. Her dilim kendi PR'ıdır; `pnpm verify:changed` v
 
 Sahip isteğiyle Vitrin altında "Sayfalar" listesi eklendi (`/storefront/pages`); düzenleme tema düzenleyicide kalır, liste yalnız bulma ve açma içindir. `/content?kind=page` bu listeye gider; tek sayfa bağlantıları düzenleyiciye.
 
+### Ek not 2026-11-24: silinmiş kaydı gösteren bölüm kaydı kilitlemez
+
+Sahip bildirimi: demo kategorileri silinip gerçek katalog içe aktarılınca ana sayfa açılışının iki kategori kutucuğu silinmiş kategorileri gösterir kaldı; `checkLayout` belgedeki bütün kayıtları denetlediği için her kayıt (SSS, İletişim, Portfolio dahil her sayfada) `storefront_layout.target_unknown` ile reddedildi ve sayfalar "değişmiyor" göründü. K2'deki kart kuralı kayıtlara da uygulanır: yalnız bu kayıtta yeni adı geçen kayıt (kategori, ürün, koleksiyon, marka, sayfa; menü bağlantıları dahil) var olmalıdır; saklanan taslakta zaten adı geçen ve sonradan silinen kayıt engellemez ("engel değil uyarı"). Vitrin silinen kaydı zaten çizmez (`liveRecords`). Panel okuması `missing_targets` (silinmiş kaydı gösteren bölüm kimlikleri) döner; düzenleyici bölümü uyarı işaretiyle gösterir ve ağacın üstünde "yeniden seçin" notu ile bölüme götürür.
+
 ## Ek 2026-11-24 (2): SSS akordeon olarak, soru soru girilir (K2'nin SSS kararını değiştirir)
 
 - **Dayanak:** sahip (2026-11-24): "SSS sayfasında SSS'ler metin olarak eklenmiş ve otomatik ayarlanıyor; bu yanlış, akordeon gibi eklenmeli. Mağaza sahibi buraya düz metin yazar, sonra neden SSS olmadı diye sorar. Olması gerektiği gibi yap."

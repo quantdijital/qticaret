@@ -7,7 +7,6 @@ import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostGiftRecipient } from "../store/carts/[id]/line-items/[line_id]/gift/validators"
 import { StorePostGiftCardBalance } from "../store/gift-cards/balance/validators"
 import { fieldTokens } from "../validation/attribute-fields"
-import { challengeOver } from "./challenge"
 import { requireMailDomain } from "./mail-domain"
 import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
@@ -94,14 +93,12 @@ export function refuseCoreGiftCardProducts(
   next(marked ? new ValidationError("catalog.core_gift_card", { field: "is_giftcard" }) : undefined)
 }
 
-const MINUTE = 60_000
-
 /**
  * Selling gift cards (adr/0025 Ek 2026-11-03), each route behind the
  * shop's `promotions.gift_cards` flag, which answers first. A gift line's
  * recipient is a cart write (the checkout's budget, per cart too) whose
  * address must take mail. A balance asked by its code is a guess at one:
- * ten a minute per address, and past three a proof of work.
+ * ten a minute per address, and past three Turnstile (turnstile-routes.ts).
  */
 export const GIFT_CARD_SALE_ROUTES = [
   { matcher: "/store/*", middlewares: [restrictStoreProductExtension] },
@@ -130,7 +127,6 @@ export const GIFT_CARD_SALE_ROUTES = [
     middlewares: [
       requireFeature(GIFT_CARDS),
       rateLimit(() => RATE_LIMIT_PROFILES.gift_card_balance),
-      challengeOver("gift_card", { max: 3, windowMs: 15 * MINUTE }),
       validateAndTransformBody(StorePostGiftCardBalance),
     ],
   },

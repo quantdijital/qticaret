@@ -38,6 +38,7 @@ const ERRORS = [
   "fraud.velocity",
   "errors.too_many_requests",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 const FALLBACK: Record<AuthMode, string> = {
