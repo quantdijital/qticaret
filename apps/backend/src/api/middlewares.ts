@@ -21,6 +21,7 @@ import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostRevealTaxId } from "./admin/customers/[id]/billing-profile/reveal/validators"
+import { MFA_OFF_LOGIN_ROUTES } from "./http/mfa-off-login"
 import { REAUTH_ROUTES } from "./http/reauth-routes"
 import { STAFF_ROUTES } from "./http/staff-routes"
 import { STAFF_ACCOUNT_ROUTES } from "./http/staff-account-routes"
@@ -339,6 +340,8 @@ export default defineMiddlewares({
     ...STAFF_ROUTES,
     ...STAFF_ACCOUNT_ROUTES,
     ...REAUTH_ROUTES,
+    // Locally with ADMIN_MFA=off: a login with a factor set up asks no code
+    ...MFA_OFF_LOGIN_ROUTES,
     {
       matcher: "/admin/customers/:id/billing-profile/reveal",
       methods: ["POST"],
