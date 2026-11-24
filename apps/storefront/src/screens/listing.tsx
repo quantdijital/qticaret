@@ -33,7 +33,7 @@ import { imageView } from "@/lib/views/image"
 import { subcategoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
 import { collectionsOn } from "@/lib/views/collections-on"
-import { filterViews } from "@/lib/views/facets"
+import { filterViews, stockForCards } from "@/lib/views/facets"
 import { currentLayout, currentShared } from "@/lib/views/layout"
 import {
   hrefOf,
@@ -341,6 +341,9 @@ export async function ListingContent({
           total: answer.count,
           sort,
           ...facets,
+          // Dated products only: no "in stock" toggle; a search counts results, not products
+          stock: stockForCards(facets.stock, cards),
+          ...(isSearch ? { countLabel: t("search.count", { count: answer.count }) } : {}),
           ...extra,
           pagination: {
             page: current,

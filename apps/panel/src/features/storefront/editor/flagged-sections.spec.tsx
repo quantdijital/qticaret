@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
+import { SECTION_REQUIRES } from "@qticaret/types"
 import "@/lib/i18n"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { ApplyReport } from "@/features/storefront/gallery/apply-report"
@@ -15,12 +16,11 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
 }))
 
-// No section needs a flag yet (adr/0077 §10): a real type stands in for one
-const REQUIRES = { faq: "catalog.booking" }
+// The real list: the upcoming departures need dated products' flag (adr/0077 §10)
 // The row's own button, not its eye or menu
-const ROW = /^Sık sorulan sorular\s?(Kapalı)?$/
-const OFF: SectionFlags = { on: new Set(), requires: REQUIRES }
-const ON: SectionFlags = { on: new Set(["catalog.booking"]), requires: REQUIRES }
+const ROW = /^Yaklaşan kalkışlar\s?(Kapalı)?$/
+const OFF: SectionFlags = { on: new Set(), requires: SECTION_REQUIRES }
+const ON: SectionFlags = { on: new Set(["catalog.booking"]), requires: SECTION_REQUIRES }
 
 const withFlags = (flags: SectionFlags, children: ReactNode) => (
   <SectionFlagsContext.Provider value={flags}>{children}</SectionFlagsContext.Provider>
@@ -46,7 +46,7 @@ describe("a section that needs a feature flag in the editor (adr/0077 §8)", () 
   it("is not offered while its flag is off, the list as before", () => {
     chooser(OFF)
 
-    expect(screen.queryByRole("button", { name: /Sık sorulan sorular/ })).toBeNull()
+    expect(screen.queryByRole("button", { name: /Yaklaşan kalkışlar/ })).toBeNull()
     expect(screen.getByRole("button", { name: /Görsel bant/ })).toBeEnabled()
     expect(screen.queryByRole("heading", { name: "Tarihli ürünler" })).toBeNull()
   })
@@ -55,14 +55,14 @@ describe("a section that needs a feature flag in the editor (adr/0077 §8)", () 
     chooser(ON)
 
     const dated = screen.getByRole("region", { name: "Tarihli ürünler" })
-    expect(within(dated).getByRole("button", { name: /Sık sorulan sorular/ })).toBeEnabled()
+    expect(within(dated).getByRole("button", { name: /Yaklaşan kalkışlar/ })).toBeEnabled()
     const general = screen.getByRole("region", { name: "Genel bölümler" })
     expect(within(general).getByRole("button", { name: /Görsel bant/ })).toBeEnabled()
-    expect(within(general).queryByRole("button", { name: /Sık sorulan sorular/ })).toBeNull()
+    expect(within(general).queryByRole("button", { name: /Yaklaşan kalkışlar/ })).toBeNull()
   })
 
   it("is kept in the tree while its flag is off, marked off and saying why", () => {
-    const doc: LayoutDocument = { ...DOC, home: [newHomeSection("faq", "sorular001")] }
+    const doc: LayoutDocument = { ...DOC, home: [newHomeSection("departures", "kalkislar01")] }
     const tree = (flags: SectionFlags) =>
       withFlags(
         flags,

@@ -12,14 +12,18 @@ const DISC: Readonly<Record<CategoryIconsView["disc"], string>> = {
   line: "border border-rule bg-transparent text-text",
 }
 
+/** Up to this many discs stand together in the row's middle instead of spreading to its ends. */
+const FEW = 4
+
 /**
  * The categories' icon row (adr/0077 §10 Ek, "İkonlu sıra"): each category
  * a round disc holding the icon the shop picked for it, else the
  * category's own picture filling the disc, else its name's first letter;
  * its name under the disc (and its count while the shop shows counts), the
  * whole a link to the category. From 1024 px the discs share the row
- * evenly; on a narrower screen they slide sideways with snapping and no
- * arrows (`phone: scroll`, bilesen-standardi §4.4 Ek: a row that only
+ * evenly (up to four stand together in its middle); on a narrower screen
+ * they slide sideways with snapping and no arrows (`phone: scroll`,
+ * bilesen-standardi §4.4 Ek: a row that only
  * overflows on a narrow screen is no carousel), or wrap onto more rows
  * (`wrap`). The icon and the picture are for the eye (alt empty): the name
  * says it.
@@ -49,7 +53,9 @@ export function CategoryIcons({
         <ul
           data-variant="icons"
           className={cn(
-            "flex gap-x-(--gap-columns) gap-y-(--gap-rows) lg:flex-wrap lg:justify-between",
+            "flex gap-x-(--gap-columns) gap-y-(--gap-rows) lg:flex-wrap",
+            // A few discs stand together in the middle, a disc's width apart; more share the row
+            view.items.length <= FEW ? "lg:justify-center lg:gap-x-28" : "lg:justify-between",
             scroll
               ? "gf-rail -mx-(--gutter) overflow-x-auto scroll-px-(--gutter) px-(--gutter) lg:mx-0 lg:overflow-visible lg:px-0"
               : "flex-wrap justify-center"

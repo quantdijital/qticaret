@@ -33,6 +33,8 @@ const BARE = [
   "frame/QuickViewDialog.tsx",
   "frame/SearchDrop.tsx",
   "frame/Sheet.tsx",
+  // adr/0077 §6: the search calendar, a sheet on a phone and a dialog from 768 px
+  "parts/DatePicker.tsx",
   "parts/QuickAdd.tsx",
   "parts/QuickViewButton.tsx",
   "product/Installments.tsx",

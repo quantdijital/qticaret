@@ -45,7 +45,7 @@ const slot = (
 })
 
 describe("bookingCardFactOf", () => {
-  it("gives the nearest departure on sale and the lowest paying price over the sold ones", () => {
+  it("gives the nearest departure on sale and the main category's lowest price over the sold ones, not a cheaper child's", () => {
     const fact = bookingCardFactOf(
       tour,
       bases,
@@ -54,7 +54,7 @@ describe("bookingCardFactOf", () => {
       NOW
     )
     expect(fact).toEqual({
-      from_price: 900,
+      from_price: 1500,
       currency_code: "try",
       next_departure: new Date(NOW.getTime() + 48 * HOUR).toISOString(),
       timezone: "Europe/Istanbul",
@@ -90,7 +90,7 @@ describe("bookingCardFactOf", () => {
 
   it("keeps the base price without a departure on sale, and no departure", () => {
     const fact = bookingCardFactOf(tour, bases, [slot("late", 2)], "try", NOW)
-    expect(fact).toMatchObject({ from_price: 900, next_departure: null })
+    expect(fact).toMatchObject({ from_price: 1500, next_departure: null })
   })
 
   it("says no price when no category has one, and never prices a difference in another currency", () => {
@@ -128,7 +128,7 @@ describe("bookingCardFactOf", () => {
       true
     )
     expect(fact).toMatchObject({
-      from_price: 900,
+      from_price: 1500,
       next_departure: new Date(NOW.getTime() + 48 * HOUR).toISOString(),
       left: 3,
       in_range: true,
@@ -143,5 +143,23 @@ describe("bookingCardFactOf", () => {
     const plain = bookingCardFactOf(tour, bases, [slot("s1", 48)], "try", NOW)
     expect(plain).not.toHaveProperty("left")
     expect(plain).not.toHaveProperty("in_range")
+  })
+
+  it("prices the main category by the shop's order, the next one when it has no price", () => {
+    const ranked: DatedCardProduct = {
+      ...tour,
+      variants: [
+        { id: "child", variant_rank: 1 },
+        { id: "infant", variant_rank: 2 },
+        { id: "adult", variant_rank: 0 },
+      ],
+    }
+    const slots = [slot("s1", 48, { price_adjustments: { adult: -20_000 } }), slot("s2", 96)]
+    // The adult ranks first: its cheaper departure, not the child's lower base
+    expect(bookingCardFactOf(ranked, bases, slots, "try", NOW)?.from_price).toBe(1300)
+    // The adult has no price: the child speaks
+    const noAdult = new Map(bases)
+    noAdult.set("adult", null)
+    expect(bookingCardFactOf(ranked, noAdult, slots, "try", NOW)?.from_price).toBe(900)
   })
 })

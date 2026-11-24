@@ -9,6 +9,7 @@ import { lookOf } from "@qticaret/types/section-look"
 import {
   headerMenuImagesOf,
   headerSearchStyleOf,
+  productImageRatioOf,
   variantOf,
 } from "@qticaret/types/section-variants"
 import {
@@ -159,11 +160,16 @@ export function footerBarOf(
   }
 }
 
-export const productMainOf = (main: Main): ProductMainView => ({
-  id: main?.product_main.id ?? "mainproduct",
-  variant: variantOf("product_main", main?.product_main.variant),
-  ...withLook(main?.product_main.look),
-})
+export const productMainOf = (main: Main): ProductMainView => {
+  const ratio = productImageRatioOf(main?.product_main.image_ratio)
+  return {
+    id: main?.product_main.id ?? "mainproduct",
+    variant: variantOf("product_main", main?.product_main.variant),
+    // The square is the page as before: no field
+    ...(ratio === "square" ? {} : { imageRatio: ratio }),
+    ...withLook(main?.product_main.look),
+  }
+}
 
 export const categoryMainOf = (main: Main): CategoryMainView => ({
   id: main?.category_main.id ?? "maincategory",

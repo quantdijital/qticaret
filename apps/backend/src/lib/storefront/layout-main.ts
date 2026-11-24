@@ -153,6 +153,10 @@ export function mainSectionsOf<L>(
       id: product.id,
       type: product.type,
       variant: product.variant,
+      // Only when the shop chose a shape other than the square: a block left alone prints as before
+      ...(product.image_ratio && product.image_ratio !== "square"
+        ? { image_ratio: product.image_ratio }
+        : {}),
       ...lookOf(product),
     },
     category_main: {

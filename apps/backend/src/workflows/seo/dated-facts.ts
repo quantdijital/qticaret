@@ -63,6 +63,7 @@ export async function datedFactsOf(
     fields: [
       "id",
       "variants.id",
+      "variants.variant_rank",
       "product_extension.booking_mode",
       "bookable.id",
       "bookable.cutoff_hours",

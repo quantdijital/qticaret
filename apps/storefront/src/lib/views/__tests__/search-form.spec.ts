@@ -90,6 +90,14 @@ describe("searchFormView", () => {
     expect(empty.words).not.toBeNull()
   })
 
+  it("hints the words field with the shop's own line, else the storefront's", () => {
+    const own = { ...SEARCH_FORM_DEFAULTS, placeholder: "Nereye gitmek istersiniz?" }
+    const hinted = searchFormView(source({ settings: own }), EMPTY_VALUES, t)
+    expect(hinted.words?.placeholder).toBe("Nereye gitmek istersiniz?")
+    const plain = searchFormView(source({ settings: SEARCH_FORM_DEFAULTS }), EMPTY_VALUES, t)
+    expect(plain.words?.placeholder).toBe(t("search.placeholder"))
+  })
+
   it("shows a search's own values chosen, its words carried unseen beside a where field", () => {
     const form = searchFormView(
       source(),

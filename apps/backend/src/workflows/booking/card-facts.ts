@@ -5,9 +5,9 @@ import {
   adjustmentOf,
   adjustmentProblem,
   bookingUnitPrice,
-  paxOf,
   salesClosed,
 } from "../../lib/booking/cart-lines"
+import { payingCategoryIds } from "../../lib/booking/categories"
 import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
 import type { DepartureDates, SlotAvailability } from "../../modules/booking/service"
@@ -17,7 +17,7 @@ type Container = Pick<MedusaContainer, "resolve">
 
 /**
  * What a dated product's card says (adr/0076 §10, Ek "D5 takip: kart
- * fiyatı"): the lowest price a paying place sells at, in the currency's
+ * fiyatı"): the lowest price the main paying category sells at, in the currency's
  * amount ("1750.5"), and the nearest departure still on sale with a place
  * free; each null when there is none. Worked out on the server, a guest's
  * price, as the product page's departures are.
@@ -48,7 +48,7 @@ export interface CardWindow {
 /** A dated product as the card facts read it. */
 export interface DatedCardProduct {
   id: string
-  variants?: ({ id: string } | null)[] | null
+  variants?: ({ id: string; variant_rank?: number | null } | null)[] | null
   product_extension?: { booking_mode?: string | null } | null
   bookable?:
     | {
@@ -64,19 +64,18 @@ export interface DatedCardProduct {
 /** Kuruş as the currency's amount a shopper reads (1750.5), the card's unit. */
 export const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 
-/** Its paying price categories (an infant who takes no place is not a "from" price). */
+/** Its paying price categories, the main one first (an infant who takes no place is not a "from" price). */
 export function payingVariants(product: DatedCardProduct): string[] {
-  const ids = (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : []))
-  const paying = ids.filter((id) => paxOf(product.bookable?.pax_by_variant, id) > 0)
-  // A product whose every category takes no place still has a price to show
-  return paying.length > 0 ? paying : ids
+  return payingCategoryIds(product.variants, product.bookable?.pax_by_variant)
 }
 
 /**
- * What a paying place sells at on a departure with these differences
- * (none: the base prices alone), one price per paying category: its base
- * plus the departure's difference. A category without a base price, or
- * whose difference this currency cannot take, has none.
+ * What a place sells at on a departure with these differences (none: the
+ * base prices alone): the main paying category's base plus the
+ * departure's difference (adr/0076 Ek "kart fiyatı ana kategoriden": the
+ * adult's, not a cheaper child's). A category without a base price, or
+ * whose difference this currency cannot take, has none and the next one
+ * in the shop's order speaks; none at all: no price. One price or none.
  */
 export function payingPricesAt(
   product: DatedCardProduct,
@@ -84,20 +83,23 @@ export function payingPricesAt(
   adjustments: Record<string, number> | null,
   currencyCode: string
 ): Kurus[] {
-  return payingVariants(product).flatMap((variantId) => {
+  for (const variantId of payingVariants(product)) {
     const base = bases.get(variantId)
     if (base === null || base === undefined) {
-      return []
+      continue
     }
     const adjustment = adjustmentOf(adjustments, variantId)
-    return adjustmentProblem(currencyCode, adjustment) ? [] : [bookingUnitPrice(base, adjustment)]
-  })
+    if (!adjustmentProblem(currencyCode, adjustment)) {
+      return [bookingUnitPrice(base, adjustment)]
+    }
+  }
+  return []
 }
 
 /**
  * A dated card's fact from its base prices and its open slots (by start):
  * the first slot whose sales are not closed is the next departure; the
- * from price is the lowest over those slots and the paying categories
+ * from price is the lowest over those slots of the main paying category
  * (each slot's difference added), or over the base prices without one.
  */
 export function bookingCardFactOf(

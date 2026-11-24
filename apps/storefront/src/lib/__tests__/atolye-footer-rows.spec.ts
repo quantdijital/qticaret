@@ -291,6 +291,14 @@ describe("the free rows footer", () => {
     }
   })
 
+  it("draws no empty legal strip for a shop with neither a legal text nor an identity line", () => {
+    const bare = draw(
+      shopWith([], { legalLinks: [], identityLines: [], companyTitle: null, etbisQr: null })
+    )
+    expect(bare).not.toContain('data-footer-legal=""')
+    expect(bare).toContain('href="/cerez-tercihleri"')
+  })
+
   it("leaves the ways to pay out of the bottom line when the shop turns them off", () => {
     const marks = { paymentMarks: [{ key: "bank_transfer", label: "Havale / EFT", logo: null }] }
     expect(draw(shopWith([], marks))).toContain('<ul aria-label="Ödeme seçenekleri"')

@@ -225,6 +225,12 @@ export const headerBar = z.discriminatedUnion(
   VARIANT_ERROR
 )
 
+/**
+ * The gallery's picture shape (`@qticaret/types`' `PRODUCT_IMAGE_RATIOS`):
+ * `square` (today's, the default), `landscape` 4:3 or `portrait` 3:4.
+ */
+export const PRODUCT_IMAGE_RATIOS = ["square", "landscape", "portrait"] as const
+
 /** The product's own block: its gallery and buying column, above the group's other sections. */
 export const productMain = z
   .object({
@@ -232,6 +238,8 @@ export const productMain = z
     look: sectionLook.optional(),
     type: z.literal("product_main"),
     variant: defaultVariant("product_main"),
+    // Left out: square, as every block saved before it
+    image_ratio: z.enum(PRODUCT_IMAGE_RATIOS, MAIN_ERROR).optional(),
   })
   .strict()
 

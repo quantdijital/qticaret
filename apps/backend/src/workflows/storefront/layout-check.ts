@@ -125,6 +125,15 @@ export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: s
   }
   // A rail's or a product page's related products: their category, collection or choice
   // (each of a columns rail's lists too)
+  // Upcoming departures' category or collection (adr/0077 §10)
+  if (section.type === "departures") {
+    const { source } = section
+    return source.kind === "category"
+      ? [as("category")(source.category_id)]
+      : source.kind === "collection"
+        ? [as("collection")(source.collection_id)]
+        : []
+  }
   if (section.type === "products" || section.type === "related_products") {
     const sources =
       section.type === "products"

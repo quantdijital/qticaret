@@ -12,6 +12,7 @@ import type {
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
+  ProductImageRatio,
   ProductMainVariant,
 } from "./section-variants.js"
 
@@ -106,6 +107,8 @@ export interface StoreMainSections {
     id: string
     type: "product_main"
     variant: ProductMainVariant
+    /** The gallery's picture shape; left out: the square (an older backend, or the shop left it). */
+    image_ratio?: ProductImageRatio
     look?: SectionLook
   }
   category_main: {

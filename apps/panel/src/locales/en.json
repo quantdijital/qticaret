@@ -3615,6 +3615,19 @@
       "blockedIn_one": "Discount not struck through on {{count}} variant",
       "blockedIn_other": "Discount not struck through on {{count}} variants"
     },
+    "badges": {
+      "title": "Product badges",
+      "description": "A small badge at the top left of the product card's photo. A card shows one: the product's own, else Best seller, else New.",
+      "manual": "The product's own badge",
+      "manualHint": "The short text you write on the product's page (e.g. \"Limited\").",
+      "bestSeller": "Best seller",
+      "bestSellerHint": "On products sold at least this many times in the last 30 days.",
+      "bestSellerMin": "Units sold (30 days)",
+      "new": "New",
+      "newHint": "On products added within this many days.",
+      "newDays": "Days",
+      "numberInvalid": "Enter a valid number."
+    },
     "catalog": {
       "card": "Catalog details",
       "hint": "Used in search results and product feeds.",
@@ -3639,6 +3652,9 @@
       "withdrawalExcludedHint": "On a physical product it is the sealed-goods warning (MSY art. 15/1-ç): the return can be requested, and one that arrives with its protective seal opened is refused at receipt. A digital product or a service stays outside the right outright (art. 15/1-ğ, h). For a made-to-order good (art. 15/1-b), mark its add-on \"Outside the right of withdrawal\".",
       "giftCard": "Gift card",
       "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
+      "badge": "Product badge",
+      "badgeHint": "Shown on the card's photo, e.g. \"Limited\". {{max}} characters at most; leave empty for none.",
+      "badgeTooLong": "{{max}} characters at most.",
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },
@@ -8986,6 +9002,10 @@
           "name": "Numbered steps",
           "description": "3–6 steps of a process in order, numbered: a title, a short intro and an optional single link under them."
         },
+        "departures": {
+          "name": "Upcoming departures",
+          "description": "Your dated products' nearest departures: date, tour name, places left and price; the storefront reads them live."
+        },
         "search_box": {
           "name": "Search box",
           "description": "The shop's search box, with an optional title and short intro. Its fields are chosen in Theme › Search box."
@@ -9215,7 +9235,8 @@
         "faq": "Frequently asked questions",
         "related_products": "Related products",
         "price_bands": "Shop by price",
-        "steps": "How it works"
+        "steps": "How it works",
+        "departures": "Upcoming departures"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -9813,6 +9834,10 @@
             "label": "Where field",
             "hint": "The attribute a visitor picks (e.g. region, city). Only filterable attributes with choices are listed.",
             "none": "Word box (no attribute)"
+          },
+          "placeholder": {
+            "label": "Word box hint",
+            "hint": "Shown in the word box before a search (e.g. \"Where would you like to go?\"). Empty: \"Search products, categories or brands\"."
           },
           "show_category": {
             "label": "Category field",
@@ -11169,6 +11194,26 @@
           "plain": "1, 2"
         }
       },
+      "departures": {
+        "intro": "Intro",
+        "source": "Departures",
+        "sourceTerm": "source",
+        "sourceHint": "The nearest departures on sale with places left, by date; a tour at most twice.",
+        "sources": {
+          "all": "Every dated product",
+          "category": "A category's products",
+          "collection": "A collection's products"
+        },
+        "limitTerm": "limit",
+        "limitHint": "Between {{min}} and {{max}} departures.",
+        "layout": {
+          "label": "Layout",
+          "term": "layout",
+          "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
+          "list": "List",
+          "cards": "Cards"
+        }
+      },
       "searchBox": {
         "titleHint": "Left empty, the box shows without a title.",
         "intro": "Intro"
@@ -11328,6 +11373,16 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        }
+      },
+      "productMain": {
+        "image_ratio": {
+          "label": "Image ratio",
+          "term": "image ratio",
+          "hint": "The shape of the large picture on the product page. Thumbnails stay square.",
+          "square": "Square",
+          "landscape": "Landscape 4:3",
+          "portrait": "Portrait 3:4"
         }
       }
     },

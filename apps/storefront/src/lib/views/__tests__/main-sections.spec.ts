@@ -122,6 +122,18 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     expect(productMainOf(undefined)).toEqual({ id: "mainproduct", variant: "standard" })
   })
 
+  it("gives the gallery the shape the shop chose, and none for the square or one off the list", () => {
+    const shaped = (image_ratio: unknown) =>
+      productMainOf({
+        ...MAIN,
+        product_main: { ...MAIN.product_main, image_ratio } as StoreMainSections["product_main"],
+      })
+    expect(shaped("landscape").imageRatio).toBe("landscape")
+    expect(shaped("portrait").imageRatio).toBe("portrait")
+    expect(shaped("square")).not.toHaveProperty("imageRatio")
+    expect(shaped("wide")).not.toHaveProperty("imageRatio")
+  })
+
   it("gives the catalog header its settings, the link named and the tree only with its button", () => {
     const t = (key: string) => (key === "menu.system.sale" ? "Kampanyalar" : key)
     const tree = [{ label: "Bıçaklar", path: "/bicaklar", image: null, children: [] }]

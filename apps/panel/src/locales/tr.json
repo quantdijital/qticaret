@@ -3615,6 +3615,19 @@
       "blockedIn_one": "{{count}} varyantta indirim üstü çizili gösterilmiyor",
       "blockedIn_other": "{{count}} varyantta indirim üstü çizili gösterilmiyor"
     },
+    "badges": {
+      "title": "Ürün rozetleri",
+      "description": "Ürün kartında görselin sol üstünde küçük bir rozet. Kartta tek rozet görünür: ürünün kendi rozeti, yoksa Çok satan, yoksa Yeni.",
+      "manual": "Ürünün kendi rozeti",
+      "manualHint": "Ürün sayfasında yazdığınız kısa metin (ör. \"Sınırlı\").",
+      "bestSeller": "Çok satan",
+      "bestSellerHint": "Son 30 günde en az bu kadar satılan ürünlerde.",
+      "bestSellerMin": "Satış adedi (30 gün)",
+      "new": "Yeni",
+      "newHint": "Bu kadar gün içinde eklenen ürünlerde.",
+      "newDays": "Gün",
+      "numberInvalid": "Geçerli bir sayı girin."
+    },
     "catalog": {
       "card": "Katalog bilgileri",
       "hint": "Arama sonuçları ve ürün listelerinde kullanılır.",
@@ -3639,6 +3652,9 @@
       "withdrawalExcludedHint": "Fiziksel üründe mühürlü ürün uyarısıdır (MSY md. 15/1-ç): iade talebi alınır, koruyucu ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmet ise cayma hakkı dışında kalır (md. 15/1-ğ, h). Kişiye özel hazırlanan ürün (md. 15/1-b) için ek seçeneği \"Cayma dışı\" işaretleyin.",
       "giftCard": "Hediye kartı",
       "giftCardHint": "Varyantlar kartın tutarlarıdır. Ödeme alınınca her adet için bir kart üretilir ve alıcıya e-postayla gider. Ürün dijital olur, kargo gerekmez; varyantlarda stok takibini kapatmanız önerilir.",
+      "badge": "Ürün rozeti",
+      "badgeHint": "Kartta görselin üstünde görünür, ör. \"Sınırlı\". En çok {{max}} karakter; boş bırakırsanız rozet olmaz.",
+      "badgeTooLong": "En çok {{max}} karakter.",
       "giftCardFeatures": "Özelliklere git",
       "kindGiftCard": "Hediye kartı dijital üründür; türü değiştirilemez."
     },
@@ -8986,6 +9002,10 @@
           "name": "Numaralı adımlar",
           "description": "Bir işin 3–6 adımı sırayla, numaralarıyla: başlık, kısa giriş ve isterseniz altında tek bağlantı."
         },
+        "departures": {
+          "name": "Yaklaşan kalkışlar",
+          "description": "Tarihli ürünlerinizin en yakın kalkışları: tarih, tur adı, kalan yer ve fiyat; vitrin her açılışta güncel okur."
+        },
         "search_box": {
           "name": "Arama kutusu",
           "description": "Mağazanın arama kutusu, isterseniz başlık ve kısa girişle. Alanları Tema › Arama kutusu'ndan seçilir."
@@ -9215,7 +9235,8 @@
         "faq": "Sık sorulan sorular",
         "related_products": "Benzer ürünler",
         "price_bands": "Fiyata göre alışveriş",
-        "steps": "Nasıl işler?"
+        "steps": "Nasıl işler?",
+        "departures": "Yaklaşan kalkışlar"
       },
       "fields": {
         "eyebrow": "Üst satır",
@@ -9813,6 +9834,10 @@
             "label": "Nereye alanı",
             "hint": "Ziyaretçinin seçeceği nitelik (ör. bölge, şehir). Yalnız filtrelenebilir ve seçenekli nitelikler listelenir.",
             "none": "Kelime kutusu (nitelik yok)"
+          },
+          "placeholder": {
+            "label": "Kelime kutusundaki ipucu",
+            "hint": "Aramadan önce kelime kutusunda görünür (ör. \"Nereye gitmek istersiniz?\"). Boşsa: \"Ürün, kategori veya marka ara\"."
           },
           "show_category": {
             "label": "Kategori alanı",
@@ -11169,6 +11194,26 @@
           "plain": "1, 2"
         }
       },
+      "departures": {
+        "intro": "Giriş",
+        "source": "Kalkışlar",
+        "sourceTerm": "source",
+        "sourceHint": "Satışta olan, yeri kalmış en yakın kalkışlar tarih sırasıyla; bir tur en çok iki kez.",
+        "sources": {
+          "all": "Tüm tarihli ürünler",
+          "category": "Bir kategorinin ürünleri",
+          "collection": "Bir koleksiyonun ürünleri"
+        },
+        "limitTerm": "limit",
+        "limitHint": "{{min}} ile {{max}} kalkış arası.",
+        "layout": {
+          "label": "Görünüm",
+          "term": "layout",
+          "hint": "Liste: tarih kutusu, tur adı, kalan yer ve fiyat satır satır. Kartlar: turun fotoğrafıyla.",
+          "list": "Liste",
+          "cards": "Kartlar"
+        }
+      },
       "searchBox": {
         "titleHint": "Boş bırakılırsa kutu başlıksız görünür.",
         "intro": "Giriş"
@@ -11328,6 +11373,16 @@
           "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
+        }
+      },
+      "productMain": {
+        "image_ratio": {
+          "label": "Görsel oranı",
+          "term": "image ratio",
+          "hint": "Ürün sayfasındaki büyük görselin biçimi. Küçük görseller kare kalır.",
+          "square": "Kare",
+          "landscape": "Yatay 4:3",
+          "portrait": "Dikey 3:4"
         }
       }
     },

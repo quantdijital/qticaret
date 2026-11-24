@@ -20,7 +20,7 @@ import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
 import { hydrateArticle, hydrateContact } from "./layout-hydrate-text"
 import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
-import { hydrateCollage, hydratePoints } from "./layout-hydrate-points"
+import { hydrateCollage, hydrateDepartures, hydratePoints } from "./layout-hydrate-points"
 import { hydrateBanner, hydratePosts } from "./layout-hydrate-band"
 import type { BandPick } from "./price-bands"
 
@@ -318,6 +318,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       }
     case "photo_collage":
       return hydrateCollage(section, { fill: (text) => fill(text, at.values), link, image })
+    case "departures":
+      return hydrateDepartures(section, { fill: (text) => fill(text, at.values), link })
     case "contact":
       return hydrateContact(section, at)
     case "payment_facts":
