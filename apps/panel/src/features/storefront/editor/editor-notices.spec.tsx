@@ -1,18 +1,32 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { REPORT_KEY } from "@/features/storefront/gallery/api"
 import type { ApplyReport } from "@/features/storefront/gallery/api"
 import { EditorNotices } from "./editor-notices"
+import { GoneRecordsContext } from "./gone-records-context"
+import { DOC } from "./theme-editor.fixtures"
 
-function notices(report: ApplyReport | null, pendingMenus: unknown[] | null = null) {
+function notices(
+  report: ApplyReport | null,
+  pendingMenus: unknown[] | null = null,
+  gone: ReadonlySet<string> = new Set(),
+  onOpenSection = vi.fn()
+) {
   const client = new QueryClient()
   client.setQueryData(REPORT_KEY, report)
   render(
     <QueryClientProvider client={client}>
-      <EditorNotices pendingMenus={pendingMenus} onDropMenus={vi.fn()} />
+      <GoneRecordsContext.Provider value={gone}>
+        <EditorNotices
+          doc={DOC}
+          onOpenSection={onOpenSection}
+          pendingMenus={pendingMenus}
+          onDropMenus={vi.fn()}
+        />
+      </GoneRecordsContext.Provider>
     </QueryClientProvider>
   )
   return client
@@ -116,5 +130,24 @@ describe("EditorNotices", () => {
 
     expect(screen.queryByText(/taslağa uygulandı/)).toBeNull()
     expect(screen.getAllByRole("status")).toHaveLength(1)
+  })
+
+  it("says a section shows a deleted record and opens it from the note (warn, don't block)", async () => {
+    const user = userEvent.setup()
+    const onOpen = vi.fn()
+    notices(null, null, new Set(["girisbolumu"]), onOpen)
+
+    const note = screen.getByRole("status")
+    expect(note).toHaveTextContent(
+      "Bir bölümün gösterdiği kayıt (kategori, ürün, koleksiyon, marka ya da sayfa) silinmiş."
+    )
+    await user.click(within(note).getByRole("button"))
+    expect(onOpen).toHaveBeenCalledWith("girisbolumu")
+  })
+
+  it("draws no gone-record note while every record is there", () => {
+    notices(null)
+
+    expect(screen.queryByRole("status")).toBeNull()
   })
 })

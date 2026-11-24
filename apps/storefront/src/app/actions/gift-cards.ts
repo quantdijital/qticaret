@@ -7,7 +7,7 @@ import { formatLira } from "@qticaret/ui"
 import type { ActionResult, GiftBalanceResult } from "@qticaret/ui"
 import { addGiftLine, giftCardsOn, saveGiftLine } from "@/lib/cart/gift"
 import type { GiftInput } from "@/lib/cart/gift"
-import { challengeOf } from "@/lib/checkout/pay"
+import { gateAsk, gated } from "@/lib/store-api/gate"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
@@ -159,14 +159,14 @@ export async function checkGiftCardBalance(
   if (!parsed.success) {
     return { ok: false, error: "gift_card.code_invalid", ...NO_BALANCE }
   }
-  const { code, challenge } = parsed.data
+  const { code } = parsed.data
   try {
     const answer = await storeCall<{ balance: number; currency_code: string }>(
       "/store/gift-cards/balance",
       {
         method: "POST",
         body: { code },
-        ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+        ...gated(form),
       }
     )
     const amount =
@@ -175,9 +175,9 @@ export async function checkGiftCardBalance(
         : `${String(answer.balance)} ${answer.currency_code.toUpperCase()}`
     return { ok: true, error: null, balance: t("gift.balance_result", { amount }), challenge: null }
   } catch (error) {
-    const asked = challengeOf(error)
+    const asked = gateAsk(error)
     if (asked) {
-      return { ok: false, error: null, balance: null, challenge: asked }
+      return { ...asked, balance: null }
     }
     if (isStoreApiError(error) && error.status === 404) {
       return { ok: false, error: "gift_card.unknown", ...NO_BALANCE }

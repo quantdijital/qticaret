@@ -85,6 +85,27 @@ describe("subscribeNewsletter", () => {
     expect(store.storeCall).not.toHaveBeenCalled()
   })
 
+  it("past the limit, hands Turnstile's ask back and sends its token next (adr/0044 Ek 2026-11-24)", async () => {
+    store.storeCall.mockRejectedValueOnce(
+      new StoreApiError(428, "fraud.turnstile_required", null, {
+        turnstile: { action: "newsletter" },
+      })
+    )
+    await expect(send({ email: "ayse@example.com", consent: "1" })).resolves.toEqual({
+      ok: false,
+      error: null,
+      challenge: null,
+      turnstile: { action: "newsletter", failed: false },
+    })
+
+    await send({ email: "ayse@example.com", consent: "1", turnstile: "0.tok_en-1" })
+    expect(store.storeCall).toHaveBeenLastCalledWith("/store/newsletter", {
+      method: "POST",
+      body: { email: "ayse@example.com", text_version: "bulten-1" },
+      headers: { "x-turnstile-token": "0.tok_en-1" },
+    })
+  })
+
   it("hands a 428's challenge back to the form", async () => {
     const challenge = { token: "t", salt: "s", bits: 12 }
     store.storeCall.mockRejectedValue(new StoreApiError(428, null, null, { challenge }))

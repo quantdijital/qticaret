@@ -7,8 +7,7 @@ import { CONTACT_MESSAGES_MODULE } from "../../src/modules/contact-messages"
 import type ContactMessagesModuleService from "../../src/modules/contact-messages/service"
 import { contactMessagesFor, eraseContactMessages } from "../../src/workflows/contact/customer-data"
 import { createAdminUser } from "../helpers/admin"
-import { solved } from "../helpers/challenge"
-import type { GivenChallenge } from "../helpers/challenge"
+import { NO_TURNSTILE } from "../helpers/challenge"
 import { registerCustomer } from "../helpers/customer"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
@@ -40,7 +39,7 @@ medusaIntegrationTestRunner({
 
     const send = (body: Record<string, unknown>, headers: Record<string, string> = {}) =>
       settle(
-        http.post<{ status?: string; message?: string; challenge?: GivenChallenge }>(
+        http.post<{ status?: string; message?: string; turnstile?: { action: string } }>(
           "/store/contact-messages",
           body,
           { headers: { ...storefront.headers, ...headers } }
@@ -194,16 +193,18 @@ medusaIntegrationTestRunner({
       }
     })
 
-    it("asks a proof of work past the first message an hour from one address", async () => {
+    it("asks Turnstile past the first message an hour from one address (adr/0044 Ek 2026-11-24)", async () => {
       // Per-address limits at their real size here (integration tests grow them)
       process.env["RATE_LIMIT_RELAXED"] = "0"
       const email = `ispat-${String(Date.now())}@example.com`
-      let asked = await send(message(email))
+      let asked = await send(message(email), NO_TURNSTILE)
       if (asked.status === 202) {
-        asked = await send(message(email))
+        asked = await send(message(email), NO_TURNSTILE)
       }
-      expect([asked.status, asked.data.message]).toEqual([428, "fraud.challenge_required"])
-      expect((await send(message(email), solved(asked.data.challenge))).status).toBe(202)
+      expect([asked.status, asked.data.message]).toEqual([428, "fraud.turnstile_required"])
+      expect(asked.data.turnstile).toEqual({ action: "contact" })
+      // With the token a test site key's widget gives (sent by default)
+      expect((await send(message(email))).status).toBe(202)
     })
 
     it("lets the team mark one answered, operations too but not read-only, and the admin delete it", async () => {

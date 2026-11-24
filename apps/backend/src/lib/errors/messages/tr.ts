@@ -1565,6 +1565,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin.",
   "fraud.challenge_required":
     "Güvenlik doğrulaması gerekiyor; sayfa bunu kendisi yapar, yeniden deneyin.",
+  "fraud.turnstile_required":
+    "Güvenlik doğrulaması gerekiyor; doğrulamayı tamamlayıp yeniden deneyin.",
+  "fraud.turnstile_failed": "Güvenlik doğrulaması geçilemedi; sayfayı yenileyip yeniden deneyin.",
   "fraud.refused": "Bu işlem şu anda yapılamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.checkout_refused": "Bu sipariş şu anda tamamlanamıyor; lütfen mağazayla iletişime geçin.",
   "fraud.velocity": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",

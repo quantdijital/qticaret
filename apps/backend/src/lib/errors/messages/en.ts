@@ -1564,6 +1564,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "auth.password_contains_email": "The password must not contain your e-mail's name.",
   "auth.password_breached": "This password appears in a known data breach; choose another.",
   "fraud.challenge_required": "A security check is needed; the page does it itself, try again.",
+  "fraud.turnstile_required": "A security check is needed; complete it and try again.",
+  "fraud.turnstile_failed": "The security check did not pass; refresh the page and try again.",
   "fraud.refused": "This cannot be done now; please contact the shop.",
   "fraud.checkout_refused": "This order cannot be completed now; please contact the shop.",
   "fraud.velocity": "Too many tries; try again a little later.",

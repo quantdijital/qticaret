@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./catalog": "./src/store/catalog.ts",
     "./storefront": "./src/store/storefront.ts",
+    "./turnstile": "./src/store/turnstile.ts",
     "./popups": "./src/store/popups.ts",
     "./style-kit": "./src/store/style-kit.ts",
     "./listing-text": "./src/store/listing-text.ts",
@@ -42,6 +43,7 @@
     "./section-departures": "./src/store/section-departures.ts",
     "./section-pages": "./src/store/section-pages.ts",
     "./editor-bridge": "./src/editor-bridge.ts",
+    "./panel-map": "./src/panel-map/index.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"

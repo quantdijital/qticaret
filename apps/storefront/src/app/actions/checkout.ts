@@ -23,7 +23,6 @@ import {
   shortOfMinimum,
 } from "@/lib/checkout/place-order"
 import {
-  challengeOf,
   completeCart,
   CREDIT_CHECKOUT,
   orderAccess,
@@ -32,6 +31,7 @@ import {
 } from "@/lib/checkout/pay"
 import type { PaymentSession } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { gateAsk, gateHeaders } from "@/lib/store-api/gate"
 import { storePost } from "@/lib/store-api/server"
 import { cardProviderOf } from "@/lib/views/checkout"
 import { afterAddressPath } from "@/lib/views/checkout-steps"
@@ -139,12 +139,13 @@ export async function placeOrder(
     }
     // The purchase is measured only within the cookie answer (F10.9); a refusal costs the order nothing
     await recordTracking(cart.id).catch(() => undefined)
-    const session = await startPayment(cart.id, input.provider_id, input.challenge ?? null)
+    const session = await startPayment(cart.id, input.provider_id, gateHeaders(form))
     next = await nextStep(cart.id, session)
   } catch (error) {
-    const challenge = challengeOf(error)
-    if (challenge) {
-      return { ok: false, error: null, challenge }
+    // Turnstile's token wanted or refused, a proof of work: the form answers and sends again
+    const asked = gateAsk(error)
+    if (asked) {
+      return asked
     }
     if (isStoreApiError(error) && error.messageKey === OUT_OF_STOCK) {
       // A unit another order took since it was put in the cart (adr/0026 Ek 2026-11-06): the cart names it
