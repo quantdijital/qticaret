@@ -11,6 +11,7 @@ const LOOKUP_ERRORS = [
   "fraud.velocity",
   "errors.too_many_requests",
   "errors.challenge_failed",
+  "errors.turnstile_failed",
 ]
 
 /**

@@ -33,6 +33,14 @@ export const RADIX_STYLE_HASHES = [
  */
 export const YOUTUBE_PLAYER_SOURCE = "https://www.youtube-nocookie.com/embed/"
 
+/**
+ * Cloudflare Turnstile (adr/0044 Ek 2026-11-24): its script, loaded by our
+ * nonce'd code only on a form that wants a token (`strict-dynamic` trusts
+ * it; the host is for browsers without), and the widget's frame. Its
+ * guidance names these two directives only.
+ */
+export const TURNSTILE_ORIGIN = "https://challenges.cloudflare.com"
+
 export interface FrameRules {
   /** Card providers' own pages a form may lead to (a checkout without script follows a 303 there). */
   formOrigins?: readonly string[]
@@ -97,7 +105,7 @@ export function contentSecurityPolicy(
     .join("")
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${tagScripts}${development ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${TURNSTILE_ORIGIN}${tagScripts}${development ? " 'unsafe-eval'" : ""}`,
     development ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     ...(development ? [] : [`style-src-attr 'unsafe-hashes' ${RADIX_STYLE_HASHES.join(" ")}`]),
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
@@ -105,8 +113,9 @@ export function contentSecurityPolicy(
     `media-src 'self' https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${tagConnects}${development ? " ws: http://localhost:*" : ""}`,
-    // A product's YouTube video (adr/0069 §8), framed only once pressed; the card providers' forms
-    `frame-src ${[YOUTUBE_PLAYER_SOURCE, ...frameOrigins].join(" ")}`,
+    // A product's YouTube video (adr/0069 §8), framed only once pressed; Turnstile's widget; the
+    // card providers' forms
+    `frame-src ${[YOUTUBE_PLAYER_SOURCE, TURNSTILE_ORIGIN, ...frameOrigins].join(" ")}`,
     "object-src 'none'",
     "base-uri 'self'",
     `form-action 'self'${formOrigins.length > 0 ? ` ${formOrigins.join(" ")}` : ""}`,

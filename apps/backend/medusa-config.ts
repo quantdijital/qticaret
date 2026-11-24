@@ -8,6 +8,7 @@ import { customerAuthProviders } from "./src/lib/auth/providers"
 import { assertCompiledPackages } from "./src/lib/control-plane/compiled-packages"
 import { assertControlPlaneConfigured } from "./src/lib/control-plane/env"
 import { isLocalEnv, parseEnv, s3Settings, sharedFileOrigins } from "./src/lib/env"
+import { assertTurnstileConfigured } from "./src/lib/security/turnstile/env"
 import { warnFakeProviders } from "./src/lib/fake-providers"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
 import { lockingModules, tenantNamespace } from "./src/lib/redis"
@@ -17,6 +18,8 @@ loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 const env = parseEnv()
 // adr/0061 §3.3 (Ek C9): a deployed shop starts managed by the control plane only
 assertControlPlaneConfigured(env)
+// adr/0044 Ek 2026-11-24: outside development and tests, Turnstile's keys or no start
+assertTurnstileConfigured(env)
 // adr/0061 Ek C10: deployed, the shared packages are their compiled copies
 assertCompiledPackages(isLocalEnv(env))
 const auth = customerAuthProviders(env)

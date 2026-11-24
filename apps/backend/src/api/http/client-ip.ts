@@ -1,3 +1,4 @@
+import { isIP } from "node:net"
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { parseEnv } from "../../lib/env"
 import { logger } from "../../lib/logging"
@@ -37,19 +38,39 @@ function vouched(req: MedusaRequest): { ip: string | null } | null {
 
 /**
  * The shopper's address for limits, fraud checks and evidence (adr/0046 §5):
- * the one the storefront's server signed, else the connection's own
+ * the one the storefront's server signed, else Cloudflare's when trusted
+ * (`cloudflareIp`), else the connection's own
  * (Express's `req.ip`, behind the trusted proxy; docs/04). A call the
  * storefront signed as "address unknown" falls back to the connection's
  * too (the storefront's own address), as an unsigned one always did; a
  * count that must not lump shoppers together asks `isShopperAddressUnknown`.
  */
 export function clientIp(req: MedusaRequest): string | null {
-  return vouched(req)?.ip ?? req.ip ?? req.socket.remoteAddress ?? null
+  return vouched(req)?.ip ?? cloudflareIp(req) ?? req.ip ?? req.socket.remoteAddress ?? null
+}
+
+let trustCloudflare: boolean | null = null
+
+/**
+ * Behind Cloudflare (adr/0044 Ek 2026-11-24) the connection's address is
+ * Cloudflare's edge; the visitor's is its `CF-Connecting-IP`. Believed only
+ * with `TRUST_CF_CONNECTING_IP=on`, set where the origin answers Cloudflare
+ * alone (F16): otherwise anyone could write the header. One valid address,
+ * else none.
+ */
+function cloudflareIp(req: MedusaRequest): string | null {
+  trustCloudflare ??= parseEnv().TRUST_CF_CONNECTING_IP === "on"
+  if (!trustCloudflare) {
+    return null
+  }
+  const value = req.headers["cf-connecting-ip"]
+  return typeof value === "string" && isIP(value.trim()) !== 0 ? value.trim() : null
 }
 
 /** Tests change the environment between runs. */
 export function resetClientIpSecret(): void {
   storefrontSecret = null
+  trustCloudflare = null
 }
 
 /** Whether the request came through our storefront's server, signed (an address or "unknown"). */

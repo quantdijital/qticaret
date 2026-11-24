@@ -27,13 +27,16 @@ export function StockAlert({
   words: AlertWords
 }) {
   const [done, setDone] = useState(false)
-  const { error, pending, checking, onSubmit } = useChallengeForm(async (state, form) => {
-    const result = await action(state, form)
-    if (result.ok) {
-      setDone(true)
-    }
-    return result
-  })
+  const { error, pending, checking, onSubmit, slot } = useChallengeForm(
+    async (state, form) => {
+      const result = await action(state, form)
+      if (result.ok) {
+        setDone(true)
+      }
+      return result
+    },
+    { action: "stock_alert" }
+  )
   if (done) {
     return (
       <p id={id} role="status" className="rounded-media gf-box p-4 text-sm font-semibold text-ok">
@@ -79,6 +82,7 @@ export function StockAlert({
           {words.submit}
         </button>
       </div>
+      {slot}
       <p role="alert" className="text-sm text-error empty:hidden">
         {error && (
           <span className="flex items-start gap-2">
