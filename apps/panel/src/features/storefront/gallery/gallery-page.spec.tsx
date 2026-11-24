@@ -114,7 +114,7 @@ describe("GalleryPage", () => {
     )
 
     expect(screen.getByRole("heading", { name: "Şu anki görünüm" })).toBeInTheDocument()
-    expect(screen.getByText("Sade · 1 Kas 2026 tarihinde yayınlandı")).toBeInTheDocument()
+    expect(screen.getByText("Sade · 1 Kas 2026 12:00 tarihinde yayınlandı")).toBeInTheDocument()
     expect(screen.getByText("Taslak yayındakiyle aynı")).toBeInTheDocument()
   })
 

@@ -7,7 +7,7 @@ import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
-import { formatDate } from "@qticaret/admin-ui/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import type { DesignGallery, PresetCard } from "./api"
 import { lookName, suggestedName } from "./design-name"
@@ -85,7 +85,7 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
                 <dt className="text-xs text-muted-foreground">{t(`${G}.liveLabel`)}</dt>
                 <dd className="font-medium">
                   {live.revision > 0 && live.published_at
-                    ? t(`${G}.live`, { name: liveName, date: formatDate(live.published_at) })
+                    ? t(`${G}.live`, { name: liveName, date: formatDateTime(live.published_at) })
                     : t(`${G}.neverLive`)}
                 </dd>
               </div>
