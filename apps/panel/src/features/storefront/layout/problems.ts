@@ -1,5 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
+import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
 import { LAYOUT_LIMITS as L, MARQUEE_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
@@ -123,6 +123,22 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "photo_collage":
       return collageProblems(section)
+    // Upcoming departures: their category or collection chosen, the intro's length (adr/0077 §10)
+    case "departures": {
+      const { source } = section
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["intro", textProblem(section.intro, DEPARTURES_LIMITS.intro)],
+        [
+          "source",
+          source.kind === "category" && source.category_id === ""
+            ? "categoryRequired"
+            : source.kind === "collection" && source.collection_id === ""
+              ? "collectionRequired"
+              : null,
+        ],
+      ]
+    }
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],

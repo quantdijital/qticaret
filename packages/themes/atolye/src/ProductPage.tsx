@@ -130,6 +130,7 @@ export function ProductPage({
                 openOn={view.galleryVariantId ?? null}
                 initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
                 words={galleryWords(t)}
+                {...(view.main?.imageRatio ? { ratio: view.main.imageRatio } : {})}
               />
             </div>
           </div>
@@ -203,7 +204,10 @@ export function ProductPage({
           <Community view={view} t={t} actions={actions} />
           {view.related.length > 0 && (
             <section aria-labelledby="benzer-urunler" className="flex flex-col gap-(--head-gap)">
-              <SectionHead id="benzer-urunler" title={t("product.related")} />
+              <SectionHead
+                id="benzer-urunler"
+                title={t(view.unshipped ? "product.related_plain" : "product.related")}
+              />
               <ProductGrid
                 products={view.related.slice(0, 8)}
                 t={t}

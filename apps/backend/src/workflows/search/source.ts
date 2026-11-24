@@ -5,7 +5,7 @@ import { searchFields } from "../../lib/search/document"
 import type { DocumentInput } from "../../modules/search-index/types"
 import { textOf } from "../seo/highlight"
 import type { HighlightValue } from "../seo/highlight"
-import { paxOf } from "../../lib/booking/cart-lines"
+import { payingCategoryIds } from "../../lib/booking/categories"
 import { indexedPrices } from "./prices"
 
 /**
@@ -58,6 +58,7 @@ export const SOURCE_FIELDS = [
   "variants.upc",
   "variants.manage_inventory",
   "variants.allow_backorder",
+  "variants.variant_rank",
   "variants.options.value",
   "variants.variant_extension.mpn",
   "variants.inventory_items.inventory.location_levels.available_quantity",
@@ -74,6 +75,7 @@ interface Variant {
   upc?: Maybe<string>
   manage_inventory?: Maybe<boolean>
   allow_backorder?: Maybe<boolean>
+  variant_rank?: Maybe<number>
   options?: Maybe<Maybe<{ value?: Maybe<string> }>[]>
   variant_extension?: Maybe<{ mpn?: Maybe<string> }>
   inventory_items?: Maybe<
@@ -111,18 +113,20 @@ const present = <T>(values: Maybe<Maybe<T>[]>): T[] =>
 
 /**
  * The variants a product's indexed price is the lowest of: all of them,
- * but a dated product's only those that take a place (an infant who
- * takes none is no "from" price, adr/0077 §5), unless none does. The
- * card prices a date search's departures; a seasonal difference between
- * the two is a known limit (adr/0077 §5).
+ * but a dated product's only its main paying category, the one its card
+ * prices (adr/0076 Ek "kart fiyatı ana kategoriden": not an infant who
+ * takes no place, nor a cheaper child, adr/0077 §5). The card prices a
+ * date search's departures; a seasonal difference between the two is a
+ * known limit (adr/0077 §5).
  */
 export function pricedVariantIds(product: ProductSource): string[] {
-  const ids = present(product.variants).flatMap((variant) => (variant.id ? [variant.id] : []))
   if (product.product_extension?.booking_mode !== "departure") {
-    return ids
+    return present(product.variants).flatMap((variant) => (variant.id ? [variant.id] : []))
   }
-  const paying = ids.filter((id) => paxOf(product.bookable?.pax_by_variant, id) > 0)
-  return paying.length > 0 ? paying : ids
+  const rows = present(product.variants).flatMap((variant) =>
+    variant.id ? [{ id: variant.id, variant_rank: variant.variant_rank ?? null }] : []
+  )
+  return payingCategoryIds(rows, product.bookable?.pax_by_variant).slice(0, 1)
 }
 
 const texts = (values: readonly Maybe<string>[]): string[] =>

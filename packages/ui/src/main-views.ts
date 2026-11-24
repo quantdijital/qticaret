@@ -148,6 +148,11 @@ export interface BackToTopView {
 export interface ProductMainView {
   id: string
   variant: ProductMainVariant
+  /**
+   * The gallery's picture shape the shop chose: `landscape` 4:3 or
+   * `portrait` 3:4; absent: the square (the page as drawn before it).
+   */
+  imageRatio?: "landscape" | "portrait"
   /** The steps the shop set (adr/0049 Ek 2026-11-14 §6); absent: the theme's own drawing. */
   look?: SectionLookView
 }

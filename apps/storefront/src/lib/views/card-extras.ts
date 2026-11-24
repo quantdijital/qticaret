@@ -1,4 +1,5 @@
 import type {
+  CardBadgeView,
   CardRatingView,
   CategoryCardView,
   CustomerPhotoView,
@@ -12,6 +13,7 @@ import type {
   ShopRatingView,
   Translate,
 } from "@qticaret/ui"
+import { cardBadge } from "./card-badge"
 import { withCardBooking } from "./card-booking"
 import { unrated } from "./card-shown"
 import type {
@@ -86,10 +88,18 @@ export function withCardFacts(
       ...withCardBooking(card, fact.booking, t),
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
+      // The shop's badge only when it has one: a card without stays as it was
+      ...badgeOf(fact, t),
     }
     // A backend before the stars says nothing of reviews: no empty stars for it
     return rating ? { ...read, rating } : fact.rating === undefined ? unrated(read) : read
   })
+}
+
+/** The card's badge field, present only with one. */
+function badgeOf(fact: StoreCardFacts, t: Translate): { badge?: CardBadgeView } {
+  const badge = cardBadge(fact.badge, t)
+  return badge ? { badge } : {}
 }
 
 const STARS = [5, 4, 3, 2, 1] as const

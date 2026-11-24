@@ -170,9 +170,9 @@ export const galleryWords = (t: Translate) => ({
 export type GalleryWords = ReturnType<typeof galleryWords>
 
 /** The description and specs block: its tabs' name and the description's own toggle. */
-export const infoWords = (t: Translate) => ({
+export const infoWords = (t: Translate, unshipped = false) => ({
   tabs: t("product.info_tabs"),
-  description: t("product.description"),
+  description: t(unshipped ? "product.description_plain" : "product.description"),
   specs: t("product.specs"),
   more: t("product.read_more"),
   less: t("product.read_less"),

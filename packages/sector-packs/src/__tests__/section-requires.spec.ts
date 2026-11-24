@@ -5,9 +5,6 @@ import type { PresetLayout } from "../index"
 // The contract's own file (`@qticaret/types`): the loader reads no runtime value from it
 const CONTRACT_FILE = join(__dirname, "../../../types/src/store/section-requires.ts")
 
-// The list is empty until the first flagged section (adr/0077 §10): a stand-in one
-const REQUIRES = { departures: "catalog.booking" }
-
 const layout = (type: string, onPage = false): PresetLayout =>
   onPage
     ? {
@@ -28,14 +25,15 @@ const pack = (flags: { key: string; enabled: boolean }[], presetLayout: PresetLa
 })
 
 describe("a preset's flagged sections (adr/0077 §8)", () => {
-  it("mirrors the contract's list", () => {
+  it("mirrors the contract's list, whose first flagged section is the departures", () => {
     const contract = jest.requireActual<{ SECTION_REQUIRES: unknown }>(CONTRACT_FILE)
     expect(SECTION_REQUIRES).toEqual(contract.SECTION_REQUIRES)
+    expect(SECTION_REQUIRES).toMatchObject({ departures: "catalog.booking" })
   })
 
   it("refuses a look laying one out in a pack that does not turn its flag on", () => {
     expect(() => {
-      checkPresetFlags(pack([], layout("departures")), REQUIRES)
+      checkPresetFlags(pack([], layout("departures")), SECTION_REQUIRES)
     }).toThrow(
       "travel/presets/rota: section departures needs flag catalog.booking, which flags.json does not turn on"
     )
@@ -43,7 +41,7 @@ describe("a preset's flagged sections (adr/0077 §8)", () => {
     expect(() => {
       checkPresetFlags(
         pack([{ key: "catalog.booking", enabled: false }], layout("departures", true)),
-        REQUIRES
+        SECTION_REQUIRES
       )
     }).toThrow("section departures needs flag catalog.booking")
   })
@@ -52,11 +50,11 @@ describe("a preset's flagged sections (adr/0077 §8)", () => {
     expect(() => {
       checkPresetFlags(
         pack([{ key: "catalog.booking", enabled: true }], layout("departures")),
-        REQUIRES
+        SECTION_REQUIRES
       )
     }).not.toThrow()
     expect(() => {
-      checkPresetFlags(pack([], layout("faq")), REQUIRES)
+      checkPresetFlags(pack([], layout("faq")), SECTION_REQUIRES)
     }).not.toThrow()
   })
 

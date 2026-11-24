@@ -13,8 +13,8 @@ import { updatePlatformSettingsWorkflow } from "../../src/workflows/platform-set
 jest.setTimeout(240 * 1000)
 
 const travel = sectorPack("travel") as SectorPack
-// A template, its five attributes, ten categories, two flags, three catalog defaults, a page
-const TRAVEL_ITEMS = 1 + 5 + 10 + 2 + 3 + 1
+// A template, its six attributes, ten categories, two flags, three catalog defaults, a page
+const TRAVEL_ITEMS = 1 + 6 + 10 + 2 + 3 + 1
 
 /**
  * adr/0076 §12: the travel pack turns on dated selling, sets what a new
