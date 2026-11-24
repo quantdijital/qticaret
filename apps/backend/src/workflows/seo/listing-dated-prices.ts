@@ -5,7 +5,7 @@ import { createTtlCache } from "../../lib/cache"
 import type { ListingQuery } from "../../lib/seo/facets"
 import { todayIn } from "../../lib/seo/facets-dated"
 import { bookingCardFacts } from "../booking/card-facts"
-import type { CardWindow, DatedCardProduct } from "../booking/card-facts"
+import type { CardWindow } from "../booking/card-facts"
 import { MAX_DATED_PRODUCTS, departureDatesOf } from "./listing-dated"
 
 /**
@@ -104,12 +104,7 @@ export async function datedPricesOf(
     fields: FIELDS,
     filters: { id: ids },
   })
-  const facts = await bookingCardFacts(
-    container,
-    data as DatedCardProduct[],
-    regionId ?? undefined,
-    window
-  )
+  const facts = await bookingCardFacts(container, data, regionId ?? undefined, window)
   const prices: Record<string, number> = {}
   for (const [id, fact] of facts) {
     if (fact.from_price !== null) {
