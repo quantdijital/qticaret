@@ -10342,6 +10342,10 @@
           "term": "link",
           "hint": "Menü çubuğunda ana menünün sonunda öne çıkan tek bağlantı (ör. Kampanyalar)."
         },
+        "action_button": {
+          "label": "Eylem düğmesi",
+          "hint": "Geniş ekranda sağda, sepetin yanında duran tek düğme (ör. Rezervasyon). Telefonda menünün başında. Boşsa düğme yok."
+        },
         "utility_bar": {
           "label": "Üst yardımcı şerit",
           "term": "top bar",
