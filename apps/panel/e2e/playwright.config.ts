@@ -6,6 +6,29 @@ const isCI = Boolean(process.env["CI"])
 const CI_REPORTERS: ReporterDescription[] = [["github"]]
 
 /**
+ * The CI's two e2e jobs (adr/0081 Ek 2026-11-25), split by measured time,
+ * not by count: group "1" is the files named here, group "2" every other
+ * file, so a new file runs without being listed. Worker seconds when they
+ * were chosen: a11y 410, scroll 145, dialogs 61 (616) against shell 276,
+ * smoke 95, layout 90, phone 84 and the rest 17 (562). Unset: every file.
+ */
+const GROUP_ONE = /(a11y|scroll|dialogs)\.e2e\.ts$/
+const EVERY_FILE = /\.e2e\.ts$/
+function groupFiles(group: string | undefined): { testMatch: RegExp; testIgnore?: RegExp } {
+  if (group === undefined || group === "") {
+    return { testMatch: EVERY_FILE }
+  }
+  if (group === "1") {
+    return { testMatch: GROUP_ONE }
+  }
+  if (group === "2") {
+    return { testMatch: EVERY_FILE, testIgnore: GROUP_ONE }
+  }
+  // A typo must not pass as a green run of no tests
+  throw new Error(`E2E_GROUP is "1", "2" or unset, not "${group}"`)
+}
+
+/**
  * The panel's e2e smoke tests (docs/07, docs/06): a temporary admin signs
  * in, the main screens open without errors, a few read-only flows work,
  * and axe finds no serious accessibility issue. They run against the
@@ -40,7 +63,7 @@ export default defineConfig({
     { name: "teardown", testMatch: /auth\.teardown\.ts/ },
     {
       name: "chromium",
-      testMatch: /\.e2e\.ts$/,
+      ...groupFiles(process.env["E2E_GROUP"]),
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: SESSION_FILE },
     },

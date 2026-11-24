@@ -5,8 +5,8 @@
 # group only the packages the push can reach run (scripts/ci-changes.sh).
 set -euo pipefail
 
-# "backend 2/3": the backend's tests are many (780 files), so they are cut
-# into shards, a job each
+# "backend 2/3": the backend's tests can be cut (scripts/ci-unit-groups.mjs)
+# into shards, a job each; today they are one job
 group="${1%% *}"
 shard=""
 [ "$1" != "$group" ] && shard="${1#* }"
