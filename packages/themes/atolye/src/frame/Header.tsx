@@ -1,5 +1,5 @@
 import { Heart, UserRound } from "lucide-react"
-import { drawnVariant, sectionMark } from "@qticaret/ui"
+import { drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -87,6 +87,9 @@ export function Header({
   const menu = menuWords(shop.categories, t)
   const search = searchOf(shop, t, searchSuggest)
   const account = accountOf(shop, t)
+  // The shop's action button (the catalog header's highlighted link, every header's): from
+  // 1024 px after the tools, on a phone first in the menu sheet; none: drawn as before it
+  const highlight = shop.headerBar?.highlight ?? null
 
   const sheet = (
     <MenuSheet
@@ -94,6 +97,7 @@ export function Header({
       topLinks={shop.topLinks}
       contact={shop.contact}
       pictures={pictures}
+      {...(highlight ? { highlight } : {})}
       words={{
         open: t("nav.open_menu"),
         title: t("nav.menu"),
@@ -149,6 +153,31 @@ export function Header({
       />
     </nav>
   )
+  const button = highlight && (
+    <a
+      href={highlight.path}
+      className="gf-btn gf-btn--small shrink-0 max-lg:hidden"
+      {...fieldMark(shop.editor, "highlight_link")}
+    >
+      {highlight.label}
+    </a>
+  )
+  // The tools with the button after them; without one, the tools alone as before it
+  const end = button ? (
+    centered ? (
+      <div className="flex items-center gap-2 justify-self-end">
+        {tools}
+        {button}
+      </div>
+    ) : (
+      <>
+        {tools}
+        {button}
+      </>
+    )
+  ) : (
+    tools
+  )
 
   return (
     <header
@@ -176,7 +205,7 @@ export function Header({
             logo={shop.logo}
             className="max-w-[calc(100vw-15rem)] justify-self-center lg:max-w-120"
           />
-          {tools}
+          {end}
         </Container>
       ) : (
         <Container
@@ -187,7 +216,7 @@ export function Header({
           <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
           {wideSearch("max-w-160", "end", "[--gf-search-open:40rem]")}
           {opener}
-          {tools}
+          {end}
         </Container>
       )}
       <SearchDrop {...search} title={t("search.title")} closeLabel={t("search.close")} />
