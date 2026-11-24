@@ -49,6 +49,8 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   // adr/0077 Ek: the posts' intro panel's covers, as the tiles'
   "sections/GuidesPanel.tsx": [0, 1],
   "sections/HeroCatalogParts.tsx": [0, 1],
+  // adr/0077 §9: the full image opening's photograph beside its words (behind them, the stage)
+  "sections/HeroFull.tsx": [1, 0],
   // adr/0077 §10: the photo collage's photographs, the reviews carousel's customer photo
   "sections/PhotoCollage.tsx": [1, 0],
   "sections/PriceBands.tsx": [0, 1],
@@ -85,7 +87,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     }
     expect(found).toEqual(WELLS)
     const total = Object.values(WELLS).reduce((sum, [a, b]) => sum + a + b, 0)
-    expect(total).toBe(34)
+    expect(total).toBe(35)
   })
 
   it("leaves the same tones on what is not a photograph's ground", () => {

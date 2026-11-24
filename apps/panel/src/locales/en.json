@@ -9012,7 +9012,8 @@
         "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one.",
         "hero": {
           "standard": "Single image",
-          "category_list": "Category list"
+          "category_list": "Category list",
+          "full_image": "Full image"
         },
         "products": {
           "grid": "Grid",
@@ -11165,6 +11166,69 @@
         "link": "Button",
         "linkTerm": "button",
         "linkHint": "Left empty, the button leads to every post."
+      },
+      "heroFull": {
+        "accent": {
+          "label": "Accent line",
+          "term": "accent",
+          "placeholder": "E.g. Find your escape.",
+          "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
+        },
+        "action": {
+          "label": "Under the heading",
+          "term": "action",
+          "hint": "The cover holds buttons or your shop's search box.",
+          "button": "Buttons",
+          "search": "Search box"
+        },
+        "searchNote": "Choose the search box's fields under Theme settings › Search box. The buttons are not drawn while the search box is chosen.",
+        "search_position": {
+          "label": "Search box position",
+          "term": "position",
+          "hint": "The box stands inside the cover or as a card over its bottom edge.",
+          "inside": "Inside the cover",
+          "overlap": "Card over the bottom edge"
+        },
+        "show_trust": {
+          "label": "Show trust icons",
+          "term": "trust badges",
+          "hint": "Your shop's trust badges (four at most) show in a white box at the cover's bottom edge."
+        },
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "hint": "How much of the screen the cover takes.",
+          "screen": "Full screen",
+          "tall": "Tall"
+        },
+        "align": {
+          "label": "Text alignment",
+          "term": "align",
+          "hint": "Where the heading, the text and the buttons stand.",
+          "center": "Centre",
+          "start": "Left"
+        },
+        "image_side": {
+          "label": "Image position",
+          "term": "image",
+          "hint": "The image fills the cover behind the text, or stands beside it on a light ground.",
+          "full": "Behind the text",
+          "end": "Beside the text"
+        },
+        "scrim": {
+          "label": "Image overlay",
+          "term": "overlay",
+          "hint": "The dark veil over the image, so the text reads on any picture.",
+          "light": "Light",
+          "strong": "Strong"
+        },
+        "edge": {
+          "label": "Image edge",
+          "term": "edge",
+          "hint": "The image ends straight or in a soft wave.",
+          "straight": "Straight",
+          "wave": "Wavy"
+        }
       },
       "trustCard": {
         "lift": {
