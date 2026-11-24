@@ -103,6 +103,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/einvoice/birfatura*" },
   // Customers' reviews and questions sent to the AI service (adr/0071 Aşama 9)
   { methods: WRITES, path: "/admin/features/ai.reviews" },
+  // Staff's own words sent to the AI service (adr/0079 §8)
+  { methods: WRITES, path: "/admin/features/ai.assistant" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
@@ -212,6 +214,12 @@ const aiSuggestion: Rule = {
 // order in a POST, so the code stays out of URLs; every role that reads orders
 const voucherCheck: Rule = { methods: ["POST"], path: "/admin/booking-vouchers/check" }
 
+// The panel assistant's turn and "Yeni sohbet" (adr/0079 §8): one's own conversation only
+const ASSISTANT: readonly Rule[] = [
+  { methods: ["POST"], path: "/admin/ai/assistant/turns" },
+  { methods: ["DELETE"], path: "/admin/ai/assistant/conversations/:id" },
+]
+
 /** What `operations` writes: the day's orders, parcels, returns, stock and moderation. */
 export const OPERATIONS_WRITES: readonly Rule[] = [
   // An order's email and addresses (Medusa's update), and shipping it
@@ -269,8 +277,10 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/ai/suggestions/:id/accept" },
   { methods: ["POST"], path: "/admin/ai/suggestions/:id/dismiss" },
   voucherCheck,
+  // The panel assistant (adr/0079 §8): every role; its tools are narrowed by role
+  ...ASSISTANT,
   readJob,
   cancelJob,
 ]
 
-export const READONLY_WRITES: readonly Rule[] = [readJob, cancelJob, voucherCheck]
+export const READONLY_WRITES: readonly Rule[] = [readJob, cancelJob, voucherCheck, ...ASSISTANT]

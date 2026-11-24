@@ -49,8 +49,44 @@ export function dailyLimits(
 export const STOREFRONT_SEARCH_GROUP = "storefront_search"
 export const DEFAULT_STOREFRONT_SEARCH_LIMIT = 500
 
-/** A day's counter: a kind of staff work, or the storefront's search. */
-export type AiDailyGroup = AiLimitGroup | typeof STOREFRONT_SEARCH_GROUP
+/**
+ * The panel assistant (adr/0079 §8): its model calls counted on their
+ * own, so the staff's ✨ buttons never stop because of it; a ceiling for
+ * the shop and one for each person (`assistant_user:<id>`, deleted when
+ * the person leaves). The platform may lower either from the environment.
+ */
+export const ASSISTANT_GROUP = "assistant"
+export const DEFAULT_ASSISTANT_SHOP_LIMIT = 300
+export const DEFAULT_ASSISTANT_USER_LIMIT = 100
+
+/** A person's own assistant counter. */
+export const assistantUserGroup = (userId: string): `assistant_user:${string}` =>
+  `assistant_user:${userId}`
+
+/** The assistant's ceilings in force: a default, or a lower value the platform set (0 closes it). */
+export function assistantLimits(lowered: {
+  shop?: number | undefined
+  user?: number | undefined
+}): {
+  shop: number
+  user: number
+} {
+  const limit = (value: number | undefined, fallback: number) =>
+    value !== undefined && Number.isSafeInteger(value) && value >= 0
+      ? Math.min(value, fallback)
+      : fallback
+  return {
+    shop: limit(lowered.shop, DEFAULT_ASSISTANT_SHOP_LIMIT),
+    user: limit(lowered.user, DEFAULT_ASSISTANT_USER_LIMIT),
+  }
+}
+
+/** A day's counter: a kind of staff work, the storefront's search, or the assistant's. */
+export type AiDailyGroup =
+  | AiLimitGroup
+  | typeof STOREFRONT_SEARCH_GROUP
+  | typeof ASSISTANT_GROUP
+  | `assistant_user:${string}`
 
 /** The storefront search's ceiling in force: the platform's value, else the default. */
 export const storefrontSearchLimit = (value: number | undefined): number =>

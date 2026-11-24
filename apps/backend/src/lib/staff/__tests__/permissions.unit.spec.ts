@@ -96,6 +96,7 @@ describe("staff roles", () => {
     ["POST", "/admin/einvoice/%62irfatura/token"],
     ["POST", "/admin/features/ai.reviews"],
     ["POST", "/admin/features/ai%2ereviews"],
+    ["POST", "/admin/features/ai.assistant"],
     ["POST", "/admin/google/connect"],
     ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],
@@ -140,6 +141,15 @@ describe("staff roles", () => {
     ["POST", "/admin/some-route-medusa-adds-later"],
   ] as const)("lets an admin %s %s", (method, path) => {
     expect(allowed("admin", method, path)).toBe(true)
+  })
+
+  it("lets every role use the assistant; only the owner turns it on (adr/0079 §8)", () => {
+    for (const role of STAFF_ROLES) {
+      expect(allowed(role, "POST", "/admin/ai/assistant/turns")).toBe(true)
+      expect(allowed(role, "GET", "/admin/ai/assistant/conversations/aiconv_1")).toBe(true)
+      expect(allowed(role, "DELETE", "/admin/ai/assistant/conversations/aiconv_1")).toBe(true)
+      expect(allowed(role, "POST", "/admin/features/ai.assistant")).toBe(role === "owner")
+    }
   })
 
   it("keeps AI service keys from operations and readonly, checks included (adr/0071 §6)", () => {
@@ -619,6 +629,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/ai/guidance/preview": false,
   // The bulk SEO fill: the search text tasks are owner and admin's (adr/0074 §5 madde 7)
   "POST /admin/ai/seo-fill": false,
+  // adr/0079 §8: the panel assistant, every role; its tools are narrowed by role
+  "POST /admin/ai/assistant/turns": true,
+  "DELETE /admin/ai/assistant/conversations/:id": true,
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,

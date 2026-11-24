@@ -51,8 +51,6 @@ export interface Failure extends AiProviderFailure {
   retry: boolean
 }
 
-type Attempt = { ok: true; result: TextResult } | { ok: false; failure: Failure }
-
 export const waitFor = (ms: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -185,7 +183,22 @@ export function failureOfThrown(service: AiService, error: unknown, timedOut: bo
   return fail("ai.provider_response_invalid", reason)
 }
 
-export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConnector {
+/** What reading a successful answer gives: its result, or why it is none. */
+export type AnswerRead<T> = { ok: true; result: T } | { ok: false; key: AiErrorKey; code: string }
+
+/**
+ * Posts one chat body to the registered address and reads the answer
+ * (`read`), tried again once as §8 allows. The text and the tool calling
+ * connectors (`openai-tools.ts`) share it, so both keep the key in the
+ * header, refuse redirects and map failures alike.
+ */
+export type ChatSend = <T>(
+  body: string,
+  read: (body: Buffer) => AnswerRead<T>,
+  signal?: AbortSignal
+) => Promise<T>
+
+export function chatSender(options: OpenAiCompatibleOptions): ChatSend {
   const { service, target, apiKey } = options
   const send = options.fetch ?? safeFetch
   const wait = options.wait ?? waitFor
@@ -202,12 +215,13 @@ export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConn
   const refuse = (key: AiErrorKey, code: string) =>
     aiProviderError({ service: service.id, key, code })
 
-  async function attempt(
+  async function attempt<T>(
     url: URL,
     body: string,
+    read: (body: Buffer) => AnswerRead<T>,
     deadline: AbortSignal,
     signal: AbortSignal
-  ): Promise<Attempt> {
+  ): Promise<{ ok: true; result: T } | { ok: false; failure: Failure }> {
     let response: SafeFetchResponse
     try {
       response = await send(url, {
@@ -224,26 +238,71 @@ export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConn
         signal,
       })
     } catch (error) {
-      return { ok: false, failure: failureOfThrown(service, error, deadline.aborted) }
+      return {
+        ok: false,
+        failure: failureOfThrown(service, error, deadline.aborted),
+      }
     }
     const failure = failureOfResponse(service, response)
     if (failure !== null) {
       return { ok: false, failure }
     }
-    const read = readCompletion(response.body)
-    if (read.ok) {
-      return { ok: true, result: read.result }
+    const answer = read(response.body)
+    if (answer.ok) {
+      return { ok: true, result: answer.result }
     }
     return {
       ok: false,
-      failure: { service: service.id, key: read.key, code: read.code, retry: false },
+      failure: {
+        service: service.id,
+        key: answer.key,
+        code: answer.code,
+        retry: false,
+      },
     }
   }
 
+  return async <T>(
+    body: string,
+    read: (body: Buffer) => AnswerRead<T>,
+    outer?: AbortSignal
+  ): Promise<T> => {
+    const url = endpointOf(service, target)
+    if (url === null) {
+      throw refuse("ai.provider_response_invalid", "endpoint_not_registered")
+    }
+    const deadline = AbortSignal.timeout(timeoutMs)
+    const signal = outer ? AbortSignal.any([deadline, outer]) : deadline
+    const first = await attempt(url, body, read, deadline, signal)
+    if (first.ok) {
+      return first.result
+    }
+    const waitMs = first.failure.retryAfterMs ?? DEFAULT_RETRY_WAIT_MS
+    if (!first.failure.retry || waitMs > MAX_RETRY_WAIT_MS) {
+      throw aiProviderError(first.failure)
+    }
+    try {
+      await wait(waitMs, signal)
+    } catch {
+      throw refuse("ai.timeout", deadline.aborted ? "timeout" : "aborted")
+    }
+    const second = await attempt(url, body, read, deadline, signal)
+    if (second.ok) {
+      return second.result
+    }
+    throw aiProviderError(second.failure)
+  }
+}
+
+export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConnector {
+  const { service, target } = options
+  const post = chatSender(options)
+  const refuse = (key: AiErrorKey, code: string) =>
+    aiProviderError({ service: service.id, key, code })
+
   return {
     async complete(request: TextRequest): Promise<TextResult> {
-      const url = endpointOf(service, target)
-      if (url === null) {
+      if (endpointOf(service, target) === null) {
         throw refuse("ai.provider_response_invalid", "endpoint_not_registered")
       }
       // A text target takes no image; a vision target only the types and sizes it documents
@@ -255,28 +314,7 @@ export function openAiCompatibleText(options: OpenAiCompatibleOptions): TextConn
           throw refuse("ai.input_unsupported", "image_not_accepted")
         }
       }
-      const deadline = AbortSignal.timeout(timeoutMs)
-      const signal = request.signal ? AbortSignal.any([deadline, request.signal]) : deadline
-      const body = bodyOf(target, request)
-
-      const first = await attempt(url, body, deadline, signal)
-      if (first.ok) {
-        return first.result
-      }
-      const waitMs = first.failure.retryAfterMs ?? DEFAULT_RETRY_WAIT_MS
-      if (!first.failure.retry || waitMs > MAX_RETRY_WAIT_MS) {
-        throw aiProviderError(first.failure)
-      }
-      try {
-        await wait(waitMs, signal)
-      } catch {
-        throw refuse("ai.timeout", deadline.aborted ? "timeout" : "aborted")
-      }
-      const second = await attempt(url, body, deadline, signal)
-      if (second.ok) {
-        return second.result
-      }
-      throw aiProviderError(second.failure)
+      return post(bodyOf(target, request), readCompletion, request.signal)
     },
   }
 }
