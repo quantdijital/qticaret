@@ -5,6 +5,7 @@ import { storefrontLink } from "../menus"
 import { HERO_FULL_DEFAULTS, HERO_FULL_LIMITS, HERO_FULL_SETTINGS } from "./hero-full"
 import { isCleanText } from "../../security/text"
 import { HERO_VIDEO_LIMITS, heroVideoLinkOf } from "./hero-video"
+import { handNote } from "./hand-note"
 import type { HeroFullSetting, HeroFullStep } from "./hero-full"
 import { heroCatalogScroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
@@ -164,6 +165,8 @@ const fullImage = z
     show_trust: z.boolean().default(false),
     video_url: optional(videoUrl),
     video_label: optional(text(HERO_VIDEO_LIMITS.label)),
+    // A short hand note over the heading (`hand-note.ts`)
+    note: handNote,
   })
   .strict()
 
