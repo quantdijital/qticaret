@@ -24,6 +24,7 @@ const fieldsOf = (term: ContentTermRecord): TermFields => ({
   name: term.name,
   handle: term.handle,
   description: term.description,
+  description_doc: (term.description_doc ?? null) as TermFields["description_doc"],
   rank: term.rank,
 })
 

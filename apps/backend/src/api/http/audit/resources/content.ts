@@ -7,6 +7,7 @@ import type ContentModuleService from "../../../../modules/content/service"
 import type { ContentEntryRecord, LandingPageRecord } from "../../../../modules/content/service"
 import type { AuditedResource, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
+import { docDigest } from "./catalog"
 
 /**
  * Content pages, blog posts and landing pages (F3.16, adr/0011): title, handle, status,
@@ -111,6 +112,12 @@ async function landingByFacet(scope: Resolver, body: unknown): Promise<Snapshot>
   return landingSnapshot(landing)
 }
 
+/** A text by its length and a short digest: enough to see that it changed. */
+const textDigest = (text: string | null): string | null =>
+  text === null
+    ? null
+    : `${String(text.length)}:${createHash("sha256").update(text).digest("hex").slice(0, 12)}`
+
 // A blog category or tag (adr/0019 ek 2026-11-03): no body, its fields as they are
 async function termSnapshot(scope: Resolver, filters: Record<string, string>): Promise<Snapshot> {
   const [term] = await content(scope).listContentTerms(filters, { take: 1 })
@@ -119,7 +126,10 @@ async function termSnapshot(scope: Resolver, filters: Record<string, string>): P
         kind: term.kind,
         name: term.name,
         handle: term.handle,
-        description: term.description,
+        // adr/0075 Ek 2026-11-24: the text (up to 5000 characters) by its length and digest,
+        // the document by its digest, never the words themselves
+        description: textDigest(term.description),
+        description_doc: docDigest(term.description_doc),
         rank: term.rank,
       }
     : {}

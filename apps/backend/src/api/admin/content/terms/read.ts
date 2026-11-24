@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
+import { storedListingDoc } from "../../../../lib/catalog/listing-description"
 import { containsPattern } from "../../../../lib/security"
 import { CONTENT_MODULE } from "../../../../modules/content"
 import type ContentModuleService from "../../../../modules/content/service"
@@ -10,7 +11,15 @@ import type { AdminGetContentTermsType } from "./validators"
 
 type Term = Pick<
   ContentTermRecord,
-  "id" | "kind" | "name" | "handle" | "description" | "rank" | "created_at" | "updated_at"
+  | "id"
+  | "kind"
+  | "name"
+  | "handle"
+  | "description"
+  | "description_doc"
+  | "rank"
+  | "created_at"
+  | "updated_at"
 >
 
 const FIELDS = [
@@ -19,6 +28,7 @@ const FIELDS = [
   "name",
   "handle",
   "description",
+  "description_doc",
   "rank",
   "created_at",
   "updated_at",
@@ -32,6 +42,8 @@ const shown = (term: Term, posts: Map<string, number>, live: Map<string, number>
   handle: term.handle,
   path: termPath(term),
   description: term.description,
+  // adr/0075 Ek 2026-11-24: null for none (the panel opens the plain text's paragraphs) or one out of shape
+  description_doc: storedListingDoc(term.description_doc),
   rank: term.rank,
   post_count: posts.get(term.id) ?? 0,
   live_post_count: live.get(term.id) ?? 0,

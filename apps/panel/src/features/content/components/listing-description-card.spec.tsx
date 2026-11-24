@@ -10,6 +10,8 @@ import { BrandDescriptionCard } from "@/features/brands/components/brand-descrip
 import { CategoryDescriptionCard } from "@/features/categories/components/category-description-card"
 import { collectionFixture } from "@/features/collections/collection-fixtures"
 import { CollectionDescriptionCard } from "@/features/collections/components/collection-description-card"
+import type { Term } from "@/features/content/api/terms"
+import { TermDescriptionCard } from "@/features/content/components/term-description-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const editorProps = vi.hoisted(() => vi.fn())
@@ -199,6 +201,61 @@ describe("listing description cards (adr/0075)", () => {
           body: { description_doc: DOC },
         })
       })
+    })
+  })
+
+  // adr/0075 Ek 2026-11-24: a blog category's or tag's text, the same editor and rule
+  describe("blog term", () => {
+    const TERM: Term = {
+      id: "cterm_1",
+      kind: "tag",
+      name: "Çelik",
+      handle: "celik",
+      path: "/blog/etiket/celik",
+      description: PLAIN,
+      description_doc: null,
+      rank: 0,
+      post_count: 2,
+      live_post_count: 2,
+      created_at: "2026-11-01T09:00:00Z",
+      updated_at: "2026-11-01T09:00:00Z",
+    }
+
+    it("opens plain text as its paragraphs, says it shows after the posts, and has no AI button", async () => {
+      respond(() => Promise.resolve({}))
+      renderCard(<TermDescriptionCard term={TERM} />)
+
+      expect(await shown()).toEqual(PARAGRAPHS)
+      expect(editorProps).toHaveBeenLastCalledWith({ media: false, shopTokens: false })
+      expect(screen.getByText(/sayfanın altında, yazılardan sonra/)).toBeInTheDocument()
+      expect(screen.getByText(/Tema ayarları > Liste metni/)).toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: /yapay zekâ/i })).toBeNull()
+      expect(fetchMock).not.toHaveBeenCalledWith("/admin/ai/services", expect.anything())
+    })
+
+    it("saves the document only, on the term's own route, and says when it holds a change", async () => {
+      const dirty = vi.fn()
+      respond((_url: string, init?: { body?: { description_doc?: JSONContent } }) =>
+        Promise.resolve({ term: { ...TERM, description_doc: init?.body?.description_doc } })
+      )
+      renderCard(<TermDescriptionCard term={TERM} onDirtyChange={dirty} />)
+      await shown()
+      typed.doc = DOC
+      await userEvent.click(screen.getByRole("button", { name: "edit" }))
+      expect(dirty).toHaveBeenLastCalledWith(true)
+      await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith("/admin/content/terms/cterm_1", {
+          method: "POST",
+          body: { description_doc: DOC },
+        })
+      })
+    })
+
+    it("opens a stored document as it is", async () => {
+      renderCard(<TermDescriptionCard term={{ ...TERM, description_doc: DOC }} />)
+      expect(await shown()).toEqual(DOC)
     })
   })
 })
