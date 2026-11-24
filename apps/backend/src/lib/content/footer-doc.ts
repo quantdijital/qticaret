@@ -30,8 +30,8 @@ interface Node {
   content?: unknown
 }
 
-/** A narrowed document's bounds: nodes, characters of text, nesting. */
-export interface NarrowDocLimits {
+/** A narrowed document's bounds: its nodes, its characters of text, its depth. */
+export interface BareDocLimits {
   nodes: number
   textLength: number
   depth: number
@@ -42,8 +42,18 @@ export interface NarrowDocLimits {
  * list, and the whole within the bounds (the document itself is depth 0,
  * so a one-level list's text sits at 4).
  */
-export const fitsFooter = (doc: ContentDoc): boolean =>
-  fitsNarrowDoc(doc, FOOTER_NODES, FOOTER_DOC_LIMITS)
+export const fitsFooter = (doc: ContentDoc): boolean => fitsBare(doc, FOOTER_DOC_LIMITS)
+
+/**
+ * Whether a checked document holds only paragraphs, line breaks and lists
+ * (bold, italic and links as marks) within `limits`: a footer block's
+ * text, an FAQ's answer (adr/0073 Ek 2026-11-24 (2)).
+ */
+export const fitsBare = (doc: ContentDoc, limits: BareDocLimits): boolean =>
+  fitsNarrowDoc(doc, FOOTER_NODES, limits)
+
+/** The bounds under the name a program step's narrowing uses (adr/0078). */
+export type NarrowDocLimits = BareDocLimits
 
 /**
  * Whether a checked document holds only the nodes on a list, within

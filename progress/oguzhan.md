@@ -2,6 +2,9 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: adr/0077 §5 Ek, tarihli fiyat sırası
+
+- **Dal:** `oguzhan/tarihli-fiyat-sirasi`. `tarih`/`ay` varken fiyat sıralaması, fiyat süzgeci ve fiyat aralığı eşleşen ürünlerin aralıktaki en düşük kart fiyatıyla (`bookingCardFacts` ortak; `listing-dated-prices.ts`, sabit 4 okuma, 30 sn önbellek). Dizin sorgusuna `price.by_product` jsonb; tarih yokken sorgu birebir eski. Testler: birim (sorgu, okuma sayısı), HTTP `dated-price-sort.spec.ts` (CI). ADR §5 Ek, "Bilinen sınır" kapandı.
 ## 2026-11-24: hazır görünüm boşlukları, handle ile kategori ikonu ve her üst bilgide eylem düğmesi
 
 - **Dal:** `oguzhan/ikon-ve-ust-dugme`. `categories`/`icons`'a `category_icons_by_handle` (kimlik > handle > görsel > baş harf); `highlight_link` (katalogdaki eylem düğmesi) `standard` ve `centered` üst bilgide de; panelde "Eylem düğmesi". Kilitli görünümlerin HTML'i ve stil özeti aynı. adr/0077 dalga 7 Ek.

@@ -114,6 +114,16 @@ export const SECTION_VARIANTS = {
    */
   rich_text: ["pane", "with_image", "article"],
   /**
+   * Questions and answers (adr/0073 Ek 2026-11-24 (2)): `standard`, today's
+   * heading on the left and the questions as rounded disclosures on the
+   * right; `page` ("Sayfa SSS'si"), a content page's questions page drawn
+   * as a questions text was before: the group headings as a row of topics
+   * (a column from 1024 px) with the ways to reach the shop beside them,
+   * each group's questions under its heading; a content page's only.
+   * Fields by variant: `section-faq`.
+   */
+  faq: ["standard", "page"],
+  /**
    * The shop's newest posts (adr/0077 Ek, "Vadi"): `grid`, today's three
    * tiles under the heading; `intro_panel` ("Tanıtım paneli"), one rounded
    * panel on the section's ground (a light tint unless the shop set one),
@@ -280,6 +290,7 @@ export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">
 export type RichTextVariant = SectionVariant<"rich_text">
+export type FaqVariant = SectionVariant<"faq">
 export type PostsVariant = SectionVariant<"posts">
 export type BannerVariant = SectionVariant<"banner">
 export type ProductMainVariant = SectionVariant<"product_main">

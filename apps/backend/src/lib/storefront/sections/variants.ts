@@ -52,6 +52,9 @@ export const SECTION_VARIANTS = {
   // The shop's own text (adr/0073 §3): today's pane first; `with_image` a picture beside it;
   // `article` a content page's own text (Ek 2026-11-19 (2) K2), the pages' only
   rich_text: ["pane", "with_image", "article"],
+  // adr/0073 Ek 2026-11-24 (2): today's heading beside the questions first; `page` a content
+  // page's questions page (its groups' topics and the ways to reach the shop beside), the pages' only
+  faq: ["standard", "page"],
   // adr/0077 Ek (Vadi): today's tiles first; `intro_panel` one panel, its words beside the cards
   posts: ["grid", "intro_panel"],
   // adr/0077 Ek (Vadi): today's band first; `split` the picture beside a panel on the ground

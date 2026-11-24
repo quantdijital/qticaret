@@ -5,7 +5,7 @@ import { announcementBar } from "./sections/announcement-bar"
 import { banner, placedBanner } from "./sections/banner"
 import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
-import { faq } from "./sections/faq"
+import { faq, placedFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { hero } from "./sections/hero"
@@ -109,7 +109,7 @@ export const categorySection = z.discriminatedUnion(
     categoryMain,
     placedRichText,
     placedBanner,
-    faq.extend({ placement }),
+    placedFaq,
     placedTrustBadges,
     worded("help").extend({ placement }),
     placedNewsletter,

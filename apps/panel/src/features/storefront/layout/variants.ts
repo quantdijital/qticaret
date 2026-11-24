@@ -18,6 +18,7 @@ import {
   SHELF_STRIPS_DEFAULTS,
   RICH_TEXT_IMAGE_SIDE_DEFAULT,
   SECTION_VARIANTS,
+  faqOffPages,
   hasVariants,
   newsletterOnPage,
   richTextInFooter,
@@ -131,10 +132,13 @@ export const VARIANT_FIELDS: {
   rich_text: {
     pane: {},
     with_image: { image: null, image_side: RICH_TEXT_IMAGE_SIDE_DEFAULT },
-    // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline and questions as today
-    article: { outline: "auto", questions: "auto" },
+    // A content page's own text (adr/0073 Ek 2026-11-19 (2) K2): its outline as today; never read as
+    // questions once switched (Ek 2026-11-24 (2): the shop's questions are an FAQ's rows)
+    article: { outline: "auto", questions: "off" },
   },
   // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
+  // adr/0073 Ek 2026-11-24 (2): the rows and switches are every variant's and stay as written
+  faq: { standard: {}, page: {} },
   posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
   // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
   banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0] } },
@@ -196,6 +200,10 @@ export function offeredVariants<S extends VariantSection>(
   const listed: readonly SectionVariant<S["type"]>[] = SECTION_VARIANTS[section.type]
   if (section.type === "newsletter" && !inFooter) {
     return listed.filter((each) => newsletterOnPage(each as SectionVariant<"newsletter">))
+  }
+  // The questions page (adr/0073 Ek 2026-11-24 (2)) on a content page only
+  if (section.type === "faq" && !onContentPage) {
+    return listed.filter((each) => faqOffPages(each as SectionVariant<"faq">))
   }
   if (section.type === "rich_text") {
     const variants = onContentPage

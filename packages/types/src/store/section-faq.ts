@@ -1,3 +1,5 @@
+import type { FaqVariant } from "./section-variants.js"
+
 /**
  * The FAQ section's settings (`faq`, docs/tema/bilesen-denetimi (b) 8,
  * 1.14): whether the first question comes open, and whether opening one
@@ -43,3 +45,43 @@ export function faqSettingsOf(section: Partial<Record<FaqSetting, unknown>>): Fa
   }
   return settings as FaqSettings
 }
+
+/**
+ * The FAQ's items (adr/0073 Ek 2026-11-24 (2)): the shop writes each
+ * question and its answer itself, nothing is read out of a text. A row is
+ * a question with its answer (a short rich text: paragraphs, lists, bold,
+ * italic and links, as a footer text block's) or a group's heading, the
+ * questions under it until the next. An answer saved before rich answers
+ * is plain text (`answer`) and reads as it was. The bounds: a question's
+ * and a heading's characters, an answer's characters of text, and the
+ * rows a section holds. Mirrored by the backend's `sections/faq.ts`; a
+ * unit test keeps them equal.
+ */
+export const FAQ_LIMITS = {
+  question: 200,
+  heading: 120,
+  /** A plain answer saved before rich answers. */
+  answer: 600,
+  /** An answer's characters of text (its document's, as a footer block's are counted). */
+  answerChars: 1500,
+  items: 40,
+} as const
+
+/** The variants only a content page's FAQ takes: `page`, drawn as a questions page. */
+export const FAQ_PAGE_VARIANTS = ["page"] as const satisfies readonly FaqVariant[]
+
+/** Whether an FAQ outside the content pages may take the variant. */
+export const faqOffPages = (variant: FaqVariant): boolean =>
+  !(FAQ_PAGE_VARIANTS as readonly string[]).includes(variant)
+
+/**
+ * One FAQ row as the store API prints it: a question with its answer as
+ * the backend's HTML (from its allow-listed document, adr/0019), a
+ * question with a plain answer saved before rich answers (its `{tokens}`
+ * filled), or a group's heading.
+ */
+export type StoreFaqItem =
+  { question: string; html: string } | { question: string; answer: string } | { heading: string }
+
+/** Whether a printed row is a group's heading. */
+export const isFaqHeading = (item: StoreFaqItem): item is { heading: string } => "heading" in item
