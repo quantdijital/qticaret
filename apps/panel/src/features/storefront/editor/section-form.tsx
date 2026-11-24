@@ -13,6 +13,7 @@ import { NewsletterForm } from "./forms/newsletter-form"
 import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { ProgramForm } from "./forms/program-form"
+import { ProductMainForm } from "./forms/product-main-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ContactForm, FactsNote } from "./forms/page-text-fields"
@@ -21,6 +22,7 @@ import { StatsForm } from "./forms/stats-form"
 import { StepsForm } from "./forms/steps-form"
 import { SearchBoxForm } from "./forms/search-box-form"
 import { CollageForm } from "./forms/collage-form"
+import { DeparturesForm } from "./forms/departures-form"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { TrustBadgeList } from "./shared/trust-badge-list"
 import { NamedGroup } from "./named-group"
@@ -85,6 +87,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <SearchBoxForm section={section} {...props} />
     case "photo_collage":
       return <CollageForm section={section} {...props} />
+    case "departures":
+      return <DeparturesForm section={section} {...props} />
     case "categories":
       return <CategoriesForm section={section} {...props} />
     case "products":
@@ -132,10 +136,11 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
       return <FactsNote section={section} />
     case "footer_bar":
       return <FooterBarForm section={section} {...props} />
-    // The header's settings stand in their own groups (`HeaderGroups`); the other main
-    // sections have nothing of their own yet: their variant and look
-    case "header_bar":
+    // The header's settings stand in their own groups (`HeaderGroups`); the category's
+    // grid has nothing of its own yet: its variant and look
     case "product_main":
+      return <ProductMainForm section={section} {...props} />
+    case "header_bar":
     case "category_main":
       return null
   }

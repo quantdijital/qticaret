@@ -27,6 +27,7 @@ describe("theme section: the search form", () => {
       show_dates: true,
       show_people: true,
       category_style: "select",
+      placeholder: null,
     })
   })
 
@@ -38,6 +39,7 @@ describe("theme section: the search form", () => {
         show_dates: false,
         show_people: false,
         category_style,
+        placeholder: "Nereye gitmek istersiniz?",
       }
       expect(full.safeParse({ ...defaults, search_form }).success).toBe(true)
     }
@@ -53,6 +55,8 @@ describe("theme section: the search form", () => {
       full.safeParse({ ...defaults, search_form: { ...SEARCH_FORM_DEFAULTS, ...search_form } })
         .success
     expect(off({ category_style: "pills" })).toBe(false)
+    expect(off({ placeholder: "" })).toBe(false)
+    expect(off({ placeholder: "x".repeat(61) })).toBe(false)
     expect(off({ attribute_key: "Gidilecek Yer" })).toBe(false)
     expect(off({ attribute_key: "" })).toBe(false)
     // A name the listing's address keeps for itself is never a filter there

@@ -85,3 +85,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0077 | [Tarihli ürün araması, bayrağa bağlı bölümler ve Tam görsel kapak](0077-tarihli-urun-aramasi-ve-bayrakli-bolumler.md) | — |
 | 0078 | [Program: tarihli üründe gün gün akış](0078-program-gun-gun-akis.md) | — |
 | 0079 | [Panel yapay zekâ yardımcısı: doğal dille yol gösterme, okuma ve onaylı işlem](0079-panel-yapay-zeka-yardimcisi.md) | — |
+| 0080 | [Vitrin pop-up'ları: bilgi, kampanya ve bülten; hedefleme, sıklık, sayaçlar](0080-vitrin-pop-uplari.md) | — |

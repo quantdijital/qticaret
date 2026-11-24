@@ -1,0 +1,41 @@
+{
+  "format": "quant-storefront-preset",
+  "code": "rota",
+  "version": 1,
+  "theme": "atolye",
+  "name": "Rota",
+  "description": "Tur ve gezi mağazası için tam ekran manzara: ortada serif başlık ve gidilecek yer, tarih, kişi arama kutusu; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı ve e-bültenli koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "tone": "light",
+  "credits": [
+    {
+      "file": "images/kapak-kapadokya.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Goreme-sunrise2025.jpg",
+      "license": "CC BY 4.0, AlphaBetaGamma (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kesif-likya.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:2023-11-19_Lycian_Way_near_Kaş_3.jpg",
+      "license": "CC BY 4.0, Alexkom000 (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kesif-karadeniz.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Uzungöl,_Trabzon_2014.jpg",
+      "license": "CC0, Hamdigumus (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kesif-oludeniz.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Oludeniz.jpg",
+      "license": "CC BY 2.0, Dan Taylor (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kesif-pamukkale.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Pamukkale_Travertines_-_2014.10_-_panoramio.jpg",
+      "license": "CC BY 3.0, rheins (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kesif-agri.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Mount_Ararat,_Ararat_Plain,_Armenia-Turkey_border,_Armenia.jpg",
+      "license": "CC BY 4.0, Vyacheslav Argenberg (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
+}

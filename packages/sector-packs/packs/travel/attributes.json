@@ -2,7 +2,7 @@
   {
     "handle": "tur-bilgileri",
     "name": "Tur bilgileri",
-    "description": "Tarihli tur ve geziler için: süre, kalkış yeri, dahil olan ve olmayan hizmetler, vize ve pasaport notu. Süre ve kalkış yeri arama sonucu açıklamasında öne çıkar.",
+    "description": "Tarihli tur ve geziler için: süre, kalkış yeri, gidilecek yer, dahil olan ve olmayan hizmetler, vize ve pasaport notu. Gidilecek yer listelerde filtre ve vitrin arama kutusunun \"Nereye\" alanı olur; süre ve kalkış yeri arama sonucu açıklamasında öne çıkar.",
     "groups": [
       { "key": "genel", "name": "Genel", "rank": 0 },
       { "key": "kapsam", "name": "Fiyata dahil olanlar", "rank": 1 },
@@ -51,6 +51,26 @@
         "group": "belgeler",
         "rank": 4,
         "aliases": ["Vize bilgisi", "Pasaport bilgisi"]
+      },
+      {
+        "key": "gidilecek_yer",
+        "label": "Gidilecek yer",
+        "type": "select",
+        "group": "genel",
+        "rank": 5,
+        "is_filterable": true,
+        "aliases": ["Destinasyon", "Bölge", "Nereye"],
+        "options": [
+          { "value": "kapadokya", "label": "Kapadokya" },
+          { "value": "ege", "label": "Ege" },
+          { "value": "akdeniz", "label": "Akdeniz" },
+          { "value": "karadeniz", "label": "Karadeniz" },
+          { "value": "marmara", "label": "Marmara" },
+          { "value": "ic-anadolu", "label": "İç Anadolu" },
+          { "value": "dogu-anadolu", "label": "Doğu Anadolu" },
+          { "value": "guneydogu-anadolu", "label": "Güneydoğu Anadolu" },
+          { "value": "yurt-disi", "label": "Yurt dışı" }
+        ]
       }
     ]
   }

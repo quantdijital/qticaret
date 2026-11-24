@@ -38,6 +38,7 @@ import { Signup } from "./Signup"
 import { Spotlight } from "./Spotlight"
 import { Stats } from "./Stats"
 import { Steps } from "./Steps"
+import { Departures } from "./Departures"
 import { Story } from "./Story"
 import { StripGallery } from "./StripGallery"
 
@@ -230,6 +231,8 @@ function BlockView({
       return <PhotoCollage section={section} first={first} />
     case "program":
       return <Program section={section} />
+    case "departures":
+      return <Departures section={section} t={t} />
     case "marquee":
       return (
         <Marquee

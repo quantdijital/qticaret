@@ -36,6 +36,7 @@ import { richTextView } from "./rich-text"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { collageView, statsView, stepsView } from "./points"
+import { departuresView } from "./departures"
 import { EMPTY_VALUES } from "./search-form"
 import { currentSearchForm } from "./search-form-data"
 import { stripGalleryView } from "./strip-gallery"
@@ -208,6 +209,8 @@ async function sectionView(
       return collageView(section, t)
     case "steps":
       return stepsView(section, t)
+    case "departures":
+      return departuresView(section, t)
     case "search_box":
       // The shop's one search box, its fields the theme's (adr/0077 §1)
       return {

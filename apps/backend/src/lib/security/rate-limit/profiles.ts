@@ -81,6 +81,9 @@ export const RATE_LIMIT_PROFILES = {
   // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date
   // picker or turns a month; each answer is kept a minute, a miss reads the month
   departure_calendar: { name: "departure_calendar", perIp: { max: 60, windowMs: MINUTE } },
+  // Upcoming departures (adr/0077 §10): a home page's section asks once a page view;
+  // each answer is kept 30 seconds, a miss reads the nearest departures
+  upcoming_departures: { name: "upcoming_departures", perIp: { max: 60, windowMs: MINUTE } },
   // The header's live search (2026-11-05): a read as the shopper types, after a
   // pause; the storefront keeps each answer a minute, so a word asked again is free
   search_suggest: { name: "search_suggest", perIp: { max: 240, windowMs: MINUTE } },
@@ -167,6 +170,9 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: HOUR },
     perIdentity: { max: 3, windowMs: HOUR },
   },
+  // adr/0080 §7: a pop-up's counters; a page view sends two or three at most (one
+  // pop-up a page view): twenty a minute is a brisk shopper, not a script
+  popup_event: { name: "popup_event", perIp: { max: 20, windowMs: MINUTE } },
   // F18: a draft's signed preview link; a guess finds nothing
   content_preview: { name: "content_preview", perIp: { max: 60, windowMs: 15 * MINUTE } },
   // adr/0065: the theme editor's live preview reads the draft after every save (a

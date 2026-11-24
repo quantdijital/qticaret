@@ -11,6 +11,7 @@ import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import { StorePostCartBooking } from "../store/carts/[id]/bookings/validators"
 import { StorePostCartTravelers } from "../store/carts/[id]/travelers/validators"
 import { StoreGetDepartureCalendar } from "../store/departures/calendar/validators"
+import { StoreGetDepartures } from "../store/departures/validators"
 import { StoreGetProductBooking } from "../store/products/[id]/booking/validators"
 import { clientIp, isShopperAddressUnknown } from "./client-ip"
 import { rateLimit } from "./rate-limit"
@@ -108,6 +109,16 @@ export const BOOKING_STORE_ROUTES = [
       requireFeature(CATALOG_BOOKING),
       rateLimit(() => RATE_LIMIT_PROFILES.departure_calendar),
       validateAndTransformQuery(StoreGetDepartureCalendar, {}),
+    ],
+  },
+  {
+    // The nearest departures (adr/0077 §10, the departures section): a read on its own budget
+    matcher: "/store/departures",
+    methods: ["GET" as const],
+    middlewares: [
+      requireFeature(CATALOG_BOOKING),
+      rateLimit(() => RATE_LIMIT_PROFILES.upcoming_departures),
+      validateAndTransformQuery(StoreGetDepartures, {}),
     ],
   },
   {

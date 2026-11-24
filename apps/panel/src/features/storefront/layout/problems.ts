@@ -1,5 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
+import { DEPARTURES_LIMITS, HEADER_CATALOG_LIMITS, SEARCH_BOX_LIMITS } from "@qticaret/types"
 import { LAYOUT_LIMITS as L, MARQUEE_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
@@ -123,6 +123,22 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "photo_collage":
       return collageProblems(section)
+    // Upcoming departures: their category or collection chosen, the intro's length (adr/0077 §10)
+    case "departures": {
+      const { source } = section
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["intro", textProblem(section.intro, DEPARTURES_LIMITS.intro)],
+        [
+          "source",
+          source.kind === "category" && source.category_id === ""
+            ? "categoryRequired"
+            : source.kind === "collection" && source.collection_id === ""
+              ? "collectionRequired"
+              : null,
+        ],
+      ]
+    }
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
@@ -247,7 +263,8 @@ function fieldsOf(section: AnySection): Found[] {
             ["strip_note", textProblem(section.strip_note, HEADER_CATALOG_LIMITS.strip_note)],
             ["strip_note_link", linkProblem(section.strip_note_link)],
           ]
-        : []
+        : // Every other header's action button
+          [["highlight_link", linkProblem(section.highlight_link ?? null)]]
     // A content page's own: the contact text is checked on the server, the facts have no fields
     case "footer_bar":
     case "product_main":

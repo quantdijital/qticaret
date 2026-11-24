@@ -136,6 +136,13 @@ const headerCommon = {
       MAIN_ERROR
     )
     .default("field"),
+  /**
+   * The header's action button, whatever the variant: its words and where
+   * it goes (the catalog header's highlighted link, now every header's). None:
+   * no button, drawn as before it; absent until written, so a bar saved
+   * before it reads and stores as it did (the catalog starts it null).
+   */
+  highlight_link: storefrontLink.nullable().optional(),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */
@@ -180,7 +187,7 @@ const headerCatalog = z
     account_text: z.boolean().default(true),
     /** The cart's subtotal beside its icon. */
     cart_total: z.boolean().default(false),
-    /** The menu bar's highlighted last link: its words and where it goes. */
+    /** The action button, the menu bar's highlighted last link here: null until set. */
     highlight_link: optional(storefrontLink),
     /** The thin strip above: the shop's top menu and the account link. */
     utility_bar: z.boolean().default(true),
@@ -218,6 +225,12 @@ export const headerBar = z.discriminatedUnion(
   VARIANT_ERROR
 )
 
+/**
+ * The gallery's picture shape (`@qticaret/types`' `PRODUCT_IMAGE_RATIOS`):
+ * `square` (today's, the default), `landscape` 4:3 or `portrait` 3:4.
+ */
+export const PRODUCT_IMAGE_RATIOS = ["square", "landscape", "portrait"] as const
+
 /** The product's own block: its gallery and buying column, above the group's other sections. */
 export const productMain = z
   .object({
@@ -225,6 +238,8 @@ export const productMain = z
     look: sectionLook.optional(),
     type: z.literal("product_main"),
     variant: defaultVariant("product_main"),
+    // Left out: square, as every block saved before it
+    image_ratio: z.enum(PRODUCT_IMAGE_RATIOS, MAIN_ERROR).optional(),
   })
   .strict()
 

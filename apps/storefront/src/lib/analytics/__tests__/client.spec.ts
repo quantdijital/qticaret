@@ -256,4 +256,11 @@ describe("the tags in the browser", () => {
       )
     ).toEqual({ name: "add_payment_info", value: 50, paymentType: "card", items: [item] })
   })
+
+  it("turns a pop-up's signal into its event, with nothing the visitor typed (adr/0080 §7)", () => {
+    fakeBrowser()
+    expect(
+      client.eventOf({ type: "popup", action: "click", popupId: "popup_1", popupType: "campaign" })
+    ).toEqual({ name: "popup_click", popupId: "popup_1", popupType: "campaign" })
+  })
 })

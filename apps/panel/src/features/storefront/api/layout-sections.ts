@@ -43,6 +43,7 @@ import type {
   StatsSection,
   StepsSection,
 } from "@/features/storefront/api/layout-points"
+import type { DeparturesSection } from "@/features/storefront/api/layout-departures"
 import type { SearchBoxSection } from "@/features/storefront/api/layout-search-box"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -408,6 +409,7 @@ export type HomeSection =
   | StepsSection
   | SearchBoxSection
   | PhotoCollageSection
+  | DeparturesSection
   | CategoriesSection
   | ProductsSection
   | FeaturedProductSection

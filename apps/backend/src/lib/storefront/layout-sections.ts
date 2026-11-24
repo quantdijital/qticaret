@@ -24,6 +24,7 @@ import { steps } from "./sections/steps"
 import { searchBox } from "./sections/search-box"
 import { photoCollage } from "./sections/photo-collage"
 import { reviews } from "./sections/reviews"
+import { departures } from "./sections/departures"
 import { stripGallery } from "./sections/strip-gallery"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
 import { worded } from "./sections/worded"
@@ -67,6 +68,7 @@ export const pageSection = z.discriminatedUnion(
     steps,
     searchBox,
     photoCollage,
+    departures,
     richText,
     trustBadges,
     newsletter,
