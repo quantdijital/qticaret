@@ -41,7 +41,7 @@ export interface StaffTurnstile {
  * with the page; the box shows only when Cloudflare wants an interaction.
  */
 export function useStaffTurnstile(
-  action: Extract<TurnstileGate, "staff_login" | "staff_password_reset">
+  action: Extract<TurnstileGate, "staff_login" | "staff_register" | "staff_password_reset">
 ): StaffTurnstile {
   const { t, i18n } = useTranslation()
   const client = useQueryClient()
@@ -114,7 +114,8 @@ export function useStaffTurnstile(
   const gate = useMemo<StaffGate>(
     () => ({
       take: async () => {
-        const key = (await client.ensureQueryData(publicConfigQuery())).turnstile.site_key
+        const key = (await client.query({ ...publicConfigQuery(), staleTime: "static" })).turnstile
+          .site_key
         return key ? (await start(key)).take() : null
       },
       spent: () => {

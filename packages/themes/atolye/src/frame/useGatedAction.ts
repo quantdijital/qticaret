@@ -14,8 +14,9 @@ import { sendGated } from "@qticaret/ui/lib/gate"
 export function useGatedAction(action: FormAction, gate: TurnstileGate) {
   const { gate: handle, slot } = useTurnstile(gate)
   const gated = useCallback(
-    (state: ActionResult, form: FormData) => sendGated((sent) => action(state, sent), form, handle),
-    [action, handle]
+    (state: ActionResult, form: FormData) =>
+      sendGated((sent) => action(state, sent), form, { own: gate, gates: { [gate]: handle } }),
+    [action, gate, handle]
   )
   return { action: gated, slot }
 }

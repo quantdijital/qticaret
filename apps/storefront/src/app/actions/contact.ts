@@ -25,7 +25,6 @@ const Message = z.object({
       .regex(/^#?\d{1,12}$/)
   ),
   body: z.string().trim().min(10).max(3000),
-  challenge: optional(z.string().regex(/^[\w.-]{1,300}$/)),
 })
 
 function failure(error: unknown): string {
@@ -58,7 +57,8 @@ export async function sendContact(
       challenge: null,
     }
   }
-  const { challenge: _answered, ...message } = parsed.data
+  // The bot checks' answers go as headers (`gated`), never in the message
+  const message = parsed.data
   try {
     await storeCall("/store/contact-messages", {
       method: "POST",

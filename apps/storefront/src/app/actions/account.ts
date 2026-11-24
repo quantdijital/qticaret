@@ -29,7 +29,7 @@ import {
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
 import { storeCall } from "@/lib/store-api/server"
-import { gateAsk, gated, gateHeaders } from "@/lib/store-api/gate"
+import { gateAsk, gated, gateHeaders, underGate } from "@/lib/store-api/gate"
 
 const NONE = null
 const failed = (error: string): ChallengeResult => ({ ok: false, error, challenge: NONE })
@@ -86,7 +86,10 @@ export async function loginAction(
   try {
     answer = await login(email, password, gateHeaders(form))
     if (answer.kind === "verify") {
-      await requestVerification(answer.token, email)
+      const asking = answer.token
+      await underGate("verification", () =>
+        requestVerification(asking, email, gateHeaders(form, "verification"))
+      )
       await rememberPending(answer.token)
     }
   } catch (error) {
@@ -146,7 +149,9 @@ export async function registerAction(
       last_name: input.last_name,
       ...(input.phone ? { phone: input.phone } : {}),
     })
-    await requestVerification(token, input.email)
+    await underGate("verification", () =>
+      requestVerification(token, input.email, gateHeaders(form, "verification"))
+    )
     await rememberPending(token)
     if (input.davet) {
       await rememberInvite(input.davet)

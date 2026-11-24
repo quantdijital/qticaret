@@ -6,8 +6,19 @@ import type { TurnstileGate } from "@qticaret/types"
 import type { ChallengeResult } from "@qticaret/ui"
 import { useTurnstile } from "@qticaret/ui/hooks/use-turnstile"
 import { sendGated } from "@qticaret/ui/lib/gate"
+import type { FormGates } from "@qticaret/ui/lib/gate"
 
 const INITIAL: ChallengeResult = { ok: false, error: null, challenge: null }
+
+export interface FormGate {
+  action: TurnstileGate
+  /** Every send carries its token (else only once the backend asked). */
+  eager?: boolean
+  /** Added to the open slot (a grid form's `sm:col-span-2`). */
+  className?: string
+  /** A second gate the same action passes (a sign-in's verification code). */
+  also?: { action: TurnstileGate; eager?: boolean }
+}
 
 /**
  * A form sent to an action behind the backend's bot checks (adr/0044 and
@@ -19,21 +30,34 @@ const INITIAL: ChallengeResult = { ok: false, error: null, challenge: null }
  */
 export function useChallengeForm(
   action: (state: ChallengeResult, form: FormData) => Promise<ChallengeResult>,
-  gate?: { action: TurnstileGate; eager?: boolean; className?: string }
+  gate?: FormGate
 ) {
   const [error, setError] = useState<string | null>(null)
   const [checking, setChecking] = useState(false)
   const [pending, start] = useTransition()
-  const turnstile = useTurnstile(gate?.action ?? "login", {
+  const own = useTurnstile(gate?.action ?? "login", {
     eager: gate?.eager ?? false,
     ...(gate?.className ? { className: gate.className } : {}),
   })
-  const handle = gate ? turnstile.gate : null
+  // Always called (a hook); used only when the form names a second gate
+  const second = useTurnstile(gate?.also?.action ?? "verification", {
+    eager: gate?.also?.eager ?? false,
+    ...(gate?.className ? { className: gate.className } : {}),
+  })
+  const gates: FormGates | null = gate
+    ? {
+        own: gate.action,
+        gates: {
+          [gate.action]: own.gate,
+          ...(gate.also ? { [gate.also.action]: second.gate } : {}),
+        },
+      }
+    : null
 
   function submit(form: FormData) {
     setError(null)
     start(async () => {
-      const result = await sendGated((sent) => action(INITIAL, sent), form, handle, {
+      const result = await sendGated((sent) => action(INITIAL, sent), form, gates, {
         checking: setChecking,
       })
       if (result.error) {
@@ -46,8 +70,18 @@ export function useChallengeForm(
     error,
     checking,
     pending,
-    slot: gate ? turnstile.slot : null,
-    warm: gate ? turnstile.warm : () => undefined,
+    slot: gate ? (
+      <>
+        {own.slot}
+        {gate.also ? second.slot : null}
+      </>
+    ) : null,
+    warm: () => {
+      if (gate) {
+        own.warm()
+        second.warm()
+      }
+    },
     onSubmit: (event: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
       event.preventDefault()
       submit(new FormData(event.currentTarget))

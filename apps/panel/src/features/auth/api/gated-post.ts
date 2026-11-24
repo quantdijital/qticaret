@@ -4,7 +4,7 @@ import {
   TURNSTILE_REQUIRED,
   TURNSTILE_TOKEN_HEADER,
   TURNSTILE_UNAVAILABLE,
-} from "@qticaret/types"
+} from "@qticaret/types/turnstile"
 import { challengeHeader, solveChallenge } from "@/lib/challenge"
 import type { Challenge } from "@/lib/challenge"
 
@@ -45,10 +45,15 @@ async function post<T>(
   return { status: response.status, body: answer }
 }
 
-/** A failure that is Turnstile's: the token refused (403), or none to be had after asking (428). */
+/**
+ * A failure that is Turnstile's: the token refused (403), or none to be had
+ * after asking (428); its key in `code` (a thrown sign-in) or `key` (`InviteFailure`).
+ */
 export function isTurnstileRefusal(error: unknown): boolean {
-  const code = (error as { code?: unknown } | null)?.code
-  return code === TURNSTILE_FAILED || code === TURNSTILE_REQUIRED
+  const failure = error as { code?: unknown; key?: unknown } | null
+  return [failure?.code, failure?.key].some(
+    (key) => key === TURNSTILE_FAILED || key === TURNSTILE_REQUIRED
+  )
 }
 
 /** The answer's key: `code` from a session client's sentence, else `message`. */
@@ -69,24 +74,24 @@ export async function postGated<T>(
   body: unknown,
   gate: StaffGate | null
 ): Promise<GatedAnswer<T>> {
-  const headers: Record<string, string> = {}
+  const headers = new Map<string, string>()
   let carried = false
   const attach = async (): Promise<boolean> => {
     const token = await gate?.take().catch(() => null)
     if (!token) {
       return false
     }
-    headers[TURNSTILE_TOKEN_HEADER] = token
+    headers.set(TURNSTILE_TOKEN_HEADER, token)
     carried = true
     return true
   }
   const once = async (): Promise<GatedAnswer<T>> => {
     try {
-      return await post<T>(path, body, headers)
+      return await post<T>(path, body, Object.fromEntries(headers))
     } finally {
       // Single use, each of them
-      delete headers[TURNSTILE_FALLBACK_HEADER]
-      delete headers[TURNSTILE_TOKEN_HEADER]
+      headers.delete(TURNSTILE_FALLBACK_HEADER)
+      headers.delete(TURNSTILE_TOKEN_HEADER)
       if (carried) {
         carried = false
         gate?.spent()
@@ -105,9 +110,10 @@ export async function postGated<T>(
       if (value === undefined) {
         break
       }
-      headers[
-        answer.body.fallback === TURNSTILE_UNAVAILABLE ? TURNSTILE_FALLBACK_HEADER : "x-challenge"
-      ] = value
+      headers.set(
+        answer.body.fallback === TURNSTILE_UNAVAILABLE ? TURNSTILE_FALLBACK_HEADER : "x-challenge",
+        value
+      )
     } else if (answerKey(answer.body) === TURNSTILE_REQUIRED && !asked) {
       asked = true
       if (!(await attach())) {

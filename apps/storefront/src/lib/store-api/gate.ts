@@ -4,8 +4,8 @@ import {
   TURNSTILE_REQUIRED,
   TURNSTILE_TOKEN_HEADER,
   TURNSTILE_UNAVAILABLE,
-} from "@qticaret/types"
-import type { TurnstileAsk } from "@qticaret/types"
+} from "@qticaret/types/turnstile"
+import type { TurnstileAsk, TurnstileGate } from "@qticaret/types"
 import type { GatedChallenge } from "@qticaret/ui"
 import { isStoreApiError } from "./errors"
 
@@ -23,19 +23,31 @@ import { isStoreApiError } from "./errors"
 
 // `<token>.<nonce>`: the backend's signed challenge and the browser's number
 const ANSWER = /^[\w.-]{1,300}$/
-// Cloudflare's token: at most 2048 characters (its own bound), printable, no spaces
-const TOKEN = /^[\x21-\x7e]{1,2048}$/
+// Cloudflare's token as the backend takes it: `[A-Za-z0-9._-]`, at most 2048 (its own bound)
+const TOKEN = /^[\w.-]{1,2048}$/
 
-const FIELDS = [
+// The form's own gate: its answers in the plain fields
+const OWN_FIELDS = [
   ["challenge", "x-challenge", ANSWER],
   ["turnstile", TURNSTILE_TOKEN_HEADER, TOKEN],
   ["turnstile_fallback", TURNSTILE_FALLBACK_HEADER, ANSWER],
 ] as const
 
-/** The form's answers as the backend's headers; empty when it carries none. */
-export function gateHeaders(form: FormData): Record<string, string> {
+// Another gate the same action passes (a sign-in's verification code): `turnstile:<gate>`
+const otherFields = (gate: string) =>
+  [
+    [`turnstile:${gate}`, TURNSTILE_TOKEN_HEADER, TOKEN],
+    [`turnstile_fallback:${gate}`, TURNSTILE_FALLBACK_HEADER, ANSWER],
+  ] as const
+
+/**
+ * The form's answers as the backend's headers; empty when it carries none.
+ * `other`: a second gate's call in the same action (its own token, no proof
+ * of the form's soft limit).
+ */
+export function gateHeaders(form: FormData, other?: TurnstileGate): Record<string, string> {
   const headers: Record<string, string> = {}
-  for (const [field, header, shape] of FIELDS) {
+  for (const [field, header, shape] of other ? otherFields(other) : OWN_FIELDS) {
     const value = form.get(field)
     if (typeof value === "string" && shape.test(value)) {
       headers[header] = value
@@ -45,9 +57,31 @@ export function gateHeaders(form: FormData): Record<string, string> {
 }
 
 /** `{ headers }` for a Store API call when the form answered something; nothing otherwise. */
-export function gated(form: FormData): { headers?: Record<string, string> } {
-  const headers = gateHeaders(form)
+export function gated(form: FormData, other?: TurnstileGate): { headers?: Record<string, string> } {
+  const headers = gateHeaders(form, other)
   return Object.keys(headers).length > 0 ? { headers } : {}
+}
+
+const GATE_OF = Symbol("gate")
+
+/**
+ * A second gate's call: a failure it throws is marked with the gate, so a
+ * stand-in proof it asks for is answered in that gate's field.
+ */
+export async function underGate<T>(gate: TurnstileGate, call: () => Promise<T>): Promise<T> {
+  try {
+    return await call()
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      Object.defineProperty(error, GATE_OF, { value: gate })
+    }
+    throw error
+  }
+}
+
+const gateOfError = (error: unknown): string | undefined => {
+  const gate = (error as { [GATE_OF]?: unknown } | null)?.[GATE_OF]
+  return typeof gate === "string" ? gate : undefined
 }
 
 /** A 428's proof of work (adr/0044 §1), marked when it stands in for Turnstile; null otherwise. */
@@ -64,11 +98,14 @@ export function challengeOf(error: unknown): GatedChallenge | null {
   ) {
     return null
   }
+  const gate = gateOfError(error)
   return {
     token: challenge.token,
     salt: challenge.salt,
     bits: challenge.bits,
-    ...(body?.fallback === TURNSTILE_UNAVAILABLE ? { fallback: true } : {}),
+    ...(body?.fallback === TURNSTILE_UNAVAILABLE
+      ? { fallback: true, ...(gate ? { action: gate } : {}) }
+      : {}),
   }
 }
 

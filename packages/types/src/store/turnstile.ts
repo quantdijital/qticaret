@@ -10,7 +10,11 @@ export const TURNSTILE_GATES = [
   "password_reset",
   "checkout",
   "staff_login",
+  // An invitation's acceptance: Medusa's staff account creation
+  "staff_register",
   "staff_password_reset",
+  // A new e-mail verification code (Medusa's `/auth/verification/request`, with the login's key)
+  "verification",
   "order_lookup",
   "contact",
   "newsletter",

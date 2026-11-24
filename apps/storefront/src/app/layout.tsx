@@ -111,20 +111,20 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             theme: "light",
           }}
         >
-        <theme.Layout
-          shop={shop}
-          t={t}
-          saveCookies={saveCookieChoice}
-          subscribe={subscribeNewsletter}
-          searchSuggest={SUGGEST_PATH}
-          changeCartLine={changeCartLine}
-          // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
-          {...(settings.product_card.quick_view
-            ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
-            : {})}
-        >
-          {children}
-        </theme.Layout>
+          <theme.Layout
+            shop={shop}
+            t={t}
+            saveCookies={saveCookieChoice}
+            subscribe={subscribeNewsletter}
+            searchSuggest={SUGGEST_PATH}
+            changeCartLine={changeCartLine}
+            // The cards' quick view dialog (adr/0049 Ek 2026-11-15): only while the shop has it on
+            {...(settings.product_card.quick_view
+              ? { quickView: { address: quickViewAddress(previewToken), addToCart } }
+              : {})}
+          >
+            {children}
+          </theme.Layout>
         </TurnstileProvider>
       </body>
     </html>

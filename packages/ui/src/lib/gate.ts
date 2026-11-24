@@ -13,6 +13,9 @@ import { TURNSTILE_FALLBACK_FIELD, TURNSTILE_FIELD } from "./turnstile"
  * - 428 proof of work: solved here and sent again, in `challenge` (the
  *   soft limit's) or in `turnstile_fallback` (Turnstile's stand-in while
  *   Cloudflare cannot answer); both may be asked of one send.
+ * One action may pass two gates (a sign-in, then the verification code it
+ * asks for): the form's own gate answers in `turnstile`, another in
+ * `turnstile:<gate>` (and `turnstile_fallback:<gate>`).
  */
 
 export interface GatedChallenge {
@@ -21,6 +24,8 @@ export interface GatedChallenge {
   bits: number
   /** Asked in Turnstile's stead: answered in `turnstile_fallback`. */
   fallback?: boolean
+  /** The gate it stands in for, when not the form's own. */
+  action?: string
 }
 
 export interface GatedResult {
@@ -30,9 +35,9 @@ export interface GatedResult {
   turnstile?: TurnstileAsk | null
 }
 
-/** A form's Turnstile widget, as `useTurnstile` gives it; null without a site key. */
+/** One gate's widget, as `useTurnstile` gives it; null without a site key. */
 export interface GateHandle {
-  /** Whether this send carries a token from the start (every-send gates, or once one was asked). */
+  /** Whether a send carries this gate's token from the start (every-send gates, or once one was asked). */
   eager: () => boolean
   /** A token for one send; null when there is no widget (no site key). */
   take: () => Promise<string | null>
@@ -40,11 +45,27 @@ export interface GateHandle {
   spent: () => void
 }
 
+/** A form's gates: its own first, then any other its action passes. */
+export interface FormGates {
+  own: string
+  gates: Partial<Record<string, GateHandle | null>>
+}
+
+/** Where a gate's token goes in the form: the form's own in `turnstile`, another in `turnstile:<gate>`. */
+export const tokenField = (gate: string, own: string) =>
+  gate === own || gate === "" ? TURNSTILE_FIELD : `${TURNSTILE_FIELD}:${gate}`
+
+/** Where a stand-in proof's answer goes, likewise. */
+export const fallbackField = (gate: string | undefined, own: string) =>
+  gate === undefined || gate === own || gate === ""
+    ? TURNSTILE_FALLBACK_FIELD
+    : `${TURNSTILE_FALLBACK_FIELD}:${gate}`
+
 export const CHALLENGE_FAILED = "errors.challenge_failed"
 export const TURNSTILE_FAILED = "errors.turnstile_failed"
 
-// A proof of work may be asked again at a harder level; Turnstile is asked once more at most
-const MAX_ROUNDS = 4
+// A proof of work may be asked again at a harder level; each gate's token is asked once more at most
+const MAX_ROUNDS = 5
 
 export interface GateHooks {
   /** A proof of work being solved (the button says "checking"). */
@@ -54,30 +75,42 @@ export interface GateHooks {
 export async function sendGated<R extends GatedResult>(
   send: (form: FormData) => Promise<R>,
   form: FormData,
-  gate: GateHandle | null,
+  gates: FormGates | null,
   hooks: GateHooks = {}
 ): Promise<R> {
-  let carried = false
-  const attach = async (): Promise<boolean> => {
-    const token = await gate?.take()
+  const own = gates?.own ?? ""
+  const handleOf = (gate: string) => gates?.gates[gate === "" ? own : gate] ?? null
+  const carried = new Set<string>()
+  const attach = async (gate: string): Promise<boolean> => {
+    const token = await handleOf(gate)?.take()
     if (!token) {
       return false
     }
-    form.set(TURNSTILE_FIELD, token)
-    carried = true
+    form.set(tokenField(gate, own), token)
+    carried.add(gate)
     return true
   }
   const once = async (): Promise<R> => {
+    // Every gate that wants a token from the start (or was asked once) gets a fresh one
+    for (const [gate, handle] of Object.entries(gates?.gates ?? {})) {
+      if (handle?.eager() && !carried.has(gate)) {
+        await attach(gate).catch(() => false)
+      }
+    }
     try {
       return await send(form)
     } finally {
-      // Single use, as the token: a stand-in proof is never sent twice
-      form.delete(TURNSTILE_FALLBACK_FIELD)
-      if (carried) {
-        carried = false
-        form.delete(TURNSTILE_FIELD)
-        gate?.spent()
+      // Single use, each of them: a token or a stand-in proof is never sent twice
+      for (const key of [...form.keys()]) {
+        if (key === TURNSTILE_FALLBACK_FIELD || key.startsWith(`${TURNSTILE_FALLBACK_FIELD}:`)) {
+          form.delete(key)
+        }
       }
+      for (const gate of carried) {
+        form.delete(tokenField(gate, own))
+        handleOf(gate)?.spent()
+      }
+      carried.clear()
     }
   }
   const refused = (result: R, error: string): R => ({
@@ -88,15 +121,8 @@ export async function sendGated<R extends GatedResult>(
     turnstile: null,
   })
 
-  if (gate?.eager()) {
-    try {
-      await attach()
-    } catch {
-      // No token to be had (the script blocked, the widget failed): the backend says what it wants
-    }
-  }
   let result = await once()
-  let asked = false
+  const asked = new Set<string>()
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const { challenge, turnstile } = result
     if (challenge) {
@@ -104,7 +130,7 @@ export async function sendGated<R extends GatedResult>(
       try {
         const nonce = await solveChallenge(challenge)
         form.set(
-          challenge.fallback ? TURNSTILE_FALLBACK_FIELD : "challenge",
+          challenge.fallback ? fallbackField(challenge.action, own) : "challenge",
           challengeAnswer(challenge.token, nonce)
         )
       } catch {
@@ -112,10 +138,11 @@ export async function sendGated<R extends GatedResult>(
       } finally {
         hooks.checking?.(false)
       }
-    } else if (turnstile && !turnstile.failed && !asked) {
-      asked = true
+    } else if (turnstile && !turnstile.failed && !asked.has(turnstile.action)) {
+      asked.add(turnstile.action)
       try {
-        if (!(await attach())) {
+        // Taken now: the gate is armed, and `once` sends this token
+        if (!(await attach(turnstile.action))) {
           return refused(result, TURNSTILE_FAILED)
         }
       } catch {

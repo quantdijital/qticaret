@@ -74,7 +74,9 @@ describe("contentSecurityPolicy", () => {
 
   it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
     const closed = contentSecurityPolicy("abc123", false)
-    expect(directive(closed, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com")
+    expect(directive(closed, "frame-src")).toBe(
+      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
+    )
     expect(directive(closed, "frame-ancestors")).toBe("frame-ancestors 'none'")
 
     const checkout = contentSecurityPolicy("abc123", false, {
@@ -117,6 +119,8 @@ describe("contentSecurityPolicy", () => {
     )
     expect(meta).not.toContain("google")
     // Nothing else opens: no frames but YouTube's player, no other scripts
-    expect(directive(meta, "frame-src")).toBe("frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com")
+    expect(directive(meta, "frame-src")).toBe(
+      "frame-src https://www.youtube-nocookie.com/embed/ https://challenges.cloudflare.com"
+    )
   })
 })

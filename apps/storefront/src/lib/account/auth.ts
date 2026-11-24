@@ -59,12 +59,20 @@ export function createCustomer(
   })
 }
 
-/** Mails a verification code (and the link to `/hesap/dogrula`) to the login's own address. */
-export function requestVerification(token: string, email: string) {
+/**
+ * Mails a verification code (and the link to `/hesap/dogrula`) to the
+ * login's own address; Turnstile's `verification` token on every request
+ * (adr/0044 Ek 2026-11-24) goes beside the login's key.
+ */
+export function requestVerification(
+  token: string,
+  email: string,
+  gate: Record<string, string> = {}
+) {
   return storeCall("/auth/verification/request", {
     method: "POST",
     body: { entity_id: email, entity_type: "email" },
-    headers: bearer(token),
+    headers: { ...gate, ...bearer(token) },
   })
 }
 
