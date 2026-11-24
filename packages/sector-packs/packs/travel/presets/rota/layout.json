@@ -1,0 +1,242 @@
+{
+  "header": [
+    {
+      "id": "mainheader",
+      "type": "header_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "sticky": true,
+      "menu_images": "off",
+      "search_style": "icon"
+    }
+  ],
+  "home": [
+    {
+      "id": "rotaacilis",
+      "type": "hero",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "full_image",
+      "eyebrow": "Küçük gruplarla rehberli turlar",
+      "heading": "Türkiye'yi keşfetmenin",
+      "title_accent": "sınırsız yolu",
+      "text": "Kapadokya'dan Karadeniz yaylalarına, Likya Yolu'ndan Ege koylarına. Nereye, ne zaman ve kaç kişi gideceğinizi seçin.",
+      "links": [{ "$href": "/magaza", "label": "Turları incele" }],
+      "image": {
+        "$image": "images/kapak-kapadokya.webp",
+        "alt": "Gün doğarken Göreme vadileri üstünde sıcak hava balonları"
+      },
+      "action": "search",
+      "search_position": "inside",
+      "height": "screen",
+      "scrim": "light",
+      "align": "center",
+      "image_side": "full",
+      "edge": "straight",
+      "show_trust": false
+    },
+    {
+      "id": "populerturlar",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Popüler turlar",
+      "source": { "kind": "best_sellers" },
+      "limit": 12,
+      "more": { "$href": "/magaza", "label": "Tüm turlar" },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "three",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
+      "id": "yaklasankalkislar",
+      "type": "departures",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yaklaşan kalkışlar",
+      "intro": "Önümüzdeki haftaların kalkışları ve kalan yerler. Tarihinizi seçip yerinizi ayırtın.",
+      "source": { "kind": "all" },
+      "limit": 6,
+      "layout": "list"
+    },
+    {
+      "id": "rakamlarlarota",
+      "type": "stats",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": "stage",
+        "align": "center",
+        "width": null
+      },
+      "title": "Yolda geçen yıllar",
+      "items": [
+        { "value": "120+", "label": "Rota", "text": "Yurt içinde ve yakın coğrafyada." },
+        { "value": "15", "label": "Yıllık deneyim", "text": null },
+        { "value": "4 mevsim", "label": "Kalkış", "text": "Yaz yaylaları, kış Kapadokya'sı." },
+        { "value": "12", "label": "Kişilik gruplar", "text": "Kalabalık değil, birlikte." }
+      ],
+      "dividers": "on",
+      "icons": "off"
+    },
+    {
+      "id": "nasilplanlanir",
+      "type": "steps",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yolculuğunuz dört adımda",
+      "intro": "Rotayı birlikte seçer, ayrıntıları biz düşünürüz. Size kalan, yola çıkmak.",
+      "items": [
+        {
+          "title": "Rotanızı seçin",
+          "text": "Gidilecek yere, türe ya da aya göre arayın; her turun programı ve dahil olanları sayfasında."
+        },
+        {
+          "title": "Tarihi ve kişiyi belirleyin",
+          "text": "Kalkış tarihini seçin, kaç kişi olduğunuzu yazın; fiyat hemen görünür."
+        },
+        {
+          "title": "Yerinizi ayırtın",
+          "text": "Ödemenizi güvenle yapın; onay ve yolculuk bilgileri e-postanıza gelir."
+        },
+        {
+          "title": "Yola çıkın",
+          "text": "Rehberiniz kalkış noktasında sizi karşılar; gerisi yolun tadı."
+        }
+      ],
+      "link": { "$href": "/magaza", "label": "Turlara göz atın" },
+      "layout": "row",
+      "numbers": "padded"
+    },
+    {
+      "id": "gezginyorumlari",
+      "type": "reviews",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Gezginler ne diyor?",
+      "limit": 6,
+      "scroller": {
+        "desktop": "three",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
+      "id": "kesfetkolaj",
+      "type": "photo_collage",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Keşfet",
+      "intro": "Yaylalardan koylara, traverten teraslardan dağ eteklerine: rotalarımızın geçtiği yerlerden kareler.",
+      "items": [
+        {
+          "image": {
+            "$image": "images/kesif-likya.webp",
+            "alt": "Kaş yakınında Likya Yolu'nun denize bakan patikası"
+          },
+          "caption": "Likya Yolu",
+          "link": null
+        },
+        {
+          "image": {
+            "$image": "images/kesif-karadeniz.webp",
+            "alt": "Ormanlı yamaçlar arasında Uzungöl ve kıyısındaki köy"
+          },
+          "caption": "Karadeniz yaylaları",
+          "link": null
+        },
+        {
+          "image": {
+            "$image": "images/kesif-oludeniz.webp",
+            "alt": "Yukarıdan bakışla Ölüdeniz lagünü ve kumsal"
+          },
+          "caption": "Ege ve Akdeniz koyları",
+          "link": null
+        },
+        {
+          "image": {
+            "$image": "images/kesif-pamukkale.webp",
+            "alt": "Pamukkale'nin beyaz traverten havuzları"
+          },
+          "caption": "Pamukkale",
+          "link": null
+        },
+        {
+          "image": {
+            "$image": "images/kesif-agri.webp",
+            "alt": "Ovanın ardında karlı Ağrı Dağı"
+          },
+          "caption": "Doğu Anadolu",
+          "link": null
+        }
+      ],
+      "layout": "asymmetric",
+      "phone": "scroll"
+    }
+  ],
+  "footer": [
+    {
+      "id": "mainfooter",
+      "type": "footer_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "brand_columns",
+      "social": "icons",
+      "payment_badges": ["visa", "mastercard", "troy", "bank_transfer"],
+      "back_to_top": false,
+      "back_to_top_side": "right",
+      "back_to_top_shape": "round",
+      "back_to_top_mobile": true,
+      "top_strip": true,
+      "about": "Küçük gruplarla, yerel rehberlerle, acele etmeden. Her turun programı, dahil olanları ve kalkış tarihleri kendi sayfasında.",
+      "ground": "stage",
+      "badge_style": "plain"
+    },
+    {
+      "id": "rotabulten",
+      "type": "newsletter",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "split",
+      "title": "Yeni rotalar e-postanızda",
+      "text": null,
+      "description": "Yeni turları, erken rezervasyon dönemlerini ve son yerleri ayda birkaç kez haber veririz.",
+      "note": "Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.",
+      "show_note": true,
+      "joined": true
+    }
+  ]
+}

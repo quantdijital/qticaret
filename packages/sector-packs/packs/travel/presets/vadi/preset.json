@@ -1,0 +1,21 @@
+{
+  "format": "quant-storefront-preset",
+  "code": "vadi",
+  "version": 1,
+  "theme": "atolye",
+  "name": "Vadi",
+  "description": "Açık zeminde yeşil ve turuncu: solda iki satırlı başlık, sağda dalga kenarlı manzara, kapağa taşan arama kutusu ve güven rozetleri; görsel üstü yazılı tur kartları, ikonlu tur türleri, gezi yazıları paneli, bölünmüş kampanya bandı, ikonlu rakamlar ve e-bültenli alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "tone": "light",
+  "credits": [
+    {
+      "file": "images/kapak-oludeniz.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Oludeniz.jpg",
+      "license": "CC BY 2.0, Dan Taylor (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bant-ayder.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Ayder_Yayla_-_panoramio.jpg",
+      "license": "CC BY 3.0, Hüseyin Öcal (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
+}

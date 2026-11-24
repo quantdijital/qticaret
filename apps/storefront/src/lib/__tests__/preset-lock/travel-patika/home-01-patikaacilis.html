@@ -1,0 +1,443 @@
+<!-- preset lock: travel-patika (docs/tema/bilesen-standardi.md §7) -->
+<div data-qs="patikaacilis">
+  <section
+    aria-labelledby="bolum-patikaacilis"
+    class="gf-cover"
+    data-side="full"
+    data-height="screen"
+    data-scrim="strong"
+    data-edge="straight"
+    data-foot=""
+  >
+    <div class="gf-cover-stage relative isolate flex flex-col justify-center">
+      <div class="gf-cover-media overflow-hidden absolute inset-0 -z-10 bg-stage">
+        <picture>
+          <img
+            src="https://cdn.example.com/preset/travel/patika/images/kapak-likya.webp"
+            alt="Kaş yakınında denize inen Likya Yolu patikası"
+            loading="eager"
+            fetchPriority="high"
+            decoding="sync"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+        </picture>
+      </div>
+      <div
+        class="mx-auto w-full max-w-(--container) px-(--gutter) gf-cover-body flex flex-col gap-8"
+      >
+        <div class="flex flex-col gap-4 lg:gap-5 gf-stage max-w-3xl bg-transparent">
+          <p class="text-xs font-semibold tracking-[0.18em] uppercase text-stage-text-2">
+            Yürüyüş ve doğa turları
+          </p>
+          <h1
+            id="bolum-patikaacilis"
+            class="gf-cover-title max-w-[20ch] text-balance text-stage-text"
+          >
+            <span>
+              Patikada adım adım
+            </span>
+            <span class="block text-signal-on-stage">
+              Anadolu
+            </span>
+          </h1>
+          <p class="max-w-[48ch] text-md lg:text-lead text-stage-text-2">
+            Likya Yolu&#x27;ndan Kaçkarlara, rehberli ve küçük gruplarla yürüyüş turları. Tur türünü seçin, gidilecek yeri ve tarihi yazın.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div
+      class="mx-auto w-full max-w-(--container) px-(--gutter) gf-cover-foot relative z-(--z-raised) flex flex-col gap-4"
+    >
+      <form
+        role="search"
+        aria-label="Ürün ara"
+        class="rounded-tile border border-rule bg-field text-left text-text shadow-float-edged w-full max-w-5xl"
+        action="/arama"
+        method="get"
+      >
+        <fieldset class="flex flex-wrap gap-x-1 border-b border-rule px-2">
+          <legend class="sr-only">
+            Kategori
+          </legend>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" checked="" value=""/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Tümü
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="el-yapimi-caki"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              El Yapımı Çakılar
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="av-bicaklari"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Av Bıçakları
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="outdoor-ve-kamp"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Outdoor ve Kamp
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input
+              type="radio"
+              class="peer sr-only"
+              name="kategori"
+              value="mutfak-ve-sef-bicaklari"
+            />
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Mutfak ve Şef Bıçakları
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="mutfak-sef-serisi"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Mutfak &amp; Şef Serisi
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="kiliclar"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Kılıçlar
+            </span>
+          </label>
+          <label class="relative cursor-pointer">
+            <input type="radio" class="peer sr-only" name="kategori" value="ozel-koleksiyon"/>
+            <span
+              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
+            >
+              Özel Koleksiyon
+            </span>
+          </label>
+        </fieldset>
+        <div class="flex flex-col gap-2 p-2 md:flex-row md:items-center">
+          <div class="flex min-w-0 flex-1 flex-col md:flex-row md:items-stretch">
+            <label
+              class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+            >
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-map-pin size-5 shrink-0 text-text-3"
+                aria-hidden="true"
+              />
+              <span class="flex min-w-0 flex-1 flex-col">
+                <span class="text-xs font-semibold text-text">
+                  Gidilecek yer
+                </span>
+                <select
+                  name="gidilecek_yer"
+                  class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                >
+                  <option value="" selected="">
+                    Tümü
+                  </option>
+                  <option value="kapadokya">
+                    Kapadokya
+                  </option>
+                  <option value="ege">
+                    Ege
+                  </option>
+                  <option value="karadeniz">
+                    Karadeniz
+                  </option>
+                  <option value="dogu-anadolu">
+                    Doğu Anadolu
+                  </option>
+                </select>
+              </span>
+            </label>
+            <div
+              role="group"
+              aria-label="Tarih"
+              class="flex min-w-0 flex-col border-t border-rule md:flex-[2.4] md:flex-row md:border-t-0 md:border-l"
+            >
+              <label
+                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-xs font-semibold text-text">
+                    Başlangıç
+                  </span>
+                  <input
+                    type="date"
+                    min="2026-11-15"
+                    max="2027-10-31"
+                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                    name="tarih_baslangic"
+                    value=""
+                  />
+                </span>
+              </label>
+              <label
+                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-xs font-semibold text-text">
+                    Bitiş
+                  </span>
+                  <input
+                    type="date"
+                    min="2026-11-15"
+                    max="2027-10-31"
+                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                    name="tarih_bitis"
+                    value=""
+                  />
+                </span>
+              </label>
+              <label
+                class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-calendar-range size-5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-xs font-semibold text-text">
+                    Esnek ay
+                  </span>
+                  <select
+                    name="ay"
+                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                  >
+                    <option value="" selected="">
+                      Fark etmez
+                    </option>
+                    <option value="2026-11">
+                      Kasım 2026
+                    </option>
+                    <option value="2026-12">
+                      Aralık 2026
+                    </option>
+                    <option value="2027-01">
+                      Ocak 2027
+                    </option>
+                    <option value="2027-02">
+                      Şubat 2027
+                    </option>
+                    <option value="2027-03">
+                      Mart 2027
+                    </option>
+                    <option value="2027-04">
+                      Nisan 2027
+                    </option>
+                    <option value="2027-05">
+                      Mayıs 2027
+                    </option>
+                    <option value="2027-06">
+                      Haziran 2027
+                    </option>
+                    <option value="2027-07">
+                      Temmuz 2027
+                    </option>
+                    <option value="2027-08">
+                      Ağustos 2027
+                    </option>
+                    <option value="2027-09">
+                      Eylül 2027
+                    </option>
+                    <option value="2027-10">
+                      Ekim 2027
+                    </option>
+                  </select>
+                </span>
+              </label>
+            </div>
+            <label
+              class="flex min-w-0 flex-1 items-center gap-3 border-t border-rule px-3 py-2.5 first:border-t-0 md:border-t-0 md:border-l md:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+            >
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-users size-5 shrink-0 text-text-3"
+                aria-hidden="true"
+              />
+              <span class="flex min-w-0 flex-1 flex-col">
+                <span class="text-xs font-semibold text-text">
+                  Kişi
+                </span>
+                <select
+                  name="kisi"
+                  class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                >
+                  <option value="1" selected="">
+                    1 kişi
+                  </option>
+                  <option value="2">
+                    2 kişi
+                  </option>
+                  <option value="3">
+                    3 kişi
+                  </option>
+                  <option value="4">
+                    4 kişi
+                  </option>
+                  <option value="5">
+                    5 kişi
+                  </option>
+                  <option value="6">
+                    6 kişi
+                  </option>
+                  <option value="7">
+                    7 kişi
+                  </option>
+                  <option value="8">
+                    8 kişi
+                  </option>
+                  <option value="9">
+                    9 kişi
+                  </option>
+                  <option value="10">
+                    10 kişi
+                  </option>
+                  <option value="11">
+                    11 kişi
+                  </option>
+                  <option value="12">
+                    12 kişi
+                  </option>
+                  <option value="13">
+                    13 kişi
+                  </option>
+                  <option value="14">
+                    14 kişi
+                  </option>
+                  <option value="15">
+                    15 kişi
+                  </option>
+                  <option value="16">
+                    16 kişi
+                  </option>
+                  <option value="17">
+                    17 kişi
+                  </option>
+                  <option value="18">
+                    18 kişi
+                  </option>
+                  <option value="19">
+                    19 kişi
+                  </option>
+                  <option value="20">
+                    20 kişi
+                  </option>
+                </select>
+              </span>
+            </label>
+          </div>
+          <button type="submit" class="gf-btn shrink-0 gap-2 md:self-stretch">
+            <svg
+              width="24"
+              height="24"
+              stroke-width="2"
+              class="lucide lucide-search size-4.5"
+              aria-hidden="true"
+            />
+            Ara
+          </button>
+        </div>
+      </form>
+      <ul
+        aria-label="Alışveriş güvenceleri"
+        class="grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2 lg:grid-cols-3"
+      >
+        <li
+          class="flex items-start gap-3 last:odd:col-span-2 lg:border-l lg:border-rule lg:px-6 lg:first:border-l-0 lg:last:odd:col-span-1"
+        >
+          <svg
+            width="24"
+            height="24"
+            stroke-width="1.75"
+            class="lucide lucide-truck size-7 shrink-0 text-signal"
+            aria-hidden="true"
+          />
+          <span class="flex min-w-0 flex-col gap-0.5 leading-snug">
+            <span class="text-sm font-extrabold tracking-[-0.01em] text-balance">
+              Ücretsiz kargo
+            </span>
+            <span class="text-xs text-balance text-text-2">
+              1.500 TL ve üzeri siparişlerde
+            </span>
+          </span>
+        </li>
+        <li
+          class="flex items-start gap-3 last:odd:col-span-2 lg:border-l lg:border-rule lg:px-6 lg:first:border-l-0 lg:last:odd:col-span-1"
+        >
+          <svg
+            width="24"
+            height="24"
+            stroke-width="1.75"
+            class="lucide lucide-refresh-cw size-7 shrink-0 text-signal"
+            aria-hidden="true"
+          />
+          <span class="flex min-w-0 flex-col gap-0.5 leading-snug">
+            <span class="text-sm font-extrabold tracking-[-0.01em] text-balance">
+              14 gün iade
+            </span>
+            <span class="text-xs text-balance text-text-2">
+              Koşulsuz cayma hakkı
+            </span>
+          </span>
+        </li>
+        <li
+          class="flex items-start gap-3 last:odd:col-span-2 lg:border-l lg:border-rule lg:px-6 lg:first:border-l-0 lg:last:odd:col-span-1"
+        >
+          <svg
+            width="24"
+            height="24"
+            stroke-width="1.75"
+            class="lucide lucide-shield-check size-7 shrink-0 text-signal"
+            aria-hidden="true"
+          />
+          <span class="flex min-w-0 flex-col gap-0.5 leading-snug">
+            <span class="text-sm font-extrabold tracking-[-0.01em] text-balance">
+              Güvenli ödeme
+            </span>
+            <span class="text-xs text-balance text-text-2">
+              256 bit SSL
+            </span>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>

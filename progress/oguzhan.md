@@ -2,6 +2,12 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-24: adr/0077 PR11, `travel` paketi v2 ve "Rota", "Vadi", "Patika"
+
+- **Dal:** `oguzhan/seyahat-paketi-v2` (#290 departures + #309 Hero full_image üstüne; taban `dev`). Paket sürüm 2: "Tur bilgileri" şablonuna seçim niteliği `gidilecek_yer` (filtrelenebilir, 9 bölge değeri; önceki sürümü almış mağazaya yalnız bu nitelik eklenir). Üç hazır görünüm (yalnız veri): Rota (tam ekran kapak + arama, popüler turlar, yaklaşan kalkışlar, koyu rakam şeridi, adımlar, yorum kaydırıcı, kolaj, koyu `brand_columns` + e-bülten, Playfair), Vadi (yanda dalgalı görsel, taşan arama ve güven kutusu, görsel üstü yazılı kart, ikonlu kategoriler, tanıtım paneli, bölünmüş bant, ikonlu rakamlar), Patika (duyuru şeridi, sola hizalı kapak + sekmeli arama, rota kartları kolajı, ikonlu "neden biz", oklu tur kartları, geniş bant, yorumlar, yazılar, iletişim sütunlu alt bilgi). Görseller Commons CC0/CC BY, atıf `preset.json` `credits`.
+- **Kilit:** yeni örnekler `travel-rota`, `travel-vadi`, `travel-patika`; kilit dükkânına `/store/departures` ve `/store/listings/products` (Nereye) yanıtları (`fixture-dated.ts`), mevcut örnekler değişmedi.
+- **Açık:** kategori ikonları hazır görünümden seçilemez (`category_icons` kimlikle anahtarlı); menüler ve önizleme görseli yok; Rota'da "ortadaki büyük kart" ve kart fiyat rozeti, Patika'da üst bilgide düğme, ürün rozeti yok.
+
 ## 2026-11-24: adr/0077 PR8, Giriş bölümüne "Tam görsel" biçimi (#309)
 
 - **Dal:** `oguzhan/kapak-tam-gorsel` (#288 `oguzhan/arama-kutusu` üstüne kurulu; taban `dev`). Hero'ya üçüncü biçim `full_image`; `standard` ve `category_list` çizimine dokunulmadı. Ayarlar (kapalı liste, ilki varsayılan): `action` (düğme / arama kutusu, #288'in tek `SearchForm`'u), `search_position` (içinde / alt kenara taşan kart), `height`, `scrim`, `align`, `image_side` (arkada / yanda), `edge` (düz / dalgalı, `hero-full.css` maskesi), `title_accent` (aynı `h1` içinde ana renkte ikinci satır), `show_trust` (ortak güven rozetleri, en çok 4, taşan beyaz kutu). İkinci düğme mevcut `links`'in ikincisi. Görsel yoksa grafit sahne (`end` de `full` gibi çizilir). Zincir: `packages/types` `section-hero-full.ts`, backend `sections/hero.ts` + `hero-full.ts`, `packages/ui` `HeroFullView`, vitrin `views/hero-full.ts`, Atölye `HeroFull.tsx` + `HeroBlock.tsx`, panel `hero-full-fields.tsx` + `hero-full-registry.ts`; adr/0077 §9 eki.

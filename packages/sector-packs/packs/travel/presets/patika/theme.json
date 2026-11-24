@@ -1,0 +1,37 @@
+{
+  "settings_version": 2,
+  "theme": "atolye",
+  "colors": { "primary": "#0f5a52", "accent": "#e07a2f", "background": "steel" },
+  "typography": { "heading": "inter", "body": "inter" },
+  "radius": "gentle",
+  "product_card": {
+    "ratio": "4:5",
+    "show_brand": false,
+    "show_rating": true,
+    "variant": "standard",
+    "hover_image": false,
+    "delivery_note": false,
+    "full_button": false,
+    "no_reviews": "hide",
+    "text_position": "below",
+    "rating_badge": true,
+    "arrow": true,
+    "duration_row": true,
+    "per_person": true
+  },
+  "header": { "layout": "left", "sticky": true },
+  "buttons": "rounded",
+  "section_spacing": "normal",
+  "surface_style": "lined",
+  "search_form": {
+    "attribute_key": "gidilecek_yer",
+    "show_category": true,
+    "show_dates": true,
+    "show_people": true,
+    "category_style": "tabs"
+  },
+  "menu_style": "plain",
+  "chip_style": "lined",
+  "density": "balanced",
+  "motion": "lively"
+}
