@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { i18next } from "@/lib/i18n"
-import { NAME_MAX, designName, lookName, sourceName, suggestedName } from "./design-name"
+import {
+  NAME_MAX,
+  designName,
+  lookName,
+  lookSource,
+  sourceName,
+  suggestedName,
+} from "./design-name"
 import { design, preset, summary } from "./gallery.fixtures"
 
 const t = i18next.t.bind(i18next)
@@ -85,5 +92,29 @@ describe("suggestedName", () => {
 
     expect(suggestedName(t, "Sade", now)).toBe("Sade, 17 Kas 2026")
     expect(suggestedName(t, "x".repeat(80), now)).toHaveLength(NAME_MAX)
+  })
+
+  it("names a save of an automatic one after its source, with one date: today's", () => {
+    const presets = [preset("sade", { version: 2 })]
+    const sade = { pack: "general", code: "sade", version: 1 }
+    const auto = design("sfd_2", {
+      kind: "auto",
+      name: null,
+      created_at: AT,
+      summary: summary({ edited: true }),
+    })
+    const designs = [design("sfd_1"), auto]
+    const today = new Date("2026-11-25T09:00:00.000Z")
+    const offered = (design_id: string | null) =>
+      suggestedName(t, lookSource(t, { preset: sade, design_id }, presets, designs), today)
+
+    // The gallery still shows it under its date and time
+    expect(lookName(t, { preset: sade, design_id: "sfd_2" }, presets, designs)).toBe(
+      "Sade, 17 Kas 2026 14:20, düzenlenmiş"
+    )
+    expect(offered("sfd_2")).toBe("Sade, 25 Kas 2026")
+    expect(offered("sfd_1")).toBe("Bayram vitrini, 25 Kas 2026")
+    expect(offered(null)).toBe("Sade, 25 Kas 2026")
+    expect(offered("sfd_gone")).toBe("Sade, 25 Kas 2026")
   })
 })

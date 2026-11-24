@@ -26,13 +26,19 @@ export function designName(
   return t(design.summary.edited ? `${G}.auto.nameEdited` : `${G}.auto.name`, values)
 }
 
+/** What the draft or the live design was last given (`gallery.current`). */
+interface LookRef {
+  preset: PresetRef | null
+  design_id: string | null
+}
+
 /**
  * What the draft or the live design was last given, in words: a saved
  * look by its name, a ready-made one by its name, else the shop's own.
  */
 export function lookName(
   t: TFunction,
-  ref: { preset: PresetRef | null; design_id: string | null },
+  ref: LookRef,
   presets: readonly PresetCard[],
   designs: readonly DesignCard[]
 ): string {
@@ -42,6 +48,24 @@ export function lookName(
   }
   const preset = ref.preset ? presets.find((each) => isLook(each, ref.preset)) : undefined
   return preset ? preset.name : t(`${G}.auto.own`)
+}
+
+/**
+ * What a save of the draft is named after (`suggestedName`): as `lookName`,
+ * but an automatic save passes on its source, not its own date, so the
+ * offered name carries one date, today's.
+ */
+export function lookSource(
+  t: TFunction,
+  ref: LookRef,
+  presets: readonly PresetCard[],
+  designs: readonly DesignCard[]
+): string {
+  const design = ref.design_id ? designs.find((each) => each.id === ref.design_id) : undefined
+  if (design && !design.name) {
+    return sourceName(t, design.summary)
+  }
+  return lookName(t, ref, presets, designs)
 }
 
 /** The name offered for keeping the draft: "{kaynak}, 17 Kas 2026". */

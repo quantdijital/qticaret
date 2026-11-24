@@ -32,7 +32,8 @@ interface DesignCardProps {
 }
 
 /**
- * A saved look (adr/0064): its sketch, name, date and state; "Taslağa al"
+ * A saved look (adr/0064): its sketch, name, date and state (an automatic
+ * save's date is in its name, shown once); "Taslağa al"
  * brings it into the draft. Its menu renames it (keeps an automatic one
  * by name) or deletes it for good, asked first (K2).
  */
@@ -58,10 +59,13 @@ export function DesignCard({ design, savedFull, busy, onApply }: DesignCardProps
             <h3 id={`${ids}-title`} className="text-[15px] leading-6 font-semibold break-words">
               {name}
             </h3>
-            <p className="text-xs text-muted-foreground">
-              {formatDateTime(design.created_at)}
-              {from && design.name ? ` · ${t(`${G}.from`, { name: from })}` : null}
-            </p>
+            {/* An automatic save's name already carries its source and date and time */}
+            {design.name ? (
+              <p className="text-xs text-muted-foreground">
+                {formatDateTime(design.created_at)}
+                {from ? ` · ${t(`${G}.from`, { name: from })}` : null}
+              </p>
+            ) : null}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
