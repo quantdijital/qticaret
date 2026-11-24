@@ -95,6 +95,20 @@ async function publicRequest<T>(path: string, query?: Record<string, QueryValue>
 }
 
 /**
+ * A write that is nobody's own (a pop-up's counter, adr/0080 §7): the
+ * visitor's address for the backend's limit, never the customer's key.
+ */
+export async function storePublicPost(path: string, body: unknown): Promise<void> {
+  const { visitorIp: ip, requestId } = await visit()
+  await storeRequest<unknown>(path, {
+    method: "POST",
+    body,
+    visitorIp: ip,
+    ...(requestId ? { requestId } : {}),
+  })
+}
+
+/**
  * A shop-wide GET (the frame, the category tree, paths): never with the
  * customer's key, kept a minute in this process (`shared.ts`). `kept`
  * keeps it longer, under an extra key part the backend is not sent (a
