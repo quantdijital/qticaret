@@ -45,3 +45,6 @@ c82914678d4ae5be8974e4a2e514ebb494401493:apps/backend/src/lib/errors/__tests__/p
 dc9891a47c3ad526429c629bcd35240868ef2eed:apps/panel/src/features/settings/components/birfatura-card.spec.tsx:generic-api-key:20
 # backend turnstile spec: typed wrong password (Turkish words + 123)
 4ad5761c2c27c22efacdf68f52ac1e7efd169051:apps/backend/integration-tests/http/turnstile.spec.ts:generic-api-key:56
+# ui + storefront turnstile gate specs: fallback challenge tokens spelled "ts_verification.s.<bits>.1.sig"
+6f4ac95871aca6078a5687f580dbd1d3d30b3574:packages/ui/src/__tests__/gate.spec.ts:generic-api-key:138
+6f4ac95871aca6078a5687f580dbd1d3d30b3574:apps/storefront/src/lib/store-api/__tests__/gate.spec.ts:generic-api-key:83
