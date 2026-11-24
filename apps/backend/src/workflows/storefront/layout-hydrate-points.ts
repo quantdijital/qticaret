@@ -3,6 +3,7 @@ import type { StatsSection } from "../../lib/storefront/sections/stats"
 import type { StepsSection } from "../../lib/storefront/sections/steps"
 import type { PhotoCollageSection } from "../../lib/storefront/sections/photo-collage"
 import type { StoreLayoutImage, StoreLayoutLink } from "./layout-hydrate"
+import type { DeparturesSection } from "../../lib/storefront/sections/departures"
 
 /** What the figures strip and the steps are printed with: the hydrate's own helpers. */
 export interface PointsContext {
@@ -74,5 +75,23 @@ export function hydrateCollage(
     })),
     layout: section.layout,
     phone: section.phone,
+  }
+}
+
+/**
+ * Upcoming departures as the storefront asks for them (adr/0077 §10): the
+ * shop's words filled, the source, count and layout as saved; the rows
+ * themselves are read live (`GET /store/departures`), never kept here.
+ */
+export function hydrateDepartures(section: DeparturesSection, at: PointsContext) {
+  const { id, type } = section
+  return {
+    id,
+    type,
+    title: section.title,
+    intro: at.fill(section.intro),
+    source: section.source,
+    limit: section.limit,
+    layout: section.layout,
   }
 }

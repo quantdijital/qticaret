@@ -42,6 +42,7 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "steps",
   "search_box",
   "photo_collage",
+  "departures",
   "contact",
   "payment_facts",
   "shipping_facts",

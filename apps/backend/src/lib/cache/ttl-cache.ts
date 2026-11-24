@@ -14,7 +14,7 @@ export function createTtlCache<T>({
   now?: () => number
 }) {
   const entries = new Map<string, { until: number; value: Promise<T> }>()
-  return (key: string, load: () => Promise<T>): Promise<T> => {
+  const read = (key: string, load: () => Promise<T>): Promise<T> => {
     const held = entries.get(key)
     if (held && held.until > now()) {
       return held.value
@@ -36,4 +36,10 @@ export function createTtlCache<T>({
     })
     return value
   }
+  /** Forgets every value (tests that change what a cache holds). */
+  return Object.assign(read, {
+    clear: () => {
+      entries.clear()
+    },
+  })
 }
