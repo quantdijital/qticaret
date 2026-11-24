@@ -1,0 +1,9 @@
+# HTTP spec files that run alone when QT_IT_BUNDLE is on (README.md in this folder).
+#
+# One file name a line, then `#` and why: what it shares with the other files
+# of a bundle (process memory, a cache, a counter) that it cannot share.
+# Files the planner sets apart by their source (runner options, jest.mock,
+# process.env or fake timers at module level, ...) need no line here.
+#
+# Example:
+# some-feature.spec.ts # reads the 60 s settings cache another file fills

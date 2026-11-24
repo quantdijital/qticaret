@@ -1,3 +1,5 @@
+import { registerProcessCache } from "./process-caches"
+
 /**
  * A few values held in process for a short time, each loaded once however
  * many callers ask at once (docs/05): a heavy read many requests share,
@@ -37,9 +39,11 @@ export function createTtlCache<T>({
     return value
   }
   /** Forgets every value (tests that change what a cache holds). */
-  return Object.assign(read, {
+  const cache = Object.assign(read, {
     clear: () => {
       entries.clear()
     },
   })
+  registerProcessCache(cache.clear, cache)
+  return cache
 }

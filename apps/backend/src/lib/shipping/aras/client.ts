@@ -9,6 +9,7 @@ import { ProviderError, isProviderError } from "../../errors"
 import type { ArasCredentials } from "./credentials"
 import { arasOrderFields } from "./mappers"
 import type { ArasOrderInput } from "./mappers"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * Aras Kargo's customer service (adr/0035): a .NET SOAP service whose
@@ -245,6 +246,10 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
 export type ArasApi = ReturnType<typeof createArasApi>
 
 let shared: ArasApi | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client set per process; a local fake server's address in development (`ARAS_BASE_URL`). */
 export function arasApi(): ArasApi {

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import type Redis from "ioredis"
 import { errorSummary, logger } from "../logging"
+import { registerProcessCache } from "./process-caches"
 
 /**
  * A value held in process and reloaded when a shared version marker changes
@@ -116,7 +117,7 @@ export function createVersionedCache<T>({
     return data
   }
 
-  return {
+  const cache: VersionedCache<T> = {
     get: () => {
       if (value && isFresh() && now() - checkedAt < checkEveryMs) {
         return Promise.resolve(value.data)
@@ -141,4 +142,11 @@ export function createVersionedCache<T>({
       await bump()
     },
   }
+  // This process's copy only: the shared marker is not bumped
+  registerProcessCache(() => {
+    generation += 1
+    value = undefined
+    inFlight = undefined
+  }, cache)
+  return cache
 }

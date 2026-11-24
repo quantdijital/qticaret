@@ -311,6 +311,9 @@ jobs:
         env:
           SUITE: ${{ matrix.suite }}
           JEST_WORKERS: "3"
+          # HTTP spec files share one Medusa boot eight at a time; the modules
+          # suite ignores it (apps/backend/integration-tests/bundle/README.md)
+          QT_IT_BUNDLE: "8"
         run: |
           set -o pipefail
           if [ "$SUITE" = modules ]; then

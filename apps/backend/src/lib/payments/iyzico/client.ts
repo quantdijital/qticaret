@@ -22,6 +22,7 @@ import { isResponseGenuine, signaturePrice, signedHeaders } from "./signatures"
 import type { IyzicoCredentialCheck, IyzicoCredentials } from "./types"
 import { toIyzicoPrice } from "./amounts"
 import type { Kurus } from "../../money"
+import { registerProcessCache } from "../../cache/process-caches"
 
 /**
  * iyzico's API over the platform HTTP client, signed per request
@@ -264,6 +265,10 @@ export function createIyzicoApi(
 }
 
 let shared: IyzicoApi | undefined
+// A new client (and circuit breaker) per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** One client per process, on iyzico's addresses or a local fake server's (`IYZICO_BASE_URL`). */
 export function iyzicoApi(): IyzicoApi {

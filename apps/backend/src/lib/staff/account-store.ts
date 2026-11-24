@@ -1,6 +1,7 @@
 import type Redis from "ioredis"
 import { parseEnv } from "../env"
 import { createRedisClient, tenantNamespace } from "../redis"
+import { registerProcessCache } from "../cache/process-caches"
 
 /**
  * What a staff member's own account keeps for a while, outside the
@@ -118,6 +119,10 @@ export function createMemoryAccountStore(now: () => number = Date.now): AccountS
 }
 
 let shared: AccountStore | undefined
+// A store in process memory starts afresh per spec file of a bundled test run
+registerProcessCache(() => {
+  shared = undefined
+})
 
 /** The tenant's store: Redis when configured, else this process's memory. */
 export function staffAccountStore(): AccountStore {
