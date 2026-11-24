@@ -1,0 +1,38 @@
+{
+  "settings_version": 2,
+  "theme": "atolye",
+  "colors": { "primary": "#2f6b3f", "accent": "#d2601a", "background": "neutral" },
+  "typography": { "heading": "manrope", "body": "manrope" },
+  "radius": "round",
+  "product_card": {
+    "ratio": "3:4",
+    "show_brand": false,
+    "show_rating": true,
+    "variant": "standard",
+    "hover_image": true,
+    "delivery_note": false,
+    "full_button": false,
+    "no_reviews": "hide",
+    "text_position": "over",
+    "rating_badge": true,
+    "duration_row": true,
+    "per_person": true
+  },
+  "header": { "layout": "left", "sticky": true },
+  "buttons": "pill",
+  "section_spacing": "normal",
+  "surface_style": "filled",
+  "search_form": {
+    "attribute_key": "gidilecek_yer",
+    "show_category": true,
+    "show_dates": true,
+    "show_people": true,
+    "category_style": "select",
+    "placeholder": "Nereye gitmek istersiniz?"
+  },
+  "menu_style": "underline",
+  "shadow": "float",
+  "media_ground": "well",
+  "density": "airy",
+  "motion": "lively"
+}

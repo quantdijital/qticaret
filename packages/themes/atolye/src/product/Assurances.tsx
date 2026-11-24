@@ -59,7 +59,7 @@ export function Assurances({ view, t }: { view: ProductPageView; t: Translate })
       className="flex flex-col gap-4 rounded-media gf-box p-4 lg:p-5"
     >
       <h2 id="teslimat" className="text-md tracking-[-0.01em]">
-        {t("product.delivery")}
+        {t(view.unshipped ? "product.promises" : "product.delivery")}
       </h2>
       <ul className="flex flex-col gap-3 text-sm">
         {view.shippingNote && (

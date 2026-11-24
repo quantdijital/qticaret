@@ -66,7 +66,9 @@ function Trust({ badges, label }: { badges: readonly TrustBadgeView[]; label: st
  * second quiet) or the shop's one search box (`SearchForm`, adr/0077 §1),
  * inside the opening or as a card over its bottom edge (`search_position`).
  * The shop's trust badges, when shown, are a box over the bottom edge too,
- * under the search card. The search box and the trust box are drawn off
+ * under the search card, which then takes the same width (one edge for
+ * both). Beside the words the photograph ends where that foot begins, so
+ * none of it shows past the cards' side. The search box and the trust box are drawn off
  * the stage, so they keep the page's own inks on their white ground.
  */
 export function HeroFull({
@@ -112,8 +114,10 @@ export function HeroFull({
           className={cn(
             "gf-cover-media overflow-hidden",
             beside
-              ? "relative aspect-[16/10] sm:aspect-[2/1] lg:absolute lg:inset-y-0 lg:right-0 lg:-z-10 lg:aspect-auto lg:w-[54%]"
+              ? "relative aspect-[16/10] sm:aspect-[2/1] lg:absolute lg:top-0 lg:right-0 lg:-z-10 lg:aspect-auto lg:w-[54%]"
               : "absolute inset-0 -z-10",
+            // Beside the words it ends where the foot's cards begin: none of it shows past their side
+            beside && (foot ? "lg:bottom-(--cover-lift)" : "lg:bottom-0"),
             // Beside the words a photograph's well; behind them, or with none, the stage
             beside ? "bg-media" : "bg-stage"
           )}
@@ -195,7 +199,9 @@ export function HeroFull({
       </div>
       {foot && (
         <Container className="gf-cover-foot relative z-(--z-raised) flex flex-col gap-4">
-          {search && overlap && <SearchForm form={search} className={box} />}
+          {search && overlap && (
+            <SearchForm form={search} className={trust.length > 0 ? "w-full" : box} />
+          )}
           {trust.length > 0 && <Trust badges={trust} label={t("footer.trust")} />}
         </Container>
       )}

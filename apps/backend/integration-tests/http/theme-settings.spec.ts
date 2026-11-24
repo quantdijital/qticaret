@@ -51,6 +51,7 @@ const SEARCH_FORM = {
   show_dates: true,
   show_people: true,
   category_style: "select",
+  placeholder: null,
 }
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */

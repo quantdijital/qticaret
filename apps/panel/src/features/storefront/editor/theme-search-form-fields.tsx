@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { searchFormOf } from "@qticaret/types"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { SEARCH_FORM_PLACEHOLDER_MAX, searchFormOf } from "@qticaret/types"
 import type { SearchFormSettings } from "@qticaret/types"
 import { templatesQuery } from "@/features/attributes/api"
 import { SEARCH_FORM_CATEGORY_STYLES } from "@/features/storefront/api/theme"
@@ -43,6 +45,9 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
   }
   const shown = (field: ThemeRegistryField) => field.shown(theme, new Set(), flags)
   const keyField = THEME_FIELD["search_form.attribute_key"]
+  const hintField = THEME_FIELD["search_form.placeholder"]
+  // As typed (its spaces too); the saved one is trimmed
+  const rawHint = theme.search_form.placeholder ?? ""
   const styleField = THEME_FIELD["search_form.category_style"]
   // A key saved before its attribute went keeps its place, by its own name
   const keys = [
@@ -84,6 +89,24 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
         }
         hint={t(`${S}.attribute_key.hint`)}
       />
+      {shown(hintField) && (
+        <Field
+          label={t(hintField.label)}
+          htmlFor={hintField.target}
+          hint={t(`${S}.placeholder.hint`)}
+        >
+          <Input
+            id={hintField.target}
+            value={rawHint}
+            maxLength={SEARCH_FORM_PLACEHOLDER_MAX}
+            autoComplete="off"
+            onChange={(event) => {
+              const text = event.target.value
+              set({ placeholder: text.trim() === "" ? null : text })
+            }}
+          />
+        </Field>
+      )}
       {toggle("show_category")}
       {shown(styleField) && (
         <ChoiceSelect

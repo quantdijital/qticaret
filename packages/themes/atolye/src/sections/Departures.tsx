@@ -65,8 +65,8 @@ const Left = ({ text }: { text: string | null }) =>
  * Upcoming departures (`departures`, adr/0077 §10): the heading and an
  * optional intro, then the nearest departures by date. `list`: one row
  * each under a hairline, the date box, the tour's name and the places left
- * when few, then the price and "İncele" at the row's end (under the name
- * on a phone). `cards`: a card each, the tour's photograph in its well
+ * when few, then the price and "İncele" at the row's end (on a phone
+ * under the name, beside the date box, the row kept tight). `cards`: a card each, the tour's photograph in its well
  * with the date box on it, the name, the places left, the price and
  * "İncele". Its ground and alignment are the section's look (`Look`).
  */
@@ -115,14 +115,14 @@ export function Departures({ section, t }: { section: Of<"departures">; t: Trans
             {section.rows.map((row) => (
               <li
                 key={row.key}
-                className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-x-4 gap-y-3 border-t border-rule py-4 md:grid-cols-[4rem_minmax(0,1fr)_auto]"
+                className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-x-4 gap-y-2 border-t border-rule py-3 md:grid-cols-[4rem_minmax(0,1fr)_auto] md:items-center md:py-4"
               >
-                <DateBox row={row} />
+                <DateBox row={row} className="row-span-2 md:row-span-1" />
                 <div className="flex min-w-0 flex-col gap-1">
                   <h3 className="text-title font-semibold text-text">{row.title}</h3>
                   <Left text={row.left} />
                 </div>
-                <div className="col-start-2 flex flex-wrap items-center gap-x-4 gap-y-2 md:col-start-3 md:justify-end">
+                <div className="col-start-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 md:col-start-3 md:justify-end">
                   {row.price && <Price price={row.price} t={t} />}
                   <Open row={row} open={section.open} />
                 </div>

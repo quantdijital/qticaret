@@ -35,7 +35,7 @@ export async function relatedView(
     return {
       id: section.id,
       type: "products",
-      title: section.title ?? t("product.related"),
+      title: section.title ?? t(product.unshipped ? "product.related_plain" : "product.related"),
       products: cards,
       more: null,
       empty: "",

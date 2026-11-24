@@ -10,7 +10,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { BottomLine } from "./FooterBottomLine"
 import { FooterNewsletterBox, footerNewsletterVariant } from "./FooterNewsletter"
-import { FooterIdentity } from "./FooterIdentity"
+import { FooterIdentity, hasIdentity } from "./FooterIdentity"
 import { FooterBlock } from "./footer-blocks/FooterBlock"
 import { foldJoins } from "./footer-blocks/fold-joins"
 import { legalLabel } from "./SmallPrint"
@@ -95,9 +95,14 @@ function Row({
 /**
  * The legal strip (adr/0070 §3), under the rows whatever the shop laid
  * out: the legal texts (the KVKK notice by its short name), the identity
- * lines the law asks for beside the ETBİS code. Not a block: always drawn.
+ * lines the law asks for beside the ETBİS code. Not a block: drawn
+ * whenever the shop has one of them.
  */
 function LegalStrip({ shop, t }: { shop: ShopView; t: Translate }) {
+  // Neither a legal text nor an identity line: no empty strip under a rule
+  if (shop.legalLinks.length === 0 && !hasIdentity(shop)) {
+    return null
+  }
   const label = t("footer.legal")
   return (
     <div data-footer-legal="" className="border-t border-rule">
