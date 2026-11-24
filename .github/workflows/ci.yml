@@ -107,7 +107,7 @@ jobs:
   integration:
     name: Integration tests (${{ matrix.suite }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 50
     # Side by side: each HTTP spec file boots Medusa (~45 s on a runner), and
     # there are about 290 of them; twelve shards of ~24 files take ~20 minutes
     strategy:

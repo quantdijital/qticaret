@@ -86,7 +86,7 @@ export function Toolbar({
           id={results}
           className="max-w-none scroll-mt-40 text-md font-semibold tracking-normal text-text-2"
         >
-          {t("listing.count", { count: view.total })}
+          {view.countLabel ?? t("listing.count", { count: view.total })}
         </h2>
         {(sheet !== null || sort !== null) && (
           // The column's 24 px gap less the margins: 12 px under the count, 16 px to

@@ -1,4 +1,5 @@
 import {
+  AppWindow,
   BadgePercent,
   ChartColumnBig,
   FileText,
@@ -129,6 +130,8 @@ export const NAV_GROUPS: NavGroup[] = [
       fromMap("promotions", BadgePercent),
       // adr/0050: bulk e-mail and SMS, the owner's and admin's, while the shop has it on
       fromMap("bulkMessages", Mails),
+      // adr/0080: storefront pop-ups while the shop has them on (on by default); every role reads
+      fromMap("popups", AppWindow),
       fromMap("reviews", MessageSquareText),
     ],
   },

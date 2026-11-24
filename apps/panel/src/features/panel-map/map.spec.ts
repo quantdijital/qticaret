@@ -7,6 +7,7 @@ import { BULK_MESSAGES_FLAG } from "@/features/bulk-messages/api/types"
 import { COLLECTIONS_FLAG } from "@/features/collections/paths"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
 import { PAYMENT_LINKS_FLAG } from "@/features/payment-links/api/types"
+import { POPUPS_FLAG } from "@/features/popups/api/types"
 import { BOOKING_FLAG } from "@/features/products/api/booking"
 import { SEO_PART_ITEMS } from "@/features/seo/parts"
 import { SETTINGS_GROUPS } from "@/features/settings/sections"
@@ -86,6 +87,7 @@ const FLAGS = new Set([
   COLLECTIONS_FLAG,
   GIFT_CARDS_FLAG,
   PAYMENT_LINKS_FLAG,
+  POPUPS_FLAG,
   BOOKING_FLAG,
   WHOLESALE_FLAG,
 ])

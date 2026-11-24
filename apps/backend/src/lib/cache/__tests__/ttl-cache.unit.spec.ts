@@ -35,4 +35,11 @@ describe("createTtlCache", () => {
     await expect(cache("a", () => Promise.reject(new Error("down")))).rejects.toThrow("down")
     expect(await cache("a", () => Promise.resolve(3))).toBe(3)
   })
+
+  it("forgets every value when cleared", async () => {
+    const cache = createTtlCache<number>({ ttlMs: 1000, maxEntries: 2, now: () => 0 })
+    await cache("a", () => Promise.resolve(1))
+    cache.clear()
+    expect(await cache("a", () => Promise.resolve(2))).toBe(2)
+  })
 })

@@ -272,6 +272,26 @@ export const MENU_ENTRIES = [
     },
   },
   {
+    key: "popups",
+    path: "/popups",
+    feature: "marketing.popups",
+    label: "nav.popups",
+    keywords: {
+      tr: [
+        "pop-up",
+        "açılır pencere",
+        "duyuru penceresi",
+        "e-bülten penceresi",
+        "indirim penceresi",
+      ],
+      en: ["pop-up", "popup", "modal", "announcement", "newsletter popup"],
+    },
+    help: {
+      tr: "Vitrinde açılan pencereleri (duyuru, indirim, e-bülten) ve ne zaman görüneceklerini yönetirsiniz.",
+      en: "Manage the storefront's pop-ups (announcement, discount, newsletter) and when they show.",
+    },
+  },
+  {
     key: "reviews",
     path: "/reviews",
     label: "nav.reviews",

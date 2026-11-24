@@ -13,6 +13,8 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 import type { Rating } from "../../modules/product-reviews/types"
+import { anyBadgeOn, badgeSettings, cardBadges } from "./card-badge"
+import type { CardBadge } from "./card-badge"
 import { liveSettings } from "./layout-shared"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -34,23 +36,31 @@ export interface CardFacts {
    * on such a product and only while the shop sells dated products.
    */
   booking?: BookingCardFact
+  /**
+   * The one badge on its photo while the shop has one on (`product_badges`):
+   * its own line, "Çok satan" or "Yeni"; absent without one.
+   */
+  badge?: CardBadge
 }
 
 interface VariantRow {
   id: string
   manage_inventory?: boolean | null
   allow_backorder?: boolean | null
+  variant_rank?: number | null
 }
 
 interface ProductRow {
   id: string
   status?: string | null
+  created_at?: string | Date | null
   variants?: (VariantRow | null)[] | null
   sales_channels?: ({ id: string } | null)[] | null
   product_extension?: {
     is_gift_card?: boolean | null
     addons?: unknown
     booking_mode?: string | null
+    badge?: string | null
   } | null
   bookable?: DatedCardProduct["bookable"]
   attribute_values?: (DurationAttributeRow | null)[] | null
@@ -59,6 +69,7 @@ interface ProductRow {
 // A dated product's booking settings and its length (adr/0077 Ek "tur kartı"), read only
 // while the shop sells them
 const BOOKABLE_FIELDS = [
+  "variants.variant_rank",
   "bookable.id",
   "bookable.cutoff_hours",
   "bookable.pax_by_variant",
@@ -158,7 +169,11 @@ export async function cardFacts(
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const reviews = container.resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
   // Kept in the settings' cache: the product read below knows its fields
-  const bookingOn = await settings.isFeatureEnabled(CATALOG_BOOKING)
+  const [bookingOn, badges] = await Promise.all([
+    settings.isFeatureEnabled(CATALOG_BOOKING),
+    badgeSettings(container),
+  ])
+  const badgesOn = anyBadgeOn(badges)
   const [{ data }, shared, addonsOn, ratings] = await Promise.all([
     query.graph({
       entity: "product",
@@ -173,6 +188,8 @@ export async function cardFacts(
         "product_extension.addons",
         "product_extension.booking_mode",
         ...(bookingOn ? BOOKABLE_FIELDS : []),
+        // A badge reads its own line and age only while the shop has one on
+        ...(badgesOn ? ["created_at", "product_extension.badge"] : []),
       ],
       filters: { id: ids },
     }),
@@ -195,7 +212,7 @@ export async function cardFacts(
   const stockRead = counted.length
     ? getVariantAvailability(query, { variant_ids: counted, sales_channel_id: channel })
     : Promise.resolve(undefined)
-  const [availability, dated, addons] = await Promise.all([
+  const [availability, dated, addons, badged] = await Promise.all([
     stockRead,
     bookingOn
       ? bookingCardFacts(container, shown, input.region_id, input.window)
@@ -207,6 +224,7 @@ export async function cardFacts(
           shown.map((product) => product.id)
         )
       : new Map<string, StoredAddon[]>(),
+    cardBadges(container, shown, badges),
   ])
   const available = (variantId: string) => availability?.[variantId]?.availability ?? 0
   const lowAt = shared.low_stock_threshold
@@ -214,6 +232,7 @@ export async function cardFacts(
     shown.map((product) => {
       const stock = stockBucketOf(variantsOf(product), available, lowAt)
       const booking = dated.get(product.id)
+      const badge = badged.get(product.id)
       return [
         product.id,
         {
@@ -221,6 +240,7 @@ export async function cardFacts(
           quick_add: quickAddOf(product, stock, addonsOn, addons.get(product.id) ?? []),
           rating: ratings.get(product.id) ?? null,
           ...(booking ? { booking: withDuration(booking, product) } : {}),
+          ...(badge ? { badge } : {}),
         },
       ]
     })

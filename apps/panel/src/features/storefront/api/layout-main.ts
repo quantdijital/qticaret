@@ -9,6 +9,7 @@ import type {
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
+  ProductImageRatio,
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
@@ -48,6 +49,11 @@ interface HeaderBarCommon extends MainBase {
    * "Ara" drops it down); the server reads a bar saved before it as `field`.
    */
   search_style: HeaderSearchStyle
+  /**
+   * The header's action button, on every variant (the catalog header's
+   * highlighted link): its words and where it goes; null or absent: none.
+   */
+  highlight_link?: LayoutLink | null
 }
 
 /**
@@ -111,6 +117,8 @@ export type FooterBarSection =
 export interface ProductMainSection extends MainBase {
   type: "product_main"
   variant: ProductMainVariant
+  /** The gallery's picture shape; left out: the square. */
+  image_ratio?: ProductImageRatio
   look?: SectionLook
 }
 

@@ -72,6 +72,34 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     })
   })
 
+  it("gives every header its action button once set, none while not (or broken)", () => {
+    const theme = { header: { layout: "left", sticky: true } } as const
+    const parts = { t: (key: string) => key, tree: () => [] }
+    const link = { kind: "url" as const, target: null, path: "/turlar", label: "Rezervasyon" }
+    for (const variant of ["standard", "centered"] as const) {
+      const set = {
+        ...MAIN,
+        header_bar: { ...MAIN.header_bar, variant, highlight_link: link },
+      } as unknown as StoreMainSections
+      expect(headerBarOf(set, theme, parts).highlight).toEqual({
+        label: "Rezervasyon",
+        path: "/turlar",
+      })
+    }
+    // None set: the view holds no key, as before it
+    expect(headerBarOf(MAIN, theme, parts)).not.toHaveProperty("highlight")
+    const broken = {
+      ...MAIN,
+      header_bar: { ...MAIN.header_bar, highlight_link: null },
+    } as StoreMainSections
+    expect(headerBarOf(broken, theme, parts)).not.toHaveProperty("highlight")
+    const unsafe = {
+      ...MAIN,
+      header_bar: { ...MAIN.header_bar, highlight_link: { ...link, path: "javascript:x" } },
+    } as unknown as StoreMainSections
+    expect(headerBarOf(unsafe, theme, parts).highlight).toBeNull()
+  })
+
   it("reads a variant this build does not know as the default", () => {
     const newer = {
       ...MAIN,
@@ -92,6 +120,18 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     })
     expect(categoryMainOf(MAIN)).toEqual({ id: "maincategory", variant: "standard" })
     expect(productMainOf(undefined)).toEqual({ id: "mainproduct", variant: "standard" })
+  })
+
+  it("gives the gallery the shape the shop chose, and none for the square or one off the list", () => {
+    const shaped = (image_ratio: unknown) =>
+      productMainOf({
+        ...MAIN,
+        product_main: { ...MAIN.product_main, image_ratio } as StoreMainSections["product_main"],
+      })
+    expect(shaped("landscape").imageRatio).toBe("landscape")
+    expect(shaped("portrait").imageRatio).toBe("portrait")
+    expect(shaped("square")).not.toHaveProperty("imageRatio")
+    expect(shaped("wide")).not.toHaveProperty("imageRatio")
   })
 
   it("gives the catalog header its settings, the link named and the tree only with its button", () => {

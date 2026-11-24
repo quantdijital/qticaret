@@ -31,7 +31,10 @@ jest.mock("../layout-row", () => ({
 
 const PAGE = "cnt_01KABOUT0000000000000000"
 const AT = "2026-11-19T09:00:00.000Z"
-const container = {} as MedusaContainer
+// Every flag off: a flag-gated section type asks the settings module, which this fake answers
+const container = {
+  resolve: () => ({ isFeatureEnabled: () => Promise.resolve(false) }),
+} as unknown as MedusaContainer
 const published = (revision: number, title = "Hakkımızda") => ({
   id: "sfl_1",
   revision,

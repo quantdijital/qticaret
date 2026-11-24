@@ -85,6 +85,23 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",
+  "popups.unknown": "Pop-up not found.",
+  "popups.text_invalid":
+    "The text is too long or holds characters that cannot be used (plain text; the body at most 500 characters and 8 lines).",
+  "popups.link_invalid":
+    "The link must be a path on the shop (starting with /) or an https address.",
+  "popups.promotion_required": "Choose a discount for a campaign pop-up.",
+  "popups.promotion_not_allowed": "Only a campaign pop-up takes a discount.",
+  "popups.promotion_unknown": "The chosen discount was not found.",
+  "popups.button_incomplete": "Give the button both its words and its link, or leave both empty.",
+  "popups.button_link_not_allowed":
+    "A newsletter pop-up's button sends the form; it takes no link.",
+  "popups.pages_required": "Choose at least one kind of page for the pop-up.",
+  "popups.trigger_value_invalid":
+    "The delay must be 0 to 120 seconds, the scroll share 1 to 100 percent.",
+  "popups.frequency_days_required": "Enter every how many days it shows (1–365).",
+  "popups.dates_invalid": "The end must come after the start.",
+  "popups.image_unknown": "The picture must come from the media library: an image in the library.",
   "bulk_edit.addon_template_unknown": "The chosen add-on template was not found.",
   "bulk_edit.alt_not_filled":
     "Some images' alt text could not be written; add it on the product page.",

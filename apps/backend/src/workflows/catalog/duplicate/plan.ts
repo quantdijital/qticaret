@@ -78,6 +78,7 @@ export interface SourceProduct {
     addons?: unknown
     description_doc?: unknown
     summary_doc?: unknown
+    badge?: string | null
   } | null
 }
 
@@ -166,6 +167,7 @@ function catalogOf(source: SourceProduct, flags: CopyFlags): CopyPlan["catalog"]
     ...(addons.length > 0 ? { addons: addons } : {}),
     ...(extension.description_doc ? { description_doc: extension.description_doc as never } : {}),
     ...(extension.summary_doc ? { summary_doc: extension.summary_doc as never } : {}),
+    ...(extension.badge ? { badge: extension.badge } : {}),
   }
 }
 

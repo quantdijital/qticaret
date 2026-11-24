@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { SLUG_MAX_LENGTH, SLUG_SEGMENT } from "../../seo/slug"
 import { LAYOUT_LIMITS, optional, recordId, title } from "../layout-fields"
 import { storefrontLink } from "../menus"
 import { sectionIcon } from "./icons"
@@ -171,6 +172,12 @@ const panels = z
  * category; one with none shows the category's picture, else its first
  * letter. An icon kept for a category no longer named is never drawn.
  */
+/** A category's URL handle (`docs/13` §2.1's slug), as a preset writes it. */
+const categoryHandle = z
+  .string()
+  .max(SLUG_MAX_LENGTH)
+  .regex(new RegExp(`^${SLUG_SEGMENT}$`), VARIANT_ERROR)
+
 const icons = z
   .object({
     ...common,
@@ -181,6 +188,16 @@ const icons = z
       .record(recordId, sectionIcon)
       .refine((picked) => Object.keys(picked).length <= LAYOUT_LIMITS.items, VARIANT_ERROR)
       .default({}),
+    /**
+     * Icons by category handle (a preset's: it cannot know a shop's ids).
+     * Read after `category_icons`: an id's icon wins, then the handle's,
+     * then the picture or initial. Absent until written, so a row saved
+     * before it parses and prints as it did.
+     */
+    category_icons_by_handle: z
+      .record(categoryHandle, sectionIcon)
+      .refine((picked) => Object.keys(picked).length <= LAYOUT_LIMITS.items, VARIANT_ERROR)
+      .optional(),
   })
   .strict()
 

@@ -135,6 +135,16 @@ describe("the theme panel's search box group", () => {
     ).toBeInTheDocument()
   })
 
+  it("saves the word box's hint as typed, and an empty one as none", () => {
+    const onChange = draw(withForm({ placeholder: "Nereye" }))
+    const field = screen.getByLabelText("Kelime kutusundaki ipucu")
+    expect(field).toHaveValue("Nereye")
+    fireEvent.change(field, { target: { value: "Nereye gitmek " } })
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ placeholder: "Nereye gitmek " }))
+    fireEvent.change(field, { target: { value: "  " } })
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ placeholder: null }))
+  })
+
   it("is found in the settings search, the dated two only with the flag", () => {
     const keys = (query: string, flags: readonly string[] = []) =>
       searchTheme(query, THEME, new Set(), t, new Set(flags)).map((hit) => hit.field.key)

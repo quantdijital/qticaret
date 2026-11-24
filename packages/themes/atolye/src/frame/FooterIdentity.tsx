@@ -1,6 +1,12 @@
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
 
+/** The shop has a line of its identity to say: its title, its lines or the ETBİS mark. */
+export const hasIdentity = (shop: ShopView): boolean =>
+  shop.identityLines.length > 0 ||
+  (shop.etbisQr ?? null) !== null ||
+  (shop.companyTitle ?? shop.name) !== shop.name
+
 /**
  * The identity lines the law asks for (6563, ETBİS: the registered title
  * when it differs from the shop's name, MERSİS, tax, KEP…) beside the
@@ -9,7 +15,7 @@ import type { ShopView, Translate } from "@qticaret/ui"
 export function FooterIdentity({ shop, t }: { shop: ShopView; t: Translate }) {
   const title = shop.companyTitle ?? shop.name
   const qr = shop.etbisQr ?? null
-  if (shop.identityLines.length === 0 && qr === null && title === shop.name) {
+  if (!hasIdentity(shop)) {
     return null
   }
   return (

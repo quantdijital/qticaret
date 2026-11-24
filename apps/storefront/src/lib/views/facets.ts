@@ -3,6 +3,7 @@ import type {
   FilterGroupView,
   LinkView,
   PriceFilterView,
+  ProductCardView,
   StockFilterView,
   Translate,
 } from "@qticaret/ui"
@@ -132,4 +133,17 @@ export function filterViews(
     active,
     clearPath: active.length > 0 ? hrefOf(pathname, cleared(state)) : null,
   }
+}
+
+/**
+ * The in-stock toggle for the page's cards: none when every card is a
+ * dated product's (a departure's places are not stock, so "only in stock"
+ * narrows nothing), unless it is on and has to be turned off again.
+ */
+export function stockForCards(
+  stock: StockFilterView | null,
+  cards: readonly Pick<ProductCardView, "booking">[]
+): StockFilterView | null {
+  const dated = cards.length > 0 && cards.every((card) => Boolean(card.booking))
+  return dated && !stock?.selected ? null : stock
 }

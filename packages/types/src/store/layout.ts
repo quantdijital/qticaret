@@ -22,6 +22,7 @@ import type {
 import type { StoreStripGallerySection } from "./section-strips.js"
 import type { StoreStatsSection } from "./section-stats.js"
 import type { StoreStepsSection } from "./section-steps.js"
+import type { StoreDeparturesSection } from "./section-departures.js"
 import type { StoreSearchBoxSection } from "./section-search-box.js"
 import type { TrustCardStep } from "./section-trust.js"
 import type { StoreNewsletterSection } from "./section-newsletter.js"
@@ -157,6 +158,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreStepsSection
     | StoreSearchBoxSection
     | StorePhotoCollageSection
+    | StoreDeparturesSection
   )
 
 /**
