@@ -47,6 +47,12 @@ export interface HeaderBarView {
   searchStyle?: HeaderSearchStyle
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
+  /**
+   * The other variants' action button (the catalog's is `catalog.highlight`):
+   * from 1024 px after the tools, on a phone first in the menu sheet; absent
+   * or null: none, drawn as before it.
+   */
+  highlight?: LinkView | null
 }
 
 /**

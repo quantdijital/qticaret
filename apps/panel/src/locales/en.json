@@ -10328,6 +10328,10 @@
           "term": "link",
           "hint": "One standout link at the end of the main menu on the menu bar (e.g. Offers)."
         },
+        "action_button": {
+          "label": "Action button",
+          "hint": "One button on the right beside the cart on wide screens (e.g. Book now). On phones, first in the menu. Empty: no button."
+        },
         "utility_bar": {
           "label": "Top utility strip",
           "term": "top bar",

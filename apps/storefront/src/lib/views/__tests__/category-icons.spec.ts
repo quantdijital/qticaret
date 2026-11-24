@@ -65,6 +65,49 @@ describe("the categories' icon row view (adr/0077 §10 Ek)", () => {
     expect(categoryCounts).not.toHaveBeenCalled()
   })
 
+  it("reads a preset's icons by handle after the ids' (id > handle > picture > initial)", async () => {
+    vi.mocked(namedCategories).mockResolvedValue({
+      categories: [
+        {
+          id: "pcat_a",
+          name: "Macera",
+          handle: "macera",
+          description: null,
+          parent_category_id: null,
+        },
+        { id: "pcat_b", name: "Plaj", handle: "plaj", description: null, parent_category_id: null },
+        {
+          id: "pcat_c",
+          name: "ıhlamur",
+          handle: "ihlamur",
+          description: null,
+          parent_category_id: null,
+        },
+      ],
+      named: [
+        { id: "pcat_a", card: { label: "Macera", path: "/macera" } },
+        { id: "pcat_b", card: { label: "Plaj", path: "/plaj", image: IMAGE } },
+        { id: "pcat_c", card: { label: "ıhlamur", path: "/ihlamur" } },
+      ],
+    })
+    const view = await iconCategoriesView(
+      row({
+        category_icons: { pcat_a: "mountain" },
+        category_icons_by_handle: { macera: "leaf", plaj: "palm", toString: "sun" } as never,
+      }),
+      t
+    )
+    expect(view).toMatchObject({
+      icons: {
+        items: [
+          { label: "Macera", icon: "mountain" },
+          { label: "Plaj", icon: "palm", image: IMAGE },
+          { label: "ıhlamur", icon: null, initial: "I" },
+        ],
+      },
+    })
+  })
+
   it("counts only while the shop shows counts, and reads unknown steps as defaults", async () => {
     const view = await iconCategoriesView(
       row({ show_count: true, disc: "gold" as never, phone: "wrap" }),

@@ -10,6 +10,8 @@ import { FIELD_IDS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
 import { HeaderCatalogFields } from "./header-catalog-fields"
 import { headerSetIn } from "./header-marks"
+import { LinkField } from "./link-field"
+import { useProblemText } from "./problem-text"
 import { StepChoice } from "./step-choice"
 
 const H = "storefront.editor.headerBar"
@@ -37,6 +39,7 @@ export function HeaderGroups({
   onChange: (section: HeaderBarSection, field?: string) => void
 }) {
   const { t } = useTranslation()
+  const problemText = useProblemText()
   const searchStyle = (
     <StepChoice
       id={FIELD_IDS.searchStyle(section.id)}
@@ -67,6 +70,23 @@ export function HeaderGroups({
       }}
     />
   )
+  // The other variants' action button (the catalog header's highlighted link, its own field there)
+  const actionId = FIELD_IDS.header(section.id, "highlight_link")
+  const action =
+    section.variant === "catalog" ? null : (
+      <div id={actionId}>
+        <LinkField
+          id={`${actionId}-input`}
+          label={t(`${H}.action_button.label`)}
+          hint={t(`${H}.action_button.hint`)}
+          link={section.highlight_link ?? null}
+          error={problemText(problems["highlight_link"])}
+          onChange={(link, typing) => {
+            onChange({ ...section, highlight_link: link }, typing ? actionId : undefined)
+          }}
+        />
+      </div>
+    )
   const group = (name: FieldGroupName, fields: ReactNode) => (
     <PanelGroup
       name={name}
@@ -95,7 +115,19 @@ export function HeaderGroups({
     <>
       {group("search", fields("search", { before: searchStyle }))}
       {catalog ? group("topBar", fields("topBar")) : null}
-      {group("menu", fields("menu", { after: menuImages }))}
+      {group(
+        "menu",
+        fields("menu", {
+          after: action ? (
+            <>
+              {menuImages}
+              {action}
+            </>
+          ) : (
+            menuImages
+          ),
+        })
+      )}
       {catalog
         ? group(
             "icons",
