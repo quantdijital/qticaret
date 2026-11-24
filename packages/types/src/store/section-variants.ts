@@ -16,9 +16,10 @@ export const SECTION_VARIANTS = {
   trust_badges: ["strip", "lined", "card"],
   /**
    * `standard`: today's graphite opening; `category_list`: the category
-   * list, the opening's tile and two category tiles side by side (H17).
+   * list, the opening's tile and two category tiles side by side (H17);
+   * `full_image` (adr/0077 §9): the photograph as the whole opening.
    */
-  hero: ["standard", "category_list"],
+  hero: ["standard", "category_list", "full_image"],
   /**
    * `tiles`: today's picture tiles; `linked`: each category a card with its
    * first subcategories as links (adr/0049 Ek 2026-11-15); `collage`:

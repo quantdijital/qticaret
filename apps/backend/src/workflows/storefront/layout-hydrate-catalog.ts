@@ -41,6 +41,22 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
     links: present(section.links.map((each) => readers.link(each))),
     image: shownImage(readers, section.image),
   }
+  if (section.variant === "full_image") {
+    // adr/0077 §9: its settings as saved; the search box and the badges are the storefront's to read
+    return {
+      ...shown,
+      variant: section.variant,
+      title_accent: readers.fill(section.title_accent),
+      action: section.action,
+      search_position: section.search_position,
+      height: section.height,
+      scrim: section.scrim,
+      align: section.align,
+      image_side: section.image_side,
+      edge: section.edge,
+      show_trust: section.show_trust,
+    }
+  }
   if (section.variant !== "category_list") {
     return shown
   }
