@@ -1,7 +1,14 @@
 import "server-only"
 import type { StoreHeroFull } from "@qticaret/types"
+import { heroVideoOf } from "@qticaret/types/hero-video"
 import { HERO_FULL_LIMITS, heroFullSettingsOf } from "@qticaret/types/section-hero-full"
-import type { HeroFullView, SearchFormView, Translate, TrustBadgeView } from "@qticaret/ui"
+import type {
+  HeroFullView,
+  HeroVideoView,
+  SearchFormView,
+  Translate,
+  TrustBadgeView,
+} from "@qticaret/ui"
 import { currentShared } from "./layout"
 import { EMPTY_VALUES } from "./search-form"
 import { currentSearchForm } from "./search-form-data"
@@ -13,10 +20,24 @@ export interface HeroFullSource {
 }
 
 /**
+ * The opening's video: the link's host and id only (the pasted address
+ * goes no further than here), with the button's words; none, or a link
+ * the parser refuses: no button.
+ */
+function heroVideo(section: StoreHeroFull): HeroVideoView | null {
+  const source = heroVideoOf(section.video_url)
+  if (!source) {
+    return null
+  }
+  const label = section.video_label?.trim() ?? ""
+  return { host: source.host, id: source.id, label: label === "" ? null : label }
+}
+
+/**
  * The full image opening's parts from what was read (adr/0077 §9): its
  * settings (one missing or off its list its default), its accent line,
- * the search box only when the opening asks for a search, and at most four
- * of the shop's trust badges only when it shows them.
+ * the search box only when the opening asks for a search, at most four
+ * of the shop's trust badges only when it shows them, and its video.
  */
 export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): HeroFullView {
   const settings = heroFullSettingsOf(section)
@@ -26,6 +47,7 @@ export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): H
     accent: accent === "" ? null : accent,
     search: settings.action === "search" ? source.search : null,
     trust: section.show_trust === true ? source.badges.slice(0, HERO_FULL_LIMITS.trust) : [],
+    video: heroVideo(section),
   }
 }
 

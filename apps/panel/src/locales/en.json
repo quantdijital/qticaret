@@ -9290,6 +9290,7 @@
         },
         "groups": {
           "buttons": "Buttons",
+          "video": "Video",
           "categoryList": "Category list",
           "tiles": "Tiles beside it",
           "chips": "Quick links",
@@ -9602,6 +9603,7 @@
       "problems": {
         "required": "Write this line or remove it.",
         "tooLong": "Write at most {{max}} characters.",
+        "videoInvalid": "Paste a YouTube or Vimeo video link (e.g. https://youtu.be/… or https://vimeo.com/…).",
         "textInvalid": "The text cannot hold invisible control characters.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu.",
         "linkLabel": "Enter the shown text of the address.",
@@ -11358,6 +11360,20 @@
           "label": "Show trust icons",
           "term": "trust badges",
           "hint": "Your shop's trust badges (four at most) show in a white box at the cover's bottom edge."
+        },
+        "video": {
+          "url": {
+            "label": "Video address",
+            "term": "YouTube / Vimeo URL",
+            "placeholder": "https://www.youtube.com/watch?v=…",
+            "hint": "Paste the link of a video on YouTube or Vimeo. A play button shows on the cover; pressed, the video opens in a window. Nothing of the video loads before the press. Left empty, no button is drawn."
+          },
+          "label": {
+            "label": "Button text",
+            "term": "label",
+            "placeholder": "Watch the video",
+            "hint": "Left empty, it reads \"Watch the video\"."
+          }
         },
         "height": {
           "label": "Height",

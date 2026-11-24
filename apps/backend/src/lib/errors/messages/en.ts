@@ -1194,6 +1194,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_layout.token_unknown":
     "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "storefront_layout.target_invalid": "The chosen record is not valid.",
+  "storefront_layout.video_invalid":
+    "The video address must be a YouTube or Vimeo video link (e.g. https://youtu.be/… or https://vimeo.com/…).",
   "storefront_layout.target_unknown":
     "A record one of the sections shows no longer exists; choose it again.",
   "storefront_layout.image_invalid": "The image must come from the shop's media library.",

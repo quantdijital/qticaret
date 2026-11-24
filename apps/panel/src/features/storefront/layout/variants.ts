@@ -70,8 +70,15 @@ export const VARIANT_FIELDS: {
       picks: [],
       show_price: true,
     },
-    // The full image starts from the contract's defaults: buttons, no accent line, no badges (adr/0077 §9)
-    full_image: { ...HERO_FULL_DEFAULTS, title_accent: null, show_trust: false },
+    // The full image starts from the contract's defaults: buttons, no accent line, no badges, no
+    // video (adr/0077 §9)
+    full_image: {
+      ...HERO_FULL_DEFAULTS,
+      title_accent: null,
+      show_trust: false,
+      video_url: null,
+      video_label: null,
+    },
   },
   // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
   categories: {

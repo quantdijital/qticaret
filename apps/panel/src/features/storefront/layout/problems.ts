@@ -24,6 +24,7 @@ export type Problem =
   | "questionRequired"
   | "answerRequired"
   | "tooLong"
+  | "videoInvalid"
   | "textInvalid"
   | "tokenUnknown"
   | "linkLabel"

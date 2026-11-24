@@ -40,6 +40,8 @@ export interface GroupPlace {
 export const PANEL_GROUPS: Readonly<Record<FieldGroupName, GroupPlace>> = {
   content: { tab: "content", title: `${P}.content` },
   buttons: { tab: "content", title: `${P}.groups.buttons` },
+  // The full image opening's video button (its link and its words)
+  video: { tab: "content", title: `${P}.groups.video` },
   categoryList: { tab: "content", title: `${P}.groups.categoryList` },
   tiles: { tab: "content", title: `${P}.groups.tiles` },
   chips: { tab: "content", title: `${P}.groups.chips` },
