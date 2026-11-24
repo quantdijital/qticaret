@@ -2,8 +2,8 @@ import { expect, pageHeading, test } from "./support/guard"
 
 /**
  * adr/0061 Ek C14: Settings > Abonelik, read only. The e2e backend runs
- * without a control plane (development): the page shows only the usage
- * tiles, every one unlimited, read only. The managed page
+ * without a control plane (development): the page says the package is not
+ * linked yet and shows the usage tiles, every one unlimited, read only. The managed page
  * (package card, payment, bars) is covered by the panel's unit tests.
  */
 test("opens Settings > Abonelik from the settings menu, read only", async ({ page, guard }) => {
@@ -15,12 +15,16 @@ test("opens Settings > Abonelik from the settings menu, read only", async ({ pag
   await page.waitForURL("**/settings/subscription")
 
   await expect(pageHeading(page)).toHaveText("Abonelik")
-  // One tile per applied limit, each unlimited without a control plane
-  const usage = page.getByRole("list", { name: "Limitler ve kullanım" })
-  await expect(usage.getByRole("listitem")).toHaveCount(5)
+  // The package's place says it is not linked yet; one tile per applied limit, in two groups
+  await expect(page.getByRole("heading", { name: "Paket bilgisi henüz yok" })).toBeVisible()
+  const totals = page.getByRole("list", { name: "Mağaza geneli" })
+  const monthly = page.getByRole("list", { name: /^Bu ay/ })
+  await expect(totals.getByRole("listitem")).toHaveCount(3)
+  await expect(monthly.getByRole("listitem")).toHaveCount(2)
   await expect(page.getByText("Paket limiti yok")).toBeVisible()
   // Read only: the tiles have nothing to press but the orders tile's (i)
-  await expect(usage.getByRole("button")).toHaveCount(1)
+  await expect(totals.getByRole("button")).toHaveCount(0)
+  await expect(monthly.getByRole("button")).toHaveCount(1)
   await page.waitForLoadState("networkidle")
   await guard.assertHealthy()
 })

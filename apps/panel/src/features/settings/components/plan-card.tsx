@@ -1,4 +1,4 @@
-import { CalendarDays, CalendarRange, CircleCheck, Hourglass, Package, Tag } from "lucide-react"
+import { CalendarDays, CircleCheck, Hourglass, Package } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { useId } from "react"
@@ -8,11 +8,12 @@ import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import type { PlanSummary } from "@/features/settings/api/plan"
+import type { PaymentRecord, PlanSummary } from "@/features/settings/api/plan"
 import { packageName } from "@/features/settings/plan-rules"
 import { DaysRing } from "@/features/settings/components/days-ring"
+import { PlanFacts } from "@/features/settings/components/plan-facts"
 import type { RingTone } from "@/features/settings/components/days-ring"
-import { isLate, periodLabel, ringShare } from "@/features/settings/subscription-rules"
+import { isLate, ringShare } from "@/features/settings/subscription-rules"
 import type { Countdown, PlanState, TrialProgress } from "@/features/settings/subscription-rules"
 
 const STATE_TONES: Record<PlanState, StatusTone> = {
@@ -83,20 +84,24 @@ const ringToneOf = (countdown: Countdown): RingTone =>
  * The package at the top of Settings > Abonelik (adr/0061 §5.6, Ek C16):
  * its name and one status, the amount due large with its day and a
  * countdown and its period ("/ ay"), the ring counting the same days (a
- * trial's as days used of its whole, Ek C20), the month the monthly limits
- * count and the package's price. The status's meaning sits behind the (i).
+ * trial's as days used of its whole, Ek C20); under them the billing
+ * cycle, price, last payment, the limits' month and what the package
+ * includes (`PlanFacts`). The status's meaning sits behind the (i).
  */
 export function PlanCard({
   plan,
   state,
   countdown,
   trial = null,
+  lastPayment,
 }: {
   plan: PlanSummary
   state: PlanState
   countdown: Countdown | null
   /** The trial's days used of its whole, when the document gives both (Ek C20). */
   trial?: TrialProgress | null
+  /** The latest payment made; null before one, undefined while unknown. */
+  lastPayment?: PaymentRecord | null | undefined
 }) {
   const { t } = useTranslation()
   const hintId = useId()
@@ -118,10 +123,6 @@ export function PlanCard({
     : null
   const accent = ACCENT[state]
   const per = billing?.period ? t(`plan.hero.per.${billing.period}`) : null
-  const price =
-    billing?.price === null || billing?.price === undefined || !per
-      ? null
-      : formatMoney(billing.price / 100, billing.currency)
   const trialRing = countdown?.kind === "trial" ? trial : null
   return (
     <section
@@ -222,21 +223,7 @@ export function PlanCard({
           ) : null}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2 border-t bg-muted/40 px-5 py-3 text-[13px] sm:px-6">
-        <CalendarRange className="size-4 text-muted-foreground" aria-hidden="true" />
-        <span className="text-muted-foreground">{t("plan.hero.period")}</span>
-        <span className="font-medium">{periodLabel(plan.period)}</span>
-        <InfoTip name={t("plan.hero.period")} hint={t("plan.hero.periodHint")} />
-        {price && per ? (
-          <span className="flex items-center gap-2 sm:ml-auto">
-            <Tag className="size-4 text-muted-foreground" aria-hidden="true" />
-            <span className="text-muted-foreground">{t("plan.hero.price")}</span>
-            <span className="font-medium tabular-nums">
-              {price} {per}
-            </span>
-          </span>
-        ) : null}
-      </div>
+      <PlanFacts plan={plan} lastPayment={lastPayment} />
     </section>
   )
 }

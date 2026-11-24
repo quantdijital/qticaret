@@ -12571,18 +12571,14 @@
         "day": "days",
         "trialUsed": "Trial: {{used}} / {{total}} days"
       },
-      "period": "Period",
-      "periodHint": "Monthly limits reset at the start of each month.",
       "per": {
         "monthly": "/ month",
         "yearly": "/ year"
-      },
-      "price": "Package price"
+      }
     },
     "usage": {
       "title": "Limits and usage",
       "hint": "Amber from 80%, red at the limit.",
-      "monthly": "This month",
       "unlimited": "Unlimited",
       "barLabel": "{{name}}: {{value}}",
       "left": "{{value}} left",
@@ -12681,6 +12677,33 @@
         "waived": "Waived",
         "open": "Pending",
         "late": "Late"
+      }
+    },
+    "details": {
+      "cycle": "Billing cycle",
+      "cycleOf": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "price": "Package price",
+      "lastPayment": "Last payment",
+      "noPayment": "None yet",
+      "usageMonth": "Usage month",
+      "usageMonthHint": "Monthly limits reset at the start of each month.",
+      "includes": "Included",
+      "included": "included",
+      "notIncluded": "not included",
+      "feature": {
+        "productVideos": "Product videos",
+        "aiOwnKeys": "Your own AI key"
+      },
+      "groups": {
+        "totals": "Shop totals",
+        "monthly": "This month ({{month}})"
+      },
+      "unlinked": {
+        "title": "No package information yet",
+        "text": "Your shop is not linked to a package yet; no limit applies for now. Your package, payment day and payments show here once it is linked."
       }
     }
   },

@@ -159,12 +159,12 @@ export function ringShare(
 }
 
 /**
- * Where a usage tile sits on a 6-column grid (tablet up to `xl`): a
- * group's tiles share its rows evenly so no row ends with a hole; 1 fills
- * the row, 2 and 4 take halves, 3 and more thirds.
+ * How many columns a group of usage tiles takes from a tablet up: every
+ * row full, none narrower than a third of the page so a tile's name is
+ * never cut (1, 2 and 3 in one row; 4 as two pairs; more in threes).
  */
-export const tileSpan = (count: number): 2 | 3 | 6 =>
-  count <= 1 ? 6 : count === 2 || count === 4 ? 3 : 2
+export const tileColumns = (count: number): 1 | 2 | 3 =>
+  count <= 1 ? 1 : count === 2 || count === 4 ? 2 : 3
 
 /** A payment's status as its row says it: an open one past its day is late. */
 export type PaymentState = "paid" | "waived" | "open" | "late"
@@ -188,4 +188,19 @@ export function paymentPeriodLabel(record: PaymentRecord): string {
   const lastDay = new Date(Date.parse(`${record.period_end}T00:00:00Z`) - 86_400_000)
   const last = periodLabel(lastDay.toISOString().slice(0, 7))
   return `${first} – ${last}`
+}
+
+/** The latest payment made (the most recent paid day), for the package card; null before one. */
+export function lastPaymentOf(records: readonly PaymentRecord[]): PaymentRecord | null {
+  let last: PaymentRecord | null = null
+  for (const record of records) {
+    if (
+      record.status === "paid" &&
+      record.paid_on &&
+      (!last || record.paid_on > (last.paid_on ?? ""))
+    ) {
+      last = record
+    }
+  }
+  return last
 }

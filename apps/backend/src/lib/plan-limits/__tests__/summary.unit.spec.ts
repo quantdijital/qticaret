@@ -143,6 +143,29 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
     expect(summary.period).toMatch(/^\d{4}-\d{2}$/)
   })
 
+  it("lists the package's features as the signed flags set them, test-only ones left out", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<Record<string, unknown>> }
+    ).planState()
+    state["platform_flags"] = { "catalog.product_videos": false, "test.platform_sample": false }
+
+    const summary = await readPlanSummary(container)
+
+    // A flag the document does not name takes its default (on)
+    expect(summary.features).toEqual([
+      { key: "catalog.product_videos", enabled: false },
+      { key: "ai.own_keys", enabled: true },
+    ])
+  })
+
+  it("gives every feature its default without a control plane", async () => {
+    const summary = await readPlanSummary(shop(false).container)
+    expect(summary.features.every((feature) => feature.enabled)).toBe(true)
+    expect(summary.features.map((feature) => feature.key)).not.toContain("test.platform_sample")
+  })
+
   it("has no limits and no billing without a control plane", async () => {
     const summary = await readPlanSummary(shop(false).container)
     expect(summary.managed).toBe(false)
