@@ -24,7 +24,9 @@ export interface LookupWords {
  * for is solved here and the form sent again.
  */
 export function LookupForm({ action, words }: { action: AuthAction; words: LookupWords }) {
-  const { error, checking, pending, onSubmit } = useChallengeForm(action)
+  const { error, checking, pending, onSubmit, slot } = useChallengeForm(action, {
+    action: "order_lookup",
+  })
   const message = error ? (words.errors[error] ?? words.fallback) : null
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
@@ -50,6 +52,7 @@ export function LookupForm({ action, words }: { action: AuthAction; words: Looku
         required
         maxLength={254}
       />
+      {slot}
       <div role="alert">
         <FieldError id="siparis-bul-hata" message={message} />
       </div>

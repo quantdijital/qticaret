@@ -46,13 +46,16 @@ export function ContactForm({
   suffix?: string
 }) {
   const [sent, setSent] = useState(false)
-  const { error, checking, pending, onSubmit } = useChallengeForm(async (state, form) => {
-    const result = await action(state, form)
-    if (result.ok) {
-      setSent(true)
-    }
-    return result
-  })
+  const { error, checking, pending, onSubmit, slot } = useChallengeForm(
+    async (state, form) => {
+      const result = await action(state, form)
+      if (result.ok) {
+        setSent(true)
+      }
+      return result
+    },
+    { action: "contact", className: "sm:col-span-2" }
+  )
   const optional = (label: string) => `${label} (${words.optional})`
   const ph = words.placeholders
   return (
@@ -151,6 +154,7 @@ export function ContactForm({
               </a>
             )}
           </p>
+          {slot}
           <div role="alert" className="empty:hidden sm:col-span-2">
             {error && (
               <FieldError

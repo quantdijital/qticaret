@@ -76,4 +76,14 @@ describe("Toolbar: the tools a text takes", () => {
     expect(json.content.map((node) => node.type)).toEqual(["paragraph", "heading", "paragraph"])
     expect(JSON.stringify(json)).not.toContain("http://a.com")
   })
+
+  // On a page it sticks under the app header; a dialog body scrolls on its own, so there
+  // a sticky bar would float over the text (jsdom has no CSS: the classes are the contract)
+  it("sticks under the header on a page and stays in place inside a dialog", () => {
+    renderToolbar(true)
+    const bar = screen.getByRole("button", { name: "Kalın" }).closest(".sticky")
+    expect(bar).not.toBeNull()
+    expect(bar?.className).toContain("top-14")
+    expect(bar?.className).toContain("[[role=dialog]_&]:static")
+  })
 })
