@@ -95,7 +95,7 @@ export async function storeLayout(
   const footerBodies = keepLive(pages.footer)
   const body: BodySection[] = [...home, ...product, ...category, ...footerBodies]
   // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1),
-  // the catalog header bar's highlighted link too (it always shows)
+  // the header bar's action button too (it always shows)
   const bar = doc.header.filter((section) => section.type === "header_bar")
   // A free rows footer's shown blocks (adr/0070 §2.2): their pictures and those pictures' links
   const blocks = freeBlocksOf(doc.footer).filter((block) => block.visible)
