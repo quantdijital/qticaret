@@ -245,11 +245,22 @@ const SECRET_PATHS: [RegExp, string][] = [
   [/^\/ode\/.+$/, "/ode"],
 ]
 
-/** The address as a tag may hear it: its keys and tokens taken out, everything else as it is. */
+/**
+ * The site search's own page: its words (`q`) may be a shopper's whole
+ * sentence (adr/0077 §7, KVKK), so a tag never hears them. The browser
+ * cannot read the shop's flag, so they are left out whether it is on or not.
+ */
+const SEARCH_PATH = "/arama"
+const SEARCH_WORDS = "q"
+
+/** The address as a tag may hear it: its keys and tokens taken out, a search's words too, everything else as it is. */
 export function safeLocation(href: string): string {
   const url = URL.parse(href)
   if (!url) {
     return ""
+  }
+  if (url.pathname === SEARCH_PATH) {
+    url.searchParams.delete(SEARCH_WORDS)
   }
   for (const key of [...url.searchParams.keys()]) {
     if (SECRET_PARAMS.has(key)) {

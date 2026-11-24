@@ -241,6 +241,11 @@ export interface ShopView {
   paymentMarks?: ShopMarkView[]
   /** The carriers whose contract the shop connected, in words. */
   carrierMarks?: ShopMarkView[]
+  /**
+   * Words for the header search while the shop reads sentences (adr/0077
+   * §7, KVKK): a sentence may be written, personal details may not; none: nothing.
+   */
+  searchHint?: string
 }
 
 export interface CookieBannerView {

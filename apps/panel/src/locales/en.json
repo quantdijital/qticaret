@@ -13243,6 +13243,20 @@
       "savedAll_other": "Alt text saved for {{count}} images.",
       "saveFailed": "{{name}} could not be saved: {{reason}}"
     },
+    "storefrontSearch": {
+      "settingTitle": "Search in their own words",
+      "settingDescription": "Shoppers can type what they look for as a sentence (e.g. \"two people to Cappadocia in August\"); the sentence becomes search filters, shown above the results as \"Anladığım:\".",
+      "settingDetail": "Works only with a text service connected with the shop's own key. While on, the shopper's search sentence goes to that service; the text is not stored. If the service does not answer, the words are searched as usual.",
+      "ownerOnly": "Shoppers' words go to an outside service, so only the shop's owner turns this on or off.",
+      "needsOwnKey": "To turn it on, first connect a text service with your own key above.",
+      "confirm": {
+        "title": "Turn on search in their own words?",
+        "description": "The search sentences shoppers type on the storefront go to the connected AI service under your own key. The service may be abroad. The text is not stored.",
+        "personal": "Phone numbers, emails, card and ID numbers are taken out where found, but a name or an address in the sentence cannot always be. The storefront tells shoppers under the search box not to type personal details.",
+        "notice": "As with every search, the searched words stay in the shop's search report for 180 days; the storefront's analytics (GA4, Meta) are not told the searched words. We suggest adding this transfer to your privacy notice (Settings › Legal texts; the ready template has a line for it).",
+        "confirm": "Turn on"
+      }
+    },
     "reviews": {
       "settingTitle": "AI on reviews and questions",
       "settingDescription": "Sums up product reviews and drafts replies to reviews and questions. A draft is published only when you send it.",

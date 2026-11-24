@@ -13243,6 +13243,20 @@
       "savedAll_other": "{{count}} görselin alt metni kaydedildi.",
       "saveFailed": "{{name}} kaydedilemedi: {{reason}}"
     },
+    "storefrontSearch": {
+      "settingTitle": "Kendi cümlesiyle arama",
+      "settingDescription": "Müşteri vitrinde aradığını cümleyle yazar (ör. \"ağustosta iki kişi Kapadokya\"); cümle arama süzgeçlerine çevrilir ve sonuçların başında \"Anladığım:\" diye gösterilir.",
+      "settingDetail": "Yalnız mağazanın kendi anahtarıyla bağlı bir metin servisiyle çalışır. Açıkken müşterinin yazdığı arama cümlesi bu servise gider; metin saklanmaz. Servis yanıt vermezse arama sözcüklerle normal yapılır.",
+      "ownerOnly": "Müşteri metni dış servise gittiği için bu ayarı yalnız mağaza sahibi açıp kapatabilir.",
+      "needsOwnKey": "Açmak için önce yukarıdan kendi anahtarınızla bir metin servisi bağlayın.",
+      "confirm": {
+        "title": "Kendi cümlesiyle arama açılsın mı?",
+        "description": "Müşterilerin vitrinde yazdığı arama cümleleri, mağazanızın kendi anahtarıyla bağlı yapay zekâ servisine gönderilir. Servis yurt dışında olabilir. Metin saklanmaz.",
+        "personal": "Telefon, e-posta, kart ve kimlik numarası metinden ayıklanmaya çalışılır, ama cümlede geçen ad ve adres her zaman ayıklanamaz. Vitrinde arama kutusunun altında müşteriye kişisel bilgi yazmaması söylenir.",
+        "notice": "Aranan sözcükler, her aramada olduğu gibi, mağazanın arama raporunda 180 gün tutulur; vitrin analitiğine (GA4, Meta) aranan sözcükler gönderilmez. Bu aktarımı KVKK aydınlatma metninize eklemenizi öneririz (Ayarlar › Yasal metinler; hazır şablonda satırı var).",
+        "confirm": "Aç"
+      }
+    },
     "reviews": {
       "settingTitle": "Yorum ve sorularda yapay zekâ",
       "settingDescription": "Ürün yorumlarını özetler, yorumlara ve sorulara yanıt taslağı hazırlar. Taslak siz göndermeden yayımlanmaz.",

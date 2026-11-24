@@ -127,6 +127,8 @@
   "search.calendar_loading": "Fiyatlar yükleniyor…",
   "search.calendar_failed": "Fiyatlar şu an gösterilemiyor; tarih yine seçilebilir.",
   "search.sort_departure": "En yakın tarih",
+  "search.natural_hint": "Aradığınızı kendi cümlenizle de yazabilirsiniz. Kişisel bilgi (ad, telefon, adres) yazmayın.",
+  "search.understood": "Anladığım:",
   "search.count": "{count} sonuç",
   "product.discount": "%{percent} indirim",
   "listing.more_pages": "Diğer sayfalar",

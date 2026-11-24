@@ -97,6 +97,7 @@ describe("staff roles", () => {
     ["POST", "/admin/features/ai.reviews"],
     ["POST", "/admin/features/ai%2ereviews"],
     ["POST", "/admin/features/ai.assistant"],
+    ["POST", "/admin/features/ai.storefront_search"],
     ["POST", "/admin/google/connect"],
     ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],

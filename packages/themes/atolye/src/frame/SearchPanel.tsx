@@ -27,6 +27,8 @@ export interface SearchPanelWords {
   priceBefore: string
   /** "{price}'den başlayan". */
   from: string
+  /** Under the panel while the shop reads sentences (adr/0077 §7, KVKK); none: nothing. */
+  hint?: string | undefined
 }
 
 /** What the panel shows for a state; null: no panel (fewer than two characters). */
@@ -268,6 +270,7 @@ export function SearchPanel({
           </a>
         )}
       </div>
+      {words.hint && <p className="px-5 pt-1 pb-3 text-xs text-text-2">{words.hint}</p>}
     </div>
   )
 }
