@@ -92,4 +92,6 @@ export interface StoreHeroFull extends Partial<HeroFullSettings> {
   video_url?: string | null
   /** The video button's words (at most `HERO_VIDEO_LIMITS.label`); none: the theme's own. */
   video_label?: string | null
+  /** A short hand note over the heading (`hand-note.ts`); null or absent: none. */
+  note?: string | null
 }

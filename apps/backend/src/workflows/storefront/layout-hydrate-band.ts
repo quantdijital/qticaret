@@ -43,7 +43,13 @@ export function hydrateBanner(section: BannerSection, at: BandContext) {
     overlay: section.overlay,
     button_style: section.button_style,
     ...(section.variant === "split"
-      ? { variant: section.variant, eyebrow: at.fill(section.eyebrow), edge: section.edge }
+      ? {
+          variant: section.variant,
+          eyebrow: at.fill(section.eyebrow),
+          edge: section.edge,
+          // The hand note is plain text, no shop tokens to fill (`hand-note.ts`)
+          note: section.note,
+        }
       : {}),
   }
 }

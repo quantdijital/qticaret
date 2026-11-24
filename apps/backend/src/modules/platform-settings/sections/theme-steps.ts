@@ -27,3 +27,11 @@ export const SECTION_SPACINGS = ["tight", "compact", "normal", "roomy"] as const
  * 1 px rule. `SURFACE_STYLES` in the contract.
  */
 export const SURFACE_STYLES = ["filled", "lined"] as const
+
+/**
+ * The face a section's hand note is drawn in (sahip 2026-11-24), `none`
+ * first and the default: a few self-hosted handwriting faces, a name from
+ * this list and never an address. Absent from a row before it: `none`.
+ * `ACCENT_FONTS` in the contract (`hand-note.ts`).
+ */
+export const ACCENT_FONTS = ["none", "caveat", "dancing-script", "kalam"] as const

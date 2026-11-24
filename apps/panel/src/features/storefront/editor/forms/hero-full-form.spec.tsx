@@ -81,6 +81,7 @@ describe("the full image opening's start", () => {
       show_trust: false,
       video_url: null,
       video_label: null,
+      note: null,
     })
     const written = { ...hero(), heading: "Doğayı keşfet", image: { url: "/vadi.webp", alt: null } }
     const switched = switchVariant(written, "full_image")

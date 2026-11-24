@@ -1,4 +1,4 @@
-import { FONT_FILES } from "../../app/fonts"
+import { ACCENT_FONT_FILES, FONT_FILES } from "../../app/fonts"
 
 /**
  * The storefront's own pages (backend `lib/seo/paths.ts`): they never go
@@ -95,6 +95,8 @@ const MARK_FILES = [
 export const SERVED_FILES: ReadonlySet<string> = new Set([
   "/icon.svg",
   ...Object.values(FONT_FILES).flat(),
+  // The accent faces (a hand note's), fetched only when a note is drawn in one
+  ...Object.values(ACCENT_FONT_FILES).flat(),
   ...MARK_FILES.map((file) => `/marks/${file}`),
 ])
 

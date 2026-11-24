@@ -1,4 +1,10 @@
-import { HERO_FULL_LIMITS, HERO_VIDEO_LIMITS, bandsRise, heroVideoOf } from "@qticaret/types"
+import {
+  HAND_NOTE_MAX,
+  HERO_FULL_LIMITS,
+  HERO_VIDEO_LIMITS,
+  bandsRise,
+  heroVideoOf,
+} from "@qticaret/types"
 import type { HeroSection, PriceBandsSection } from "@/features/storefront/api/layout"
 import {
   HERO_CATALOG_LIMITS,
@@ -34,6 +40,8 @@ export function heroFullProblems(section: HeroSection): Found[] {
     ],
     ["video_url", link !== null && heroVideoOf(link) === null ? "videoInvalid" : null],
     ["video_label", textProblem(section.video_label ?? null, HERO_VIDEO_LIMITS.label)],
+    // The hand note over the heading: plain text within its length
+    ["note", textProblem(section.note ?? null, HAND_NOTE_MAX)],
   ]
 }
 

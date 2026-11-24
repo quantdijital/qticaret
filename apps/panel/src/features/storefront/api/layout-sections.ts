@@ -173,6 +173,8 @@ export type BannerSection = BodySectionBase & {
   eyebrow?: string | null
   /** `split`: the picture's inner edge. */
   edge?: BannerSplitEdge
+  /** `split`: a short hand note over the heading (`HAND_NOTE_MAX`); none: no note. */
+  note?: string | null
 } & BannerSettings
 
 interface CategoriesBase extends BodySectionBase {

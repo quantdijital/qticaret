@@ -14,6 +14,9 @@ const search = vi.hoisted(() => ({ currentSearchForm: vi.fn() }))
 vi.mock("../search-form-data", () => search)
 const layout = vi.hoisted(() => ({ currentShared: vi.fn() }))
 vi.mock("../layout", () => layout)
+// Whether the shop chose an accent face, read only for an opening with a note
+const theme = vi.hoisted(() => ({ noteInHand: vi.fn() }))
+vi.mock("../theme-settings", () => theme)
 
 const { heroFullParts, heroFullView } = await import("../hero-full")
 
@@ -27,6 +30,8 @@ beforeEach(() => {
   search.currentSearchForm.mockResolvedValue(FORM)
   layout.currentShared.mockReset()
   layout.currentShared.mockResolvedValue({ trust_badges: BADGES, color_swatches: [] })
+  theme.noteInHand.mockReset()
+  theme.noteInHand.mockResolvedValue(false)
 })
 
 // adr/0077 §9: the full image opening's parts
@@ -108,6 +113,23 @@ describe("heroFullView", () => {
     })
     expect(search.currentSearchForm).not.toHaveBeenCalled()
     expect(layout.currentShared).not.toHaveBeenCalled()
+  })
+
+  it("carries the hand note in the accent face when the shop chose one, else italic", async () => {
+    theme.noteInHand.mockResolvedValue(true)
+    expect((await heroFullView(section({ note: " Sizi bekliyoruz! " }), t)).note).toEqual({
+      text: "Sizi bekliyoruz!",
+      hand: true,
+    })
+    expect(theme.noteInHand).toHaveBeenCalledWith(" Sizi bekliyoruz! ")
+
+    theme.noteInHand.mockResolvedValue(false)
+    expect((await heroFullView(section({ note: "Merhaba" }), t)).note).toEqual({
+      text: "Merhaba",
+      hand: false,
+    })
+    // None, or spaces: no note in the view at all (the opening as before it)
+    expect(await heroFullView(section({ note: "   " }), t)).not.toHaveProperty("note")
   })
 
   it("reads the shop's one search box and its badges when the opening shows them", async () => {

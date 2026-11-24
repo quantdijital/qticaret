@@ -1,6 +1,8 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import type { AccentFont } from "@qticaret/types"
 import {
+  ACCENT_FONTS,
   BODY_FONTS,
   BUTTON_SHAPES,
   HEADING_FONTS,
@@ -42,6 +44,19 @@ function FontName({ font }: { font: HeadingFont | BodyFont }) {
       <span className="text-xs text-muted-foreground">
         {t(SERIF_FONTS.has(font) ? `${C}.serif` : `${C}.sans`)}
       </span>
+    </span>
+  )
+}
+
+/** An accent face by its name, a handwriting one marked so: "Yok" alone. */
+function AccentName({ font }: { font: AccentFont }) {
+  const { t } = useTranslation()
+  return (
+    <span className="flex items-baseline gap-2">
+      {t(`${C}.accentFonts.${font}`)}
+      {font === "none" ? null : (
+        <span className="text-xs text-muted-foreground">{t(`${C}.handwriting`)}</span>
+      )}
     </span>
   )
 }
@@ -118,6 +133,19 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             render={(font) => <FontName font={font} />}
           />
         </Pair>
+        <ChoiceSelect
+          id={THEME_IDS["typography.accent"]}
+          label={t(`${C}.accentFont`)}
+          term={t(`${C}.accentFontTerm`)}
+          value={typography.accent ?? "none"}
+          options={ACCENT_FONTS}
+          onChange={(value) => {
+            // Written even as none: the draft holds the shop's own choice
+            onChange({ ...theme, typography: { ...typography, accent: value } })
+          }}
+          render={(font) => <AccentName font={font} />}
+          hint={t(`${C}.accentFontHint`)}
+        />
       </PanelGroup>
       <PanelGroup name="shapes" title={t(THEME_GROUP_TITLES.shapes)} reveal={reveal("shapes")}>
         <Pair>

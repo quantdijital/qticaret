@@ -51,6 +51,8 @@ export function isGrafit(values: ThemeValues): boolean {
     values.colors.background === g.colors.background &&
     values.typography.heading === g.typography.heading &&
     values.typography.body === g.typography.body &&
+    // The hand note's face: none is Grafit's, written or not
+    (values.typography.accent ?? "none") === (g.typography.accent ?? "none") &&
     values.radius === g.radius &&
     values.buttons === g.buttons &&
     values.section_spacing === g.section_spacing &&

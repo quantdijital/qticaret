@@ -1,4 +1,5 @@
 import {
+  ACCENT_FONTS,
   CARD_BUTTON_STYLES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
@@ -17,7 +18,7 @@ import {
   STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
 } from "@qticaret/types"
-import type { ListingTextSettings, SearchFormSettings, StyleKit } from "@qticaret/types"
+import type { AccentFont, ListingTextSettings, SearchFormSettings, StyleKit } from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -93,6 +94,8 @@ export { SEARCH_FORM_CATEGORY_STYLES }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
+/** The face a section's hand note is drawn in (`@qticaret/types` `hand-note.ts`), none first. */
+export { ACCENT_FONTS }
 
 export interface ThemeSettings extends StyleKit {
   /**
@@ -109,7 +112,8 @@ export interface ThemeSettings extends StyleKit {
     accent: string | null
     background: StorefrontBackground
   }
-  typography: { heading: HeadingFont; body: BodyFont }
+  /** The hand note's face (`ACCENT_FONTS`); absent (saved before it): none. */
+  typography: { heading: HeadingFont; body: BodyFont; accent?: AccentFont }
   radius: (typeof RADII)[number]
   product_card: {
     ratio: (typeof CARD_RATIOS)[number]

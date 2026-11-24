@@ -1,6 +1,8 @@
 import "server-only"
 import { cache } from "react"
 import { storefrontSettings } from "@/lib/store-api/requests"
+import { handNoteOf } from "@qticaret/types/hand-note"
+import { handFace } from "./accent"
 import { currentLayout } from "./layout"
 import { cardLookOf } from "./card-look"
 import type { CardOptions } from "./product"
@@ -16,6 +18,14 @@ export const currentTheme = cache(async () => {
   const [layout, answer] = await Promise.all([currentLayout(), storefrontSettings()])
   return themeSettings(...themeSourceOf(layout, answer))
 })
+
+/**
+ * Whether a section's hand note is drawn in the shop's accent face: the
+ * theme is read only for a section that has a note.
+ */
+export async function noteInHand(note: unknown): Promise<boolean> {
+  return handNoteOf(note) === null ? false : handFace(await currentTheme())
+}
 
 /**
  * What the shop's cards show; the brand is left out of the view when the

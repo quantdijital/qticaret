@@ -78,6 +78,7 @@ export const VARIANT_FIELDS: {
       show_trust: false,
       video_url: null,
       video_label: null,
+      note: null,
     },
   },
   // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
@@ -148,7 +149,7 @@ export const VARIANT_FIELDS: {
   faq: { standard: {}, page: {} },
   posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
   // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
-  banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0] } },
+  banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0], note: null } },
   product_main: { standard: {} },
   category_main: { standard: {} },
 }

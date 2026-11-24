@@ -58,6 +58,8 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
       // The storefront takes the video's id from the link and builds the player's address itself
       video_url: section.video_url,
       video_label: section.video_label,
+      // Plain text, no shop tokens to fill (`hand-note.ts`)
+      note: section.note,
     }
   }
   if (section.variant !== "category_list") {
