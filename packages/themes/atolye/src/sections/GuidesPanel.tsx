@@ -71,11 +71,11 @@ export function GuidesPanel({
                 <article className="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane">
                   {post.image && (
                     <div
-                      className={
-                        section.coverRatio === "wide"
-                          ? "relative aspect-[2/1] bg-media-deep"
-                          : "relative aspect-[16/10] bg-media-deep"
-                      }
+                      className={cn(
+                        "relative",
+                        section.coverRatio === "wide" ? "aspect-[2/1]" : "aspect-[16/10]",
+                        "bg-media-deep"
+                      )}
                     >
                       <ResponsiveImage
                         image={{ ...post.image, alt: "" }}
