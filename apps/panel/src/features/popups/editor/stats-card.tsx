@@ -8,7 +8,11 @@ import { dailyImpressions } from "@/features/popups/stats"
 
 const S = "popups.stats"
 
-/** Its counts all time, and the last 30 days' impressions as a line (adr/0080 §7). */
+/**
+ * Its counts all time, and the last 30 days' impressions as a line (adr/0080
+ * §7); two by two in the detail's right column, four across when the
+ * columns stack.
+ */
 export function StatsCard({ popup }: { popup: PopupDetail }) {
   const { t } = useTranslation()
   const { counts } = popup
@@ -29,7 +33,7 @@ export function StatsCard({ popup }: { popup: PopupDetail }) {
   return (
     <SectionCard title={t(`${S}.title`)}>
       <div className="flex flex-col gap-4">
-        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-2">
           {tiles.map((tile) => (
             <StatCard
               key={tile.key}

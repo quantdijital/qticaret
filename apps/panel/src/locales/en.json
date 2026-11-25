@@ -12163,6 +12163,20 @@
       "layout": {
         "modal": "Centred window",
         "corner": "Corner card"
+      },
+      "design": {
+        "classic": "Classic",
+        "split": "Side by side",
+        "hero": "Large picture",
+        "minimal": "Plain",
+        "coupon": "Coupon"
+      },
+      "designHint": {
+        "classic": "Picture on top, words below; the first design.",
+        "split": "On a wide screen the picture left, the words right; without a picture it looks classic.",
+        "hero": "A tall picture on top, the title large and centred.",
+        "minimal": "No picture; a large title and short words, centred.",
+        "coupon": "The discount code large, like a ticket; without a code the title sits in the ticket."
       }
     },
     "form": {
@@ -12202,7 +12216,8 @@
       "frequencyDays": "Every how many days",
       "daysUnit": "days",
       "look": "Look",
-      "layout": "Layout",
+      "design": "Design",
+      "layout": "Placement",
       "advanced": "Advanced",
       "priority": "Priority",
       "priorityHint": "When more than one pop-up fits a page, the larger number shows first.",
@@ -12240,13 +12255,19 @@
       "codePlaceholder": "CODE",
       "device": "Preview device",
       "desktop": "Desktop",
-      "mobile": "Mobile"
+      "mobile": "Mobile",
+      "copy": "Copy"
     },
     "stats": {
       "title": "Results",
       "clickRate": "Click rate {{rate}}",
       "last30": "Views, last 30 days",
       "daily": "Last 30 days, daily views"
+    },
+    "facts": {
+      "title": "Summary",
+      "created": "Created",
+      "updated": "Last changed"
     }
   },
   "paymentLinks": {

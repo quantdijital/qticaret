@@ -23,6 +23,13 @@ function problems(values: PopupValues): Record<string, string> {
 }
 
 describe("popupSchema", () => {
+  it("takes the five designs and nothing else", () => {
+    for (const design of ["classic", "split", "hero", "minimal", "coupon"] as const) {
+      expect(problems(valid({ design }))).toEqual({})
+    }
+    expect(problems(valid({ design: "fullscreen" as never }))).toHaveProperty("design")
+  })
+
   it("takes a new pop-up with only its name and title", () => {
     expect(problems(valid())).toEqual({})
   })
@@ -123,6 +130,17 @@ describe("switchType", () => {
     })
     expect(switchType(campaign, "campaign")).toMatchObject({ promotion_id: "promo_1" })
   })
+
+  it("lets an untouched new design follow the type, never a chosen one", () => {
+    const info = valid()
+    expect(info.design).toBe("classic")
+    expect(emptyValues("campaign").design).toBe("coupon")
+    expect(switchType(info, "campaign", { suggest: true }).design).toBe("coupon")
+    expect(switchType(info, "campaign").design).toBe("classic")
+    expect(switchType(valid({ design: "hero" }), "campaign", { suggest: true }).design).toBe("hero")
+    const campaign = valid({ type: "campaign", design: "coupon" })
+    expect(switchType(campaign, "newsletter", { suggest: true }).design).toBe("classic")
+  })
 })
 
 describe("requestOf", () => {
@@ -148,6 +166,7 @@ describe("requestOf", () => {
       frequency: "days",
       frequency_days: 7,
       layout: "modal",
+      design: "classic",
       priority: 0,
       starts_at: null,
       ends_at: null,

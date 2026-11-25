@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { isSafeHref } from "../../../lib/content/doc"
 import {
+  POPUP_DESIGNS,
   POPUP_DEVICES,
   POPUP_FREQUENCIES,
   POPUP_LAYOUTS,
@@ -81,6 +82,7 @@ const fields = {
   frequency: z.enum(POPUP_FREQUENCIES).optional(),
   frequency_days: z.number().int().min(1).max(POPUP_LIMITS.daysMax).nullable().optional(),
   layout: z.enum(POPUP_LAYOUTS).optional(),
+  design: z.enum(POPUP_DESIGNS).optional(),
 }
 
 /** A new pop-up: its name, type and title; the rest start from `POPUP_DEFAULTS`. */

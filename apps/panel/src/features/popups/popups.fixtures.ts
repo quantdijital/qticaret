@@ -27,6 +27,7 @@ export function popupFixture(overrides: Partial<PopupDetail> = {}): PopupDetail 
     frequency: "days",
     frequency_days: 7,
     layout: "modal",
+    design: "classic",
     created_at: "2026-11-20T09:00:00Z",
     updated_at: "2026-11-20T09:00:00Z",
     state: "live",
