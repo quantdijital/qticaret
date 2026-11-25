@@ -1,8 +1,10 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { precheckSignedRequest } from "@qticaret/server-kit"
 import { AI_CALL_RESPONSE_HEADERS, AI_GATEWAY_REFUSALS } from "@qticaret/types/control-plane"
+import { bodyReadTuning, holdBodyRead } from "../../lib/ai-gateway/body-reads"
 import { AI_GATEWAY_BODY_TIMEOUT_MS } from "../../lib/ai-gateway/limits"
 import { matchTenantApi } from "../../lib/fleet/tenant-api-routes"
+import { clientBucket } from "./rate-limit"
 import { ensureRequestId, rejectRequest, routePath } from "./request"
 
 /**
@@ -12,10 +14,15 @@ import { ensureRequestId, rejectRequest, routePath } from "./request"
  * kept exactly as sent and parsed by nothing before the signature over
  * them is checked. Before a byte is read (security review of P3b O2): the
  * signature's headers must be there, well formed and on time (else the
- * guard's own 401), and a declared length within the route's size (else
- * 413). A stream past the size is cut and refused (413, the gateway's own
- * refusal, its strict envelope); one slower than 30 s is answered 408 and
- * its connection closed. Any other request passes untouched.
+ * guard's own 401), a declared length (third review O1; else 411, the
+ * body unread) within the route's size (else 413), and a slot among the
+ * process's 16 bodies read at once, four of them from one client address
+ * (N2, O1; body-reads.ts; else 503 `unavailable`, the body never kept).
+ * A stream past the size or its declared length is cut and refused (413,
+ * the gateway's own refusal, its strict envelope); one slower than 30 s,
+ * or than 32 KB a second once 2 s have gone (O1), is answered 408 and its
+ * connection closed. Any other request passes untouched: the limit is the
+ * call's alone, the one route whose body may be 6 MB.
  */
 
 const rawBodies = new WeakMap<MedusaRequest, Buffer>()
@@ -50,13 +57,35 @@ function closeAfter(req: MedusaRequest, res: MedusaResponse): void {
   })
 }
 
-function tooLarge(req: MedusaRequest, res: MedusaResponse): void {
+/** The gateway's own refusal before the body is kept: its envelope, the rest let through unkept. */
+function refuse(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  code: "body_too_large" | "unavailable"
+): void {
   ensureRequestId(req, res)
   dropRest(req, res)
-  res.setHeader(AI_CALL_RESPONSE_HEADERS.refusal, "body_too_large")
+  res.setHeader(AI_CALL_RESPONSE_HEADERS.refusal, code)
   res.setHeader("cache-control", "no-store")
   // The gateway's envelope as its schema has it: the request id rides in its header
-  res.status(AI_GATEWAY_REFUSALS.body_too_large).json({ qt_ai_gateway: { code: "body_too_large" } })
+  res.status(AI_GATEWAY_REFUSALS[code]).json({ qt_ai_gateway: { code } })
+}
+
+/**
+ * The process, or the client's address, reads its limit of bodies (N2,
+ * O1): answered 503 at once, the
+ * body never kept; a sender still sending past the body's time loses its
+ * connection.
+ */
+function tooBusy(req: MedusaRequest, res: MedusaResponse): void {
+  refuse(req, res, "unavailable")
+  const timer = setTimeout(() => {
+    req.socket.destroy()
+  }, bodyTimeoutMs())
+  timer.unref()
+  req.socket.once("close", () => {
+    clearTimeout(timer)
+  })
 }
 
 /** The signature guard's own words for what is refused before the body. */
@@ -83,24 +112,55 @@ export function readRawBody(
     rejectRequest(req, res, 401, { type: "unauthorized", message }, unsigned)
     return
   }
-  const max = rule.maxBodyBytes
-  const declared = Number(req.headers["content-length"] ?? "")
-  if (Number.isFinite(declared) && declared > max) {
-    tooLarge(req, res)
+  // O1: a length declared, so a body's end is known before a byte is read
+  const length = req.headers["content-length"] ?? ""
+  if (!/^\d{1,15}$/.test(length)) {
+    dropRest(req, res)
+    rejectRequest(
+      req,
+      res,
+      411,
+      { type: "invalid_data", message: "errors.length_required" },
+      "body_length_missing"
+    )
     return
   }
+  const declared = Number(length)
+  if (declared > rule.maxBodyBytes) {
+    refuse(req, res, "body_too_large")
+    return
+  }
+  const max = declared
+  // N2, O1: whoever sends it, a body is kept only within the process's reads and its address's
+  const release = holdBodyRead(clientBucket(req))
+  if (release === null) {
+    tooBusy(req, res)
+    return
+  }
+  const pace = bodyReadTuning()
+  const started = Date.now()
   const chunks: Buffer[] = []
   let size = 0
   let done = false
-  const finish = (failed: "too_large" | "too_slow" | null) => {
+  /** Every way out of the read: the slot back, the timers gone, no more bytes kept. */
+  const stop = (): boolean => {
     if (done) {
-      return
+      return false
     }
     done = true
+    release()
     clearTimeout(timer)
+    clearInterval(paceCheck)
     req.removeListener("data", onData)
+    return true
+  }
+  const finish = (failed: "too_large" | "too_slow" | null) => {
+    if (!stop()) {
+      return
+    }
     if (failed === "too_large") {
-      tooLarge(req, res)
+      chunks.length = 0
+      refuse(req, res, "body_too_large")
       return
     }
     if (failed === "too_slow") {
@@ -120,6 +180,15 @@ export function readRawBody(
   const timer = setTimeout(() => {
     finish("too_slow")
   }, bodyTimeoutMs())
+  timer.unref()
+  // O1: past its grace, a body keeps up with the slowest pace or goes
+  const paceCheck = setInterval(() => {
+    const spent = Date.now() - started
+    if (spent >= pace.graceMs && size < (spent / 1000) * pace.minBytesPerSecond) {
+      finish("too_slow")
+    }
+  }, pace.paceCheckMs)
+  paceCheck.unref()
   const onData = (chunk: Buffer) => {
     size += chunk.length
     if (size > max) {
@@ -133,10 +202,14 @@ export function readRawBody(
     finish(null)
   })
   req.once("error", () => {
-    if (!done) {
-      done = true
-      clearTimeout(timer)
+    if (stop()) {
       res.destroy()
+    }
+  })
+  // The sender gone before its body ended: nothing to answer, the slot back
+  req.once("close", () => {
+    if (stop()) {
+      chunks.length = 0
     }
   })
 }

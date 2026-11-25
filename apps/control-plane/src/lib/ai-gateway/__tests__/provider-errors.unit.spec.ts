@@ -88,20 +88,46 @@ describe("a provider's failure as the shop reads it (P3b review D2, D3)", () => 
 
   it("reads a success as JSON or a picture only", () => {
     expect(readableAnswerType("application/json; charset=utf-8")).toBe(true)
-    expect(readableAnswerType("image/png")).toBe(true)
-    expect(readableAnswerType("text/html")).toBe(false)
-    expect(readableAnswerType("application/octet-stream")).toBe(false)
+    for (const type of ["image/png", "image/jpeg", "IMAGE/WEBP"]) {
+      expect(readableAnswerType(type)).toBe(true)
+    }
+    // An SVG is a document, not a picture (second review's note)
+    for (const type of ["image/svg+xml", "image/gif", "text/html", "application/octet-stream"]) {
+      expect(readableAnswerType(type)).toBe(false)
+    }
   })
 
   it("tells the platform's own failure: a 404, its key refused in a 400", () => {
     expect(platformFault(404, Buffer.alloc(0))).toBe(true)
-    expect(platformFault(400, json({ error: { details: [{ reason: "API_KEY_INVALID" }] } }))).toBe(
-      true
-    )
-    expect(platformFault(400, json({ error: { message: "API key not valid. Please pass" } }))).toBe(
-      true
-    )
+    // Google RPC's ErrorInfo, as Gemini answers a key it does not take
+    const gemini = (reason: string) =>
+      json({
+        error: {
+          code: 400,
+          message: "API key not valid. Please pass a valid API key.",
+          status: "INVALID_ARGUMENT",
+          details: [{ "@type": "type.googleapis.com/google.rpc.ErrorInfo", reason }],
+        },
+      })
+    expect(platformFault(400, gemini("API_KEY_INVALID"))).toBe(true)
+    expect(platformFault(400, gemini("API_KEY_EXPIRED"))).toBe(true)
+    expect(platformFault(400, gemini("FIELD_INVALID"))).toBe(false)
+    expect(platformFault(400, json({ error: { code: "invalid_api_key" } }))).toBe(true)
     expect(platformFault(400, json({ error: { message: "max_tokens too large" } }))).toBe(false)
-    expect(platformFault(422, json({ error: { message: "API key not valid" } }))).toBe(false)
+    expect(platformFault(422, gemini("API_KEY_INVALID"))).toBe(false)
+  })
+
+  // Second review N5: a provider echoing the shop's input in its message is the shop's 400
+  it("never reads a refused key from the error's words", () => {
+    const echoed = "API_KEY_INVALID API key not valid API key expired invalid_api_key"
+    for (const body of [
+      json({ error: { code: 400, message: echoed, status: "INVALID_ARGUMENT" } }),
+      json({ error: { message: echoed, details: [{ reason: "BAD_REQUEST", note: echoed }] } }),
+      json({ error: { code: 400, message: echoed, type: "invalid_api_key" } }),
+      json({ message: echoed, code: "invalid_api_key" }),
+      Buffer.from(`<html>${echoed}</html>`),
+    ]) {
+      expect(platformFault(400, body)).toBe(false)
+    }
   })
 })

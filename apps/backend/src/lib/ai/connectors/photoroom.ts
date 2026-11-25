@@ -1,8 +1,9 @@
 import { randomBytes } from "node:crypto"
-import type { safeFetch } from "../../security/safe-fetch"
-import type { SafeFetchResponse } from "../../security/safe-fetch"
 import { aiProviderError } from "../errors"
 import type { AiService, ImageEditTarget } from "../registry/services"
+import { transportOf } from "../transport/own-key"
+import type { ConnectorSending } from "../transport/own-key"
+import type { AiTransport, AiTransportResponse } from "../transport/types"
 import { postImageCall } from "./image-call"
 import { IMAGE_TIMEOUT_MS } from "./image-types"
 import type {
@@ -15,7 +16,7 @@ import type {
 /**
  * Photoroom's Remove Background API (Aşama 4; the record and its pages:
  * `lib/ai/registry/services.ts`). The picture goes as multipart
- * `image_file`; the key in `x-api-key` and nowhere else; a white
+ * `image_file`; the key in `x-api-key` (the transport's) and nowhere else; a white
  * background as `bg_color`, a transparent one as a PNG with none. The
  * answer is the image itself, or JSON with it in `base64img`; never an
  * address.
@@ -30,16 +31,13 @@ const EXTENSIONS: Readonly<Record<string, string>> = {
   "image/webp": "webp",
 }
 
-export interface PhotoroomOptions {
+export type PhotoroomOptions = {
   service: AiService
   target: ImageEditTarget
-  /** Stays in this closure; never in a result or an error. */
-  apiKey: string
   timeoutMs?: number
   /** Tests only. */
-  fetch?: typeof safeFetch
   wait?: (ms: number, signal: AbortSignal) => Promise<void>
-}
+} & ConnectorSending
 
 /** A multipart body of plain fields and one file. */
 export function multipartBody(
@@ -66,12 +64,12 @@ export function multipartBody(
   return { body: Buffer.concat(parts), contentType: `multipart/form-data; boundary=${boundary}` }
 }
 
-const contentTypeOf = (response: SafeFetchResponse): string => {
+const contentTypeOf = (response: AiTransportResponse): string => {
   const header = response.headers["content-type"]
-  return (typeof header === "string" ? header : "").split(";")[0]?.trim().toLowerCase() ?? ""
+  return (header ?? "").split(";")[0]?.trim().toLowerCase() ?? ""
 }
 
-function readAnswer(service: AiService, response: SafeFetchResponse): Buffer {
+function readAnswer(service: AiService, response: AiTransportResponse): Buffer {
   const invalid = (code: string) =>
     aiProviderError({ service: service.id, key: "ai.provider_response_invalid", code })
   const type = contentTypeOf(response)
@@ -103,8 +101,8 @@ function readAnswer(service: AiService, response: SafeFetchResponse): Buffer {
  * sector pack's description. `referenceBox=originalImage`: the product
  * stays where and as large as it was in the photo.
  */
-function photoroomScene(options: PhotoroomOptions, url: string) {
-  const { service, apiKey } = options
+function photoroomScene(options: PhotoroomOptions, transport: AiTransport, url: string) {
+  const { service, target } = options
   return async (request: ImageSceneRequest): Promise<ImageEditResult> => {
     const extension = EXTENSIONS[request.image.mimeType]
     if (extension === undefined) {
@@ -125,9 +123,9 @@ function photoroomScene(options: PhotoroomOptions, url: string) {
     )
     const response = await postImageCall({
       service,
+      target,
       url,
       headers: {
-        "x-api-key": apiKey,
         "Content-Type": contentType,
         Accept: "image/png, image/jpeg, application/json",
       },
@@ -135,7 +133,7 @@ function photoroomScene(options: PhotoroomOptions, url: string) {
       timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
       maxResponseBytes: MAX_RESPONSE_BYTES,
       signal: request.signal,
-      fetch: options.fetch,
+      transport,
       wait: options.wait,
     })
     return { kind: "bytes", bytes: readAnswer(service, response), usage: {} }
@@ -143,9 +141,10 @@ function photoroomScene(options: PhotoroomOptions, url: string) {
 }
 
 export function photoroomImageEdit(options: PhotoroomOptions): ImageEditConnector {
-  const { service, target, apiKey } = options
+  const { service, target } = options
+  const transport = transportOf(options)
   return {
-    ...(target.scene ? { scene: photoroomScene(options, target.scene.url) } : {}),
+    ...(target.scene ? { scene: photoroomScene(options, transport, target.scene.url) } : {}),
     async edit(request: ImageEditRequest): Promise<ImageEditResult> {
       if (!target.backgrounds.includes(request.background)) {
         throw aiProviderError({
@@ -175,9 +174,9 @@ export function photoroomImageEdit(options: PhotoroomOptions): ImageEditConnecto
       )
       const response = await postImageCall({
         service,
+        target,
         url: target.url,
         headers: {
-          "x-api-key": apiKey,
           "Content-Type": contentType,
           Accept: "image/png, image/jpeg, application/json",
         },
@@ -185,7 +184,7 @@ export function photoroomImageEdit(options: PhotoroomOptions): ImageEditConnecto
         timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
         maxResponseBytes: MAX_RESPONSE_BYTES,
         signal: request.signal,
-        fetch: options.fetch,
+        transport,
         wait: options.wait,
       })
       return { kind: "bytes", bytes: readAnswer(service, response), usage: {} }

@@ -110,8 +110,11 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     }
     // The platform's own failure (D3): a model gone, its key refused in a 400
     expect(notTaken(answered(404), deepseek)).toBe(true)
+    const keyRefused = '{"error":{"message":"API key not valid.","code":"invalid_api_key"}}'
+    expect(notTaken(answered(400, keyRefused), deepseek)).toBe(true)
+    // Its words alone are no proof (second review N5): the provider may echo the shop's input
     expect(notTaken(answered(400, '{"error":{"message":"API key not valid."}}'), deepseek)).toBe(
-      true
+      false
     )
     expect(notTaken({ kind: "not_connected", code: "connect_failed" }, deepseek)).toBe(true)
     expect(notTaken({ kind: "timeout", code: "timeout" }, deepseek)).toBe(false)

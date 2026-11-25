@@ -167,7 +167,9 @@ describe("the provider body the gateway sends (adr/0085 K2)", () => {
 
   it("passes a form's bytes as they came, its type with them", () => {
     const form = Buffer.from(
-      "--b\r\ncontent-disposition: form-data; name=image_file\r\n\r\n\xff\x00--b--"
+      '--b\r\ncontent-disposition: form-data; name="image_file"; filename="a.png"\r\n' +
+        "content-type: image/png\r\n\r\n\xff\x00\r\n--b--\r\n",
+      "latin1"
     )
     const type = "multipart/form-data; boundary=b"
     const result = send(form, {
