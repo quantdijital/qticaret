@@ -114,6 +114,42 @@ describe("AiPage", () => {
     expect(screen.getByRole("button", { name: "DeepSeek işlemleri" })).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "Bağla" })).toHaveLength(2)
     expect(screen.queryByText(/Paketiniz kendi anahtarınızla/)).toBeNull()
+    // The credits off (this stand-in answers no wallet): no trace of them
+    expect(screen.queryByRole("heading", { name: "Platform kredisi" })).toBeNull()
+  })
+
+  it("keeps the platform's credits out of the key table, in a card of their own", async () => {
+    serve(true)
+    const base = fetchMock.getMockImplementation()
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/admin/ai/services") {
+        const answer = services(true)
+        answer.services.push({
+          id: "platform",
+          capabilities: ["text"],
+          status: "connected",
+          funding: "platform_credit",
+          data_note_key: "ai.data_note.platform",
+        })
+        return Promise.resolve(answer)
+      }
+      if (url === "/admin/ai/credits") {
+        return Promise.resolve({
+          available: true,
+          plan: { remaining: 40, renews_on: "2026-12-01" },
+          purchased: { remaining: 0, expires_on: null },
+          daily: { cap: 300, remaining: 300 },
+          tasks: { seo_title: 1 },
+          packs: [],
+          pending_order: null,
+        })
+      }
+      return (base as (url: string) => Promise<unknown>)(url)
+    })
+    renderPage()
+    expect(await screen.findByRole("heading", { name: "Platform kredisi" })).toBeInTheDocument()
+    const table = screen.getByRole("table", { name: "Servisler" })
+    expect(within(table).queryByRole("row", { name: /Platform kredisi/ })).toBeNull()
   })
 
   it("the reviews switch is a line, its words behind the (i)", async () => {
