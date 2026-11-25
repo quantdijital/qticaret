@@ -3487,7 +3487,12 @@
         "valuesPlaceholder": "Değer yazıp Enter'a basın: S, M, L",
         "removeValue": "{{value}} değerini kaldır",
         "remove": "Seçeneği kaldır",
-        "suggestions": ["Beden", "Renk", "Boyut", "Malzeme"]
+        "suggestions": [
+          "Beden",
+          "Renk",
+          "Boyut",
+          "Malzeme"
+        ]
       },
       "pricingCard": "Fiyat ve stok",
       "pricingHint": "Fiyatlar KDV dahil girilir.",
@@ -4300,7 +4305,7 @@
     "variant": {
       "title": "Varyantı düzenle",
       "listTitle": "Varyantlar",
-      "listHint": "Fiyatını, stoğunu, kodlarını ve görsellerini düzenlemek için bir varyanta tıklayın.",
+      "listHint": "Seçenekleri yazıp varyantları oluşturun; bir varyantın fiyatını, stoğunu, kodlarını ve görsellerini satırına tıklayarak yerinde düzenleyin.",
       "singleTitle": "Fiyat, stok ve kodlar",
       "price": "Fiyat",
       "sellingPrice": "Satış fiyatı",
@@ -4352,7 +4357,58 @@
         "noBarcode": "Barkod yok"
       },
       "details": "Tüm varyant ayrıntıları",
-      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın."
+      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın.",
+      "untrackedShort": "Stok takibi yok — her zaman satılır",
+      "groupCount_one": "{{count}} varyant",
+      "groupCount_other": "{{count}} varyant",
+      "options": {
+        "title": "Seçenekler",
+        "none": "Bu ürünün seçeneği yok. Renk, beden gibi seçenekler ekleyip varyantlarını oluşturabilirsiniz.",
+        "add": "Seçenek ekle",
+        "edit": "Seçenekleri düzenle",
+        "hint": "Her seçeneğin değerlerini yazıp Enter'a basın. \"Varyantları oluştur\" eksik bütün birleşimleri ekler; var olan varyantlar silinmez, aynısı ikinci kez oluşturulmaz.",
+        "preview_one": "{{count}} varyant oluşturulacak; fiyatını oluşturduktan sonra girersiniz.",
+        "preview_other": "{{count}} varyant oluşturulacak; fiyatlarını oluşturduktan sonra girersiniz.",
+        "nothingNew": "Oluşturulacak yeni varyant yok.",
+        "fill_one": "{{count}} varyanta yeni seçeneğin ilk değeri verilecek.",
+        "fill_other": "{{count}} varyanta yeni seçeneğin ilk değeri verilecek.",
+        "create_one": "{{count}} varyantı oluştur",
+        "create_other": "{{count}} varyantı oluştur",
+        "save": "Seçenekleri kaydet",
+        "created_one": "{{count}} varyant oluşturuldu. Fiyatını girin.",
+        "created_other": "{{count}} varyant oluşturuldu. Fiyatlarını girin.",
+        "saved": "Seçenekler kaydedildi.",
+        "valueUsed": "\"{{value}}\" değerini kullanan varyant var; bu değer kaldırılamaz.",
+        "optionUsed": "Bu seçeneği kullanan varyant var; kaldırılamaz.",
+        "problems": {
+          "name": "Değer yazılan her seçeneğin bir adı olmalı.",
+          "duplicate": "Aynı adla iki seçenek olamaz."
+        }
+      },
+      "bulk": {
+        "title": "Toplu değişiklik",
+        "field": "Değiştirilecek alan",
+        "value": "Yeni değer",
+        "filter": "Hangi varyantlar",
+        "every": "Tüm varyantlar",
+        "fields": {
+          "price": "Satış fiyatı",
+          "cost": "Maliyet",
+          "stock": "Stok adedi"
+        },
+        "applyAll_one": "{{count}} varyanta uygula",
+        "applyAll_other": "{{count}} varyanta uygula",
+        "applySelected_one": "Seçilen {{count}} varyanta uygula",
+        "applySelected_other": "Seçilen {{count}} varyanta uygula",
+        "applied_one": "{{count}} varyant güncellendi.",
+        "applied_other": "{{count}} varyant güncellendi.",
+        "untracked_one": "Stoğu sayılmayan {{count}} varyant atlandı.",
+        "untracked_other": "Stoğu sayılmayan {{count}} varyant atlandı.",
+        "nothing": "Değişecek bir şey yok: varyantlar zaten bu değerde ya da stokları sayılmıyor.",
+        "pick": "{{name}} varyantını seç",
+        "pickAll": "Tüm varyantları seç",
+        "pickGroup": "{{name}} grubunu seç"
+      }
     },
     "rowActions": "{{title}} işlemleri",
     "duplicate": {
