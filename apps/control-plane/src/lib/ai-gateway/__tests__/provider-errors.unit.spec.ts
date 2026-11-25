@@ -117,6 +117,25 @@ describe("a provider's failure as the shop reads it (P3b review D2, D3)", () => 
     expect(platformFault(422, gemini("API_KEY_INVALID"))).toBe(false)
   })
 
+  // #389 review D1: our unpaid account in a 400 is not the shop's request to pay for
+  it("counts the platform's unpaid or unbought account in a 400 as its own fault", () => {
+    for (const code of [
+      "Arrearage",
+      "PrepaidBillOverdue",
+      "PostpaidBillOverdue",
+      "CommodityNotPurchased",
+      "BudgetLimitExceeded",
+      "AccessDenied.Unpurchased",
+      "AllocationQuota.FreeTierOnly",
+    ]) {
+      expect(platformFault(400, json({ error: { code, message: "x" } }))).toBe(true)
+    }
+    expect(platformFault(400, json({ error: { code: "InvalidParameter" } }))).toBe(false)
+    expect(
+      platformFault(400, json({ error: { message: "Arrearage", code: "data_inspection_failed" } }))
+    ).toBe(false)
+  })
+
   // Second review N5: a provider echoing the shop's input in its message is the shop's 400
   it("never reads a refused key from the error's words", () => {
     const echoed = "API_KEY_INVALID API key not valid API key expired invalid_api_key"
