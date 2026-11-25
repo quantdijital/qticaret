@@ -26,18 +26,32 @@ export async function providerKeysHeld(
   container: Container
 ): Promise<Map<string, ProviderKeyMeta>> {
   const held = new Map<string, ProviderKeyMeta>()
-  // Newest version first within a name: the first seen is the one in force
-  for (const meta of await vaultIn(container).listSecretMeta(PLATFORM_OWNER)) {
-    const service = aiProviderOfKeyName(meta.name)
+  // Only the keys' own names, not the platform's every record (PR #371
+  // D2); newest version first within a name: the first seen is in force
+  const rows = await vaultIn(container).listSecretRecords(
+    { owner: PLATFORM_OWNER, name: keyedServices().map(aiProviderKeyName) },
+    {
+      select: ["name", "version", "created_at"],
+      order: { name: "ASC", version: "DESC" },
+      take: KEY_ROWS_MAX,
+    }
+  )
+  for (const row of rows) {
+    const service = aiProviderOfKeyName(row.name)
     if (service !== null && !held.has(service)) {
-      held.set(service, { version: meta.version, written_at: meta.created_at })
+      held.set(service, { version: row.version, written_at: row.created_at })
     }
   }
   return held
 }
 
+/** Live versions read at most: one a service since a write retires the older (D1). */
+const KEY_ROWS_MAX = 200
+
 /** The services a key may be held for now, in the shared table's order. */
-export const keyedServices = (): readonly string[] => aiTargetServiceIds(process.env["NODE_ENV"])
+export function keyedServices(): readonly string[] {
+  return aiTargetServiceIds(process.env["NODE_ENV"])
+}
 
 function knownService(service: string): string {
   if (!isKnownService(service)) {

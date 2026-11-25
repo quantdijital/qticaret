@@ -8,7 +8,7 @@ import { deleteProviderKey, keyedServices, writeProviderKey } from "../keys"
  */
 describe("provider keys outside test and development", () => {
   const nodeEnv = process.env["NODE_ENV"]
-  const vault = { putSecret: jest.fn(), retireSecret: jest.fn(), listSecretMeta: jest.fn() }
+  const vault = { putSecret: jest.fn(), retireSecret: jest.fn(), listSecretRecords: jest.fn() }
   const container = { resolve: jest.fn(() => vault) }
 
   afterEach(() => {
