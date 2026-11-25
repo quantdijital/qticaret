@@ -12,6 +12,7 @@ import type { AiGatewayEndpoint } from "../../control-plane/ai-gateway"
 import type { Fetch } from "../../control-plane/pull"
 import { aiProviderError } from "../errors"
 import type { AiErrorKey } from "../errors"
+import { PLATFORM_SERVICE_ID } from "../registry/platform-service"
 import type { AiCharge, AiTransport, AiTransportResponse } from "./types"
 
 /**
@@ -30,8 +31,8 @@ import type { AiCharge, AiTransport, AiTransportResponse } from "./types"
  * Never sent twice: a second call of the operation is the caller's choice.
  */
 
-/** Errors of the gateway itself name this service; a provider's answer names the connector's. */
-export const PLATFORM_SERVICE_ID = "platform"
+// Errors of the gateway itself name the `platform` service; a provider's answer names the connector's
+export { PLATFORM_SERVICE_ID }
 
 /** The gateway's body cap (adr/0085 §2); checked here first so nothing larger leaves. */
 export const AI_GATEWAY_MAX_BODY_BYTES = 6 * 1024 * 1024

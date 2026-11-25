@@ -1,3 +1,4 @@
+import { isAiCreditTask } from "@qticaret/types/control-plane"
 import type { AiErrorKey } from "./errors"
 import { aiServices, sceneTargetOf } from "./registry/services"
 import type { AiService } from "./registry/services"
@@ -37,7 +38,13 @@ export function canRunTask(service: AiService, task: AiTask): boolean {
   return task.optionSource !== "scenes" || sceneTargetOf(target) !== null
 }
 
-/** Connected and verified ∩ able to do the task ∩ paid in a way that is open; registry order. */
+/**
+ * Connected and verified ∩ able to do the task ∩ paid in a way that is
+ * open; in the order given (the registry's). The platform's credits have
+ * no credential row: they are passed in only where they are connected
+ * (`aiPlatformServiceOf`), after the shop's own, and run only a task the
+ * credit table prices (adr/0085 K4, K10: never the storefront's search).
+ */
 export function usableServices(
   task: AiTask,
   connections: readonly AiConnection[],
@@ -49,7 +56,9 @@ export function usableServices(
   )
   return services.filter(
     (service) =>
-      connected.has(service.credentialProvider) &&
+      (service.funding === "platform_credit"
+        ? isAiCreditTask(task.id)
+        : connected.has(service.credentialProvider)) &&
       canRunTask(service, task) &&
       fundingOpen(service, flags)
   )

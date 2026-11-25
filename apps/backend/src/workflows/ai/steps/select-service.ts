@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { aiValidationError } from "../../../lib/ai/errors"
 import { productPhotoOf } from "../../../lib/ai/facts/product-attributes"
@@ -8,7 +9,7 @@ import type { AiTask } from "../../../lib/ai/registry/tasks"
 import { canRunTask, chooseService, usableServices } from "../../../lib/ai/select"
 import { AI_MODULE } from "../../../modules/ai"
 import type AiModuleService from "../../../modules/ai/service"
-import { aiConnectionsOf, aiFlagsOf } from "../connections"
+import { aiConnectionsOf, aiFlagsOf, aiServicesFor } from "../connections"
 
 export interface SelectServiceInput {
   task: string
@@ -63,7 +64,8 @@ export const selectServiceStep = createStep(
       aiFlagsOf(container),
       container.resolve<AiModuleService>(AI_MODULE).preferenceOf(input.user_id, task.id),
     ])
-    const usable = usableServices(task, connections, flags)
+    // The platform's credits come after the shop's own: picked, remembered or alone (adr/0085 K8)
+    const usable = usableServices(task, connections, flags, await aiServicesFor(flags))
     const choice = chooseService({ task, usable, requested: input.service, preference })
     if (!choice.ok) {
       throw aiValidationError(choice.error)
@@ -75,6 +77,8 @@ export const selectServiceStep = createStep(
       capability: photo === null ? task.capability : ("vision" as const),
       image_file_id: photo?.file_id ?? null,
       funding: choice.service.funding,
+      // This run's operation (adr/0085 K3): its every call (a correction too) is one charge on credits
+      operation: randomUUID(),
       alternatives: choice.alternatives,
       // Several to choose from and one asked for: the picker was used, so it is remembered
       remember: usable.length > 1 && typeof input.service === "string",
