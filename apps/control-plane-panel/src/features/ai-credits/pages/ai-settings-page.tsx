@@ -50,8 +50,19 @@ export function AiSettingsPage() {
             </PageColumn>
           </PageGrid>
         </>
-      ) : settings.isError ? (
-        <ErrorState text={errorText(t, settings.error)} onRetry={() => void settings.refetch()} />
+      ) : settings.isError || providers.isError ? (
+        // Either read failed with nothing to show: said, with a retry of what failed
+        <ErrorState
+          text={errorText(t, settings.isError ? settings.error : providers.error)}
+          onRetry={() => {
+            if (settings.isError) {
+              void settings.refetch()
+            }
+            if (providers.isError) {
+              void providers.refetch()
+            }
+          }}
+        />
       ) : (
         <Skeleton className="h-64 rounded-lg" />
       )}

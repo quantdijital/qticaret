@@ -6,7 +6,7 @@ import "@/lib/i18n"
 import type { AiSettingsAnswer } from "@/features/ai-credits/api/schemas"
 import { AiSettingsPage } from "@/features/ai-credits/pages/ai-settings-page"
 import { forgetStepUp } from "@/lib/step-up"
-import { stubApi } from "@/test/api"
+import { refusal, stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
 import { PROVIDERS, SETTINGS } from "@/test/ai-settings"
 import { renderAs } from "@/test/member"
@@ -119,5 +119,32 @@ describe("the AI settings cards' drafts (adr/0085 §5)", () => {
     ).toBeInTheDocument()
     expect(sent.filter((call) => call.method === "POST")).toEqual([])
     expect(screen.getByLabelText("Genel günlük tavan")).toHaveValue("450")
+  })
+
+  it("says a failed providers read under the settings too, and reads again on retry", async () => {
+    const stored = { answer: SETTINGS }
+    let down = true
+    const base = controlPlane(stored)
+    stubApi((call) =>
+      down && call.path === "/admin/cp/ai/providers" ? refusal(500, "boom") : base(call)
+    )
+    page()
+
+    // The providers card's and the settings' own: no endless skeleton
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: "Tekrar dene" })).toHaveLength(2)
+    })
+    expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument()
+    down = false
+    const retry = screen.getAllByRole("button", { name: "Tekrar dene" }).at(-1)
+    if (!retry) {
+      throw new Error("no retry")
+    }
+    await userEvent.click(retry)
+
+    expect(
+      await screen.findByRole("radiogroup", { name: "Metin yazma: servis ve model" })
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText("Genel günlük tavan")).toHaveValue("300")
   })
 })
