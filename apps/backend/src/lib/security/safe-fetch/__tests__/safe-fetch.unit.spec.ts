@@ -110,7 +110,9 @@ describe("safeFetch", () => {
 
   describe("limits", () => {
     it("refuses a declared length over the limit before reading", async () => {
-      // Declares 2000 bytes, sends one and stalls: only the header check ends this quickly
+      // Declares 2000 bytes, sends one and stalls: a read of the body waits
+      // out the 30 s timeout (and ends as "timeout"), the header check ends
+      // it at once. The bound leaves a loaded CI runner seconds (adr/0081)
       const server = await serve((_req, res) => {
         res.writeHead(200, { "content-length": "2000" })
         res.write("x")
@@ -120,13 +122,13 @@ describe("safeFetch", () => {
       const reason = await failureOf(
         fetchAsPublic()(
           publicUrl(server),
-          onPort(server, { maxResponseBytes: 1000, timeoutMs: 3000 })
+          onPort(server, { maxResponseBytes: 1000, timeoutMs: 30_000 })
         )
       )
 
       expect(reason).toBe("response_too_large")
-      expect(Date.now() - started).toBeLessThan(2000)
-    })
+      expect(Date.now() - started).toBeLessThan(10_000)
+    }, 40_000)
 
     it("stops reading a streamed response past the limit", async () => {
       const server = await serve((_req, res) => {

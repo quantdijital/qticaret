@@ -2,33 +2,58 @@ import { measureGrowth } from "@qticaret/testing"
 import { contentDoc, docStats, isSafeHref, renderDoc } from ".."
 import { plainText } from "../../seo/resolve"
 
-const nested = (depth: number): unknown =>
-  depth === 0
-    ? { type: "paragraph", content: [{ type: "text", text: "x" }] }
-    : { type: "orderedList", content: [{ type: "listItem", content: [nested(depth - 1)] }] }
-
-const timed = (run: () => void): number => {
-  const started = performance.now()
-  run()
-  return performance.now() - started
+/**
+ * Ordered lists nested `depth` deep around one paragraph, which counts every
+ * read of its fields: what was read and how often, counted instead of timed (a busy CI
+ * runner broke a 200 ms budget; adr/0081).
+ */
+function counted(depth: number): { doc: unknown; reads: () => number } {
+  let reads = 0
+  const fields: Record<string, unknown> = {
+    type: "paragraph",
+    content: [{ type: "text", text: "x" }],
+  }
+  const innermost = {}
+  for (const [key, value] of Object.entries(fields)) {
+    Object.defineProperty(innermost, key, {
+      enumerable: true,
+      get: () => {
+        reads += 1
+        return value
+      },
+    })
+  }
+  let node: unknown = innermost
+  for (let level = 0; level < depth; level++) {
+    node = { type: "orderedList", content: [{ type: "listItem", content: [node] }] }
+  }
+  return { doc: { type: "doc", content: [node] }, reads: () => reads }
 }
 
 describe("content bounds (no input costs more than its size)", () => {
   it("refuses deep nesting before parsing it", () => {
-    let result: ReturnType<typeof contentDoc.safeParse> | undefined
-    const ms = timed(() => {
-      result = contentDoc.safeParse({ type: "doc", content: [nested(40)] })
-    })
-    expect(result?.success).toBe(false)
-    expect(result?.error?.issues[0]?.message).toBe("content.too_large")
-    expect(ms).toBeLessThan(200)
+    // The bounds walk stops at the first level past the limit and never
+    // reaches the innermost node; a parse would read it
+    const { doc, reads } = counted(40)
+    const result = contentDoc.safeParse(doc)
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.message).toBe("content.too_large")
+    expect(reads()).toBe(0)
   })
 
   it("parses each node once, whatever the nesting it is allowed", () => {
-    const ms = timed(() => {
-      expect(contentDoc.safeParse({ type: "doc", content: [nested(5)] }).success).toBe(true)
-    })
-    expect(ms).toBeLessThan(200)
+    // The innermost paragraph is read as often at the deepest nesting allowed
+    // as on its own: the bounds walk reads its `text` and `content`, the parse
+    // its `type` and `content`, once each. A shape tried again per level
+    // would read it more with every level
+    const readsAt = (depth: number) => {
+      const { doc, reads } = counted(depth)
+      expect(contentDoc.safeParse(doc).success).toBe(true)
+      return reads()
+    }
+    const shallow = readsAt(0)
+    expect(shallow).toBeLessThanOrEqual(4)
+    expect([1, 2, 3, 4, 5].map(readsAt)).toEqual([shallow, shallow, shallow, shallow, shallow])
   })
 
   it("reads a long run of marks or brackets in one pass", () => {

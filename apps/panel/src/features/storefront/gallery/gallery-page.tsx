@@ -16,7 +16,7 @@ import type { ApplyTarget, PresetCard as Preset } from "./api"
 import { ApplyDialog } from "./apply-dialog"
 import { CurrentLookCard } from "./current-look-card"
 import { DesignCard } from "./design-card"
-import { lookName, suggestedName } from "./design-name"
+import { lookSource, suggestedName } from "./design-name"
 import { presetFamilies } from "./families"
 import { SaveDesignDialog } from "./name-dialog"
 import { PresetCard } from "./preset-card"
@@ -91,8 +91,8 @@ export function GalleryPage() {
   const saved = gallery?.designs.filter((each) => each.kind === "saved").length ?? 0
   const limits = gallery?.limits ?? { saved: 10, auto: 5 }
   const savedFull = saved >= limits.saved
-  const currentName = gallery
-    ? lookName(t, gallery.current.draft, presets.data ?? [], gallery.designs)
+  const currentSource = gallery
+    ? lookSource(t, gallery.current.draft, presets.data ?? [], gallery.designs)
     : t(`${G}.auto.own`)
   const applyPreset = (preset: Preset) => {
     setPreviewing(null)
@@ -203,7 +203,7 @@ export function GalleryPage() {
         pendingMenus={Boolean(layout.data?.draft.settings.menus)}
         savedFull={savedFull}
         savedLimit={limits.saved}
-        currentName={currentName}
+        currentName={currentSource}
       />
       <PresetPreviewDialog
         preset={previewing}
@@ -215,7 +215,7 @@ export function GalleryPage() {
       <SaveDesignDialog
         open={saving}
         onOpenChange={setSaving}
-        initial={suggestedName(t, currentName)}
+        initial={suggestedName(t, currentSource)}
       />
     </div>
   )

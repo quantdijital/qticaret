@@ -10,7 +10,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import type { DesignGallery, PresetCard } from "./api"
-import { lookName, suggestedName } from "./design-name"
+import { lookName, lookSource, suggestedName } from "./design-name"
 import { DesignThumb } from "./design-thumb"
 import { draftSketch } from "./draft-summary"
 import { hasNewVersion, isLook } from "./families"
@@ -117,7 +117,7 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
       <SaveDesignDialog
         open={saving}
         onOpenChange={setSaving}
-        initial={suggestedName(t, draftName)}
+        initial={suggestedName(t, lookSource(t, draft, presets, gallery.designs))}
       />
     </SectionCard>
   )

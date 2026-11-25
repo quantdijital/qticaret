@@ -46,7 +46,9 @@ describe("runHealthChecks", () => {
     })
 
     expect(report.checks[0]).toMatchObject({ status: "down", reason: "timeout" })
-    expect(Date.now() - started).toBeLessThan(1000)
+    // Its own 100 ms, not the hanging check (never) nor the default 5 s: the
+    // bound leaves a loaded CI runner seconds of slack (adr/0081)
+    expect(Date.now() - started).toBeLessThan(3_000)
   })
 
   it("runs the checks in parallel", async () => {

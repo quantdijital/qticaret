@@ -76,9 +76,12 @@ describe("a video file's kind, by its first bytes (adr/0069 §3)", () => {
     // Elements of size zero (an ID and a zero size) up to the header's end
     const empty = Array.from({ length: 60 }, () => [0xec, 0x80]).flat()
     const head = bytes([0x1a, 0x45, 0xdf, 0xa3, 0x80 | 0x78], empty)
+    // An endless loop never returns at all; the clock only fences a walk gone
+    // slow, with seconds of slack for a loaded CI runner (a forward walk of
+    // these 120 bytes takes microseconds; adr/0081)
     const started = Date.now()
     expect(videoSignature(head)).toBeNull()
-    expect(Date.now() - started).toBeLessThan(100)
+    expect(Date.now() - started).toBeLessThan(2_000)
     // An element claiming more than the header holds
     expect(videoSignature(bytes([0x1a, 0x45, 0xdf, 0xa3, 0x84, 0x42, 0x82, 0x88, 0x77]))).toBeNull()
   })

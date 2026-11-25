@@ -33,7 +33,21 @@ export function createTemporaryAdmin(): TemporaryAdmin {
     throw new Error("e2e: the temporary admin could not be created")
   }
   // The run checks every screen: it is the shop's owner (adr/0040)
-  backend(["exec", "./src/scripts/set-staff-role.ts", email, "owner"])
+  try {
+    backend(["exec", "./src/scripts/set-staff-role.ts", email, "owner"])
+  } catch (error) {
+    // The setup has not yet written the file the teardown reads it from:
+    // without a role the account goes here, or it would stay in the database
+    try {
+      removeTemporaryAdmin(email)
+    } catch (removal) {
+      // Its own message already says why, without the CLI's piped output
+      throw new Error(`e2e: the temporary admin got no role and stays (${email})`, {
+        cause: removal,
+      })
+    }
+    throw error
+  }
   return { email, password }
 }
 
