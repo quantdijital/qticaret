@@ -31,6 +31,8 @@ export const AiSeoFillInput = z
       .min(1)
       .max(SEO_FILL_MAX),
     service: z.string().regex(NAME).optional(),
+    // Set on the server when queued (never the request's): each item is paid that way or not asked
+    funding: z.enum(["own_key", "platform_credit"]).optional(),
   })
   .strict()
 export type AiSeoFillInput = z.infer<typeof AiSeoFillInput>
@@ -139,6 +141,7 @@ export function seoFill(
             entity_type: ask.entity_type,
             entity_id: ask.entity_id,
             service: input.service,
+            funding: input.funding,
             user_id: input.user_id,
           },
         })

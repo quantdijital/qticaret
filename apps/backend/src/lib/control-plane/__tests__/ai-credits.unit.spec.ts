@@ -8,7 +8,13 @@ import { AI_CREDITS_PATHS } from "@qticaret/types/control-plane"
 import type { AiCreditsStatus } from "@qticaret/types/control-plane"
 import { FIXED_NOW, TENANT_ID, TEST_ONLY_TENANT_SEED } from "@qticaret/types/control-plane/testing"
 import { forgetProcessCaches } from "../../cache/process-caches"
-import { AI_CREDITS_CACHE_MS, aiCreditsStatus, noteAiCharge } from "../ai-credits"
+import { logger } from "../../logging"
+import {
+  AI_CREDITS_CACHE_MS,
+  AI_CREDITS_FAILURE_CACHE_MS,
+  aiCreditsStatus,
+  noteAiCharge,
+} from "../ai-credits"
 
 /** adr/0085 §3 (P4a): the platform's credits as the control plane says, kept a minute. */
 
@@ -91,13 +97,14 @@ describe("the platform's credits status", () => {
     ["of another shape", () => json({ ...AVAILABLE, model: "deepseek-flash" })],
     ["a balance below zero", () => json({ ...AVAILABLE, daily: { cap: 300, remaining: -1 } })],
     ["too large", () => new Response(" ".repeat(17 * 1024) + JSON.stringify(AVAILABLE))],
-  ])("%s: not available, and not kept", async (_case, answer) => {
+  ])("%s: not available, kept a shorter while", async (_case, answer) => {
     const failing = controlPlane(answer)
     await expect(
       aiCreditsStatus({ endpoint: ENDPOINT, fetch: failing.fetch, now })
     ).resolves.toEqual({
       available: false,
     })
+    clock += AI_CREDITS_FAILURE_CACHE_MS
     const working = controlPlane(() => json(AVAILABLE))
     await expect(
       aiCreditsStatus({ endpoint: ENDPOINT, fetch: working.fetch, now })
@@ -110,6 +117,63 @@ describe("the platform's credits status", () => {
     await expect(aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).resolves.toEqual({
       available: false,
     })
+    expect(received).toHaveLength(1)
+  })
+})
+
+describe("the status while the control plane cannot be reached (review D1)", () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  const unreachable = () => controlPlane(() => Promise.reject(new TypeError("fetch failed")))
+
+  it("asks once for ten asks in a row, with one warning, and again after the window", async () => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+    const { fetch, received } = unreachable()
+    for (let each = 0; each < 10; each++) {
+      await expect(aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).resolves.toEqual({
+        available: false,
+      })
+      clock += 1_000
+    }
+    expect(received).toHaveLength(1)
+    expect(warn).toHaveBeenCalledTimes(1)
+
+    clock = FIXED_NOW + AI_CREDITS_FAILURE_CACHE_MS
+    await aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })
+    expect(received).toHaveLength(2)
+    expect(warn).toHaveBeenCalledTimes(2)
+  })
+
+  it("keeps a failure shorter than an answer", () => {
+    expect(AI_CREDITS_FAILURE_CACHE_MS).toBeLessThan(AI_CREDITS_CACHE_MS)
+  })
+
+  it("sends one ask for those asking at once, each given its answer", async () => {
+    let release: (response: Response) => void = () => undefined
+    const { fetch, received } = controlPlane(
+      () =>
+        new Promise<Response>((resolve) => {
+          release = resolve
+        })
+    )
+    const asks = Array.from({ length: 5 }, () =>
+      aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })
+    )
+    await new Promise((resolve) => setImmediate(resolve))
+    release(json(AVAILABLE))
+    await expect(Promise.all(asks)).resolves.toEqual(Array.from({ length: 5 }, () => AVAILABLE))
+    expect(received).toHaveLength(1)
+  })
+
+  it("sends one ask for those asking at once while it fails", async () => {
+    jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+    const { fetch, received } = unreachable()
+    const answers = await Promise.all(
+      Array.from({ length: 5 }, () => aiCreditsStatus({ endpoint: ENDPOINT, fetch, now }))
+    )
+    expect(answers).toEqual(Array.from({ length: 5 }, () => ({ available: false })))
     expect(received).toHaveLength(1)
   })
 })
