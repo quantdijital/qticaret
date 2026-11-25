@@ -3325,7 +3325,8 @@
       "category": "Kategori",
       "updated": "Son değişiklik",
       "price": "Fiyat",
-      "actions": "İşlemler"
+      "actions": "İşlemler",
+      "sku": "Stok kodu (SKU)"
     },
     "errors": {
       "title": "Ürün adı en az 2 karakter olmalı.",
@@ -4061,6 +4062,19 @@
       "selectAll_one": "Eşleşen {{formatted}} ürünün hepsini seç",
       "selectAll_other": "Eşleşen {{formatted}} ürünün hepsini seç",
       "clear": "Seçimi kaldır",
+      "delete": {
+        "action": "Sil",
+        "working": "Siliniyor… {{done}}/{{total}}",
+        "title_one": "{{formatted}} ürün silinsin mi?",
+        "title_other": "{{formatted}} ürün silinsin mi?",
+        "description": "Ürünler, varyantları ve stok kayıtlarıyla birlikte silinir. Bu işlem geri alınamaz. Silinemeyen ürünler atlanır, nedeni yazılır.",
+        "confirm_one": "{{formatted}} ürünü sil",
+        "confirm_other": "{{formatted}} ürünü sil",
+        "done_one": "{{formatted}} ürün silindi.",
+        "done_other": "{{formatted}} ürün silindi.",
+        "skipped_one": "{{formatted}} ürün silinemedi; seçili bırakıldı.",
+        "skipped_other": "{{formatted}} ürün silinemedi; seçili bırakıldı."
+      },
       "edit": "Toplu düzenle",
       "tooMany": "Bir seferde en fazla {{max}} ürün düzenlenebilir; aramayı ya da görünümü daraltın.",
       "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
@@ -4472,6 +4486,13 @@
       }
     },
     "rowActions": "{{title}} işlemleri",
+    "listOptions": {
+      "label": "Görünüm",
+      "perPage": "Sayfa başına",
+      "pageSize_one": "{{count}} ürün",
+      "pageSize_other": "{{count}} ürün",
+      "columns": "Sütunlar"
+    },
     "duplicate": {
       "action": "Kopyala",
       "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
