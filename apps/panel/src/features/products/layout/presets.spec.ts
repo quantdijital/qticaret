@@ -1,20 +1,25 @@
 import { describe, expect, it } from "vitest"
-import { DEFAULT_LAYOUT, FOLDED_PARTS, isLocked, layoutOf } from "./parts"
+import { DEFAULT_LAYOUT, FOLDED_PARTS, TAB_KEYS, isLocked, layoutOf } from "./parts"
 import type { ProductLayout } from "./parts"
 import { applyPreset, presetOf } from "./presets"
 
 describe("ready layouts of the product page", () => {
-  it("Basit shows the main work and the advisor, and keeps the parts a dated product needs", () => {
+  it("Basit shows the main work, the price, stock and variants tabs and the advisor, and keeps the parts a dated product needs", () => {
     const basic = applyPreset("basic", DEFAULT_LAYOUT)
-    const shown = [...basic.main, ...basic.side].filter((key) => !basic.hidden.includes(key))
+    const shown = [...basic.main, ...basic.side, ...TAB_KEYS].filter(
+      (key) => !basic.hidden.includes(key)
+    )
     expect(shown).toEqual([
       "general",
-      "variants",
       "media",
       "description",
+      "data",
       "departures",
       "program",
       "advisor",
+      "pricing",
+      "stock",
+      "variants",
     ])
     expect(basic.hidden.some(isLocked)).toBe(false)
     expect(basic.open).toEqual([])

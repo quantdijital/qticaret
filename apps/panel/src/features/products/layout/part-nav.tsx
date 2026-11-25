@@ -16,7 +16,7 @@ import { useActivePart, usePresentParts } from "./use-active-part"
 const L = "products.layout.nav"
 
 /** A part's mark: a tick when complete, a dot when something is missing (red when urgent). */
-function Mark({ mark }: { mark: PartMark }) {
+export function Mark({ mark }: { mark: PartMark }) {
   const { t } = useTranslation()
   if (mark === null) {
     return null

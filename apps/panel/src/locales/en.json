@@ -4226,6 +4226,7 @@
       "title": "Customise the product page",
       "description": "Hide sections or drag them into order. The layout applies to the whole team; a hidden section keeps its data.",
       "main": "Main column",
+      "tabs": "Product data tabs",
       "side": "Side column",
       "locked": "Always shown",
       "conditional": "Shown only when used",
@@ -4240,7 +4241,7 @@
       "shownRevealed": "Hidden section: shown for this visit.",
       "parts": {
         "general": "General",
-        "variants": "Variants and price",
+        "variants": "Variants",
         "media": "Pictures",
         "description": "Description",
         "shortDescription": "Short description",
@@ -4249,13 +4250,15 @@
         "seo": "Search appearance",
         "attributes": "Attributes",
         "faq": "FAQ",
-        "addons": "Add-ons",
-        "priceHistory": "Price history",
         "summary": "Summary",
         "advisor": "SEO advisor",
         "organize": "Categories, brand and VAT",
         "catalog": "Catalog details",
-        "shipping": "Parcel"
+        "shipping": "Shipping (parcel)",
+        "data": "Product data",
+        "pricing": "General (price)",
+        "stock": "Inventory",
+        "advanced": "Advanced (add-ons, price history)"
       },
       "presets": "Ready layouts",
       "preset": {
@@ -4264,9 +4267,9 @@
         "advanced": "Advanced"
       },
       "presetHint": {
-        "basic": "General details, variants and price, pictures, description and the SEO advisor. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
+        "basic": "General details, pictures, description, the SEO advisor, and price, stock and variants in the product data. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
         "standard": "The first layout: seldom parts stay closed under the page.",
-        "advanced": "Every part shown; search appearance, attributes, FAQ, add-ons and price history start open.",
+        "advanced": "Every part and tab is shown; search appearance and FAQ start open.",
         "custom": "Arranged by hand."
       },
       "shortcuts": "Shortcuts",
@@ -4296,6 +4299,32 @@
         }
       },
       "shortcutSave": "Save changes"
+    },
+    "data": {
+      "title": "Product data",
+      "type": "Product type",
+      "types": {
+        "simple": "Simple product",
+        "variable": "Variable product"
+      },
+      "kind": {
+        "digital": "Digital product: no shipping",
+        "service": "Service: no shipping"
+      },
+      "variableLocked_one": "This product has {{count}} variant.",
+      "variableLocked_other": "This product has {{count}} variants; reduce them to one to make it a simple product.",
+      "tabs": {
+        "pricing": "General",
+        "stock": "Inventory",
+        "shipping": "Shipping",
+        "attributes": "Attributes",
+        "variants": "Variants",
+        "catalog": "Catalog",
+        "advanced": "Advanced"
+      },
+      "pricesOnVariants": "Prices are entered on each variant.",
+      "stockOnVariants": "Stock and codes are entered on each variant.",
+      "goVariants": "Go to variants"
     },
     "variant": {
       "title": "Edit variant",

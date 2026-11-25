@@ -30,6 +30,13 @@ export const MEDIA_ALT_TARGET = "product-media-alt"
 /** The barcode field: the first variant without one opens on it (its dialog's codes tab). */
 export const VARIANT_CODES_TARGET = "product-variant-codes"
 
+/** The "Ürün verileri" card's Genel and Stok tabs (a simple product's price, stock and codes). */
+export const PRICING_TARGET = "product-pricing"
+export const STOCK_TARGET = "product-stock"
+
+/** The "Ürün verileri" card (docs/06 "Ürün sayfası"). */
+export const DATA_CARD_ID = "product-data"
+
 /**
  * Where each of the advisor's manual fixes takes the person on the
  * product's page: a main card by its anchor, a folded section, which
