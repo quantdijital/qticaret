@@ -1,5 +1,5 @@
 import { chatBody } from "./body-chat"
-import { boundaryOf, formRefusal } from "./body-form"
+import { boundaryOf, formRefusal, formTypeOf } from "./body-form"
 import { geminiImageBody } from "./body-gemini"
 import { BodyRefused, TOOL_FIELDS, isRecord, mediaTypeOf } from "./body-shared"
 import type { BodyInput, BodyRefusal, PreparedBody } from "./body-shared"
@@ -15,9 +15,9 @@ export type { BodyInput, BodyRefusal, PreparedBody } from "./body-shared"
  * allows (body-chat.ts, body-gemini.ts), the model, the output budget,
  * streaming and the target's fixed fields written by the gateway alone.
  * Its text (the body less its inline pictures) is held to the task's
- * size. A form body (Photoroom) is not parsed: its type, its parts' names
- * (body-form.ts) and its size are
- * checked and its bytes go as they came. A body that cannot be read or
+ * size. A form body (Photoroom) is not parsed: its type (one boundary, no
+ * other parameter), its parts' names (body-form.ts) and its size are
+ * checked, its bytes go as they came and its type as the gateway writes it. A body that cannot be read or
  * written back (not JSON, nested past what can be written) is refused
  * before any credit is taken. Nothing here reads or keeps what the prompt
  * says.
@@ -37,8 +37,9 @@ export function prepareBody(input: BodyInput): PreparedBody {
   }
   const type = mediaTypeOf(input.contentType)
   if (target.protocol === "photoroom") {
-    // A form, sent as its bytes: the boundary must be named for the provider to read it
-    if (type !== "multipart/form-data" || boundaryOf(input.contentType) === null) {
+    // A form, sent as its bytes: exactly one boundary named, for the provider to read it (N3)
+    const boundary = boundaryOf(input.contentType)
+    if (type !== "multipart/form-data" || boundary === null) {
       return refuse("type_not_form")
     }
     // Only the parts the shop's connector sends, one file (body-form.ts, review D1)
@@ -46,7 +47,8 @@ export function prepareBody(input: BodyInput): PreparedBody {
     if (why !== null) {
       return refuse(why, why === "over_task_text" ? "body_too_large" : "body_refused")
     }
-    return { ok: true, body: raw, contentType: input.contentType, images: 1 }
+    // The type rewritten with the boundary read: the provider reads the form as the gateway did
+    return { ok: true, body: raw, contentType: formTypeOf(boundary), images: 1 }
   }
   if (type !== "application/json") {
     return refuse("type_not_json")
