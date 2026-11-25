@@ -53,7 +53,11 @@ export function SimpleSwitch({ product, state }: { product: ProductDetail; state
   const stocked = others.filter((variant) => (stockOf(variant) ?? 0) > 0)
   const units = stocked.reduce((sum, variant) => sum + (stockOf(variant) ?? 0), 0)
   const confirm = () => {
-    make.mutate(simplePlan(product, keep, placeholder), { onSuccess: state.madeSimple })
+    // Not `mutate`'s own onSuccess: the product read again is simple, so this
+    // question is gone before it would run (an unmounted caller's callbacks never do)
+    make.mutateAsync(simplePlan(product, keep, placeholder)).then(state.madeSimple, () => {
+      // Said in the card while it is still asked (`make.isError`)
+    })
   }
   return (
     <div

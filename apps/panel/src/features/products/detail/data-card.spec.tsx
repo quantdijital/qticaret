@@ -47,13 +47,20 @@ function renderCard(
   hidden: readonly PartKey[] = []
 ) {
   fetchMock.mockImplementation((url: string) => Promise.resolve(answer(url, answers)))
-  return render(
-    <QueryClientProvider
-      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-    >
-      <Card product={product} hidden={hidden} />
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const tree = (shown: ProductDetail) => (
+    <QueryClientProvider client={client}>
+      <Card product={shown} hidden={hidden} />
     </QueryClientProvider>
   )
+  const view = render(tree(product))
+  return {
+    ...view,
+    /** The page read the product again (what the save's refetch does). */
+    reread: (next: ProductDetail) => {
+      view.rerender(tree(next))
+    },
+  }
 }
 
 const tabNames = () => screen.getAllByRole("tab").map((tab) => tab.textContent)
@@ -258,6 +265,30 @@ describe("DataCard", () => {
       ],
       ["options", { remove: ["opt_1"] }],
     ])
+  })
+
+  it("shows the product simple once it is read again, the question gone with it", async () => {
+    const user = userEvent.setup()
+    const view = renderCard({}, ONE_COLOUR)
+    // The save reads the product again before it ends: the question unmounts mid-save
+    linkOptions.mockImplementation((_id, body) => {
+      if ((body as { remove?: string[] }).remove) {
+        act(() => {
+          view.reread({
+            ...PRODUCT,
+            options: [{ id: "opt_std", title: "Seçenek", values: [{ value: "Standart" }] }],
+          } as unknown as ProductDetail)
+        })
+      }
+      return Promise.resolve({})
+    })
+    await pickSimple(user)
+    await user.click(within(asking()).getByRole("button", { name: "Basit ürüne geç" }))
+    await waitFor(() => {
+      expect(screen.getByRole("combobox", { name: "Ürün tipi" })).toHaveTextContent("Basit ürün")
+    })
+    expect(screen.queryByRole("group", { name: "Basit ürüne geçilsin mi?" })).toBeNull()
+    expect(tabNames()).not.toContain("Varyantlar")
   })
 
   it("adds no second placeholder to a product that has one already", () => {
