@@ -8,10 +8,11 @@ import { release, settle, spend } from "../ai-credits/spend"
 import type { SpendResult } from "../ai-credits/spend"
 import { PLATFORM_OWNER, aiProviderKeyName } from "../vault/secret-names"
 import { prepareBody } from "./body"
-import { mayEchoKey, passedOn, refusal } from "./errors"
+import { answerOf, mayEchoKey, refusal } from "./errors"
 import type { CreditNote, GatewayAnswer } from "./errors"
 import { forwardCall, notTaken } from "./forward"
 import { holdCallSlot } from "./in-flight"
+import { platformFault } from "./provider-errors"
 import type { ForwardOutcome, ProviderFetch } from "./forward"
 import { callParamsOf } from "./headers"
 import { providerKeysHeld } from "./keys"
@@ -145,13 +146,6 @@ async function closeOperation(
   return charge.note
 }
 
-function answerOf(outcome: ForwardOutcome, echoes: boolean, note: CreditNote): GatewayAnswer {
-  if (outcome.kind === "answered") {
-    return echoes ? refusal("unavailable", note) : passedOn(outcome, note)
-  }
-  return refusal(outcome.kind === "timeout" ? "provider_timeout" : "provider_unreachable", note)
-}
-
 type Note = (fields: Record<string, unknown>) => void
 
 /** The call, its slot held (`gatewayCall`). */
@@ -229,8 +223,12 @@ async function heldCall(
     call: spent.kind,
     outcome: outcome.kind === "answered" ? outcome.status : outcome.code,
     charged: credit.charged,
+    // D3: the operator's to fix (a model gone, the platform's key refused); never the body
+    ...(outcome.kind === "answered" && platformFault(outcome.status, outcome.body)
+      ? { platform_fault: true }
+      : {}),
   })
-  return answerOf(outcome, echoes, credit)
+  return answerOf(outcome, { echoes, service: target.service }, credit)
 }
 
 /**

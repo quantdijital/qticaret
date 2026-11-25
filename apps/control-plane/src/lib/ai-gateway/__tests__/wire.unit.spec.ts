@@ -105,9 +105,14 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     for (const status of [401, 402, 403, 429, 500, 502, 503]) {
       expect(notTaken(answered(status), deepseek)).toBe(true)
     }
-    for (const status of [200, 400, 404, 408, 413, 422]) {
+    for (const status of [200, 400, 408, 413, 422]) {
       expect(notTaken(answered(status), deepseek)).toBe(false)
     }
+    // The platform's own failure (D3): a model gone, its key refused in a 400
+    expect(notTaken(answered(404), deepseek)).toBe(true)
+    expect(notTaken(answered(400, '{"error":{"message":"API key not valid."}}'), deepseek)).toBe(
+      true
+    )
     expect(notTaken({ kind: "not_connected", code: "connect_failed" }, deepseek)).toBe(true)
     expect(notTaken({ kind: "timeout", code: "timeout" }, deepseek)).toBe(false)
     expect(notTaken({ kind: "failed", code: "answer_cut" }, deepseek)).toBe(false)
@@ -135,12 +140,17 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
       seen.push(init)
       expect(url.href).toBe("https://api.deepseek.com/chat/completions")
       return Promise.resolve(
-        new Response("hello", { status: 201, headers: { "content-type": "text/plain" } })
+        new Response("hello", { status: 201, headers: { "content-type": "application/json" } })
       )
     })
-    expect(ok).toMatchObject({ kind: "answered", status: 201, contentType: "text/plain" })
+    expect(ok).toMatchObject({ kind: "answered", status: 201, contentType: "application/json" })
     expect(ok.kind === "answered" && ok.body.toString()).toBe("hello")
     expect(seen[0]).toMatchObject({ method: "POST", redirect: "error" })
+    // A success the shop cannot read (D2) is no answer; a failure keeps its type to be rewritten
+    const typed = (status: number, type: string) =>
+      call(() => Promise.resolve(new Response("x", { status, headers: { "content-type": type } })))
+    expect(await typed(200, "text/html")).toEqual({ kind: "failed", code: "answer_type" })
+    expect(await typed(500, "text/html")).toMatchObject({ kind: "answered", status: 500 })
     expect(await call(() => Promise.resolve(new Response("x".repeat(2000))))).toEqual({
       kind: "failed",
       code: "answer_too_large",

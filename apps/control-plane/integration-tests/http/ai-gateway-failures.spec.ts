@@ -74,7 +74,8 @@ medusaIntegrationTestRunner({
         } else {
           expect(reply.status).toBe(status)
           expect(reply.headers["x-qt-ai-refusal"]).toBeUndefined()
-          expect(jsonOf(reply)).toEqual({ error: { message: "no" } })
+          // D2: the status, and the provider's words never
+          expect(jsonOf(reply)).toEqual({ error: { code: status } })
         }
         expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 100 })
         expect(await operationOf(operation)).toMatchObject({ status: "released" })

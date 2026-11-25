@@ -174,22 +174,25 @@ Sıra: P1 → (P2 ‖ P4'ün ağ geçidine bağlı olmayan kısmı) → P3 → P
 
 - **(a) Çağrı değerleri sorgu dizgisinde, imzanın kapsamında.** İş, yetenek, servis ve işlem kimliği başlıkta değil sorguda gelir: `POST /tenant-api/v1/ai/calls?task=<iş>&capability=<yetenek>&service=<servis>&operation=<uuid>` (sıra sabit; ortak paket `aiCallPath`). İmza yöntem + istek hedefi (yol ve sorgu) + kiracı + zaman + nonce + anahtar + gövde özetini kapsadığı için faturayı belirleyen dört değer imzasız kalmaz; imzadan sonra değişen sorgu 401'dir. Ağ geçidi değerleri yalnız imzalı hedeften okur; aynı adlı başlıklar yok sayılır. Eksik, yinelenen, biçimsiz ya da sözleşme dışı parametre 400 `body_refused`. İzinli uç eşlemesi ve hız profili yolu sorgusuz karşılaştırır.
 - **(b) "Yanıt aynen döner" kuralının istisnası.** Sağlayıcının 401/403 yanıtı ya da gövdesinde anahtarı geçen yanıt mağazaya dönmez; ağ geçidinin `unavailable` (503) retti döner (anahtarın bir parçasını yankılayabilir).
-- **(c) Geri verme ölçütü mağazanın `notTakenByService`'idir.** Kredi yalnız sağlayıcı işi almadıysa geri verilir: 401/402/403/429/5xx, bağlanamama, MiniMax'in "iş yapılmadı" gövde kodları (200 içinde). 400/404/408/422, zaman aşımı ve yarıda kesilen ya da tavanı aşan yanıtta kredi kalır, işlem kesinleşir (`charged`; iş sağlayıcıda faturalanmış olabilir, denetim işi bunu müşteri lehine geri vermesin). Geri verme yalnız işlemin ilk çağrısında olur.
+- **(c) Geri verme ölçütü mağazanın `notTakenByService`'idir.** Kredi yalnız sağlayıcı işi almadıysa geri verilir: 401/402/403/429/5xx, bağlanamama, MiniMax'in "iş yapılmadı" gövde kodları (200 içinde). 400/404/408/422 (platformun hatası olan 404 ve anahtar 400'ü hariç, bkz. g), zaman aşımı ve yarıda kesilen ya da tavanı aşan yanıtta kredi kalır, işlem kesinleşir (`charged`; iş sağlayıcıda faturalanmış olabilir, denetim işi bunu müşteri lehine geri vermesin). Geri verme yalnız işlemin ilk çağrısında olur.
 - **(d) Ret kodları ve durumları** (zarf `{ qt_ai_gateway: { code } }`, başlık `x-qt-ai-refusal`):
 
   | Kod | Durum | Ne zaman | Kredi |
   |---|---|---|---|
   | `credits_exhausted` | 402 | Bakiye yetmiyor | düşmez |
   | `daily_cap` | 429 | Günlük tavan doldu | düşmez |
-  | `unavailable` | 503 | Bayrak kapalı, mağaza etkin değil, yönlendirme ya da anahtar yok, sorgudaki servis yönlendirmeyle uyuşmuyor; sağlayıcının 401/403'ü | düşmez / geri verilir |
+  | `unavailable` | 503 | Bayrak kapalı, mağaza etkin değil, yönlendirme ya da anahtar yok, sorgudaki servis yönlendirmeyle uyuşmuyor; sağlayıcının 401/403'ü, 404'ü ya da anahtar geçersiz 400'ü (g) | düşmez / geri verilir |
   | `task_mismatch` | 422 | Yetenek işe uymuyor ya da aynı işlemde yetenek değişti | düşmez |
   | `call_cap` | 409 | İşlemin çağrı tavanı doldu ya da işlem kapandı | düşmez |
   | `not_offered` | 404 | İş kredi ile satılmıyor (`search_intent` vb.) | düşmez |
   | `body_refused` | 400 | Bozuk sorgu; araç tanımı (yardımcı dışında); işin aldığından çok görsel; satır içi olmayan görsel; okunamayan gövde | düşmez |
-  | `body_too_large` | 413 | 6 MB üstü (imzadan önce, ham okuyucu) ya da metin işinde 256 KB, yardımcıda 512 KB üstü | düşmez |
-  | `provider_unreachable` | 502 | Kredi ayrıldıktan sonra yarıda kesilen ya da tavanı aşan yanıt (bağlanamama geri verilir) | kalır |
+  | `body_too_large` | 413 | 6 MB üstü (imzadan önce, ham okuyucu) ya da işin metin tavanı üstü (f) | düşmez |
+  | `busy` | 429 | Mağazanın (4) ya da sürecin (32) uçuştaki çağrısı dolu (f) | düşmez |
+  | `provider_unreachable` | 502 | Kredi ayrıldıktan sonra yarıda kesilen, tavanı aşan ya da okunamayan (JSON/görsel olmayan 2xx) yanıt (bağlanamama geri verilir) | kalır |
   | `provider_timeout` | 504 | Sağlayıcı süresinde yanıt vermedi | kalır |
 
   İmza retleri (401 `signature.*`) ve hız sınırı (429, `retry-after`) kiracı korumasınındır, `x-qt-ai-refusal` taşımaz.
 - **(e) Mağaza 5xx/429'da aynı işlem kimliğiyle yeniden denemez.** İlk çağrısı geri verilen işlem kapanır; aynı kimlikle yeni çağrı 409 `call_cap` alır. Yeniden deneme yeni işlem kimliğiyle yapılır (yeni kredi ayrılır).
+- **(f) Güvenlik incelemesi sonrası (P3b).** Sağlayıcı gövdesi izin listesiyle yeniden kurulur (sohbette yalnız mesajlar, yanıt biçimi `json_object`/`text`, 0–2 sıcaklık, yardımcıda işlev araçları; model, `stream: false`, çıktı tavanı ve hedefin sabit alanları `fixedBody` ağ geçidinindir; başka her alan atılır). Belgeli çıktı tavanı olmayan sohbet hedefi (bugün Gemini metin ve görsel okuma) kredide yönlendirilemez (`cp.ai_route_uncapped`). Metin iş başına sınırlıdır (görsel baytları hariç: kısa iş ve görsel okuma 64 KB, uzun yazı 128 KB, görsel düzenleme talimatı 32 KB, yardımcı 512 KB; aşan 413). İmza başlıkları ve zaman gövde okunmadan denetlenir; gövde 30 sn'de gelmezse 408; mağaza başına 4, süreç başına 32 uçuştaki çağrı, aşan `busy` (429, kredi düşmez).
+- **(g) "Yanıt aynen döner" kuralının ikinci istisnası: hata gövdesi.** 2xx dışı yanıtta durum kodu korunur, gövde `{"error":{"code":<durum>}}` olur (`application/json`); sağlayıcının sözleri (platform hesabının kota kimliği, bakiyesi, projesi) mağazaya geçmez. Mağazanın hata eşlemesinin okuduğu kısa kodlar taşınır: gövde kodu `base_resp.status_code` (MiniMax) ve Google servisinin 429'unda kotanın bittiği (`"code":"quota_exceeded"`); eşdeğerliği mağazanın kendi eşleyicisiyle birim testi sınar. 2xx yanıtı JSON ya da görsel değilse yanıt sayılmaz: 502 `provider_unreachable`, kredi kalır. Sağlayıcının 404'ü ve anahtar geçersizliğini söyleyen 400'ü platformun hatasıdır: kredi geri verilir (ilk çağrıda), mağazaya `unavailable` döner, günlüğe yalnız servis ve durum (`platform_fault`) yazılır.
 - Üst panelde `safeFetch` yoktur: sağlayıcı çağrısı düz `fetch`, `redirect: "error"`, zaman aşımı ve yanıt tavanıyla yapılır; adres yalnız ortak hedef tablosundan, `https` ve tablodaki ana bilgisayarlarla sınırlı.
