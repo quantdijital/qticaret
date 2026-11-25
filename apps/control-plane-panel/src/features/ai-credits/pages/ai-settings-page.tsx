@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
+import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { providersQuery, settingsQuery } from "@/features/ai-credits/api/queries"
 import { ProvidersCard } from "@/features/ai-credits/components/providers-card"
+import { GeneralCard } from "@/features/ai-credits/components/general-card"
+import { PacksCard } from "@/features/ai-credits/components/packs-card"
 import { RoutingCard } from "@/features/ai-credits/components/routing-card"
 import { errorText } from "@/lib/errors"
 
@@ -38,7 +41,17 @@ export function AiSettingsPage() {
       {settings.isError ? (
         <ErrorState text={errorText(t, settings.error)} onRetry={() => void settings.refetch()} />
       ) : answer && providers.data ? (
-        <RoutingCard key={version} answer={answer} providers={providers.data.providers} />
+        <>
+          <RoutingCard key={version} answer={answer} providers={providers.data.providers} />
+          <PageGrid>
+            <PageColumn span={5}>
+              <GeneralCard key={version} settings={answer.settings} />
+            </PageColumn>
+            <PageColumn span={7}>
+              <PacksCard settings={answer.settings} />
+            </PageColumn>
+          </PageGrid>
+        </>
       ) : (
         <Skeleton className="h-64 rounded-lg" />
       )}
