@@ -36,6 +36,8 @@ export const PROVIDERS_KEY = [...AI_CREDITS_KEY, "providers"] as const
 
 export const LEDGER_PAGE_SIZE = 20
 export const ORDERS_PAGE_SIZE = 50
+// The control plane's offset bound (ai/validators.ts, 100 000): the last page it serves
+export const ORDERS_PAGE_MAX = 100_000 / ORDERS_PAGE_SIZE + 1
 
 export const walletPath = (tenantId: string, rest = "") =>
   `/admin/cp/tenants/${encodeURIComponent(tenantId)}/ai-credits${rest}`
