@@ -603,6 +603,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",
+  "stock_tracking.variant_unknown": "Varyant bu üründe bulunamadı; sayfayı yenileyin.",
+  "stock_tracking.reserved":
+    "Bu varyantın açık siparişlerde ayrılmış stoğu var; siparişler tamamlanmadan stok takibi kapatılamaz.",
+  "stock_tracking.dated":
+    "Tarihli satılan üründe stok takibi açılamaz; yerleri kalkışlar belirler.",
+  "stock_tracking.no_location":
+    "Mağazanın varsayılan depo adresi yok; stok takibi için önce bir depo adresi ekleyin.",
+  "stock_tracking.kit": "Set ürünün stoğu parçalarından sayılır; adedi buradan yazılamaz.",
+  "stock_tracking.quantity_untracked": "Stok takibi kapalı varyanta adet yazılamaz.",
   "reviews.not_purchased": "Yalnızca teslim aldığınız ürünlere yorum yazabilirsiniz.",
   "reviews.photo_unknown": "Fotoğraflardan biri bulunamadı; yeniden ekleyin.",
   "reviews.photos_too_many": "Bir yoruma en çok 3 fotoğraf eklenebilir.",

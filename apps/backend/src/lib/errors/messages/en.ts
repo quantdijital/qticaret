@@ -593,6 +593,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",
+  "stock_tracking.variant_unknown": "The variant was not found on this product; reload the page.",
+  "stock_tracking.reserved":
+    "Open orders hold stock of this variant; stock tracking can be turned off once they are done.",
+  "stock_tracking.dated":
+    "A product sold by date cannot track stock; its departures decide the places.",
+  "stock_tracking.no_location": "The shop has no default location; add one before tracking stock.",
+  "stock_tracking.kit": "A kit's stock is counted from its parts; its count cannot be set here.",
+  "stock_tracking.quantity_untracked": "A variant whose stock is not tracked takes no count.",
   "reviews.not_purchased": "You can review only products you have received.",
   "reviews.photo_unknown": "One of the photos was not found; add it again.",
   "reviews.photos_too_many": "A review takes at most 3 photos.",

@@ -29,6 +29,7 @@ import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
+import { AdminPostProductStockTracking } from "./admin/products/[id]/stock-tracking/validators"
 import { VariantImagesInput } from "../lib/catalog/variant-images"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
@@ -326,6 +327,12 @@ export default defineMiddlewares({
       methods: ["POST"],
       bodyParser: { sizeLimit: "1mb" },
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
+    },
+    // A variant's stock tracking turned on (with its count) or off after it was made
+    {
+      matcher: "/admin/products/:id/stock-tracking",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductStockTracking)],
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
     ...SEO_ROUTES,
