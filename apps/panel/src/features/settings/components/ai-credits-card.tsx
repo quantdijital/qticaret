@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { Progress } from "@qticaret/admin-ui/ui/progress"
 import { formatCount, formatDate } from "@qticaret/admin-ui/lib/format"
 import { aiCreditsQuery, formatMinorMoney, mayReadCredits } from "@/features/ai/api/credits"
 import type { AiCreditsWallet } from "@/features/ai/api/credits"
@@ -95,17 +96,30 @@ export function AiCreditsCard() {
   )
 }
 
-/** This month's grant, then the topped-up credits while there are any. */
+/**
+ * This month's grant, then the topped-up credits while there are any.
+ * With the month's whole grant known (P5b) the line says "kalan / toplam"
+ * and a bar shows what is left; without it, or a grant of 0, the line is
+ * the remainder alone and there is no bar. The words carry the numbers,
+ * the bar only repeats them.
+ */
 function Balance({ wallet }: { wallet: AiCreditsWallet }) {
   const { t } = useTranslation()
   const { plan, purchased } = wallet
+  const granted = plan.granted !== undefined && plan.granted > 0 ? plan.granted : null
+  const numbers = {
+    remaining: formatCount(plan.remaining),
+    granted: granted === null ? "" : formatCount(granted),
+  }
   return (
     <>
       <p className="flex flex-wrap gap-x-2">
         {plan.remaining > 0 ? (
           <>
             <span className="font-medium tabular-nums">
-              {t(`${C}.plan`, { remaining: formatCount(plan.remaining) })}
+              {granted === null
+                ? t(`${C}.plan`, { remaining: numbers.remaining })
+                : t(`${C}.planOf`, numbers)}
             </span>
             <span className="text-muted-foreground">
               {t(`${C}.planRenews`, { date: formatDate(plan.renews_on) })}
@@ -117,6 +131,14 @@ function Balance({ wallet }: { wallet: AiCreditsWallet }) {
           </span>
         )}
       </p>
+      {granted === null ? null : (
+        <Progress
+          className="max-w-sm"
+          value={Math.min(100, Math.round((plan.remaining / granted) * 100))}
+          aria-label={t(`${C}.planBar`)}
+          getValueLabel={() => t(`${C}.planBarValue`, numbers)}
+        />
+      )}
       {purchased.remaining > 0 ? (
         <p className="flex flex-wrap gap-x-2">
           <span className="font-medium tabular-nums">

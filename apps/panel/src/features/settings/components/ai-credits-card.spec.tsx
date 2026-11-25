@@ -59,6 +59,34 @@ describe("AiCreditsCard", () => {
     expect(screen.queryByText("Krediniz bitti.")).toBeNull()
   })
 
+  it("says what is left of the month's whole grant, with a bar that repeats it (P5b)", async () => {
+    renderCard(wallet({ plan: { remaining: 1500, renews_on: "2026-12-01", granted: 2000 } }))
+    await card()
+    expect(screen.getByText("Bu ay 1.500 / 2.000 kredi kaldı")).toBeInTheDocument()
+    const bar = screen.getByRole("progressbar", { name: "Bu ayın kalan kredisi" })
+    expect(bar).toHaveAttribute("aria-valuenow", "75")
+    expect(bar).toHaveAttribute("aria-valuemin", "0")
+    expect(bar).toHaveAttribute("aria-valuemax", "100")
+    expect(bar).toHaveAttribute("aria-valuetext", "2.000 krediden 1.500 kredi kaldı")
+  })
+
+  it("draws an empty bar beside the used-up words once the grant is spent", async () => {
+    renderCard(wallet({ plan: { remaining: 0, renews_on: "2026-12-01", granted: 100 } }))
+    await card()
+    expect(screen.getByText(/Bu ayın kredisi bitti; 1 Ara 2026/)).toBeInTheDocument()
+    expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "0")
+  })
+
+  it.each([
+    ["no whole", { remaining: 40, renews_on: "2026-12-01" }],
+    ["a whole of 0", { remaining: 40, renews_on: "2026-12-01", granted: 0 }],
+  ])("says the remainder alone and draws no bar with %s", async (_case, plan) => {
+    renderCard(wallet({ plan }))
+    await card()
+    expect(screen.getByText("Bu ay 40 kredi kaldı")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).toBeNull()
+  })
+
   it("says the grant used up and the topped-up credits with their last day", async () => {
     renderCard(
       wallet({
