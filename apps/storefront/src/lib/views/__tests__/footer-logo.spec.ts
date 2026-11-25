@@ -71,14 +71,15 @@ describe("the footer's logo (owner 2026-11-16)", () => {
 
 describe("the footer bar with the shop's logo (owner 2026-11-16)", () => {
   const image = footerLogoOf({ name: "B", logo_url: "/m/a.svg" })
+  const logos = { light: image, dark: image, primary: image }
 
   it("carries the logo whenever the shop has one, with no setting of its own", () => {
-    expect(footerBarOf(footer({}), t, image)).toEqual({
+    expect(footerBarOf(footer({}), t, logos)).toEqual({
       id: "mainfooter",
       variant: "ledger",
       logo: image,
     })
-    expect(footerBarOf(undefined, t, image)).toMatchObject({ logo: image })
+    expect(footerBarOf(undefined, t, logos)).toMatchObject({ logo: image })
   })
 
   it("carries none without a logo: the footer writes the name as before", () => {

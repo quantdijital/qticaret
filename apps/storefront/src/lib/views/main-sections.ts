@@ -21,7 +21,6 @@ import type {
   CategoryMainView,
   FooterBarView,
   HeaderBarView,
-  ImageView,
   NavCategoryView,
   ProductMainView,
   SectionLookView,
@@ -29,6 +28,7 @@ import type {
 } from "@qticaret/ui"
 import { shopMarks } from "./card-extras"
 import { footerColumnsOf } from "./footer-columns"
+import type { FooterLogos } from "./footer-logo"
 import { footerRowsOf, freeRowsOf } from "./footer-rows"
 import type { FooterRowsParts } from "./footer-rows"
 import { headerCatalogOf } from "./header-catalog"
@@ -96,8 +96,8 @@ const footerStep = <S extends FooterBarSetting>(setting: S, value: unknown): Foo
   return listed.includes(value) ? (value as FooterBarStep<S>) : FOOTER_BAR_DEFAULTS[setting]
 }
 
-/** What the free rows footer's blocks are filled with, beyond the words and the logo. */
-export type FreeRowsParts = Omit<FooterRowsParts, "t" | "logo">
+/** What the free rows footer's blocks are filled with, beyond the words and the logos. */
+export type FreeRowsParts = Omit<FooterRowsParts, "t" | "logos">
 
 const isBadge = (value: unknown): value is PaymentBadge =>
   (PAYMENT_BADGES as readonly unknown[]).includes(value)
@@ -108,12 +108,13 @@ const isBadge = (value: unknown): value is PaymentBadge =>
  * pay it does not know is left out, a repeat too); a backend before them
  * prints none, and the footer is drawn as before. The shop's logo, when it
  * has one, names it over the contact (owner 2026-11-16: the header's logo,
- * in the footer too); none, its name.
+ * in the footer too); none, its name. On the stage the dark-ground logo
+ * (`footerLogosOf`), each free row by its own ground.
  */
 export function footerBarOf(
   main: Main,
   t: Translate,
-  logo: ImageView | null = null,
+  logos: FooterLogos | null = null,
   rows?: FreeRowsParts
 ): FooterBarView {
   const bar = main?.footer_bar
@@ -125,6 +126,11 @@ export function footerBarOf(
   // The free rows footer too (adr/0070), its rows filled with the shop's details
   const free = variant === "free_rows" && rows !== undefined
   const marks = shopMarks(badges, t)
+  const columnsView = columns ? footerColumnsOf(bar?.columns) : null
+  const freeView = free ? freeRowsOf(bar) : null
+  // The ledger stands on the light well; the other two on the ground the shop picks
+  const dark = (columnsView ?? freeView)?.ground === "stage"
+  const logo = (dark ? logos?.dark : logos?.light) ?? null
   return {
     id: bar?.id ?? "mainfooter",
     variant,
@@ -136,16 +142,20 @@ export function footerBarOf(
             columns || free ? marks : badges.map((key) => ({ key, label: t(`marks.${key}`) })),
         }
       : {}),
-    ...(columns ? { columns: footerColumnsOf(bar?.columns) } : {}),
-    ...(free
+    ...(columnsView ? { columns: columnsView } : {}),
+    ...(free && freeView
       ? {
-          freeRows: freeRowsOf(bar),
-          rows: footerRowsOf(bar?.rows, {
-            ...rows,
-            t,
-            logo,
-            payments: marks.length > 0 ? marks : rows.payments,
-          }),
+          freeRows: freeView,
+          rows: footerRowsOf(
+            bar?.rows,
+            {
+              ...rows,
+              t,
+              logos: logos ?? { light: null, dark: null, primary: null },
+              payments: marks.length > 0 ? marks : rows.payments,
+            },
+            dark
+          ),
         }
       : {}),
     ...(bar?.back_to_top === true
