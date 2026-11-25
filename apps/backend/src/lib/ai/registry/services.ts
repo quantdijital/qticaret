@@ -1,3 +1,4 @@
+import { AI_FAKE_TARGET, AI_SERVICE_TARGETS as T, endpointUrl } from "@qticaret/types/control-plane"
 import type { AiSource } from "../../media/ai-source"
 import type { AiErrorKey } from "../errors"
 import type { AiCapability } from "./capabilities"
@@ -7,7 +8,9 @@ import type { AiCapability } from "./capabilities"
  * user, setting or service answer can name a base address (§9 SSRF). A
  * capability is listed only after it was checked against the service's
  * own current documentation; the date and the pages stand above each
- * record. What could not be verified is not here.
+ * record. What could not be verified is not here. The network targets
+ * (hosts, addresses, models) are read from the shared table the control
+ * plane's gateway calls from (`AI_SERVICE_TARGETS`, adr/0085 §2).
  */
 
 export type AiFunding = "own_key" | "platform_credit"
@@ -176,14 +179,14 @@ const DEEPSEEK: AiService = {
   id: "deepseek",
   credentialProvider: "deepseek",
   funding: "own_key",
-  hosts: ["api.deepseek.com"],
+  hosts: T.deepseek.hosts,
   downloadHosts: [],
   capabilities: {
     text: {
       connector: "openai-compatible",
-      model: "deepseek-flash",
-      baseUrl: "https://api.deepseek.com",
-      path: "/chat/completions",
+      model: T.deepseek.capabilities.text.model,
+      baseUrl: T.deepseek.capabilities.text.baseUrl,
+      path: T.deepseek.capabilities.text.path,
       maxTokensField: "max_tokens",
       jsonMode: true,
       // Thinking is on unless turned off; a title needs none
@@ -204,9 +207,9 @@ const DEEPSEEK: AiService = {
     },
     vision: {
       connector: "openai-compatible",
-      model: "deepseek-flash",
-      baseUrl: "https://api.deepseek.com",
-      path: "/chat/completions",
+      model: T.deepseek.capabilities.vision.model,
+      baseUrl: T.deepseek.capabilities.vision.baseUrl,
+      path: T.deepseek.capabilities.vision.path,
       maxTokensField: "max_tokens",
       jsonMode: false,
       body: { thinking: { type: "disabled" } },
@@ -252,14 +255,14 @@ const MINIMAX: AiService = {
   id: "minimax",
   credentialProvider: "minimax",
   funding: "own_key",
-  hosts: ["api.minimax.io"],
+  hosts: T.minimax.hosts,
   downloadHosts: [],
   capabilities: {
     text: {
       connector: "openai-compatible",
-      model: "MiniMax-M3.1-Flash",
-      baseUrl: "https://api.minimax.io/v1",
-      path: "/chat/completions",
+      model: T.minimax.capabilities.text.model,
+      baseUrl: T.minimax.capabilities.text.baseUrl,
+      path: T.minimax.capabilities.text.path,
       maxTokensField: "max_completion_tokens",
       jsonMode: false,
       // The model always thinks; its thinking goes to its own field, not into the text
@@ -278,9 +281,9 @@ const MINIMAX: AiService = {
     },
     vision: {
       connector: "openai-compatible",
-      model: "MiniMax-M3.1-Flash",
-      baseUrl: "https://api.minimax.io/v1",
-      path: "/chat/completions",
+      model: T.minimax.capabilities.vision.model,
+      baseUrl: T.minimax.capabilities.vision.baseUrl,
+      path: T.minimax.capabilities.vision.path,
       maxTokensField: "max_completion_tokens",
       jsonMode: false,
       body: { reasoning_split: true, reasoning_effort: "low" },
@@ -366,14 +369,14 @@ const GEMINI: AiService = {
   id: "gemini",
   credentialProvider: "gemini",
   funding: "own_key",
-  hosts: ["generativelanguage.googleapis.com"],
+  hosts: T.gemini.hosts,
   downloadHosts: [],
   capabilities: {
     text: {
       connector: "openai-compatible",
-      model: "gemini-4-hydrogen",
-      baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
-      path: "/chat/completions",
+      model: T.gemini.capabilities.text.model,
+      baseUrl: T.gemini.capabilities.text.baseUrl,
+      path: T.gemini.capabilities.text.path,
       maxTokensField: null,
       jsonMode: false,
       // Thinking cannot be turned off on this model; the lowest documented effort in the example
@@ -396,9 +399,9 @@ const GEMINI: AiService = {
     },
     vision: {
       connector: "openai-compatible",
-      model: "gemini-4-hydrogen",
-      baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
-      path: "/chat/completions",
+      model: T.gemini.capabilities.vision.model,
+      baseUrl: T.gemini.capabilities.vision.baseUrl,
+      path: T.gemini.capabilities.vision.path,
       maxTokensField: null,
       jsonMode: false,
       body: { reasoning_effort: "low" },
@@ -421,8 +424,8 @@ const GEMINI: AiService = {
      */
     image_edit: {
       connector: "gemini-image",
-      model: "gemini-nano-banana-2.1",
-      url: "https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
+      model: T.gemini.capabilities.image_edit.model,
+      url: endpointUrl(T.gemini.capabilities.image_edit),
       backgrounds: ["white"],
       /*
        * A scene (Aşama 7). Verified 2026-11-18 against:
@@ -436,8 +439,8 @@ const GEMINI: AiService = {
        * Interactions endpoint the page also shows is not used (one endpoint, as Aşama 4).
        */
       scene: {
-        model: "gemini-nano-banana-2.1",
-        url: "https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
+        model: T.gemini.capabilities.image_edit.scene.model,
+        url: endpointUrl(T.gemini.capabilities.image_edit.scene),
         source: "generated",
       },
     },
@@ -485,13 +488,13 @@ const PHOTOROOM: AiService = {
   id: "photoroom",
   credentialProvider: "photoroom",
   funding: "own_key",
-  hosts: ["sdk.photoroom.com", "image-api.photoroom.com"],
+  hosts: T.photoroom.hosts,
   downloadHosts: [],
   capabilities: {
     image_edit: {
       connector: "photoroom",
-      model: "segment-v1",
-      url: "https://sdk.photoroom.com/v1/segment",
+      model: T.photoroom.capabilities.image_edit.model,
+      url: endpointUrl(T.photoroom.capabilities.image_edit),
       backgrounds: ["transparent", "white"],
       /*
        * A scene (Aşama 7): AI Backgrounds of the Image Editing API. Verified 2026-11-18:
@@ -508,8 +511,8 @@ const PHOTOROOM: AiService = {
        * Not verified: a prompt length limit (none documented; ours are at most 400).
        */
       scene: {
-        model: "edit-v2-ai-background",
-        url: "https://image-api.photoroom.com/v2/edit",
+        model: T.photoroom.capabilities.image_edit.scene.model,
+        url: endpointUrl(T.photoroom.capabilities.image_edit.scene),
         source: "edited",
         unitPrice: { currency: "USD", perImage: 100_000 },
       },
@@ -536,16 +539,16 @@ export const FAKE_SERVICE: AiService = {
   capabilities: {
     text: {
       connector: "fake",
-      model: "fake-text",
+      model: AI_FAKE_TARGET.capabilities.text.model,
       // Its own scenario (connectors/fake-tools.ts): no pages to read, nothing leaves the machine
       toolCalls: { verified: true, verifiedOn: "2026-11-24", source: [], toolChoice: false },
     },
-    vision: { connector: "fake", model: "fake-vision" },
+    vision: { connector: "fake", model: AI_FAKE_TARGET.capabilities.vision.model },
     image_edit: {
       connector: "fake-image",
-      model: "fake-image",
+      model: AI_FAKE_TARGET.capabilities.image_edit.model,
       backgrounds: ["transparent", "white"],
-      scene: { model: "fake-scene", source: "generated" },
+      scene: { model: AI_FAKE_TARGET.capabilities.image_edit.scene.model, source: "generated" },
     },
   },
   unitPrices: {},
