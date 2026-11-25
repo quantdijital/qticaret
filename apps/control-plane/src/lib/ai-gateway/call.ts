@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { AI_TASK_CAPABILITIES, isAiCreditTask } from "@qticaret/types/control-plane"
 import type { AiCreditCapability, AiGatewayRefusalCode } from "@qticaret/types/control-plane"
-import { vaultIn } from "../../workflows/modules"
+import { aiCreditsIn, vaultIn } from "../../workflows/modules"
 import { aiCreditSettingsOf } from "../ai-credits/platform-settings"
 import { release, settle, spend } from "../ai-credits/spend"
 import type { SpendResult } from "../ai-credits/spend"
@@ -135,14 +135,14 @@ async function closeOperation(
     return charge.note
   }
   const answered = outcome.kind === "answered" && outcome.status >= 200 && outcome.status < 300
-  await settle(container, {
-    tenantId,
-    operationId,
-    measures: answered
-      ? measuresOf(target, outcome, input.imagesSent)
-      : { service: target.service, model: target.model },
-    now,
-  })
+  const measures = answered
+    ? measuresOf(target, outcome, input.imagesSent)
+    : { service: target.service, model: target.model }
+  const { settled } = await settle(container, { tenantId, operationId, measures, now })
+  if (!settled && answered) {
+    // Settled by an earlier call (P3d, D4): this one's measures add to it
+    await aiCreditsIn(container).addCallMeasures(tenantId, operationId, measures)
+  }
   return charge.note
 }
 
