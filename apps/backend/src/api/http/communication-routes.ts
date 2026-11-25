@@ -21,14 +21,22 @@ const NOTE_TO_CUSTOMER: RateLimitProfile = {
   perIdentityAnyIp: { max: 20, windowMs: 60 * 60 * 1000 },
 }
 
-/** Only a note that goes to the customer spends the budget; the team's own notes do not. */
-const limitNoteToCustomer = rateLimit(
-  (req) =>
-    (req.validatedBody as { notify_customer?: boolean } | undefined)?.notify_customer === true
-      ? NOTE_TO_CUSTOMER
-      : null,
-  { identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id }
-)
+/** One customer's inbox: a few notes an hour, whoever on the team writes them (security review). */
+const NOTE_TO_ONE_CUSTOMER: RateLimitProfile = {
+  name: "order_note_to_one_customer",
+  perIdentityAnyIp: { max: 5, windowMs: 60 * 60 * 1000 },
+}
+
+const notifies = (req: { validatedBody?: unknown }): boolean =>
+  (req.validatedBody as { notify_customer?: boolean } | undefined)?.notify_customer === true
+
+/** Only a note that goes to the customer spends the budgets; the team's own notes do not. */
+const limitNoteToCustomer = rateLimit((req) => (notifies(req) ? NOTE_TO_CUSTOMER : null), {
+  identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+})
+const limitNotesToOneOrder = rateLimit((req) => (notifies(req) ? NOTE_TO_ONE_CUSTOMER : null), {
+  identity: (req) => req.params["id"],
+})
 
 /**
  * F12.8: the team's notes on an order and what its customer was sent.
@@ -47,6 +55,7 @@ export const COMMUNICATION_ROUTES = [
       requireUserActor,
       validateAndTransformBody(AdminPostOrderNote),
       limitNoteToCustomer,
+      limitNotesToOneOrder,
     ],
   },
   {

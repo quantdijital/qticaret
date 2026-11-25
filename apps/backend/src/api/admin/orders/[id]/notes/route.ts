@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { addOrderNoteWorkflow, orderNotes } from "../../../../../workflows/orders/order-notes"
+import { AUDIT_RESOURCE_ID, AUDIT_RESULT } from "../../../../http/audit/notes"
 import type { AdminPostOrderNoteType } from "./validators"
 
 /**
@@ -30,5 +31,8 @@ export async function POST(
       notify_customer: req.validatedBody.notify_customer === true,
     },
   })
+  // The audit entry says a note went to the customer, and how; never its text or the address
+  res.locals[AUDIT_RESOURCE_ID] = result.id
+  res.locals[AUDIT_RESULT] = { notify_customer: result.sent !== null, sent: result.sent }
   res.status(201).json({ note: { id: result.id }, sent: result.sent })
 }
