@@ -32,7 +32,7 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   const { readdirSync } = require("node:fs")
   const { join } = require("node:path")
   const jobs = join(__dirname, "..", "src", "jobs")
-  for (const file of readdirSync(jobs)) {
+  for (const file of readdirSync(jobs, { recursive: true })) {
     defineFileConfig({ path: join(jobs, file), isDisabled: () => true })
   }
 }

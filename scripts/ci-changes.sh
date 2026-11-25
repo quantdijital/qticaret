@@ -26,7 +26,7 @@ groups="$(dirname "$0")/ci-unit-groups.mjs"
 # The integration jobs (ci.yml's `integration` matrix), each a `suite`: the
 # backend's HTTP shards and its modules suite, and the control plane's suite
 backend_suites='"HTTP 1/8","HTTP 2/8","HTTP 3/8","HTTP 4/8","HTTP 5/8","HTTP 6/8","HTTP 7/8","HTTP 8/8","modules"'
-control_plane_suites='"control plane 1/2","control plane 2/2"'
+control_plane_suites='"control plane"'
 answer() {
   {
     echo "code=$1"

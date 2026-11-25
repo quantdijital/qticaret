@@ -247,7 +247,7 @@ jobs:
     # before, twelve shards of one worker each left three cores idle and
     # filled the account's twenty job slots). "HTTP k/8" and "modules".
     # Control plane (apps/control-plane, adr/0081 Ek 2026-11-25 (3)): its
-    # HTTP files on one worker, two shards ("control plane k/2")
+    # HTTP files on one worker in one job ("control plane"; ~5 minutes of tests)
     strategy:
       fail-fast: false
       matrix:
@@ -266,6 +266,19 @@ jobs:
         options: >-
           --tmpfs /var/lib/postgresql/data --shm-size 1g
           --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      # The control plane keeps staff sessions in Redis (its `cp:end-sessions`
+      # test ends them there); the backend's suites run without one (no
+      # REDIS_URL is set for them). Started in every job of the matrix: a
+      # service cannot follow the matrix without hiding its image from Renovate
+      redis:
+        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
@@ -307,15 +320,15 @@ jobs:
       # The control plane's escrow recipient: a public age key whose identity
       # is thrown away at once, so nothing sealed to it can ever be opened
       - name: Throwaway escrow recipient
-        if: startsWith(matrix.suite, 'control plane')
+        if: matrix.suite == 'control plane'
         run: >-
           echo "CP_ESCROW_RECIPIENTS=$(pnpm --silent --filter @qticaret/server-kit exec node --input-type=module
           -e 'import { generateIdentity, identityToRecipient } from "age-encryption";
           console.log(await identityToRecipient(await generateIdentity()))')" >> "$GITHUB_ENV"
       # Backend: three jest workers, each replaced when its heap grows (jest.config.js).
-      # Control plane: one worker (its package.json); its panel's origin and the
-      # platform domain its tests expect (`<slug>.localhost`); its scheduled jobs
-      # stay off in the tests (integration-tests/setup.js)
+      # Control plane: one worker (its package.json), the job's Redis, its panel's
+      # origin and the platform domain its tests expect (`<slug>.localhost`); its
+      # scheduled jobs stay off in the tests (integration-tests/setup.js)
       - name: Run the suite
         env:
           SUITE: ${{ matrix.suite }}
@@ -329,10 +342,11 @@ jobs:
             modules)
               pnpm --filter @qticaret/backend test:integration:modules 2>&1 | tee suite.log
               ;;
-            "control plane "*)
-              ADMIN_CORS=http://localhost:5174 AUTH_CORS=http://localhost:5174 \
-                CP_PANEL_URL=http://localhost:5174 PLATFORM_DOMAIN=localhost \
-                pnpm --filter @qticaret/control-plane test:integration:http --shard="${SUITE#control plane }" 2>&1 | tee suite.log
+            "control plane")
+              REDIS_URL=redis://localhost:6379 ADMIN_CORS=http://localhost:5174 \
+                AUTH_CORS=http://localhost:5174 CP_PANEL_URL=http://localhost:5174 \
+                PLATFORM_DOMAIN=localhost \
+                pnpm --filter @qticaret/control-plane test:integration:http 2>&1 | tee suite.log
               ;;
             *)
               pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }" 2>&1 | tee suite.log
