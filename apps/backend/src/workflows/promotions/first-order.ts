@@ -92,10 +92,7 @@ async function meetsFirstOrderRule(
       { relations: ["rules", "rules.values"] }
     ),
   ])
-  return [...coded, ...automatic].some(
-    (promotion) =>
-      restrictionsOf(promotion.rules).firstOrder
-  )
+  return [...coded, ...automatic].some((promotion) => restrictionsOf(promotion.rules).firstOrder)
 }
 
 /**
