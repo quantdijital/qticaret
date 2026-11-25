@@ -12,7 +12,6 @@ const promotion = (over: Partial<PromotionStateRow> = {}): PromotionStateRow => 
   is_tax_inclusive: true,
   created_at: "2026-11-01T00:00:00.000Z",
   limit: null,
-  used: 0,
   rules: [],
   application_method: {
     type: "percentage",
@@ -119,15 +118,13 @@ describe("the automatic promotions' key for the index's minute (adr/0023 Ek 2026
     expect(state(dated, new Date("2026-11-07T00:01:00.000Z"))).toBe(during)
   })
 
-  it("changes once a limit or a budget is used up, not with each use before it", () => {
-    const limited = (used: number) => [promotion({ limit: 100, used })]
-    expect(state(limited(3))).toBe(state(limited(4)))
-    expect(state(limited(100))).not.toBe(state(limited(99)))
-
-    const budget = (used: number) => [
-      promotion(campaign({ budget: { type: "spend", limit: 5000, used } })),
-    ]
-    expect(state(budget(1200))).toBe(state(budget(1300)))
-    expect(state(budget(5000))).not.toBe(state(budget(1300)))
+  it("leaves out a promotion with a budget or a limit of uses: no price (adr/0076 Ek 2026-11-25)", () => {
+    const none = state([])
+    expect(state([promotion({ limit: 100 })])).toBe(none)
+    expect(state([promotion(campaign({ budget: { type: "spend", limit: 5000 } }))])).toBe(none)
+    expect(state([promotion(campaign({ budget: { type: "usage", limit: 50 } }))])).toBe(none)
+    // A budget with no limit holds nothing back: the price, as before
+    const open = [promotion(campaign({ budget: { type: "spend", limit: null } }))]
+    expect(state(open)).not.toBe(none)
   })
 })

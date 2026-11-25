@@ -10,10 +10,11 @@ import { queueAllProducts } from "./drain"
 /**
  * The automatic promotions' side of the index's minute (adr/0056, adr/0023
  * Ek 2026-11-05). A promotion every shopper gets is a product's price, so
- * it decides `on_sale`; but a campaign that begins or ends, or a budget
- * used up, changes no row and sends no event of the catalogue's. Each
- * minute the promotions are read as they stand (a few rows) and compared
- * with the last reading every process shares; when they differ, every
+ * it decides `on_sale`; but a campaign that begins or ends changes no
+ * row and sends no event of the catalogue's (one with a budget is no
+ * price, adr/0076 Ek 2026-11-25). Each minute the promotions are read as
+ * they stand (a few rows) and compared with the last reading every
+ * process shares; when they differ, every
  * product is indexed again (a promotion may cover the whole catalogue).
  */
 
@@ -30,7 +31,6 @@ const FIELDS = [
   "is_tax_inclusive",
   "created_at",
   "limit",
-  "used",
   ...RULE.map((field) => `rules.${field}`),
   "application_method.type",
   "application_method.target_type",
@@ -44,7 +44,6 @@ const FIELDS = [
   "campaign.ends_at",
   "campaign.budget.type",
   "campaign.budget.limit",
-  "campaign.budget.used",
 ]
 
 /** The shop's automatic promotions that are a price, as they apply at `now`, in one key. */
@@ -54,8 +53,8 @@ export async function automaticOfferState(container: MedusaContainer, now: Date)
     fields: FIELDS,
     filters: { is_automatic: true },
   })
-  const rows: PromotionStateRow[] = data
-  return offerState(rows, CURRENCY, now)
+  // Typed as the fields read; the generated types may read it as any
+  return offerState(data as PromotionStateRow[], CURRENCY, now)
 }
 
 /**

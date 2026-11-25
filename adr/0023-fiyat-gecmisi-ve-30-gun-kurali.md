@@ -104,3 +104,7 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **`/kampanyalar`:** herkese uygulanan otomatik kampanyanın indirdiği ürünler de listelenir; ölçüt kartla aynı (`priceDisplays` `on_sale`, 10 gün kuralı). Kampanya başladıktan sonra zamlanıp indirimi gösterilemeyen ürün listelenmez. Hesap ürün indekslenirken yapılır (adr/0056 Ek 2026-11-05); dizin listelerinde fiyat süzgeci ve sıralama da kampanyalı fiyatla.
 - **GA4 / Meta:** `view_item`, `view_item_list` ve `add_to_cart` sayfanın gösterdiği fiyatı (`price-display` `current`, kampanya dahil) gönderir; liste kartındaki hızlı ekle de `add_to_cart` gönderir. `begin_checkout` ve `add_payment_info` kalemleri sepet satırının sunucu toplamı / adet (kampanya düşülmüş). `purchase` değişmedi (birim fiyat, backend sunucu olayıyla aynı).
 - Açık kalanlar: hizmet ve çabuk bozulan mal için "bir önceki fiyat" kuralı; kanal başına referans fiyat (md. 14/5); harcama bütçesi kısmen dolmuş kampanya dizine geç yansır (adr/0056 Ek).
+
+## Ek (2026-11-25): bütçeli kampanya fiyat değildir
+
+Mağaza sahibinin kararı: kampanyası bütçeli (sınırlı harcama ya da kullanım) ya da kendi kullanım sınırı olan otomatik kampanya kartta, listede, JSON-LD'de gösterilmez, yalnız sepette uygulanır. Yukarıdaki "kampanya bütçesi kişi başı değil" koşulu "kampanya bütçesi ve kullanım sınırı yok" olarak okunur; "harcama bütçesi kısmen dolmuş kampanya dizine geç yansır" açığı kapandı. Ayrıntı: adr/0076 Ek 2026-11-25.

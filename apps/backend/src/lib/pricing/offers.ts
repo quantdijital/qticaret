@@ -10,7 +10,10 @@ import type { PricePoint } from "./discount"
  * price-before rule. One whose only condition is the cart (a minimum) is
  * a hint beside the price ("Sepette %30 indirim"). Anything else (a
  * customer group, a region, a per-customer limit, "X al Y öde", free
- * shipping) stays in the cart. Pure: Medusa's promotion module says which
+ * shipping) stays in the cart. So does one with a limit that can run out
+ * between the card and the cart (a campaign budget of spend or uses, or
+ * the promotion's own uses): the card never shows a price the cart may
+ * not give (adr/0076 Ek 2026-11-25). Pure: Medusa's promotion module says which
  * promotions apply to which variant; this file says how they are shown.
  */
 
@@ -51,6 +54,8 @@ export interface PromotionRow {
   is_automatic?: boolean | null
   is_tax_inclusive?: boolean | null
   created_at?: When
+  /** How many times it may be used in all; null: no such limit. */
+  limit?: number | string | null
   rules?: (RuleRow | null)[] | null
   application_method?: {
     type?: string | null
@@ -63,8 +68,24 @@ export interface PromotionRow {
   } | null
   campaign?: {
     starts_at?: When
-    budget?: { type?: string | null } | null
+    budget?: { type?: string | null; limit?: number | string | null } | null
   } | null
+}
+
+const numberOf = (value: number | string | null | undefined): number | null => {
+  const amount = value === null || value === undefined ? Number.NaN : Number(value)
+  return Number.isFinite(amount) ? amount : null
+}
+
+/**
+ * A limit Medusa holds the promotion to, as its promotion module reads it:
+ * the campaign's budget (spend or uses, in all or per attribute) once it
+ * has a limit, the promotion's own count of uses once it is a number.
+ * Either may run out between the card and the cart.
+ */
+export function isLimited(row: Pick<PromotionRow, "limit" | "campaign">): boolean {
+  const budget = numberOf(row.campaign?.budget?.limit)
+  return (budget !== null && budget > 0) || numberOf(row.limit) !== null
 }
 
 const valuesOf = (rule: RuleRow): string[] =>
@@ -109,8 +130,8 @@ function conditionOf(
 
 /**
  * How a promotion is shown in a currency; null when it stays in the cart.
- * Medusa decides whether it applies now (status, dates, limits, budget,
- * target products): this reads only its shape.
+ * Medusa decides whether it applies now (status, dates, target products):
+ * this reads its shape, and whether it has a limit at all (`isLimited`).
  */
 export function offerOf(row: PromotionRow, currency: string): Offer | null {
   const method = row.application_method
@@ -126,7 +147,9 @@ export function offerOf(row: PromotionRow, currency: string): Offer | null {
     !Number.isFinite(value) ||
     value <= 0 ||
     // A limit on how many each promotion counts per customer is a condition on who buys
-    row.campaign?.budget?.type === "use_by_attribute"
+    row.campaign?.budget?.type === "use_by_attribute" ||
+    // A budget or a count of uses: the cart alone applies it (adr/0076 Ek 2026-11-25)
+    isLimited(row)
   ) {
     return null
   }

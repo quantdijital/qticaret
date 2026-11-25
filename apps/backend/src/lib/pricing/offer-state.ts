@@ -6,20 +6,15 @@ import type { PromotionRow, RuleRow, When } from "./offers"
  * The automatic promotions that are a price (adr/0023 Ek 2026-11-05) as
  * they stand now, in one key: each one's code, what it takes, from when,
  * which products it targets, and whether it can apply now (inside its
- * campaign's dates, its own limit and its campaign's budget not used up).
- * The search index's minute job compares it with the last one it noted:
- * what no event tells of (a campaign beginning or ending, a budget
- * running out) marks every product to be indexed again, so `on_sale`
- * follows. An order counted on a promotion that still applies is no
- * change. Pure.
+ * campaign's dates). The search index's minute job compares it with the
+ * last one it noted: what no event tells of (a campaign beginning or
+ * ending) marks every product to be indexed again, so `on_sale` follows.
+ * A promotion with a budget or a limit of uses is no price (`offerOf`,
+ * adr/0076 Ek 2026-11-25), so its uses never change the key. Pure.
  */
 
-type Amount = number | string | null | undefined
-
-/** A promotion as the minute job reads it: `PromotionRow` with its targets, dates and limits. */
+/** A promotion as the minute job reads it: `PromotionRow` with its targets and dates. */
 export interface PromotionStateRow extends PromotionRow {
-  limit?: Amount
-  used?: Amount
   application_method?:
     | (NonNullable<PromotionRow["application_method"]> & {
         target_rules?: (RuleRow | null)[] | null
@@ -28,20 +23,8 @@ export interface PromotionStateRow extends PromotionRow {
   campaign?:
     | (NonNullable<PromotionRow["campaign"]> & {
         ends_at?: When
-        budget?: { type?: string | null; limit?: Amount; used?: Amount } | null
       })
     | null
-}
-
-const numberOf = (value: Amount): number | null => {
-  const amount = value === null || value === undefined ? Number.NaN : Number(value)
-  return Number.isFinite(amount) ? amount : null
-}
-
-/** A limit used up: Medusa applies a promotion no more once its uses or spend reach it. */
-function usedUp(limit: Amount, used: Amount): boolean {
-  const most = numberOf(limit)
-  return most !== null && most > 0 && (numberOf(used) ?? 0) >= most
 }
 
 const timeOf = (when: When): number | null => {
@@ -53,12 +36,7 @@ function appliesNow(row: PromotionStateRow, now: Date): boolean {
   const starts = timeOf(row.campaign?.starts_at)
   const ends = timeOf(row.campaign?.ends_at)
   const at = now.getTime()
-  return (
-    (starts === null || starts <= at) &&
-    (ends === null || ends > at) &&
-    !usedUp(row.limit, row.used) &&
-    !usedUp(row.campaign?.budget?.limit, row.campaign?.budget?.used)
-  )
+  return (starts === null || starts <= at) && (ends === null || ends > at)
 }
 
 /** A rule as text, its values sorted: the same targets read the same whatever their order. */
