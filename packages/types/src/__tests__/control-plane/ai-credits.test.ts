@@ -166,12 +166,18 @@ describe("the gateway's shapes", () => {
   })
 
   it("asks for a pack by its id only; the answer is the order as it stands", () => {
-    expect(aiCreditOrderRequestSchema.parse({ pack_id: "kredi-500" })).toEqual({
-      pack_id: "kredi-500",
-    })
-    expect(aiCreditOrderRequestSchema.safeParse({ pack_id: "kredi-500", amount: 1 }).success).toBe(
-      false
-    )
+    const asked = { pack_id: "kredi-500", requested_by: "user_01JABCDEF" }
+    expect(aiCreditOrderRequestSchema.parse(asked)).toEqual(asked)
+    for (const body of [
+      { ...asked, amount: 1 },
+      { ...asked, credits: 500 },
+      { pack_id: "kredi-500" },
+      { ...asked, requested_by: "selin@example.com" },
+      { ...asked, requested_by: "Selin Aydın" },
+      { ...asked, requested_by: "" },
+    ]) {
+      expect(aiCreditOrderRequestSchema.safeParse(body).success).toBe(false)
+    }
     expect(aiCreditOrderResponseSchema.parse({ order: ORDER })).toEqual({ order: ORDER })
     expect(
       aiCreditOrderResponseSchema.safeParse({ order: { ...ORDER, status: "refunded" } }).success

@@ -1,11 +1,10 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectTransactionManager, MedusaContext, MedusaError } from "@medusajs/framework/utils"
 import { addMonths } from "../../lib/ai-credits/period"
-import { AI_PURCHASED_LIFETIME_MONTHS } from "../../lib/ai-credits/settings"
 import { AI_CREDIT_BUCKETS } from "./models/entry"
 import type { AiCreditBucket } from "./models/entry"
 import { ID_MAX, adjustRef, movedCredits, noteOf, purchaseRef, requiredLine } from "./inputs"
-import { STALE, addGrantEntry, isStale, rowsOf } from "./sql"
+import { STALE, addGrantEntry, isStale, platformValues, rowsOf } from "./sql"
 import type { Executor, Stale, WalletClock } from "./sql"
 import { AiCreditWallets, WALLET_COLUMNS } from "./service-wallet"
 import type { WalletRow } from "./service-wallet"
@@ -107,7 +106,11 @@ export class AiCreditGrants extends AiCreditWallets {
               purchased_expires_at = GREATEST(purchased_expires_at, ?), updated_at = now()
         WHERE tenant_id = ? AND deleted_at IS NULL
         RETURNING ${WALLET_COLUMNS}`,
-      [credits, addMonths(clock.now, AI_PURCHASED_LIFETIME_MONTHS), input.tenantId]
+      [
+        credits,
+        addMonths(clock.now, (await platformValues(manager)).lifetimeMonths),
+        input.tenantId,
+      ]
     )
     if (!after) {
       throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "cp.ai_credit_wallet_missing")
@@ -170,7 +173,9 @@ export class AiCreditGrants extends AiCreditWallets {
              OR purchased_expires_at <= ? THEN ? ELSE purchased_expires_at END`
         : ""
     const lifeParams =
-      life === "" ? [] : [clock.now, addMonths(clock.now, AI_PURCHASED_LIFETIME_MONTHS)]
+      life === ""
+        ? []
+        : [clock.now, addMonths(clock.now, (await platformValues(manager)).lifetimeMonths)]
     const [after] = await rowsOf<{ balance: number }>(
       manager,
       `UPDATE ai_credit_wallet SET ${column} = ${column} + ?${life}, updated_at = now()

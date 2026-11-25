@@ -2,10 +2,12 @@ import type { Context } from "@medusajs/framework/types"
 import { InjectManager, MedusaContext, MedusaError } from "@medusajs/framework/utils"
 import { rowsOf } from "./sql"
 import type { Executor } from "./sql"
-import { AiCreditOrders } from "./service-orders"
+import { AiCreditReads } from "./service-reads"
 
 export { StaleWallet } from "./sql"
 export type { AiCreditOrderRow, OrderPayment } from "./service-orders"
+export type { AiCreditSettingRow, AiCreditSettingValues } from "./service-settings"
+export type { AiCreditEntryView, Page } from "./service-reads"
 
 /** A shop's ledger and wallet that do not agree (the reconcile job's finding). */
 export interface LedgerMismatch {
@@ -25,10 +27,10 @@ function refuseWrite(): never {
  * the charged operations and the top-up requests. Every change goes
  * through the methods of the classes below it (service-wallet.ts,
  * service-grants.ts, service-operations.ts, service-closing.ts,
- * service-orders.ts), each one transaction with conditional statements;
+ * service-orders.ts, service-settings.ts), each one transaction with conditional statements;
  * the generated writers are closed.
  */
-class AiCreditsModuleService extends AiCreditOrders {
+class AiCreditsModuleService extends AiCreditReads {
   /**
    * Every shop whose ledger does not add up to its wallet, bucket by
    * bucket. One statement, so one snapshot: a change commits its wallet and
@@ -95,6 +97,11 @@ class AiCreditsModuleService extends AiCreditOrders {
   override deleteAiCreditOrders = refuseWrite
   override softDeleteAiCreditOrders = refuseWrite
   override restoreAiCreditOrders = refuseWrite
+  override createAiCreditSettings = refuseWrite
+  override updateAiCreditSettings = refuseWrite
+  override deleteAiCreditSettings = refuseWrite
+  override softDeleteAiCreditSettings = refuseWrite
+  override restoreAiCreditSettings = refuseWrite
 }
 
 export default AiCreditsModuleService

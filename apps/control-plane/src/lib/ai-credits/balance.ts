@@ -3,7 +3,6 @@ import { istanbulDay } from "../billing/days"
 import { aiCreditsIn } from "../../workflows/modules"
 import { istanbulMonth, nextMonthStart, spentOn } from "./period"
 import { withCurrentMonth } from "./rollover"
-import { AI_DAILY_CAP_DEFAULT } from "./settings"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -31,7 +30,7 @@ export async function balanceOf(
     credits.currentWallet(tenantId, clock)
   )
   const period = wallet.plan_period ?? istanbulMonth(now)
-  const cap = wallet.daily_cap ?? AI_DAILY_CAP_DEFAULT
+  const cap = wallet.daily_cap ?? (await credits.platformValuesNow()).dailyCap
   const spent = spentOn(wallet.spent_today, wallet.spent_day, istanbulDay(now))
   return {
     plan: { balance: wallet.plan_balance, period, renewsOn: nextMonthStart(period) },

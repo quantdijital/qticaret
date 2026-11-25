@@ -1,5 +1,6 @@
 import { CP_STAFF_ROLES } from "./roles"
 import type { CpStaffRole } from "./roles"
+import { AI_ROUTES } from "./route-table-ai"
 import { BILLING_ROUTES } from "./route-table-billing"
 import { FLEET_ROUTES } from "./route-table-fleet"
 import { PROVISIONING_ROUTES } from "./route-table-provisioning"
@@ -298,6 +299,7 @@ export const CP_ROUTES: readonly RouteRule[] = [
   ...PROVISIONING_ROUTES,
   ...BILLING_ROUTES,
   ...FLEET_ROUTES,
+  ...AI_ROUTES,
 ]
 
 const compiled = new Map<string, RegExp>()

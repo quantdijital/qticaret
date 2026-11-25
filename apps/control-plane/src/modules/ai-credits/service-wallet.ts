@@ -11,6 +11,7 @@ import { istanbulMonth } from "../../lib/ai-credits/period"
 import { AiCreditEntry } from "./models/entry"
 import { AiCreditOperation } from "./models/operation"
 import { AiCreditOrder } from "./models/order"
+import { AiCreditSetting } from "./models/setting"
 import { AiCreditWallet } from "./models/wallet"
 import { STALE, addEntries, rowsOf, wholeCredits } from "./sql"
 import type { Executor, Stale, WalletClock } from "./sql"
@@ -41,6 +42,7 @@ export class AiCreditWallets extends MedusaService({
   AiCreditEntry,
   AiCreditOperation,
   AiCreditOrder,
+  AiCreditSetting,
 }) {
   /** The wallet's month (a hint to read the grant before a change); undefined without a wallet. */
   @InjectManager()

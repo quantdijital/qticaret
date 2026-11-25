@@ -269,9 +269,26 @@ export const aiGatewayRefusalSchema = z.strictObject({
 })
 export type AiGatewayRefusal = z.infer<typeof aiGatewayRefusalSchema>
 
-/** `POST …/ai/orders`: a pack asked for; its price is read from the platform's pack, never sent. */
-export const aiCreditOrderRequestSchema = z.strictObject({ pack_id: aiCreditPackSchema.shape.id })
+/**
+ * Who in the shop asked: the shop user's opaque id (`user_01…`), never an
+ * e-mail or a name (a `@` is refused; docs/kvkk-envanter.md).
+ */
+export const aiCreditRequesterSchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{1,128}$/, "must be an opaque user id")
+
+/**
+ * `POST …/ai/orders`: a pack asked for and who asked; its credits and
+ * price are read from the platform's pack, never sent.
+ */
+export const aiCreditOrderRequestSchema = z.strictObject({
+  pack_id: aiCreditPackSchema.shape.id,
+  requested_by: aiCreditRequesterSchema,
+})
 export type AiCreditOrderRequest = z.infer<typeof aiCreditOrderRequestSchema>
+
+/** The request's body is held to this (a pack's id and a user's id). */
+export const AI_CREDIT_ORDER_MAX_BYTES = 1024
 
 export const aiCreditOrderResponseSchema = z.strictObject({ order: aiCreditOrderSchema })
 export type AiCreditOrderResponse = z.infer<typeof aiCreditOrderResponseSchema>
