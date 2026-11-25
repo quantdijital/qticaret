@@ -1,0 +1,89 @@
+import { maxImagesOf } from "./limits"
+import { BodyRefused, isRecord } from "./body-shared"
+import type { BodyInput, RebuiltBody } from "./body-shared"
+
+/**
+ * A Gemini picture body (`generateContent`) rebuilt from an allow-list
+ * (security review of P3b C1): only `contents`, each turn's parts only a
+ * text or an inline picture (`inline_data` / `inlineData`: its type and
+ * base64 bytes), and the target's fixed `generationConfig` written over
+ * whatever the shop sent (an image asked for alone, one candidate). A part
+ * naming a file or a function is refused; `generation_config`,
+ * `systemInstruction`, `tools`, `cachedContent`, `safetySettings`, `model`
+ * and any other field are dropped. The model is the address's.
+ */
+
+interface Pictures {
+  count: number
+  bytes: number
+}
+
+const string = (value: unknown): string => {
+  if (typeof value !== "string") {
+    throw new BodyRefused("part_refused")
+  }
+  return value
+}
+
+/** The inline picture kept in the spelling the shop used (REST takes either). */
+function inlineOf(part: Record<string, unknown>, pictures: Pictures): Record<string, unknown> {
+  const snake = "inline_data" in part
+  const data: unknown = snake ? part["inline_data"] : part["inlineData"]
+  if (!isRecord(data)) {
+    throw new BodyRefused("part_refused")
+  }
+  const bytes = string(data["data"])
+  const mimeType = string(snake ? data["mime_type"] : data["mimeType"])
+  pictures.count += 1
+  pictures.bytes += bytes.length
+  return snake
+    ? { inline_data: { mime_type: mimeType, data: bytes } }
+    : { inlineData: { mimeType, data: bytes } }
+}
+
+function partOf(part: unknown, pictures: Pictures): Record<string, unknown> {
+  if (!isRecord(part)) {
+    throw new BodyRefused("part_refused")
+  }
+  if ("file_data" in part || "fileData" in part) {
+    throw new BodyRefused("image_not_inline")
+  }
+  if ("inline_data" in part || "inlineData" in part) {
+    return inlineOf(part, pictures)
+  }
+  if ("text" in part) {
+    return { text: string(part["text"]) }
+  }
+  throw new BodyRefused("part_refused")
+}
+
+function turnOf(turn: unknown, pictures: Pictures): Record<string, unknown> {
+  const parts: unknown = isRecord(turn) ? turn["parts"] : undefined
+  if (!isRecord(turn) || !Array.isArray(parts) || parts.length === 0) {
+    throw new BodyRefused("contents_refused")
+  }
+  const role = turn["role"]
+  if (role !== undefined && role !== "user") {
+    throw new BodyRefused("contents_refused")
+  }
+  return {
+    ...(role === undefined ? {} : { role }),
+    parts: parts.map((part) => partOf(part, pictures)),
+  }
+}
+
+export function geminiImageBody(body: Record<string, unknown>, input: BodyInput): RebuiltBody {
+  const contents = body["contents"]
+  if (!Array.isArray(contents) || contents.length === 0) {
+    throw new BodyRefused("contents_refused")
+  }
+  const pictures: Pictures = { count: 0, bytes: 0 }
+  const rebuilt = {
+    contents: contents.map((turn) => turnOf(turn, pictures)),
+    ...input.target.fixedBody,
+  }
+  if (pictures.count > maxImagesOf(input.task, input.capability)) {
+    throw new BodyRefused("too_many_images")
+  }
+  return { body: rebuilt, images: pictures.count, imageBytes: pictures.bytes }
+}

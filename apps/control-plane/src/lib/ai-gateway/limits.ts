@@ -69,6 +69,10 @@ export function maxBodyBytesOf(task: AiCreditTask, capability: AiCreditCapabilit
   return task === "assistant" ? AI_ASSISTANT_MAX_BODY_BYTES : AI_TEXT_MAX_BODY_BYTES
 }
 
+/** The text a call may send: its body less the inline pictures' base64. */
+export const maxTextBytesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>
+  maxBodyBytesOf(task, capability)
+
 /** The pictures a call may send: none as plain text, the task's own otherwise. */
 export const maxImagesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>
   capability === "text" ? 0 : AI_TASK_LIMITS[task].maxImages

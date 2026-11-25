@@ -17,6 +17,8 @@ interface ShopTask {
   maxTokens?: number
 }
 interface ShopTarget {
+  connector: string
+  body?: Readonly<Record<string, unknown>>
   maxTokensField?: string | null
   scene?: { unitPrice?: unknown }
 }
@@ -80,6 +82,22 @@ describe("the gateway against the shop's registry (adr/0085 K2)", () => {
         if (target.scene?.unitPrice !== undefined) {
           expect(ours?.scene?.price).toEqual(target.scene.unitPrice)
         }
+      }
+    }
+  })
+
+  it("writes the shop's fixed body fields for each chat target, and no other", () => {
+    for (const service of aiServices("production")) {
+      for (const [capability, target] of Object.entries(service.capabilities)) {
+        if (target.connector !== "openai-compatible") {
+          continue
+        }
+        const ours = targets[service.id]?.capabilities[capability as "text"]
+        expect([service.id, capability, ours?.fixedBody]).toEqual([
+          service.id,
+          capability,
+          target.body,
+        ])
       }
     }
   })

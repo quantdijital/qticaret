@@ -115,6 +115,13 @@ medusaIntegrationTestRunner({
       expect(
         keys(await save({ routing: { text: { service: "deepseek", model: "deepseek-pro" } } }))
       ).toBe("cp.ai_route_model_not_allowed")
+      // A chat whose output no documented field caps (P3b review C1): not on credits
+      for (const capability of ["text", "vision"]) {
+        const gemini = {
+          routing: { [capability]: { service: "gemini", model: "gemini-4-hydrogen" } },
+        }
+        expect(keys(await save(gemini))).toBe("cp.ai_route_uncapped")
+      }
       expect((await call.get(S, owner)).data).toMatchObject({
         settings: { packs: [], routing: {} },
       })
@@ -198,7 +205,7 @@ medusaIntegrationTestRunner({
         answers.push(await dropKey("fake"))
         answers.push(await call.get(P, owner))
         answers.push(await call.get(S, owner))
-      })
+      }, getContainer())
       const [before, short, first, second, , listed, , dropped, after, settings] = answers
       expect(fakeOf(before)).toEqual({
         service: "fake",
