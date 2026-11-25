@@ -3,16 +3,10 @@ import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@qticaret/admin-ui/ui/select"
 import type { BoardOrder } from "@/features/orders/api/orders"
 import { OrderBoardCard } from "@/features/orders/components/order-board-card"
 import { OrderExportButton } from "@/features/orders/components/order-export"
+import type { ExtraOrderFilters } from "@/features/orders/components/order-filters"
 import { cleanSearch, filtersOf } from "@/features/orders/search"
 import { useWholesaleOpen } from "@/features/wholesale/api/access"
 import { accountOptionsQuery } from "@/features/wholesale/api/accounts"
@@ -23,8 +17,6 @@ import type { WholesaleOrderSearch } from "@/features/wholesale/search"
 
 const route = getRouteApi("/_auth/wholesale/orders")
 const O = "wholesale.orders"
-// Radix's Select takes no empty value: "every wholesaler" is this
-const EVERY = "all"
 
 /** The wholesaler who placed the order, linking to their page. */
 function useWholesalerColumn(): Column<BoardOrder> {
@@ -53,36 +45,30 @@ function useWholesalerColumn(): Column<BoardOrder> {
   }
 }
 
-/** The list narrowed to one wholesaler, or all of them. */
-function WholesalerPicker({
-  value,
-  onChange,
-}: {
-  value: string | undefined
-  onChange: (id: string | undefined) => void
-}) {
+/**
+ * One wholesaler's orders: a filter in the list's menu with a chip like
+ * the others, which names the wholesaler once the wholesalers are read.
+ */
+function useWholesalerFilter(value: string | undefined): ExtraOrderFilters {
   const { t } = useTranslation()
   const accounts = useQuery(accountOptionsQuery())
-  return (
-    <Select
-      value={value ?? EVERY}
-      onValueChange={(next) => {
-        onChange(next === EVERY ? undefined : next)
-      }}
-    >
-      <SelectTrigger aria-label={t(`${O}.pick`)} className="w-full sm:w-64">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={EVERY}>{t(`${O}.every`)}</SelectItem>
-        {(accounts.data ?? []).map((account) => (
-          <SelectItem key={account.id} value={account.id}>
-            {accountTitle(account)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
+  return {
+    filters: [
+      {
+        key: "wholesaler",
+        label: t(`${O}.pick`),
+        kind: "single",
+        options: (accounts.data ?? []).map((account) => ({
+          value: account.id,
+          label: accountTitle(account),
+        })),
+        format: () => t(`${O}.picked`),
+      },
+    ],
+    values: { wholesaler: value },
+    change: (_key, next) => ({ wholesaler: typeof next === "string" ? next : undefined }),
+    cleared: { wholesaler: undefined },
+  }
 }
 
 function WholesaleOrders() {
@@ -95,6 +81,7 @@ function WholesaleOrders() {
     wholesaler: search.wholesaler,
   }
   const column = useWholesalerColumn()
+  const wholesalerFilter = useWholesalerFilter(search.wholesaler)
   const setSearch = (next: WholesaleOrderSearch) => {
     const merged = { ...search, ...next }
     void navigate({
@@ -110,17 +97,11 @@ function WholesaleOrders() {
       search={search}
       onSearch={setSearch}
       onRefilter={(next) => {
-        setSearch({ ...next, page: 1 })
+        // The page's own filter puts a wholesaler's id or nothing in it
+        setSearch({ ...(next as WholesaleOrderSearch), page: 1 })
       }}
       extraColumns={[column]}
-      toolbar={
-        <WholesalerPicker
-          value={search.wholesaler}
-          onChange={(wholesaler) => {
-            setSearch({ wholesaler, page: 1 })
-          }}
-        />
-      }
+      extraFilters={wholesalerFilter}
     />
   )
 }
@@ -129,7 +110,7 @@ function WholesaleOrders() {
  * Toptancılar > Siparişler (ADR-0068 Ek 2026-11-15 (2)): the orders
  * wholesalers placed, apart from the retail list, with the same columns,
  * filters, shipping and order page; the wholesaler beside each, and a
- * picker for one wholesaler's.
+ * filter for one wholesaler's.
  */
 export function WholesaleOrdersPage() {
   const { t } = useTranslation()

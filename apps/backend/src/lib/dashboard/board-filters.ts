@@ -63,3 +63,11 @@ export function shippingFilterOf(
   }
   return lifecycle === "delivered" ? "delivered" : lifecycle === "shipped" ? "on_the_way" : "none"
 }
+
+/**
+ * Whether a value is one of a filter's choices (an order paid or refunded);
+ * no choices, the filter not set, keeps every value.
+ */
+export function oneOf(choices: readonly string[] | undefined, value: string): boolean {
+  return !choices || choices.length === 0 || choices.includes(value)
+}

@@ -1,4 +1,4 @@
-import { paymentFilterOf, shippingFilterOf } from "../board-filters"
+import { oneOf, paymentFilterOf, shippingFilterOf } from "../board-filters"
 import type { LifecycleOrder } from "../lifecycle"
 
 const order = (collection: Record<string, unknown> | null): LifecycleOrder => ({
@@ -31,5 +31,15 @@ describe("order list filters", () => {
     expect(shippingFilterOf("shipped", null)).toBe("on_the_way")
     expect(shippingFilterOf("delivered", null)).toBe("delivered")
     expect(shippingFilterOf("to_ship", "canceled")).toBe("none")
+  })
+})
+
+describe("a value among a filter's choices", () => {
+  it("keeps any of the choices, and everything when none is set", () => {
+    expect(oneOf(["paid", "refunded"], "refunded")).toBe(true)
+    expect(oneOf(["paid", "refunded"], "awaiting")).toBe(false)
+    expect(oneOf(["paid"], "paid")).toBe(true)
+    expect(oneOf(undefined, "awaiting")).toBe(true)
+    expect(oneOf([], "awaiting")).toBe(true)
   })
 })

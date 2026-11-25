@@ -94,10 +94,11 @@ export interface OrderFilters {
   q: string
   /** One customer's orders, for their page. */
   customerId?: string | undefined
-  payment?: PaymentFilter | undefined
-  shipping?: ShippingFilter | undefined
-  method?: PaymentMethod | undefined
-  carrier?: CarrierFilter | undefined
+  /** These four: one choice or several, an order matching any of them. */
+  payment?: readonly PaymentFilter[] | undefined
+  shipping?: readonly ShippingFilter[] | undefined
+  method?: readonly PaymentMethod[] | undefined
+  carrier?: readonly CarrierFilter[] | undefined
   from?: string | undefined
   to?: string | undefined
   /** Retail orders unless set; the wholesale list and a customer's page set it. */
@@ -106,15 +107,19 @@ export interface OrderFilters {
   wholesaler?: string | undefined
 }
 
+// Several choices as the server takes them: a comma list (`payment=paid,refunded`)
+const choices = (key: string, list: readonly string[] | undefined) =>
+  list && list.length > 0 ? { [key]: list.join(",") } : {}
+
 /** The filters as the server names them, empty ones left out. */
 export const filterQuery = (filters: OrderFilters): Record<string, string> => ({
   stage: filters.stage,
   ...(filters.q ? { q: filters.q } : {}),
   ...(filters.customerId ? { customer_id: filters.customerId } : {}),
-  ...(filters.payment ? { payment: filters.payment } : {}),
-  ...(filters.shipping ? { shipping: filters.shipping } : {}),
-  ...(filters.method ? { method: filters.method } : {}),
-  ...(filters.carrier ? { carrier: filters.carrier } : {}),
+  ...choices("payment", filters.payment),
+  ...choices("shipping", filters.shipping),
+  ...choices("method", filters.method),
+  ...choices("carrier", filters.carrier),
   ...(filters.from ? { from: filters.from } : {}),
   ...(filters.to ? { to: filters.to } : {}),
   ...(filters.segment ? { segment: filters.segment } : {}),

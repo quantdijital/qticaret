@@ -13087,7 +13087,7 @@
       "wholesaler": "Wholesaler",
       "unnamed": "Unnamed wholesaler",
       "pick": "Wholesaler",
-      "every": "All wholesalers"
+      "picked": "Selected wholesaler"
     },
     "password": {
       "generate": "Generate a strong password",
