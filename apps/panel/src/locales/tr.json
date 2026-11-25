@@ -6113,6 +6113,7 @@
       "perCustomer": "Müşteri başına kullanım",
       "perCustomerHint": "Bir müşterinin bu kampanyayı kaç kez kullanabileceği. Boşsa sınırsız.",
       "perCustomerLocked": "Bu kampanyanın bütçesi başka bir yerde tanımlı; gelişmiş panelden değiştirin.",
+      "budgetNotShown": "Bütçeli kampanyanın indirimi ürün kartında gösterilmez, sepette uygulanır.",
       "previewScope": {
         "categories_one": "Seçili {{count}} kategoride",
         "categories_other": "Seçili {{count}} kategoride",

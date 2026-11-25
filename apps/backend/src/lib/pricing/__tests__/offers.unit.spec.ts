@@ -1,7 +1,7 @@
 import type { Kurus } from "../../money"
 import { priceDisplay } from "../display"
 import type { PricePoint } from "../discount"
-import { offerDiscount, offerOf, offerPrice, pricesWithOffers } from "../offers"
+import { isLimited, offerDiscount, offerOf, offerPrice, pricesWithOffers } from "../offers"
 import type { PriceOffer, PromotionRow } from "../offers"
 
 const NOW = new Date("2026-11-05T12:00:00.000Z")
@@ -101,6 +101,12 @@ describe("which automatic promotions show before the cart (adr/0023 Ek 2026-11-0
       { rules: [{ attribute: "region.id", operator: "in", values: [{ value: "reg_1" }] }] },
       { rules: [{ attribute: "currency_code", operator: "in", values: [{ value: "eur" }] }] },
       { campaign: { budget: { type: "use_by_attribute" } } },
+      // A limit that can run out between the card and the cart (adr/0076 Ek 2026-11-25)
+      { campaign: { budget: { type: "spend", limit: 50_000 } } },
+      { campaign: { budget: { type: "usage", limit: "100" } } },
+      { campaign: { budget: { type: "spend_by_attribute", limit: 500 } } },
+      { limit: 10 },
+      { limit: 0 },
       {
         application_method: {
           type: "percentage",
@@ -125,6 +131,29 @@ describe("which automatic promotions show before the cart (adr/0023 Ek 2026-11-0
       },
     })
     expect(offerOf(capped, "try")).toMatchObject({ kind: "cart" })
+  })
+
+  it("shows a budget only once it has no limit; a limited one is not even a cart offer", () => {
+    // Medusa holds a promotion to its campaign's budget only once the budget has a limit
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: null } } }))).toBe(
+      false
+    )
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: 0 } } }))).toBe(false)
+    expect(isLimited(promotion({ limit: null }))).toBe(false)
+    // A shape this code cannot read is a budget: the card shows nothing the cart may not give
+    const odd = { value: "100", precision: 20 } as unknown as number
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: odd } } }))).toBe(true)
+    expect(isLimited(promotion({ limit: odd }))).toBe(true)
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: "0" } } }))).toBe(
+      false
+    )
+    const open = promotion({ campaign: { budget: { type: "usage", limit: null } } })
+    expect(offerOf(open, "try")).toMatchObject({ kind: "price" })
+    const minimum = promotion({
+      rules: [{ attribute: "item_total", operator: "gte", values: [{ value: "500" }] }],
+      campaign: { budget: { type: "spend", limit: 1000 } },
+    })
+    expect(offerOf(minimum, "try")).toBeNull()
   })
 })
 
