@@ -31,6 +31,8 @@ export interface ProductCardView {
   title: string
   path: string
   brand: string | null
+  /** The product's subtitle, on a split card only (`look.split`); none elsewhere. */
+  subtitle?: string | null
   image: ImageView | null
   /**
    * The product's second photo, on every variant while the shop has
@@ -96,6 +98,11 @@ export interface CardBadgeView {
 export interface CardLookView {
   /** The name, a line and the price over a dark fade at the photo's foot, the price at the right. */
   over: boolean
+  /**
+   * Over the photo, the name and its subtitle at the left and a short price in
+   * the accent colour at the right, no rows (`text_position: over_split`). Absent: false.
+   */
+  split?: boolean
   /** The stars' average as a pill on the photo ("★ 4,8") instead of the stars' row. */
   ratingBadge: boolean
   /** A round arrow at the card's foot, for the eye only: the card keeps its one link. */

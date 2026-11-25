@@ -142,7 +142,6 @@ function ProductPage({
           />
           {wide ? null : nav}
           <EditorLayout
-            narrowSide
             main={
               <>
                 {wide ? nav : null}

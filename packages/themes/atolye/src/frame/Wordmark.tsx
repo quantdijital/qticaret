@@ -30,7 +30,7 @@ export function Wordmark({
           image={logo}
           sizes={large ? "300px" : "180px"}
           priority
-          className={cn("h-9 w-auto", large ? "lg:h-14" : "lg:h-10")}
+          className={cn("h-9 w-auto", large ? "lg:h-16" : "lg:h-10")}
         />
       ) : (
         <span className="truncate font-display text-wordmark leading-none font-extrabold tracking-(--tracking-display)">

@@ -56,6 +56,8 @@ export const useEditOrder = (orderId: string) =>
 export interface OrderAddressInput {
   first_name: string
   last_name: string
+  /** The invoice's company, on a billing address. */
+  company?: string
   address_1: string
   address_2: string
   province: string
@@ -64,12 +66,26 @@ export interface OrderAddressInput {
   phone: string
 }
 
-/** The delivery address, before the order is packed (Medusa's own update, checked by ours). */
-export const useUpdateOrderAddress = (orderId: string) =>
-  useOrderMutation((address: OrderAddressInput) =>
-    sdk.admin.order.update(orderId, {
-      shipping_address: { ...address, country_code: "tr" },
-    })
+/** What staff change on the order itself: an address, or the e-mail. */
+export type OrderUpdate =
+  | { shipping_address: OrderAddressInput }
+  | { billing_address: OrderAddressInput }
+  | { email: string }
+
+/**
+ * The delivery address (before the order is packed), the billing address
+ * (before its invoice) or the e-mail: Medusa's own update, checked by ours.
+ */
+export const useUpdateOrder = (orderId: string) =>
+  useOrderMutation((change: OrderUpdate) =>
+    sdk.admin.order.update(
+      orderId,
+      "email" in change
+        ? { email: change.email }
+        : "billing_address" in change
+          ? { billing_address: { ...change.billing_address, country_code: "tr" } }
+          : { shipping_address: { ...change.shipping_address, country_code: "tr" } }
+    )
   )
 
 /** Variants to add, by name or code. */

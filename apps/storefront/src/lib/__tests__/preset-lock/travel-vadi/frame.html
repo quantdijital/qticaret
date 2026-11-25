@@ -1,6 +1,6 @@
 <!-- preset lock: travel-vadi (docs/tema/bilesen-standardi.md §7) -->
-<link rel="preload" href="/fonts/manrope-latin.8bd97e6bbb.woff2" as="font" type="font/woff2"/>
-<link rel="preload" href="/fonts/manrope-tr.d4c13b9d87.woff2" as="font" type="font/woff2"/>
+<link rel="preload" href="/fonts/plus-jakarta-latin.153fc85b70.woff2" as="font" type="font/woff2"/>
+<link rel="preload" href="/fonts/plus-jakarta-tr.37427dca1e.woff2" as="font" type="font/woff2"/>
 <style>
   :root{
   --primary:#264f33;
@@ -8,26 +8,32 @@
   --ring:#264f33;
   --announcement:#264f33;
   --announcement-foreground:#ffffff;
-  --highlight:#b44f14;
-  --highlight-foreground:#ffffff;
+  --highlight:#e9730c;
+  --highlight-foreground:#111113;
+  --font-heading:var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans:var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --radius-scale:1.5;
-  --card-ratio:3 / 4;
+  --card-ratio:4 / 5;
   --color-paper:#f6f4ef;
   --color-paper-2:#eeebe2;
   --color-paper-3:#e2ddd2;
   --color-field:#f9f7f4;
   --color-chip:#f6f5f1;
   --color-rule:#dbd7cd;
-  --color-mark:#b44f14;
-  --color-mark-ink:#ffffff;
-  --color-mark-deep:color-mix(in oklab,#b44f14 85%,#111113)
+  --color-mark:#e9730c;
+  --color-mark-ink:#111113;
+  --color-mark-deep:color-mix(in oklab,#e9730c 85%,#111113);
+  --section-scale:0.35
   }
 </style>
 <div
   class="flex min-h-dvh flex-col"
   data-surface="filled"
   data-menu-style="underline"
+  data-density="balanced"
   data-motion="lively"
+  data-page-width="narrow"
+  data-accent-ink="light"
 >
   <a href="#icerik" class="gf-skip">
     İçeriğe geç
@@ -643,9 +649,9 @@
     class="gf-footer-cols mt-(--footer-gap)"
   >
     <div
-      class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-16"
+      class="mx-auto w-full max-w-(--container) px-(--gutter) grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-12"
     >
-      <section aria-labelledby="footer-brand" class="flex flex-col gap-5 lg:col-span-4">
+      <section aria-labelledby="footer-brand" class="flex flex-col gap-5 lg:col-span-3">
         <h2
           id="footer-brand"
           class="text-wordmark leading-tight font-extrabold tracking-(--tracking-display)"
@@ -655,50 +661,6 @@
         <p class="max-w-[40ch] text-sm text-text-2">
           Doğaya açılan rotalarda küçük gruplarla turlar. Programlar, dahil olanlar ve kalkış tarihleri her turun sayfasında.
         </p>
-        <ul class="flex flex-col text-sm">
-          <li class="flex items-start gap-3 py-2 text-text-2">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="2"
-              class="lucide lucide-map-pin mt-0.5 size-4 shrink-0"
-              aria-hidden="true"
-            />
-            <span class="max-w-[36ch]">
-              Örnek Mah. 1. Sok. No: 1, Denizli
-            </span>
-          </li>
-          <li>
-            <a
-              href="tel:+905320000000"
-              class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8 tabular gap-3"
-            >
-              <svg
-                width="24"
-                height="24"
-                stroke-width="2"
-                class="lucide lucide-phone size-4 shrink-0"
-                aria-hidden="true"
-              />
-              0532 000 00 00
-            </a>
-          </li>
-          <li>
-            <a
-              href="mailto:bilgi@example.com"
-              class="inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8 gap-3 break-all"
-            >
-              <svg
-                width="24"
-                height="24"
-                stroke-width="2"
-                class="lucide lucide-mail size-4 shrink-0"
-                aria-hidden="true"
-              />
-              bilgi@example.com
-            </a>
-          </li>
-        </ul>
         <ul aria-label="Sosyal medya" class="flex flex-wrap gap-2">
           <li>
             <a
@@ -766,52 +728,6 @@
             </a>
           </li>
         </ul>
-        <section aria-labelledby="bulten" class="flex flex-col gap-4">
-          <h2 id="bulten" class="max-w-[28ch] text-sm font-semibold">
-            Yeni rotalardan ilk siz haberdar olun
-          </h2>
-          <form class="flex flex-col gap-3 gf-news">
-            <label for="bulten-alt-eposta" class="text-sm font-semibold">
-              E-posta adresiniz
-            </label>
-            <div class="flex flex-col gap-2 sm:flex-row">
-              <input
-                id="bulten-alt-eposta"
-                type="email"
-                required=""
-                maxLength="254"
-                autoComplete="email"
-                inputMode="email"
-                placeholder="ornek@eposta.com"
-                aria-describedby="bulten-alt-durum"
-                class="gf-field min-w-0 flex-1"
-                name="email"
-              />
-              <button type="submit" class="gf-btn shrink-0">
-                Abone ol
-              </button>
-            </div>
-            <div class="gf-news-more flex flex-col gap-3">
-              <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-                <input
-                  type="checkbox"
-                  required=""
-                  class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-                  name="consent"
-                  value="1"
-                />
-                <span>
-                  Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
-                  <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
-                    KVKK aydınlatma metni
-                  </a>
-                </span>
-              </label>
-              <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
-              </p>
-            </div>
-          </form>
-        </section>
         <div class="flex items-start gap-4">
           <ul class="flex flex-col gap-0.5 text-xs text-text-3">
             <li class="font-semibold text-text-2">
@@ -826,7 +742,7 @@
           </ul>
         </div>
       </section>
-      <div class="lg:col-span-8">
+      <div class="lg:col-span-6">
         <div class="border-t border-rule lg:hidden">
           <details class="group border-b border-rule">
             <summary
@@ -980,9 +896,65 @@
           </nav>
         </div>
       </div>
+      <div class="lg:col-span-3 lg:border-l lg:border-rule lg:pl-(--gap-columns)">
+        <section aria-labelledby="bulten" class="flex flex-col gap-3">
+          <h2 id="bulten" class="max-w-[28ch] text-sm font-semibold">
+            E-bülten
+          </h2>
+          <p class="max-w-[32ch] text-sm text-text-2">
+            Yeni rotalar ve erken rezervasyon dönemleri e-postanızda.
+          </p>
+          <form class="flex flex-col gap-2 gf-news">
+            <label for="bulten-alt-eposta" class="sr-only">
+              E-posta adresiniz
+            </label>
+            <div class="gf-join">
+              <input
+                id="bulten-alt-eposta"
+                type="email"
+                required=""
+                maxLength="254"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="ornek@eposta.com"
+                aria-describedby="bulten-alt-durum"
+                class="gf-field min-w-0 flex-1"
+                name="email"
+              />
+              <button type="submit" class="gf-btn shrink-0">
+                Abone ol
+              </button>
+            </div>
+            <div class="gf-news-more flex flex-col gap-3">
+              <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+                <input
+                  type="checkbox"
+                  required=""
+                  class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+                  name="consent"
+                  value="1"
+                />
+                <span>
+                  Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
+                </span>
+              </label>
+              <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
+              </p>
+            </div>
+            <p class="gf-news-privacy text-xs">
+              <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
+                KVKK aydınlatma metni
+              </a>
+            </p>
+          </form>
+        </section>
+      </div>
     </div>
-    <div class="border-t border-rule">
-      <div class="mx-auto w-full max-w-(--container) px-(--gutter) gf-foot-line py-4 lg:py-5">
+    <div>
+      <div
+        class="mx-auto w-full max-w-(--container) px-(--gutter) gf-foot-line py-4 lg:py-5"
+        data-align="center"
+      >
         <p class="gf-foot-copy text-xs text-text-3">
           © 2026 Örnek Atölye Ltd. Şti.
         </p>

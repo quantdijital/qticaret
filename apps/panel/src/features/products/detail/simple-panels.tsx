@@ -62,7 +62,13 @@ export function PricingPanel({ simple }: { simple: SimpleVariant }) {
   })
   return (
     <PanelForm label={t("products.data.tabs.pricing")} simple={simple}>
-      <PriceFields form={simple.form} idPrefix={ID} sale={simple.sale} others={0} />
+      <PriceFields
+        form={simple.form}
+        idPrefix={ID}
+        sale={simple.sale}
+        others={0}
+        saleOf={simple.salePrice}
+      />
     </PanelForm>
   )
 }

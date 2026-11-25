@@ -105,12 +105,18 @@ export const BANNER_SPLIT_EDGES = ["straight", "curved"] as const
 
 export const BANNER_EYEBROW_MAX = 40
 
+/** The first button's tone and the panel's flower (mirrors `@qticaret/types`). */
+export const BANNER_SPLIT_BUTTON_TONES = ["primary", "accent"] as const
+export const BANNER_SPLIT_ORNAMENTS = ["none", "flower"] as const
+
 const split = z
   .object({
     ...common,
     variant: z.literal("split"),
     eyebrow: optional(shopText(BANNER_EYEBROW_MAX)),
     edge: step(BANNER_SPLIT_EDGES, "straight"),
+    button_tone: step(BANNER_SPLIT_BUTTON_TONES, "primary"),
+    ornament: step(BANNER_SPLIT_ORNAMENTS, "none"),
     // A short hand note over the panel's heading (`hand-note.ts`); the slides have no one heading
     note: handNote,
   })

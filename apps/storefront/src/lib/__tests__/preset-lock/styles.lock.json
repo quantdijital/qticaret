@@ -14,7 +14,7 @@
       "file": "buy.css"
     },
     {
-      "sha256": "af138dbdc6dc7e1ebc4a8705fad6da20bbcb93e192184130247dd5965e2dc8db",
+      "sha256": "ae6163f2da35fc7c0f985ef2f5430c32346a9d9e70b779df03a520ef9bf548f0",
       "file": "card-over.css"
     },
     {
@@ -46,7 +46,7 @@
       "file": "density.css"
     },
     {
-      "sha256": "27260cb8665d305ee70a9febcebc7c9db563b654f3a150815313c1be7ee85e0c",
+      "sha256": "f9c0bf7355b2f8a27dd269acbd1114f6c02ef17adec70603bcced07040ff96c6",
       "file": "footer-columns.css"
     },
     {
@@ -62,16 +62,20 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "316e8fc8209725a9daa3361369cd5e570fbb7757969e4ae91d4a5ac137633011",
+      "sha256": "f6bd41322804947ea20412facd0faead72e24871506074163b4685723f8c3b9b",
       "file": "header-inline.css"
     },
     {
-      "sha256": "83736296492631e6c040838f2b70056085b54c900c6d92b564319cd40c6c2c59",
+      "sha256": "71272ebb86609034a61444c003d4f955b5387acb31915797fdfe3c0076586a29",
       "file": "hero-full.css"
     },
     {
       "sha256": "3beee3bcb91134bf5d5b699022315d5daa1d964ebced3f28f0f718d58794861b",
       "file": "hover.css"
+    },
+    {
+      "sha256": "64528ad209dbb9f42bfea320dccf69e385044060045d6a7bb254a5162402e123",
+      "file": "kit-steps.css"
     },
     {
       "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
@@ -150,7 +154,7 @@
       "file": "slider.css"
     },
     {
-      "sha256": "8c6684b33f5467b15eb23d34be2fabd4423afa05b56b25fd170dccef662308a9",
+      "sha256": "bfe03782d802406344c16479c9feacce59900df477c18dbc361c4065b0363dfc",
       "file": "split.css"
     },
     {
@@ -162,7 +166,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "e8231432ea93006a5b559fa508d5a693ed547dbba1cac5bbca17a901c988d8b4",
+      "sha256": "cefc7e909627b93af948ad94c3d015f1b007738353859f1699f93ede60165dd4",
       "file": "styles.css"
     },
     {

@@ -12,6 +12,8 @@ import type { ImageView, LinkView } from "./views"
 export interface CategoryIconsView {
   disc: CategoryIconsStep<"disc">
   phone: CategoryIconsStep<"phone">
+  /** `strip`: a smaller disc with the name beside it, the heading for a reader only. */
+  row_style: CategoryIconsStep<"row_style">
   items: CategoryIconView[]
 }
 

@@ -90,6 +90,9 @@ export interface FooterBarSettings {
 export const FOOTER_COLUMNS_SETTINGS = {
   ground: ["well", "page", "stage"],
   badge_style: ["card", "plain"],
+  news_place: ["brand", "column"],
+  brand_contact: ["show", "hide"],
+  bottom_align: ["spread", "center"],
 } as const
 
 export const FOOTER_COLUMNS_LIMITS = { about: 240 } as const
@@ -99,7 +102,13 @@ export const FOOTER_COLUMNS_DEFAULTS = {
   about: null,
   ground: "well",
   badge_style: "card",
+  news_place: "brand",
+  brand_contact: "show",
+  bottom_align: "spread",
 } as const
+
+/** The settings printed only when the shop changed them, so a footer before them reads as it did. */
+const QUIET_COLUMNS = ["news_place", "brand_contact", "bottom_align"] as const
 
 type ColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
 
@@ -117,21 +126,41 @@ export const footerColumnsFields = {
   about: optional(text(FOOTER_COLUMNS_LIMITS.about)),
   ground: columnsStep("ground"),
   badge_style: columnsStep("badge_style"),
+  news_place: columnsStep("news_place"),
+  brand_contact: columnsStep("brand_contact"),
+  bottom_align: columnsStep("bottom_align"),
 }
+
+type ColumnsStep<S extends ColumnsSetting> = (typeof FOOTER_COLUMNS_SETTINGS)[S][number]
 
 export interface FooterColumnsSettings {
   top_strip: boolean
   about: string | null
-  ground: (typeof FOOTER_COLUMNS_SETTINGS)["ground"][number]
-  badge_style: (typeof FOOTER_COLUMNS_SETTINGS)["badge_style"][number]
+  ground: ColumnsStep<"ground">
+  badge_style: ColumnsStep<"badge_style">
+  news_place: ColumnsStep<"news_place">
+  brand_contact: ColumnsStep<"brand_contact">
+  bottom_align: ColumnsStep<"bottom_align">
 }
 
-/** The `brand_columns` footer's own settings as the storefront draws them: all of them. */
-export const footerColumnsOf = (footer: FooterColumnsSettings): FooterColumnsSettings => ({
+/**
+ * The `brand_columns` footer's own settings as the storefront draws them:
+ * all of them, the later three only when not their default.
+ */
+export const footerColumnsOf = (
+  footer: FooterColumnsSettings
+): Partial<FooterColumnsSettings> &
+  Omit<FooterColumnsSettings, (typeof QUIET_COLUMNS)[number]> => ({
   top_strip: footer.top_strip,
   about: footer.about,
   ground: footer.ground,
   badge_style: footer.badge_style,
+  ...Object.fromEntries(
+    QUIET_COLUMNS.filter((key) => footer[key] !== FOOTER_COLUMNS_DEFAULTS[key]).map((key) => [
+      key,
+      footer[key],
+    ])
+  ),
 })
 
 /** A footer read in or saved before the settings: the defaults, a list of its own. */

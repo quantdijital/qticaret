@@ -1,7 +1,9 @@
 import type {
   AnnouncementSettings,
   BannerSettings,
+  BannerSplitButtonTone,
   BannerSplitEdge,
+  BannerSplitOrnament,
   BannerTone,
   BannerVariant,
   CardVariant,
@@ -9,6 +11,7 @@ import type {
   FaqVariant,
   FeaturedProductSettings,
   MarqueeSettings,
+  PostsPanelStep,
   ProductSource,
   ProgramVariant,
   RelatedProductsVariant,
@@ -173,6 +176,9 @@ export type BannerSection = BodySectionBase & {
   eyebrow?: string | null
   /** `split`: the picture's inner edge. */
   edge?: BannerSplitEdge
+  /** `split`: the first button's colour and the panel's flower; absent: `primary`, `none`. */
+  button_tone?: BannerSplitButtonTone
+  ornament?: BannerSplitOrnament
   /** `split`: a short hand note over the heading (`HAND_NOTE_MAX`); none: no note. */
   note?: string | null
 } & BannerSettings
@@ -235,6 +241,10 @@ export interface PostsSection extends BodySectionBase {
   intro?: string | null
   /** `intro_panel`: the button; none: the storefront's "every post". */
   link?: LayoutLink | null
+  /** `intro_panel`: the panel's tone, its leaf sprig and the covers' shape; absent: the first of each. */
+  panel_tone?: PostsPanelStep<"panel_tone">
+  ornament?: PostsPanelStep<"ornament">
+  cover_ratio?: PostsPanelStep<"cover_ratio">
 }
 
 /** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */

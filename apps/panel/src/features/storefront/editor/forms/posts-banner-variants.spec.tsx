@@ -73,6 +73,20 @@ describe("the posts' intro panel", () => {
     expect(screen.getByText("Düğme")).toBeInTheDocument()
   })
 
+  it("offers the panel's tone, leaves and covers' ratio, each from the panel as it was", async () => {
+    const user = userEvent.setup()
+    const { changes } = renderPanel(switchVariant(guides(), "intro_panel"), "home")
+    await openGroup(user, "İçerik")
+    expect(screen.getByRole("radio", { name: "Zemin" })).toHaveAttribute("data-state", "on")
+    expect(screen.getByRole("radio", { name: "16:10" })).toHaveAttribute("data-state", "on")
+    await user.click(screen.getByRole("radio", { name: "Açık ton" }))
+    expect(changes.at(-1)).toMatchObject({ panel_tone: "tint" })
+    await user.click(screen.getByRole("radio", { name: "Yaprak" }))
+    expect(changes.at(-1)).toMatchObject({ ornament: "leaves" })
+    await user.click(screen.getByRole("radio", { name: "Geniş (2:1)" }))
+    expect(changes.at(-1)).toMatchObject({ cover_ratio: "wide" })
+  })
+
   it("shows none of them on the tiles", async () => {
     const user = userEvent.setup()
     renderPanel(guides(), "home")
@@ -125,6 +139,18 @@ describe("the split band", () => {
     await openGroup(user, "İçerik")
     expect(screen.getByLabelText(/Üst satır/)).toBeInTheDocument()
     expect(screen.getByText(/yalnız ilk görseli/)).toBeInTheDocument()
+  })
+
+  it("offers the button's colour and the flower in Diziliş, each from today's", async () => {
+    const user = userEvent.setup()
+    const { changes } = renderPanel(switchVariant(band(), "split"), "home")
+    await openGroup(user, "Diziliş")
+    expect(screen.getByRole("radio", { name: "Ana" })).toHaveAttribute("data-state", "on")
+    expect(screen.getByRole("radio", { name: "Yok" })).toHaveAttribute("data-state", "on")
+    await user.click(screen.getByRole("radio", { name: "Vurgu" }))
+    expect(changes.at(-1)).toMatchObject({ button_tone: "accent" })
+    await user.click(screen.getByRole("radio", { name: "Çiçek" }))
+    expect(changes.at(-1)).toMatchObject({ ornament: "flower" })
   })
 
   it("lists the edge in the settings search on the split only", () => {
