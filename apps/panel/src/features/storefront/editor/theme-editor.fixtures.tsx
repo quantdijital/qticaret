@@ -64,6 +64,8 @@ export const THEME: ThemeSettings = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 export const DOC: LayoutDocument = {

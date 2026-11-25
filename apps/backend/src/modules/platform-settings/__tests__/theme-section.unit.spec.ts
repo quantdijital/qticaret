@@ -93,6 +93,9 @@ describe("theme section", () => {
       density: "airy",
       // adr/0067 Ek 2026-11-18: today's motion
       motion: "calm",
+      // adr/0067 Ek 2026-11-25: the page width and the accent words as before
+      page_width: "standard",
+      accent_ink: "auto",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)

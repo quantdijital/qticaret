@@ -84,6 +84,12 @@ export const FOOTER_BAR_DEFAULTS = {
 export const FOOTER_COLUMNS_SETTINGS = {
   ground: ["well", "page", "stage"],
   badge_style: ["card", "plain"],
+  /** The newsletter box under the brand block, or as the row's last column. */
+  news_place: ["brand", "column"],
+  /** The address, phone and e-mail in the brand block, or only its logo, line and profiles. */
+  brand_contact: ["show", "hide"],
+  /** The bottom line spread across the page, or its words in the middle between two rules. */
+  bottom_align: ["spread", "center"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type FooterColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
@@ -100,6 +106,9 @@ export const FOOTER_COLUMNS_DEFAULTS = {
   about: null,
   ground: "well",
   badge_style: "card",
+  news_place: "brand",
+  brand_contact: "show",
+  bottom_align: "spread",
 } as const satisfies { [S in FooterColumnsSetting]: FooterColumnsStep<S> } & {
   top_strip: boolean
   about: null
@@ -112,6 +121,12 @@ export interface StoreFooterColumns {
   about: string | null
   ground: FooterColumnsStep<"ground">
   badge_style: FooterColumnsStep<"badge_style">
+  /** Printed only when not the default; absent: `brand`. */
+  news_place?: FooterColumnsStep<"news_place">
+  /** Printed only when not the default; absent: `show`. */
+  brand_contact?: FooterColumnsStep<"brand_contact">
+  /** Printed only when not the default; absent: `spread`. */
+  bottom_align?: FooterColumnsStep<"bottom_align">
 }
 
 /** The footer bar's own settings as `GET /store/storefront-layout` prints them. */

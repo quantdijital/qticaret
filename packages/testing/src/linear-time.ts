@@ -4,12 +4,39 @@
  * checks). The work runs on an input of `size` and of `factor` × `size`;
  * linear work takes about `factor` times as long, quadratic work about
  * `factor`² times. Each size is timed `rounds` times, alternating, and the
- * fastest round counts, so one pause of the machine does not decide.
+ * fastest round counts, so one pause of the machine does not decide. The
+ * heap is emptied before each timed run: without it, linear work that
+ * builds big strings (a parser's) paid for the earlier runs' garbage and
+ * measured about 16 to 23 against a limit of 22.6 (2026-11-25); with it,
+ * about 5 to 8.
  *
  * Work whose large run stays under `floorMs` passes whatever its ratio:
  * at such sizes a quadratic scan takes far longer, and sub-millisecond
  * timings are mostly noise.
  */
+
+import { setFlagsFromString } from "node:v8"
+import { runInNewContext } from "node:vm"
+
+/**
+ * The garbage collector, to empty the heap before each timed run: a large
+ * run otherwise pays for the garbage the runs before it left. Jest's own
+ * leak detector reaches it the same way; without it, runs are timed as
+ * they come.
+ */
+const collect: (() => void) | undefined = (() => {
+  const exposed = (globalThis as { gc?: () => void }).gc
+  if (typeof exposed === "function") {
+    return exposed
+  }
+  try {
+    setFlagsFromString("--expose-gc")
+    const gc = runInNewContext("gc") as unknown
+    return typeof gc === "function" ? (gc as () => void) : undefined
+  } catch {
+    return undefined
+  }
+})()
 
 export interface GrowthOptions {
   /** How many times larger the second input is (default 8). */
@@ -30,6 +57,7 @@ export interface Growth {
 }
 
 function fastest(run: () => unknown, times: number[]): void {
+  collect?.()
   const started = performance.now()
   run()
   times.push(performance.now() - started)

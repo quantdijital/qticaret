@@ -137,7 +137,7 @@ describe("Atölye's blended full image opening", () => {
     const box = /<ul aria-label="[^"]+" class="([^"]*)"/.exec(html)?.[1] ?? ""
 
     expect(box).toContain("mx-auto")
-    expect(box).toContain("lg:w-[76%]")
+    expect(box).toContain("lg:w-[82%]")
     expect(box).toContain("lg:py-7")
   })
 

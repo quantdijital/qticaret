@@ -14,6 +14,8 @@ export const STYLE_KIT = {
   media_ground: ["well", "page"],
   density: ["airy", "balanced", "compact"],
   motion: ["calm", "lively"],
+  page_width: ["standard", "narrow"],
+  accent_ink: ["auto", "light"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -31,6 +33,8 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKitSettings> = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 /** The kit's fields for the theme section's schema: a step on its list only. */
@@ -41,6 +45,8 @@ export const styleKitSchema = {
   media_ground: z.enum(STYLE_KIT.media_ground),
   density: z.enum(STYLE_KIT.density),
   motion: z.enum(STYLE_KIT.motion),
+  page_width: z.enum(STYLE_KIT.page_width),
+  accent_ink: z.enum(STYLE_KIT.accent_ink),
 }
 
 /**

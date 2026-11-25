@@ -97,6 +97,9 @@ medusaIntegrationTestRunner({
         about: null,
         ground: "well",
         badge_style: "card",
+        news_place: "brand",
+        brand_contact: "show",
+        bottom_align: "spread",
       })
 
       // What the shop set, beside the footer's common settings, live on publishing

@@ -30,7 +30,18 @@ export async function iconCategoriesView(
       ? categoryCounts()
       : Promise.resolve(new Map<string, number>() as ReadonlyMap<string, number>),
   ])
-  if (named.length === 0) {
+  // A preset's handles narrow the top ones, in its order, while no id is named
+  const handled = section.category_handles ?? []
+  const byHandleOrder =
+    section.category_ids.length === 0 && handled.length > 0
+      ? handled.flatMap((handle) => {
+          const found = all.find((category) => category.handle === handle)
+          const entry = found ? named.find((each) => each.id === found.id) : undefined
+          return entry ? [entry] : []
+        })
+      : null
+  const shown = byHandleOrder && byHandleOrder.length > 0 ? byHandleOrder : named
+  if (shown.length === 0) {
     return null
   }
   const picked: Readonly<Record<string, unknown>> = section.category_icons
@@ -48,7 +59,7 @@ export async function iconCategoriesView(
   }
   const counted = (id: string) =>
     section.show_count === true ? { count: counts.get(id) ?? 0 } : {}
-  const items = named.map(({ id, card }): CategoryIconView => ({
+  const items = shown.map(({ id, card }): CategoryIconView => ({
     label: card.label,
     path: card.path,
     icon: iconOf(id),
@@ -56,7 +67,7 @@ export async function iconCategoriesView(
     initial: initialOf(card.label),
     ...counted(id),
   }))
-  const categories = named.map(({ id, card }): CategoryCardView => ({ ...card, ...counted(id) }))
+  const categories = shown.map(({ id, card }): CategoryCardView => ({ ...card, ...counted(id) }))
   const more = layoutLink(section.more ?? null, t)
   return {
     id: section.id,

@@ -31,6 +31,10 @@ export const STATS_SETTINGS = {
    * (`off`, the strip as it came); a figure with no icon picked draws none.
    */
   icons: ["off", "on"],
+  /** The figures stacked, each over its label (`stacked`), or one tight row: the icon at the left of its value and label (`row`). */
+  arrangement: ["stacked", "row"],
+  /** The shop's social profiles at the row's end under a "follow us" line (`on`) or none (`off`). */
+  social: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StatsSetting = keyof typeof STATS_SETTINGS
@@ -40,6 +44,8 @@ export type StatsStep<S extends StatsSetting> = (typeof STATS_SETTINGS)[S][numbe
 export const STATS_DEFAULTS: { readonly [S in StatsSetting]: StatsStep<S> } = {
   dividers: "on",
   icons: "off",
+  arrangement: "stacked",
+  social: "off",
 }
 
 export const STATS_SETTING_NAMES = Object.keys(STATS_SETTINGS) as StatsSetting[]
@@ -57,6 +63,8 @@ export function statsSettingsOf(section: Partial<Record<StatsSetting, unknown>>)
   return {
     dividers: stepOf("dividers", section.dividers),
     icons: stepOf("icons", section.icons),
+    arrangement: stepOf("arrangement", section.arrangement),
+    social: stepOf("social", section.social),
   }
 }
 

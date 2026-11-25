@@ -45,6 +45,7 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   sticky: theme.sticky,
   menu_images: "submenus",
   search_style: "field",
+  tool_labels: "show",
 })
 
 const FOOTER_BAR: FooterBar = {
@@ -134,6 +135,7 @@ export function mainSectionsOf<L>(
       sticky: header.sticky,
       menu_images: header.menu_images,
       search_style: header.search_style,
+      tool_labels: header.tool_labels,
       // The one-row header's tools: only once set (absent: the round tools)
       ...(header.tools_style ? { tools_style: header.tools_style } : {}),
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
