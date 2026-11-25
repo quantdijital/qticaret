@@ -73,6 +73,7 @@ describe("the icon variants' start", () => {
     expect(VARIANT_FIELDS.categories.icons).toEqual({
       disc: "tint",
       phone: "scroll",
+      row_style: "stacked",
       category_icons: {},
     })
   })
@@ -139,6 +140,7 @@ describe("the categories' icon row", () => {
       ["show_count", "content"],
       ["disc", "layout"],
       ["icons_phone", "layout"],
+      ["icons_row_style", "layout"],
     ])
   })
 })

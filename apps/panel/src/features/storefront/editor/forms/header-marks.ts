@@ -5,7 +5,12 @@ import type { FieldGroupName } from "./field-registry"
 import { headerCatalogOffers } from "./header-catalog-steps"
 
 /** Every header's own settings as a new one has them (the steps' first, staying at the top). */
-const HEADER_DEFAULTS = { search_style: "field", menu_images: "submenus", sticky: true } as const
+const HEADER_DEFAULTS = {
+  search_style: "field",
+  menu_images: "submenus",
+  tool_labels: "show",
+  sticky: true,
+} as const
 
 /**
  * How many of a group's header settings the shop moved off their
@@ -15,7 +20,9 @@ const HEADER_DEFAULTS = { search_style: "field", menu_images: "submenus", sticky
  */
 export function headerSetIn(section: HeaderBarSection, group: FieldGroupName): number {
   const own = (Object.keys(HEADER_GROUPS) as (keyof typeof HEADER_GROUPS)[]).filter(
-    (field) => HEADER_GROUPS[field] === group && section[field] !== HEADER_DEFAULTS[field]
+    (field) =>
+      HEADER_GROUPS[field] === group &&
+      (section[field] ?? HEADER_DEFAULTS[field]) !== HEADER_DEFAULTS[field]
   ).length
   if (section.variant !== "catalog") {
     // The action button counts once written, with the menu bar's settings

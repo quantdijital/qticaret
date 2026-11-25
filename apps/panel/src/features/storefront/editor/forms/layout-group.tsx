@@ -3,7 +3,7 @@ import type { AnySection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
 import { BANNER_LAYOUT_SETTINGS, bannerSettingsFor } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
-import { BannerEdgeField } from "./banner-split-fields"
+import { BannerEdgeField, BannerSplitLookFields } from "./banner-split-fields"
 import { FeaturedGroups } from "./featured-groups"
 import { HeroFullGroups } from "./hero-full-fields"
 import { IconGroups } from "./icon-groups"
@@ -77,7 +77,10 @@ export function SectionLayoutGroup({
         />
         {/* The split's edge (adr/0077 Ek), beside its height */}
         {section.variant === "split" ? (
-          <BannerEdgeField section={section} onChange={onChange} />
+          <>
+            <BannerEdgeField section={section} onChange={onChange} />
+            <BannerSplitLookFields section={section} onChange={onChange} />
+          </>
         ) : null}
       </div>
     </PanelGroup>

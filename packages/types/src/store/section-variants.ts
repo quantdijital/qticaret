@@ -203,6 +203,23 @@ export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
 export type HeaderSearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
 
 /**
+ * The one-row header's tools (`inline`, adr/0066 §2 "küçük yerleşim → bölüm
+ * ayarı"): `show` the cart's word beside its icon (the drawing from before
+ * the setting, so the default), `hide` round icons only; each keeps its
+ * accessible name. Mirrored by the backend's `HEADER_TOOL_LABELS`.
+ */
+export const HEADER_TOOL_LABELS = ["show", "hide"] as const
+
+export type HeaderToolLabels = (typeof HEADER_TOOL_LABELS)[number]
+
+/** The tools' words as a reader takes them: absent or off the list, the default (`show`). */
+export function headerToolLabelsOf(value: unknown): HeaderToolLabels {
+  return (HEADER_TOOL_LABELS as readonly unknown[]).includes(value)
+    ? (value as HeaderToolLabels)
+    : "show"
+}
+
+/**
  * The one-row header's tools (`header_bar` `inline`): `round`, each icon in
  * a hairline ring in a 96 px row (the drawing from before the setting, so
  * the default); `plain`, the search, account and cart as small plain icons

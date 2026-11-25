@@ -53,3 +53,18 @@ export function availableStock(variants: (VariantRow | null)[] | null | undefine
     0
   )
 }
+
+/**
+ * The stock code a list row shows under the name: the first variant's
+ * that has one, and how many other variants carry their own.
+ */
+export function listSku(
+  variants: ({ sku?: string | null } | null)[] | null | undefined
+): { sku: string; more: number } | null {
+  const codes = (variants ?? []).flatMap((variant) => {
+    const sku = variant?.sku?.trim()
+    return sku ? [sku] : []
+  })
+  const [first] = codes
+  return first ? { sku: first, more: codes.length - 1 } : null
+}

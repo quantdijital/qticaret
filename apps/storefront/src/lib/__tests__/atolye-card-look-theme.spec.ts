@@ -148,4 +148,20 @@ describe("Atölye's card: the tour look", () => {
     expect(text).toContain("En yakın: 12 Ara")
     expect(text).toContain("1.750,00 TL'den itibaren kişi başı")
   })
+
+  it("splits the words: name and subtitle at the left, the short price at the right, the whole one heard", () => {
+    const split = look({ over: true, split: true, ratingBadge: true })
+    const html = cardOf(dated({ rating: rated, subtitle: "Göller ve dağlar", look: split }))
+    expect(html).toContain("data-split")
+    expect(html).toContain("gf-card-split-price")
+    expect(html).toContain("Göller ve dağlar")
+    expect(html).toMatch(/<span aria-hidden="true">1\.750 TL<\/span>/)
+    expect(textOf(dated({ look: split }))).toContain("1.750,00 TL'den itibaren")
+    expect(html).toContain("gf-card-pill-dark")
+    expect(html).not.toContain("En yakın")
+    // The plain over card keeps its pill and rows
+    const over = cardOf(dated({ rating: rated, look: look({ over: true, ratingBadge: true }) }))
+    expect(over).not.toContain("data-split")
+    expect(over).not.toContain("gf-card-pill-dark")
+  })
 })

@@ -26,12 +26,15 @@ describe("cardLookOf", () => {
     }
     expect(cardLookOf({ ...all, show_rating: true })).toEqual({
       over: true,
+      split: false,
       ratingBadge: true,
       arrow: true,
       duration: true,
       perPerson: true,
     })
     expect(cardLookOf({ ...all, show_rating: false }).ratingBadge).toBe(false)
+    const split = cardLookOf({ ...all, text_position: "over_split", show_rating: true })
+    expect(split.over && split.split).toBe(true)
     expect(cardLook(cardLookOf({ ...card, arrow: true }))).toEqual({
       ...CARD_LOOK_DEFAULTS,
       arrow: true,
@@ -64,6 +67,26 @@ describe("cardLookOf", () => {
         }
       ).look
     ).toEqual({ ...CARD_LOOK_DEFAULTS, perPerson: true })
+  })
+
+  it("carries the subtitle on a split card only", () => {
+    const product = {
+      id: "p",
+      title: "Tur",
+      handle: "tur",
+      subtitle: "Göller ve dağlar",
+      description: null,
+      thumbnail: null,
+      variants: [],
+    } as unknown as StoreProduct
+    const options = { showBrand: true, showRating: false }
+    const over = { ...CARD_LOOK_DEFAULTS, over: true }
+    expect(productCard(product, "/urun/tur", {}, { ...options, look: over })).not.toHaveProperty(
+      "subtitle"
+    )
+    expect(
+      productCard(product, "/urun/tur", {}, { ...options, look: { ...over, split: true } }).subtitle
+    ).toBe("Göller ve dağlar")
   })
 })
 

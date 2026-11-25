@@ -26,5 +26,8 @@ export function footerColumnsOf(
     about: about.length > 0 ? about.slice(0, FOOTER_COLUMNS_LIMITS.about) : null,
     ground: step("ground", columns?.ground),
     badgeStyle: step("badge_style", columns?.badge_style),
+    ...(step("news_place", columns?.news_place) === "column" ? { newsPlace: "column" } : {}),
+    ...(step("brand_contact", columns?.brand_contact) === "hide" ? { brandContact: "hide" } : {}),
+    ...(step("bottom_align", columns?.bottom_align) === "center" ? { bottomAlign: "center" } : {}),
   }
 }

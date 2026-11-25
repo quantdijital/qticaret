@@ -40,13 +40,24 @@ export const FOOTER_FIELDS = [
   "back_to_top_mobile",
 ] as const
 /** The brand columns footer's own (adr/0049 Ek 2026-11-17): words under "İçerik", the look under "Stil". */
-export const FOOTER_COLUMNS_FIELDS = ["top_strip", "about", "ground", "badge_style"] as const
+export const FOOTER_COLUMNS_FIELDS = [
+  "top_strip",
+  "about",
+  "ground",
+  "badge_style",
+  "news_place",
+  "brand_contact",
+  "bottom_align",
+] as const
 export type FooterColumnsField = (typeof FOOTER_COLUMNS_FIELDS)[number]
 const FOOTER_COLUMNS_GROUPS = {
   top_strip: "content",
   about: "content",
   ground: "appearance",
   badge_style: "appearance",
+  news_place: "appearance",
+  brand_contact: "appearance",
+  bottom_align: "appearance",
 } as const satisfies Record<FooterColumnsField, string>
 
 /** The free rows footer's own (adr/0070): the marks in the bottom line, its look as the brand columns'. */

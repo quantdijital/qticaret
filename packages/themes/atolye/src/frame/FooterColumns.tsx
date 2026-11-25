@@ -17,11 +17,14 @@ function Newsletter({
   t,
   subscribe,
   wide,
+  column = false,
 }: {
   shop: ShopView
   t: Translate
   subscribe: Subscribe
   wide: boolean
+  /** The row's last column: its line under the heading, the field and button joined. */
+  column?: boolean
 }) {
   const news = shop.newsletter
   if (!news) {
@@ -31,7 +34,7 @@ function Newsletter({
     <section
       aria-labelledby="bulten"
       {...sectionMark(news.mark)}
-      className={cn("flex flex-col gap-4", wide && "lg:col-span-6")}
+      className={cn("flex flex-col gap-4", wide && "lg:col-span-6", column && "gap-3")}
     >
       <h2
         id="bulten"
@@ -40,9 +43,13 @@ function Newsletter({
       >
         {news.title}
       </h2>
+      {column && news.description && (
+        <p className="max-w-[32ch] text-sm text-text-2">{news.description}</p>
+      )}
       <NewsletterForm
         id="bulten-alt"
         quiet
+        joined={column}
         action={subscribe}
         privacyPath={shop.privacyPath}
         words={newsletterWords(t, news.text)}
@@ -82,6 +89,8 @@ export function FooterColumns({
   const { contact } = shop
   const reach = [contact.phoneHref, contact.whatsappHref, contact.email].some(Boolean)
   const strip = columns.topStrip && (news !== null || reach)
+  // The newsletter as the row's last column, while it is not in the strip above
+  const asColumn = columns.newsPlace === "column" && !strip ? news : null
   return (
     <footer
       data-gf-clear=""
@@ -110,16 +119,40 @@ export function FooterColumns({
           </Container>
         </div>
       )}
-      <Container className="grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-16">
-        <BrandBlock shop={shop} t={t} about={columns.about} withContact={!strip}>
-          {!strip && news && <Newsletter shop={shop} t={t} subscribe={news} wide={false} />}
+      <Container
+        className={cn(
+          "grid gap-10 py-12 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:py-16",
+          // One row of five: brand, the link columns, the newsletter (`news_place: column`)
+          asColumn && "lg:py-12"
+        )}
+      >
+        <BrandBlock
+          shop={shop}
+          t={t}
+          about={columns.about}
+          withContact={!strip}
+          bare={columns.brandContact === "hide"}
+          className={asColumn ? "lg:col-span-3" : undefined}
+        >
+          {!strip && news && !asColumn && (
+            <Newsletter shop={shop} t={t} subscribe={news} wide={false} />
+          )}
           {subscribe && drawn === "in_footer" && (
             <FooterNewsletterBox shop={shop} t={t} subscribe={subscribe} variant="in_footer" />
           )}
         </BrandBlock>
-        <LinkColumns groups={shop.footerGroups} shop={shop} t={t} />
+        {asColumn ? (
+          <>
+            <LinkColumns groups={shop.footerGroups} shop={shop} t={t} className="lg:col-span-6" />
+            <div className="lg:col-span-3 lg:border-l lg:border-rule lg:pl-(--gap-columns)">
+              <Newsletter shop={shop} t={t} subscribe={asColumn} wide={false} column />
+            </div>
+          </>
+        ) : (
+          <LinkColumns groups={shop.footerGroups} shop={shop} t={t} />
+        )}
       </Container>
-      <BottomLine shop={shop} t={t} />
+      <BottomLine shop={shop} t={t} center={columns.bottomAlign === "center"} />
     </footer>
   )
 }

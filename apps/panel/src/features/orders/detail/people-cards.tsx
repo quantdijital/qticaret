@@ -1,4 +1,4 @@
-import { Mail, MapPin, Pencil, Phone, UserRound } from "lucide-react"
+import { ListOrdered, Mail, Pencil, Phone, UserRound } from "lucide-react"
 import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import type { ReactNode } from "react"
@@ -6,20 +6,9 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { OrderDetail } from "@/features/orders/api/orders"
-import { AddressDialog } from "./address-dialog"
-
-type Address = NonNullable<OrderDetail["shipping_address"]>
-
-/** A Turkish address as it is written on a parcel: street, then postcode ilçe / il. */
-function addressLines(address: Address): string[] {
-  const place = [address.city, address.province].filter(Boolean).join(" / ")
-  return [
-    [address.first_name, address.last_name].filter(Boolean).join(" "),
-    address.company ?? "",
-    [address.address_1, address.address_2].filter(Boolean).join(" "),
-    [address.postal_code, place].filter(Boolean).join(" "),
-  ].filter((line) => line.trim() !== "")
-}
+import { AddressSections } from "./address-sections"
+import type { AddressKind } from "./address-form"
+import { EmailForm } from "./email-form"
 
 function Line({ icon: Icon, children }: { icon: typeof Mail; children: ReactNode }) {
   return (
@@ -30,59 +19,13 @@ function Line({ icon: Icon, children }: { icon: typeof Mail; children: ReactNode
   )
 }
 
-/** Where the parcel goes, and the invoice address when it differs. */
-function Addresses({ order, onEdit }: { order: OrderDetail; onEdit: (() => void) | null }) {
-  const { t } = useTranslation()
-  const shipping = order.shipping_address ? addressLines(order.shipping_address) : []
-  const billing = order.billing_address ? addressLines(order.billing_address) : []
-  const sameBilling = billing.join("|") === shipping.join("|")
-  return (
-    <div className="flex flex-col gap-4 border-t pt-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex min-h-8 items-center justify-between gap-3">
-          <h3 className="text-xs font-medium text-muted-foreground">
-            {t("orders.detail.delivery")}
-          </h3>
-          {onEdit ? (
-            <Button size="sm" variant="outline" onClick={onEdit}>
-              <Pencil />
-              {t("orders.address.edit")}
-            </Button>
-          ) : null}
-        </div>
-        {shipping.length ? (
-          <Line icon={MapPin}>
-            {shipping.map((line) => (
-              <span key={line} className="block">
-                {line}
-              </span>
-            ))}
-          </Line>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("orders.detail.noAddress")}</p>
-        )}
-      </div>
-      {billing.length && !sameBilling ? (
-        <div className="flex flex-col gap-1.5 border-t pt-4">
-          <h3 className="text-xs font-medium text-muted-foreground">
-            {t("orders.detail.billing")}
-          </h3>
-          {billing.map((line) => (
-            <span key={line} className="text-sm">
-              {line}
-            </span>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
 /**
  * Who ordered, how to reach them and where the parcel goes, in one card
- * (docs/06 "Detay sayfası düzeni": the side column). The delivery address
- * changes while nothing is packed (adr/0033); the name opens the
- * customer's page.
+ * (docs/06 "Detay sayfası düzeni": the side column). Each part changes in
+ * place, one at a time: the e-mail while the order is open, the delivery
+ * address while nothing is packed (adr/0033, `editable`), the billing
+ * address until its invoice. The name opens the customer's page, and a
+ * link under it their other orders.
  */
 export function CustomerCard({
   order,
@@ -92,7 +35,7 @@ export function CustomerCard({
   editable?: boolean
 }) {
   const { t } = useTranslation()
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState<AddressKind | "email" | null>(null)
   const customer = order.customer
   const name =
     [customer?.first_name, customer?.last_name].filter(Boolean).join(" ") ||
@@ -101,16 +44,9 @@ export function CustomerCard({
       .join(" ")
   const phone = customer?.phone ?? order.shipping_address?.phone
   const email = order.email ?? customer?.email
+  const emailEditable = order.status !== "canceled" && editing === null
   return (
     <SectionCard title={t("orders.detail.customer")}>
-      {editing ? (
-        <AddressDialog
-          order={order}
-          onClose={() => {
-            setEditing(false)
-          }}
-        />
-      ) : null}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2.5">
           <Line icon={UserRound}>
@@ -126,12 +62,40 @@ export function CustomerCard({
               name || t("orders.noName")
             )}
           </Line>
-          {email ? (
-            <Line icon={Mail}>
-              <a href={`mailto:${email}`} className="hover:underline">
-                {email}
-              </a>
-            </Line>
+          {editing === "email" ? (
+            <EmailForm
+              orderId={order.id}
+              email={email ?? ""}
+              onClose={() => {
+                setEditing(null)
+              }}
+            />
+          ) : email || emailEditable ? (
+            <div className="flex min-w-0 items-start justify-between gap-2">
+              <Line icon={Mail}>
+                {email ? (
+                  <a href={`mailto:${email}`} className="hover:underline">
+                    {email}
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground">{t("orders.address.noEmail")}</span>
+                )}
+              </Line>
+              {emailEditable ? (
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  className="-mt-1 shrink-0"
+                  aria-label={t("orders.address.editEmail")}
+                  title={t("orders.address.editEmail")}
+                  onClick={() => {
+                    setEditing("email")
+                  }}
+                >
+                  <Pencil />
+                </Button>
+              ) : null}
+            </div>
           ) : null}
           {phone ? (
             <Line icon={Phone}>
@@ -140,16 +104,25 @@ export function CustomerCard({
               </a>
             </Line>
           ) : null}
+          {customer?.id ? (
+            <Line icon={ListOrdered}>
+              <Link
+                to="/orders"
+                search={{ customer: customer.id }}
+                className="text-muted-foreground hover:text-foreground hover:underline"
+              >
+                {t("orders.filters.customerOrders")}
+              </Link>
+            </Line>
+          ) : null}
         </div>
-        <Addresses
+        <AddressSections
           order={order}
-          onEdit={
-            editable
-              ? () => {
-                  setEditing(true)
-                }
-              : null
-          }
+          shippingEditable={editable}
+          editing={editing}
+          onEditing={(kind) => {
+            setEditing(kind)
+          }}
         />
       </div>
     </SectionCard>

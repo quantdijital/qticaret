@@ -1,6 +1,12 @@
 import "server-only"
 import type { StoreBannerSection } from "@qticaret/types"
-import { bannerSplitEdgeOf, bannerStepOf, bannerToneOf } from "@qticaret/types/section-banner"
+import {
+  bannerSplitEdgeOf,
+  bannerSplitOrnamentOf,
+  bannerSplitToneOf,
+  bannerStepOf,
+  bannerToneOf,
+} from "@qticaret/types/section-banner"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { BannerSectionView, Translate } from "@qticaret/ui"
 import { handNoteView } from "./accent"
@@ -57,6 +63,12 @@ export function bannerView(
           edge: bannerSplitEdgeOf(section.edge),
           // The hand note only when there is one: a split without it is the view it was
           ...(note ? { note } : {}),
+          ...(bannerSplitToneOf(section.button_tone) === "accent"
+            ? { buttonTone: "accent" as const }
+            : {}),
+          ...(bannerSplitOrnamentOf(section.ornament) === "flower"
+            ? { ornament: "flower" as const }
+            : {}),
         }
       : {}),
   }
