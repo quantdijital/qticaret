@@ -33,9 +33,43 @@ async function product(page: Page, id: string): Promise<ProductRow> {
 }
 
 async function openProduct(page: Page, id: string): Promise<void> {
+  // The advisor's assessment may open the search appearance by itself: wait for it first
+  const assessed = page
+    .waitForResponse(
+      (answer) =>
+        answer.url().includes(`/admin/seo/assessments/product/${encodeURIComponent(id)}`) &&
+        answer.request().method() === "GET",
+      { timeout: 15_000 }
+    )
+    .catch(() => null)
   await page.goto(`/products/${id}`)
   await expect(pageHeading(page)).toBeVisible()
   await expect(page.locator('main [data-part="general"]')).toBeAttached()
+  await assessed
+}
+
+/**
+ * Opens the search appearance (folded to a line; the section bar above
+ * carries a link-button of the same name) and gives its title field. An
+ * urgent advisor finding opens it by itself, maybe just as it is clicked,
+ * folding it again: the click is tried until it stands open, its field
+ * shown and editable.
+ */
+async function searchTitle(page: Page) {
+  const fold = page
+    .locator("#product-seo")
+    .getByRole("button", { name: "Arama motoru görünümü", exact: true })
+  const field = page.locator("#product-seo input").first()
+  await expect(fold).toBeVisible()
+  await expect(async () => {
+    if ((await fold.getAttribute("aria-expanded")) !== "true") {
+      await fold.click()
+    }
+    await expect(fold).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 })
+    await expect(field).toBeVisible({ timeout: 1_000 })
+    await expect(field).toBeEditable({ timeout: 1_000 })
+  }).toPass({ timeout: 15_000 })
+  return field
 }
 
 const headerSave = (page: Page) => page.getByRole("group", { name: "Sayfanın kaydı" })
@@ -61,16 +95,8 @@ test.describe("product page header save", () => {
     await name.fill(`${title} Pro`)
     const handle = page.locator("#detail-handle")
     const address = await handle.inputValue()
-    // A second card: the search appearance, opened from its folded line (the
-    // section bar above carries a link-button of the same name). An urgent
-    // advisor finding opens it by itself: a click then would fold it again.
-    const fold = page
-      .locator("#product-seo")
-      .getByRole("button", { name: "Arama motoru görünümü", exact: true })
-    if ((await fold.getAttribute("aria-expanded")) === "false") {
-      await fold.click()
-    }
-    const seoTitle = page.locator("#product-seo input").first()
+    // A second card: the search appearance
+    const seoTitle = await searchTitle(page)
     const seoBefore = await seoTitle.inputValue()
     await seoTitle.fill(`${title} – özel`)
 
