@@ -202,6 +202,20 @@ describe("a call's charge on the kept status", () => {
     })
   })
 
+  it("reads the month's whole grant when sent and keeps it through a charge (P5b)", async () => {
+    const plan = { remaining: 30, renews_on: "2026-12-01", granted: 200 }
+    const { fetch } = controlPlane(() =>
+      json({ ...AVAILABLE, balance: { ...AVAILABLE.balance, plan } })
+    )
+    expect(await aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).toMatchObject({
+      balance: { plan },
+    })
+    noteAiCharge({ credits: 10, balance: 120 })
+    expect(await aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).toMatchObject({
+      balance: { plan: { remaining: 20, granted: 200 } },
+    })
+  })
+
   it("forgets a wallet that grew meanwhile, and asks again", async () => {
     const grown = await keptAfter({ credits: 0, balance: 500 })
     expect(grown.asked).toBe(2)

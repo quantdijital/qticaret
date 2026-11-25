@@ -45,8 +45,11 @@ export const aiCreditsViewSchema = z.discriminatedUnion("available", [
   z.strictObject({ available: z.literal(false) }),
   z.strictObject({
     available: z.literal(true),
-    /** This month's grant left and the day it renews (K5). */
-    plan: z.strictObject({ remaining: count, renews_on: day }),
+    /**
+     * This month's grant left and the day it renews (K5); `granted`, the
+     * month's whole grant, only when the control plane sends it (P5b).
+     */
+    plan: z.strictObject({ remaining: count, renews_on: day, granted: count.optional() }),
     /** Bought credits left and their last day (K6); null while none were bought. */
     purchased: z.strictObject({ remaining: count, expires_on: day.nullable() }),
     /** The day's cap and what is left of it today (K7). */
@@ -94,7 +97,12 @@ export function creditsViewOf(status: AiCreditsStatus): AiCreditsView {
   }
   return aiCreditsViewSchema.parse({
     available: true,
-    plan: { remaining: plan.remaining, renews_on: plan.renews_on },
+    plan: {
+      remaining: plan.remaining,
+      renews_on: plan.renews_on,
+      // A control plane before P5b sends no whole: the answer stays as it was
+      ...(plan.granted === undefined ? {} : { granted: plan.granted }),
+    },
     purchased: { remaining: purchased.remaining, expires_on: purchased.expires_on },
     daily: { cap: status.daily.cap, remaining: status.daily.remaining },
     tasks,
