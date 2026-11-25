@@ -4,7 +4,7 @@ import { AI_TASK_CREDITS, aiCreditsStatusSchema } from "@qticaret/types/control-
 import type { AiCreditOrder, AiCreditsStatus, TenantStatus } from "@qticaret/types/control-plane"
 import type { AiCreditOrderRow } from "../../modules/ai-credits/service"
 import { plansIn, tenantsIn } from "../../workflows/modules"
-import { balanceOf } from "../ai-credits/balance"
+import { balanceReadOf } from "../ai-credits/balance"
 import { requestOrder } from "../ai-credits/grant"
 import { activePacks, aiCreditSettingsOf } from "../ai-credits/platform-settings"
 import { pendingOrderOf } from "../ai-credits/staff"
@@ -118,7 +118,7 @@ export async function creditsStatusOf(
     return UNAVAILABLE
   }
   const [balance, settings, pending] = await Promise.all([
-    balanceOf(container, tenantId, now),
+    balanceReadOf(container, tenantId, now),
     aiCreditSettingsOf(container),
     pendingOrderOf(container, tenantId),
   ])
