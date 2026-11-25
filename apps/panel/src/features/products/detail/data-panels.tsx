@@ -26,7 +26,7 @@ function Inset({ id, children }: { id?: string; children: ReactNode }) {
   return (
     <div
       id={id}
-      className="flex min-w-0 scroll-mt-20 flex-col [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none"
+      className="flex min-w-0 scroll-mt-20 flex-col [&>section]:rounded-none [&>section]:border-0 [&>section]:bg-transparent [&>section]:shadow-none [&>div>section]:rounded-none [&>div>section]:border-0 [&>div>section]:bg-transparent [&>div>section]:shadow-none [&>div]:gap-0 [&>div]:divide-y"
     >
       {children}
     </div>
