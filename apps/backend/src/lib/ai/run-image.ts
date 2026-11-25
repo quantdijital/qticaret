@@ -11,6 +11,7 @@ import { MAX_RESULT_BYTES, downloadResult } from "./download"
 import { VISION_ENCODE_TIMEOUT_SECONDS } from "./image-input"
 import type { DownloadOptions } from "./download"
 import { aiProviderError } from "./errors"
+import { laidOnWhite } from "./on-white"
 import type { AiService, ImageBackground } from "./registry/services"
 
 /**
@@ -98,13 +99,14 @@ async function checkedResult(
   const { service } = run
   const invalid = (code: string) =>
     aiProviderError({ service: service.id, key: "ai.provider_response_invalid", code })
-  const bytes =
+  const fetched =
     result.kind === "url"
       ? await downloadResult(service, result.url, { signal: run.signal, fetch: run.download })
       : result.bytes
-  if (bytes.length === 0 || bytes.length > MAX_RESULT_BYTES) {
+  if (fetched.length === 0 || fetched.length > MAX_RESULT_BYTES) {
     throw invalid("result_size")
   }
+  const bytes = result.onWhite ? await laidOnWhite(service, fetched) : fetched
   try {
     const prepared = await prepareImage(bytes, `${run.name}.png`, "image", { aiSource: source })
     return { image: prepared, usage: result.usage }

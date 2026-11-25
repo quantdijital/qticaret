@@ -27,6 +27,8 @@ export function authOf(target: OpenAiCompatibleTarget | ImageEditTarget): AiTarg
       return "x-api-key"
     case "gemini-image":
       return "x-goog-api-key"
+    case "bria":
+      return "api_token"
   }
 }
 
@@ -39,6 +41,8 @@ function credentialOf(auth: AiTargetAuth, apiKey: string): Record<string, string
       return { "x-api-key": apiKey }
     case "x-goog-api-key":
       return { "x-goog-api-key": apiKey }
+    case "api_token":
+      return { api_token: apiKey }
   }
 }
 
@@ -53,6 +57,7 @@ const CREDENTIAL_HEADERS: ReadonlySet<string> = new Set([
   "authorization",
   "x-api-key",
   "x-goog-api-key",
+  "api_token",
 ])
 
 /** A connector's headers without any credential's name. */

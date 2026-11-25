@@ -31,6 +31,7 @@ describe("AI registries (adr/0071 §2)", () => {
         "minimax",
         "gemini",
         "photoroom",
+        "bria",
       ])
       expect(findAiService("fake", env)).toBeNull()
     }
@@ -93,9 +94,15 @@ describe("AI registries (adr/0071 §2)", () => {
     for (const service of aiServices("production")) {
       expect(service.hosts.length).toBeGreaterThan(0)
       for (const [capability, target] of Object.entries(service.capabilities)) {
-        expect(["openai-compatible", "photoroom", "gemini-image"]).toContain(target.connector)
+        expect(["openai-compatible", "photoroom", "gemini-image", "bria"]).toContain(
+          target.connector
+        )
         if (target.connector !== "openai-compatible") {
-          if (target.connector === "photoroom" || target.connector === "gemini-image") {
+          if (
+            target.connector === "photoroom" ||
+            target.connector === "gemini-image" ||
+            target.connector === "bria"
+          ) {
             const image = new URL(target.url)
             expect(image.protocol).toBe("https:")
             expect(service.hosts).toContain(image.hostname)
@@ -136,10 +143,15 @@ describe("AI registries (adr/0071 §2)", () => {
       minimax: ["text", "vision"],
       gemini: ["text", "vision", "image_edit"],
       photoroom: ["image_edit"],
+      bria: ["image_edit"],
     })
-    // No result address is fetched from any service yet: both answer with the bytes
+    // A result is fetched by its address from Bria alone, from its documented host only;
+    // the others answer with the bytes
     for (const service of aiServices("production")) {
-      expect(service.downloadHosts).toEqual([])
+      expect([service.id, service.downloadHosts]).toEqual([
+        service.id,
+        service.id === "bria" ? ["engine.prod.bria-api.com"] : [],
+      ])
     }
   })
 
@@ -220,6 +232,8 @@ describe("service selection (adr/0071 §4)", () => {
     const photoroom = findAiService("photoroom", "production")
     expect(gemini && canRunTask(gemini, IMAGE_SCENE_TASK)).toBe(true)
     expect(photoroom && canRunTask(photoroom, IMAGE_SCENE_TASK)).toBe(true)
+    const bria = findAiService("bria", "production")
+    expect(bria && canRunTask(bria, IMAGE_SCENE_TASK)).toBe(true)
     const all = aiServices("test")
     const ids = (list: AiService[]) => list.map((each) => each.id)
     expect(

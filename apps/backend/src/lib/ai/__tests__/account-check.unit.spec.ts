@@ -96,8 +96,33 @@ describe("AI account check (adr/0071 §3, §9)", () => {
     expect(JSON.stringify(warn.mock.calls)).not.toContain(KEY)
   })
 
-  it("lets only Photoroom's key replace a working one unchecked", () => {
+  it("asks Bria the status of a request it never had, the key in api_token alone", async () => {
+    const { calls, result } = check("bria", answer(404, { error: { code: 404 } }))
+
+    expect(await result).toBe("valid")
+    expect(calls).toHaveLength(1)
+    expect(calls[0]?.url).toBe("https://engine.prod.bria-api.com/v2/status/qticaret-key-check")
+    expect(calls[0]?.options).toMatchObject({
+      method: "GET",
+      redirect: "error",
+      headers: { api_token: KEY },
+    })
+    expect(calls[0]?.options.headers).not.toHaveProperty("Authorization")
+    expect(calls[0]?.options.body).toBeUndefined()
+    expect(await check("bria", answer(200, { status: "UNKNOWN" })).result).toBe("valid")
+  })
+
+  it("lets Bria refuse a key only with 401; a 403 and anything else are no verdict", async () => {
+    expect(await check("bria", answer(401, SERVICE_SAID)).result).toBe("secret_invalid")
+    expect(await check("bria", answer(403, SERVICE_SAID)).result).toBe("unreachable")
+    expect(await check("bria", answer(200, MODELS)).result).toBe("unreachable")
+    expect(await check("bria", answer(503, SERVICE_SAID)).result).toBe("unreachable")
+    expect(await check("bria", answer(400, {})).result).toBe("unreachable")
+  })
+
+  it("lets only Photoroom's and Bria's keys replace a working one unchecked", () => {
     expect(replacesUnchecked("photoroom")).toBe(true)
+    expect(replacesUnchecked("bria")).toBe(true)
     for (const id of ["deepseek", "minimax", "gemini", "fake", "paytr"]) {
       expect(replacesUnchecked(id)).toBe(false)
     }

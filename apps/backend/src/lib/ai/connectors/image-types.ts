@@ -14,8 +14,13 @@ export interface ImageEditRequest {
   signal?: AbortSignal
 }
 
-export type ImageEditResult =
+/**
+ * `onWhite`: the service made a cut-out where a white background was
+ * asked for (it documents none); it is laid on white once fetched.
+ */
+export type ImageEditResult = (
   { kind: "bytes"; bytes: Buffer; usage: AiUsage } | { kind: "url"; url: string; usage: AiUsage }
+) & { onWhite?: true }
 
 /**
  * A product photo set in a scene (Aşama 7). `setting` is a sector pack's

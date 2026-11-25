@@ -64,6 +64,13 @@ describe("own key transport", () => {
     ],
     ["photoroom", "image_edit", "https://sdk.photoroom.com/v1/segment", "x-api-key", KEY],
     [
+      "bria",
+      "image_edit",
+      "https://engine.prod.bria-api.com/v2/image/edit/remove_background",
+      "api_token",
+      KEY,
+    ],
+    [
       "gemini",
       "image_edit",
       "https://generativelanguage.googleapis.com/v1/models/x:generateContent",
@@ -119,6 +126,7 @@ describe("own key transport", () => {
         authorization: "Bearer test-key-other",
         "X-Api-Key": "test-key-other",
         "x-goog-api-key": "test-key-other",
+        Api_Token: "test-key-other",
         Accept: "*/*",
       })
     )

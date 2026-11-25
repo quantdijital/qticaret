@@ -27,6 +27,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   minimax: "MiniMax",
   gemini: "Gemini",
   photoroom: "Photoroom",
+  bria: "Bria",
   fake: "Fake AI",
 }
 

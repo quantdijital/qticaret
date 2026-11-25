@@ -151,6 +151,7 @@ const CHECKERS = {
   minimax: aiAccountChecker("minimax"),
   gemini: aiAccountChecker("gemini"),
   photoroom: aiAccountChecker("photoroom"),
+  bria: aiAccountChecker("bria"),
   fake: aiAccountChecker("fake"),
 } satisfies Record<CredentialProviderName, Checker>
 

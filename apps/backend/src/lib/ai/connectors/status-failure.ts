@@ -108,6 +108,10 @@ export function statusFailure(
     return null
   }
   const code = `http_${String(status)}`
+  const documented = service.statusErrors?.[status]
+  if (documented !== undefined) {
+    return { key: documented, code }
+  }
   if (status === 429 && service.quotaErrors === "google-rpc" && googleQuotaUsedUp(body)) {
     return { key: "ai.provider_quota", code: `${code}_quota` }
   }

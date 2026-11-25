@@ -1,3 +1,4 @@
+import { logger } from "../logging"
 import { isSafeFetchError, safeFetch } from "../security/safe-fetch"
 import { aiProviderError } from "./errors"
 import type { AiService } from "./registry/services"
@@ -50,6 +51,10 @@ export async function downloadResult(
     aiProviderError({ service: service.id, key: "ai.provider_response_invalid", code })
   const url = listedResultUrl(service, raw)
   if (url === null) {
+    // The host alone, for the operator to see where a service's results are (Bria's
+    // is not documented); never the address, whose path or query may be a signed token
+    const host = URL.canParse(raw) ? new URL(raw).hostname.slice(0, 253) : "unreadable"
+    logger.warn({ event: "ai.download_host_not_listed", service: service.id, host })
     throw refuse("download_host_not_listed")
   }
   let response

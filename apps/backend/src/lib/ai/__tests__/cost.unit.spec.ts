@@ -22,6 +22,14 @@ describe("cost estimate", () => {
     expect(estimateCost(photoroom, "image_edit", { images: 3 })?.micros).toBe(60_000)
   })
 
+  it("prices a Bria cut-out at $0.018 and its scene at its own $0.032", () => {
+    const bria = service("bria")
+    expect(estimateCost(bria, "image_edit", { images: 1 })?.micros).toBe(18_000)
+    const scene = sceneTargetOf(bria.capabilities.image_edit)
+    const price = scene && "unitPrice" in scene ? scene.unitPrice : undefined
+    expect(estimateCost(bria, "image_edit", { images: 1 }, price)?.micros).toBe(32_000)
+  })
+
   it("prices a Photoroom scene at its own $0.10, a Gemini scene by its tokens", () => {
     const photoroom = service("photoroom")
     const scene = sceneTargetOf(photoroom.capabilities.image_edit)

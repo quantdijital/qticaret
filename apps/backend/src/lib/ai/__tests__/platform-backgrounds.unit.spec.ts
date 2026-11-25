@@ -26,11 +26,14 @@ describe("the platform's backgrounds", () => {
     }
   })
 
-  it.each(["photoroom", "gemini"])("are the same whichever service %s runs behind", (id) => {
-    const platform = platformServiceOf({ text: "deepseek", image_edit: id }, "production")
-    expect(platform).not.toBeNull()
-    expect(platform && platformBackgroundsOf(platform)).toEqual(["white"])
-  })
+  it.each(["photoroom", "gemini", "bria"])(
+    "are the same whichever service %s runs behind",
+    (id) => {
+      const platform = platformServiceOf({ text: "deepseek", image_edit: id }, "production")
+      expect(platform).not.toBeNull()
+      expect(platform && platformBackgroundsOf(platform)).toEqual(["white"])
+    }
+  )
 
   it("are none where the platform edits no images", () => {
     const platform = platformServiceOf({ text: "deepseek" }, "production")
