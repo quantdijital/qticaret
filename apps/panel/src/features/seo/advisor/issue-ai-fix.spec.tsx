@@ -21,7 +21,7 @@ const ai = vi.hoisted(() => ({ tasks: [] as unknown[] }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
 vi.mock("sonner", () => ({ toast }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true, useStaff: () => undefined }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>

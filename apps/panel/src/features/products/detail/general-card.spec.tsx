@@ -13,7 +13,7 @@ vi.mock("@/lib/sdk", () => ({
   sdk: { client: { fetch: fetchMock }, admin: { product: { update: updateMock } } },
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true, useStaff: () => undefined }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
