@@ -24,7 +24,7 @@ export const MAIN_PARTS = [
   { key: "program", targets: ["product-program"] },
   { key: "seo", targets: [PRODUCT_SECTIONS.seo] },
   { key: "attributes", targets: [PRODUCT_SECTIONS.attributes] },
-  { key: "faq", targets: [] },
+  { key: "faq", targets: [PRODUCT_SECTIONS.faq] },
   { key: "addons", targets: [PRODUCT_SECTIONS.addons] },
   { key: "priceHistory", targets: [PRODUCT_SECTIONS.priceHistory] },
 ] as const satisfies readonly PartInfo[]
@@ -51,17 +51,30 @@ export function partOfTarget(target: string): PartKey | undefined {
   return ALL.find((part) => part.targets.includes(target))?.key as PartKey | undefined
 }
 
-/** The page as laid out: each column's order, and the parts hidden. */
+/**
+ * The parts folded to a line (docs/06 "Ürün sayfası"), closed by default;
+ * the shop may have them start open ("Gelişmiş"). Each key is also the
+ * fold's remembered name, `product.<key>`.
+ */
+export const FOLDED_PARTS = ["seo", "attributes", "faq", "addons", "priceHistory"] as const
+export type FoldedPart = (typeof FOLDED_PARTS)[number]
+
+const isFolded = (key: string): key is FoldedPart =>
+  (FOLDED_PARTS as readonly string[]).includes(key)
+
+/** The page as laid out: each column's order, the parts hidden and the folded ones open. */
 export interface ProductLayout {
   main: MainPart[]
   side: SidePart[]
   hidden: PartKey[]
+  open: FoldedPart[]
 }
 
 export const DEFAULT_LAYOUT: ProductLayout = {
   main: MAIN_PARTS.map((part) => part.key),
   side: SIDE_PARTS.map((part) => part.key),
   hidden: [],
+  open: [],
 }
 
 /** What the shop saved (`panel_layout.product`), as the server keeps it. */
@@ -69,6 +82,7 @@ export const storedLayoutSchema = z.object({
   main: z.array(z.string()).catch([]),
   side: z.array(z.string()).catch([]),
   hidden: z.array(z.string()).catch([]),
+  open: z.array(z.string()).catch([]),
 })
 export type StoredLayout = z.infer<typeof storedLayoutSchema>
 
@@ -113,11 +127,13 @@ export function layoutOf(stored: unknown): ProductLayout {
   const hidden = [...new Set(parsed.data.hidden)].filter(
     (key): key is PartKey => known.has(key) && !isLocked(key as PartKey)
   )
-  return { main, side, hidden }
+  const open = [...new Set(parsed.data.open)].filter(isFolded)
+  return { main, side, hidden, open }
 }
 
 /** Whether two layouts show the same page. */
 export const sameLayout = (a: ProductLayout, b: ProductLayout): boolean =>
   a.main.join() === b.main.join() &&
   a.side.join() === b.side.join() &&
-  [...a.hidden].sort().join() === [...b.hidden].sort().join()
+  [...a.hidden].sort().join() === [...b.hidden].sort().join() &&
+  [...a.open].sort().join() === [...b.open].sort().join()

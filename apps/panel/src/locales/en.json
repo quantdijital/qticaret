@@ -4256,6 +4256,44 @@
         "organize": "Categories, brand and VAT",
         "catalog": "Catalog details",
         "shipping": "Parcel"
+      },
+      "presets": "Ready layouts",
+      "preset": {
+        "basic": "Simple",
+        "standard": "Standard",
+        "advanced": "Advanced"
+      },
+      "presetHint": {
+        "basic": "General details, variants and price, pictures, description and the SEO advisor. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
+        "standard": "The first layout: seldom parts stay closed under the page.",
+        "advanced": "Every part shown; search appearance, attributes, FAQ, add-ons and price history start open.",
+        "custom": "Arranged by hand."
+      },
+      "shortcuts": "Shortcuts",
+      "shortcutGo": "Go to field",
+      "modKey": "⌘ / Ctrl",
+      "nav": {
+        "label": "The page's sections",
+        "placeholder": "Go to section",
+        "mark": {
+          "complete": "complete",
+          "missing": "something missing",
+          "urgent": "needs attention"
+        }
+      },
+      "go": {
+        "heading": "Go to field",
+        "hiddenPart": "{{name}} (hidden)",
+        "fields": {
+          "title": "Product name",
+          "handle": "Page address",
+          "price": "Price and stock",
+          "barcode": "Barcode and SKU",
+          "altText": "Picture alt text",
+          "seoTitle": "SEO title",
+          "categories": "Category and brand",
+          "weight": "Weight and dimensions"
+        }
       }
     },
     "variant": {
@@ -4380,7 +4418,9 @@
         "empty": "The question and the answer cannot be empty.",
         "not_a_question": "The question must end with a question mark.",
         "too_long": "A question can be at most 120 characters, an answer at most 400."
-      }
+      },
+      "summary": "A question and answer draft from the product's details",
+      "summaryOpen": "Draft open"
     },
     "addonTemplates": {
       "title": "Add-on groups",

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
@@ -12,10 +13,15 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
-import { usePartAttention } from "@/features/products/detail/use-product-findings"
+import { usePartDraws } from "@/features/products/detail/use-part-draws"
+import { usePartAttention, usePartMarks } from "@/features/products/detail/use-product-findings"
 import { LayoutSheet } from "@/features/products/layout/layout-sheet"
+import { PartNav } from "@/features/products/layout/part-nav"
+import type { PartKey } from "@/features/products/layout/parts"
 import { HiddenLine, PartSlot } from "@/features/products/layout/part-slot"
+import { useGoToCommands } from "@/features/products/layout/use-go-to-commands"
 import { usePageLayout } from "@/features/products/layout/use-page-layout"
+import { useSideBySide } from "@/features/products/layout/use-side-by-side"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/products/$id")
@@ -79,56 +85,76 @@ function ProductPage({
   back: { to: string; label: string }
 }) {
   const attention = usePartAttention(product)
-  const page = usePageLayout(attention)
+  const draws = usePartDraws(product.id)
+  const page = usePageLayout(attention, draws)
+  const marks = usePartMarks(product)
+  const wide = useSideBySide()
   // The layout is the shop's: whoever may change its settings arranges it
   const canArrange = useCan("settings")
-  const slot = (key: Parameters<typeof page.shownWhy>[0]) => {
+  const slot = (key: PartKey) => {
     const why = page.shownWhy(key)
     return why === "off" ? undefined : why
   }
+  useGoToCommands({ layout: page.layout, draws, goToKey: page.goToKey, goTo: page.goTo })
+  const shown = (keys: readonly PartKey[]) => keys.filter((key) => slot(key) !== undefined)
+  // Side by side, the bar heads the main column and names its parts; narrower, the whole page's
+  const nav = (
+    <PartNav
+      parts={wide ? shown(page.layout.main) : shown([...page.layout.main, ...page.layout.side])}
+      marks={marks}
+      wide={wide}
+      onGo={page.goToKey}
+    />
+  )
+  // The folded parts the shop has start open ("Gelişmiş"), by their remembered names
+  const open = new Set<string>(page.layout.open.map((key) => `product.${key}`))
   return (
-    <div className="flex flex-col gap-[var(--grid-gap)]">
-      <PageHeader
-        title={product.title}
-        badge={<ProductStatusBadge status={product.status} />}
-        back={back}
-        action={
-          <ProductActions
-            product={product}
-            onCustomize={
-              canArrange
-                ? () => {
-                    page.setDraft(page.saved)
-                  }
-                : undefined
-            }
-          />
-        }
-      />
-      <EditorLayout
-        main={
-          <>
-            {page.layout.main.map((key) => {
-              const why = slot(key)
-              return why === undefined ? null : (
-                <PartSlot key={key} part={key} why={why}>
-                  <MainPartView part={key} product={product} />
-                </PartSlot>
-              )
-            })}
-            <HiddenLine parts={page.away} onShow={page.showAll} />
-          </>
-        }
-        side={page.layout.side.map((key) => {
-          const why = slot(key)
-          return why === undefined ? null : (
-            <PartSlot key={key} part={key} why={why}>
-              <SidePartView part={key} product={product} onTarget={page.goTo} />
-            </PartSlot>
-          )
-        })}
-      />
-      <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
-    </div>
+    <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
+      <div className="flex flex-col gap-[var(--grid-gap)]">
+        <PageHeader
+          title={product.title}
+          badge={<ProductStatusBadge status={product.status} />}
+          back={back}
+          action={
+            <ProductActions
+              product={product}
+              onCustomize={
+                canArrange
+                  ? () => {
+                      page.setDraft(page.saved)
+                    }
+                  : undefined
+              }
+            />
+          }
+        />
+        {wide ? null : nav}
+        <EditorLayout
+          main={
+            <>
+              {wide ? nav : null}
+              {page.layout.main.map((key) => {
+                const why = slot(key)
+                return why === undefined ? null : (
+                  <PartSlot key={key} part={key} why={why}>
+                    <MainPartView part={key} product={product} />
+                  </PartSlot>
+                )
+              })}
+              <HiddenLine parts={page.away} onShow={page.showAll} />
+            </>
+          }
+          side={page.layout.side.map((key) => {
+            const why = slot(key)
+            return why === undefined ? null : (
+              <PartSlot key={key} part={key} why={why}>
+                <SidePartView part={key} product={product} onTarget={page.goTo} />
+              </PartSlot>
+            )
+          })}
+        />
+        <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
+      </div>
+    </SectionDefaults>
   )
 }

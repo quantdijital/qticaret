@@ -68,6 +68,14 @@ function setup(options: { allowed?: boolean; addStatus?: number } = {}) {
 }
 
 const BUTTON = "SSS taslağı"
+
+/** Folded like the page's other seldom parts: opened, then the draft asked for. */
+async function openDraft(user: ReturnType<typeof userEvent.setup>) {
+  const fold = await screen.findByRole("button", { name: "Sık sorulan sorular" })
+  expect(fold).toHaveAttribute("aria-expanded", "false")
+  await user.click(fold)
+  await user.click(screen.getByRole("button", { name: BUTTON }))
+}
 const posted = () => netFetch.mock.calls.map(([url]) => String(url))
 const bodyOf = (url: string) =>
   JSON.parse(
@@ -89,7 +97,7 @@ afterEach(() => {
 describe("FaqCard (adr/0074 §5 madde 4)", () => {
   it("lists the draft's items, editable and kept, and adds the kept ones as edited", async () => {
     const user = setup()
-    await user.click(await screen.findByRole("button", { name: BUTTON }))
+    await openDraft(user)
 
     const questions = await screen.findAllByLabelText("Soru")
     expect(questions.map((each) => (each as HTMLInputElement).value)).toEqual(
@@ -124,7 +132,7 @@ describe("FaqCard (adr/0074 §5 madde 4)", () => {
 
   it("holds an item the server would refuse, and shows the server's refusal", async () => {
     const user = setup({ addStatus: 400 })
-    await user.click(await screen.findByRole("button", { name: BUTTON }))
+    await openDraft(user)
     const question = (await screen.findAllByLabelText("Soru"))[0] as HTMLInputElement
     await user.clear(question)
     await user.type(question, "Kaç saat sıcak tutar")
@@ -140,7 +148,7 @@ describe("FaqCard (adr/0074 §5 madde 4)", () => {
 
   it("dismisses the draft on Vazgeç, the cancel kind", async () => {
     const user = setup()
-    await user.click(await screen.findByRole("button", { name: BUTTON }))
+    await openDraft(user)
     await screen.findAllByLabelText("Soru")
     const close = screen.getByRole("button", { name: "Vazgeç" })
     expect(close.className).toMatch(/destructive|red/)
