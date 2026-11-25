@@ -3,7 +3,7 @@ import {
   AI_CREDITS_PATHS,
   AI_CREDIT_ORDER_MAX_BYTES,
   aiCreditOrderRequestSchema,
-  aiCreditOrderResponseSchema,
+  aiCreditOrderResponseReadSchema,
 } from "@qticaret/types/control-plane"
 import type { AiCreditOrder } from "@qticaret/types/control-plane"
 import { errorSummary, logger } from "../logging"
@@ -70,7 +70,7 @@ function answerOf(status: number, text: string): AiCreditOrderResult {
     } catch {
       return unavailable("answer_not_json")
     }
-    const answer = aiCreditOrderResponseSchema.safeParse(parsed)
+    const answer = aiCreditOrderResponseReadSchema.safeParse(parsed)
     return answer.success
       ? { kind: "ordered", order: answer.data.order }
       : unavailable("answer_shape")

@@ -2,7 +2,7 @@ import { signRequest } from "@qticaret/server-kit"
 import {
   AI_CREDITS_PATHS,
   AI_CREDITS_STATUS_MAX_BYTES,
-  aiCreditsStatusSchema,
+  aiCreditsStatusReadSchema,
 } from "@qticaret/types/control-plane"
 import type { AiCreditsStatus } from "@qticaret/types/control-plane"
 import { registerProcessCache } from "../cache/process-caches"
@@ -92,7 +92,8 @@ async function askControlPlane(
     logger.warn({ event: "ai_credits.status_refused", status: 200, reason: "not_json" })
     return null
   }
-  const parsed = aiCreditsStatusSchema.safeParse(body)
+  // Read open: a field a newer control plane adds is dropped, not refused
+  const parsed = aiCreditsStatusReadSchema.safeParse(body)
   if (!parsed.success) {
     logger.warn({ event: "ai_credits.status_refused", status: 200, reason: "shape" })
     return null

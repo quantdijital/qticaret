@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import type { AiFailure } from "@/features/ai/api/suggestions"
 import { AiBackgroundCompare } from "@/features/ai/components/ai-background-compare"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
+import { AiCreditCost } from "@/features/ai/components/ai-credit-cost"
 import { AiSceneCustom } from "@/features/ai/components/ai-scene-custom"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { AiTryOthers } from "@/features/ai/components/ai-try-others"
@@ -249,6 +250,7 @@ export function AiBackgroundDialog({
               </p>
             ) : null}
             <AiTryOthers services={others} onTryWith={tryWith} reveal />
+            <AiCreditCost tasks={[current.task]} service={service} />
             <p className="text-xs text-muted-foreground">
               {state.status === "ready"
                 ? (blocked ?? useNote)

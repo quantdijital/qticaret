@@ -103,7 +103,10 @@ medusaIntegrationTestRunner({
       const status = aiCreditsStatusSchema.parse(answer.data)
       expect(status).toMatchObject({
         available: true,
-        balance: { plan: { remaining: 250 }, purchased: { remaining: 0, expires_on: null } },
+        balance: {
+          plan: { remaining: 250, granted: 250 },
+          purchased: { remaining: 0, expires_on: null },
+        },
         daily: { cap: 300, remaining: 300 },
         services: { text: "fake", vision: "fake", image_edit: "fake" },
         table: { ...AI_TASK_CREDITS },
@@ -193,6 +196,29 @@ medusaIntegrationTestRunner({
       expect(await walletOf(getContainer(), who.id)).toMatchObject({
         plan_period: istanbulMonth(now),
         plan_balance: 55,
+      })
+    })
+
+    it("names the month's whole grant beside what is left of it (P5b)", async () => {
+      await routeAll(getContainer())
+      const who = await shop({ monthly: 100 })
+      expect(await statusOf(who)).toMatchObject({
+        balance: { plan: { remaining: 100, granted: 100 } },
+      })
+      // Raised mid-month: the whole is the package's now, the month already granted stays
+      await setMonthlyGrant(getContainer(), who.id, 300)
+      expect(await statusOf(who)).toMatchObject({
+        balance: { plan: { remaining: 100, granted: 300 } },
+      })
+      // Lowered below what is left: the whole is never smaller than the rest
+      await setMonthlyGrant(getContainer(), who.id, 30)
+      expect(await statusOf(who)).toMatchObject({
+        balance: { plan: { remaining: 100, granted: 100 } },
+      })
+      // A package with no grant says 0, not nothing
+      const none = await shop({ monthly: 0 })
+      expect(await statusOf(none)).toMatchObject({
+        balance: { plan: { remaining: 0, granted: 0 } },
       })
     })
   },

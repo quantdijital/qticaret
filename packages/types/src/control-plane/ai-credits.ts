@@ -139,26 +139,43 @@ export const aiServiceIdSchema = z.string().regex(/^[a-z][a-z0-9_]{0,39}$/, "mus
 /** The operation's id: a UUID the shop makes, one per operation. */
 export const aiOperationIdSchema = z.uuid()
 
+/**
+ * The answers a shop reads are written closed and read open. The platform
+ * builds them with the closed schema, so nothing unlisted leaves it; a shop
+ * reads them with the `…ReadSchema` twin, which drops a field it does not
+ * know instead of refusing the whole answer, so the platform can add a field
+ * without every shop updating first (P5b). One builder makes both, so the
+ * two cannot drift. The open maker is typed as the closed one: both yield
+ * the same value, only what happens to an unlisted field differs.
+ */
+type ObjectMaker = typeof z.strictObject
+const CLOSED: ObjectMaker = z.strictObject
+const OPEN = z.object as unknown as ObjectMaker
+
+const packOf = (object: ObjectMaker) =>
+  object({
+    id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,39}$/, "must be a pack id"),
+    name: z.string().min(1).max(100).regex(PLAIN_LINE),
+    credits: credits.min(1),
+    amount: z.int().min(0).max(100_000_000),
+    currency: z.literal(AI_CREDIT_CURRENCY),
+  })
 /** A top-up pack as the platform sells it (K11, K12): name, credits, price in kuruş. */
-export const aiCreditPackSchema = z.strictObject({
-  id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,39}$/, "must be a pack id"),
-  name: z.string().min(1).max(100).regex(PLAIN_LINE),
-  credits: credits.min(1),
-  amount: z.int().min(0).max(100_000_000),
-  currency: z.literal(AI_CREDIT_CURRENCY),
-})
+export const aiCreditPackSchema = packOf(CLOSED)
 export type AiCreditPack = z.infer<typeof aiCreditPackSchema>
 
 export const AI_CREDIT_ORDER_STATUSES = ["pending", "paid", "cancelled"] as const
 export type AiCreditOrderStatus = (typeof AI_CREDIT_ORDER_STATUSES)[number]
 
+const orderOf = (object: ObjectMaker) =>
+  object({
+    id: z.string().regex(/^[A-Za-z0-9_]{1,64}$/, "must be an order id"),
+    pack: packOf(object),
+    status: z.enum(AI_CREDIT_ORDER_STATUSES),
+    requested_at: z.iso.datetime(),
+  })
 /** A top-up request (K11): the pack as it was asked for; staff mark it paid. */
-export const aiCreditOrderSchema = z.strictObject({
-  id: z.string().regex(/^[A-Za-z0-9_]{1,64}$/, "must be an order id"),
-  pack: aiCreditPackSchema,
-  status: z.enum(AI_CREDIT_ORDER_STATUSES),
-  requested_at: z.iso.datetime(),
-})
+export const aiCreditOrderSchema = orderOf(CLOSED)
 export type AiCreditOrder = z.infer<typeof aiCreditOrderSchema>
 
 /** The paths of the gateway's tenant routes (`TENANT_API_ROUTES` lists them with P3). */
@@ -175,29 +192,45 @@ export const AI_CREDITS_PATHS = {
  * table, the packs and the open request. Unavailable (flag off, no key, no
  * routing) it says only that: the shop shows nothing of the credits.
  */
-export const aiCreditsStatusSchema = z.discriminatedUnion("available", [
-  z.strictObject({ available: z.literal(false) }),
-  z.strictObject({
-    available: z.literal(true),
-    balance: z.strictObject({
-      /** This month's grant left (K5) and the Istanbul day it renews. */
-      plan: z.strictObject({ remaining: credits, renews_on: z.iso.date() }),
-      /** Bought credits left (K6) and their last day; null while none were bought. */
-      purchased: z.strictObject({ remaining: credits, expires_on: z.iso.date().nullable() }),
+const statusOf = (object: ObjectMaker) =>
+  z.discriminatedUnion("available", [
+    object({ available: z.literal(false) }),
+    object({
+      available: z.literal(true),
+      balance: object({
+        /**
+         * This month's grant left (K5) and the Istanbul day it renews;
+         * `granted`: the month's whole grant (P5b), at least `remaining`, 0
+         * for a shop whose package gives none. Optional: a control plane
+         * before P5b leaves it out and a shop reads `remaining` alone. A shop
+         * before P5b read the answer closed and refuses it: such a shop
+         * updates before its control plane; from P5b on a shop reads open.
+         */
+        plan: object({
+          remaining: credits,
+          renews_on: z.iso.date(),
+          granted: credits.optional(),
+        }),
+        /** Bought credits left (K6) and their last day; null while none were bought. */
+        purchased: object({ remaining: credits, expires_on: z.iso.date().nullable() }),
+      }),
+      /** The day's cap (K7) and what is left of it today. */
+      daily: object({ cap: credits, remaining: credits }),
+      services: z
+        .record(aiCapabilityNameSchema, aiServiceIdSchema)
+        .refine((value) => Object.keys(value).length <= 10, "has too many capabilities"),
+      /** The gateway's own table (K4): what each task costs now. */
+      table: z
+        .record(aiTaskNameSchema, credits.min(1))
+        .refine((value) => Object.keys(value).length <= 200, "has too many tasks"),
+      packs: z.array(packOf(object)).max(20),
+      pending_order: orderOf(object).nullable(),
     }),
-    /** The day's cap (K7) and what is left of it today. */
-    daily: z.strictObject({ cap: credits, remaining: credits }),
-    services: z
-      .record(aiCapabilityNameSchema, aiServiceIdSchema)
-      .refine((value) => Object.keys(value).length <= 10, "has too many capabilities"),
-    /** The gateway's own table (K4): what each task costs now. */
-    table: z
-      .record(aiTaskNameSchema, credits.min(1))
-      .refine((value) => Object.keys(value).length <= 200, "has too many tasks"),
-    packs: z.array(aiCreditPackSchema).max(20),
-    pending_order: aiCreditOrderSchema.nullable(),
-  }),
-])
+  ])
+/** The status as the platform writes it: closed. */
+export const aiCreditsStatusSchema = statusOf(CLOSED)
+/** The status as a shop reads it: a field it does not know is dropped. */
+export const aiCreditsStatusReadSchema = statusOf(OPEN)
 export type AiCreditsStatus = z.infer<typeof aiCreditsStatusSchema>
 
 /** The status answer is held to this before it is parsed. */
@@ -325,4 +358,6 @@ export type AiCreditOrderRequest = z.infer<typeof aiCreditOrderRequestSchema>
 export const AI_CREDIT_ORDER_MAX_BYTES = 1024
 
 export const aiCreditOrderResponseSchema = z.strictObject({ order: aiCreditOrderSchema })
+/** The same answer as a shop reads it: a field it does not know is dropped. */
+export const aiCreditOrderResponseReadSchema = OPEN({ order: orderOf(OPEN) })
 export type AiCreditOrderResponse = z.infer<typeof aiCreditOrderResponseSchema>

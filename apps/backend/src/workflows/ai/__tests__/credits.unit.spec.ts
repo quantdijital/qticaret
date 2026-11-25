@@ -85,6 +85,22 @@ describe("the credits' view", () => {
     }
   })
 
+  it("passes the month's whole grant on when the control plane sends it (P5b)", () => {
+    const plan = { remaining: 30, renews_on: "2026-12-01", granted: 200 }
+    const granted: AiCreditsStatus = { ...AVAILABLE, balance: { ...AVAILABLE.balance, plan } }
+    expect(creditsViewOf(granted)).toMatchObject({ plan })
+    const none = { ...plan, remaining: 0, granted: 0 }
+    expect(
+      creditsViewOf({ ...AVAILABLE, balance: { ...AVAILABLE.balance, plan: none } })
+    ).toMatchObject({ plan: none })
+    // Without it (a control plane before P5b) the answer is as it was: no key at all
+    const view = creditsViewOf(AVAILABLE)
+    expect(view.available && Object.keys(view.plan)).toEqual(["remaining", "renews_on"])
+    expect(aiCreditsViewSchema.safeParse({ ...view, plan: { ...plan, granted: -1 } }).success).toBe(
+      false
+    )
+  })
+
   it("holds the answer to a closed schema", () => {
     const view = creditsViewOf(AVAILABLE)
     expect(aiCreditsViewSchema.safeParse({ ...view, services: { text: "x" } }).success).toBe(false)

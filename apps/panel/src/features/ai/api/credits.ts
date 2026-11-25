@@ -42,7 +42,8 @@ export const aiCreditsSchema = z.discriminatedUnion("available", [
   z.object({ available: z.literal(false) }),
   z.object({
     available: z.literal(true),
-    plan: z.object({ remaining: count, renews_on: z.string() }),
+    /** `granted`: the month's whole grant, when the control plane sends it (P5b). */
+    plan: z.object({ remaining: count, renews_on: z.string(), granted: count.optional() }),
     purchased: z.object({ remaining: count, expires_on: z.string().nullable() }),
     daily: z.object({ cap: count, remaining: count }),
     tasks: z.record(z.string(), count),

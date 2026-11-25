@@ -89,12 +89,26 @@ describe("the platform's credits status", () => {
     expect(received).toHaveLength(0)
   })
 
+  it("drops a field a newer control plane adds and reads the rest (P5b)", async () => {
+    const newer = {
+      ...AVAILABLE,
+      model: "deepseek-flash",
+      balance: {
+        ...AVAILABLE.balance,
+        plan: { ...AVAILABLE.balance.plan, carried_over: 12 },
+      },
+      daily: { ...AVAILABLE.daily, resets_at: "2026-11-26T00:00:00Z" },
+    }
+    const { fetch } = controlPlane(() => json(newer))
+    await expect(aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).resolves.toEqual(AVAILABLE)
+  })
+
   it.each([
     ["unreachable", () => Promise.reject(new TypeError("fetch failed"))],
     ["refused", () => json({ error: "signature.invalid" }, 401)],
     ["failing", () => json({}, 500)],
     ["not JSON", () => new Response("<html>")],
-    ["of another shape", () => json({ ...AVAILABLE, model: "deepseek-flash" })],
+    ["of another shape", () => json({ ...AVAILABLE, daily: "none" })],
     ["a balance below zero", () => json({ ...AVAILABLE, daily: { cap: 300, remaining: -1 } })],
     ["too large", () => new Response(" ".repeat(17 * 1024) + JSON.stringify(AVAILABLE))],
   ])("%s: not available, kept a shorter while", async (_case, answer) => {
@@ -199,6 +213,20 @@ describe("a call's charge on the kept status", () => {
     expect(bought.status).toMatchObject({
       balance: { plan: { remaining: 0 }, purchased: { remaining: 90 } },
       daily: { remaining: 240 },
+    })
+  })
+
+  it("reads the month's whole grant when sent and keeps it through a charge (P5b)", async () => {
+    const plan = { remaining: 30, renews_on: "2026-12-01", granted: 200 }
+    const { fetch } = controlPlane(() =>
+      json({ ...AVAILABLE, balance: { ...AVAILABLE.balance, plan } })
+    )
+    expect(await aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).toMatchObject({
+      balance: { plan },
+    })
+    noteAiCharge({ credits: 10, balance: 120 })
+    expect(await aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).toMatchObject({
+      balance: { plan: { remaining: 20, granted: 200 } },
     })
   })
 

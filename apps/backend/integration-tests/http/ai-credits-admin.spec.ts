@@ -123,6 +123,16 @@ medusaIntegrationTestRunner({
       }
     })
 
+    it("passes the month's whole grant on when the control plane sends it (P5b)", async () => {
+      await credits(true)
+      const base = availableStatus()
+      const plan = { ...base.balance.plan, granted: 100 }
+      gateway.state.status = { ...base, balance: { ...base.balance, plan } }
+      const view = await read(owner.headers)
+      expect(view.status).toBe(200)
+      expect(view.data).toMatchObject({ available: true, plan })
+    })
+
     it("lists the platform as a service by its own name alone", async () => {
       await credits(true)
       const view = await settle(
