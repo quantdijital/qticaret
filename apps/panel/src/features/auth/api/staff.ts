@@ -44,6 +44,8 @@ export type Capability =
   | "searchSynonyms"
   /** The order list as an Excel or CSV file, every customer's details in it: the owner's alone. */
   | "orderExport"
+  /** The customer list as an Excel or CSV file, names and e-mails in it (CU2): the owner's alone. */
+  | "customerExport"
   /** Editing customers, adding a guest, their addresses and note (2026-11-06): owner, admin, operations. */
   | "customers"
   /** The carts left behind and their reminders (2026-11-06): owner, admin, operations. */
