@@ -36,6 +36,9 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
       })),
       dividers: section.dividers,
       icons: section.icons,
+      // Printed only when changed, so a strip before them reads as it did
+      ...(section.arrangement !== "stacked" ? { arrangement: section.arrangement } : {}),
+      ...(section.social !== "off" ? { social: section.social } : {}),
     }
   }
   return {

@@ -12,7 +12,9 @@ import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { BulkAction } from "@/features/products/api/bulk"
-import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
+import { productCountsQuery, productsQuery } from "@/features/products/api/products"
+import { ListOptions } from "@/features/products/components/list-options"
+import { useListPrefs } from "@/features/products/list-prefs"
 import type { ProductFilters } from "@/features/products/api/products"
 import { PLAN_STRIP_ID } from "@/components/layout/plan-status-banner"
 import { usePlanRestricted } from "@/features/auth/api/staff"
@@ -54,7 +56,9 @@ export function ProductsPage() {
     sort: search.sort,
   }
   const filters: ProductFilters = { q, status, ...values }
-  const list = useQuery(productsQuery({ ...filters, page }))
+  // "Görünüm": products per page and the columns shown, kept per person
+  const [prefs, setPrefs] = useListPrefs()
+  const list = useQuery(productsQuery({ ...filters, page, pageSize: prefs.pageSize }))
   const counts = useQuery(productCountsQuery())
   const scores = useQuery(
     productScoresQuery((list.data?.products ?? []).map((product) => product.id))
@@ -66,7 +70,8 @@ export function ProductsPage() {
     new Map((scores.data ?? []).map((score) => [score.entity_id, score])),
     (product) => {
       duplicate.run(product.id)
-    }
+    },
+    prefs.hidden
   )
   // A search or a filter that can leave products out: the empty list says "no match"
   const filtered =
@@ -194,12 +199,24 @@ export function ProductsPage() {
             />
           }
           actions={
-            <ProductSort
-              value={values.sort}
-              onChange={(sort) => {
-                setSearch({ sort, page: 1 })
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <ProductSort
+                value={values.sort}
+                onChange={(sort) => {
+                  setSearch({ sort, page: 1 })
+                }}
+              />
+              <ListOptions
+                value={prefs}
+                onChange={(next) => {
+                  // Another page size starts from the first page
+                  if (next.pageSize !== prefs.pageSize) {
+                    setSearch({ page: 1 })
+                  }
+                  setPrefs(next)
+                }}
+              />
+            </div>
           }
           note={
             list.data?.limited ? (
@@ -259,7 +276,7 @@ export function ProductsPage() {
             {list.data && list.data.count > 0 ? (
               <Pagination
                 page={page}
-                pageSize={PAGE_SIZE}
+                pageSize={prefs.pageSize}
                 count={list.data.count}
                 onPageChange={(next) => {
                   setSearch({ page: next + 1 })

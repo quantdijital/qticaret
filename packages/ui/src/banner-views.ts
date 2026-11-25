@@ -25,6 +25,10 @@ export interface BannerSectionView extends BannerSettings {
   edge?: BannerSplitEdge
   /** `split`: a short hand note over the heading; null or absent: none. */
   note?: HandNoteView | null
+  /** `split`: the first button in the accent colour; absent: the main colour. */
+  buttonTone?: "accent"
+  /** `split`: a flower spray at the panel's lower right; absent: none. */
+  ornament?: "flower"
 }
 
 export interface BannerSlideView {

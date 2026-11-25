@@ -67,7 +67,7 @@ export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
 /** The quick view button (`CARD_QUICK_VIEW_TRIGGERS`): on hover, or an icon always. */
 export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
 /** A standard card's words (`CARD_TEXT_POSITIONS`): under the photo (today's) or over it. */
-export const CARD_TEXT_POSITIONS = ["below", "over"] as const
+export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 
 /**
  * The card's defaults, the Grafit look's (adr/0062 §2): today's card. A

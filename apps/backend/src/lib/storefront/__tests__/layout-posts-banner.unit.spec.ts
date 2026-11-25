@@ -3,8 +3,14 @@ import { imagesOf, linksOf } from "../../../workflows/storefront/layout-check"
 import { hydrateSection } from "../../../workflows/storefront/layout-hydrate"
 import type { HydrateContext } from "../../../workflows/storefront/layout-hydrate"
 import { layoutDocument, readStoredLayout } from "../layout"
-import { BANNER_EYEBROW_MAX, BANNER_SPLIT_EDGES, banner } from "../sections/banner"
-import { POSTS_INTRO_LIMITS, posts } from "../sections/posts"
+import {
+  BANNER_EYEBROW_MAX,
+  BANNER_SPLIT_BUTTON_TONES,
+  BANNER_SPLIT_EDGES,
+  BANNER_SPLIT_ORNAMENTS,
+  banner,
+} from "../sections/banner"
+import { POSTS_INTRO_LIMITS, POSTS_PANEL_SETTINGS, posts } from "../sections/posts"
 
 // The contract's own files (`@qticaret/types`), through jest: the package is ESM for tsc here
 const CONTRACT = path.resolve(__dirname, "../../../../../../packages/types/src/store")
@@ -90,6 +96,28 @@ describe("the posts' intro panel (adr/0077 Ek, Vadi)", () => {
   it("mirrors the contract's lengths", () => {
     const contract = jest.requireActual<Record<string, unknown>>(`${CONTRACT}/section-posts.ts`)
     expect(POSTS_INTRO_LIMITS).toEqual(contract["POSTS_INTRO_LIMITS"])
+    expect(POSTS_PANEL_SETTINGS).toEqual(contract["POSTS_PANEL_SETTINGS"])
+  })
+
+  it("prints the panel's tone, leaves and wide covers only off their defaults", async () => {
+    const plain = await hydrateSection(posts.parse(guides({ variant: "intro_panel" })), linked([]))
+    expect(plain).not.toHaveProperty("panel_tone")
+    expect(plain).not.toHaveProperty("ornament")
+    expect(plain).not.toHaveProperty("cover_ratio")
+    const set = posts.parse(
+      guides({
+        variant: "intro_panel",
+        panel_tone: "tint",
+        ornament: "leaves",
+        cover_ratio: "wide",
+      })
+    )
+    expect(await hydrateSection(set, linked([]))).toMatchObject({
+      panel_tone: "tint",
+      ornament: "leaves",
+      cover_ratio: "wide",
+    })
+    expect(() => posts.parse(guides({ variant: "intro_panel", cover_ratio: "3:1" }))).toThrow()
   })
 })
 
@@ -138,5 +166,19 @@ describe("the band's split variant (adr/0077 Ek, Vadi)", () => {
     const contract = jest.requireActual<Record<string, unknown>>(`${CONTRACT}/section-banner.ts`)
     expect(BANNER_SPLIT_EDGES).toEqual(contract["BANNER_SPLIT_EDGES"])
     expect(BANNER_EYEBROW_MAX).toEqual(contract["BANNER_EYEBROW_MAX"])
+    expect(BANNER_SPLIT_BUTTON_TONES).toEqual(contract["BANNER_SPLIT_BUTTON_TONES"])
+    expect(BANNER_SPLIT_ORNAMENTS).toEqual(contract["BANNER_SPLIT_ORNAMENTS"])
+  })
+
+  it("prints the split's accent button and flower only off their defaults", async () => {
+    const plain = await hydrateSection(banner.parse(band({ variant: "split" })), linked([]))
+    expect(plain).not.toHaveProperty("button_tone")
+    expect(plain).not.toHaveProperty("ornament")
+    const set = banner.parse(band({ variant: "split", button_tone: "accent", ornament: "flower" }))
+    expect(await hydrateSection(set, linked([]))).toMatchObject({
+      button_tone: "accent",
+      ornament: "flower",
+    })
+    expect(() => banner.parse(band({ variant: "split", button_tone: "pink" }))).toThrow()
   })
 })

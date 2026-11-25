@@ -109,7 +109,13 @@ export function SingleVariantCard({ product }: { product: ProductDetail }) {
       >
         {/* Side by side from `lg` up: the card runs the main column's width */}
         <div className="grid gap-5 lg:grid-cols-2 lg:gap-8">
-          <PriceFields form={form} idPrefix={ID} sale={facts.sale} others={0} />
+          <PriceFields
+            form={form}
+            idPrefix={ID}
+            sale={facts.sale}
+            others={0}
+            saleTarget={{ productId: product.id, variantId: variant.id }}
+          />
           <StockFields
             form={form}
             idPrefix={ID}

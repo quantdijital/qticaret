@@ -6,6 +6,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderToolLabels,
   HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
@@ -50,6 +51,8 @@ interface HeaderBarCommon extends MainBase {
    * "Ara" drops it down); the server reads a bar saved before it as `field`.
    */
   search_style: HeaderSearchStyle
+  /** The one-row header's tools with words or as round icons only; absent (a bar saved before it): `show`. */
+  tool_labels?: HeaderToolLabels
   /** The one-row header's tools (`inline` only); absent: `round`. */
   tools_style?: HeaderToolsStyle
   /**
@@ -102,6 +105,9 @@ export interface FooterColumnsFields {
   about: string | null
   ground: FooterColumnsStep<"ground">
   badge_style: FooterColumnsStep<"badge_style">
+  news_place: FooterColumnsStep<"news_place">
+  brand_contact: FooterColumnsStep<"brand_contact">
+  bottom_align: FooterColumnsStep<"bottom_align">
 }
 
 export type FooterColumnsSection = FooterBarCommon & {

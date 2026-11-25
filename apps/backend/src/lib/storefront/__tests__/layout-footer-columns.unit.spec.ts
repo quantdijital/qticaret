@@ -44,7 +44,7 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
       id: "mainfooter",
       type: "footer_bar",
       variant: "brand_columns",
-      columns: FOOTER_COLUMNS_DEFAULTS,
+      columns: { top_strip: true, about: null, ground: "well", badge_style: "card" },
     })
   })
 
@@ -79,6 +79,28 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
         badge_style: "plain",
       },
     })
+  })
+
+  it("prints the newsletter's place, the brand's contact and the bottom line only when changed", () => {
+    const doc = withMainSections(
+      layoutDocument.parse({
+        footer: [
+          footer({
+            variant: "brand_columns",
+            news_place: "column",
+            brand_contact: "hide",
+            bottom_align: "center",
+          }),
+        ],
+      }),
+      LEFT
+    )
+    expect(mainSectionsOf(doc).footer_bar).toMatchObject({
+      columns: { news_place: "column", brand_contact: "hide", bottom_align: "center" },
+    })
+    expect(
+      issues({ footer: [footer({ variant: "brand_columns", news_place: "top" })] })
+    ).toHaveLength(1)
   })
 
   it("leaves the ledger's print as it was", () => {

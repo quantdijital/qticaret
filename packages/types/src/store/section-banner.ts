@@ -95,6 +95,25 @@ export const bannerSplitEdgeOf = (value: unknown): BannerSplitEdge =>
   BANNER_SPLIT_EDGES.find((each) => each === value) ?? "straight"
 
 /**
+ * The split's first button in the shop's main colour as today (`primary`)
+ * or in its accent colour (`accent`, "Düğme rengi: Ana / Vurgu"); a small
+ * flower spray drawn at the panel's lower right corner (`flower`, "Süs:
+ * Yok / Çiçek"). Each list's first is the default: the band as it was.
+ */
+export const BANNER_SPLIT_BUTTON_TONES = ["primary", "accent"] as const
+export type BannerSplitButtonTone = (typeof BANNER_SPLIT_BUTTON_TONES)[number]
+export const BANNER_SPLIT_ORNAMENTS = ["none", "flower"] as const
+export type BannerSplitOrnament = (typeof BANNER_SPLIT_ORNAMENTS)[number]
+
+/** The button's tone as a reader takes it: absent or off the list, `primary`. */
+export const bannerSplitToneOf = (value: unknown): BannerSplitButtonTone =>
+  BANNER_SPLIT_BUTTON_TONES.find((each) => each === value) ?? "primary"
+
+/** The ornament as a reader takes it: absent or off the list, `none`. */
+export const bannerSplitOrnamentOf = (value: unknown): BannerSplitOrnament =>
+  BANNER_SPLIT_ORNAMENTS.find((each) => each === value) ?? "none"
+
+/**
  * The band as the storefront reads it. The settings may be absent (a
  * backend from before them): read with `bannerStepOf` and `bannerToneOf`.
  * `variant` and the split's own only off the default (a `standard` band
@@ -111,6 +130,10 @@ export interface StoreBannerSection extends Partial<BannerSettings> {
   edge?: BannerSplitEdge
   /** `split`: a short hand note over the heading (`hand-note.ts`); null or absent: none. */
   note?: string | null
+  /** `split`: printed only off the default; absent: `primary`. */
+  button_tone?: BannerSplitButtonTone
+  /** `split`: printed only off the default; absent: `none`. */
+  ornament?: BannerSplitOrnament
 }
 
 export interface StoreBannerSlide {
