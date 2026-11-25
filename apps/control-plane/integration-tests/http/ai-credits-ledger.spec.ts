@@ -13,6 +13,7 @@ import { CP_AUDIT_MODULE } from "../../src/modules/cp-audit"
 import type CpAuditModuleService from "../../src/modules/cp-audit/service"
 import { aiCreditsIn } from "../../src/workflows/modules"
 import {
+  adjustKey,
   entriesOf,
   expectLedgerMatchesWallet,
   istanbul,
@@ -139,21 +140,32 @@ medusaIntegrationTestRunner({
       const tenantId = shopId()
       await buy(tenantId, 10, NOW)
       const correction = { tenantId, bucket: "purchased" as const, actor: "usr_staff", now: NOW }
-      await expect(adjust(c(), { ...correction, amount: 5, note: "  " })).rejects.toThrow(
-        "cp.ai_credit_note_required"
-      )
-      await expect(adjust(c(), { ...correction, amount: -11, note: "fazla" })).rejects.toThrow(
-        "cp.ai_credit_balance_short"
-      )
       await expect(
-        adjust(c(), { ...correction, bucket: "plan", amount: -1, note: "hak yok" })
+        adjust(c(), { ...correction, key: adjustKey(), amount: 5, note: "  " })
+      ).rejects.toThrow("cp.ai_credit_note_required")
+      await expect(
+        adjust(c(), { ...correction, key: adjustKey(), amount: -11, note: "fazla" })
+      ).rejects.toThrow("cp.ai_credit_balance_short")
+      await expect(
+        adjust(c(), {
+          ...correction,
+          key: adjustKey(),
+          bucket: "plan",
+          amount: -1,
+          note: "hak yok",
+        })
       ).rejects.toThrow("cp.ai_credit_balance_short")
       expect(await walletOf(c(), tenantId)).toMatchObject({
         purchased_balance: 10,
         plan_balance: 0,
       })
 
-      const done = await adjust(c(), { ...correction, amount: -4, note: "hatalı yükleme" })
+      const done = await adjust(c(), {
+        ...correction,
+        key: adjustKey(),
+        amount: -4,
+        note: "hatalı yükleme",
+      })
       expect(done.balance).toBe(6)
       // The refused corrections wrote nothing
       expect((await entriesOf(c(), tenantId)).filter((each) => each.kind === "adjust")).toEqual([
@@ -206,13 +218,14 @@ medusaIntegrationTestRunner({
       // Paid, the next request may come; a cancelled one cannot be paid
       const next = await requestOrder(c(), { tenantId, pack: PACK, requestedBy: null, now: NOW })
       expect(
-        (await cancelOrder(c(), { orderId: next.id, actor: "usr_finance", now: NOW })).status
+        (await cancelOrder(c(), { tenantId, orderId: next.id, actor: "usr_finance", now: NOW }))
+          .status
       ).toBe("cancelled")
       await expect(
         markOrderPaid(c(), { orderId: next.id, actor: "usr_finance", method: "other", now: NOW })
       ).rejects.toThrow("cp.ai_credit_order_closed")
       await expect(
-        cancelOrder(c(), { orderId: order.id, actor: "usr_finance", now: NOW })
+        cancelOrder(c(), { tenantId, orderId: order.id, actor: "usr_finance", now: NOW })
       ).rejects.toThrow("cp.ai_credit_order_closed")
       await expectLedgerMatchesWallet(c(), tenantId)
     })
@@ -223,12 +236,14 @@ medusaIntegrationTestRunner({
       const operationId = opId()
       await spend(c(), { tenantId, operationId, task: "product_from_photo", now: NOW })
       await pgOf(c()).raw(
-        "UPDATE ai_credit_wallet SET purchased_balance = purchased_balance + 5 WHERE tenant_id = ?",
+        "UPDATE ai_credit_wallet SET purchased_balance = purchased_balance + 5, purchased_expires_at = now() + interval '1 year' WHERE tenant_id = ?",
         [tenantId]
       )
 
       // Fourteen minutes on, the operation may still be answered: it stays open
-      const soon = await reconcileAiCredits(c(), new Date(NOW.getTime() + 14 * 60 * 1000))
+      const soon = await reconcileAiCredits(c(), new Date(NOW.getTime() + 14 * 60 * 1000), {
+        compare: true,
+      })
       expect(soon.mismatches.filter((each) => each.tenant_id === tenantId)).toEqual([
         {
           tenant_id: tenantId,
@@ -239,7 +254,9 @@ medusaIntegrationTestRunner({
       expect(await operationOf(c(), tenantId, operationId)).toMatchObject({ status: "open" })
       expect(await walletOf(c(), tenantId)).toMatchObject({ purchased_balance: 5 })
 
-      const later = await reconcileAiCredits(c(), new Date(NOW.getTime() + 16 * 60 * 1000))
+      const later = await reconcileAiCredits(c(), new Date(NOW.getTime() + 16 * 60 * 1000), {
+        compare: true,
+      })
       expect(later.released).toBeGreaterThanOrEqual(1)
       expect(later.failed).toBe(0)
       expect(await operationOf(c(), tenantId, operationId)).toMatchObject({ status: "released" })
@@ -248,7 +265,9 @@ medusaIntegrationTestRunner({
         purchased_balance: 5,
       })
       // Still reported: the watch never writes the difference away
-      const again = await reconcileAiCredits(c(), new Date(NOW.getTime() + 17 * 60 * 1000))
+      const again = await reconcileAiCredits(c(), new Date(NOW.getTime() + 17 * 60 * 1000), {
+        compare: true,
+      })
       expect(again.mismatches.some((each) => each.tenant_id === tenantId)).toBe(true)
     })
 

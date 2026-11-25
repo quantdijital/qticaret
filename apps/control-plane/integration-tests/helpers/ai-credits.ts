@@ -15,6 +15,9 @@ export const shopId = () => `ten_${randomUUID().replace(/-/g, "").slice(0, 20)}`
 
 export const opId = () => randomUUID()
 
+/** A staff correction's key, as the form would make it once. */
+export const adjustKey = () => randomUUID()
+
 /** An instant on Istanbul's clock (UTC+3): `istanbul("2026-11-10", "23:30")`. */
 export const istanbul = (day: string, time = "12:00") => new Date(`${day}T${time}:00.000+03:00`)
 

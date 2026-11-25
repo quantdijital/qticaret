@@ -238,7 +238,7 @@ medusaIntegrationTestRunner({
         grantPurchase(c(), {
           tenantId,
           credits: 50,
-          grantRef: `order:test_${tenantId}`,
+          grantRef: `eft:test_${tenantId}`,
           actor: "usr_test",
           now: NOW,
         })
@@ -250,7 +250,7 @@ medusaIntegrationTestRunner({
         (each) => each.kind === "grant_purchase"
       )
       expect(purchases).toEqual([
-        expect.objectContaining({ amount: 50, grant_ref: `order:test_${tenantId}` }),
+        expect.objectContaining({ amount: 50, grant_ref: `eft:test_${tenantId}` }),
       ])
       await expectLedgerMatchesWallet(c(), tenantId)
     })
