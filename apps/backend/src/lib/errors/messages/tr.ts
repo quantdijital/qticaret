@@ -895,6 +895,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
   "minimax.secret_invalid":
     "MiniMax bu API anahtarını kabul etmedi. Anahtarı MiniMax platformundaki API anahtarları sayfasından yeniden kopyalayın.",
+  "qwen.secret_invalid":
+    "Qwen bu API anahtarını kabul etmedi. Anahtarı Alibaba Model Studio'nun (Singapur bölgesi) API anahtarları sayfasından yeniden kopyalayın.",
   "gemini.secret_invalid":
     "Gemini bu API anahtarını kabul etmedi. Anahtarı Google AI Studio'daki API anahtarları sayfasından yeniden kopyalayın.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",

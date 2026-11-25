@@ -1554,6 +1554,7 @@
     "services": {
       "deepseek": "DeepSeek",
       "minimax": "MiniMax",
+      "qwen": "Qwen (Alibaba)",
       "gemini": "Google Gemini",
       "photoroom": "Photoroom",
       "fake": "Sahte servis (yalnız test)"

@@ -216,8 +216,8 @@ describe("the registry's tool calling records (adr/0079 §2)", () => {
     const verified = aiServices("test")
       .filter((service) => verifiedToolCalls(service) !== null)
       .map((service) => service.id)
-    expect(verified).toEqual(["deepseek", "gemini", "fake"])
-    for (const id of ["deepseek", "gemini"]) {
+    expect(verified).toEqual(["deepseek", "gemini", "qwen", "fake"])
+    for (const id of ["deepseek", "gemini", "qwen"]) {
       const support = verifiedToolCalls(serviceOf(id).service)
       expect(support?.verifiedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/)
       expect(support?.source.every((page) => page.startsWith("https://"))).toBe(true)

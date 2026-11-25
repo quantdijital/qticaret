@@ -31,6 +31,7 @@ describe("AI registries (adr/0071 §2)", () => {
         "minimax",
         "gemini",
         "photoroom",
+        "qwen",
       ])
       expect(findAiService("fake", env)).toBeNull()
     }
@@ -136,6 +137,7 @@ describe("AI registries (adr/0071 §2)", () => {
       minimax: ["text", "vision"],
       gemini: ["text", "vision", "image_edit"],
       photoroom: ["image_edit"],
+      qwen: ["text", "vision"],
     })
     // No result address is fetched from any service yet: both answer with the bytes
     for (const service of aiServices("production")) {

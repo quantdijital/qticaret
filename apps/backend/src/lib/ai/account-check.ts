@@ -53,6 +53,15 @@ interface CheckCall {
 const CHECKS: Readonly<Record<string, CheckCall>> = {
   deepseek: { url: "https://api.deepseek.com/models", header: "bearer", answer: "model_list" },
   minimax: { url: "https://api.minimax.io/v1/models", header: "bearer", answer: "model_list" },
+  // Read 2026-11-25: Model Studio's pages (base-url, the OpenAI-compatible chat reference)
+  // document no model list; the OpenAI-compatible address is tried, and only a 401 refuses
+  // (a 403 there may be an overdue account or a model the key may not call: error-code)
+  qwen: {
+    url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
+    header: "bearer",
+    answer: "model_list",
+    documented: false,
+  },
   gemini: {
     url: "https://generativelanguage.googleapis.com/v1beta/openai/models",
     header: "bearer",

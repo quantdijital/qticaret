@@ -16,6 +16,7 @@ const services = aiServices("production")
 const HOSTS: Record<string, string[]> = {
   deepseek: ["api.deepseek.com"],
   minimax: ["api.minimax.io"],
+  qwen: ["dashscope-intl.aliyuncs.com"],
   gemini: ["generativelanguage.googleapis.com"],
   photoroom: ["sdk.photoroom.com", "image-api.photoroom.com"],
 }
@@ -92,6 +93,8 @@ describe("the registry's targets come from the shared table", () => {
       "scene https://generativelanguage.googleapis.com/v1/models/gemini-nano-banana-2.1:generateContent",
       "photoroom segment-v1 https://sdk.photoroom.com/v1/segment",
       "scene https://image-api.photoroom.com/v2/edit",
+      "qwen qwen3.8-flash https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "qwen qwen3.8-flash https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
     ])
   })
 
