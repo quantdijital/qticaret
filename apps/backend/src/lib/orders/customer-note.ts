@@ -13,14 +13,19 @@ export const ORDER_NOTE_MAX = 500
 /** What a storefront may send before cleaning: room for the spaces and breaks cleaning drops. */
 export const ORDER_NOTE_RAW_MAX = 2000
 
+// Unicode's invisible format characters (Cf): what turns text around or hides it on screen
+const FORMAT = /^\p{Cf}$/u
+
 /**
  * The note as kept: one form of each letter (NFC), line breaks as `\n`,
- * a tab as a space, other control characters and lone surrogates dropped,
- * at most one empty line in a row, no spaces at either end.
+ * a tab as a space, other control characters, invisible format characters
+ * (direction marks and overrides, zero-width spaces, tag characters; the
+ * joiners that shape emoji and some scripts stay) and lone surrogates
+ * dropped, at most one empty line in a row, no spaces at either end.
  */
 export function cleanOrderNote(text: string): string {
   let out = ""
-  for (const char of text.normalize("NFC").replace(/\r\n?/g, "\n")) {
+  for (const char of text.normalize("NFC").replace(/\r\n?|[\u2028\u2029]/g, "\n")) {
     const code = char.codePointAt(0) ?? 0
     if (code === 0x0a) {
       out += "\n"
@@ -30,9 +35,7 @@ export function cleanOrderNote(text: string): string {
       code < 0x20 ||
       (code >= 0x7f && code <= 0x9f) ||
       (code >= 0xd800 && code <= 0xdfff) ||
-      // Bidirectional overrides can turn a note's text around on screen
-      (code >= 0x202a && code <= 0x202e) ||
-      (code >= 0x2066 && code <= 0x2069)
+      (FORMAT.test(char) && code !== 0x200c && code !== 0x200d)
     ) {
       continue
     } else {

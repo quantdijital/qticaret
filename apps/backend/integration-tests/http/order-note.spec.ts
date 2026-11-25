@@ -58,7 +58,7 @@ medusaIntegrationTestRunner({
         beforeComplete: async (id) => {
           cartId = id
           first = await send(id, {
-            note: "  Hediye paketi\u0000 olsun\r\n\r\n\r\n‮Lütfen\t zili çalın  ",
+            note: "  Hediye paketi\u0000 olsun\r\n\r\n\r\n\u202eLütfen\t zili çalın  ",
           })
           // Over 500 characters once cleaned: refused, the first note stays
           tooLong = await send(id, { note: "a".repeat(501) })

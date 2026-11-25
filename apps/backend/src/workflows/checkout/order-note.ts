@@ -11,6 +11,7 @@ import {
   ORDER_NOTE_MAX,
   cleanOrderNote,
   orderNoteLength,
+  orderNoteOf,
   withOrderNote,
 } from "../../lib/orders/customer-note"
 
@@ -30,7 +31,7 @@ interface NoteCart {
 /**
  * Writes the shopper's note on their open cart (only this storefront's),
  * cleaned and within its limit; an empty note takes it off. Undone, the
- * cart's metadata is put back as it was.
+ * note alone is put back as it was.
  */
 const setOrderNoteStep = createStep(
   "checkout-write-order-note",
@@ -52,18 +53,22 @@ const setOrderNoteStep = createStep(
     ) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "carts.unknown")
     }
-    const before = cart.metadata ?? null
+    const before = orderNoteOf(cart.metadata) ?? ""
     await container
       .resolve(Modules.CART)
-      .updateCarts(input.cart_id, { metadata: withOrderNote(before, note) })
+      .updateCarts(input.cart_id, { metadata: withOrderNote(cart.metadata, note) })
     return new StepResponse({ note: note === "" ? null : note }, { id: input.cart_id, before })
   },
+  // Only the note goes back: other keys written since stay as they are (security review)
   async (previous, { container }) => {
-    if (previous) {
-      await container
-        .resolve(Modules.CART)
-        .updateCarts(previous.id, { metadata: previous.before ?? {} })
+    if (!previous) {
+      return
     }
+    const carts = container.resolve(Modules.CART)
+    const cart = await carts.retrieveCart(previous.id, { select: ["id", "metadata"] })
+    await carts.updateCarts(previous.id, {
+      metadata: withOrderNote(cart.metadata, previous.before),
+    })
   }
 )
 

@@ -9,9 +9,15 @@ import {
 
 describe("cleanOrderNote", () => {
   it("drops control and direction characters, keeps line breaks and Turkish letters", () => {
-    expect(cleanOrderNote("Zil\u0000 bozuk\u0007\r\nKapıya‮ bırakın⁦")).toBe(
+    expect(cleanOrderNote("Zil\u0000 bozuk\u0007\r\nKapıya\u202e bırakın\u2066")).toBe(
       "Zil bozuk\nKapıya bırakın"
     )
+  })
+
+  it("drops invisible format characters but keeps the joiners emoji need", () => {
+    expect(cleanOrderNote("a\u200eb\u200bc\ufeffd\u{e0041}e\u061cf")).toBe("abcdef")
+    expect(cleanOrderNote("👨\u200d👩")).toBe("👨\u200d👩")
+    expect(cleanOrderNote("a\u2028\u2029\u2029\u2029b")).toBe("a\n\nb")
   })
 
   it("turns tabs into spaces, keeps one empty line at most, trims each line's end and the whole", () => {
