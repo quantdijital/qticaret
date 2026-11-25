@@ -9613,6 +9613,17 @@
           "medium": "Orta",
           "large": "Büyük",
           "hint": "Şeridin yüksekliği ve yazı boyu birlikte: 32, 36 ya da 44 piksel."
+        },
+        "tone": {
+          "label": "Zemin rengi",
+          "term": "tone",
+          "graphite": "Koyu",
+          "primary": "Ana renk",
+          "hint": "Koyu, şeridin bugünkü grafit zeminidir; Ana renk, mağazanın ana rengini kullanır."
+        },
+        "link": {
+          "label": "Şerit düğmesi",
+          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez."
         }
       },
       "problems": {

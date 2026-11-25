@@ -472,6 +472,8 @@ export type CategorySection = (
 export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
   lines: string[]
+  /** The small button beside the lines; absent or null: none. */
+  link?: LayoutLink | null
 } & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {

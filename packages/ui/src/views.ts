@@ -159,6 +159,8 @@ export interface ShopView {
    * the first line alone.
    */
   announcementSettings?: AnnouncementSettings
+  /** The bar's small button beside its lines (the shop's link and words); absent: none. */
+  announcementLink?: LinkView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

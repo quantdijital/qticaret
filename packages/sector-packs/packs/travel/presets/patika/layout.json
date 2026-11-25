@@ -12,7 +12,12 @@
       "pause_button": "always",
       "hover_pause": "on",
       "align": "center",
-      "size": "small"
+      "size": "small",
+      "tone": "primary",
+      "link": {
+        "$href": "/magaza",
+        "label": "Teklif al"
+      }
     },
     {
       "id": "mainheader",

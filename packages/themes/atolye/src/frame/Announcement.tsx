@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react"
+import { ArrowRight, Phone } from "lucide-react"
 import type { AnnouncementSettings } from "@qticaret/types"
 import { sectionMark } from "@qticaret/ui"
 import type { ContactView, LinkView } from "@qticaret/ui"
@@ -88,10 +88,13 @@ export function Announcement({
   contact,
   words,
   mark,
+  button,
 }: {
   lines: readonly string[]
   /** How several lines show; absent (an older storefront): the first alone. */
   settings?: AnnouncementSettings | undefined
+  /** The small pill button beside the lines (`announcement_bar.link`); absent: none. */
+  button?: LinkView | undefined
   links: readonly LinkView[]
   contact: ContactView
   words: { announcements: string; links: string; pause: string; play: string }
@@ -115,6 +118,8 @@ export function Announcement({
   return (
     <div
       {...sectionMark(mark)}
+      // The shop's main colour for the ground (`tone: primary`, `announcement.css`); else the stage
+      data-bar={settings?.tone === "primary" ? "primary" : undefined}
       className={cn("gf-stage", size.text, shown.length === 0 && "max-lg:hidden")}
     >
       <Container
@@ -129,6 +134,12 @@ export function Announcement({
         )}
       >
         {shown.length > 0 && <Lines lines={shown} keys={keys} settings={settings} words={words} />}
+        {button && shown.length > 0 && (
+          <a href={button.path} className="gf-bar-btn" {...(mark ? { "data-qf": "link" } : {})}>
+            {button.label}
+            <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" strokeWidth={2.25} />
+          </a>
+        )}
         {wide && (
           <nav
             aria-label={words.links}

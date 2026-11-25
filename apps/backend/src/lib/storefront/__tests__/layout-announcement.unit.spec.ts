@@ -69,6 +69,16 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
     ])
   })
 
+  it("keeps the ground's tone and the button's link, none absent as before", () => {
+    const link = { kind: "system" as const, target: "shop" as const, label: "Teklif al" }
+    const doc = layoutDocument.parse({ header: [bar({ tone: "primary", link })] })
+    expect(doc.header[0]).toMatchObject({ tone: "primary", link })
+    expect(layoutDocument.parse({ header: [bar()] }).header[0]).not.toHaveProperty("link")
+    expect(issues({ header: [bar({ tone: "green" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
   it("keeps every alignment and size with every way of showing the lines", () => {
     for (const mode of ANNOUNCEMENT_SETTINGS.mode) {
       for (const align of ANNOUNCEMENT_SETTINGS.align) {

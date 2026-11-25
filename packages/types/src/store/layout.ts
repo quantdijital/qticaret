@@ -356,6 +356,11 @@ export type StoreAnnouncementBar = {
   id: string
   type: "announcement_bar"
   lines: string[]
+  /**
+   * A small button beside the lines (its words the link's own label);
+   * absent or null (today's): none.
+   */
+  link?: StoreLayoutLink | null
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {
