@@ -22,4 +22,6 @@ export const customersReportQuery = (range: ReportRange) =>
     queryKey: ["reports", "customers", range],
     queryFn: () => sdk.client.fetch<CustomersReport>("/admin/reports/customers", { query: range }),
     placeholderData: keepPreviousData,
+    // Each read is recorded (it names customers): not read again on every return to the tab
+    staleTime: 5 * 60_000,
   })

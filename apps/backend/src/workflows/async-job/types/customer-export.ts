@@ -123,7 +123,14 @@ export const customerExport: JobType<Input> = {
       resource_type: "customer",
       resource_id: null,
       outcome: 200,
-      changes: { filters, format, customers: customers.length, capped, job: job.id },
+      // A search may be a person's name or e-mail: the record says one was made, not what
+      changes: {
+        filters: { kind: filters.kind, q_length: filters.q?.length ?? 0 },
+        format,
+        customers: customers.length,
+        capped,
+        job: job.id,
+      },
     })
     await progress(100)
     return {
