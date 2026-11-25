@@ -62,7 +62,7 @@
       "limit": 12,
       "more": {
         "$href": "/magaza",
-        "label": "Tüm turlar"
+        "label": "Tüm rotalar"
       },
       "card_variant": null,
       "scroller": {
@@ -122,6 +122,9 @@
       "limit": 2,
       "eyebrow": "Gezi yazıları",
       "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
+      "panel_tone": "tint",
+      "ornament": "leaves",
+      "cover_ratio": "wide",
       "link": {
         "$href": "/blog",
         "label": "Tüm yazılar"
@@ -142,8 +145,10 @@
         "align": null,
         "width": null
       },
-      "eyebrow": "Erken rezervasyon",
+      "eyebrow": "Özel fırsat",
       "edge": "curved",
+      "button_tone": "accent",
+      "ornament": "flower",
       "slides": [
         {
           "image": {
@@ -162,7 +167,7 @@
         }
       ],
       "width": "boxed",
-      "height": "medium",
+      "height": "low",
       "text_position": "middle_left",
       "overlay": "none",
       "button_style": "solid"
@@ -209,7 +214,9 @@
         }
       ],
       "dividers": "off",
-      "icons": "on"
+      "icons": "on",
+      "arrangement": "row",
+      "social": "on"
     }
   ],
   "footer": [
@@ -229,7 +236,10 @@
       "top_strip": false,
       "about": "Doğaya açılan rotalarda küçük gruplarla turlar. Programlar, dahil olanlar ve kalkış tarihleri her turun sayfasında.",
       "ground": "well",
-      "badge_style": "card"
+      "badge_style": "card",
+      "news_place": "column",
+      "brand_contact": "hide",
+      "bottom_align": "center"
     },
     {
       "id": "vadibulten",
@@ -238,7 +248,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "standard",
-      "title": "Yeni rotalardan ilk siz haberdar olun",
+      "title": "E-bülten",
       "text": null,
       "description": "Yeni rotalar ve erken rezervasyon dönemleri e-postanızda."
     }
