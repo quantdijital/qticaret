@@ -1,9 +1,15 @@
 import { useTranslation } from "react-i18next"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
-import { BANNER_EYEBROW_MAX, BANNER_SPLIT_EDGES } from "@qticaret/types"
+import {
+  BANNER_EYEBROW_MAX,
+  BANNER_SPLIT_BUTTON_TONES,
+  BANNER_SPLIT_EDGES,
+  BANNER_SPLIT_ORNAMENTS,
+} from "@qticaret/types"
 import type { BannerSplitEdge } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
-import { bannerEdgeId } from "./banner-groups"
+import { bannerEdgeId, bannerSplitLookId } from "./banner-groups"
+import { StepChoice } from "./step-choice"
 import { TextField } from "./fields"
 import { HandNoteField } from "./hand-note-field"
 import type { SectionFormProps } from "./form-props"
@@ -91,5 +97,46 @@ export function BannerEdgeField({
         ))}
       </ToggleGroup>
     </div>
+  )
+}
+
+/** The split's first button's colour and its flower spray, each today's band by default. */
+const BANNER_SPLIT_LOOK = {
+  button_tone: BANNER_SPLIT_BUTTON_TONES,
+  ornament: BANNER_SPLIT_ORNAMENTS,
+} as const
+
+/** "Düğme rengi" and "Süs" (the split's own), under "Diziliş" beside its edge. */
+export function BannerSplitLookFields({
+  section,
+  onChange,
+}: {
+  section: BannerSection
+  onChange: (section: BannerSection) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <>
+      {(Object.keys(BANNER_SPLIT_LOOK) as (keyof typeof BANNER_SPLIT_LOOK)[]).map((key) => {
+        const steps: readonly string[] = BANNER_SPLIT_LOOK[key]
+        const first = steps[0] ?? ""
+        return (
+          <StepChoice<string>
+            key={key}
+            id={bannerSplitLookId(section.id, key)}
+            label={t(`${B}.${key}.label`)}
+            term={t(`${B}.${key}.term`)}
+            hint={t(`${B}.${key}.hint`)}
+            steps={steps}
+            value={section[key] ?? first}
+            fallback={first}
+            nameOf={(step) => t(`${B}.${key}.${step}`)}
+            onChange={(step) => {
+              onChange({ ...section, [key]: step })
+            }}
+          />
+        )
+      })}
+    </>
   )
 }

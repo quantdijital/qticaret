@@ -7,6 +7,7 @@ import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
 import { useVariantContext } from "./use-variant-context"
+import { useVariantSale } from "./use-variant-sale"
 import { variantFacts } from "./variant-facts"
 import { useSaveVariant } from "./variant-save"
 import { savedVariant, stockFacts, variantSchemaFor } from "./variant-values"
@@ -16,7 +17,7 @@ import type { VariantField, VariantValues } from "./variant-values"
  * A simple product's one variant as the "Ürün verileri" card edits it
  * (docs/06 "Ürün sayfası"): one form behind its Genel tab (price, cost)
  * and its Stok tab (stock, codes), saved together, once on the page's
- * save bar. Prices are checked by the server as from the variant's dialog.
+ * header save. Prices are checked by the server as from the variant's dialog.
  */
 export function useSimpleVariant(product: ProductDetail, on: boolean) {
   const { t } = useTranslation()
@@ -36,7 +37,12 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
       : {}),
   })
   const save = useSaveVariant(product, locationId)
-  const submit = form.handleSubmit((values) => {
+  // Its sale price (adr/0086), in the Genel tab: saved with the variant, one entry on the page's header save
+  const sale = useVariantSale(
+    variant ? { productId: product.id, variantId: variant.id } : null,
+    false
+  )
+  const submitForm = form.handleSubmit((values) => {
     if (!variant || !saved) {
       return
     }
@@ -56,10 +62,19 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
     if (saved) {
       form.reset(saved, FULL_RESET)
     }
+    sale.reset()
   }
-  const dirty = form.formState.isDirty
-  // One entry for both tabs: the save bar saves the variant once
-  useDirtyEntry({ dirty, saving: save.isPending, submit: () => void submit(), reset })
+  const formDirty = form.formState.isDirty
+  const dirty = formDirty || sale.dirty
+  const saving = save.isPending || sale.saving
+  const submit = () => {
+    if (formDirty) {
+      void submitForm()
+    }
+    sale.submit()
+  }
+  // One entry for both tabs: the page's header save saves the variant once
+  useDirtyEntry({ dirty, saving, submit, reset })
   if (!variant || !saved) {
     return null
   }
@@ -74,11 +89,12 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
     form,
     saved,
     sale: facts.sale,
+    salePrice: sale,
     stock: stockFacts(variant, locationId),
     context,
     dirty,
-    saving: save.isPending,
-    submit: () => void submit(),
+    saving,
+    submit,
     reset,
   }
 }

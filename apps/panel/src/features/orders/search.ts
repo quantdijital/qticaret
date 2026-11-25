@@ -44,8 +44,9 @@ const choices = (values: readonly string[]) =>
     .catch(undefined)
 
 /**
- * The order list's URL: `/orders?stage=to_ship&payment=paid,refunded&shipping=label&method=cod&carrier=aras&from=2026-11-01&to=2026-11-06&q=1042&page=2`
- * (1-based in the URL). Every filter lives here, so a filtered list is a link.
+ * The order list's URL: `/orders?stage=to_ship&payment=paid,refunded&shipping=label&method=cod&carrier=aras&from=2026-11-01&to=2026-11-06&customer=cus_01…&q=1042&page=2`
+ * (1-based in the URL). Every filter lives here, so a filtered list is a link
+ * (one customer's orders: from the order's customer card and their page).
  */
 export const orderListSearchSchema = z.object({
   q: z.string().max(100).optional().catch(undefined),
@@ -56,6 +57,7 @@ export const orderListSearchSchema = z.object({
   carrier: choices(CARRIER_FILTERS),
   from: day,
   to: day,
+  customer: z.string().trim().min(1).max(64).optional().catch(undefined),
   page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
 })
 
@@ -73,7 +75,13 @@ export const choicesOf = (search: OrderListSearch) => ({
 export const isFiltered = (search: OrderListSearch): boolean => {
   const lists = choicesOf(search)
   return Boolean(
-    lists.payment ?? lists.shipping ?? lists.method ?? lists.carrier ?? search.from ?? search.to
+    lists.payment ??
+    lists.shipping ??
+    lists.method ??
+    lists.carrier ??
+    search.from ??
+    search.to ??
+    search.customer
   )
 }
 
@@ -89,6 +97,7 @@ export const cleanSearch = (search: OrderListSearch): OrderListSearch => {
     carrier: choicesText(lists.carrier),
     from: search.from,
     to: search.to,
+    customer: search.customer === "" ? undefined : search.customer,
     page: search.page && search.page > 1 ? search.page : undefined,
   }
 }
@@ -100,4 +109,6 @@ export const filtersOf = (search: OrderListSearch): OrderFilters => ({
   ...choicesOf(search),
   from: search.from,
   to: search.to,
+  // One customer's orders, wholesale ones too, as on their page (ADR-0068 Ek 2026-11-15 (2))
+  ...(search.customer ? { customerId: search.customer, segment: "all" as const } : {}),
 })

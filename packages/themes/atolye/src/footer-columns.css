@@ -113,6 +113,34 @@
     justify-content: flex-end;
     gap: 0 1.25rem;
   }
+  /*
+   * `bottom_align: center`: the year and the shop's name alone in the
+   * middle between two short rules, the marks and the cookie choices
+   * centred on the row under them.
+   */
+  .gf-foot-line[data-align="center"] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .gf-foot-line[data-align="center"] > .gf-foot-copy {
+    display: flex;
+    flex-basis: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .gf-foot-line[data-align="center"] > .gf-foot-copy::before,
+  .gf-foot-line[data-align="center"] > .gf-foot-copy::after {
+    width: min(9rem, 15%);
+    height: 1px;
+    background: var(--color-rule);
+    content: "";
+  }
+  .gf-foot-line[data-align="center"] > .gf-foot-tools {
+    justify-content: center;
+  }
 
   .gf-pay {
     display: flex;

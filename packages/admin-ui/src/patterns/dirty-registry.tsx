@@ -9,7 +9,7 @@ import {
 } from "react"
 import type { ReactNode } from "react"
 
-/** A form on the page that saves on its own (a card): what the page's save bar needs of it. */
+/** A form on the page that saves on its own (a card): what the page's header save needs of it. */
 export interface DirtyEntry {
   dirty: boolean
   saving: boolean
@@ -30,7 +30,7 @@ export interface DirtyState {
 const CLEAN: DirtyState = { dirty: 0, saving: false }
 
 /**
- * The page's forms by id: each card puts its latest state in, the save bar
+ * The page's forms by id: each card puts its latest state in, the page's header save
  * reads the count and saves or lets go of all of them. Listeners hear only
  * when the count or the saving changes, not on every keystroke.
  */
@@ -90,7 +90,7 @@ export type DirtyRegistry = ReturnType<typeof createDirtyRegistry>
 
 const Registry = createContext<DirtyRegistry | null>(null)
 
-/** A page whose cards save on their own and share one save bar (docs/06 "Ürün sayfası"). */
+/** A page whose cards save on their own and share one save in the header (docs/06 "Ürün sayfası"). */
 export function DirtyRegistryProvider({ children }: { children: ReactNode }) {
   const [registry] = useState(createDirtyRegistry)
   return <Registry.Provider value={registry}>{children}</Registry.Provider>
@@ -115,7 +115,7 @@ export function useDirtyEntry(entry: DirtyEntry): void {
   )
 }
 
-/** The page's registry and its state, for the save bar; null outside a page that has one. */
+/** The page's registry and its state, for the page's header save; null outside a page that has one. */
 export function useDirtyRegistry(): (DirtyRegistry & { now: DirtyState }) | null {
   const registry = useContext(Registry)
   const now = useSyncExternalStore(

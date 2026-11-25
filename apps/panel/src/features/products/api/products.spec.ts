@@ -68,6 +68,16 @@ describe("the product list's page (owner 2026-11-06)", () => {
     expect(page.products).toEqual([])
   })
 
+  it("reads as many products as the person's page size asks", async () => {
+    fetchMock.mockResolvedValue({ ids: [], count: 0, limited: false })
+
+    await read({ q: "", status: "all", page: 2, pageSize: 50 })
+
+    expect(fetchMock).toHaveBeenCalledWith("/admin/product-board", {
+      query: { order: "-updated_at", offset: 100, limit: 50 },
+    })
+  })
+
   it("selects every match for a bulk change, none past the limit", async () => {
     fetchMock.mockResolvedValueOnce({ ids: ["prod_a"], count: 1, limited: false })
     expect(await matchingProductIds({ q: "", status: "all", stock: "out" })).toEqual({

@@ -17,10 +17,13 @@ export function LinkColumns({
   groups,
   shop,
   t,
+  className = "lg:col-span-8",
 }: {
   groups: readonly FooterGroupView[]
   shop: ShopView
   t: Translate
+  /** The columns' width on the brand columns' grid. */
+  className?: string
 }) {
   const columns: Column[] = [
     ...groups.map((group) => ({ title: group.title, links: group.links })),
@@ -32,7 +35,7 @@ export function LinkColumns({
     return null
   }
   return (
-    <div className="lg:col-span-8">
+    <div className={className}>
       <div className="border-t border-rule lg:hidden">
         {columns.map((column) => (
           <details key={column.title} className="group border-b border-rule">

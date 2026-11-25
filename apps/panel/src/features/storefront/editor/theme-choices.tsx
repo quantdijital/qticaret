@@ -190,6 +190,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             hint={t(`${C}.sectionSpacingHint`)}
           />
           <KitChoice field="density" {...kit} />
+          <KitChoice field="page_width" {...kit} />
         </Pair>
       </PanelGroup>
       <PanelGroup

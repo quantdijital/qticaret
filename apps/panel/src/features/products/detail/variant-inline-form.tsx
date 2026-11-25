@@ -15,6 +15,7 @@ import type { CatalogVariant } from "./variant-codes"
 import { imageTies } from "./variant-facts"
 import { CodeFields, MeasureFields, PriceFields, StockFields } from "./variant-fields"
 import { VariantPictures } from "./variant-pictures"
+import { useVariantSale } from "./use-variant-sale"
 import { useSaveVariant } from "./variant-save"
 import { FIELD_TABS, fieldId, savedVariant, stockFacts, variantSchemaFor } from "./variant-values"
 import type { Variant, VariantField, VariantValues } from "./variant-values"
@@ -41,7 +42,7 @@ interface VariantInlineFormProps {
  * Everything about one variant, open in its row (the owner, 2026-11-25:
  * "modal olmasın", WooCommerce's variations): price and stock, codes and
  * its own parcel, its pictures, one under another. "Kaydet" here, the
- * page's save bar or ⌘S save it; a refused field is told beside it and
+ * page's header save or ⌘S save it; a refused field is told beside it and
  * gets the caret. Prices are checked by the server as everywhere else.
  */
 export function VariantInlineForm({
@@ -67,7 +68,11 @@ export function VariantInlineForm({
     defaultValues: saved,
   })
   const save = useSaveVariant(product, locationId)
-  const dirty = form.formState.isDirty
+  // Its sale price (adr/0086): saved with the row's "Kaydet", one entry on the page's header save
+  const salePrice = useVariantSale({ productId: product.id, variantId: variant.id }, false)
+  const formDirty = form.formState.isDirty
+  const dirty = formDirty || salePrice.dirty
+  const saving = save.isPending || salePrice.saving
   useEffect(() => {
     onDirtyChange(dirty)
   }, [dirty, onDirtyChange])
@@ -92,7 +97,7 @@ export function VariantInlineForm({
       setCaret({ id: fieldId(field) })
     }
   }
-  const submit = form.handleSubmit((values) => {
+  const submitForm = form.handleSubmit((values) => {
     const changed = form.formState.dirtyFields as Partial<Record<VariantField, boolean>>
     save.mutate(
       { variant, values, saved, dirty: changed },
@@ -106,10 +111,17 @@ export function VariantInlineForm({
       }
     )
   }, showError)
+  const submit = () => {
+    if (formDirty) {
+      void submitForm()
+    }
+    salePrice.submit()
+  }
   const reset = () => {
     form.reset(saved, FULL_RESET)
+    salePrice.reset()
   }
-  useDirtyEntry({ dirty, saving: save.isPending, submit: () => void submit(), reset })
+  useDirtyEntry({ dirty, saving, submit, reset })
 
   return (
     <form
@@ -118,7 +130,7 @@ export function VariantInlineForm({
       className="flex flex-col gap-6 border-t bg-muted/30 px-5 py-5"
       onSubmit={(event) => {
         event.preventDefault()
-        void submit()
+        submit()
       }}
       onKeyDown={(event) => {
         if (event.key === "Escape" && !dirty) {
@@ -129,7 +141,7 @@ export function VariantInlineForm({
     >
       {/* Side by side from `lg` up, one under another on a phone or a tablet */}
       <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-        <PriceFields form={form} idPrefix={ID} sale={sale} others={0} />
+        <PriceFields form={form} idPrefix={ID} sale={sale} others={0} saleOf={salePrice} />
         <StockFields
           form={form}
           idPrefix={ID}
@@ -151,13 +163,13 @@ export function VariantInlineForm({
           type="button"
           variant="ghost"
           size="sm"
-          disabled={save.isPending}
+          disabled={saving}
           onClick={dirty ? reset : onClose}
         >
           {dirty ? t("common.reset") : t("common.close")}
         </Button>
-        <Button type="submit" size="sm" disabled={save.isPending || !dirty}>
-          {save.isPending ? <Loader2 className="animate-spin" /> : null}
+        <Button type="submit" size="sm" disabled={saving || !dirty}>
+          {saving ? <Loader2 className="animate-spin" /> : null}
           {t("common.save")}
         </Button>
       </div>

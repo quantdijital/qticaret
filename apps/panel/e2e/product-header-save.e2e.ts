@@ -61,6 +61,8 @@ async function searchTitle(page: Page) {
     .getByRole("button", { name: "Arama motoru görünümü", exact: true })
   const field = page.locator("#product-seo input").first()
   await expect(fold).toBeVisible()
+  // The advisor has answered (its score is drawn): it opens the card by itself no more
+  await expect(page.getByRole("img", { name: /^SEO puanı \d+\/100$/ }).first()).toBeVisible()
   await expect(async () => {
     if ((await fold.getAttribute("aria-expanded")) !== "true") {
       await fold.click()

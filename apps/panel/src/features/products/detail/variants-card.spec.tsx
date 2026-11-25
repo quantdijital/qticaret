@@ -29,7 +29,7 @@ vi.mock("@/lib/sdk", () => ({
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }))
 
-/** The page's save bar, as far as the card is concerned: its count and its "Kaydet". */
+/** The page's header save, as far as the card is concerned: its count and its "Kaydet". */
 function BarProbe() {
   const registry = useDirtyRegistry()
   return (
@@ -88,7 +88,7 @@ describe("the variants card", () => {
     await user.click(pembe)
     expect(pembe).toHaveAttribute("aria-expanded", "true")
     expect(screen.queryByRole("dialog")).toBeNull()
-    expect(within(form()).getByLabelText("Satış fiyatı")).toHaveValue("3.100,00")
+    expect(within(form()).getByLabelText("Normal fiyat")).toHaveValue("3.100,00")
     // Codes, parcel and pictures in the same place, one under another
     expect(within(form()).getByLabelText("Barkod (GTIN)")).toBeInTheDocument()
     expect(within(form()).getByRole("heading", { name: "Ölçüler" })).toBeInTheDocument()
@@ -101,7 +101,7 @@ describe("the variants card", () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Sarı/))
-    const price = within(form()).getByLabelText("Satış fiyatı")
+    const price = within(form()).getByLabelText("Normal fiyat")
     await user.clear(price)
     await user.type(price, "2.900")
     await user.click(await row(/Renk: Mor/))
@@ -109,15 +109,15 @@ describe("the variants card", () => {
     await user.click(within(ask).getByRole("button", { name: "Değişiklikleri at" }))
 
     expect(await row(/Renk: Mor/)).toHaveAttribute("aria-expanded", "true")
-    expect(within(form()).getByLabelText("Satış fiyatı")).toHaveValue("3.100,00")
+    expect(within(form()).getByLabelText("Normal fiyat")).toHaveValue("3.100,00")
     expect(batchVariants).not.toHaveBeenCalled()
   })
 
-  it("joins the page's save bar: an edit counts there and the bar saves it", async () => {
+  it("joins the page's header save: an edit counts there and the bar saves it", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Sarı/))
-    const price = within(form()).getByLabelText("Satış fiyatı")
+    const price = within(form()).getByLabelText("Normal fiyat")
     await user.clear(price)
     await user.type(price, "2.900")
     await user.click(screen.getByRole("button", { name: "Bar: 1" }))
@@ -169,7 +169,7 @@ describe("the variants card", () => {
     })
     expect(await row(/Renk: Pembe/)).toHaveAttribute("aria-expanded", "true")
     await waitFor(() => {
-      expect(within(form()).getByLabelText("Satış fiyatı")).toHaveFocus()
+      expect(within(form()).getByLabelText("Normal fiyat")).toHaveFocus()
     })
   })
 
@@ -261,7 +261,7 @@ describe("a product of one variant", () => {
     expect(await screen.findByRole("heading", { name: "Fiyat, stok ve kodlar" })).toBeVisible()
     expect(screen.queryByRole("button", { name: /Varsayılan/ })).toBeNull()
 
-    const price = screen.getByLabelText("Satış fiyatı")
+    const price = screen.getByLabelText("Normal fiyat")
     await waitFor(() => {
       expect(price).toHaveValue("3.100,00")
     })
