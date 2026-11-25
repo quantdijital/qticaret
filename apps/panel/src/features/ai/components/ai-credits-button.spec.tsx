@@ -3,7 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { wallet } from "@/features/settings/components/ai-credits.fixtures"
+import type { AiCreditsWallet } from "@/features/ai/api/credits"
+import { PACK, wallet } from "@/features/settings/components/ai-credits.fixtures"
 import { AiButton } from "./ai-button"
 
 const sdkFetch = vi.hoisted(() => vi.fn())
@@ -52,10 +53,12 @@ const draft = (service: string) => ({
   },
 })
 
-function setup(usable: string[], cost = 3) {
+function setup(usable: string[], cost = 3, changes: Partial<AiCreditsWallet> = {}) {
   sdkFetch.mockImplementation((url: string) =>
     Promise.resolve(
-      url === "/admin/ai/credits" ? wallet({ tasks: { seo_title: cost } }) : services(usable)
+      url === "/admin/ai/credits"
+        ? wallet({ tasks: { seo_title: cost }, ...changes })
+        : services(usable)
     )
   )
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -143,6 +146,26 @@ describe("AiButton on the platform's credits", () => {
     expect(await screen.findByText("Krediniz bitti.")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "Kredi yükle" }))
     expect(await screen.findByRole("dialog", { name: "Kredi yükle" })).toBeInTheDocument()
+  })
+
+  it("tells the owner a request is on its way in place of Kredi yükle", async () => {
+    failWith("ai.credits_exhausted", 402)
+    const pending_order = {
+      id: "aicord_01",
+      pack_id: PACK.id,
+      credits: PACK.credits,
+      amount: PACK.amount,
+      currency: PACK.currency,
+      status: "pending",
+      requested_at: "2026-11-25T10:00:00.000Z",
+    }
+    const user = setup(["platform"], 3, { pending_order })
+    await open(user)
+    expect(await screen.findByText("Krediniz bitti.")).toBeInTheDocument()
+    expect(
+      await screen.findByText("Bekleyen talebiniz var; ödeme onaylanınca krediniz yüklenir.")
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Kredi yükle" })).toBeNull()
   })
 
   it("tells anyone but the owner to let the owner know", async () => {
