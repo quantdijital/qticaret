@@ -270,76 +270,6 @@
       "back_to_top_mobile": true,
       "ground": "stage",
       "badge_style": "plain",
-      "bottom_badges": true,
-      "rows": [
-        {
-          "id": "patikarow1",
-          "ground": "inherit",
-          "space": "medium",
-          "align": "start",
-          "phone_columns": 1,
-          "divider": false,
-          "layout": "2-1-1-1",
-          "columns": [
-            {
-              "blocks": [
-                {
-                  "id": "patikabrand",
-                  "visible": true,
-                  "device": "all",
-                  "type": "brand",
-                  "logo": true,
-                  "about": "Rehberli yürüyüş ve doğa turları. Günlük mesafe, zorluk ve konaklama her turun sayfasında yazılı.",
-                  "social": true,
-                  "address": false
-                }
-              ]
-            },
-            {
-              "blocks": [
-                {
-                  "id": "patikamenu1",
-                  "visible": true,
-                  "device": "all",
-                  "type": "menu",
-                  "slot": 1,
-                  "title": null,
-                  "collapse_phone": true
-                }
-              ]
-            },
-            {
-              "blocks": [
-                {
-                  "id": "patikamenu2",
-                  "visible": true,
-                  "device": "all",
-                  "type": "menu",
-                  "slot": 2,
-                  "title": null,
-                  "collapse_phone": true
-                }
-              ]
-            },
-            {
-              "blocks": [
-                {
-                  "id": "patikailetisim",
-                  "visible": true,
-                  "device": "all",
-                  "type": "contact",
-                  "title": null,
-                  "address": true,
-                  "phone": true,
-                  "whatsapp": true,
-                  "email": true,
-                  "hours": true
-                }
-              ]
-            }
-          ]
-        }
-      ],
       "top_strip": false,
       "about": "Rehberli yürüyüş ve doğa turları. Günlük mesafe, zorluk ve konaklama her turun sayfasında yazılı.",
       "news_place": "column",
@@ -355,8 +285,7 @@
       "variant": "standard",
       "title": "Yol notları e-postanızda",
       "text": null,
-      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
-      "joined": true
+      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar."
     }
   ],
   "product": [
