@@ -2,6 +2,7 @@ import { AI_FAKE_TARGET, AI_SERVICE_TARGETS as T, endpointUrl } from "@qticaret/
 import type { AiSource } from "../../media/ai-source"
 import type { AiErrorKey } from "../errors"
 import type { AiCapability } from "./capabilities"
+import { QWEN } from "./service-qwen"
 
 /**
  * The AI services a shop can connect (adr/0071 §2). A fixed registry: no
@@ -555,7 +556,7 @@ export const FAKE_SERVICE: AiService = {
   dataNoteKey: "ai.data_note.fake",
 }
 
-const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI, PHOTOROOM]
+const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI, PHOTOROOM, QWEN]
 
 /** The services of this instance, in registry order (the order a choice falls back to). */
 export function aiServices(
