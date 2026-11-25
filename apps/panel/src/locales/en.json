@@ -4294,7 +4294,8 @@
           "categories": "Category and brand",
           "weight": "Weight and dimensions"
         }
-      }
+      },
+      "shortcutSave": "Save changes"
     },
     "variant": {
       "title": "Edit variant",
@@ -4309,7 +4310,7 @@
       "stock": "Stock",
       "stockHint": "The quantity at the shop's default location.",
       "onHand": "Stock quantity",
-      "untracked": "This variant's stock is not tracked.",
+      "untracked": "Stock not tracked: this variant is always sold.",
       "backorderHint": "Orders are taken after it sells out too (preorder).",
       "codes": "Codes",
       "measures": "Measures",
@@ -4349,7 +4350,9 @@
         "soldOut": "Out of stock",
         "preorder": "Preorder",
         "noBarcode": "No barcode"
-      }
+      },
+      "details": "All variant details",
+      "detailsDirty": "Save or undo this card's changes first."
     },
     "rowActions": "Actions for {{title}}",
     "duplicate": {

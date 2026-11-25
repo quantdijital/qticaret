@@ -68,6 +68,11 @@
   "recordStepper": {
     "position": "{{at}} / {{total}}"
   },
+  "saveBar": {
+    "label": "Unsaved changes",
+    "text_one": "Unsaved changes",
+    "text_other": "Unsaved changes (in {{count}} parts)"
+  },
   "wizard": {
     "stepOf": "Step {{step}} of {{total}}"
   }

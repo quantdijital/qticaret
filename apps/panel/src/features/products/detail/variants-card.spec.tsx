@@ -328,6 +328,23 @@ describe("a product of one variant", () => {
     })
   })
 
+  it("opens the variant's dialog for all its details, and says untracked stock is always sold", async () => {
+    const user = userEvent.setup()
+    renderCard({
+      ...PRODUCT,
+      variants: [variant("variant_1", "Varsayılan", { sku: "MYL-1" })],
+    } as unknown as ProductDetail)
+    expect(
+      await screen.findByText("Stok takibi yok: bu varyant her zaman satılır.")
+    ).toBeInTheDocument()
+    const details = screen.getByRole("button", { name: "Tüm varyant ayrıntıları" })
+    await waitFor(() => {
+      expect(details).toBeEnabled()
+    })
+    await user.click(details)
+    expect(await screen.findByRole("dialog", { name: /Varyantı düzenle/ })).toBeVisible()
+  })
+
   /** The owner, 2026-11-19: the stock count stood ~40 px below the price beside it. */
   it("keeps the location's note under the stock count, not above the stock fields", async () => {
     renderCard({

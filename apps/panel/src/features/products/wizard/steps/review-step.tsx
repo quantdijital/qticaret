@@ -11,6 +11,7 @@ import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { toSlug } from "@/lib/slug"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { readiness, wordCount } from "../readiness"
+import { useWizardShown } from "../wizard-layout"
 import type { ReadinessItem } from "../readiness"
 import type { WizardValues } from "../schema"
 
@@ -73,7 +74,7 @@ export function ReviewStep() {
   const names = (categories.data ?? [])
     .filter((category) => values.category_ids.includes(category.id))
     .map((category) => category.name)
-  const items = readiness(values)
+  const items = readiness(values, useWizardShown())
   const prefix = useProductPathPrefix()
   const slug = values.handle.trim() || toSlug(values.title)
   const excerpt = values.description.trim()

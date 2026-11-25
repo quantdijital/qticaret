@@ -68,6 +68,11 @@
   "recordStepper": {
     "position": "{{at}} / {{total}}"
   },
+  "saveBar": {
+    "label": "Kaydedilmemiş değişiklikler",
+    "text_one": "Kaydedilmemiş değişiklikler",
+    "text_other": "Kaydedilmemiş değişiklikler ({{count}} bölümde)"
+  },
   "wizard": {
     "stepOf": "Adım {{step}} / {{total}}"
   }

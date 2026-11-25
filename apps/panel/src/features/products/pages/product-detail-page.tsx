@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
+import { DirtyRegistryProvider } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SaveBar } from "@qticaret/admin-ui/patterns/save-bar"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
@@ -109,52 +111,55 @@ function ProductPage({
   // The folded parts the shop has start open ("Gelişmiş"), by their remembered names
   const open = new Set<string>(page.layout.open.map((key) => `product.${key}`))
   return (
-    <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
-      <div className="flex flex-col gap-[var(--grid-gap)]">
-        <PageHeader
-          title={product.title}
-          badge={<ProductStatusBadge status={product.status} />}
-          back={back}
-          action={
-            <ProductActions
-              product={product}
-              onCustomize={
-                canArrange
-                  ? () => {
-                      page.setDraft(page.saved)
-                    }
-                  : undefined
-              }
-            />
-          }
-        />
-        {wide ? null : nav}
-        <EditorLayout
-          main={
-            <>
-              {wide ? nav : null}
-              {page.layout.main.map((key) => {
-                const why = slot(key)
-                return why === undefined ? null : (
-                  <PartSlot key={key} part={key} why={why}>
-                    <MainPartView part={key} product={product} />
-                  </PartSlot>
-                )
-              })}
-              <HiddenLine parts={page.away} onShow={page.showAll} />
-            </>
-          }
-          side={page.layout.side.map((key) => {
-            const why = slot(key)
-            return why === undefined ? null : (
-              <PartSlot key={key} part={key} why={why}>
-                <SidePartView part={key} product={product} onTarget={page.goTo} />
-              </PartSlot>
-            )
-          })}
-        />
-        <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
-      </div>
-    </SectionDefaults>
+    <DirtyRegistryProvider>
+      <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
+        <div className="flex flex-col gap-[var(--grid-gap)]">
+          <PageHeader
+            title={product.title}
+            badge={<ProductStatusBadge status={product.status} />}
+            back={back}
+            action={
+              <ProductActions
+                product={product}
+                onCustomize={
+                  canArrange
+                    ? () => {
+                        page.setDraft(page.saved)
+                      }
+                    : undefined
+                }
+              />
+            }
+          />
+          {wide ? null : nav}
+          <EditorLayout
+            main={
+              <>
+                {wide ? nav : null}
+                {page.layout.main.map((key) => {
+                  const why = slot(key)
+                  return why === undefined ? null : (
+                    <PartSlot key={key} part={key} why={why}>
+                      <MainPartView part={key} product={product} />
+                    </PartSlot>
+                  )
+                })}
+                <HiddenLine parts={page.away} onShow={page.showAll} />
+              </>
+            }
+            side={page.layout.side.map((key) => {
+              const why = slot(key)
+              return why === undefined ? null : (
+                <PartSlot key={key} part={key} why={why}>
+                  <SidePartView part={key} product={product} onTarget={page.goTo} />
+                </PartSlot>
+              )
+            })}
+          />
+          <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
+          <SaveBar />
+        </div>
+      </SectionDefaults>
+    </DirtyRegistryProvider>
   )
 }

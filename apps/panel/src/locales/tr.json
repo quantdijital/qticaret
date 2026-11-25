@@ -4294,7 +4294,8 @@
           "categories": "Kategori ve marka",
           "weight": "Ağırlık ve ölçüler"
         }
-      }
+      },
+      "shortcutSave": "Değişiklikleri kaydet"
     },
     "variant": {
       "title": "Varyantı düzenle",
@@ -4309,7 +4310,7 @@
       "stock": "Stok",
       "stockHint": "Mağazanın varsayılan depo adresindeki adet.",
       "onHand": "Stok adedi",
-      "untracked": "Bu varyantın stoğu takip edilmiyor.",
+      "untracked": "Stok takibi yok: bu varyant her zaman satılır.",
       "backorderHint": "Stok bitince de sipariş alınır (ön sipariş).",
       "codes": "Kodlar",
       "measures": "Ölçüler",
@@ -4349,7 +4350,9 @@
         "soldOut": "Stokta yok",
         "preorder": "Ön sipariş",
         "noBarcode": "Barkod yok"
-      }
+      },
+      "details": "Tüm varyant ayrıntıları",
+      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın."
     },
     "rowActions": "{{title}} işlemleri",
     "duplicate": {
