@@ -9,6 +9,7 @@ import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { customerQuery } from "@/features/customers/api/customers"
 import type { CustomerDetail } from "@/features/customers/api/customers"
@@ -42,7 +43,18 @@ function OrdersCard({ customerId }: { customerId: string }) {
     return <EmptyRow text={t("customers.detail.noOrders")} />
   }
   return (
-    <SectionCard title={t("customers.detail.orders")} flush>
+    <SectionCard
+      title={t("customers.detail.orders")}
+      flush
+      action={
+        // Every one of them, in the order list filtered to this customer
+        <Button asChild variant="outline" size="sm">
+          <Link to="/orders" search={{ customer: customerId }}>
+            {t("customers.detail.allOrders")}
+          </Link>
+        </Button>
+      }
+    >
       <AsyncBody query={query} skeleton={<Skeleton className="mx-5 mb-5 h-40" />}>
         {(data) => (
           <ul className="flex flex-col">

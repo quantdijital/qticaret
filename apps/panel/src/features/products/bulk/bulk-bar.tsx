@@ -14,6 +14,7 @@ import { MAX_BULK_PRODUCTS, matchingProductIds } from "@/features/products/api/b
 import type { BulkAction } from "@/features/products/api/bulk"
 import type { ProductFilters } from "@/features/products/api/products"
 import { useCan } from "@/features/auth/api/staff"
+import { BulkDeleteButton } from "@/features/products/bulk/bulk-delete-button"
 import { ADDONS_FLAG } from "@/features/products/api/addons"
 import { useFeatureState } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
@@ -37,7 +38,7 @@ interface BulkBarProps {
 /**
  * Above the list while products are picked (F3.10): how many, picking
  * every one the search holds (up to the limit a run takes), letting go,
- * and the changes that can be made to them at once.
+ * deleting them (asked first) and the changes that can be made to them at once.
  */
 export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts }: BulkBarProps) {
   const { t } = useTranslation()
@@ -110,32 +111,39 @@ export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts 
           {t("products.bulk.tooMany", { max: formatCount(MAX_BULK_PRODUCTS) })}
         </span>
       ) : null}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button size="sm" className="ml-auto" disabled={tooMany}>
-            <Pencil />
-            {t("products.bulk.edit")}
-            <ChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {CATALOG_ACTIONS.map(item)}
-          <DropdownMenuSeparator />
-          {SEO_ACTIONS.map(item)}
-          {addonsOn ? (
-            <>
-              <DropdownMenuSeparator />
-              {item("addon_template")}
-            </>
-          ) : null}
-          {canEdit ? (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={onFacts}>{t("attributes.facts.action")}</DropdownMenuItem>
-            </>
-          ) : null}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="ml-auto flex items-center gap-2">
+        {canEdit ? (
+          <BulkDeleteButton selected={selected} onSelect={onSelect} disabled={tooMany} />
+        ) : null}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" disabled={tooMany}>
+              <Pencil />
+              {t("products.bulk.edit")}
+              <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {CATALOG_ACTIONS.map(item)}
+            <DropdownMenuSeparator />
+            {SEO_ACTIONS.map(item)}
+            {addonsOn ? (
+              <>
+                <DropdownMenuSeparator />
+                {item("addon_template")}
+              </>
+            ) : null}
+            {canEdit ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={onFacts}>
+                  {t("attributes.facts.action")}
+                </DropdownMenuItem>
+              </>
+            ) : null}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   )
 }

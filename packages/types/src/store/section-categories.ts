@@ -139,6 +139,12 @@ export interface StoreCategoriesLinked {
 export const CATEGORY_ICONS_SETTINGS = {
   disc: ["tint", "well", "line"],
   phone: ["scroll", "wrap"],
+  /**
+   * `stacked` the name under the disc with the section's heading (today's),
+   * `strip` (adr/0066 Ek 2026-11-25) one quiet row across the page: a
+   * smaller disc with the name beside it, the heading kept for a reader only.
+   */
+  row_style: ["stacked", "strip"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type CategoryIconsSetting = keyof typeof CATEGORY_ICONS_SETTINGS
@@ -151,6 +157,7 @@ export const CATEGORY_ICONS_DEFAULTS: {
 } = {
   disc: "tint",
   phone: "scroll",
+  row_style: "stacked",
 }
 
 /** `icons`' own fields as `GET /store/storefront-layout` prints them. */
@@ -158,6 +165,14 @@ export interface StoreCategoriesIcons {
   variant: "icons"
   disc: CategoryIconsStep<"disc">
   phone: CategoryIconsStep<"phone">
+  /** The row's arrangement; absent (an older backend, or the default): `stacked`. */
+  row_style?: CategoryIconsStep<"row_style">
+  /**
+   * The categories by handle, in order (a preset's: it cannot know a shop's
+   * ids), read while no id is named: the top ones narrowed to these.
+   * Absent while none is written.
+   */
+  category_handles?: string[]
   /** Each picked icon by category id; a category with none is absent. */
   category_icons: Record<string, SectionIcon>
   /**
@@ -178,5 +193,5 @@ export function categoryIconsSettingsOf(section: Partial<Record<CategoryIconsSet
       ? (section[name] as CategoryIconsStep<S>)
       : CATEGORY_ICONS_DEFAULTS[name]
   }
-  return { disc: step("disc"), phone: step("phone") }
+  return { disc: step("disc"), phone: step("phone"), row_style: step("row_style") }
 }

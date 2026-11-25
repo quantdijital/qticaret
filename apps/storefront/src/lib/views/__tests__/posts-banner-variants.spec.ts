@@ -83,6 +83,26 @@ describe("the posts' view (adr/0077 Ek)", () => {
     })
   })
 
+  it("brings the panel's tone, leaves and wide covers only off their defaults", async () => {
+    const plain = await postsView(guides({ variant: "intro_panel" }), t)
+    expect(plain).not.toHaveProperty("panelTone")
+    expect(plain).not.toHaveProperty("ornament")
+    expect(plain).not.toHaveProperty("coverRatio")
+    expect(
+      await postsView(
+        guides({
+          variant: "intro_panel",
+          panel_tone: "tint",
+          ornament: "leaves",
+          cover_ratio: "wide",
+        }),
+        t
+      )
+    ).toMatchObject({ panelTone: "tint", ornament: "leaves", coverRatio: "wide" })
+    const odd = await postsView(guides({ variant: "intro_panel", cover_ratio: "3:1" as never }), t)
+    expect(odd).not.toHaveProperty("coverRatio")
+  })
+
   it("reads a variant it does not know as the tiles, and no posts as no section", async () => {
     const view = await postsView(guides({ variant: "mosaic" as never, eyebrow: "x" }), t)
     expect(view).not.toHaveProperty("variant")
@@ -109,5 +129,17 @@ describe("the band's view (adr/0077 Ek)", () => {
       edge: "straight",
     })
     expect(bannerView(band({ variant: "ribbon" as never }), t)).not.toHaveProperty("variant")
+  })
+
+  it("brings the split's accent button and flower only off their defaults", () => {
+    const plain = bannerView(band({ variant: "split" }), t)
+    expect(plain).not.toHaveProperty("buttonTone")
+    expect(plain).not.toHaveProperty("ornament")
+    expect(
+      bannerView(band({ variant: "split", button_tone: "accent", ornament: "flower" }), t)
+    ).toMatchObject({ buttonTone: "accent", ornament: "flower" })
+    expect(
+      bannerView(band({ variant: "split", button_tone: "pink" as never }), t)
+    ).not.toHaveProperty("buttonTone")
   })
 })

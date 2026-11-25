@@ -10,6 +10,7 @@ import { stepNumber, stepsSettingsOf } from "@qticaret/types/section-steps"
 import type {
   PhotoCollageSectionView,
   StatsSectionView,
+  SocialLinkView,
   StepsSectionView,
   Translate,
 } from "@qticaret/ui"
@@ -20,7 +21,11 @@ import { layoutImage, layoutLink } from "./layout"
  * figures as saved, its steps as the contract knows them (an unknown one,
  * from a newer backend, read as the default). No figure: no strip.
  */
-export function statsView(section: StoreStatsSection, t: Translate): StatsSectionView | null {
+export function statsView(
+  section: StoreStatsSection,
+  t: Translate,
+  profiles: readonly SocialLinkView[] = []
+): StatsSectionView | null {
   const settings = statsSettingsOf(section)
   return section.items.length > 0
     ? {
@@ -36,6 +41,10 @@ export function statsView(section: StoreStatsSection, t: Translate): StatsSectio
           ...(settings.icons === "on" ? { icon: sectionIconOf(item.icon) } : {}),
         })),
         ...settings,
+        // The profiles at the row's end only while the shop asks and has one
+        ...(settings.social === "on" && profiles.length > 0
+          ? { follow: { title: t("home.stats_follow"), profiles: [...profiles] } }
+          : {}),
       }
     : null
 }

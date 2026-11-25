@@ -32,4 +32,13 @@
     --color-deal: var(--color-deal-on-stage);
     color: var(--color-text);
   }
+  /* The split card (`text_position: over_split`): its short price in a light step of the accent, its stars' pill dark glass */
+  .gf-card-over[data-split] .gf-card-split-price {
+    color: color-mix(in oklab, var(--highlight) 82%, white);
+  }
+  .gf-card-over[data-split] .gf-card-pill-dark {
+    background: rgb(16 20 18 / 0.62);
+    color: #fff;
+    backdrop-filter: blur(4px);
+  }
 }

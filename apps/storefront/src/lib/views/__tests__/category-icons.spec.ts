@@ -118,6 +118,43 @@ describe("the categories' icon row view (adr/0077 §10 Ek)", () => {
     })
   })
 
+  it("narrows to a preset's handles in their order while no id is named, a strip kept", async () => {
+    const category = (id: string, handle: string) => ({
+      id,
+      name: handle,
+      handle,
+      description: null,
+      parent_category_id: null,
+    })
+    vi.mocked(namedCategories).mockResolvedValue({
+      categories: [
+        category("pcat_a", "macera"),
+        category("pcat_b", "plaj"),
+        category("pcat_c", "x"),
+      ],
+      named: [
+        { id: "pcat_a", card: { label: "Macera", path: "/macera" } },
+        { id: "pcat_b", card: { label: "Plaj", path: "/plaj" } },
+        { id: "pcat_c", card: { label: "X", path: "/x" } },
+      ],
+    })
+    const view = await iconCategoriesView(
+      row({
+        category_ids: [],
+        category_handles: ["plaj", "yok", "macera"],
+        row_style: "strip",
+      } as never),
+      t
+    )
+    expect(view).toMatchObject({
+      icons: { row_style: "strip", items: [{ label: "Plaj" }, { label: "Macera" }] },
+    })
+    // No handle found: every top category, as before
+    const all = await iconCategoriesView(row({ category_ids: [], category_handles: ["yok"] }), t)
+    expect(all).toMatchObject({ icons: { row_style: "stacked" } })
+    expect((all as { icons: { items: unknown[] } }).icons.items).toHaveLength(3)
+  })
+
   it("draws nothing with no category", async () => {
     vi.mocked(namedCategories).mockResolvedValue({ categories: [], named: [] })
     expect(await iconCategoriesView(row(), t)).toBeNull()
