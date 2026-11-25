@@ -13635,6 +13635,8 @@
       "exhausted": "You have run out of credits.",
       "dailyReached": "Today's limit is reached; it renews tomorrow.",
       "pending": "Request received; your credits are added once the payment is confirmed.",
+      "requested": "Request received. Your credits are added once the payment is confirmed.",
+      "pendingWait": "You have a pending request; your credits are added once the payment is confirmed.",
       "pendingPack": "{{credits}} credits · {{amount}}",
       "noPacks": "Write to us to top up credits.",
       "topUp": "Top up credits",

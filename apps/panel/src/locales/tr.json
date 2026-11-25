@@ -13635,6 +13635,8 @@
       "exhausted": "Krediniz bitti.",
       "dailyReached": "Bugünkü sınıra ulaşıldı, yarın yenilenir.",
       "pending": "Talebiniz alındı; ödeme onaylanınca krediniz yüklenir.",
+      "requested": "Talebiniz alındı. Ödeme onaylanınca krediniz yüklenir.",
+      "pendingWait": "Bekleyen talebiniz var; ödeme onaylanınca krediniz yüklenir.",
       "pendingPack": "{{credits}} kredi · {{amount}}",
       "noPacks": "Kredi yüklemek için bize yazın.",
       "topUp": "Kredi yükle",

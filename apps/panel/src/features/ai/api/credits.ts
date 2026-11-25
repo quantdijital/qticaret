@@ -1,7 +1,9 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { z } from "zod"
 import { AI_KEY, aiServicesQuery } from "@/features/ai/api/ai"
 import { postAi } from "@/features/ai/api/suggestions"
+import { i18next } from "@/lib/i18n"
 import { sdk } from "@/lib/sdk"
 
 /**
@@ -72,7 +74,9 @@ export const aiCreditsQuery = () =>
 /**
  * A top-up request: the pack's id alone. A failure keeps the backend's key
  * (`ai.credits_order_open`, `ai.credits_pack_unknown`) in `code`; done,
- * the wallet and the services are read again.
+ * a short toast says so and the wallet and the services are read again.
+ * The toast is the hook's own: a call's `onSuccess` would not run once the
+ * dialog that sent it is gone (an AI button's layer closes with it).
  */
 export function useRequestCreditTopUp() {
   const client = useQueryClient()
@@ -83,11 +87,13 @@ export function useRequestCreditTopUp() {
       } | null
       return orderSchema.parse(answer?.order)
     },
-    onSuccess: () =>
-      Promise.all([
+    onSuccess: () => {
+      toast.success(i18next.t("ai.credits.requested"))
+      return Promise.all([
         client.invalidateQueries({ queryKey: AI_CREDITS_KEY }),
         client.invalidateQueries({ queryKey: aiServicesQuery().queryKey }),
-      ]),
+      ])
+    },
     // A request already open, a pack gone: the wallet as it stands now
     onError: () => client.invalidateQueries({ queryKey: AI_CREDITS_KEY }),
   })

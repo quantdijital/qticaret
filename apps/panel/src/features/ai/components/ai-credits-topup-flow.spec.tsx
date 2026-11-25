@@ -3,6 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { toast } from "sonner"
+import { aiServicesQuery } from "@/features/ai/api/ai"
+import { AI_CREDITS_KEY } from "@/features/ai/api/credits"
 import { PACK, wallet } from "@/features/settings/components/ai-credits.fixtures"
 import { AiButton } from "./ai-button"
 
@@ -16,6 +19,7 @@ const sdkFetch = vi.hoisted(() => vi.fn())
 const staff = vi.hoisted(() => ({ role: "owner" }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 vi.mock("@/features/auth/api/staff", () => ({
   useCan: () => true,
   useStaff: () => staff,
@@ -85,6 +89,7 @@ function setup() {
 const orderCalls = () => netFetch.mock.calls.filter(([url]) => url === ORDERS)
 
 beforeEach(() => {
+  vi.clearAllMocks()
   staff.role = "owner"
   sdkFetch.mockReset()
   netFetch.mockReset()
@@ -96,23 +101,48 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+/** The run-out answer, "Kredi yükle", a pack, "Talep gönder": done once the dialog is gone. */
+async function requestFromButton(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: "Yapay zekâ ile öner" }))
+  expect(await screen.findByText("Krediniz bitti.")).toBeInTheDocument()
+  const topUp = screen.getByRole("button", { name: "Kredi yükle" })
+  // A plain button: the default (submit) would send the form around it
+  expect(topUp).toHaveAttribute("type", "button")
+  await user.click(topUp)
+  await screen.findByRole("dialog", { name: "Kredi yükle" })
+  await screen.findByRole("radio")
+  await user.click(screen.getByRole("button", { name: "Talep gönder" }))
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog", { name: "Kredi yükle" })).toBeNull()
+  })
+}
+
 describe("Kredi yükle from the AI button inside a form", () => {
   it("sends the request once and never the form around the button", async () => {
     const { outer, user } = setup()
-    await user.click(await screen.findByRole("button", { name: "Yapay zekâ ile öner" }))
-    expect(await screen.findByText("Krediniz bitti.")).toBeInTheDocument()
-    const topUp = screen.getByRole("button", { name: "Kredi yükle" })
-    // A plain button: the default (submit) would send the form around it
-    expect(topUp).toHaveAttribute("type", "button")
-    await user.click(topUp)
-    const dialog = await screen.findByRole("dialog", { name: "Kredi yükle" })
-    expect(dialog).toBeInTheDocument()
-    await screen.findByRole("radio")
-    await user.click(screen.getByRole("button", { name: "Talep gönder" }))
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog", { name: "Kredi yükle" })).toBeNull()
-    })
+    await requestFromButton(user)
     expect(orderCalls()).toHaveLength(1)
     expect(outer).not.toHaveBeenCalled()
+  })
+
+  it("says the request is in once the dialog is gone", async () => {
+    const { user } = setup()
+    await requestFromButton(user)
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith(
+        "Talebiniz alındı. Ödeme onaylanınca krediniz yüklenir."
+      )
+    })
+    expect(toast.success).toHaveBeenCalledTimes(1)
+  })
+
+  it("reads the wallet and the services again once the request is in", async () => {
+    const { client, user } = setup()
+    const invalidate = vi.spyOn(client, "invalidateQueries")
+    await requestFromButton(user)
+    await waitFor(() => {
+      expect(invalidate).toHaveBeenCalledWith({ queryKey: AI_CREDITS_KEY })
+    })
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: aiServicesQuery().queryKey })
   })
 })
