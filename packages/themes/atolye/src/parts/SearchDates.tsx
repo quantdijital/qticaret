@@ -9,9 +9,11 @@ import { DatePicker } from "./DatePicker"
 import type { DatesChoice, PickerMode } from "./date-picker-days"
 import { CONTROL, Cell, DAY, DayCell, SelectCell } from "./search-form-cells"
 
-// On a phone its fields join the form's grid rows; from 768 px one part of the bar
+// On a phone its fields join the form's grid rows; from 768 px one part of the bar.
+// From 1024 px never narrower than its three fields' own widths (`DAY`): squeezed
+// below them, the flexible month ran over the people field beside it
 const GROUP =
-  "flex min-w-0 max-md:contents md:flex-[2.4] md:flex-row md:border-l md:border-rule lg:flex-[3]"
+  "flex min-w-0 max-md:contents md:flex-[2.4] md:flex-row md:border-l md:border-rule lg:flex-[3] lg:min-w-fit"
 
 // False on the server and while hydrating, true after: the page as sent is the plain form's
 const never = () => () => undefined
