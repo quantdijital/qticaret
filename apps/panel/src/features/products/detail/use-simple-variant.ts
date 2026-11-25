@@ -75,7 +75,10 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
   }
   // One entry for both tabs: the page's header save saves the variant once
   useDirtyEntry({ dirty, saving, submit, reset })
-  if (!variant || !saved) {
+  // A product that has just become simple (made so on the card): the form
+  // gets its values on the next render, read as loading until then
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- empty before `values` reach it
+  if (!variant || !saved || form.getValues("price") === undefined) {
     return null
   }
   const facts = variantFacts(

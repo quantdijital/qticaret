@@ -52,7 +52,7 @@ async function openTaba(page: Page, id: string) {
 }
 
 test.describe("a variant's sale price", () => {
-  test("sets it in the row through the save bar, shows it again, and removes it", async ({
+  test("sets it in the row through the header save, shows it again, and removes it", async ({
     page,
     guard,
   }) => {

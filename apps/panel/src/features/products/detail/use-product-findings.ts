@@ -7,7 +7,8 @@ import { targetsOf } from "@/features/products/layout/parts"
 import type { PartKey } from "@/features/products/layout/parts"
 import { assessmentQuery } from "@/features/seo/api/advisor"
 import { PRODUCT_TARGETS } from "./sections"
-import { isSimpleProduct } from "./use-data-card"
+import { usePlaceholderOption } from "./placeholder-option"
+import { isSimpleProduct } from "./simple-plan"
 
 /** The advisor's findings for one part of the product's page, by its element id. */
 export function useProductFindings(product: ProductDetail) {
@@ -28,7 +29,7 @@ export type PartMark = "complete" | "missing" | "urgent" | null
  * empty required attribute. Before the advisor answers, nothing is known.
  */
 function usePartState(product: ProductDetail) {
-  const simple = isSimpleProduct(product)
+  const simple = isSimpleProduct(product, usePlaceholderOption())
   const findings = useProductFindings(product)
   const known = useQuery(assessmentQuery("product", product.id, product.updated_at)).isSuccess
   const attributes = useQuery(productAttributesQuery(product.id)).data
