@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "@tanstack/react-router"
 import { Loader2 } from "lucide-react"
+import type { ReactNode } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -31,19 +32,23 @@ function useSave(existing: PopupDetail | null) {
 
 /**
  * The pop-up's one page (adr/0080 S2): its content, who and where, when,
- * and how it looks on the left; the live preview and the save on the
- * right (under them on a narrow screen). Read-only for a role that may
+ * and how it looks on the left; the live preview, the save and `aside`
+ * (a saved one's facts and counts) in the sticky right column from 1280
+ * px (under the form on a narrower screen). Read-only for a role that may
  * not write (the API refuses it anyway).
  */
 export function PopupForm({
   existing,
   type,
   canWrite,
+  aside,
 }: {
   existing: PopupDetail | null
   /** A new one's type, chosen first. */
   type?: PopupType
   canWrite: boolean
+  /** Short facts under the save in the right column. */
+  aside?: ReactNode
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -88,7 +93,7 @@ export function PopupForm({
           {/* `contents`: the fieldset only locks the fields; the grid's columns stay its own */}
           <fieldset disabled={!canWrite} className="contents">
             <PageColumn span={8}>
-              <ContentCard />
+              <ContentCard isNew={existing === null} />
               <AudienceCard />
               <TimingCard />
               <LookCard />
@@ -124,6 +129,7 @@ export function PopupForm({
                 {t(existing ? "common.save" : `${F}.create`)}
               </Button>
             ) : null}
+            {aside}
           </PageColumn>
         </PageGrid>
       </form>

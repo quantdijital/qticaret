@@ -3,10 +3,10 @@
 import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useRef, useState } from "react"
-import { ResponsiveImage } from "@qticaret/ui"
 import type { PlaceOrderResult, PopupMode, PopupView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { LayerPortal } from "./Layers"
+import { PopupBody, splitsWide } from "./PopupDesigns"
 import { CampaignCode, PopupLink, PopupNewsletter } from "./PopupParts"
 import type { PopupWords } from "./popup-words"
 
@@ -23,9 +23,6 @@ const MODE_CLASS: Record<PopupMode, string> = {
   sheet:
     "inset-x-0 bottom-0 max-h-[40dvh] rounded-t-tile motion-safe:data-[state=closed]:slide-out-to-bottom motion-safe:data-[state=open]:slide-in-from-bottom",
 }
-
-/** The picture's widths: the dialog's 480 px, the card's 384 px. */
-const IMAGE_SIZES = "(min-width: 768px) 480px, 100vw"
 
 /** The element the focus was on when it appeared (the page's body is none). */
 const focused = () =>
@@ -44,6 +41,7 @@ const focused = () =>
  * middle; the focus goes back where it was. Its body is plain text, its
  * lines kept. A campaign shows its code to copy (or that the cart applies
  * it), an info pop-up its button, a newsletter pop-up the footer's form.
+ * Inside, the pop-up's design (`PopupBody`, adr/0080 §6a) lays them out.
  */
 export default function PopupDialog({
   popup,
@@ -111,7 +109,9 @@ export default function PopupDialog({
           }}
           className={cn(
             "fixed z-(--z-modal) flex flex-col bg-paper text-text shadow-float outline-none duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0",
-            MODE_CLASS[mode]
+            MODE_CLASS[mode],
+            // The split design's picture beside the words wants a wider dialog
+            splitsWide(popup, mode) && "sm:max-w-180"
           )}
         >
           <Dialog.Close
@@ -121,52 +121,43 @@ export default function PopupDialog({
             <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
           </Dialog.Close>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            {popup.image && mode !== "sheet" && (
-              <ResponsiveImage
-                image={popup.image}
-                sizes={IMAGE_SIZES}
-                className={cn(
-                  "h-auto w-full object-cover",
-                  modal ? "max-h-72 rounded-t-tile" : "max-h-44 rounded-t-tile"
-                )}
-              />
-            )}
-            <div className="flex flex-col gap-3 px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6">
-              <Dialog.Title className="max-w-none pr-10 text-title">{popup.title}</Dialog.Title>
-              {popup.body && (
-                <Dialog.Description className="text-sm whitespace-pre-line text-text-2">
-                  {popup.body}
-                </Dialog.Description>
-              )}
-              {popup.type === "campaign" && popup.promotion && (
-                <CampaignCode
-                  promotion={popup.promotion}
-                  words={words}
-                  onCopy={() => {
-                    onAct("click")
-                  }}
-                />
-              )}
-              {popup.type !== "newsletter" && popup.button && (
-                <PopupLink
-                  button={popup.button}
-                  onFollow={() => {
-                    onAct("click")
-                  }}
-                />
-              )}
-              {popup.type === "newsletter" && subscribe && (
-                <PopupNewsletter
-                  popup={popup}
-                  words={words}
-                  privacyPath={privacyPath}
-                  subscribe={subscribe}
-                  onSignup={() => {
-                    onAct("signup")
-                  }}
-                />
-              )}
-            </div>
+            <PopupBody
+              popup={popup}
+              mode={mode}
+              actions={
+                <>
+                  {popup.type === "campaign" && popup.promotion && (
+                    <CampaignCode
+                      promotion={popup.promotion}
+                      words={words}
+                      ticket={popup.design === "coupon"}
+                      onCopy={() => {
+                        onAct("click")
+                      }}
+                    />
+                  )}
+                  {popup.type !== "newsletter" && popup.button && (
+                    <PopupLink
+                      button={popup.button}
+                      onFollow={() => {
+                        onAct("click")
+                      }}
+                    />
+                  )}
+                  {popup.type === "newsletter" && subscribe && (
+                    <PopupNewsletter
+                      popup={popup}
+                      words={words}
+                      privacyPath={privacyPath}
+                      subscribe={subscribe}
+                      onSignup={() => {
+                        onAct("signup")
+                      }}
+                    />
+                  )}
+                </>
+              }
+            />
           </div>
         </Dialog.Content>
       </LayerPortal>

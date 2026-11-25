@@ -223,6 +223,7 @@ describe("storePopupOf", () => {
       trigger: { kind: "delay", value: 5 },
       frequency: { kind: "days", days: 7 },
       layout: "modal",
+      design: "classic",
       priority: 0,
       ends_at: "2026-12-15T00:00:00.000Z",
     })

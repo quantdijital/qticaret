@@ -149,16 +149,21 @@ medusaIntegrationTestRunner({
           routing: { text: { service: "deepseek", model: "deepseek-flash" } },
         },
       })
-      // A kept pack is named by its id and keeps it; one left out is gone
+      // A kept pack is named by its id and keeps it while its terms stay; one left out is gone
       const [first] = settings.packs
-      const kept = await save({ packs: [{ ...pack, id: first?.id, credits: 600 }] })
-      expect(kept.data).toMatchObject({ settings: { packs: [{ id: first?.id, credits: 600 }] } })
+      const kept = await save({ packs: [{ ...pack, id: first?.id, name: "Yeni ad" }] })
+      expect(kept.data).toMatchObject({ settings: { packs: [{ id: first?.id, name: "Yeni ad" }] } })
+      // New credits or a new amount: a new pack, a new id (PR #371 D3)
+      const repriced = await save({ packs: [{ ...pack, id: first?.id, credits: 600 }] })
+      const [renewed] = (repriced.data as { settings: { packs: { id: string }[] } }).settings.packs
+      expect(renewed?.id).toMatch(/^pack_[0-9a-f]{16}$/)
+      expect(renewed?.id).not.toBe(first?.id)
       expect(
         (
           await save({
             packs: [
-              { ...pack, id: first?.id },
-              { ...pack, id: first?.id },
+              { ...pack, id: renewed?.id },
+              { ...pack, id: renewed?.id },
             ],
           })
         ).status

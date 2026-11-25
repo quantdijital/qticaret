@@ -1,4 +1,5 @@
 import type {
+  PopupDesign,
   PopupDevice,
   PopupFrequency,
   PopupLayout,
@@ -36,6 +37,7 @@ export interface PopupValues {
   frequency: PopupFrequency
   frequency_days: number | null
   layout: PopupLayout
+  design: PopupDesign
 }
 
 export interface PopupRecord extends PopupValues {

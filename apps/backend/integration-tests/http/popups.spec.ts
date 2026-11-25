@@ -13,6 +13,7 @@ interface AdminPopup {
   id: string
   name: string
   type: string
+  design: string
   is_active: boolean
   state: string
   pages: string[]
@@ -39,6 +40,7 @@ const INFO = {
   frequency: "days",
   frequency_days: 3,
   layout: "corner",
+  design: "split",
   priority: 5,
 }
 
@@ -116,12 +118,31 @@ medusaIntegrationTestRunner({
           trigger: { kind: "scroll", value: 40 },
           frequency: { kind: "days", days: 3 },
           layout: "corner",
+          design: "split",
           priority: 5,
           ends_at: null,
         },
       ])
       expect(live.data.popups[0]).not.toHaveProperty("name")
       expect(live.data.popups[0]).not.toHaveProperty("is_active")
+    })
+
+    it("starts a pop-up as classic, changes its design, refuses one it does not know", async () => {
+      const withoutDesign: Partial<typeof INFO> = { ...INFO }
+      delete withoutDesign.design
+      const created = await post<{ popup: AdminPopup }>("/admin/popups", withoutDesign)
+      expect(created.status).toBe(201)
+      expect(created.data.popup.design).toBe("classic")
+      const { id } = created.data.popup
+
+      const changed = await post<{ popup: AdminPopup }>(`/admin/popups/${id}`, { design: "coupon" })
+      expect(changed.status).toBe(200)
+      expect(changed.data.popup).toMatchObject({ design: "coupon", layout: "corner" })
+
+      const refused = await post(`/admin/popups/${id}`, { design: "fullscreen" })
+      expect(refused.status).toBe(400)
+      const read = await adminGet<{ popup: { design: string } }>(`/admin/popups/${id}`)
+      expect(read.data.popup.design).toBe("coupon")
     })
 
     it("keeps fields left out of a change, empties what a choice no longer uses", async () => {
