@@ -969,13 +969,10 @@
       "emptyFiltered": "Bu süzgeçlere uyan kayıt yok.",
       "filters": {
         "actor": "Yapan",
-        "anyone": "Herkes",
         "people": "Ekip",
         "others": "Diğer",
         "resource": "Kaynak",
-        "anything": "Tüm kaynaklar",
         "rangeHint": "Türkiye saatiyle; bir uç boş kalabilir.",
-        "clear": "Temizle",
         "groups": {
           "sales": "Satış",
           "catalog": "Katalog",
@@ -984,7 +981,8 @@
           "settings": "Ayarlar ve bağlantılar",
           "people": "Ekip ve güvenlik",
           "other": "Diğer"
-        }
+        },
+        "days": "Tarih"
       },
       "detail": {
         "title": "Kayıt ayrıntısı",
@@ -4285,18 +4283,15 @@
     },
     "filters": {
       "category": "Kategori",
-      "anyCategory": "Tüm kategoriler",
       "brand": "Marka",
       "anyBrand": "Tüm markalar",
       "stock": "Stok",
-      "anyStock": "Tüm stok durumları",
       "stocks": {
         "in": "Stokta",
         "low": "Az kaldı",
         "out": "Tükendi"
       },
       "missing": "Eksik",
-      "anyMissing": "Eksik bilgi: tümü",
       "missings": {
         "image": "Görseli yok",
         "price": "Fiyatı yok",
@@ -4304,7 +4299,6 @@
         "seo": "SEO'su zayıf"
       },
       "kind": "Tür",
-      "anyKind": "Tüm ürün türleri",
       "kinds": {
         "physical": "Fiziksel",
         "digital": "Dijital",
@@ -4322,7 +4316,6 @@
         "stock": "Stok (az olan önce)",
         "stock_desc": "Stok (çok olan önce)"
       },
-      "clear": "Filtreleri temizle",
       "limited": "Bu filtre en yeni 5.000 ürüne bakar; daha eskiler listede görünmüyor."
     },
     "tags": {
@@ -4997,7 +4990,6 @@
       "saved": "Teslimat adresi güncellendi."
     },
     "filters": {
-      "any": "{{what}}: tümü",
       "payment": "Ödeme",
       "shipping": "Kargo",
       "payments": {
@@ -5029,7 +5021,7 @@
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
-      "clear": "Filtreleri temizle"
+      "days": "Sipariş tarihi"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",

@@ -101,7 +101,10 @@ describe("AuditPage", () => {
         created_before: "2026-10-29T20:59:59.999Z",
       },
     })
-    expect(screen.getByRole("button", { name: "Temizle" })).toBeInTheDocument()
+    // The address's filters as chips under the filter button
+    expect(screen.getByRole("button", { name: "Filtrele · 3" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /^Tarih: / })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Tümünü temizle" })).toBeInTheDocument()
   })
 
   it("opens an entry in full: who, outcome, request, browser and each field's change", async () => {
