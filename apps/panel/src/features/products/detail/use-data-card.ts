@@ -1,45 +1,13 @@
 import { useState } from "react"
 import { useRememberedChoice } from "@qticaret/admin-ui/hooks/use-section-open"
 import type { ProductDetail } from "@/features/products/api/products"
-import type { SimplePlan } from "@/features/products/api/product-simple"
 import { isTab } from "@/features/products/layout/parts"
 import type { TabPart } from "@/features/products/layout/parts"
+import { usePlaceholderOption } from "./placeholder-option"
+import { isSimpleProduct } from "./simple-plan"
 
 /** "Basit ürün" or "Varyantlı ürün" (WooCommerce's product type). */
 export type ProductType = "simple" | "variable"
-
-type ProductOption = NonNullable<ProductDetail["options"]>[number]
-
-// What Medusa names the option of a product made without any: nothing for a shopper to pick
-const DEFAULT_OPTION = "Default option"
-// What the wizard and the import give a product without options (backend `plan-variants.ts`)
-const WIZARD_OPTION = { title: "Seçenek", value: "Standart" }
-
-const isPlaceholder = (option: ProductOption) =>
-  option.title === DEFAULT_OPTION ||
-  (option.title === WIZARD_OPTION.title &&
-    (option.values ?? []).length <= 1 &&
-    (option.values?.[0]?.value ?? WIZARD_OPTION.value) === WIZARD_OPTION.value)
-
-/** The options a shopper picks from: Medusa's "Default option" and the wizard's left out. */
-export function realOptions(product: Pick<ProductDetail, "options">): ProductOption[] {
-  return (product.options ?? []).filter((option) => !isPlaceholder(option))
-}
-
-/** A product of one variant and no option a shopper picks: a simple one. */
-export function isSimpleProduct(product: Pick<ProductDetail, "variants" | "options">): boolean {
-  return (product.variants?.length ?? 0) <= 1 && realOptions(product).length === 0
-}
-
-/** What making the product simple keeping this variant deletes and unlinks. */
-export function simplePlan(product: ProductDetail, keep: string): SimplePlan {
-  return {
-    remove: (product.variants ?? []).flatMap((variant) =>
-      variant.id === keep ? [] : [variant.id]
-    ),
-    options: realOptions(product).map((option) => option.id),
-  }
-}
 
 /**
  * The "Ürün verileri" card's state, kept by the page (its "Alana git"
@@ -51,7 +19,8 @@ export function simplePlan(product: ProductDetail, keep: string): SimplePlan {
  * simple deletes its other variants and takes its options off.
  */
 export function useDataCard(product: ProductDetail) {
-  const simpleNow = isSimpleProduct(product)
+  const placeholder = usePlaceholderOption()
+  const simpleNow = isSimpleProduct(product, placeholder)
   const [picked, setPicked] = useState<ProductType>(simpleNow ? "simple" : "variable")
   const [confirming, setConfirming] = useState(false)
   // A product that gained options or variants elsewhere is one with variants, whatever was picked

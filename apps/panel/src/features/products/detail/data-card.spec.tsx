@@ -11,7 +11,8 @@ import { DataCard } from "./data-card"
 import { CATALOG, PRODUCT, answer } from "./product-fixtures"
 import type { Answers } from "./product-fixtures"
 import { PRODUCT_SECTIONS } from "./sections"
-import { isSimpleProduct, useDataCard } from "./use-data-card"
+import { isSimpleProduct, simplePlan } from "./simple-plan"
+import { useDataCard } from "./use-data-card"
 import { usePartDraws } from "./use-part-draws"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
@@ -58,15 +59,33 @@ function renderCard(
 const tabNames = () => screen.getAllByRole("tab").map((tab) => tab.textContent)
 const open = () => screen.getByRole("tabpanel")
 
+// The wizard's option of a product without options, in the words the wizard writes it with
+const WIZARD = { title: "Seçenek", value: "Standart" }
+
 const TWO_VARIANTS = {
   ...PRODUCT,
-  options: [{ id: "opt_1", title: "Renk", values: [] }],
+  options: [
+    {
+      id: "opt_1",
+      title: "Renk",
+      values: [
+        { id: "optval_1", value: "Sarı" },
+        { id: "optval_2", value: "Mor" },
+      ],
+    },
+  ],
   variants: [
-    ...(PRODUCT.variants ?? []),
+    {
+      id: "variant_1",
+      title: "Sarı",
+      prices: [{ amount: 3100, currency_code: "try" }],
+      options: [{ option_id: "opt_1", value: "Sarı" }],
+    },
     {
       id: "variant_2",
       title: "Mor",
       prices: [{ amount: 3400, currency_code: "try" }],
+      options: [{ option_id: "opt_1", value: "Mor" }],
       manage_inventory: true,
       inventory_items: [{ inventory: { location_levels: [{ stocked_quantity: 4 }] } }],
     },
@@ -84,6 +103,21 @@ const pickSimple = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(await screen.findByRole("option", { name: "Basit ürün" }))
 }
 
+/** The server calls in the order made: which batch, and its body. */
+const calls = () =>
+  [
+    ...batchVariants.mock.calls.map((call, at) => ({
+      order: batchVariants.mock.invocationCallOrder[at] ?? 0,
+      call: ["variants", call[1]],
+    })),
+    ...linkOptions.mock.calls.map((call, at) => ({
+      order: linkOptions.mock.invocationCallOrder[at] ?? 0,
+      call: ["options", call[1]],
+    })),
+  ]
+    .sort((a, b) => a.order - b.order)
+    .map((each) => each.call)
+
 const asking = () => screen.getByRole("group", { name: "Basit ürüne geçilsin mi?" })
 
 /** The owner, 2026-11-25: WooCommerce's product data box, one card with a type and vertical tabs. */
@@ -96,22 +130,25 @@ describe("DataCard", () => {
   })
 
   it("tells a simple product from one with variants", () => {
-    expect(isSimpleProduct(PRODUCT)).toBe(true)
+    expect(isSimpleProduct(PRODUCT, WIZARD)).toBe(true)
     expect(
-      isSimpleProduct({
-        ...PRODUCT,
-        options: [{ title: "Default option" }],
-      } as unknown as ProductDetail)
+      isSimpleProduct(
+        { ...PRODUCT, options: [{ title: "Default option" }] } as unknown as ProductDetail,
+        WIZARD
+      )
     ).toBe(true)
     // The wizard's "Seçenek: Standart" is not a choice either
     expect(
-      isSimpleProduct({
-        ...PRODUCT,
-        options: [{ title: "Seçenek", values: [{ value: "Standart" }] }],
-      } as unknown as ProductDetail)
+      isSimpleProduct(
+        {
+          ...PRODUCT,
+          options: [{ title: "Seçenek", values: [{ value: "Standart" }] }],
+        } as unknown as ProductDetail,
+        WIZARD
+      )
     ).toBe(true)
-    expect(isSimpleProduct(ONE_COLOUR)).toBe(false)
-    expect(isSimpleProduct(TWO_VARIANTS)).toBe(false)
+    expect(isSimpleProduct(ONE_COLOUR, WIZARD)).toBe(false)
+    expect(isSimpleProduct(TWO_VARIANTS, WIZARD)).toBe(false)
   })
 
   it("draws a simple product's tabs, Genel first, with no Varyantlar", async () => {
@@ -209,12 +246,35 @@ describe("DataCard", () => {
     expect(ask).not.toHaveTextContent("stoğu var")
     await user.click(within(ask).getByRole("button", { name: "1 varyantı sil ve basit ürüne geç" }))
     await waitFor(() => {
-      expect(linkOptions).toHaveBeenCalledWith("prod_1", { remove: ["opt_1"] })
+      expect(linkOptions).toHaveBeenCalledTimes(2)
     })
-    expect(batchVariants).toHaveBeenCalledWith("prod_1", { delete: ["variant_1"] })
-    expect(batchVariants.mock.invocationCallOrder[0]).toBeLessThan(
-      linkOptions.mock.invocationCallOrder[0] ?? 0
+    // Deleted, the placeholder added and given, the real option off last
+    expect(calls()).toEqual([
+      ["variants", { delete: ["variant_1"] }],
+      ["options", { add: [{ title: "Seçenek", values: ["Standart"], is_exclusive: true }] }],
+      [
+        "variants",
+        { update: [{ id: "variant_2", options: { Renk: "Mor", Seçenek: "Standart" } }] },
+      ],
+      ["options", { remove: ["opt_1"] }],
+    ])
+  })
+
+  it("adds no second placeholder to a product that has one already", () => {
+    const plan = simplePlan(
+      {
+        ...ONE_COLOUR,
+        options: [
+          ...(ONE_COLOUR.options ?? []),
+          { id: "opt_std", title: "Seçenek", values: [{ id: "v", value: "Standart" }] },
+        ],
+      } as unknown as ProductDetail,
+      "variant_1",
+      WIZARD
     )
+    expect(plan.add).toBeNull()
+    expect(plan.values).toEqual({ Renk: "Sarı", Seçenek: "Standart" })
+    expect(plan.options).toEqual(["opt_1"])
   })
 
   it("keeps the options when deleting the variants is refused, and says so in the card", async () => {
@@ -240,9 +300,17 @@ describe("DataCard", () => {
     expect(within(ask).queryByRole("radio")).toBeNull()
     await user.click(within(ask).getByRole("button", { name: "Basit ürüne geç" }))
     await waitFor(() => {
-      expect(linkOptions).toHaveBeenCalledWith("prod_1", { remove: ["opt_1"] })
+      expect(linkOptions).toHaveBeenCalledTimes(2)
     })
-    expect(batchVariants).not.toHaveBeenCalled()
+    // Nothing deleted; the variant ends on the wizard's "Seçenek: Standart"
+    expect(calls()).toEqual([
+      ["options", { add: [{ title: "Seçenek", values: ["Standart"], is_exclusive: true }] }],
+      [
+        "variants",
+        { update: [{ id: "variant_1", options: { Renk: "Sarı", Seçenek: "Standart" } }] },
+      ],
+      ["options", { remove: ["opt_1"] }],
+    ])
   })
 
   it("brings the Varyantlar tab once a simple product is made one with variants", async () => {

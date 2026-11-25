@@ -4,18 +4,23 @@ import { expect, pageHeading, test } from "./support/guard"
 /**
  * A product with variants made simple (docs/06 "Ürün sayfası", "Ürün
  * verileri"): "Basit ürün" asks in the card, the person keeps the second
- * variant, the other is deleted and the option taken off; read again, the
- * product is simple. The test makes its own draft product and deletes it
+ * variant, the other is deleted and the colour replaced by the wizard's
+ * "Seçenek: Standart"; read again, the product is simple. The test makes its own draft product and deletes it
  * at the end: nothing of the shop's own changes.
  */
 
 interface Stored {
-  options: { id: string; title: string }[]
-  variants: { id: string; title: string; prices?: { amount: number; currency_code: string }[] }[]
+  options: { id: string; title: string; values?: { value: string }[] }[]
+  variants: {
+    id: string
+    title: string
+    prices?: { amount: number; currency_code: string }[]
+    options?: { value: string }[]
+  }[]
 }
 
 const FIELDS =
-  "id,options.id,options.title,variants.id,variants.title,variants.prices.amount,variants.prices.currency_code"
+  "id,options.id,options.title,options.values.value,variants.id,variants.title,variants.options.value,variants.prices.amount,variants.prices.currency_code"
 
 async function stored(page: Page, id: string): Promise<Stored> {
   const answer = await page.request.get(`/admin/products/${id}?fields=${FIELDS}`)
@@ -75,11 +80,20 @@ test.describe("product made simple", () => {
         .poll(async () => {
           const product = await stored(page, id)
           return {
-            options: product.options.length,
-            variants: product.variants.map((variant) => variant.title),
+            // The wizard's placeholder, as a product made without options has
+            options: product.options.map(
+              (option) => `${option.title}: ${(option.values ?? []).map((v) => v.value).join(",")}`
+            ),
+            variants: product.variants.map((variant) => ({
+              title: variant.title,
+              values: (variant.options ?? []).map((value) => value.value),
+            })),
           }
         })
-        .toEqual({ options: 0, variants: ["Siyah"] })
+        .toEqual({
+          options: ["Seçenek: Standart"],
+          variants: [{ title: "Siyah", values: ["Standart"] }],
+        })
       const kept = (await stored(page, id)).variants[0]
       expect(kept?.prices?.find((price) => price.currency_code === "try")?.amount).toBe(690)
 

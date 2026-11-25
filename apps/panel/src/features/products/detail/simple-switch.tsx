@@ -8,7 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { useMakeSimple } from "@/features/products/api/product-simple"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
-import { realOptions, simplePlan } from "./use-data-card"
+import { usePlaceholderOption } from "./placeholder-option"
+import { realOptions, simplePlan } from "./simple-plan"
 import type { DataCardState } from "./use-data-card"
 import { variantName } from "./variant-facts"
 import { priceOf } from "./variant-values"
@@ -46,12 +47,13 @@ export function SimpleSwitch({ product, state }: { product: ProductDetail; state
   const variants = product.variants ?? []
   const [keep, setKeep] = useState(variants[0]?.id ?? "")
   const make = useMakeSimple(product.id)
-  const options = realOptions(product).map((option) => option.title)
+  const placeholder = usePlaceholderOption()
+  const options = realOptions(product, placeholder).map((option) => option.title)
   const others = variants.filter((variant) => variant.id !== keep)
   const stocked = others.filter((variant) => (stockOf(variant) ?? 0) > 0)
   const units = stocked.reduce((sum, variant) => sum + (stockOf(variant) ?? 0), 0)
   const confirm = () => {
-    make.mutate(simplePlan(product, keep), { onSuccess: state.madeSimple })
+    make.mutate(simplePlan(product, keep, placeholder), { onSuccess: state.madeSimple })
   }
   return (
     <div
