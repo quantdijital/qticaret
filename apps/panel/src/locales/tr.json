@@ -4456,6 +4456,27 @@
       "pageSize_other": "{{count}} ürün",
       "columns": "Sütunlar"
     },
+    "quickEdit": {
+      "toggle": "Hızlı düzenle",
+      "lockedHint": "Önce değişiklikleri kaydedin ya da vazgeçin.",
+      "label": "Hızlı düzenleme",
+      "save_one": "{{count}} değişikliği kaydet",
+      "save_other": "{{count}} değişikliği kaydet",
+      "saved_one": "{{formatted}} ürün güncellendi.",
+      "saved_other": "{{formatted}} ürün güncellendi.",
+      "failed_one": "{{formatted}} ürün kaydedilemedi; değişikliği listede duruyor.",
+      "failed_other": "{{formatted}} ürün kaydedilemedi; değişiklikleri listede duruyor.",
+      "discardTitle": "Değişikliklerden vazgeçilsin mi?",
+      "discardText_one": "Kaydedilmemiş {{count}} değişiklik silinir.",
+      "discardText_other": "Kaydedilmemiş {{count}} değişiklik silinir.",
+      "discard": "Değişikliklerden vazgeç",
+      "priceOf": "{{title}} fiyatı",
+      "stockOf": "{{title}} stoku",
+      "statusOf": "{{title}} durumu",
+      "inVariants": "Varyantlarda düzenle",
+      "untracked": "Takip yok",
+      "untrackedHint": "Stok sayılmıyor: bu ürün her zaman satılır."
+    },
     "duplicate": {
       "action": "Kopyala",
       "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
