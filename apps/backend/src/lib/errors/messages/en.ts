@@ -830,6 +830,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.input_unsupported": "This image's type or size does not suit this task.",
   "ai.daily_limit_reached": "Today's AI usage limit has been reached. Try again tomorrow.",
   "ai.credits_exhausted": "You are out of AI credits. Add credits to continue.",
+  "ai.credits_daily_cap": "Today's credit limit has been reached. Try again tomorrow.",
+  "ai.platform_unavailable":
+    "Platform credits cannot be used right now. Try again in a little while.",
   "ai.unknown_entity": "The record the suggestion was asked for was not found.",
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",

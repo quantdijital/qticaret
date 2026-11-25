@@ -172,7 +172,8 @@ medusaIntegrationTestRunner({
         task: "image_scene",
         capability: "image_edit",
         operation,
-        contentType: `multipart/form-data; boundary=${boundary}`,
+        // Spelled as a client may: the provider is sent the type as the gateway writes it (N3)
+        contentType: `Multipart/Form-Data;boundary="${boundary}"`,
       })
       expect(reply.status).toBe(200)
       expect(reply.headers["content-type"]).toBe("image/png")

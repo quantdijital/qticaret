@@ -216,4 +216,34 @@ describe("the allow-list the gateway rebuilds a body from (P3b review C1)", () =
       code: "body_refused",
     })
   })
+
+  // Second review's note: the target's fixed fields are written last, no shop field over them
+  it("writes the target's fixed fields over every field the shop sent", () => {
+    const fixed = { temperature: 0.2, response_format: { type: "text" }, tool_choice: "none" }
+    const chat = { ...DEEPSEEK, fixedBody: fixed }
+    const body = sent(
+      send(
+        {
+          messages: [{ role: "user", content: "u" }],
+          temperature: 1.5,
+          response_format: { type: "json_object" },
+          tools: [{ type: "function", function: { name: "f" } }],
+          tool_choice: "auto",
+        },
+        chat,
+        "assistant"
+      )
+    )
+    expect(body).toMatchObject(fixed)
+    const gemini = { ...GEMINI_IMAGE, fixedBody: { generationConfig: { candidateCount: 1 } } }
+    const edit = sent(
+      send(
+        { contents: [{ parts: [{ text: "t" }] }], generationConfig: { candidateCount: 8 } },
+        gemini,
+        "image_background",
+        "image_edit"
+      )
+    )
+    expect(edit["generationConfig"]).toEqual({ candidateCount: 1 })
+  })
 })

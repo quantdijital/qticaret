@@ -163,8 +163,9 @@ export const AI_SERVICE_TARGETS = deepFrozen({
       image_edit: {
         protocol: "gemini-image",
         auth: "x-goog-api-key",
-        // The shop's connector's own (an image asked for alone), and one answer only
-        fixedBody: { generationConfig: { responseModalities: ["IMAGE"], candidateCount: 1 } },
+        // The shop's connector's own (an image asked for alone); the one answer
+        // (`candidateCount: 1`) is the gateway's own field, written last
+        fixedBody: { generationConfig: { responseModalities: ["IMAGE"] } },
         ...GEMINI_IMAGE,
         scene: GEMINI_IMAGE,
       },
