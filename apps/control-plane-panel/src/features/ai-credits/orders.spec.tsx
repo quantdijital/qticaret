@@ -21,6 +21,7 @@ const PROOF = {
 const ORDER: AiOrder = {
   id: "aico_1",
   tenant_id: "ten_kahve",
+  tenant: { name: "Kahve Durağı", slug: "kahve", primary_hostname: "kahveduragi.com" },
   pack: {
     id: "pack_0123456789abcdef",
     name: "Orta",
@@ -46,9 +47,6 @@ const refusingCancel =
 function controlPlane(call: Sent): Answer {
   if (call.path.startsWith("/admin/cp/ai/orders?")) {
     return { status: 200, body: { orders: [ORDER], count: 1, limit: 50, offset: 0 } }
-  }
-  if (call.path.startsWith("/admin/cp/tenants?")) {
-    return { status: 200, body: { tenants: [{ id: "ten_kahve", name: "Kahve Durağı" }] } }
   }
   if (call.path.startsWith("/admin/cp/ai/orders/aico_1/")) {
     if (!call.headers[STEP_UP_HEADER]) {
@@ -92,9 +90,49 @@ describe("the AI credit requests (adr/0085 K11)", () => {
     page()
 
     expect(await screen.findByText("Kahve Durağı")).toBeInTheDocument()
+    expect(screen.getByText("kahveduragi.com")).toBeInTheDocument()
     expect(screen.getByText("2.500")).toBeInTheDocument()
     expect(screen.getByText(/499,00/)).toBeInTheDocument()
     expect(sent[0]?.path).toContain("status=pending")
+    // The request names its shop: the shops' list is not read (P3d)
+    expect(sent.filter((call) => call.path.startsWith("/admin/cp/tenants"))).toEqual([])
+  })
+
+  it.each([
+    ["null (a shop no longer listed)", { tenant: null }],
+    ["absent (a control plane before P3d)", { tenant: undefined }],
+  ])("shows the shop by its id when its name is %s", async (_case, shop) => {
+    stubApi((call) =>
+      call.path.startsWith("/admin/cp/ai/orders?")
+        ? { status: 200, body: { orders: [{ ...ORDER, ...shop }], count: 1, limit: 50, offset: 0 } }
+        : controlPlane(call)
+    )
+    page()
+
+    expect(await screen.findByRole("link", { name: "ten_kahve" })).toBeInTheDocument()
+    expect(screen.queryByText("kahveduragi.com")).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: "Ödendi olarak işaretle" }))
+    const form = await screen.findByRole("dialog", { name: "Ödendi olarak işaretle" })
+    expect(form).toHaveTextContent("ten_kahve mağazasına 2.500 kredi yüklenecek")
+  })
+
+  it("falls back to the slug when the shop has no primary address", async () => {
+    stubApi((call) =>
+      call.path.startsWith("/admin/cp/ai/orders?")
+        ? {
+            status: 200,
+            body: {
+              orders: [{ ...ORDER, tenant: { ...ORDER.tenant, primary_hostname: null } }],
+              count: 1,
+              limit: 50,
+              offset: 0,
+            },
+          }
+        : controlPlane(call)
+    )
+    page()
+
+    expect(await screen.findByText("kahve")).toBeInTheDocument()
   })
 
   it("asks before marking paid, naming the shop and the credits, then sends one request", async () => {

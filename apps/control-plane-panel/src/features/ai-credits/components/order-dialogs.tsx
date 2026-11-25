@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { money } from "@/features/billing/words"
 import { useMarkPaid } from "@/features/ai-credits/api/mutations"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
-import { credits } from "@/features/ai-credits/words"
+import { credits, shopName } from "@/features/ai-credits/words"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
@@ -20,9 +20,9 @@ import { isStepUpCancelled } from "@/lib/step-up"
 const REFERENCE_MAX = 256
 
 /** What a request's dialogs say of it: the shop, the pack, its credits and amount. */
-function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder, shop: string) {
+function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder) {
   return {
-    shop,
+    shop: shopName(order),
     pack: order.pack.name,
     credits: credits(t, order.pack.credits),
     amount: money(order.pack.amount, order.pack.currency),
@@ -35,15 +35,7 @@ function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder, shop
  * N kredi yüklenecek"). One request on submit, behind a step-up; marked
  * twice, the credits are added once (`applied: false`).
  */
-export function PaidDialog({
-  order,
-  shop,
-  onClose,
-}: {
-  order: AiOrder
-  shop: string
-  onClose: () => void
-}) {
+export function PaidDialog({ order, onClose }: { order: AiOrder; onClose: () => void }) {
   const { t } = useTranslation()
   const mark = useMarkPaid(order)
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer")
@@ -58,7 +50,7 @@ export function PaidDialog({
         }
       }}
       title={t("aiCredits.orders.paid.title")}
-      description={t("aiCredits.orders.paid.text", factsOf(t, order, shop))}
+      description={t("aiCredits.orders.paid.text", factsOf(t, order))}
       dirty
       saving={mark.isPending}
       submitLabel={t("aiCredits.orders.paid.submit")}
@@ -139,12 +131,10 @@ export function PaidDialog({
  */
 export function CancelDialog({
   order,
-  shop,
   onConfirm,
   onClose,
 }: {
   order: AiOrder
-  shop: string
   onConfirm: () => void
   onClose: () => void
 }) {
@@ -158,7 +148,7 @@ export function CancelDialog({
         }
       }}
       title={t("aiCredits.orders.cancel.title")}
-      description={t("aiCredits.orders.cancel.text", factsOf(t, order, shop))}
+      description={t("aiCredits.orders.cancel.text", factsOf(t, order))}
       confirmLabel={t("aiCredits.orders.cancel.confirm")}
       destructive
       onConfirm={onConfirm}

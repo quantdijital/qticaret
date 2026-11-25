@@ -16,9 +16,10 @@ import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { money } from "@/features/billing/words"
 import { useCancelOrder } from "@/features/ai-credits/api/mutations"
-import { ORDERS_PAGE_SIZE, ordersQuery, shopNamesQuery } from "@/features/ai-credits/api/queries"
+import { ORDERS_PAGE_SIZE, ordersQuery } from "@/features/ai-credits/api/queries"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
 import { CancelDialog, PaidDialog } from "@/features/ai-credits/components/order-dialogs"
+import { shopName, shopPlace } from "@/features/ai-credits/words"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
@@ -37,7 +38,6 @@ export function OrdersPage() {
   const { status, page } = route.useSearch()
   const navigate = useNavigate({ from: "/ai-orders" })
   const list = useQuery(ordersQuery(status, page - 1))
-  const names = useQuery(shopNamesQuery())
   // Owned here, not by the confirmation: its answer is said after that has closed
   const cancel = useCancelOrder()
   const [open, setOpen] = useState<Open>(null)
@@ -56,7 +56,6 @@ export function OrdersPage() {
   const go = (next: Partial<{ status: AiCreditOrderStatus; page: number }>) => {
     void navigate({ search: (prev) => ({ ...prev, page: 1, ...next }) })
   }
-  const shopOf = (order: AiOrder) => names.data?.get(order.tenant_id) ?? order.tenant_id
   const pending = status === "pending"
   const columns: Column<AiOrder>[] = [
     {
@@ -70,8 +69,11 @@ export function OrdersPage() {
             search={{ part: "ai-credits" }}
             className="truncate font-medium hover:underline"
           >
-            {shopOf(row)}
+            {shopName(row)}
           </Link>
+          {shopPlace(row) ? (
+            <span className="truncate text-xs text-muted-foreground">{shopPlace(row)}</span>
+          ) : null}
           <span className="truncate text-xs text-muted-foreground">
             {row.pack.name} · {formatDate(row.requested_at)}
           </span>
@@ -171,13 +173,10 @@ export function OrdersPage() {
           />
         </SectionCard>
       )}
-      {open?.action === "paid" ? (
-        <PaidDialog order={open.order} shop={shopOf(open.order)} onClose={close} />
-      ) : null}
+      {open?.action === "paid" ? <PaidDialog order={open.order} onClose={close} /> : null}
       {open?.action === "cancel" ? (
         <CancelDialog
           order={open.order}
-          shop={shopOf(open.order)}
           onConfirm={() => {
             cancelOrder(open.order)
           }}

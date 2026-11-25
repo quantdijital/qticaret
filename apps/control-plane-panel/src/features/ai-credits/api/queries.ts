@@ -64,23 +64,6 @@ export const ordersQuery = (status: AiCreditOrderStatus, page: number) =>
     placeholderData: keepPreviousData,
   })
 
-/**
- * The shops' names for the requests list: the request names its shop by
- * id only, so the first 100 shops (the list route's page) are read once.
- * A shop beyond them is shown by its id.
- */
-export const shopNamesQuery = () =>
-  queryOptions({
-    queryKey: [...AI_CREDITS_KEY, "shop-names"],
-    queryFn: async () => {
-      const list = await api<{ tenants: { id: string; name: string }[] }>("/admin/cp/tenants", {
-        query: { limit: 100 },
-      })
-      return new Map(list.tenants.map((shop) => [shop.id, shop.name]))
-    },
-    staleTime: 60_000,
-  })
-
 export const settingsQuery = () =>
   queryOptions({
     queryKey: SETTINGS_KEY,

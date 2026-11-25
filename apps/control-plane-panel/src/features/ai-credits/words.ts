@@ -2,6 +2,7 @@ import type { TFunction } from "i18next"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import type { Me } from "@/features/auth/api"
 import { displayName } from "@/features/auth/api"
+import type { AiOrder } from "@/features/ai-credits/api/schemas"
 
 /**
  * The AI credits in this panel's words (adr/0085): counts the Turkish way
@@ -10,6 +11,13 @@ import { displayName } from "@/features/auth/api"
 
 export const credits = (t: TFunction, value: number) =>
   t("aiCredits.credits", { count: value, value: formatCount(value) })
+
+/** A request's shop by its name; by its id when the answer names none. */
+export const shopName = (order: AiOrder) => order.tenant?.name ?? order.tenant_id
+
+/** Where the shop is found: its primary address, else its slug; null when unnamed. */
+export const shopPlace = (order: AiOrder) =>
+  order.tenant?.primary_hostname ?? order.tenant?.slug ?? null
 
 /** A ledger row's move with its sign: "+500", "−20". */
 export const signed = (value: number) =>

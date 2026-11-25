@@ -44,9 +44,21 @@ export const walletSchema = z.object({
 export type AiWallet = z.infer<typeof walletSchema>
 export type AiLedgerEntry = AiWallet["entries"][number]
 
+/**
+ * A request's shop as the shops' list names it (P3d): null for a shop no
+ * longer listed; absent from a control plane older than P3d. Either way
+ * the screens fall back to the shop's id.
+ */
+const orderShopSchema = z.object({
+  name: z.string(),
+  slug: z.string().optional(),
+  primary_hostname: z.string().nullable().optional(),
+})
+
 export const orderSchema = z.object({
   id: z.string(),
   tenant_id: z.string(),
+  tenant: orderShopSchema.nullable().optional(),
   pack: aiCreditPackSchema,
   status: z.enum(AI_CREDIT_ORDER_STATUSES),
   method: z.enum(PAYMENT_METHODS).nullable(),
