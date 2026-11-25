@@ -57,7 +57,7 @@ medusaIntegrationTestRunner({
         for (const [body] of refused) {
           answers.push(await post(`${P}/fake`, body))
         }
-      })
+      }, getContainer())
       expect(answers.map((each) => each.status)).toEqual(refused.map(() => 400))
       const told = JSON.stringify(answers.map((each) => each.data))
       for (const [, value] of refused) {

@@ -86,7 +86,7 @@ medusaIntegrationTestRunner({
         for (let i = 0; i < 5; i += 1) {
           answers.push(await check(member))
         }
-      })
+      }, getContainer())
       expect(answers.map((each) => each.data)).toEqual([
         { ok: true },
         { ok: false, reason: "rejected" },
