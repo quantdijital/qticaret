@@ -4,13 +4,13 @@
   "version": 1,
   "theme": "atolye",
   "name": "Vadi",
-  "description": "Sıcak açık zeminde koyu yeşil ve turuncu: tek satırlık üst bilgi, yazı tarafı yumuşak dalgalarla açılan tam genişlik manzara, turuncu düğme, kapağın içinde arama kutusu ve alt kenara taşan güven rozetleri; görsel üstü yazılı tur kartları, ikonlu tur türleri, gezi yazıları paneli, bölünmüş kampanya bandı, ikonlu rakamlar, e-bültenli alt bilgi ve tur sayfasında açılır program. Menülere ve ürünlere dokunmaz.",
+  "description": "Sıcak açık zeminde koyu yeşil ve turuncu: tek satırlık üst bilgi, dalgalarla açılan tam genişlik manzara, turuncu düğme, kapağın içinde arama kutusu, alt kenara taşan güven rozetleri; görsel üstü yazılı tur kartları, ikonlu tur türleri, gezi yazıları, bölünmüş kampanya bandı, ikonlu rakamlar ve tur sayfasında açılır program. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
-      "file": "images/kapak-oludeniz.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:Oludeniz.jpg",
-      "license": "CC BY 2.0, Dan Taylor (küçültülüp WebP'ye çevrildi)"
+      "file": "images/kapak-braies.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Lago_di_Braies_South_Tyrol_9.jpg",
+      "license": "CC BY-SA 4.0, kallerna (yatay çevrilip küçültüldü, WebP'ye çevrildi; değiştirilmiş hali de CC BY-SA 4.0)"
     },
     {
       "file": "images/bant-ayder.webp",

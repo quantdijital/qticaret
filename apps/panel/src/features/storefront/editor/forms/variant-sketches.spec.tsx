@@ -48,15 +48,16 @@ describe("the header bar's sketches", () => {
     }
   })
 
-  it("gives each choice its own whole edge, the third alone on its row too", () => {
+  it("gives each choice its own whole edge, an odd one alone on its row too", () => {
     render(<VariantField id="v" type="header_bar" value="standard" onChange={() => undefined} />)
     const choices = screen.getAllByRole("radio")
-    expect(choices).toHaveLength(3)
+    expect(choices).toHaveLength(4)
     for (const choice of choices) {
       // Joined items (spacing 0) drop the left edge and the outer corners of all but the first
       expect(choice).not.toHaveAttribute("data-spacing", "0")
       expect(choice.querySelector("svg")).not.toBeNull()
     }
     expect(screen.getByRole("radio", { name: /Klasik katalog/ })).toBeInTheDocument()
+    expect(screen.getByRole("radio", { name: /Tek satır/ })).toBeInTheDocument()
   })
 })
