@@ -115,6 +115,30 @@ function realRunner() {
     : actual
 }
 
+/**
+ * The file's snapshot, taken again when Postgres refuses it for another
+ * session on the database (55006: a scheduled job's query in flight, a
+ * connection not yet handed back). The runner drops the old template before
+ * it copies the database, so a refusal left none, and every test of the file
+ * and of the files after it failed at its restore (dev, 2026-11-25). The
+ * other session is over in a moment; one that stays is thrown as it is.
+ */
+async function snapshotAlone(dbUtils) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await dbUtils.snapshot()
+      return
+    } catch (error) {
+      const busy = error?.code === "55006" || /being accessed by other users/.test(String(error))
+      if (!busy || attempt === 10) {
+        throw error
+      }
+      say(`snapshot refused for another session on the database, again in 500 ms (${attempt})`)
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+  }
+}
+
 function runBundle(kind, names) {
   const bundle = path.basename(String(expect.getState().testPath ?? "bundle"))
   say(`${bundle} (${kind}): ${names.join(", ")}`)
@@ -135,7 +159,7 @@ function runBundle(kind, names) {
       if (state.snapshotDue) {
         state.snapshotDue = false
         // Also tells the runner to skip its restore before this test
-        await state.context.dbUtils.snapshot()
+        await snapshotAlone(state.context.dbUtils)
       }
       return fn.call(this)
     }, ms)
