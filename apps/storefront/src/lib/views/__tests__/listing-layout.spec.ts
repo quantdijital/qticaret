@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { LISTING_PAGE_DEFAULTS } from "@qticaret/types/listing-page"
 import type { ListingPageSettings } from "@qticaret/types/listing-page"
+import type { BreadcrumbView } from "@qticaret/ui"
 import { hrefOf, listingQueryOf, stateFromSearch, stateOf, viewAsked } from "../listing"
 import { dateFilterView, datedChip, layoutOf, trailOf, viewSwitchView } from "../listing-layout"
 
@@ -62,21 +63,19 @@ describe("the view switch", () => {
 })
 
 describe("the trail's last crumb", () => {
-  const crumbs = [
-    { label: "Ana sayfa", path: "/" },
-    { label: "Tüm ürünler", path: null },
-  ]
+  const home: BreadcrumbView = { label: "Ana sayfa", path: "/" }
+  const here: BreadcrumbView = { label: "Tüm ürünler", path: null }
 
   it("is shown by default and hidden when the shop asks", () => {
-    expect(trailOf(crumbs, shop())).toEqual(crumbs)
-    expect(trailOf(crumbs, shop({ breadcrumb_current: "hide" }))).toEqual([crumbs[0]])
+    expect(trailOf([home, here], shop())).toEqual([home, here])
+    expect(trailOf([home, here], shop({ breadcrumb_current: "hide" }))).toEqual([home])
   })
 
   it("keeps a trail of one, and a last crumb that is a link", () => {
     const hide = shop({ breadcrumb_current: "hide" })
-    expect(trailOf([crumbs[1] ?? crumbs[0]], hide)).toHaveLength(1)
-    const linked = [crumbs[0], { label: "Turlar", path: "/turlar" }]
-    expect(trailOf(linked as typeof crumbs, hide)).toHaveLength(2)
+    expect(trailOf([here], hide)).toEqual([here])
+    const linked: BreadcrumbView = { label: "Turlar", path: "/turlar" }
+    expect(trailOf([home, linked], hide)).toEqual([home, linked])
   })
 })
 
