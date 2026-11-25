@@ -1580,6 +1580,7 @@
       "empty": "No moves yet.",
       "system": "System",
       "you": "{{name}} (you)",
+      "unnamed": "Removed staff member",
       "columns": {
         "at": "Date",
         "kind": "Kind",

@@ -25,6 +25,13 @@ export const walletSchema = z.object({
     daily: z.object({ cap: count, spent: count, remaining: count }),
   }),
   own_daily_cap: count.nullable(),
+  // P3d, so the tab reads no other route; each absent from an older control
+  // plane, and the tab then says nothing of what it does not know
+  /** The plan has `ai.platform_credits` on, whatever the shop's status. */
+  flag_on: z.boolean().optional(),
+  tenant_status: z.string().optional(),
+  /** The month's whole grant (not what is left of it). */
+  monthly_grant: count.optional(),
   entries: z.array(
     z.object({
       id: z.string(),
@@ -34,6 +41,9 @@ export const walletSchema = z.object({
       bucket: z.enum(["plan", "purchased"]),
       note: z.string().nullable(),
       actor: z.string(),
+      // The staff member's name beside their id (P3d); null for the system, the
+      // shop, or one since removed; absent from a control plane before P3d
+      actor_name: z.string().nullable().optional(),
       created_at: day,
     })
   ),

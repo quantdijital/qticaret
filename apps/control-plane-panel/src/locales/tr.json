@@ -1580,6 +1580,7 @@
       "empty": "Henüz hareket yok.",
       "system": "Sistem",
       "you": "{{name}} (siz)",
+      "unnamed": "Silinmiş personel",
       "columns": {
         "at": "Tarih",
         "kind": "Tür",

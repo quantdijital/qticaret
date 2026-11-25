@@ -6,7 +6,7 @@ import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { useMe } from "@/features/auth/api"
 import { LEDGER_PAGE_SIZE } from "@/features/ai-credits/api/queries"
 import type { AiLedgerEntry, AiWallet } from "@/features/ai-credits/api/schemas"
-import { actorText, kindText, signed } from "@/features/ai-credits/words"
+import { actorOf, kindText, signed } from "@/features/ai-credits/words"
 
 /**
  * The ledger, newest first, a page at a time (adr/0085 §1): when, what,
@@ -71,7 +71,17 @@ export function LedgerTable({
       key: "actor",
       header: t("aiCredits.ledger.columns.actor"),
       className: "hidden lg:table-cell",
-      cell: (row) => <span className="break-all">{actorText(t, row.actor, me)}</span>,
+      cell: (row) => {
+        const who = actorOf(t, row, me)
+        return (
+          <div className="flex min-w-0 flex-col">
+            <span className="break-words">{who.text}</span>
+            {who.id ? (
+              <span className="text-xs break-all text-muted-foreground">{who.id}</span>
+            ) : null}
+          </div>
+        )
+      },
     },
   ]
   return (

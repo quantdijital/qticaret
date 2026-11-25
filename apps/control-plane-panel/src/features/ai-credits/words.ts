@@ -44,15 +44,30 @@ export function monthText(period: string): string {
     : at.toLocaleDateString("tr-TR", { month: "long", year: "numeric", timeZone: "UTC" })
 }
 
-/** Who wrote a row: the system, you, or a staff member's id (the ledger keeps no name). */
-export function actorText(t: TFunction, actor: string, me: Me | undefined): string {
-  if (actor === "system") {
-    return t("aiCredits.ledger.system")
+/**
+ * Who wrote a row: the system, you, or a staff member by the name the
+ * answer gives (`actor_name`, P3d). A staff id with no name is a member
+ * since removed (or a control plane before P3d): said neutrally, the id
+ * kept as a quiet second line (`id`). Any other actor is shown as it is.
+ */
+export function actorOf(
+  t: TFunction,
+  row: { actor: string; actor_name?: string | null },
+  me: Me | undefined
+): { text: string; id?: string } {
+  if (row.actor === "system") {
+    return { text: t("aiCredits.ledger.system") }
   }
-  if (me?.id === actor) {
-    return t("aiCredits.ledger.you", { name: displayName(me) })
+  if (me?.id === row.actor) {
+    return { text: t("aiCredits.ledger.you", { name: displayName(me) }) }
   }
-  return actor
+  if (row.actor_name) {
+    return { text: row.actor_name }
+  }
+  if (row.actor.startsWith("user_")) {
+    return { text: t("aiCredits.ledger.unnamed"), id: row.actor }
+  }
+  return { text: row.actor }
 }
 
 const SERVICES = ["deepseek", "minimax", "gemini", "photoroom", "fake"] as const
