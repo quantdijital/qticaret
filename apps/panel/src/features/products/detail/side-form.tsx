@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react"
 import { useEffect, useRef } from "react"
 import type { KeyboardEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { useDiscardGuard } from "@qticaret/admin-ui/patterns/use-discard-guard"
 import { Button } from "@qticaret/admin-ui/ui/button"
 
@@ -37,6 +38,8 @@ export function SideForm({
   const { t } = useTranslation()
   const form = useRef<HTMLFormElement>(null)
   const { guard, confirm } = useDiscardGuard(dirty)
+  // The page's save bar saves it, or lets it go (asked there once for all), too
+  useDirtyEntry({ dirty, saving, submit: onSubmit, reset: onCancel })
   useEffect(() => {
     const first = form.current?.querySelector<HTMLElement>(
       "input:not([type=hidden]):not([disabled]), button[role=combobox], [role=checkbox], select, textarea"

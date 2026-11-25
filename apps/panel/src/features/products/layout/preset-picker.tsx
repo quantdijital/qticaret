@@ -57,7 +57,12 @@ export function ShortcutsHint() {
     <section className="flex flex-col gap-2 border-t pt-4">
       <h3 className="text-xs font-medium text-muted-foreground">{t(`${L}.shortcuts`)}</h3>
       <dl className="flex flex-col gap-1.5 text-[13px]">
-        {([["K", "shortcutGo"]] as const).map(([key, label]) => (
+        {(
+          [
+            ["S", "shortcutSave"],
+            ["K", "shortcutGo"],
+          ] as const
+        ).map(([key, label]) => (
           <div key={key} className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">{t(`${L}.${label}`)}</dt>
             <dd>
