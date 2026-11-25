@@ -52,11 +52,12 @@ export function StatsHead({ section, heading }: { section: Stats; heading: React
 
 /**
  * The strip's items as features (`item_style: feature`, Wanderly's "More
- * Than Just Trips"): each its icon on a light disc of the shop's accent,
- * its label in bold and its one quiet line; the value is not drawn (it
- * stays the figure's, should the shop turn the figures back). One a line
- * on a phone, two from 640 px, all in one line from 1024 px, hairlines
- * between them there while `dividers` is on. A list (`dl`): each label a
+ * Than Just Trips"), set close: each its icon on a small light disc of the
+ * shop's accent, its label in bold and its one quiet line in the small
+ * size; the value is not drawn (it stays the figure's, should the shop
+ * turn the figures back). Two a line on a phone, all in one line from
+ * 1024 px, a hairline before each there while `dividers` is on (the first
+ * too, the row standing in from the heading). A list (`dl`): each label a
  * term, its line its description.
  */
 export function StatsFeatures({ section }: { section: Stats }) {
@@ -65,7 +66,7 @@ export function StatsFeatures({ section }: { section: Stats }) {
   return (
     <dl
       className={cn(
-        "grid grid-cols-1 gap-x-(--gap-columns) gap-y-6 sm:grid-cols-2",
+        "grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-(--gap-columns)",
         WIDE[section.items.length],
         lined && "lg:gap-x-0"
       )}
@@ -75,15 +76,17 @@ export function StatsFeatures({ section }: { section: Stats }) {
           key={`${String(at)}-${item.label}`}
           className={cn(
             "flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center",
-            lined &&
-              "lg:border-l lg:border-rule lg:px-(--gap-columns) lg:first:border-l-0 lg:first:pl-0"
+            lined && "lg:border-l lg:border-rule lg:px-(--gap-columns)"
           )}
         >
-          <dt className="order-2 mt-3 font-semibold text-text" {...qf(at, "label")}>
+          <dt
+            className="order-2 mt-2 text-sm leading-snug font-semibold text-text lg:text-md"
+            {...qf(at, "label")}
+          >
             {item.label}
           </dt>
           {item.text && (
-            <dd className="order-3 text-sm text-text-2" {...qf(at, "text")}>
+            <dd className="order-3 text-xs leading-snug text-text-2" {...qf(at, "text")}>
               {item.text}
             </dd>
           )}
@@ -91,9 +94,9 @@ export function StatsFeatures({ section }: { section: Stats }) {
           {item.icon && (
             <dd
               aria-hidden="true"
-              className="order-1 grid size-12 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal"
+              className="order-1 grid size-10 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal lg:size-12"
             >
-              <SectionIcon icon={item.icon} className="size-6 shrink-0" />
+              <SectionIcon icon={item.icon} className="size-5 shrink-0 lg:size-6" />
             </dd>
           )}
         </div>

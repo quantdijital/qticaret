@@ -104,10 +104,27 @@
 
   /* The second button clear, its play mark in a ring (`second_button: play`) */
   .gf-cover .gf-btn--play {
+    /* The ring and the hairline around it: the hover ground's round end is the ring's own */
+    min-height: calc(2.75rem + 2px);
     padding-block: 0;
     padding-inline: 0 var(--space-sm);
     border-color: transparent;
     background: transparent;
+  }
+  /* The hover ground eases in, not switched on (over the buttons' own, `motion.css`) */
+  .gf-cover .gf-btn.gf-btn--play {
+    transition:
+      background-color var(--dur-short) ease,
+      color var(--dur-short) ease,
+      border-color var(--dur-short) ease,
+      box-shadow var(--dur-short) ease,
+      transform var(--dur-micro) var(--ease-out),
+      scale var(--dur-micro) var(--ease-out);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-cover .gf-btn.gf-btn--play {
+      transition: none;
+    }
   }
   .gf-cover .gf-play-ring {
     display: inline-flex;

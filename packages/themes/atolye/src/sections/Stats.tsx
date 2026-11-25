@@ -46,7 +46,13 @@ export function Stats({ section }: { section: Of<"stats"> }) {
       {...(section.title ? { "aria-labelledby": id } : { "aria-label": section.label })}
       className="gf-section"
     >
-      <Container className="flex flex-col gap-(--head-gap)">
+      {/* The features set close: a smaller step from the head to the row */}
+      <Container
+        className={cn(
+          "flex flex-col",
+          section.item_style === "feature" ? "gap-(--head-gap-s)" : "gap-(--head-gap)"
+        )}
+      >
         <StatsHead
           section={section}
           heading={

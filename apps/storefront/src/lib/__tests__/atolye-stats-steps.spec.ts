@@ -100,6 +100,53 @@ describe("Atölye's figures strip and steps", () => {
     expect(html).not.toContain("border-rule")
   })
 
+  it("keeps the figures as they were while no item style is chosen", () => {
+    const view = statsView(strip(), t)
+    if (!view) {
+      throw new Error("no strip")
+    }
+    expect(view.item_style).toBe("figure")
+    const html = home([view])
+    expect(html).toContain("flex flex-col gap-(--head-gap)")
+    expect(html).not.toContain("rounded-full")
+  })
+
+  it("draws features close: a disc, the label as the term, its line, no value", () => {
+    const view = statsView(
+      strip({
+        title: "Bir turdan fazlası",
+        item_style: "feature",
+        icons: "on",
+        eyebrow: "Neden biz",
+        note: "Yol seni değiştirir",
+        items: [
+          {
+            value: "Seçkin",
+            label: "Seçilmiş rotalar",
+            text: "Önce biz yürürüz.",
+            icon: "compass",
+          },
+          { value: "Esnek", label: "Size göre", text: null, icon: "calendar" },
+        ],
+      }),
+      t
+    )
+    if (!view) {
+      throw new Error("no strip")
+    }
+    expect(view).toMatchObject({ eyebrow: "Neden biz", note: { text: "Yol seni değiştirir" } })
+    const html = home([view])
+
+    expect(html).toContain("gap-(--head-gap-s)")
+    expect(html).toContain("grid grid-cols-2 gap-x-4")
+    expect(html).toMatch(/<dt[^>]*>Seçilmiş rotalar<\/dt>/)
+    expect(html).toContain("text-xs leading-snug")
+    expect(html).toContain("rounded-full")
+    expect(html).not.toContain(">Seçkin<")
+    expect(html).toContain("Neden biz")
+    expect(html).toContain("Yol seni değiştirir")
+  })
+
   it("draws the steps as one ordered list, the numbers for the eye only, the link under them", () => {
     const view = stepsView(
       howTo({

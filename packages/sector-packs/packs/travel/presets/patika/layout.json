@@ -157,32 +157,40 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
+      "look": {
+        "space_outer": "small",
+        "space_below": "small",
+        "space_inner": null,
+        "ground": null,
+        "align": null,
+        "width": null
+      },
       "title": "Bir turdan fazlası",
       "eyebrow": "Neden bizimle yolculuk",
       "note": "Yol seni değiştirir",
       "items": [
         {
-          "value": "12 kişi",
-          "label": "Küçük gruplar",
-          "text": "En fazla 12 kişiyle yürüyoruz.",
-          "icon": "users"
-        },
-        {
-          "value": "Yerel",
-          "label": "Yerel rehberler",
-          "text": "Yolu yürümüş, bölgeyi bilen ekip.",
+          "value": "Seçkin",
+          "label": "Özenle seçilmiş rotalar",
+          "text": "Her rotayı önce kendimiz yürürüz.",
           "icon": "compass"
         },
         {
-          "value": "Açık",
-          "label": "Açık program",
-          "text": "Mesafe ve konaklama baştan belli.",
-          "icon": "map_pin"
+          "value": "Esnek",
+          "label": "Size göre program",
+          "text": "Tempo ve konaklama sizin seçiminiz.",
+          "icon": "calendar"
         },
         {
-          "value": "7/24",
-          "label": "Yolda destek",
-          "text": "Tur boyunca her an yanınızdayız.",
+          "value": "Kolay",
+          "label": "Dert yok",
+          "text": "Yol, yatak ve sofra bizden.",
+          "icon": "leaf"
+        },
+        {
+          "value": "Unutulmaz",
+          "label": "Unutulmaz anlar",
+          "text": "Yıllarca anlatacağınız hikâyeler.",
           "icon": "heart"
         }
       ],
