@@ -41,6 +41,7 @@ export const CP_ERROR_CODES = [
   "ai_route_no_key",
   "ai_route_service_unknown",
   "ai_route_uncapped",
+  "ai_route_unverified",
   "ai_service_unknown",
   "amount_zero",
   "audit_kind_invalid",

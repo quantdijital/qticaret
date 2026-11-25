@@ -65,6 +65,14 @@ export interface AiCapabilityTarget extends AiEndpointTarget {
   maxTokensField?: "max_tokens" | "max_completion_tokens" | null
   /** `image_edit` only: a product set in a scene (`image_scene`), its own endpoint. */
   scene?: AiEndpointTarget
+  /**
+   * What a real call has not yet proven, so the target is never routed on
+   * the platform's credits (`cp.ai_route_unverified`; the gateway sends
+   * nothing to it); a shop's own key may still use it. `download_host`:
+   * the host the service hands its result from is not in its documents, so
+   * a charged result might not be fetched. Taken out once a call proves it.
+   */
+  unverified?: "download_host"
 }
 
 export interface AiServiceTarget {
@@ -77,6 +85,13 @@ export interface AiServiceTarget {
    * quota back, the gateway its credits (the shop's `notTakenByService`).
    */
   notTakenBodyCodes?: readonly number[]
+  /**
+   * Statuses beyond the shared ones (401, 402, 403, 429, a 5xx) this
+   * service documents as a refusal before any work: Bria's 415, a picture
+   * type it does not take. The shop gives its quota back on them (its
+   * `statusErrors` keys `notTakenByService` holds), the gateway its credits.
+   */
+  notTakenStatuses?: readonly number[]
 }
 
 /** `baseUrl` + `path`: the endpoint's full address. */
@@ -179,10 +194,12 @@ const GEMINI_IMAGE = {
  * writes itself (the shop reads no status address). A cut-out pins RMBG
  * 2.0 (`model`, the default); a scene is Replace Background in `fibo2`
  * mode, where the product's own pixels are pasted back, at the input's
- * size (`original_quality`).
+ * size (`original_quality`). Its result's host is not in the documents:
+ * not on credits until a real call proves it (`unverified`).
  */
 const BRIA_IMAGE = {
   protocol: "bria",
+  unverified: "download_host",
   auth: "api_token",
   model: "RMBG2",
   baseUrl: "https://engine.prod.bria-api.com",
@@ -252,6 +269,8 @@ export const AI_SERVICE_TARGETS = deepFrozen({
   bria: {
     hosts: ["engine.prod.bria-api.com"],
     capabilities: { image_edit: BRIA_IMAGE },
+    // A picture type it does not take, refused before the work (the shop's `statusErrors`)
+    notTakenStatuses: [415],
   },
 } as const satisfies Record<string, AiServiceTarget>)
 
@@ -346,6 +365,21 @@ export function aiTargetUncapped(service: string, capability: string): boolean {
     AI_SERVICE_TARGETS[service as AiNetworkServiceId] as AiServiceTarget
   ).capabilities[capability as AiTargetCapability]
   return target?.protocol === "openai-chat" && (target.maxTokensField ?? null) === null
+}
+
+/**
+ * A target a real call has not yet proven (`AiCapabilityTarget.unverified`,
+ * Bria's result host): never routed on the platform's credits. False for
+ * any other, and for a service or capability not in the table.
+ */
+export function aiTargetUnverified(service: string, capability: string): boolean {
+  if (!Object.hasOwn(AI_SERVICE_TARGETS, service)) {
+    return false
+  }
+  const target: AiCapabilityTarget | undefined = (
+    AI_SERVICE_TARGETS[service as AiNetworkServiceId] as AiServiceTarget
+  ).capabilities[capability as AiTargetCapability]
+  return target?.unverified !== undefined
 }
 
 /** What a capability of a service may be routed to: the models it runs, or null where it has none. */

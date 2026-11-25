@@ -845,6 +845,7 @@
       "ai_route_service_unknown": "Bilinmeyen servis.",
       "ai_route_no_key": "Bu servisin anahtarı yok; önce anahtarını yazın.",
       "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
+      "ai_route_unverified": "Bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez.",
       "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
     },
     "ai_credits": {
@@ -1732,6 +1733,7 @@
       "label": "{{capability}}: servis ve model",
       "noKey": "{{service}} (anahtar yok)",
       "uncapped": "{{service}}: bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
+      "unverified": "{{service}}: bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez.",
       "done": "Yönlendirme kaydedildi."
     },
     "general": {

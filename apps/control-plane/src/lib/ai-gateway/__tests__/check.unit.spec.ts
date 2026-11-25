@@ -104,6 +104,14 @@ describe("checkProviderKey", () => {
       ["photoroom", answering(200, '{"images":{}}'), { ok: true }],
       // Bria's: a request it never had is "not found" to a key it took, 401 to one it refused
       ["bria", answering(404, '{"error":{"code":404}}'), { ok: true }],
+      ["bria", answering(404, '{"status":"UNKNOWN"}'), { ok: true }],
+      // Only in Bria's own JSON: a proxy's page, an empty or odd 404 is no verdict
+      ["bria", answering(404, "<html>Not Found</html>"), { ok: false, reason: "unreachable" }],
+      ["bria", answering(404, ""), { ok: false, reason: "unreachable" }],
+      ["bria", answering(404, "Not Found"), { ok: false, reason: "unreachable" }],
+      ["bria", answering(404, "{}"), { ok: false, reason: "unreachable" }],
+      ["bria", answering(404, '{"error":"no"}'), { ok: false, reason: "unreachable" }],
+      ["bria", answering(404, "[]"), { ok: false, reason: "unreachable" }],
       ["bria", answering(200, '{"status":"UNKNOWN"}'), { ok: true }],
       ["bria", answering(401, "no"), { ok: false, reason: "rejected" }],
       ["bria", answering(403, "no"), { ok: false, reason: "unexpected" }],

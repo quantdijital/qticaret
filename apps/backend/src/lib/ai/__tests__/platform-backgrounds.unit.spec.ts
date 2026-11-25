@@ -1,3 +1,4 @@
+import { aiTargetUnverified } from "@qticaret/types/control-plane"
 import {
   PLATFORM_BACKGROUNDS,
   platformBackgroundsOf,
@@ -26,7 +27,8 @@ describe("the platform's backgrounds", () => {
     }
   })
 
-  it.each(["photoroom", "gemini", "bria"])(
+  // Bria joins once a real call proves its result's host (ai-targets.ts `unverified`)
+  it.each(["photoroom", "gemini", "bria"].filter((id) => !aiTargetUnverified(id, "image_edit")))(
     "are the same whichever service %s runs behind",
     (id) => {
       const platform = platformServiceOf({ text: "deepseek", image_edit: id }, "production")
@@ -34,6 +36,12 @@ describe("the platform's backgrounds", () => {
       expect(platform && platformBackgroundsOf(platform)).toEqual(["white"])
     }
   )
+
+  it("are none while the image service named is not yet proven (Bria)", () => {
+    expect(aiTargetUnverified("bria", "image_edit")).toBe(true)
+    const platform = platformServiceOf({ text: "deepseek", image_edit: "bria" }, "production")
+    expect(platform && platformBackgroundsOf(platform)).toEqual([])
+  })
 
   it("are none where the platform edits no images", () => {
     const platform = platformServiceOf({ text: "deepseek" }, "production")

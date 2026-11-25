@@ -4,6 +4,7 @@ import {
   aiTargetModels,
   aiTargetServiceIds,
   aiTargetUncapped,
+  aiTargetUnverified,
 } from "@qticaret/types/control-plane"
 import type { AiTargetCapability } from "@qticaret/types/control-plane"
 
@@ -47,6 +48,10 @@ export function checkedRoute(capability: string, route: AiRoute): AiRoute {
   // An output no documented field caps is not sold on credits (ai-targets.ts `GEMINI_CHAT`)
   if (aiTargetUncapped(route.service, capability)) {
     throw refuse("cp.ai_route_uncapped")
+  }
+  // Not yet proven by a real call (ai-targets.ts `unverified`: Bria's result host)
+  if (aiTargetUnverified(route.service, capability)) {
+    throw refuse("cp.ai_route_unverified")
   }
   if (!models.includes(route.model)) {
     throw refuse("cp.ai_route_model_not_allowed")

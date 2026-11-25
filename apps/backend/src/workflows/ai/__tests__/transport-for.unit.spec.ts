@@ -84,6 +84,11 @@ describe("the platform as a service", () => {
     expect(Object.keys(platform?.capabilities ?? {}).sort()).toEqual(["image_edit", "text"])
     expect(platformServiceOf({ text: "fake" }, "test")).toBeNull()
     expect(platformServiceOf({ text: "nobody" }, "test")).toBeNull()
+    // Bria's result host is unproven (ai-targets.ts `unverified`): not on credits, even if named
+    expect(platformServiceOf({ image_edit: "bria" }, "test")).toBeNull()
+    expect(
+      Object.keys(platformServiceOf({ ...ROUTED, image_edit: "bria" }, "test")?.capabilities ?? {})
+    ).toEqual(["text"])
   })
 
   it("is connected only with the flag on, a control plane and its status saying so", async () => {

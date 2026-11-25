@@ -1,11 +1,14 @@
 import { BodyRefused, checkInlineImage, isRecord } from "./body-shared"
 import type { BodyInput, RebuiltBody } from "./body-shared"
+import { pixelSizeOf } from "./image-dimensions"
+import { AI_INLINE_IMAGE_MAX_PIXELS } from "./limits"
 
 /**
  * A Bria body (v2 image editing: Remove Background, Replace Background)
  * rebuilt from an allow-list, as Gemini's is (body-gemini.ts): `image`,
  * the picture as base64 alone (never an address: Bria would fetch it, and
- * our storage's addresses are never given out), and, for a scene alone, a
+ * our storage's addresses are never given out; at most 40 MP by its
+ * header, one whose size cannot be read refused), and, for a scene alone, a
  * `prompt` (the shop's scene description), both written last. The target's
  * fixed fields stand in for anything else: `sync: true` (the gateway
  * reads no status address), the pinned cut-out model, the scene's `fibo2`
@@ -50,6 +53,14 @@ function imageOf(value: unknown): string {
     throw new BodyRefused("image_type_refused")
   }
   checkInlineImage(type, value)
+  // Held to the shop's upload limit by its header, never decoded here; unread is refused too
+  const size = pixelSizeOf(type, Buffer.from(value, "base64"))
+  if (size === null) {
+    throw new BodyRefused("image_size_unread")
+  }
+  if (size.width * size.height > AI_INLINE_IMAGE_MAX_PIXELS) {
+    throw new BodyRefused("image_too_many_pixels")
+  }
   return value
 }
 

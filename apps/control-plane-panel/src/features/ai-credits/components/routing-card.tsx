@@ -1,7 +1,11 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { AI_TARGET_CAPABILITIES, aiTargetUncapped } from "@qticaret/types/control-plane"
+import {
+  AI_TARGET_CAPABILITIES,
+  aiTargetUncapped,
+  aiTargetUnverified,
+} from "@qticaret/types/control-plane"
 import type { AiTargetCapability } from "@qticaret/types/control-plane"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -27,8 +31,9 @@ interface Option {
  * The options for one capability: off, then each service and model the
  * shared table allows. A service without a key, or whose output no
  * documented field caps (Gemini's text and image reading,
- * `aiTargetUncapped`: the server would answer `cp.ai_route_uncapped`), is
- * shown but cannot be chosen, with the reason.
+ * `aiTargetUncapped`: the server would answer `cp.ai_route_uncapped`), or
+ * that no real call has proven yet (Bria, `aiTargetUnverified`:
+ * `cp.ai_route_unverified`), is shown but cannot be chosen, with the reason.
  */
 function optionsFor(
   t: ReturnType<typeof useTranslation>["t"],
@@ -42,9 +47,11 @@ function optionsFor(
     for (const model of target.capabilities[capability] ?? []) {
       const why = aiTargetUncapped(target.service, capability)
         ? t("aiCredits.routing.uncapped", { service: name })
-        : keyed.has(target.service)
-          ? null
-          : t("aiCredits.routing.noKey", { service: name })
+        : aiTargetUnverified(target.service, capability)
+          ? t("aiCredits.routing.unverified", { service: name })
+          : keyed.has(target.service)
+            ? null
+            : t("aiCredits.routing.noKey", { service: name })
       options.push({ value: choiceOf(target.service, model), label: `${name} · ${model}`, why })
     }
   }

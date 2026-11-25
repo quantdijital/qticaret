@@ -2,7 +2,7 @@ import { answerContentType, callParamsOf, providerHeaders } from "../headers"
 import { forwardCall, notTaken } from "../forward"
 import type { ForwardOutcome, ProviderFetch } from "../forward"
 import { measuresOf } from "../measures"
-import { FAKE_URL_ENV, gatewayTargetOf } from "../target"
+import { FAKE_URL_ENV, gatewayTargetOf, tableTargetOf } from "../target"
 import type { GatewayTarget } from "../target"
 
 const KEY = ["test", "key", "wire", "0000"].join("-")
@@ -79,7 +79,11 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
       "edit-v2-ai-background",
     ])
     expect(gatewayTargetOf("photoroom", "text", "seo_title")).toBeNull()
-    const cut = must(gatewayTargetOf("bria", "image_edit", "image_background"))
+    // Bria's result host is unproven (ai-targets.ts `unverified`): no call goes to it on
+    // credits; its table endpoints, held to its host, are what a call would use once proven
+    expect(gatewayTargetOf("bria", "image_edit", "image_background")).toBeNull()
+    expect(gatewayTargetOf("bria", "image_edit", "image_scene")).toBeNull()
+    const cut = must(tableTargetOf("bria", "image_edit", "image_background"))
     expect([cut.url.href, cut.model, cut.auth, cut.fixedBody]).toEqual([
       "https://engine.prod.bria-api.com/v2/image/edit/remove_background",
       "RMBG2",
@@ -87,7 +91,7 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
       { model: "RMBG2", sync: true },
     ])
     // The scene's own fixed fields, not the cut-out's
-    const briaScene = must(gatewayTargetOf("bria", "image_edit", "image_scene"))
+    const briaScene = must(tableTargetOf("bria", "image_edit", "image_scene"))
     expect([briaScene.url.href, briaScene.model, briaScene.fixedBody]).toEqual([
       "https://engine.prod.bria-api.com/v2/image/edit/replace_background",
       "fibo2",
@@ -143,6 +147,18 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     expect(notTaken(answered(200, coded(1008)), minimax)).toBe(true)
     expect(notTaken(answered(200, coded(1026)), minimax)).toBe(false)
     expect(notTaken(answered(200, coded(1008)), deepseek)).toBe(false)
+    // Bria refuses a picture type before the work (415): its own row's status, no other's
+    const bria = must(tableTargetOf("bria", "image_edit", "image_background"))
+    expect(bria.notTakenStatuses).toEqual([415])
+    expect(notTaken(answered(415), bria)).toBe(true)
+    expect(notTaken(answered(422), bria)).toBe(false)
+    for (const other of [
+      deepseek,
+      minimax,
+      must(gatewayTargetOf("photoroom", "image_edit", "image_background")),
+    ]) {
+      expect(notTaken(answered(415), other)).toBe(false)
+    }
   })
 
   const call = (fetch: ProviderFetch, maxAnswerBytes = 1024, timeoutMs = 1_000) =>
@@ -216,7 +232,7 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     expect(
       measuresOf(photoroom, { contentType: "image/png", body: Buffer.from("png") }, 1)
     ).toMatchObject({ images: 1, estimatedCostMicros: 100_000 })
-    const bria = must(gatewayTargetOf("bria", "image_edit", "image_scene"))
+    const bria = must(tableTargetOf("bria", "image_edit", "image_scene"))
     const named = (body: unknown) => ({
       contentType: "application/json",
       body: Buffer.from(JSON.stringify(body)),

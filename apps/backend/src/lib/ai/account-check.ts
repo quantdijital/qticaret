@@ -137,6 +137,20 @@ function isDocumentedAnswer(answer: CheckCall["answer"], body: Buffer): boolean 
   }
 }
 
+/**
+ * Bria's own "no such request" (a 404): a JSON object with its `status`
+ * or its error object. The control plane's check reads it the same way
+ * (`apps/control-plane/src/lib/ai-gateway/check.ts`).
+ */
+function isBriaNotFound(body: Buffer): boolean {
+  try {
+    const parsed: unknown = JSON.parse(body.toString("utf8"))
+    return isRecord(parsed) && (typeof parsed["status"] === "string" || isRecord(parsed["error"]))
+  } catch {
+    return false
+  }
+}
+
 /** A registered body code by what it means; any other is an answer out of the documentation. */
 const BODY_VERDICTS: Readonly<Partial<Record<AiErrorKey, AiAccountCheck>>> = {
   "ai.key_rejected": "secret_invalid",
@@ -167,9 +181,10 @@ function verdictOf(service: AiService, response: SafeFetchResponse): [AiAccountC
   if (status === 408 || status === 429 || status >= 500) {
     return ["unreachable", code]
   }
-  // Bria: "no such request" is said only to a key it took (CHECKS above)
+  // Bria: "no such request" is said only to a key it took (CHECKS above), and only in its
+  // own JSON; a bare, HTML or empty 404 (a proxy, a moved path) says nothing of the key
   if (status === 404 && CHECKS[service.id]?.answer === "bria_status") {
-    return ["valid", code]
+    return isBriaNotFound(response.body) ? ["valid", code] : ["unreachable", "not_bria_404"]
   }
   if (status >= 200 && status < 300) {
     const answer = CHECKS[service.id]?.answer ?? "model_list"

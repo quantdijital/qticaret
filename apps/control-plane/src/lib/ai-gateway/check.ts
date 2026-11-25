@@ -121,6 +121,20 @@ function isDocumented(answer: CheckTarget["answer"], body: Buffer): boolean {
   }
 }
 
+/**
+ * Bria's own "no such request" (a 404): a JSON object with its `status`
+ * or its error object. The shop's check reads it the same way
+ * (`apps/backend/src/lib/ai/account-check.ts`).
+ */
+function isBriaNotFound(body: Buffer): boolean {
+  try {
+    const parsed: unknown = JSON.parse(body.toString("utf8"))
+    return isRecord(parsed) && (typeof parsed["status"] === "string" || isRecord(parsed["error"]))
+  } catch {
+    return false
+  }
+}
+
 /** The answer's bytes up to the cap; null past it (the rest is not read). */
 async function readCapped(response: Response): Promise<Buffer | null> {
   const max = PROVIDER_CHECK_MAX_ANSWER_BYTES
@@ -148,9 +162,12 @@ function verdictOf(target: CheckTarget, status: number, body: Buffer | null): Pr
   if (status === 408 || status === 429 || status >= 500) {
     return { ok: false, reason: "unreachable" }
   }
-  // Bria: "the request_id does not exist" is said only to a key it took (a 401 otherwise)
+  // Bria: "the request_id does not exist" is said only to a key it took (a 401 otherwise),
+  // and only in its own JSON; a bare, HTML or empty 404 says nothing of the key
   if (status === 404 && target.answer === "bria_status") {
-    return { ok: true }
+    return body !== null && isBriaNotFound(body)
+      ? { ok: true }
+      : { ok: false, reason: "unreachable" }
   }
   if (status >= 200 && status < 300 && body !== null && isDocumented(target.answer, body)) {
     return { ok: true }

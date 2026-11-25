@@ -1,4 +1,4 @@
-import { aiTargetUncapped } from "@qticaret/types/control-plane"
+import { aiTargetUncapped, aiTargetUnverified } from "@qticaret/types/control-plane"
 import type { AiCapability } from "./capabilities"
 import { FAKE_SERVICE, findAiService } from "./services"
 import type { AiService, AiTarget, ImageBackground } from "./services"
@@ -28,7 +28,8 @@ const PLATFORM_CAPABILITIES = [
  * status names none, a service this instance does not list or one without
  * that capability, the fake one (a call on credits must reach the
  * gateway, which the fake connector never does) or a chat target with no
- * output cap (never routed on credits, adr/0085 Ek (P3b) f).
+ * output cap (never routed on credits, adr/0085 Ek (P3b) f) or one no real
+ * call has proven yet (Bria's result host, ai-targets.ts `unverified`).
  */
 export function platformBackingOf(
   services: Readonly<Record<string, string>>,
@@ -36,7 +37,12 @@ export function platformBackingOf(
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): AiService | null {
   const id = Object.hasOwn(services, capability) ? services[capability] : undefined
-  if (id === undefined || id === FAKE_SERVICE.id || aiTargetUncapped(id, capability)) {
+  if (
+    id === undefined ||
+    id === FAKE_SERVICE.id ||
+    aiTargetUncapped(id, capability) ||
+    aiTargetUnverified(id, capability)
+  ) {
     return null
   }
   const service = findAiService(id, nodeEnv)

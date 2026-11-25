@@ -39,6 +39,17 @@ describe("a stored routing read back", () => {
     )
   })
 
+  it("refuses and leaves out a Bria route until a real call proves its result's host", () => {
+    const bria = models("bria", "image_edit")[0] ?? ""
+    expect(bria).toBe("RMBG2")
+    const route = { service: "bria", model: bria }
+    expect(() => checkedRoute("image_edit", route)).toThrow("cp.ai_route_unverified")
+    expect(storedRouting({ image_edit: route })).toEqual({})
+    // Another image service still routes
+    const photoroom = { service: "photoroom", model: models("photoroom", "image_edit")[0] ?? "" }
+    expect(checkedRoute("image_edit", photoroom)).toEqual(photoroom)
+  })
+
   it("reads nothing routable from what is not a routing", () => {
     for (const value of [null, "text", [], 3]) {
       expect(storedRouting(value)).toEqual({})

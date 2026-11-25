@@ -1,6 +1,7 @@
 import { prepareBody } from "../body"
-import { gatewayTargetOf } from "../target"
+import { tableTargetOf } from "../target"
 import type { GatewayTarget } from "../target"
+import { jpegHeader, pngHeader, webpExtendedHeader, webpLossyHeader } from "./image-headers"
 
 /**
  * Bria's body rebuilt from an allow-list (body-bria.ts): the picture as
@@ -9,16 +10,13 @@ import type { GatewayTarget } from "../target"
  * a webhook or any other field never reaches Bria.
  */
 
-const PNG = Buffer.concat([
-  Buffer.from("89504e470d0a1a0a", "hex"),
-  Buffer.from("0000000d49484452", "hex"),
-]).toString("base64")
-const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70, 0, 1]).toString("base64")
+const PNG = pngHeader(1200, 800).toString("base64")
+const JPEG = jpegHeader(640, 480).toString("base64")
 
 type Task = "image_background" | "image_scene"
 
 const targetOf = (task: Task): GatewayTarget => {
-  const target = gatewayTargetOf("bria", "image_edit", task)
+  const target = tableTargetOf("bria", "image_edit", task)
   if (target === null) {
     throw new Error("no Bria target")
   }
@@ -101,6 +99,36 @@ describe("a Bria body", () => {
     }
     expect(reason({}, "image_background")).toBe("image_refused")
     expect(reason({ images: [PNG] }, "image_background")).toBe("image_refused")
+  })
+
+  it("holds a picture to 40 MP by its header, and refuses one whose size it cannot read", () => {
+    const base64 = (bytes: Buffer) => bytes.toString("base64")
+    // 40 MP exactly passes, in each type
+    for (const image of [
+      pngHeader(8_000, 5_000),
+      jpegHeader(8_000, 5_000),
+      webpExtendedHeader(8_000, 5_000),
+    ]) {
+      expect(reason({ image: base64(image) }, "image_background")).toBe("sent")
+    }
+    for (const image of [
+      pngHeader(8_000, 5_001),
+      jpegHeader(65_535, 65_535),
+      webpExtendedHeader(16_383, 16_383),
+      webpLossyHeader(16_383, 16_383),
+      // Narrow and very long is counted by its area too
+      pngHeader(1, 40_000_001),
+    ]) {
+      expect(reason({ image: base64(image) }, "image_scene")).toBe("image_too_many_pixels")
+    }
+    for (const image of [
+      // The first bytes of a PNG or JPEG, no size behind them
+      Buffer.from("89504e470d0a1a0a0000000d49484452", "hex"),
+      Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16, 74, 70, 73, 70, 0, 1]),
+      pngHeader(0, 10),
+    ]) {
+      expect(reason({ image: base64(image) }, "image_background")).toBe("image_size_unread")
+    }
   })
 
   it("refuses a scene without words, or with more than any scene of the shop's", () => {

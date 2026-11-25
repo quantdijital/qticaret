@@ -10,6 +10,7 @@ import {
   aiTargetModels,
   aiTargetServiceIds,
   aiTargetUncapped,
+  aiTargetUnverified,
   endpointUrl,
 } from "../../control-plane/index.js"
 import type {
@@ -146,6 +147,25 @@ describe("Bria's targets", () => {
       documented: false,
     })
     expect(new URL(AI_SERVICE_CHECKS.bria.url).pathname).toMatch(/^\/v2\/status\/[a-z-]+$/)
+  })
+
+  it("is not on credits until a real call proves its result's host; no other target is held", () => {
+    expect(edit.unverified).toBe("download_host")
+    expect(aiTargetUnverified("bria", "image_edit")).toBe(true)
+    const held = Object.entries(AI_SERVICE_TARGETS).flatMap(([service, target]) =>
+      Object.keys((target as AiServiceTarget).capabilities)
+        .filter((capability) => aiTargetUnverified(service, capability))
+        .map((capability) => `${service} ${capability}`)
+    )
+    expect(held).toEqual(["bria image_edit"])
+    for (const [service, capability] of [
+      ["bria", "text"],
+      ["nobody", "image_edit"],
+      ["bria", "toString"],
+      ["__proto__", "image_edit"],
+    ] as const) {
+      expect(aiTargetUnverified(service, capability)).toBe(false)
+    }
   })
 })
 

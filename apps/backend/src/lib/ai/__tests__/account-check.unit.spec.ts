@@ -120,6 +120,17 @@ describe("AI account check (adr/0071 §3, §9)", () => {
     expect(await check("bria", answer(400, {})).result).toBe("unreachable")
   })
 
+  it("takes Bria's 404 as a key it took only in Bria's own JSON", async () => {
+    expect(await check("bria", answer(404, { status: "UNKNOWN" })).result).toBe("valid")
+    expect(await check("bria", answer(404, { error: { code: 404 } })).result).toBe("valid")
+    // A proxy's page, a moved path, an empty or odd body: no verdict on the key
+    for (const body of ["<html>Not Found</html>", "", "Not Found", "[]", "null", '"x"']) {
+      expect(await check("bria", answer(404, body)).result).toBe("unreachable")
+    }
+    expect(await check("bria", answer(404, {})).result).toBe("unreachable")
+    expect(await check("bria", answer(404, { error: "no" })).result).toBe("unreachable")
+  })
+
   it("lets only Photoroom's and Bria's keys replace a working one unchecked", () => {
     expect(replacesUnchecked("photoroom")).toBe(true)
     expect(replacesUnchecked("bria")).toBe(true)

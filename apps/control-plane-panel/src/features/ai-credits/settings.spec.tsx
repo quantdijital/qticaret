@@ -158,6 +158,38 @@ describe("the AI providers page (adr/0085 §2, §5)", () => {
     expect(within(edit).getByRole("radio", { name: "Google Gemini · gemini-image" })).toBeEnabled()
   })
 
+  it("offers Bria only as disabled until a real call proves it, even with its key held", async () => {
+    const withBria = {
+      ...SETTINGS,
+      targets: [...SETTINGS.targets, { service: "bria", capabilities: { image_edit: ["RMBG2"] } }],
+    }
+    const keyed = {
+      providers: [
+        ...PROVIDERS.providers,
+        { service: "bria", has_key: true, version: 1, written_at: null, routed: [] },
+      ],
+    }
+    const base = controlPlane(() => ({ ok: true }))
+    stubApi((call) =>
+      call.path === "/admin/cp/ai/settings"
+        ? { status: 200, body: withBria }
+        : call.path === "/admin/cp/ai/providers"
+          ? { status: 200, body: keyed }
+          : base(call)
+    )
+    page()
+
+    const edit = await screen.findByRole("radiogroup", {
+      name: "Görsel düzenleme: servis ve model",
+    })
+    const bria = within(edit).getByRole("radio", { name: "Bria · RMBG2" })
+    expect(bria).toBeDisabled()
+    expect(bria).toHaveAccessibleDescription(
+      "Bria: bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez."
+    )
+    expect(within(edit).getByRole("radio", { name: "Google Gemini · gemini-image" })).toBeEnabled()
+  })
+
   it("notes a changed price makes a new pack, and reads the settings again before saving", async () => {
     const sent = stubApi(controlPlane(() => ({ ok: true })))
     page()
