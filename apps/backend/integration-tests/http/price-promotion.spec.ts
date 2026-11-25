@@ -172,6 +172,58 @@ medusaIntegrationTestRunner({
       expect(await cartItems(other.variantId)).toBe(750)
     })
 
+    // adr/0076 Ek 2026-11-25: a budget may run out between the card and the cart
+    it("shows no campaign with a budget before the cart, which still applies it", async () => {
+      const { variantId } = await stockedProduct(getContainer(), shop, "kampanya-butce", 5, 1000)
+      const budgeted = async (identifier: string, budget: Record<string, unknown>) =>
+        (
+          await http.post<{ campaign: { id: string } }>(
+            "/admin/campaigns",
+            { name: identifier, campaign_identifier: identifier, budget },
+            { headers: admin.headers }
+          )
+        ).data.campaign.id
+      await promotion({
+        code: "BUTCE30",
+        is_automatic: true,
+        campaign_id: await budgeted("butce", {
+          type: "spend",
+          limit: 50_000,
+          currency_code: "try",
+        }),
+        application_method: { ...percent(30), currency_code: "try" },
+      })
+      expect(await display(variantId)).toMatchObject({
+        current: "1000.00",
+        before: null,
+        on_sale: false,
+        cart_offer: null,
+      })
+      expect(await cartItems(variantId)).toBe(700)
+
+      // One with a count of uses beside one with no budget: only the latter, on the whole price
+      const other = await stockedProduct(getContainer(), shop, "kampanya-karma", 5, 1000)
+      const target = [{ attribute: "items.product.id", operator: "in", values: [other.productId] }]
+      await promotion({
+        code: "ADET40",
+        is_automatic: true,
+        campaign_id: await budgeted("adet", { type: "usage", limit: 100 }),
+        application_method: percent(40, target),
+      })
+      await promotion({
+        code: "OTO10",
+        is_automatic: true,
+        application_method: percent(10, target),
+      })
+      expect(await display(other.variantId)).toMatchObject({
+        current: "900.00",
+        before: "1000.00",
+        on_sale: true,
+      })
+      // The cart gives both (the budgeted one alone would be 600): never more than the card said
+      expect(await cartItems(other.variantId)).toBeLessThan(600)
+    })
+
     it("waits for a promotion's campaign to begin", async () => {
       const { variantId } = await stockedProduct(getContainer(), shop, "kampanya-yarin", 5, 1000)
       const campaign = await http.post<{ campaign: { id: string } }>(

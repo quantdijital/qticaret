@@ -114,7 +114,9 @@ function ProductList({ value, onChange }: { value: string[]; onChange: (ids: str
 export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boolean }) {
   const { t } = useTranslation()
   const { control, register, formState } = useFormContext<PromotionValues>()
-  const [kind, scope] = useWatch<PromotionValues, ["kind", "scope"]>({ name: ["kind", "scope"] })
+  const [kind, scope, automatic] = useWatch<PromotionValues, ["kind", "scope", "automatic"]>({
+    name: ["kind", "scope", "automatic"],
+  })
   const error = (name: keyof PromotionValues) => {
     const key = formState.errors[name]?.message
     return key ? t(key) : undefined
@@ -186,11 +188,15 @@ export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boole
           <Field
             label={t("promotions.form.perCustomer")}
             htmlFor="promotion-per-customer"
-            hint={t(
-              perCustomerLocked
-                ? "promotions.form.perCustomerLocked"
-                : "promotions.form.perCustomerHint"
-            )}
+            hint={[
+              t(
+                perCustomerLocked
+                  ? "promotions.form.perCustomerLocked"
+                  : "promotions.form.perCustomerHint"
+              ),
+              // A budget is the cart's alone (adr/0076 Ek 2026-11-25); a code's never shows anyway
+              ...(automatic ? [t("promotions.form.budgetNotShown")] : []),
+            ].join(" ")}
             error={error("perCustomer")}
           >
             <NumberField

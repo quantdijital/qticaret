@@ -6118,6 +6118,7 @@
       "perCustomer": "Uses per customer",
       "perCustomerHint": "How many times one customer may use it. Empty means no limit.",
       "perCustomerLocked": "This campaign's budget is set elsewhere; change it in the advanced dashboard.",
+      "budgetNotShown": "A campaign with a budget is not shown on the product card; the cart applies it.",
       "previewScope": {
         "categories_one": "In {{count}} selected category",
         "categories_other": "In {{count}} selected categories",

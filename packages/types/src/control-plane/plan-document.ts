@@ -4,6 +4,7 @@ import {
   COUNTED_LIMIT_KEYS,
   FEATURE_FLAG_KEY,
   GRANT_LIMIT_KEYS,
+  GRANT_LIMIT_MAX,
   SUBSCRIPTION_STATUSES,
   TENANT_STATUSES,
 } from "./registry"
@@ -33,7 +34,7 @@ const limitValue = z.int().min(0).nullable()
  * without it while the fleet is updated (docs/08), and the control plane
  * leaves a 0 out.
  */
-const grantValue = z.int().min(0).optional()
+const grantValue = z.int().min(0).max(GRANT_LIMIT_MAX).optional()
 
 const limitsSchema = z.strictObject({
   ...(Object.fromEntries(COUNTED_LIMIT_KEYS.map((key) => [key, limitValue])) as Record<

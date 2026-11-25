@@ -26,6 +26,10 @@ interface Promo {
   products: string[]
   starts_at?: Date
   ends_at?: Date
+  /** The campaign's budget; none: no budget. */
+  budget?: { type: "spend" | "usage"; limit: number | null }
+  /** The promotion's own count of uses; none: no limit. */
+  limit?: number
 }
 
 const promo = (extra: Partial<Promo> & Pick<Promo, "code">): Promo => ({
@@ -54,7 +58,11 @@ const rowOf = (each: Promo) => ({
     currency_code: "try",
     buy_rules_min_quantity: null,
   },
-  campaign: each.starts_at ? { starts_at: each.starts_at.toISOString(), budget: null } : null,
+  limit: each.limit ?? null,
+  campaign:
+    each.starts_at || each.budget
+      ? { starts_at: each.starts_at?.toISOString() ?? null, budget: each.budget ?? null }
+      : null,
 })
 
 interface Line {
@@ -68,26 +76,32 @@ function shop(
   history: Record<string, { at: Date; amount: number; original: number }[]> = {},
   selling: Record<string, number> = {}
 ) {
-  const computeActions = jest.fn((codes: string[], context: { items: Line[] }) =>
-    context.items.flatMap((item) =>
-      promos
-        .filter(
-          (each) =>
-            (each.is_automatic || codes.includes(each.code)) &&
-            each.products.includes(item.product.id) &&
-            (!each.starts_at || each.starts_at <= NOW) &&
-            (!each.ends_at || each.ends_at > NOW)
-        )
-        .map((each) => ({
-          action: "addItemAdjustment",
-          item_id: item.id,
-          code: each.code,
-          amount:
-            each.method === "percentage"
-              ? (Number(item.unit_price) * each.value) / 100
-              : Math.min(each.value, Number(item.unit_price)),
-        }))
-    )
+  // As Medusa: the largest value first, each on what the ones before it left
+  const computeActions = jest.fn(
+    (
+      codes: string[],
+      context: { items: Line[] },
+      options?: { prevent_auto_promotions?: boolean }
+    ) =>
+      context.items.flatMap((item) => {
+        let left = Number(item.unit_price)
+        return promos
+          .filter(
+            (each) =>
+              ((each.is_automatic && !options?.prevent_auto_promotions) ||
+                codes.includes(each.code)) &&
+              each.products.includes(item.product.id) &&
+              (!each.starts_at || each.starts_at <= NOW) &&
+              (!each.ends_at || each.ends_at > NOW)
+          )
+          .sort((a, b) => b.value - a.value)
+          .map((each) => {
+            const amount =
+              each.method === "percentage" ? (left * each.value) / 100 : Math.min(each.value, left)
+            left -= amount
+            return { action: "addItemAdjustment", item_id: item.id, code: each.code, amount }
+          })
+      })
   )
   const rows = ({ entity, fields }: { entity: string; fields: string[] }) => {
     if (entity === "promotion") {
@@ -160,8 +174,9 @@ describe("placeDisplays", () => {
     const shown = (await placeDisplays(container, [unit], bases, "try", NOW)).get(placeKey(unit))
     // 1.750,50 less 20%: 1.400,40; a difference has no record, so nothing struck through
     expect(shown).toEqual({ current: 140_040, before: null })
-    // No code is ever asked: only what every shopper gets
-    expect(computeActions.mock.calls[0]?.[0]).toEqual([])
+    // Only the shown automatic promotions are asked, by code, and none other
+    expect(computeActions.mock.calls[0]?.[0]).toEqual(["OTO20"])
+    expect(computeActions.mock.calls[0]?.[2]).toEqual({ prevent_auto_promotions: true })
     expect(computeActions.mock.calls[0]?.[1].items[0]).toMatchObject({
       id: "adult:25050",
       variant_id: "adult",
@@ -187,6 +202,25 @@ describe("placeDisplays", () => {
     expect(await shownOf([promo({ code: "BITTI", ends_at: yesterday })])).toEqual(none)
     expect(await shownOf([promo({ code: "YARIN", starts_at: tomorrow })])).toEqual(none)
     expect(await shownOf([promo({ code: "BASKA", products: ["prod_other"] })])).toEqual(none)
+  })
+
+  it("shows no promotion with a budget or a limit of uses, on the card or the product (adr/0076 Ek 2026-11-25)", async () => {
+    const spend = promo({ code: "BUTCE30", value: 30, budget: { type: "spend", limit: 50_000 } })
+    const usage = promo({ code: "ADET30", value: 30, budget: { type: "usage", limit: 100 } })
+    const own = promo({ code: "SINIR30", value: 30, limit: 10 })
+    const none = { current: 175_050, before: null }
+    for (const limited of [spend, usage, own]) {
+      expect(await shownOf([limited])).toEqual(none)
+    }
+    // A budget with no limit is no budget: shown as before
+    const open = promo({ code: "ACIK20", budget: { type: "spend", limit: null } })
+    expect(await shownOf([open])).toEqual({ current: 140_040, before: null })
+    // Both: only the one with no budget, on the whole price, as the cart once the budget is out
+    const both = [spend, promo({ code: "OTO20" })]
+    expect(await shownOf(both)).toEqual({ current: 140_040, before: null })
+    const { container } = shop(both, {}, { adult: 1500 })
+    const product = (await priceDisplays(container, ["adult"], "try", NOW)).get("adult")
+    expect(product).toMatchObject({ current: 120_000, cart_offer: null })
   })
 
   it("strikes a departure without a difference through by the price-before rule, from the record", async () => {
