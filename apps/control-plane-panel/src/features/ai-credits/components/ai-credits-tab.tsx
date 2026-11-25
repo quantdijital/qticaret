@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { settingsQuery, walletQuery } from "@/features/ai-credits/api/queries"
-import { creditsOn, monthlyGrantOf } from "@/features/ai-credits/standing"
+import { creditsOff } from "@/features/ai-credits/standing"
 import type { TenantDetail } from "@/features/tenants/api"
 import { errorText } from "@/lib/errors"
 import { AdjustDialog } from "./adjust-dialog"
@@ -19,8 +19,9 @@ import { WalletSummary } from "./wallet-summary"
 /**
  * A shop's "Yapay zekâ kredisi" tab (adr/0085 §5; the owner's alone): its
  * wallet, its ledger, "Kredi ekle / düş" and its own day's cap. With the
- * credits off for the shop (flag or status) the tab says so, and the
- * wallet is still shown: a correction may be due before it opens again.
+ * credits off for the shop (flag or status, as the wallet's answer says
+ * them, P3d) the tab says so, and the wallet is still shown: a correction
+ * may be due before it opens again.
  */
 export function AiCreditsTab({ shop }: { shop: TenantDetail }) {
   const { t } = useTranslation()
@@ -29,7 +30,6 @@ export function AiCreditsTab({ shop }: { shop: TenantDetail }) {
   const [open, setOpen] = useState<"adjust" | "cap" | null>(null)
   const wallet = useQuery(walletQuery(id, page))
   const settings = useQuery(settingsQuery())
-  const grant = monthlyGrantOf(shop)
   const data = wallet.data
   const actions = data ? (
     <>
@@ -52,12 +52,12 @@ export function AiCreditsTab({ shop }: { shop: TenantDetail }) {
   ) : undefined
   return (
     <div className="flex flex-col gap-4">
-      {creditsOn(shop) ? null : (
+      {data && creditsOff(data) ? (
         <Alert>
           <Info aria-hidden="true" />
           <AlertDescription>{t("aiCredits.tab.off")}</AlertDescription>
         </Alert>
-      )}
+      ) : null}
       <SectionCard
         title={t("aiCredits.tab.title")}
         description={t("aiCredits.tab.text")}
@@ -66,7 +66,7 @@ export function AiCreditsTab({ shop }: { shop: TenantDetail }) {
         {wallet.isError ? (
           <ErrorState text={errorText(t, wallet.error)} onRetry={() => void wallet.refetch()} />
         ) : data ? (
-          <WalletSummary wallet={data} monthlyGrant={grant} />
+          <WalletSummary wallet={data} />
         ) : (
           <Skeleton className="h-24 rounded-lg" />
         )}

@@ -87,6 +87,14 @@ export async function writeProviderKey(
  * (a failure between the two leaves the key unrouted, never routed and
  * keyless). Whether a key was held and the capabilities unrouted come back.
  * Retiring is not revoking: a leaked key is revoked at the provider first.
+ *
+ * The routing is taken out a second time once the key is retired (P6b): a
+ * settings save that saw the key held before the retire may have written
+ * its routing between the first pass and the retire. One advisory lock
+ * cannot hold the two apart: the routing row (ai-credits module) and the
+ * key (vault module) are each changed in their own module's transaction.
+ * A save that commits after this second pass checks the keys again itself
+ * (`saveAiSettingsWithKeys`), so nothing stays routed to a keyless service.
  */
 export async function deleteProviderKey(
   container: Container,
@@ -96,5 +104,6 @@ export async function deleteProviderKey(
   const id = knownService(service)
   const unrouted = await unrouteService(container, id, actor)
   const deleted = await vaultIn(container).retireSecret(PLATFORM_OWNER, aiProviderKeyName(id))
-  return { deleted, unrouted }
+  const late = await unrouteService(container, id, actor)
+  return { deleted, unrouted: [...new Set([...unrouted, ...late])] }
 }

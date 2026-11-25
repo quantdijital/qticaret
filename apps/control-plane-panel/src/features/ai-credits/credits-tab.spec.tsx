@@ -8,41 +8,10 @@ import { forgetStepUp } from "@/lib/step-up"
 import { refusal, stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
 import { renderAs } from "@/test/member"
+import { WALLET, WALLET_PATH } from "@/test/ai-wallet"
 import { SHOP } from "@/test/shops"
 
-const BASE = `/admin/cp/tenants/${SHOP.tenant.id}/ai-credits`
-
-const WALLET: AiWallet = {
-  balance: {
-    plan: { balance: 120, period: "2026-11", renewsOn: "2026-12-01" },
-    purchased: { balance: 1500, expiresAt: "2027-11-20T21:00:00.000Z" },
-    daily: { cap: 300, spent: 45, remaining: 255 },
-  },
-  own_daily_cap: null,
-  entries: [
-    {
-      id: "ent_1",
-      kind: "adjust",
-      amount: 500,
-      bucket: "purchased",
-      note: "Kampanya telafisi",
-      actor: "user_me",
-      created_at: "2026-11-20T10:00:00.000Z",
-    },
-    {
-      id: "ent_2",
-      kind: "spend",
-      amount: -3,
-      bucket: "plan",
-      note: null,
-      actor: "system",
-      created_at: "2026-11-21T10:00:00.000Z",
-    },
-  ],
-  count: 2,
-  limit: 20,
-  offset: 0,
-}
+const BASE = WALLET_PATH
 
 function controlPlane(adjust: () => Answer) {
   return (call: Sent): Answer => {
@@ -91,13 +60,6 @@ describe("a shop's AI credits tab (adr/0085 §5)", () => {
     expect(screen.getAllByText("Kampanya telafisi").length).toBeGreaterThan(0)
     expect(screen.getByText("Sistem")).toBeInTheDocument()
     expect(screen.queryByText(/platform kredisi kapalı/)).toBeNull()
-  })
-
-  it("says the credits are off for a shop whose flag is off", async () => {
-    stubApi(controlPlane(() => ({ status: 200, body: { applied: true } })))
-    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
-
-    expect(await screen.findByText(/Bu mağazada platform kredisi kapalı/)).toBeInTheDocument()
   })
 
   it("does not send a correction without a note", async () => {

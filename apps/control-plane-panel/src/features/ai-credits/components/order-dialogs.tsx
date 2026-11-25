@@ -9,20 +9,22 @@ import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { money } from "@/features/billing/words"
 import { useMarkPaid } from "@/features/ai-credits/api/mutations"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
-import { credits } from "@/features/ai-credits/words"
+import { credits, shopName } from "@/features/ai-credits/words"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
-// The control plane's bound on a payment's reference
+// The control plane's bounds on a payment's reference and on a cancellation's note
 const REFERENCE_MAX = 256
+const NOTE_MAX = 500
 
 /** What a request's dialogs say of it: the shop, the pack, its credits and amount. */
-function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder, shop: string) {
+function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder) {
   return {
-    shop,
+    shop: shopName(order),
     pack: order.pack.name,
     credits: credits(t, order.pack.credits),
     amount: money(order.pack.amount, order.pack.currency),
@@ -35,15 +37,7 @@ function factsOf(t: ReturnType<typeof useTranslation>["t"], order: AiOrder, shop
  * N kredi yüklenecek"). One request on submit, behind a step-up; marked
  * twice, the credits are added once (`applied: false`).
  */
-export function PaidDialog({
-  order,
-  shop,
-  onClose,
-}: {
-  order: AiOrder
-  shop: string
-  onClose: () => void
-}) {
+export function PaidDialog({ order, onClose }: { order: AiOrder; onClose: () => void }) {
   const { t } = useTranslation()
   const mark = useMarkPaid(order)
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer")
@@ -58,7 +52,7 @@ export function PaidDialog({
         }
       }}
       title={t("aiCredits.orders.paid.title")}
-      description={t("aiCredits.orders.paid.text", factsOf(t, order, shop))}
+      description={t("aiCredits.orders.paid.text", factsOf(t, order))}
       dirty
       saving={mark.isPending}
       submitLabel={t("aiCredits.orders.paid.submit")}
@@ -134,21 +128,22 @@ export function PaidDialog({
 
 /**
  * "İptal et": asked first, naming the shop, the pack, its credits and
- * amount. Only the question: the page that stays on screen sends it
- * (behind a step-up) and says the answer, so closing this loses nothing.
+ * amount, with an optional short note why (P3d; kept in the audit row
+ * alone, up to the control plane's 500). Only the question: the page that
+ * stays on screen sends it (behind a step-up) and says the answer, so
+ * closing this loses nothing.
  */
 export function CancelDialog({
   order,
-  shop,
   onConfirm,
   onClose,
 }: {
   order: AiOrder
-  shop: string
-  onConfirm: () => void
+  onConfirm: (note: string) => void
   onClose: () => void
 }) {
   const { t } = useTranslation()
+  const [note, setNote] = useState("")
   return (
     <ConfirmDialog
       open
@@ -158,10 +153,26 @@ export function CancelDialog({
         }
       }}
       title={t("aiCredits.orders.cancel.title")}
-      description={t("aiCredits.orders.cancel.text", factsOf(t, order, shop))}
+      description={t("aiCredits.orders.cancel.text", factsOf(t, order))}
       confirmLabel={t("aiCredits.orders.cancel.confirm")}
       destructive
-      onConfirm={onConfirm}
-    />
+      onConfirm={() => {
+        onConfirm(note)
+      }}
+    >
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cancel-note">{t("aiCredits.orders.cancel.note")}</Label>
+        <Textarea
+          id="cancel-note"
+          rows={2}
+          maxLength={NOTE_MAX}
+          value={note}
+          onChange={(event) => {
+            setNote(event.target.value)
+          }}
+        />
+        <p className="text-[13px] text-muted-foreground">{t("aiCredits.orders.cancel.noteHelp")}</p>
+      </div>
+    </ConfirmDialog>
   )
 }
