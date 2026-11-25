@@ -28,6 +28,7 @@ const NO_QUERY_READS = [
   "/admin/dashboard/tasks",
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
+  "/admin/category-counts",
   "/admin/order-board/:id",
   "/admin/orders/:id/money",
   "/admin/price-lists/:id/lines",

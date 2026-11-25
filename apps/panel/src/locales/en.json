@@ -6063,7 +6063,8 @@
     "columns": {
       "category": "Category",
       "status": "Status",
-      "order": "Order"
+      "order": "Order",
+      "count": "Products"
     },
     "empty": "No categories yet. Add your first one.",
     "expand": "Show {{name}}'s subcategories",
@@ -6106,7 +6107,8 @@
       "alt": "Alt text",
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."
-    }
+    },
+    "countOf": "{{name}}: {{count}} products"
   },
   "inventory": {
     "description": "Sellable stock; low and sold-out items first",

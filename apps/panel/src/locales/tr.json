@@ -6063,7 +6063,8 @@
     "columns": {
       "category": "Kategori",
       "status": "Durum",
-      "order": "Sıra"
+      "order": "Sıra",
+      "count": "Ürün"
     },
     "empty": "Henüz kategori yok. İlk kategorinizi ekleyin.",
     "expand": "{{name}} alt kategorilerini göster",
@@ -6106,7 +6107,8 @@
       "alt": "Alt metin",
       "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
       "saved": "Kategori görseli kaydedildi."
-    }
+    },
+    "countOf": "{{name}}: {{count}} ürün"
   },
   "inventory": {
     "description": "Satılabilir stok; önce azalan ve tükenen ürünler",
