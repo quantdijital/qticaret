@@ -16,9 +16,19 @@ const fold = (text: string) => text.trim().toLocaleLowerCase("tr")
 
 /** The shop's tag with this name, letter case aside; null when it has none. */
 async function tagNamed(container: MedusaContainer, value: string): Promise<string | null> {
-  const tags = await container
-    .resolve<IProductModuleService>(Modules.PRODUCT)
-    .listProductTags({ q: value.trim() }, { take: TAG_LOOKUP, select: ["id", "value"] })
+  const service = container.resolve<IProductModuleService>(Modules.PRODUCT)
+  // The exact name first: a search may hold more tags than it reads
+  const [exact] = await service.listProductTags(
+    { value: [value.trim()] },
+    { take: 1, select: ["id", "value"] }
+  )
+  if (exact) {
+    return exact.id
+  }
+  const tags = await service.listProductTags(
+    { q: value.trim() },
+    { take: TAG_LOOKUP, select: ["id", "value"] }
+  )
   return tags.find((tag) => fold(tag.value) === fold(value))?.id ?? null
 }
 

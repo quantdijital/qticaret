@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { chunksOf } from "../../../lib/catalog"
 import { productSaleFacts, shopCurrency } from "../../pricing/variant-sale/read"
 import type { ProductSaleFacts } from "../../pricing/variant-sale/read"
@@ -94,6 +94,8 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
 
 // Products read with their variants per query
 const PRODUCT_CHUNK = 100
+// A sale change's per-product reads (prices, sale lists) run this many side by side
+const SALE_READS_AT_ONCE = 5
 
 /** The products a run names, in the order named; ones that are gone are left out. */
 export async function bulkProducts(
@@ -116,8 +118,19 @@ export async function bulkProducts(
   if (action === "sale" && found.size > 0) {
     // The sale workflow's own read, so the plan sees what the write will
     const currency = await shopCurrency(container)
-    for (const product of found.values()) {
-      product.sale = await productSaleFacts(container, product.id, currency)
+    for (const group of chunksOf([...found.values()], SALE_READS_AT_ONCE)) {
+      await Promise.all(
+        group.map(async (product) => {
+          try {
+            product.sale = await productSaleFacts(container, product.id, currency)
+          } catch (error) {
+            // Deleted since its row was read: left without facts, planned as missing
+            if (!(error instanceof MedusaError && error.type === MedusaError.Types.NOT_FOUND)) {
+              throw error
+            }
+          }
+        })
+      )
     }
   }
   return ids.flatMap((id) => {
