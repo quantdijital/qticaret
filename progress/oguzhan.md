@@ -2,6 +2,16 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-25: adr/0085 platform kredisi, sunucudan iki panele (P1–P6b)
+
+- **Ne bitti (hepsi `dev`'de, bayrak `ai.platform_credits` hiçbir pakette açık değil):** P1 #367, P2 #368, P3a #371, P4a #372, P3b #373 (ağ geçidi), P3c #374, P4b-1 #375, P4b-2 #376, P3d #380, P6 #377 (üst panel arayüzü), P5 #381 (mağaza paneli), P6b #384, P5b #385. Her PR'da `security-reviewer` koştu, bulgular ve kapanışları PR yorumlarında; ayrıntı ve kararlar `docs/22-yapay-zeka-uygulama-plani.md` "Yapıldı (P…)" maddelerinde.
+- **Bu oturumun kararları:** Gemini metin ve görsel okuma platform kredisinde yönlendirilmez (belgeli çıktı tavanı yok; `cp.ai_route_uncapped`). Ağ geçidi gövdeyi izin listesinden yeniden kurar; dört çağrı değeri imzalı sorgu dizgisinde. Açıkça istenen servis yoksa farklı ödeme yoluna düşülmez (hata). Toplu iş kuyruğa alındığı andaki ödeme yolunu korur. Bakiye sahip + yönetici, yükleme talebi yalnız sahip. Üst panel kredi yanıtlarını kapalı yazar, mağaza açık okur (`…ReadSchema`; üst panel alan ekleyince güncellenmemiş mağaza kırılmaz).
+- **Açık (küçük):** "Yeniden dene"nin aynı işlem kimliğiyle gitmesi (para yoluna dokunur, ayrı tasarım); kullanım kartında platform kredisi özeti; maliyet raporu (sunucu ucu yok); anahtar silme / ayar kaydında ara adım hata verirse denetim notunun kısmi sonuçla düşmesi (#384 incelemesi); Gemini görselde belgeli `maxOutputTokens`; üst panelde `trust proxy` dağıtımda doğrulanacak.
+- **Doğrulama sınırı:** iki panelin kredi ekranları tarayıcıda görülmedi, yalnız testlerle doğrulandı (yerel bellek iki mağaza ayaktayken üst paneli kaldırmıyor).
+- **Sahibin kararı bekleyenler:** bayrağı açmadan önce sağlayıcıların yeniden satış izni, ön ödemeli kredinin faturalanması ve süresi dolan kredi (mali müşavir), paket fiyatları ve aylık haklar, sözleşme metni. `.env.example`'a `AI_ASSISTANT_DAILY_LIMIT=300` ve `AI_ASSISTANT_USER_DAILY_LIMIT=100` satırları (sahip ekleyecek). #364 (adr/0082–0084 taslakları) okunmayı bekliyor.
+- **Ders:** bir bileşene yeni hook eklenince onu çizen öbür spec'ler de koşulmalı (#381'de `AiButton` `useStaff` okumaya başladı, `useCan`'i tek başına taklit eden 12 spec CI'da düştü).
+- **Sıradaki işler:** yukarıdaki açık küçükler; ekranların tarayıcıda gözden geçirilmesi; hafızadaki yapılacaklar listesindeki S1–S8.
+
 ## 2026-11-24: adr/0077 PR9, doğal dille arama arayüzü ve panel anahtarı
 
 - **Dal:** `oguzhan/dogal-dil-arayuz`. Vitrin: `/arama?q=<≥3 sözcük>` bayrak açıkken `POST /store/search/interpret` ile süzgece çevrilir, işaretli kanonik adrese 307 (`_anlam=1`), orada "Anladığım:" çipleri (nofollow, kaldırılabilir); hata/kapalıda düz `q` araması. Kutunun altında KVKK ipucu (yalnız bayrak açıkken). Backend: `features.natural_search`, bayrak yazımı yalnız sahip. Panel: Ayarlar › Yapay zekâ anahtarı + onay penceresi (Özellikler sayfasında da). ADR'ye PR9 notu.
