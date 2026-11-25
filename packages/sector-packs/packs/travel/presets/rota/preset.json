@@ -4,13 +4,13 @@
   "version": 1,
   "theme": "atolye",
   "name": "Rota",
-  "description": "Tur ve gezi mağazası için tam ekran manzara: ortada serif başlık ve gidilecek yer, tarih, kişi arama kutusu; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı, e-bültenli koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",
+  "description": "Tur ve gezi mağazası için tam ekran manzara: fotoğrafın üstünde zeminsiz üst bilgi, üstte eğik tırnaklı vurgulu başlık, altta kısa metin ve tek düğme; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı, e-bültenli koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
-      "file": "images/kapak-kapadokya.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:Goreme-sunrise2025.jpg",
-      "license": "CC BY 4.0, AlphaBetaGamma (küçültülüp WebP'ye çevrildi)"
+      "file": "images/kapak-erciyes.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Mount_Erciyes_(Argaeus),_Turkey_(31870998063).jpg",
+      "license": "CC BY-SA 2.0, Carole Raddato (kırpılıp küçültüldü, WebP'ye çevrildi)"
     },
     {
       "file": "images/kesif-likya.webp",

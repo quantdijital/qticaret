@@ -66,6 +66,18 @@
       "file": "header-inline.css"
     },
     {
+      "sha256": "49ea4c72fc23164c67f97908704b05011eb407055a5eeff1e18ff05935832894",
+      "file": "header-over.css"
+    },
+    {
+      "sha256": "de03886ac1c6c1709864987cf4626232bdc555c42ce689aa17231b87ffcef842",
+      "file": "hero-full-mix.css"
+    },
+    {
+      "sha256": "2ccd8ed38ecd13a8bbd6b2a5261c9ff85e8195bcca2cd54e620c219365eead65",
+      "file": "hero-full-split.css"
+    },
+    {
       "sha256": "e0f9d76556b0be75e6fa1af2d2fd21c4d1394030edd05866d6b3eb94da8c14e6",
       "file": "hero-full.css"
     },
@@ -150,7 +162,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "f8250ee02336f712bc2d287dd832009c2d7e036e5286b7c8a3f8a89c881d305d",
+      "sha256": "7f48671868eb1ac2b4cbc0ed3afb0cf32fc90dc07cb0432cfe3004463d04d7f5",
       "file": "styles.css"
     },
     {
