@@ -50,6 +50,7 @@ describe("the order list's address", () => {
       carrier: "own",
       from: undefined,
       to: undefined,
+      customer: undefined,
       page: undefined,
     })
   })
@@ -63,5 +64,19 @@ describe("the order list's address", () => {
       payment: "paid,refunded",
       shipping: "none",
     })
+  })
+
+  it("narrows to one customer's orders, wholesale ones too, and keeps it in the address", () => {
+    const search = parse({ customer: "cus_01ABC", stage: "all" })
+
+    expect(isFiltered(search)).toBe(true)
+    expect(cleanSearch(search).customer).toBe("cus_01ABC")
+    expect(filterQuery(filtersOf(search))).toEqual({
+      stage: "all",
+      customer_id: "cus_01ABC",
+      segment: "all",
+    })
+    expect(parse({ customer: "x".repeat(65) }).customer).toBeUndefined()
+    expect(cleanSearch({ customer: "" }).customer).toBeUndefined()
   })
 })

@@ -5200,12 +5200,35 @@
     },
     "address": {
       "edit": "Düzenle",
-      "title": "#{{number}} teslimat adresi",
-      "description": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+      "title": {
+        "shipping": "Teslimat adresi",
+        "billing": "Fatura adresi"
+      },
+      "hint": {
+        "shipping": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+        "billing": "Fatura kesilene kadar fatura adresi değiştirilebilir."
+      },
+      "saved": {
+        "shipping": "Teslimat adresi güncellendi.",
+        "billing": "Fatura adresi güncellendi."
+      },
+      "editOf": {
+        "shipping": "Teslimat adresini düzenle",
+        "billing": "Fatura adresini düzenle"
+      },
       "firstName": "Ad",
       "lastName": "Soyad",
       "nameRequired": "Ad ve soyad gerekli.",
-      "saved": "Teslimat adresi güncellendi."
+      "company": "Firma adı",
+      "sameAsDelivery": "Teslimat adresiyle aynı.",
+      "invoiced": "Fatura kesildi; fatura adresi artık değişmez.",
+      "email": "E-posta",
+      "emailHint": "Siparişin iletileri bundan sonra bu adrese gider. Müşterinin hesabındaki e-posta değişmez.",
+      "emailRequired": "E-posta gerekli.",
+      "emailInvalid": "Geçerli bir e-posta adresi yazın.",
+      "emailSaved": "E-posta güncellendi.",
+      "editEmail": "E-postayı düzenle",
+      "noEmail": "E-posta yok."
     },
     "filters": {
       "payment": "Ödeme",
@@ -5239,7 +5262,12 @@
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
-      "days": "Sipariş tarihi"
+      "days": "Sipariş tarihi",
+      "customer": "Müşteri",
+      "customerOrders": "Bu müşterinin diğer siparişleri",
+      "anyCustomer": "Ad ya da e-posta ile arayın",
+      "noCustomer": "Müşteri bulunamadı.",
+      "customerUnknown": "Bulunamayan müşteri"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",
@@ -5702,7 +5730,8 @@
       "tabs": {
         "label": "Müşterinin kayıtları",
         "orders": "Siparişler"
-      }
+      },
+      "allOrders": "Tüm siparişleri"
     },
     "consents": {
       "title": "İleti izinleri",
