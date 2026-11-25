@@ -1,5 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 import { isReservedParam } from "../../../lib/seo/facets"
+import { SLUG_MAX_LENGTH, SLUG_SEGMENT } from "../../../lib/seo/slug"
+import { sectionIcon } from "../../../lib/storefront/sections/icons"
+import type { SectionIcon } from "../../../lib/storefront/sections/icons"
 import { isPlainObject } from "./define"
 
 /**
@@ -21,6 +24,10 @@ export interface SearchFormSettings {
   date_words: boolean
   boxed_fields: boolean
   category_style: (typeof SEARCH_FORM_CATEGORY_STYLES)[number]
+  /** The categories offered, in order, each with its icon; empty: the top ones, no icon. */
+  tabs: { handle: string; icon: SectionIcon | null }[]
+  /** The tabs' "Tümü" first; off: the first tab stands chosen. */
+  tab_all: boolean
   /** The words field's hint before a search; null: the storefront's own. */
   placeholder: string | null
 }
@@ -35,8 +42,13 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   date_words: false,
   boxed_fields: false,
   category_style: "select",
+  tabs: [],
+  tab_all: true,
   placeholder: null,
 }
+
+/** The most categories the shop may name as tabs (`@qticaret/types`' `SEARCH_FORM_TABS_MAX`). */
+export const SEARCH_FORM_TABS_MAX = 8
 
 // An attribute key as the listing reads one in its address (adr/0013)
 const ATTRIBUTE_KEY = /^[a-z][a-z0-9_]{0,63}$/
@@ -65,6 +77,22 @@ export const searchFormSchema = z
     date_words: z.boolean(),
     boxed_fields: z.boolean(),
     category_style: z.enum(SEARCH_FORM_CATEGORY_STYLES),
+    // By handle (a preset's cannot know a shop's ids), each once
+    tabs: z
+      .array(
+        z
+          .object({
+            handle: z
+              .string()
+              .max(SLUG_MAX_LENGTH)
+              .regex(new RegExp(`^${SLUG_SEGMENT}$`)),
+            icon: sectionIcon.nullable(),
+          })
+          .strict()
+      )
+      .max(SEARCH_FORM_TABS_MAX)
+      .refine((tabs) => new Set(tabs.map((tab) => tab.handle)).size === tabs.length),
+    tab_all: z.boolean(),
     // Trimmed, never empty: no hint is null (the storefront's own words)
     placeholder: z.string().trim().min(1).max(SEARCH_FORM_PLACEHOLDER_MAX).nullable(),
   })

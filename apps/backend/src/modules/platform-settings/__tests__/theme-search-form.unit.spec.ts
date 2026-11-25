@@ -30,6 +30,8 @@ describe("theme section: the search form", () => {
       date_words: false,
       boxed_fields: false,
       category_style: "select",
+      tabs: [],
+      tab_all: true,
       placeholder: null,
     })
   })
@@ -44,6 +46,11 @@ describe("theme section: the search form", () => {
         flexible_month: false,
         date_words: true,
         boxed_fields: true,
+        tabs: [
+          { handle: "yurt-ici-turlar", icon: "map_pin" },
+          { handle: "gemi-turlari", icon: null },
+        ],
+        tab_all: false,
         category_style,
         placeholder: "Nereye gitmek istersiniz?",
       }
@@ -72,6 +79,14 @@ describe("theme section: the search form", () => {
     expect(off({ show_dates: "yes" })).toBe(false)
     expect(off({ date_words: "yes" })).toBe(false)
     expect(off({ boxed_fields: "yes" })).toBe(false)
+    expect(off({ tab_all: "yes" })).toBe(false)
+    expect(off({ tabs: [{ handle: "Yurt Ici", icon: null }] })).toBe(false)
+    expect(off({ tabs: [{ handle: "gemi", icon: "ship" }] })).toBe(false)
+    expect(off({ tabs: [{ handle: "gemi" }] })).toBe(false)
+    const twice = { handle: "gemi", icon: null }
+    expect(off({ tabs: [twice, twice] })).toBe(false)
+    const many = Array.from({ length: 9 }, (_, at) => ({ handle: `k${String(at)}`, icon: null }))
+    expect(off({ tabs: many })).toBe(false)
     expect(off({ show_words: true })).toBe(false)
   })
 

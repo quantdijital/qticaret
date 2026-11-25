@@ -9993,6 +9993,18 @@
           "boxed_fields": {
             "label": "Boxed fields",
             "hint": "Each field's name on top and the field in a light grey box, with room between them. Off, a hairline divides the fields."
+          },
+          "tabs": {
+            "label": "Categories on the tabs",
+            "hint": "The categories you tick become tabs in this order; each can have a small icon. With none ticked, every top category shows, without icons.",
+            "tabOf": "{{name}} on a tab",
+            "iconOf": "{{name}} icon",
+            "noIcon": "No icon",
+            "empty": "No categories yet."
+          },
+          "tab_all": {
+            "label": "\"All\" tab",
+            "hint": "Off, the first tab opens chosen and a search always names a category."
           }
         }
       },

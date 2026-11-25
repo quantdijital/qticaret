@@ -25,6 +25,23 @@ export const SEARCH_FORM_ATTRIBUTE_KEY = /^[a-z][a-z0-9_]{0,63}$/
 /** The longest words the shop may write in the words field before a search (`placeholder`). */
 export const SEARCH_FORM_PLACEHOLDER_MAX = 60
 
+/** The most categories the shop may name as tabs (`tabs`). */
+export const SEARCH_FORM_TABS_MAX = 8
+
+/** A category's URL handle as the tabs name one (lower-case words and hyphens). */
+export const SEARCH_FORM_TAB_HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+
+/** One category the shop names as a tab: its handle and, optionally, its small icon. */
+export interface SearchFormTab {
+  handle: string
+  /**
+   * Drawn before its name: a name off the sections' icon set
+   * (`section-icons.ts`, read with `sectionIconOf`: one it does not know
+   * is none); null: none.
+   */
+  icon: string | null
+}
+
 export interface SearchFormSettings {
   /**
    * The filterable choice attribute whose values fill the "where" field;
@@ -51,6 +68,17 @@ export interface SearchFormSettings {
   boxed_fields: boolean
   category_style: SearchFormCategoryStyle
   /**
+   * The categories the box offers, in this order, each with its icon
+   * (Wanderly's four tabs); empty (today's): the shop's top categories,
+   * no icon. A handle the shop no longer has is left out.
+   */
+  tabs: SearchFormTab[]
+  /**
+   * The tabs' "Tümü" first (today's, on); off: the first tab stands chosen
+   * and a search always names a category. Read only with `tabs` style.
+   */
+  tab_all: boolean
+  /**
    * The words field's hint before a search ("Nereye gitmek istersiniz?");
    * null: the storefront's own ("Ürün, kategori veya marka ara").
    */
@@ -67,6 +95,8 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   date_words: false,
   boxed_fields: false,
   category_style: "select",
+  tabs: [],
+  tab_all: true,
   placeholder: null,
 }
 
@@ -96,8 +126,31 @@ export function searchFormOf(
     category_style: (SEARCH_FORM_CATEGORY_STYLES as readonly unknown[]).includes(style)
       ? (style as SearchFormCategoryStyle)
       : SEARCH_FORM_DEFAULTS.category_style,
+    tabs: tabsOf(value?.tabs),
+    tab_all: flag(value?.tab_all, SEARCH_FORM_DEFAULTS.tab_all),
     placeholder: hintOf(value?.placeholder),
   }
+}
+
+// An icon's name as the sections' set writes one (`section-icons.ts` holds the list)
+const ICON_NAME = /^[a-z][a-z_]{0,31}$/
+
+/** The named tabs: each well-formed handle once, at most the limit; an unknown icon none. */
+function tabsOf(value: unknown): SearchFormTab[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+  const seen = new Set<string>()
+  const tabs: SearchFormTab[] = []
+  for (const each of value as unknown[]) {
+    const handle = (each as { handle?: unknown } | null)?.handle
+    if (typeof handle === "string" && SEARCH_FORM_TAB_HANDLE.test(handle) && !seen.has(handle)) {
+      seen.add(handle)
+      const icon = (each as { icon?: unknown }).icon
+      tabs.push({ handle, icon: typeof icon === "string" && ICON_NAME.test(icon) ? icon : null })
+    }
+  }
+  return tabs.slice(0, SEARCH_FORM_TABS_MAX)
 }
 
 /** The shop's hint, trimmed and at most its length; empty or anything else: none. */

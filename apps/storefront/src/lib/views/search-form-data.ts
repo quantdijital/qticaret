@@ -1,6 +1,8 @@
 import "server-only"
 import { cache } from "react"
 import { searchFormOf } from "@qticaret/types/search-form"
+import { sectionIconOf } from "@qticaret/types/section-icons"
+import type { SearchFormSettings } from "@qticaret/types"
 import type { SearchFormView, Translate } from "@qticaret/ui"
 import { listingPage } from "@/lib/store-api/listings"
 import { allCategories, storefrontSettings } from "@/lib/store-api/requests"
@@ -50,6 +52,25 @@ const topCategories = cache(async (): Promise<SearchFormSource["categories"]> =>
 })
 
 /**
+ * The categories the box offers: the ones its tabs name, in their order
+ * with their icons (a handle the shop no longer has left out), else the
+ * shop's top ones (`search_form.tabs` empty, today's).
+ */
+async function offeredCategories(
+  tabs: SearchFormSettings["tabs"]
+): Promise<SearchFormSource["categories"]> {
+  if (tabs.length === 0) {
+    return topCategories()
+  }
+  const categories = await allCategories().catch(() => [])
+  const names = new Map(categories.map(({ handle, name }) => [handle, name]))
+  return tabs.flatMap(({ handle, icon }) => {
+    const name = names.get(handle)
+    return name === undefined ? [] : [{ handle, name, icon: sectionIconOf(icon) }]
+  })
+}
+
+/**
  * The shop's search box for this request (adr/0077 §1), its values those
  * given: its theme setting (a preview's draft on its address), whether it
  * sells dated products, its categories and its "where" values. Only what
@@ -62,7 +83,7 @@ export async function currentSearchForm(
   const [theme, answer] = await Promise.all([currentTheme(), storefrontSettings()])
   const settings = searchFormOf(theme.search_form)
   const [categories, where] = await Promise.all([
-    settings.show_category ? topCategories() : Promise.resolve([]),
+    settings.show_category ? offeredCategories(settings.tabs) : Promise.resolve([]),
     settings.attribute_key ? whereOf(settings.attribute_key) : Promise.resolve(null),
   ])
   const source: SearchFormSource = {

@@ -9993,6 +9993,18 @@
           "boxed_fields": {
             "label": "Kutulu alanlar",
             "hint": "Her alanın adı üstte, kendisi açık gri bir kutuda; alanlar arasında boşluk olur. Kapalıyken alanlar ince çizgiyle ayrılır."
+          },
+          "tabs": {
+            "label": "Sekmelerdeki kategoriler",
+            "hint": "İşaretlediğiniz kategoriler bu sırayla sekme olur; her birine küçük bir ikon seçebilirsiniz. Hiçbiri işaretli değilse ana kategorilerin hepsi ikonsuz çıkar.",
+            "tabOf": "{{name}} sekmede",
+            "iconOf": "{{name}} ikonu",
+            "noIcon": "İkon yok",
+            "empty": "Henüz kategori yok."
+          },
+          "tab_all": {
+            "label": "\"Tümü\" sekmesi",
+            "hint": "Kapalıyken ilk sekme seçili açılır ve arama her zaman bir kategoride yapılır."
           }
         }
       },

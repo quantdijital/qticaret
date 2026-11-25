@@ -136,6 +136,25 @@ describe("Atölye's search box", () => {
     expect(radios.every((radio) => radio.includes('name="kategori"'))).toBe(true)
     expect(radios[0]).toContain("checked")
     expect(html).not.toContain('<select name="kategori"')
+    // No icon picked: a tab is its name alone
+    const tabs = [...html.matchAll(/<label class="relative cursor-pointer">(.*?)<\/label>/g)]
+    expect(tabs.every((tab) => !tab[1]?.includes("<svg"))).toBe(true)
+  })
+
+  it('draws a tab\'s icon before its name, and without "Tümü" the first tab chosen', () => {
+    const view = form({ category_style: "tabs", tab_all: false })
+    const options = view.category?.options.map((option, at) =>
+      at === 0 ? { ...option, icon: "compass" as const } : option
+    )
+    const html = home([
+      box({ ...view, category: view.category && { ...view.category, options: options ?? [] } }),
+    ])
+    const radios = [...html.matchAll(/<input[^>]*type="radio"[^>]*>/g)].map((match) => match[0])
+    expect(radios.map((radio) => /value="([^"]*)"/.exec(radio)?.[1])).toEqual(["kultur", "doga"])
+    expect(radios[0]).toContain("checked")
+    const tabs = [...html.matchAll(/<label class="relative cursor-pointer">(.*?)<\/label>/g)]
+    expect(tabs[0]?.[1]).toMatch(/<span class="[^"]*flex items-center gap-2[^"]*"><svg/)
+    expect(tabs[1]?.[1]).not.toContain("<svg")
   })
 
   it("stands over a search's results with the values asked, its words carried unseen", () => {
