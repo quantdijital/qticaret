@@ -10264,6 +10264,27 @@
           },
           "words": "açıklama metin yazı kategori marka koleksiyon devamını oku katla"
         },
+        "listingPageTitle": "Liste sayfası",
+        "listingPageHint": "Tüm ürünler, kategori ve marka sayfalarında ürünlerin dizilişi. Bütün varsayılanlar bugünkü sayfadır.",
+        "listingPage": {
+          "default_view": {
+            "label": "Varsayılan görünüm",
+            "hint": "Ziyaretçi sayfayı ilk açtığında ürünler nasıl dizilir. Izgara: yan yana kartlar (grid). Liste: her satırda bir ürün; solda görsel, sağda fiyat.",
+            "steps": {
+              "grid": "Izgara",
+              "list": "Liste"
+            }
+          },
+          "view_switch": {
+            "label": "Ziyaretçi görünümü değiştirebilsin",
+            "hint": "Sıralamanın yanında ızgara/liste düğmeleri çıkar. Seçim adreste kalır (?gorunum=liste), paylaşılabilir; arama motorları yine tek sayfa görür."
+          },
+          "breadcrumb_current": {
+            "label": "Yol izinde sayfanın kendi adı",
+            "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
+          },
+          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler"
+        },
         "searchFormTitle": "Arama kutusu",
         "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",
         "searchForm": {

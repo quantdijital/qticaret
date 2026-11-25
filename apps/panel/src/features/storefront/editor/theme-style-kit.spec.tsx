@@ -80,6 +80,7 @@ describe("the style kit in the theme panel", () => {
       "card",
       "framed",
       "listingText",
+      "listingPage",
       "searchForm",
     ])
   })
