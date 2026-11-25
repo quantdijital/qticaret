@@ -73,6 +73,8 @@ export function productCard(
     title: product.title,
     path,
     brand: options.showBrand ? (product.brand?.name ?? null) : null,
+    // The split card's line under the name; no other card carries it
+    ...(look?.split && product.subtitle ? { subtitle: product.subtitle } : {}),
     image: images[0] ?? null,
     ...(second ? { secondImage: second } : {}),
     price: cardPrice(variants, displays),

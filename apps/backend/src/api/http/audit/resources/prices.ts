@@ -1,4 +1,7 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { toMedusaAmount } from "../../../../lib/money"
+import { productSaleFacts, shopCurrency } from "../../../../workflows/pricing/variant-sale/read"
 import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
 
@@ -210,4 +213,27 @@ export const PRICE_RESOURCES: readonly AuditedResource[] = [
     snapshot: ({ scope, params }: { scope: Resolver; params: Record<string, string> }) =>
       priceList(scope, params["id"]),
   })),
+  // adr/0086: each variant's sale, `variant:<id>:sale` → "80.00 try 2026-12-01T…/–"
+  {
+    ...route("POST", "/admin/products/:id/sale-prices", `/admin/products/(?<id>${ID})/sale-prices`),
+    resourceType: "product",
+    resourceId: productId,
+    snapshot: ({ scope, params }) => variantSales(scope, params["id"] ?? ""),
+  },
 ]
+
+async function variantSales(scope: Resolver, productId: string): Promise<Snapshot> {
+  const container = scope as unknown as Pick<MedusaContainer, "resolve">
+  const currency = await shopCurrency(container)
+  const facts = await productSaleFacts(container, productId, currency).catch(() => null)
+  const snapshot: Snapshot = {}
+  for (const [variantId, sales] of facts?.existing ?? []) {
+    snapshot[`variant:${variantId}:sale`] = sales
+      .map(
+        (sale) =>
+          `${toMedusaAmount(sale.amount)} ${currency} ${sale.starts_at ?? "–"}/${sale.ends_at ?? "–"}`
+      )
+      .join(", ")
+  }
+  return snapshot
+}

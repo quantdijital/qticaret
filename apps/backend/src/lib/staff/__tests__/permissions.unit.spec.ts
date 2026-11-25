@@ -144,6 +144,18 @@ describe("staff roles", () => {
     expect(allowed("admin", method, path)).toBe(true)
   })
 
+  it("lets the owner and an admin lay out the product page, not operations or readonly", () => {
+    const path = "/admin/platform-settings/panel_layout"
+    expect(allowed("owner", "POST", path)).toBe(true)
+    expect(allowed("admin", "POST", path)).toBe(true)
+    expect(allowed("operations", "POST", path)).toBe(false)
+    expect(allowed("readonly", "POST", path)).toBe(false)
+    // Everyone reads it: the page is drawn as the shop laid it out
+    for (const role of STAFF_ROLES) {
+      expect(allowed(role, "GET", path)).toBe(true)
+    }
+  })
+
   it("lets every role use the assistant; only the owner turns it on (adr/0079 §8)", () => {
     for (const role of STAFF_ROLES) {
       expect(allowed(role, "POST", "/admin/ai/assistant/turns")).toBe(true)
@@ -779,6 +791,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // which stays the catalog roles' as a content draft's does
   "POST /admin/products/:id/duplicate": false,
   "POST /admin/products/:id/preview": false,
+  // adr/0086: a sale price is a price, like a price list's
+  "POST /admin/products/:id/sale-prices": false,
   // adr/0069: a product's videos are written by those who write its images
   "POST /admin/products/:id/videos": false,
   "DELETE /admin/products/:id/videos/:video_id": false,

@@ -37,10 +37,13 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
   control,
   errors,
   idPrefix,
+  stacked = false,
 }: {
   control: Control<T>
   errors: Errors
   idPrefix: string
+  /** One field a row, in a narrow column's card (an order's side column). */
+  stacked?: boolean
 }) {
   const { t } = useTranslation()
   const name = (key: keyof TrAddressValues) => key as Path<T>
@@ -72,7 +75,7 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
 
   const id = (key: string) => `${idPrefix}-${key}`
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className={stacked ? "flex flex-col gap-4" : "grid gap-4 sm:grid-cols-2"}>
       <Field
         label={t("address.province")}
         htmlFor={id("province")}

@@ -1,0 +1,22 @@
+/*
+ * Two style kit steps (adr/0067 Ek 2026-11-25), each a token set on the
+ * theme's root element over what it inherits from `:root`; at their
+ * defaults nothing is marked and nothing here applies.
+ *
+ * - S8 `page_width`: `narrow` a 1344 px content column instead of the
+ *   theme's 1440 px (`--container`, `parts/Container`); a section's own
+ *   reading measure or full width (`look.css`) still wins on its element.
+ * - S9 `accent_ink`: `light` white words on the accent colour, over the
+ *   automatic choice (`readableOn`), for a bright accent; its buttons'
+ *   words bold, as a bright fill asks.
+ */
+[data-page-width="narrow"] {
+  --container: 1344px;
+}
+
+[data-accent-ink="light"] {
+  --highlight-foreground: #fff;
+}
+[data-accent-ink="light"] .gf-btn--accent {
+  font-weight: 700;
+}

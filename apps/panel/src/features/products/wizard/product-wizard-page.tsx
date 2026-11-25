@@ -27,6 +27,7 @@ import { MediaStep } from "./steps/media-step"
 import { PricingStep } from "./steps/pricing-step"
 import { ReviewStep } from "./steps/review-step"
 import { ShippingStep } from "./steps/shipping-step"
+import { useWizardShown } from "./wizard-layout"
 import { missingRequired, withRequiredSwitches } from "./wizard-template"
 
 const STEP_VIEWS: Record<WizardStepKey, ComponentType> = {
@@ -61,10 +62,12 @@ export function ProductWizardPage() {
   // A product past the package's limit is refused: the toast links to Settings > Abonelik
   const planFailure = usePlanFailureToast()
   const values = useWatch({ control: form.control }) as WizardValues
-  const stepKeys = stepsFor(values.kind)
+  // The shop's product page layout: a part it hid is not asked here either
+  const shown = useWizardShown()
+  const stepKeys = stepsFor(values.kind, shown)
   const stepKey = stepKeys[current] ?? "basics"
   const last = current === stepKeys.length - 1
-  const publishable = canPublish(readiness(values))
+  const publishable = canPublish(readiness(values, shown))
   const StepView = STEP_VIEWS[stepKey]
 
   const goTo = (index: number) => {

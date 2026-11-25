@@ -89,24 +89,40 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
     }
     await expect(part).toHaveAttribute("aria-expanded", "true")
   }
-  await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
-  // A variant's dialog, each of its tabs; a product of one variant has the fields in its card
+  // The "Ürün verileri" card, each of its tabs (2026-11-25)
+  const data = page.locator("#product-data")
+  for (const tab of await data.getByRole("tab").all()) {
+    await tab.click()
+    await page.waitForLoadState("networkidle")
+    expect(await seriousIssues(page)).toEqual([])
+  }
+  // The variants in their tab; a simple product has its codes in its Stok tab
+  const variants = data.getByRole("tab", { name: "Varyantlar" })
+  if ((await variants.count()) > 0) {
+    await variants.click()
+  } else {
+    await data.getByRole("tab", { name: "Stok" }).click()
+  }
+  // A variant's row open in place (the owner, 2026-11-25), its options' editor and the bulk
+  // bar; a product of one variant has the fields in its Genel and Stok tabs (or its card)
   const rows = page.locator("[data-variant-row]")
   if ((await rows.count()) > 0) {
     await rows.first().click()
-    const dialog = page.getByRole("dialog", { name: "Varyantı düzenle" })
-    for (const tab of ["Fiyat ve stok", "Kodlar ve ölçüler", "Görseller"]) {
-      await dialog.getByRole("tab", { name: tab }).click()
-      expect(await seriousIssues(page)).toEqual([])
-    }
-    await page.keyboard.press("Escape")
-    await expect(dialog).toBeHidden()
+    const form = page.getByRole("form", { name: "Varyantı düzenle" })
+    await expect(form).toBeVisible()
+    expect(await seriousIssues(page)).toEqual([])
+    await rows.first().click()
+    await expect(form).toBeHidden()
+    await page.getByRole("button", { name: "Seçenekleri düzenle" }).click()
+    await expect(page.locator("[data-variant-options]")).toBeVisible()
+    expect(await seriousIssues(page)).toEqual([])
+    await page.locator("[data-variant-options]").getByRole("button", { name: "Vazgeç" }).click()
   } else {
     await expect(page.locator("#product-variant-codes")).toBeVisible()
   }
-  // The media dialog the gallery's drop zone opens, and a narrow column card's dialog. The
+  // The media dialog the gallery's drop zone opens, and a narrow column card's form. The
   // zone and the dialog say "Görsel ya da video ekle" while the product takes a video (adr/0069)
   await page
     .getByRole("button", { name: /^Görsel( ya da video)? ekle: / })
@@ -116,8 +132,9 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
   await page.keyboard.press("Escape")
-  await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
-  await expect(page.getByRole("dialog", { name: "Katalog bilgileri" })).toBeVisible()
+  // A narrow column card, edited in place (2026-11-25)
+  await page.getByRole("button", { name: "Kategori, marka ve KDV: düzenle" }).click()
+  await expect(page.getByRole("form", { name: "Kategori, marka ve KDV" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
 })
 

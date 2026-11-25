@@ -1,6 +1,6 @@
 import type { SectionIcon, StatsSettings, StepsSettings } from "@qticaret/types"
 import type { HandNoteView } from "./hand-note-views"
-import type { LinkView } from "./views"
+import type { LinkView, SocialLinkView } from "./views"
 
 /**
  * The figures strip as a theme draws it (`stats`, adr/0077 §10): two to
@@ -22,6 +22,11 @@ export interface StatsSectionView extends StatsSettings {
   eyebrow?: string
   /** A short hand note beside the heading; absent: none. */
   note?: HandNoteView
+  /**
+   * The shop's social profiles at the row's end (`social: on`) under their
+   * line ("Bizi izleyin"); absent: none (the setting off, or no profile).
+   */
+  follow?: { title: string; profiles: SocialLinkView[] }
 }
 
 export interface StatsItemView {

@@ -39,6 +39,9 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
       item_style: section.item_style,
       ...(section.eyebrow ? { eyebrow: at.fill(section.eyebrow) } : {}),
       ...(section.note ? { note: section.note } : {}),
+      // Printed only when changed, so a strip before them reads as it did
+      ...(section.arrangement !== "stacked" ? { arrangement: section.arrangement } : {}),
+      ...(section.social !== "off" ? { social: section.social } : {}),
     }
   }
   return {

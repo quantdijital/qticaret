@@ -202,9 +202,20 @@ export const STEP_FIELDS = {
 export type WizardStepKey = keyof typeof STEP_FIELDS
 export const WIZARD_STEPS = Object.keys(STEP_FIELDS) as WizardStepKey[]
 
-/** The steps for a kind: a digital or service product has no parcel, so no shipping step. */
-export const stepsFor = (kind: WizardValues["kind"]): WizardStepKey[] =>
-  kind === "physical" ? WIZARD_STEPS : WIZARD_STEPS.filter((key) => key !== "shipping")
+/**
+ * The steps for a kind: a digital or service product has no parcel, so no
+ * shipping step. A step whose part the shop hid on the product page
+ * (pictures, parcel) is skipped too (`wizardShown`).
+ */
+export const stepsFor = (
+  kind: WizardValues["kind"],
+  shown: { media: boolean; shipping: boolean } = { media: true, shipping: true }
+): WizardStepKey[] =>
+  WIZARD_STEPS.filter(
+    (key) =>
+      (key !== "shipping" || (kind === "physical" && shown.shipping)) &&
+      (key !== "media" || shown.media)
+  )
 
 /**
  * Weight and all three dimensions given: carriers price by the product's

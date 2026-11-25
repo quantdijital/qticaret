@@ -43,6 +43,13 @@ export function iconFields(section: AnySection, target: Target): RegistryField[]
     return [
       layoutEntry(target, section, "disc", `${at}.disc`, CATEGORY_ICONS_SETTINGS.disc),
       layoutEntry(target, section, "icons_phone", `${at}.phone`, CATEGORY_ICONS_SETTINGS.phone),
+      layoutEntry(
+        target,
+        section,
+        "icons_row_style",
+        `${at}.row_style`,
+        CATEGORY_ICONS_SETTINGS.row_style
+      ),
     ]
   }
   return []

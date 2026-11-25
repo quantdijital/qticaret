@@ -20,6 +20,7 @@ import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { toSlug } from "@/lib/slug"
 import { PhotoFillButton } from "../photo-fill/photo-fill"
 import { SUGGESTED_WORDS, wordCount } from "../readiness"
+import { useWizardShown } from "../wizard-layout"
 import { AttributesSection } from "./attributes-section"
 import type { WizardValues } from "../schema"
 
@@ -211,10 +212,13 @@ function ShortDescriptionField() {
 
 /**
  * Step 1: what the product is called, its URL, its story, its short
- * description (optional) and where it belongs.
+ * description (optional) and where it belongs. What the shop hid on its
+ * product page is not asked (`wizardShown`); the name and address always are.
  */
 export function BasicsStep() {
   const { t } = useTranslation()
+  const shown = useWizardShown()
+  const side = shown.organize || shown.catalog
   const { register, formState, control } = useFormContext<WizardValues>()
   const description = useWatch({ control, name: "description" })
   const words = wordCount(description)
@@ -224,7 +228,7 @@ export function BasicsStep() {
       <SectionCard
         title={t("products.wizard.basics.card")}
         action={<PhotoFillButton />}
-        className="xl:col-span-8"
+        className={side ? "xl:col-span-8" : "xl:col-span-12"}
       >
         <div className="flex flex-col gap-5">
           <Field
@@ -241,31 +245,44 @@ export function BasicsStep() {
             />
           </Field>
           <UrlField />
-          <Field
-            label={t("products.wizard.descriptionLabel")}
-            htmlFor="product-description"
-            hint={t("products.wizard.words", { count: words, suggested: SUGGESTED_WORDS })}
-          >
-            <Textarea
-              id="product-description"
-              className="min-h-52"
-              placeholder={t("products.wizard.descriptionPlaceholder")}
-              {...register("description")}
-            />
-          </Field>
-          <ShortDescriptionField />
+          {shown.description ? (
+            <Field
+              label={t("products.wizard.descriptionLabel")}
+              htmlFor="product-description"
+              hint={t("products.wizard.words", { count: words, suggested: SUGGESTED_WORDS })}
+            >
+              <Textarea
+                id="product-description"
+                className="min-h-52"
+                placeholder={t("products.wizard.descriptionPlaceholder")}
+                {...register("description")}
+              />
+            </Field>
+          ) : null}
+          {shown.shortDescription ? <ShortDescriptionField /> : null}
         </div>
       </SectionCard>
-      <SectionCard title={t("products.wizard.organize")} className="xl:col-span-4">
-        <div className="flex flex-col gap-5">
-          <KindPicker />
-          <Field label={t("products.wizard.categories")} hint={t("products.wizard.categoriesHint")}>
-            <CategoryPicker />
-          </Field>
-          <VatPicker />
-        </div>
-      </SectionCard>
-      <AttributesSection className="xl:col-span-8" />
+      {side ? (
+        <SectionCard title={t("products.wizard.organize")} className="xl:col-span-4">
+          <div className="flex flex-col gap-5">
+            {shown.catalog ? <KindPicker /> : null}
+            {shown.organize ? (
+              <>
+                <Field
+                  label={t("products.wizard.categories")}
+                  hint={t("products.wizard.categoriesHint")}
+                >
+                  <CategoryPicker />
+                </Field>
+                <VatPicker />
+              </>
+            ) : null}
+          </div>
+        </SectionCard>
+      ) : null}
+      {shown.attributes ? (
+        <AttributesSection className={side ? "xl:col-span-8" : "xl:col-span-12"} />
+      ) : null}
     </div>
   )
 }

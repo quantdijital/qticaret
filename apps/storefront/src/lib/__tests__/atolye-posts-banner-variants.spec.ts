@@ -9,6 +9,7 @@ import type {
   PostCardView,
   PostsSectionView,
 } from "@qticaret/ui"
+import { atolyeCss } from "@/test/atolye-css"
 import { renderPage } from "@/test/theme-render"
 
 /**
@@ -134,6 +135,24 @@ describe("the posts' intro panel (adr/0077 Ek)", () => {
     expect(html.match(/<article /g)).toHaveLength(2)
     expect(html).toContain('class="grid gap-4 sm:grid-cols-2"')
   })
+
+  it("keeps the panel's ground, no leaves and 16:10 covers by default", () => {
+    const html = draw(guides({ variant: "intro_panel" }))
+    expect(html).not.toContain("data-tone=")
+    expect(html).not.toContain("gf-panel-leaves")
+    expect(html).toContain("aspect-[16/10]")
+    expect(html).not.toContain("aspect-[2/1]")
+  })
+
+  it("tints the panel, adds the leaf sprig and widens the covers as set", () => {
+    const html = draw(
+      guides({ variant: "intro_panel", panelTone: "tint", ornament: "leaves", coverRatio: "wide" })
+    )
+    expect(html).toMatch(/data-ground="well" data-tone="tint" class="gf-ground [^"]*relative/)
+    expect(html).toMatch(/<svg aria-hidden="true" focusable="false"[^>]*gf-panel-leaves/)
+    expect(html).toContain("aspect-[2/1]")
+    expect(html).not.toContain("aspect-[16/10]")
+  })
 })
 
 describe("the split band (adr/0077 Ek)", () => {
@@ -168,5 +187,26 @@ describe("the split band (adr/0077 Ek)", () => {
     expect(html).toMatch(/data-ground="primary" data-edge="curved" class="gf-ground gf-split/)
     expect(html).not.toMatch(/gf-split[^"]*rounded-tile/)
     expect(html).not.toMatch(/gf-look[^>]*data-ground=/)
+  })
+
+  it("keeps the button in the main colour and no flower by default", () => {
+    const html = draw(band({ variant: "split" }))
+    expect(html).not.toContain("gf-btn--accent")
+    expect(html).not.toContain("gf-band-flower")
+  })
+
+  it("paints the first button in the accent colour and adds the flower spray as set", () => {
+    const html = draw(band({ variant: "split", buttonTone: "accent", ornament: "flower" }))
+    expect(html).toMatch(/<a href="\/turlar" class="gf-btn gf-btn--accent">Paketleri gör<\/a>/)
+    expect(html).toMatch(/<div class="relative"><div [^>]*gf-split/)
+    expect(html).toMatch(/<svg aria-hidden="true"[^>]*gf-band-flower/)
+  })
+
+  it("keeps the accent button, the tint and the ornaments' paint in the theme's stylesheet", () => {
+    const css = atolyeCss("split.css")
+    expect(css).toContain(".gf-split .gf-btn--accent")
+    expect(css).toContain('.gf-ground[data-ground][data-tone="tint"]')
+    expect(css).toContain(".gf-band-flower .gf-band-petal")
+    expect(css).toContain(".gf-panel-leaves")
   })
 })

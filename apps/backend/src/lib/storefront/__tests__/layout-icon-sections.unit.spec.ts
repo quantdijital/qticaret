@@ -179,6 +179,26 @@ describe("the icon row's icons by handle (a preset's)", () => {
   })
 })
 
+describe("the icon row's strip and a preset's handles", () => {
+  it("prints the strip and the handles only once written, today's row as it was", async () => {
+    const today = await hydrateSection(categories.parse(row()), context)
+    expect(today).not.toHaveProperty("row_style")
+    expect(today).not.toHaveProperty("category_handles")
+    const written = categories.parse(
+      row({ row_style: "strip", category_handles: ["macera", "plaj"] })
+    )
+    expect(await hydrateSection(written, context)).toMatchObject({
+      row_style: "strip",
+      category_handles: ["macera", "plaj"],
+    })
+  })
+
+  it("refuses a row style off its list and a handle that is no slug", () => {
+    expect(issues({ home: [row({ row_style: "wide" })] })).not.toEqual([])
+    expect(issues({ home: [row({ category_handles: ["Plaj"] })] })).not.toEqual([])
+  })
+})
+
 describe("the figures strip's icons", () => {
   it("leaves the icons off and a figure's icon absent until picked", () => {
     const parsed = stats.parse(strip())

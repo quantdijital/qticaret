@@ -5,6 +5,7 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { OrderBoard } from "@/features/orders/api/orders"
 import { OrderBoardCard } from "@/features/orders/components/order-board-card"
+import { useCustomerFilter } from "@/features/orders/components/customer-filter"
 import { OrderExportButton } from "@/features/orders/components/order-export"
 import { VoucherCheckButton } from "@/features/orders/components/voucher-check"
 import { cleanSearch, filtersOf } from "@/features/orders/search"
@@ -52,6 +53,10 @@ export function OrdersPage() {
   const setSearch = (next: OrderListSearch) => {
     void navigate({ to: "/orders", search: cleanSearch({ ...search, ...next }), replace: true })
   }
+  // One customer's orders: from the order's customer card or their page (`?customer=`)
+  const customerFilter = useCustomerFilter(search.customer, (customer) => {
+    setSearch({ customer, page: 1 })
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -91,6 +96,7 @@ export function OrdersPage() {
         onRefilter={(next) => {
           setSearch({ ...next, page: 1 })
         }}
+        extraFilters={customerFilter}
         notice={(board) => <WholesaleMatches board={board} q={filters.q} />}
       />
     </div>
