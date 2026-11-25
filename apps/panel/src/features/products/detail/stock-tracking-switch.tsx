@@ -77,7 +77,7 @@ export function StockTrackingSwitch({
               <div className="flex flex-wrap justify-end gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="cancel"
                   size="sm"
                   onClick={() => {
                     setAsking(false)
