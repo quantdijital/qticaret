@@ -53,11 +53,14 @@ describe("the new variants and settings keep today's drawing by default", () => 
   })
 
   it("reads the icon row's settings forgivingly", () => {
-    expect(CATEGORY_ICONS_DEFAULTS).toEqual({ disc: "tint", phone: "scroll" })
+    expect(CATEGORY_ICONS_DEFAULTS).toEqual({ disc: "tint", phone: "scroll", row_style: "stacked" })
     expect(categoryIconsSettingsOf({ disc: "line", phone: "wrap" })).toEqual({
       disc: "line",
       phone: "wrap",
+      row_style: "stacked",
     })
     expect(categoryIconsSettingsOf({ disc: "gold" })).toEqual(CATEGORY_ICONS_DEFAULTS)
+    expect(categoryIconsSettingsOf({ row_style: "strip" }).row_style).toBe("strip")
+    expect(categoryIconsSettingsOf({ row_style: "wide" }).row_style).toBe("stacked")
   })
 })

@@ -64,6 +64,7 @@ export type ContentField =
   | "lift"
   | "disc"
   | "icons_phone"
+  | "icons_row_style"
   | "collage_layout"
   | "collage_phone"
   | "departures_layout"
