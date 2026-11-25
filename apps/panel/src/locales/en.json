@@ -253,6 +253,26 @@
       "legalIdentity": {
         "label": "Legal identity incomplete",
         "hint": "Required details missing"
+      },
+      "openReturns": {
+        "label": "Returns to decide",
+        "hint": "Requests to approve or reject"
+      },
+      "unreadContact": {
+        "label": "Unanswered messages",
+        "hint": "New messages from the contact form"
+      },
+      "pendingReviews": {
+        "label": "Reviews to approve",
+        "hint": "Checked before they show in the store"
+      },
+      "pendingQuestions": {
+        "label": "Questions to approve",
+        "hint": "Questions and the answers they got"
+      },
+      "outOfStock": {
+        "label": "Sold out",
+        "hint": "Variants with no sellable stock left"
       }
     },
     "recent": {
