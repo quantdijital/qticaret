@@ -1,15 +1,18 @@
 import { z } from "zod"
 import {
   AI_CALL_RESPONSE_HEADERS,
+  aiCallParamsSchema,
+  aiCallPath,
   aiCallResponseHeadersSchema,
 } from "@qticaret/types/control-plane"
+import type { AiCallParams } from "@qticaret/types/control-plane"
 import { ProviderError } from "../../errors/errors"
-import { aiCallPath, aiGatewayEndpoint, postToAiGateway } from "../../control-plane/ai-gateway"
-import type { AiCallTerms, AiGatewayEndpoint } from "../../control-plane/ai-gateway"
+import { aiGatewayEndpoint, postToAiGateway } from "../../control-plane/ai-gateway"
+import type { AiGatewayEndpoint } from "../../control-plane/ai-gateway"
 import type { Fetch } from "../../control-plane/pull"
 import { aiProviderError } from "../errors"
 import type { AiErrorKey } from "../errors"
-import type { AiTransport, AiTransportResponse } from "./types"
+import type { AiCharge, AiTransport, AiTransportResponse } from "./types"
 
 /**
  * The platform's credits (adr/0085 §3, P4a): the connector's body, as it
@@ -22,7 +25,7 @@ import type { AiTransport, AiTransportResponse } from "./types"
  * An answer without the gateway's refusal header is the provider's,
  * passed back as it is for the connector to read (its failure mapping
  * applies), with the credits charged and the wallet left read from the
- * gateway's headers (`lastCharge`). A refusal is an `AiGatewayRefusalError`
+ * gateway's headers (on the answer and to `onCharge`, per answer). A refusal is an `AiGatewayRefusalError`
  * with our key; the envelope's words and the body never enter an error.
  * Never sent twice: a second call of the operation is the caller's choice.
  */
@@ -48,6 +51,8 @@ const REFUSAL_KEYS: Readonly<Record<string, AiErrorKey>> = Object.freeze({
   unavailable: "ai.platform_unavailable",
   task_mismatch: "ai.platform_unavailable",
   not_offered: "ai.platform_unavailable",
+  // The shop's (or the gateway's) calls in flight are many: nothing taken, ask again shortly
+  busy: "ai.platform_busy",
 })
 
 export const refusalKeyOf = (code: string): AiErrorKey =>
@@ -78,17 +83,12 @@ export class AiGatewayRefusalError extends ProviderError {
 export const isAiGatewayRefusal = (value: unknown): value is AiGatewayRefusalError =>
   value instanceof AiGatewayRefusalError
 
-export interface AiCharge {
-  credits: number
-  balance: number
-}
-
-export interface PlatformTransport extends AiTransport {
-  /** The last answer's charge and wallet left; null before one, or when it named none. */
-  lastCharge: () => AiCharge | null
-}
-
-export interface PlatformTransportOptions extends AiCallTerms {
+export interface PlatformTransportOptions extends AiCallParams {
+  /**
+   * Told each answer's charge and wallet left as it comes (a refusal's
+   * too, when it names one); nothing is kept between calls.
+   */
+  onCharge?: ((charge: AiCharge) => void) | undefined
   /** Tests only: where and how to sign; the shop's configuration otherwise. */
   endpoint?: AiGatewayEndpoint | null | undefined
   fetch?: Fetch | undefined
@@ -136,24 +136,31 @@ function forwardedHeaders(headers: Readonly<Record<string, string>>): Record<str
 }
 
 /**
- * Throws on an unmanaged or unconfigured shop: the platform's credits
- * exist only where a control plane does.
+ * Throws on an unmanaged or unconfigured shop (the platform's credits
+ * exist only where a control plane does), and on terms the contract
+ * refuses: nothing malformed is signed or leaves.
  */
-export function platformTransport(options: PlatformTransportOptions): PlatformTransport {
+export function platformTransport(options: PlatformTransportOptions): AiTransport {
   const endpoint = options.endpoint === undefined ? aiGatewayEndpoint() : options.endpoint
   if (endpoint === null) {
     throw unavailable("control_plane_not_configured")
   }
-  const path = aiCallPath(options)
-  let charge: AiCharge | null = null
+  const terms = aiCallParamsSchema.safeParse({
+    task: options.task,
+    capability: options.capability,
+    service: options.service,
+    operation: options.operation,
+  })
+  if (!terms.success) {
+    throw unavailable("call_terms_invalid")
+  }
+  const path = aiCallPath(terms.data)
 
   return {
     funding: "platform_credit",
     retries: false,
-    lastCharge: () => charge,
     async send(request): Promise<AiTransportResponse> {
-      charge = null
-      if (request.to.service.id !== options.service) {
+      if (request.to.service.id !== terms.data.service) {
         // A body built for one service sent as another's: a bug of ours, never sent
         throw unavailable("service_mismatch")
       }
@@ -194,7 +201,10 @@ export function platformTransport(options: PlatformTransportOptions): PlatformTr
         })
       }
       const { status, headers, body } = exchange
-      charge = chargeOf(headers)
+      const charge = chargeOf(headers)
+      if (charge !== null) {
+        options.onCharge?.(charge)
+      }
       const refusalHeader = headers.get(AI_CALL_RESPONSE_HEADERS.refusal)
       if (refusalHeader !== null) {
         const refusal = refusalOf(refusalHeader, body)
@@ -210,7 +220,7 @@ export function platformTransport(options: PlatformTransportOptions): PlatformTr
         throw unavailable(`gateway_http_${String(status)}`)
       }
       const type = headers.get("content-type")
-      return { status, headers: type === null ? {} : { "content-type": type }, body }
+      return { status, headers: type === null ? {} : { "content-type": type }, body, charge }
     },
   }
 }

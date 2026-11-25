@@ -1,6 +1,5 @@
 import { signRequest } from "@qticaret/server-kit"
 import type { Ed25519Signer } from "@qticaret/server-kit"
-import { AI_CREDITS_PATHS } from "@qticaret/types/control-plane"
 import { controlPlaneConfig, tenantSigner } from "./config"
 import type { Fetch } from "./pull"
 
@@ -28,28 +27,6 @@ export function aiGatewayEndpoint(env: NodeJS.ProcessEnv = process.env): AiGatew
   }
   const signer = tenantSigner(env)
   return signer ? { url: config.url, tenantId: config.tenantId, signer } : null
-}
-
-/** The four values that decide a call's charge: in the query, so the signature covers them. */
-export interface AiCallTerms {
-  task: string
-  capability: string
-  service: string
-  operation: string
-}
-
-/**
- * `POST …/ai/calls?task=…&capability=…&service=…&operation=…`, in this
- * order. Replaced by the shared package's `aiCallPath` once P3b lands.
- */
-export function aiCallPath(terms: AiCallTerms): string {
-  const query = new URLSearchParams([
-    ["task", terms.task],
-    ["capability", terms.capability],
-    ["service", terms.service],
-    ["operation", terms.operation],
-  ])
-  return `${AI_CREDITS_PATHS.calls}?${query.toString()}`
 }
 
 export interface AiGatewayPost {
