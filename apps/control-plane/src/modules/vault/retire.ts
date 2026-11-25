@@ -7,8 +7,9 @@ interface Executor {
 /**
  * The versions of `owner`/`name` below `below` (all without it) retired
  * inside the caller's transaction: sealed form emptied, row soft-deleted,
- * number kept (the unique index covers retired rows, and the next version
- * counts them, so a number is never reused). How many were held.
+ * number kept: the next version is numbered under the name's lock from
+ * max(version) over retired rows too, so a number is never reused (the
+ * unique index covers live rows only, PR #374 review Y2). How many were held.
  */
 export async function retire(
   sharedContext: Context,

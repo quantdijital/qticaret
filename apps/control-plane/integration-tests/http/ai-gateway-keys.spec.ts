@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { vaultIn } from "../../src/workflows/modules"
 import { pgOf } from "../helpers/ai-credits"
 import { anyStatus, makeMember } from "../helpers/staff"
 import type { Answer, HttpClient, Member } from "../helpers/staff"
@@ -150,6 +151,27 @@ medusaIntegrationTestRunner({
         await auditRows(getContainer(), { action: `POST ${P}/:service`, outcome: 200 })
       ).map((row) => (row.changes as { key: { to: { version: number } } }).key.to.version)
       expect(new Set(audited).size).toBe(audited.length)
+    })
+
+    it("never destroys a provider's key, only retires it; any other name as before", async () => {
+      // PR #374 review Y2: destroyed rows would let a version number come back
+      expect((await post(`${P}/fake`, { api_key: `test-key-${randomUUID()}` })).status).toBe(200)
+      const vault = vaultIn(getContainer())
+      const before = await vaultRows()
+      await expect(vault.destroySecret("platform", "ai.fake.api_key")).rejects.toMatchObject({
+        message: "cp.secret_retire_only",
+      })
+      await expect(vault.destroySecret("platform", "ai.other.api_key")).rejects.toMatchObject({
+        message: "cp.secret_retire_only",
+      })
+      expect(await vaultRows()).toBe(before)
+      const name = `test.destroy_${randomUUID().slice(0, 8)}`
+      await vault.putSecret({ owner: "platform", name, value: `test-key-${randomUUID()}` })
+      await vault.putSecret({ owner: "platform", name, value: `test-key-${randomUUID()}` })
+      expect(await vaultRows()).toBe(Number(before) + 2)
+      await vault.destroySecret("platform", name)
+      expect(await vaultRows()).toBe(before)
+      expect((await remove(`${P}/fake`)).data).toMatchObject({ deleted: true })
     })
   },
 })

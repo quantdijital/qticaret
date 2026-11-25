@@ -22,7 +22,10 @@ export const SecretRecord = model
     sealed: model.text(),
   })
   .indexes([
-    // Over retired (soft-deleted) rows too: a version is not reused
+    // Over live rows only (the model's soft delete leaves retired rows out,
+    // PR #374 review Y2): a version is not reused because writers of a name
+    // take its lock and number from max(version) over retired rows too
+    // (`putSecret`), and an AI provider's key is never destroyed, only retired
     { on: ["owner", "name", "version"], unique: true },
     { on: ["kek_id"] },
   ])

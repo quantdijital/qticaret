@@ -1,4 +1,5 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
+import type { Logger, MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import {
   AI_FAKE_TARGET,
   AI_SERVICE_CHECKS,
@@ -25,6 +26,7 @@ type Container = Pick<MedusaContainer, "resolve">
  * answer, header or status text (a refusal may quote the key).
  *
  * - `no_key`: the platform holds no key for it.
+ * - `unexpected` too when the vault cannot open the key it holds (logged).
  * - `rejected`: the service refused the key (401; 403 where documented).
  * - `unreachable`: no answer to judge (network, 408, 429, 5xx).
  * - `timeout`: past the time.
@@ -160,6 +162,15 @@ const causeCode = (error: unknown): string => {
   return typeof cause?.code === "string" ? cause.code : ""
 }
 
+// The vault holds no such key (any more): `openSecret`'s own refusal
+const secretGone = (error: unknown): boolean => {
+  const { type, message } = (error ?? {}) as { type?: unknown; message?: unknown }
+  return type === MedusaError.Types.NOT_FOUND && message === "cp.secret_unknown"
+}
+
+const kindOf = (error: unknown): string =>
+  error instanceof Error ? error.name : error === null ? "null" : typeof error
+
 /** One check of the platform's key for `service`; `options` for tests only. */
 export async function checkProviderKey(
   container: Container,
@@ -178,9 +189,17 @@ export async function checkProviderKey(
   try {
     try {
       key = await vaultIn(container).openSecret(PLATFORM_OWNER, aiProviderKeyName(service))
-    } catch {
+    } catch (error) {
       // Retired meanwhile: nothing was sent
-      return { ok: false, reason: "no_key" }
+      if (secretGone(error)) {
+        return { ok: false, reason: "no_key" }
+      }
+      // PR #374 review Y4: the vault failed (no KEK, a broken envelope);
+      // logged by the error's kind alone, never its text
+      container
+        .resolve<Logger>(ContainerRegistrationKeys.LOGGER)
+        .error(`ai.provider_check.vault_failed ${JSON.stringify({ service, err: kindOf(error) })}`)
+      return { ok: false, reason: "unexpected" }
     }
     const value = key.toString("utf8")
     const response = await (options.fetch ?? fetch)(target.url, {

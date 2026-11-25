@@ -1,3 +1,4 @@
+import { MedusaError } from "@medusajs/framework/utils"
 import { checkProviderKey, checkTargetOf } from "../check"
 import type { ProviderFetch } from "../forward"
 
@@ -55,7 +56,8 @@ describe("checkProviderKey", () => {
       return Promise.resolve(key)
     }),
   }
-  const container = { resolve: jest.fn(() => vault) }
+  const logger = { error: jest.fn() }
+  const container = { resolve: jest.fn((key: string) => (key === "logger" ? logger : vault)) }
   const answering =
     (status: number, body: string): ProviderFetch =>
     () =>
@@ -113,13 +115,37 @@ describe("checkProviderKey", () => {
         reason: "no_key",
       }
     )
-    vault.openSecret.mockRejectedValueOnce(new Error("cp.secret_unknown"))
+    vault.openSecret.mockRejectedValueOnce(
+      new MedusaError(MedusaError.Types.NOT_FOUND, "cp.secret_unknown")
+    )
     expect(
       await checkProviderKey(container, "deepseek", { fetch: answering(200, models) })
     ).toEqual({
       ok: false,
       reason: "no_key",
     })
+  })
+
+  it("says unexpected when the vault fails otherwise, logging only the error's kind", async () => {
+    // PR #374 review Y4: a missing KEK or a broken envelope is not "no key"
+    const sent = jest.fn(answering(200, models))
+    for (const error of [
+      new TypeError("test-secret-detail no KEK"),
+      new SyntaxError("test-secret-detail broken envelope"),
+    ]) {
+      vault.openSecret.mockRejectedValueOnce(error)
+      expect(await checkProviderKey(container, "deepseek", { fetch: sent })).toEqual({
+        ok: false,
+        reason: "unexpected",
+      })
+    }
+    expect(sent).not.toHaveBeenCalled()
+    const lines = logger.error.mock.calls.map(([line]) => String(line))
+    expect(lines).toEqual([
+      'ai.provider_check.vault_failed {"service":"deepseek","err":"TypeError"}',
+      'ai.provider_check.vault_failed {"service":"deepseek","err":"SyntaxError"}',
+    ])
+    expect(lines.join(" ")).not.toContain("test-secret-detail")
   })
 
   it("says timeout past its time", async () => {

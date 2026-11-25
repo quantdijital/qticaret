@@ -4,6 +4,7 @@ import { answeringAiConflicts } from "../../../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../../../http/audit"
 import { actorOf, paramOf } from "../../../../tenants/params"
 import type { PostAiOrderPaidType } from "../../../validators"
+import { shopOf } from "../../../shops"
 import { orderView } from "../../../views"
 
 /**
@@ -38,5 +39,8 @@ export async function POST(
       method: done.order.method,
     },
   })
-  res.json({ applied: done.applied, order: orderView(done.order) })
+  res.json({
+    applied: done.applied,
+    order: orderView(done.order, await shopOf(req, done.order.tenant_id)),
+  })
 }

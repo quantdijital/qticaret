@@ -195,6 +195,37 @@ medusaIntegrationTestRunner({
       expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 60 })
     })
 
+    it("adds an operation's later calls' measures to it, charging once (P3d, D4)", async () => {
+      const who = await shop(100)
+      const operation = randomUUID()
+      provider.answer(
+        { body: chatAnswer("Bir", { prompt_tokens: 120, completion_tokens: 30 }) },
+        { body: chatAnswer("İki", { prompt_tokens: 200, completion_tokens: 50 }) },
+        { body: chatAnswer("Üç", { prompt_tokens: 80, completion_tokens: 20 }) }
+      )
+      const charged: unknown[] = []
+      for (let i = 0; i < 3; i += 1) {
+        const reply = await callAs(http, who, chatBody(), { operation })
+        expect(reply.status).toBe(200)
+        charged.push(reply.headers["x-qt-ai-credits-charged"])
+      }
+      expect(charged).toEqual(["1", "0", "0"])
+      // A fourth is past the task's calls: refused, nothing added
+      expect((await callAs(http, who, chatBody(), { operation })).status).not.toBe(200)
+      expect(await operationOf(operation)).toMatchObject({
+        status: "charged",
+        calls: 3,
+        credits: 1,
+        model: "fake-text",
+        input_tokens: 400,
+        output_tokens: 100,
+        images: null,
+        // (120 + 200 + 80) × 1 $ + (30 + 50 + 20) × 2 $ per million tokens
+        estimated_cost_micros: 600,
+      })
+      expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 99 })
+    })
+
     it("answers its own refusal apart from a provider's: a marker, an envelope, its status", async () => {
       const who = await shop(0)
       const reply = await callAs(http, who, chatBody())

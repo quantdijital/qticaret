@@ -29,10 +29,13 @@ export interface ReleaseResult {
   purchased: number
 }
 
+// An integer column's top (the operation's counts; `addCallMeasures` writes it out)
+const INT_MAX = 2_147_483_647
+
 const measure = (value: number | null | undefined): number | null =>
   value === undefined || value === null || !Number.isSafeInteger(value) || value < 0
     ? null
-    : Math.min(value, 2_147_483_647)
+    : Math.min(value, INT_MAX)
 
 /**
  * How an open operation ends (adr/0085 §1): its credits given back when
@@ -195,6 +198,50 @@ export class AiCreditClosing extends AiCreditOperations {
       ]
     )
     return { settled: rows.length > 0 }
+  }
+
+  /**
+   * A later call's measures added to its operation once it is charged
+   * (P3d; the gateway review's D4): `settle` keeps one call's, so without
+   * this the cost report (K12) would miss an operation's second and third
+   * calls. Each call either settles the operation or adds here, once. Only
+   * the counts move (each held to the column's range); no credit, wallet
+   * or ledger row, and the service and model stay the first call's. A
+   * measure not known (null) leaves its column as it is. Whether a row took it.
+   */
+  @InjectTransactionManager()
+  async addCallMeasures(
+    tenantId: string,
+    operationId: string,
+    measures: OperationMeasures,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ added: boolean }> {
+    const counts = [
+      measure(measures.inputTokens),
+      measure(measures.outputTokens),
+      measure(measures.images),
+      measure(measures.estimatedCostMicros),
+    ]
+    if (counts.every((each) => each === null)) {
+      return { added: false }
+    }
+    const rows = await rowsOf<{ id: string }>(
+      sharedContext.transactionManager as Executor,
+      `UPDATE ai_credit_operation SET
+              input_tokens = CASE WHEN ?::bigint IS NULL THEN input_tokens
+                ELSE LEAST(coalesce(input_tokens, 0) + ?::bigint, 2147483647) END,
+              output_tokens = CASE WHEN ?::bigint IS NULL THEN output_tokens
+                ELSE LEAST(coalesce(output_tokens, 0) + ?::bigint, 2147483647) END,
+              images = CASE WHEN ?::bigint IS NULL THEN images
+                ELSE LEAST(coalesce(images, 0) + ?::bigint, 2147483647) END,
+              estimated_cost_micros = CASE WHEN ?::bigint IS NULL THEN estimated_cost_micros
+                ELSE LEAST(coalesce(estimated_cost_micros, 0) + ?::bigint, 2147483647) END,
+              updated_at = now()
+        WHERE tenant_id = ? AND operation_id = ? AND deleted_at IS NULL AND status = 'charged'
+        RETURNING id`,
+      [...counts.flatMap((each) => [each, each]), tenantId, operationId]
+    )
+    return { added: rows.length > 0 }
   }
 
   /**

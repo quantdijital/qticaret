@@ -4,7 +4,8 @@ import type { AiCreditEntryView, AiCreditOrderRow, Page } from "../../modules/ai
 import { aiCreditsIn } from "../../workflows/modules"
 import { balanceOf } from "./balance"
 import type { AiCreditBalance } from "./balance"
-import { withCurrentMonth } from "./rollover"
+import { platformCreditsFlagOf } from "./flag"
+import { monthlyGrantOf, withCurrentMonth } from "./rollover"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -18,6 +19,10 @@ export interface WalletAsStaff {
   /** The shop's own day's cap; null: the platform's. */
   ownDailyCap: number | null
   ledger: Page<AiCreditEntryView>
+  /** The shop's `ai.platform_credits` as its plan document says it, whatever its status (P3d). */
+  flagOn: boolean
+  /** Its month's whole grant as its limits say it now (K5), not what is left of it (P3d). */
+  monthlyGrant: number
 }
 
 /** A shop's wallet as it stands at `now` (made current like any read) and a page of its ledger. */
@@ -29,11 +34,13 @@ export async function walletAsStaff(
 ): Promise<WalletAsStaff> {
   const balance = await balanceOf(container, tenantId, now)
   const credits = aiCreditsIn(container)
-  const [ledger, ownDailyCap] = await Promise.all([
+  const [ledger, ownDailyCap, flagOn, monthlyGrant] = await Promise.all([
     credits.ledgerOf(tenantId, page),
     credits.ownDailyCapOf(tenantId),
+    platformCreditsFlagOf(container, tenantId, now),
+    monthlyGrantOf(container, tenantId, now),
   ])
-  return { balance, ownDailyCap, ledger }
+  return { balance, ownDailyCap, ledger, flagOn, monthlyGrant }
 }
 
 /** A shop's own day's cap set (K7), or null for the platform's; before and after for the audit. */
