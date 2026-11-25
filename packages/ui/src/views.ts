@@ -128,6 +128,12 @@ export interface MiniCartView {
    */
   taxNote?: string | null
   /**
+   * The drawer's note in place of the theme's usual one: a cart with
+   * nothing to ship (only tours, services; adr/0076 §6) says no word of
+   * shipping. Absent: the usual note.
+   */
+  note?: string | null
+  /**
    * Why the cart cannot go to the payment yet, as on the cart page
    * (`CartPageView.checkoutBlocked`): the drawer's "Ödemeye geç" is drawn
    * off with the reason beside it. Null or left out: the button as ever.

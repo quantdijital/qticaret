@@ -41,7 +41,7 @@ jobs:
       actions: read
     outputs:
       code: ${{ steps.changes.outputs.code }}
-      backend: ${{ steps.changes.outputs.backend }}
+      integration: ${{ steps.changes.outputs.integration }}
       e2e: ${{ steps.changes.outputs.e2e }}
       filter: ${{ steps.changes.outputs.filter }}
       unit: ${{ steps.changes.outputs.unit }}
@@ -234,30 +234,24 @@ jobs:
   integration:
     name: Integration tests (${{ matrix.suite }})
     needs: changes
-    # Skipped (and so passing) on a branch that leaves the backend's packages alone
-    if: needs.changes.outputs.backend == 'true'
+    # Only the suites the push reaches (scripts/ci-changes.sh lists them): the
+    # backend's when its packages changed, the control plane's when it or a
+    # workspace it depends on did. None reached: skipped, which the gate
+    # counts as green
+    if: needs.changes.outputs.integration != '[]'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
-    # Each HTTP spec file boots Medusa (~20 s) on a database and a Redis
-    # namespace of its own, so files run side by side: three jest workers on
-    # a runner's four cores, eight shards of ~50 files (adr/0081; before, twelve
-    # shards of one worker each left three cores idle and filled the
-    # account's twenty job slots)
+    # Backend: each HTTP spec file boots Medusa (~20 s) on a database and a
+    # Redis namespace of its own, so files run side by side: three jest
+    # workers on a runner's four cores, eight shards of ~50 files (adr/0081;
+    # before, twelve shards of one worker each left three cores idle and
+    # filled the account's twenty job slots). "HTTP k/8" and "modules".
+    # Control plane (apps/control-plane, adr/0081 Ek 2026-11-25 (3)): its
+    # HTTP files on one worker in one job ("control plane"; ~5 minutes of tests)
     strategy:
       fail-fast: false
       matrix:
-        suite:
-          [
-            "HTTP 1/8",
-            "HTTP 2/8",
-            "HTTP 3/8",
-            "HTTP 4/8",
-            "HTTP 5/8",
-            "HTTP 6/8",
-            "HTTP 7/8",
-            "HTTP 8/8",
-            "modules",
-          ]
+        suite: ${{ fromJSON(needs.changes.outputs.integration) }}
     services:
       postgres:
         image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
@@ -275,6 +269,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # The control plane keeps staff sessions in Redis (its `cp:end-sessions`
+      # test ends them there); the backend's suites run without one (no
+      # REDIS_URL is set for them). Started in every job of the matrix: a
+      # service cannot follow the matrix without hiding its image from Renovate
+      redis:
+        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DB_HOST: localhost
       DB_PORT: "5432"
@@ -285,10 +292,10 @@ jobs:
         with:
           persist-credentials: false
       # Product videos (adr/0069): the video upload suite needs ffmpeg and
-      # ffprobe on the server; any HTTP shard may hold it
+      # ffprobe on the server; any backend HTTP shard may hold it
       # (first, before the job runs any of the repository's code: see the action)
       - uses: ./.github/actions/ffmpeg
-        if: matrix.suite != 'modules'
+        if: startsWith(matrix.suite, 'HTTP ')
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -296,11 +303,12 @@ jobs:
           cache: pnpm
       # Random per run and useless outside this job; masked all the same,
       # since every later step lists its env in the (public) log. Staff 2FA
-      # (adr/0040) needs its sealing key: the 2FA and team suites turn it on
+      # (adr/0040) needs its sealing key: the 2FA and team suites turn it on.
+      # The control plane's keys too (its env schema requires them)
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY \
-            AUTH_MFA_ENCRYPTION_KEY; do
+            AUTH_MFA_ENCRYPTION_KEY CP_HASH_KEY CP_MASTER_KEY; do
             value="$(openssl rand -hex 32)"
             # Masking only tidies the log: the values are worthless outside this
             # job, so a branch that stops workflow commands exposes nothing
@@ -309,7 +317,18 @@ jobs:
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
-      # Three jest workers, each replaced when its heap grows (jest.config.js)
+      # The control plane's escrow recipient: a public age key whose identity
+      # is thrown away at once, so nothing sealed to it can ever be opened
+      - name: Throwaway escrow recipient
+        if: matrix.suite == 'control plane'
+        run: >-
+          echo "CP_ESCROW_RECIPIENTS=$(pnpm --silent --filter @qticaret/server-kit exec node --input-type=module
+          -e 'import { generateIdentity, identityToRecipient } from "age-encryption";
+          console.log(await identityToRecipient(await generateIdentity()))')" >> "$GITHUB_ENV"
+      # Backend: three jest workers, each replaced when its heap grows (jest.config.js).
+      # Control plane: one worker (its package.json), the job's Redis, its panel's
+      # origin and the platform domain its tests expect (`<slug>.localhost`); its
+      # scheduled jobs stay off in the tests (integration-tests/setup.js)
       - name: Run the suite
         env:
           SUITE: ${{ matrix.suite }}
@@ -319,12 +338,22 @@ jobs:
           QT_IT_BUNDLE: "8"
         run: |
           set -o pipefail
-          if [ "$SUITE" = modules ]; then
-            pnpm --filter @qticaret/backend test:integration:modules 2>&1 | tee suite.log
-          else
-            pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }" 2>&1 | tee suite.log
-          fi
-      # A test that passed only on its second try (integration-tests/plain-failures.js)
+          case "$SUITE" in
+            modules)
+              pnpm --filter @qticaret/backend test:integration:modules 2>&1 | tee suite.log
+              ;;
+            "control plane")
+              REDIS_URL=redis://localhost:6379 ADMIN_CORS=http://localhost:5174 \
+                AUTH_CORS=http://localhost:5174 CP_PANEL_URL=http://localhost:5174 \
+                PLATFORM_DOMAIN=localhost \
+                pnpm --filter @qticaret/control-plane test:integration:http 2>&1 | tee suite.log
+              ;;
+            *)
+              pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }" 2>&1 | tee suite.log
+              ;;
+          esac
+      # A test that passed only on its second try (the backend's
+      # integration-tests/plain-failures.js, the control plane's retry.js)
       # is named in the run's summary: it is to be mended, not forgotten
       - name: Name the tests that needed a second try
         if: always()

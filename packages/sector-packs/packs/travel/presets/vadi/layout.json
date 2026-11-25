@@ -216,6 +216,20 @@
       "ends_at": null,
       "variant": "accordion",
       "title": "Gün gün yolculuk"
+    },
+    {
+      "id": "vadibenzer",
+      "type": "related_products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "grid",
+      "title": "Bunlara da göz atın",
+      "source": { "kind": "same_category" },
+      "limit": 4,
+      "card_variant": null,
+      "columns": 4,
+      "columns_mobile": 2
     }
   ]
 }
