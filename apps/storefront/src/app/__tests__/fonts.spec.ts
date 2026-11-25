@@ -7,6 +7,7 @@ import { DEFAULT_THEME, THEME_FONTS } from "@/lib/views/theme"
 import type { ThemeBodyFont, ThemeHeadingFont } from "@qticaret/types"
 import { entry } from "@/themes/atolye"
 import { ACCENT_FONT_FILES, FONT_FILES, FONT_PRELOAD_BUDGET, fontPreloads } from "../fonts"
+import { woff2CodePoints } from "./woff2-cmap"
 
 const publicDir = fileURLToPath(new URL("../../../public", import.meta.url))
 const css = readFileSync(fileURLToPath(new URL("../fonts.css", import.meta.url)), "utf8")
@@ -19,8 +20,21 @@ const HEADINGS: readonly ThemeHeadingFont[] = [
   "playfair",
   "dm-serif",
   "manrope",
+  "plus-jakarta",
+  "montserrat",
 ]
-const BODIES: readonly ThemeBodyFont[] = ["inter", "manrope", "source-sans", "nunito"]
+const BODIES: readonly ThemeBodyFont[] = [
+  "inter",
+  "manrope",
+  "source-sans",
+  "nunito",
+  "plus-jakarta",
+  "montserrat",
+]
+/** The heading faces whose files carry no ₺ (the panel says so, `NO_LIRA_FONTS`). */
+const NO_LIRA: readonly string[] = ["playfair", "dm-serif"]
+const codePoints = (path: string) => woff2CodePoints(readFileSync(`${publicDir}${path}`))
+const chars = (text: string) => Array.from(text, (char) => char.codePointAt(0) ?? 0)
 const bytes = (paths: readonly string[]) =>
   paths.reduce((sum, path) => sum + statSync(`${publicDir}${path}`).size, 0)
 
@@ -45,6 +59,16 @@ describe("the self-hosted faces", () => {
     }
     // The first look's own faces went with it (adr/0062 §7)
     expect(css).not.toMatch(/caslon|hanken/)
+  })
+
+  it("draws every Turkish letter in the face itself: ç ö ü ı from latin, ğ İ ş from its cut", () => {
+    for (const [font, [latin, turkish]] of Object.entries(FONT_FILES)) {
+      const own = codePoints(latin)
+      const cut = codePoints(turkish)
+      for (const point of chars("çÇöÖüÜıa")) expect(own.has(point), `${font} ${latin}`).toBe(true)
+      for (const point of chars("ğĞİşŞ")) expect(cut.has(point), `${font} ${turkish}`).toBe(true)
+      expect(cut.has(0x20ba), `${font} ₺`).toBe(!NO_LIRA.includes(font))
+    }
   })
 
   it("serves every file past the proxy (no resolve, no 404 report)", () => {
@@ -72,6 +96,15 @@ describe("fontPreloads", () => {
     expect(chosen.some((path) => path.includes("inter") || path.includes("fraunces"))).toBe(false)
   })
 
+  it("preloads the 2026-11-25 faces only for the shop that chose them", () => {
+    const chosen = fontPreloads({
+      ...DEFAULT_THEME,
+      typography: { heading: "montserrat", body: "plus-jakarta" },
+    })
+    expect(chosen).toEqual([...FONT_FILES["plus-jakarta"], ...FONT_FILES.montserrat])
+    expect(fontPreloads(DEFAULT_THEME).some((path) => /jakarta|montserrat/.test(path))).toBe(false)
+  })
+
   it("names a face once when it draws both", () => {
     expect(
       fontPreloads({ ...DEFAULT_THEME, typography: { heading: "manrope", body: "manrope" } })
@@ -93,7 +126,7 @@ describe("fontPreloads", () => {
         return { pair: `${heading} + ${body}`, total: bytes(files) }
       })
     )
-    expect(totals).toHaveLength(20)
+    expect(totals).toHaveLength(HEADINGS.length * BODIES.length)
     for (const { pair, total } of totals) {
       expect(total, pair).toBeLessThanOrEqual(FONT_PRELOAD_BUDGET)
     }

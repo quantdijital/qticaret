@@ -131,6 +131,15 @@ describe("theme section", () => {
     expect(parsed.typography).toEqual({ heading: "playfair", body: "nunito" })
   })
 
+  it("takes the faces added 2026-11-25 in either role", () => {
+    for (const typography of [
+      { heading: "plus-jakarta", body: "montserrat" },
+      { heading: "montserrat", body: "plus-jakarta" },
+    ]) {
+      expect(full.parse(mergePatch(defaults, { typography })).typography).toEqual(typography)
+    }
+  })
+
   it("keeps a nested group's other fields when the panel sends one", () => {
     const body = patch.parse({ colors: { primary: "#1a1814" } })
     const merged = full.parse(mergePatch(defaults, body))

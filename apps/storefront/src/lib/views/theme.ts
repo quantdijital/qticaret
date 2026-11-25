@@ -113,6 +113,8 @@ export const THEME_FONTS: Readonly<
   manrope: { variable: "--font-manrope", fallback: SANS, displayWeight: 800 },
   "source-sans": { variable: "--font-source-sans", fallback: SANS, displayWeight: 800 },
   nunito: { variable: "--font-nunito", fallback: SANS, displayWeight: 800 },
+  "plus-jakarta": { variable: "--font-plus-jakarta", fallback: SANS, displayWeight: 800 },
+  montserrat: { variable: "--font-montserrat", fallback: SANS, displayWeight: 800 },
 }
 
 const HEADING_FONTS: readonly ThemeHeadingFont[] = [
@@ -121,8 +123,17 @@ const HEADING_FONTS: readonly ThemeHeadingFont[] = [
   "playfair",
   "dm-serif",
   "manrope",
+  "plus-jakarta",
+  "montserrat",
 ]
-const BODY_FONTS: readonly ThemeBodyFont[] = ["inter", "manrope", "source-sans", "nunito"]
+const BODY_FONTS: readonly ThemeBodyFont[] = [
+  "inter",
+  "manrope",
+  "source-sans",
+  "nunito",
+  "plus-jakarta",
+  "montserrat",
+]
 
 /**
  * The corner scale's factor (`--radius-scale`); soft is the theme's own.

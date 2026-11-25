@@ -132,6 +132,8 @@ Düzeltme listesinin 1, 2, 3 ve 6. maddeleri yapıldı; 4. madde ertelendi (aşa
   | Manrope | 23 + 14 KB | 23,9 + 2,4 KB |
   | Source Sans 3 | 28 + 58 KB | 28,1 + 2,6 KB |
   | Nunito | 38 + 34 KB | 38,2 + 3,6 KB |
+  | Plus Jakarta Sans (2026-11-25) | 27 + 21 KB | 26,7 + 2,7 KB |
+  | Montserrat (2026-11-25) | 37 + 69 KB | 37,1 + 5,5 KB |
 
   Varsayılan mağazanın önyüklediği dört dosya 350 KB'tan 122 KB'a indi.
 - **CLS:** her yüzün yedek yazı tipi (Arial ya da Times New Roman) next/font'un ölçüleriyle aynı (`size-adjust`, `ascent-override` …), `font-display: swap`.

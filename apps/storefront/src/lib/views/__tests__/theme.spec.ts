@@ -270,12 +270,19 @@ describe("themeStyle", () => {
   })
 
   it("prints every face the lists offer, and only the one that is not Manrope", () => {
-    for (const heading of ["fraunces", "inter", "playfair", "dm-serif"] as const) {
+    for (const heading of [
+      "fraunces",
+      "inter",
+      "playfair",
+      "dm-serif",
+      "plus-jakarta",
+      "montserrat",
+    ] as const) {
       const style = themeStyle(theme({ typography: { heading, body: "manrope" } }))
       expect(style).toContain(`--font-heading:var(${THEME_FONTS[heading].variable}), `)
       expect(style).not.toContain("--font-sans")
     }
-    for (const body of ["inter", "source-sans", "nunito"] as const) {
+    for (const body of ["inter", "source-sans", "nunito", "plus-jakarta", "montserrat"] as const) {
       const style = themeStyle(theme({ typography: { heading: "manrope", body } }))
       expect(style).toContain(`--font-sans:var(${THEME_FONTS[body].variable}), `)
       expect(style).not.toContain("--font-heading")
@@ -287,7 +294,14 @@ describe("themeStyle", () => {
       ':root{--font-heading:var(--font-dm-serif), ui-serif, Georgia, "Times New Roman", serif;' +
         "--display-weight:400}"
     )
-    for (const heading of ["fraunces", "inter", "playfair", "manrope"] as const) {
+    for (const heading of [
+      "fraunces",
+      "inter",
+      "playfair",
+      "manrope",
+      "plus-jakarta",
+      "montserrat",
+    ] as const) {
       expect(THEME_FONTS[heading].displayWeight).toBe(800)
       expect(themeStyle(theme({ typography: { heading, body: "manrope" } })) ?? "").not.toContain(
         "--display-weight"

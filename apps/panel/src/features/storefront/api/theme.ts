@@ -32,8 +32,23 @@ import type { StorefrontBackground } from "@/theme/storefront"
  */
 
 /** Self-hosted faces the storefront has a loader for; names only. */
-export const HEADING_FONTS = ["fraunces", "inter", "playfair", "dm-serif", "manrope"] as const
-export const BODY_FONTS = ["inter", "manrope", "source-sans", "nunito"] as const
+export const HEADING_FONTS = [
+  "fraunces",
+  "inter",
+  "playfair",
+  "dm-serif",
+  "manrope",
+  "plus-jakarta",
+  "montserrat",
+] as const
+export const BODY_FONTS = [
+  "inter",
+  "manrope",
+  "source-sans",
+  "nunito",
+  "plus-jakarta",
+  "montserrat",
+] as const
 export const BACKGROUNDS = [
   "steel",
   "warm",

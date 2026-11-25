@@ -214,6 +214,66 @@
 }
 
 /*
+ * Plus Jakarta Sans and Montserrat (2026-11-25): Fontsource's copies of
+ * Google's files, cut the same way. No Reserved Font Name in either, so the
+ * Turkish files keep their own. Fallback metrics against Arial over a
+ * Turkish sample line at weight 400 (fontTools).
+ */
+@font-face {
+  font-family: "qt-plus-jakarta";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-latin.153fc85b70.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-plus-jakarta";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/plus-jakarta-tr.37427dca1e.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-plus-jakarta-fallback";
+  src: local("Arial");
+  ascent-override: 101.77%;
+  descent-override: 21.77%;
+  line-gap-override: 0%;
+  size-adjust: 101.99%;
+}
+
+@font-face {
+  font-family: "qt-montserrat";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/montserrat-latin.06b16db7a9.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-montserrat";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/montserrat-tr.324b17bf3a.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-montserrat-fallback";
+  src: local("Arial");
+  ascent-override: 87.74%;
+  descent-override: 22.75%;
+  line-gap-override: 0%;
+  size-adjust: 110.32%;
+}
+
+/*
  * The accent faces (handwriting, `ACCENT_FONTS` in `@qticaret/types`): only a
  * section's hand note is drawn in one, and only while the shop chose it
  * (`--font-accent`, `lib/views/theme.ts`). Never preloaded: a page with no
@@ -313,6 +373,8 @@
   --font-manrope: "qt-manrope", "qt-manrope-fallback";
   --font-source-sans: "qt-source-sans", "qt-source-sans-fallback";
   --font-nunito: "qt-nunito", "qt-nunito-fallback";
+  --font-plus-jakarta: "qt-plus-jakarta", "qt-plus-jakarta-fallback";
+  --font-montserrat: "qt-montserrat", "qt-montserrat-fallback";
   --font-caveat: "qt-caveat", "qt-caveat-fallback";
   --font-dancing-script: "qt-dancing-script", "qt-dancing-script-fallback";
   --font-kalam: "qt-kalam", "qt-kalam-fallback";
