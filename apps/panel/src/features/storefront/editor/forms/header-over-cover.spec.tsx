@@ -9,6 +9,7 @@ import type { AnySection, HeaderBarSection } from "@/features/storefront/api/lay
 import { SectionPanel } from "../section-panel"
 import { searchSettings } from "../settings-search"
 import { openTab } from "../settings-groups.fixtures"
+import { headerSetIn } from "./header-marks"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -91,5 +92,11 @@ describe("the header over the opening", () => {
     expect(keys(inline, "kapak görselinin")).toContain("over_cover")
     expect(keys(inline, "transparent")).toContain("over_cover")
     expect(keys({ ...inline, variant: "standard" }, "kapak görselinin")).not.toContain("over_cover")
+  })
+
+  it("counts in its group's mark only once switched on", () => {
+    expect(headerSetIn(inline, "look")).toBe(0)
+    expect(headerSetIn({ ...inline, over_cover: false }, "look")).toBe(0)
+    expect(headerSetIn({ ...inline, over_cover: true }, "look")).toBe(1)
   })
 })
