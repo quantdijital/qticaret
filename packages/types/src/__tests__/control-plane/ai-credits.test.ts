@@ -147,6 +147,8 @@ describe("the gateway's shapes", () => {
 
   it("gives each refusal its own envelope and an error status", () => {
     expect([...AI_GATEWAY_REFUSAL_CODES].sort()).toEqual([
+      "body_refused",
+      "body_too_large",
       "call_cap",
       "credits_exhausted",
       "daily_cap",
@@ -154,6 +156,9 @@ describe("the gateway's shapes", () => {
       "task_mismatch",
       "unavailable",
     ])
+    // A provider's 4xx and the gateway's own are told apart by the header, not the status
+    expect(AI_GATEWAY_REFUSALS.body_too_large).toBe(413)
+    expect(AI_GATEWAY_REFUSALS.credits_exhausted).toBe(402)
     for (const code of AI_GATEWAY_REFUSAL_CODES) {
       expect(AI_GATEWAY_REFUSALS[code]).toBeGreaterThanOrEqual(400)
       expect(aiGatewayRefusalSchema.parse({ qt_ai_gateway: { code } })).toEqual({

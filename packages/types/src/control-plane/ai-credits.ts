@@ -246,8 +246,11 @@ export type AiCallResponseHeaders = z.infer<typeof aiCallResponseHeadersSchema>
 /**
  * Why the gateway refused before any provider was asked, and its status:
  * no credits left, the day's cap reached, credits not available (flag,
- * key or routing), a capability the task may not call as, the
- * operation's calls used up, a task not sold on credits.
+ * key or routing; the service named is not the one routed), a capability
+ * the task may not call as, the operation's calls used up (or the
+ * operation closed), a task not sold on credits, a body the task may not
+ * send (a tool outside the assistant, too many pictures, a type the
+ * service does not take, more than the task's input), a body over 6 MB.
  */
 export const AI_GATEWAY_REFUSALS = Object.freeze({
   credits_exhausted: 402,
@@ -256,6 +259,8 @@ export const AI_GATEWAY_REFUSALS = Object.freeze({
   task_mismatch: 422,
   call_cap: 409,
   not_offered: 404,
+  body_refused: 400,
+  body_too_large: 413,
 } as const)
 export type AiGatewayRefusalCode = keyof typeof AI_GATEWAY_REFUSALS
 export const AI_GATEWAY_REFUSAL_CODES = Object.keys(AI_GATEWAY_REFUSALS) as [
