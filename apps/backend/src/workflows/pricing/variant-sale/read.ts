@@ -146,6 +146,14 @@ export async function productSaleFacts(
   }
 }
 
+/** Whether one price list is a variant's sale list of ours: read by its id alone. */
+export async function isVariantSaleList(container: Resolver, id: string): Promise<boolean> {
+  const [list] = (await container
+    .resolve(Modules.PRICING)
+    .listPriceLists({ id: [id] }, { select: ["id", "metadata"], take: 1 })) as unknown as ListRow[]
+  return isVariantSaleMeta(list?.metadata)
+}
+
 /** Every price list of ours (adr/0086): kept out of the price lists screen. */
 export async function variantSaleListIds(container: Resolver): Promise<Set<string>> {
   const lists = (await container

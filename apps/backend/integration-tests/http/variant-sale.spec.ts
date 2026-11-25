@@ -1,5 +1,5 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { createCartWorkflow } from "@medusajs/medusa/core-flows"
+import { createCartWorkflow, updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PRICE_HISTORY_MODULE } from "../../src/modules/price-history"
 import type PriceHistoryModuleService from "../../src/modules/price-history/service"
@@ -213,6 +213,37 @@ medusaIntegrationTestRunner({
         )
       )
       expect(write.status).toBe(409)
+
+      // Nor can a list be given the mark from outside
+      const forged = await settle(
+        http.post(
+          "/admin/price-lists",
+          {
+            title: "Sahte",
+            description: "",
+            status: "active",
+            type: "sale",
+            metadata: { managed_by: "variant_sale", variant_id: variantId },
+          },
+          { headers: admin.headers }
+        )
+      )
+      expect(forged.status).toBe(409)
+    })
+
+    it("keeps the sale when the variant's regular price is saved", async () => {
+      const { productId, variantId } = await stockedProduct(getContainer(), shop, "korunur", 5, 100)
+      await send(productId, { set: [{ variant_id: variantId, amount: "80.00" }] })
+      await updateProductVariantsWorkflow(getContainer()).run({
+        input: {
+          product_variants: [{ id: variantId, prices: [{ currency_code: "try", amount: 120 }] }],
+        },
+      })
+      expect((await read(productId)).variants[0]).toMatchObject({
+        regular: "120.00",
+        sale: { amount: "80.00" },
+      })
+      expect(await cartItems(variantId)).toBe(80)
     })
   },
 })

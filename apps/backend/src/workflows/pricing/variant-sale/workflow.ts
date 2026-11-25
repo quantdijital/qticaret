@@ -47,7 +47,7 @@ export const setVariantSalesWorkflow = createWorkflow(
   "variant-sale-set",
   (input: VariantSaleInput) => {
     const lock = transform({ input }, ({ input }) => `variant-sale:${input.product_id}`)
-    acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
+    acquireLockStep({ key: lock, timeout: 5, ttl: 300 })
     const plan = planVariantSalesStep(input)
     when("variant-sale-create", { plan }, ({ plan }) => plan.create.length > 0).then(() => {
       createPriceListsWorkflow.runAsStep({

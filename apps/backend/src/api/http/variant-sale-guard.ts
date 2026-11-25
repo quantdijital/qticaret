@@ -1,6 +1,7 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ConflictError } from "../../lib/errors"
-import { variantSaleListIds } from "../../workflows/pricing/variant-sale/read"
+import { VARIANT_SALE } from "../../workflows/pricing/variant-sale/plan"
+import { isVariantSaleList, variantSaleListIds } from "../../workflows/pricing/variant-sale/read"
 import { withoutOwned } from "./wholesale-guard"
 
 /**
@@ -49,7 +50,13 @@ export async function guardVariantSaleLists(
 ) {
   try {
     const id = req.params["id"]
-    if (id && (await variantSaleListIds(req.scope)).has(id)) {
+    // Nor may a list be given our mark from outside: it would be hidden and locked
+    const meta = (req.body as { metadata?: unknown } | undefined)?.metadata
+    const marked =
+      typeof meta === "object" && meta !== null && "managed_by" in meta
+        ? (meta as { managed_by?: unknown }).managed_by === VARIANT_SALE
+        : false
+    if (marked || (id && (await isVariantSaleList(req.scope, id)))) {
       next(new ConflictError("variant_sale.managed"))
       return
     }
@@ -65,6 +72,11 @@ export const VARIANT_SALE_ROUTES = [
     matcher: "/admin/price-lists",
     methods: ["GET" as const],
     middlewares: [hideVariantSaleLists],
+  },
+  {
+    matcher: "/admin/price-lists",
+    methods: ["POST" as const],
+    middlewares: [guardVariantSaleLists],
   },
   ...["/admin/price-lists/:id", "/admin/price-lists/:id/*"].map((matcher) => ({
     matcher,
