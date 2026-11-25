@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react"
 
-// Where the page's two columns stand side by side (Tailwind `lg`, `EditorLayout narrowSide`)
-const QUERY = "(min-width: 64rem)"
+// Where the page's two columns stand side by side (Tailwind `xl`, `EditorLayout`)
+const QUERY = "(min-width: 80rem)"
 
 // Without media queries (a test's DOM) the columns read as side by side
 const supported = () => typeof window.matchMedia === "function"
