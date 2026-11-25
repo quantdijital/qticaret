@@ -53,6 +53,11 @@ export const CP_RATE_LIMIT_PROFILES = {
   },
   // adr/0085 §2: the AI credits' routes per verified shop, apart from the signer's 30 (P3b's calls too)
   tenant_api_ai: { name: "cp_tenant_api_ai", perIdentityAnyIp: { max: 60, windowMs: MINUTE } },
+  // "Bağlantıyı dene" (adr/0085 §2): a provider called with the platform's key, per member
+  ai_provider_check: {
+    name: "cp_ai_provider_check",
+    perIdentityAnyIp: { max: 6, windowMs: MINUTE },
+  },
   // A sole proprietor's TCKN shown: per staff member from every address (C7 review L1)
   tckn_reveal: { name: "cp_tckn_reveal", perIdentityAnyIp: { max: 20, windowMs: HOUR } },
 } as const satisfies Record<string, RateLimitProfile>
