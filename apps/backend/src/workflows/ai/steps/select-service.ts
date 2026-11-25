@@ -3,7 +3,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { aiValidationError } from "../../../lib/ai/errors"
 import { productPhotoOf } from "../../../lib/ai/facts/product-attributes"
 import type { AiImageRef } from "../../../lib/ai/facts/media"
-import type { AiService } from "../../../lib/ai/registry/services"
+import type { AiFunding, AiService } from "../../../lib/ai/registry/services"
 import { findAiTask } from "../../../lib/ai/registry/tasks"
 import type { AiTask } from "../../../lib/ai/registry/tasks"
 import { canRunTask, chooseService, usableServices } from "../../../lib/ai/select"
@@ -16,6 +16,12 @@ export interface SelectServiceInput {
   user_id: string
   /** The service the staff member picked; only when several are usable. */
   service?: string | null | undefined
+  /**
+   * A queued job's way of paying, set when it was queued (a bulk job's
+   * item): only services paid that way are usable, so an item never moves
+   * to the platform's credits or back by itself.
+   */
+  funding?: AiFunding | undefined
   /** The record asked for: a `photo` task looks for its picture (adr/0074 §5 madde 3). */
   entity_type?: string | undefined
   entity_id?: string | undefined
@@ -46,30 +52,54 @@ async function photoOf(
 }
 
 /**
- * Which service runs the task (adr/0071 §4): the usable ones are only
- * what `usableServices` makes of the shop's accounts and the package's
- * flags, and `chooseService` picks among them. Only the service's id
+ * The service a task runs on for this staff member now (adr/0071 §4): the
+ * usable ones are only what `usableServices` makes of the shop's accounts
+ * and the package's flags, and `chooseService` picks among them. Throws
+ * the choice's error. Also what a bulk job reads when it is queued, to
+ * keep the way of paying it was queued with (`aiAltText.prepare`).
+ */
+export async function pickServiceFor(
+  container: Parameters<typeof aiConnectionsOf>[0],
+  input: Pick<SelectServiceInput, "task" | "user_id" | "service" | "funding">
+): Promise<{ task: AiTask; service: AiService; alternatives: string[]; several: boolean }> {
+  const task = findAiTask(input.task)
+  if (!task) {
+    throw aiValidationError("ai.unknown_task")
+  }
+  const [connections, flags, preference] = await Promise.all([
+    aiConnectionsOf(container),
+    aiFlagsOf(container),
+    container.resolve<AiModuleService>(AI_MODULE).preferenceOf(input.user_id, task.id),
+  ])
+  // The platform's credits come after the shop's own: picked, remembered or alone (adr/0085 K8)
+  const open = usableServices(task, connections, flags, await aiServicesFor(flags))
+  const usable =
+    input.funding === undefined ? open : open.filter((each) => each.funding === input.funding)
+  if (usable.length === 0 && open.length > 0) {
+    // Usable only paid another way than the job was queued with: it stops, never spends otherwise
+    throw aiValidationError("ai.service_unavailable")
+  }
+  const choice = chooseService({ task, usable, requested: input.service, preference })
+  if (!choice.ok) {
+    throw aiValidationError(choice.error)
+  }
+  return {
+    task,
+    service: choice.service,
+    alternatives: choice.alternatives,
+    several: usable.length > 1,
+  }
+}
+
+/**
+ * Which service runs the task (`pickServiceFor`). Only the service's id
  * leaves this step; its key is read where it is used (`call-service`).
  * Nothing to undo.
  */
 export const selectServiceStep = createStep(
   "ai-select-service",
   async (input: SelectServiceInput, { container }) => {
-    const task = findAiTask(input.task)
-    if (!task) {
-      throw aiValidationError("ai.unknown_task")
-    }
-    const [connections, flags, preference] = await Promise.all([
-      aiConnectionsOf(container),
-      aiFlagsOf(container),
-      container.resolve<AiModuleService>(AI_MODULE).preferenceOf(input.user_id, task.id),
-    ])
-    // The platform's credits come after the shop's own: picked, remembered or alone (adr/0085 K8)
-    const usable = usableServices(task, connections, flags, await aiServicesFor(flags))
-    const choice = chooseService({ task, usable, requested: input.service, preference })
-    if (!choice.ok) {
-      throw aiValidationError(choice.error)
-    }
+    const { task, ...choice } = await pickServiceFor(container, input)
     const photo = await photoOf(container, task, choice.service, input)
     return new StepResponse({
       service: choice.service.id,
@@ -81,7 +111,7 @@ export const selectServiceStep = createStep(
       operation: randomUUID(),
       alternatives: choice.alternatives,
       // Several to choose from and one asked for: the picker was used, so it is remembered
-      remember: usable.length > 1 && typeof input.service === "string",
+      remember: choice.several && typeof input.service === "string",
     })
   }
 )

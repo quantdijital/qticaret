@@ -109,7 +109,13 @@ export const requestSeoFillWorkflow = createWorkflow(
     const job = enqueueAsyncJobWorkflow.runAsStep({
       input: transform({ input, chosen, checked }, ({ input, chosen, checked }) => ({
         type: "ai.seo_fill",
-        input: { fields: checked.fields, pages: checked.pages, service: chosen.service },
+        input: {
+          fields: checked.fields,
+          pages: checked.pages,
+          service: chosen.service,
+          // Each page is paid the way the job was chosen now, or not asked
+          funding: chosen.funding,
+        },
         requested_by: input.user_id,
       })),
     })

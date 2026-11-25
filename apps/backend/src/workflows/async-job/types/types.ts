@@ -77,5 +77,12 @@ export interface JobType<Input = unknown> {
    * a staff member started shows as any other.
    */
   scheduled?: boolean
+  /**
+   * What the server sets in the input as the job is queued, after the
+   * request's input passed the schema (an AI bulk job keeps the way of
+   * paying chosen now, docs/22 P4b-1). Throws to refuse the job; what it
+   * returns is what the job runs with.
+   */
+  prepare?: (container: MedusaContainer, input: Input, requestedBy: string | null) => Promise<Input>
   execute: (context: JobContext, input: Input) => Promise<JobResult>
 }

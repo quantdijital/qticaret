@@ -1,7 +1,8 @@
 import { isAiCreditTask } from "@qticaret/types/control-plane"
 import type { AiErrorKey } from "./errors"
-import { aiServices, sceneTargetOf } from "./registry/services"
-import type { AiService } from "./registry/services"
+import { PLATFORM_SERVICE_ID } from "./registry/platform-service"
+import { aiServices, findAiService, sceneTargetOf } from "./registry/services"
+import type { AiFunding, AiService } from "./registry/services"
 import type { AiTask } from "./registry/tasks"
 
 /**
@@ -77,10 +78,19 @@ export const alternativesTo = (usable: readonly AiService[], id: string | null):
   usable.filter((service) => service.id !== id).map((service) => service.id)
 
 /**
+ * How a requested service is paid: the platform's credits by their id,
+ * any other id with the shop's own key (every registered service is one).
+ */
+export const requestedFundingOf = (id: string): AiFunding =>
+  id === PLATFORM_SERVICE_ID ? "platform_credit" : (findAiService(id)?.funding ?? "own_key")
+
+/**
  * The service for this run. None usable: `ai.no_service`. One: that one,
- * whatever was asked. Several: the requested one (`ai.service_unavailable`
- * when it is not among them), else the remembered preference, else the
- * first in registry order.
+ * whatever was asked, as long as it is paid the way the requested one is:
+ * a request never moves from the shop's own key to the platform's credits
+ * or back by itself (`ai.service_unavailable`). Several: the requested one
+ * (`ai.service_unavailable` when it is not among them), else the
+ * remembered preference, else the first in registry order.
  */
 export function chooseService(input: {
   task: AiTask
@@ -98,10 +108,14 @@ export function chooseService(input: {
     service,
     alternatives: alternativesTo(usable, service.id),
   })
+  const asking = requested !== undefined && requested !== null
   if (second === undefined) {
-    return pick(first)
+    // The only one, but paid otherwise than the one asked for: never spent in its place
+    return asking && first.id !== requested && requestedFundingOf(requested) !== first.funding
+      ? { ok: false, error: "ai.service_unavailable", alternatives: alternativesTo(usable, null) }
+      : pick(first)
   }
-  if (requested !== undefined && requested !== null) {
+  if (asking) {
     const asked = usable.find((service) => service.id === requested)
     return asked
       ? pick(asked)
