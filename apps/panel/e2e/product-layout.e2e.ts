@@ -78,27 +78,35 @@ test.describe("product page layout", () => {
     await page.getByRole("menuitem", { name: "Sayfayı düzenle" }).click()
     const sheet = page.getByRole("dialog", { name: "Ürün sayfasını düzenle" })
     await expect(sheet).toBeVisible()
-    // The name and the variants cannot be hidden
+    // The name and the product data card cannot be hidden
     await expect(sheet.getByRole("switch", { name: "Genel bilgiler: göster" })).toHaveCount(0)
 
-    await sheet.getByRole("switch", { name: "Fiyat geçmişi: göster" }).click()
+    await sheet
+      .getByRole("switch", { name: "Gelişmiş (ek seçenekler, fiyat geçmişi): göster" })
+      .click()
     await sheet.getByRole("button", { name: "Görseller: yukarı taşı" }).click()
     // The page behind follows the draft
-    await expect(page.locator('main [data-part="priceHistory"]')).toHaveCount(0)
+    await expect(page.locator('main [data-part="advanced"]')).toHaveCount(0)
     await sheet.getByRole("button", { name: "Kaydet" }).click()
     await expect(sheet).toBeHidden()
 
     await page.reload()
     await expect(page.locator('main [data-part="general"]')).toBeAttached()
-    await expect(page.locator('main [data-part="priceHistory"]')).toHaveCount(0)
+    await expect(page.locator('main [data-part="advanced"]')).toHaveCount(0)
     const order = await mainOrder(page)
-    expect(order.indexOf("media")).toBeLessThan(order.indexOf("variants"))
-    await expect(page.getByText(/^Gizli bölümler: .*Fiyat geçmişi/)).toBeVisible()
+    expect(order.indexOf("media")).toBeLessThan(order.indexOf("general"))
+    await expect(page.getByText(/^Gizli bölümler: .*Gelişmiş/)).toBeVisible()
 
     // Still reached: "Göster" brings it back for this visit
     await page.getByRole("button", { name: "Göster", exact: true }).click()
-    await expect(page.locator('main [data-part="priceHistory"]')).toBeAttached()
-    await expect(page.getByText("Gizlenen bölüm: bu ziyaret için gösteriliyor.")).toBeVisible()
+    await expect(page.locator('main [data-part="advanced"]')).toBeAttached()
+    // A tab of the data card: back in its tab list, its line said in its panel once opened
+    await page.locator("#product-data").getByRole("tab", { name: "Gelişmiş" }).click()
+    await expect(
+      page
+        .locator('main [data-part="advanced"]')
+        .getByText("Gizlenen bölüm: bu ziyaret için gösteriliyor.")
+    ).toBeVisible()
     await guard.assertHealthy()
   })
 
@@ -112,16 +120,24 @@ test.describe("product page layout", () => {
     const sheet = page.getByRole("dialog", { name: "Ürün sayfasını düzenle" })
     await expect(sheet.getByRole("radio", { name: "Standart" })).toBeChecked()
     await sheet.getByRole("radio", { name: "Basit" }).click()
-    await expect(page.locator('main [data-part="priceHistory"]')).toHaveCount(0)
+    await expect(page.locator('main [data-part="advanced"]')).toHaveCount(0)
     await sheet.getByRole("button", { name: "Kaydet" }).click()
     await expect(sheet).toBeHidden()
-    expect((await storedLayout(page)).hidden).toContain("priceHistory")
+    expect((await storedLayout(page)).hidden).toContain("advanced")
 
     await page.reload()
     await expect(page.locator('main [data-part="general"]')).toBeAttached()
     const bar = page.getByRole("navigation", { name: "Sayfanın bölümleri" })
     await expect(bar).toBeVisible()
-    await expect(bar.getByRole("button", { name: /^Fiyat geçmişi/ })).toHaveCount(0)
+    // A hidden tab the advisor never points at is gone from the data card
+    await expect(page.locator("#product-data").getByRole("tab", { name: "Gelişmiş" })).toHaveCount(
+      0
+    )
+    // The hidden search appearance leaves the bar, unless an urgent advisor finding shows it
+    // anyway (docs/06 "Sayfa düzeni"), its card then saying why
+    const seoChip = bar.getByRole("button", { name: /^Arama motoru görünümü/ })
+    const seoNeeded = page.locator('main [data-part="seo"][data-shown-hidden="attention"]')
+    await expect.poll(async () => (await seoChip.count()) === (await seoNeeded.count())).toBe(true)
     const media = bar.getByRole("button", { name: /^Görseller/ })
     await media.click()
     await expect(page.locator("#product-media")).toBeInViewport()
@@ -133,7 +149,7 @@ test.describe("product page layout", () => {
       main: [],
       side: [],
       hidden: [],
-      open: ["seo", "attributes", "faq", "addons", "priceHistory"],
+      open: ["seo", "faq"],
     })
     // A person's own earlier choice would win: start from none
     await page.goto("/")
@@ -146,7 +162,6 @@ test.describe("product page layout", () => {
     })
     await openProduct(page, productId)
     await expect(page.locator("#product-seo")).toHaveAttribute("data-open", "")
-    await expect(page.locator("#product-price-history")).toHaveAttribute("data-open", "")
     await guard.assertHealthy()
   })
 
@@ -175,8 +190,8 @@ test.describe("product page layout", () => {
         "seo",
         "attributes",
         "faq",
-        "addons",
-        "priceHistory",
+        "stock",
+        "advanced",
         "organize",
         "catalog",
         "shipping",
@@ -214,6 +229,31 @@ test.describe("product page layout", () => {
     await form.getByRole("button", { name: "Kaydet" }).click()
     await expect(form).toHaveCount(0)
     await expect(page.getByText("Değişiklikler kaydedildi.")).toBeVisible()
+    await guard.assertHealthy()
+  })
+
+  test("opens a tab of the product data card in place and remembers it", async ({
+    page,
+    guard,
+  }) => {
+    await openProduct(page, productId)
+    const data = page.locator("#product-data")
+    await expect(data.getByRole("combobox", { name: "Ürün tipi" })).toBeVisible()
+    await data.getByRole("tab", { name: "Katalog" }).click()
+    await expect(data.getByRole("form", { name: "Katalog bilgileri" })).toBeVisible()
+    await expect(page.getByRole("dialog")).toHaveCount(0)
+
+    await page.reload()
+    await expect(
+      page.locator("#product-data").getByRole("tab", { name: "Katalog" })
+    ).toHaveAttribute("aria-selected", "true")
+    // A phone: the tabs wrap above the panel, nothing scrolls sideways
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(page.locator("#product-data [role=tablist]")).toBeVisible()
+    const sideways = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+    )
+    expect(sideways).toBe(false)
     await guard.assertHealthy()
   })
 })

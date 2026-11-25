@@ -71,6 +71,10 @@ test.describe("product variants in place", () => {
     try {
       await page.goto(`/products/${id}`)
       await expect(pageHeading(page)).toBeVisible()
+      // The variants are a tab of the "Ürün verileri" card of a product with variants
+      const data = page.locator("#product-data")
+      await expect(data.getByRole("combobox", { name: "Ürün tipi" })).toHaveText("Varyantlı ürün")
+      await data.getByRole("tab", { name: "Varyantlar" }).click()
       await expect(page.locator("[data-variant-row]")).toHaveCount(2)
 
       // A value typed into the option, the missing variant made

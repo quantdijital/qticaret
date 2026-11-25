@@ -62,6 +62,11 @@ const productAction =
       await page.goto(href)
       await expect(pageHeading(page)).toBeVisible()
       await page.waitForLoadState("networkidle")
+      // The variants are a tab of the "Ürün verileri" card (a product with variants)
+      const variants = page.locator('#product-data [role="tab"][data-tab="variants"]')
+      if ((await variants.count()) > 0) {
+        await variants.click()
+      }
       if ((await page.locator(has).count()) > 0) {
         await open(page)
         return true
@@ -106,8 +111,9 @@ const CASES: Case[] = [
   { name: "new redirect", path: "/settings/seo?part=redirects", open: click("Yönlendirme ekle") },
   { name: "new menu", path: "/storefront/menus", open: click("Menü ekle") },
   { name: "new location", path: "/settings/shipping?part=locations", open: click("Depo ekle") },
-  // A product of one variant keeps "Tüm varyant ayrıntıları" in a dialog; several variants open
-  // in their rows (the owner, 2026-11-25), the media dialog on the size scale
+  // A product of one variant typed "Varyantlı ürün" keeps "Tüm varyant ayrıntıları" in a dialog
+  // (its Varyantlar tab; a simple product has its fields in Genel and Stok, no dialog); several
+  // variants open in their rows (the owner, 2026-11-25); the media dialog on the size scale
   {
     name: "variant",
     path: "/products",

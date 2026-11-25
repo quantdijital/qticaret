@@ -4226,6 +4226,7 @@
       "title": "Ürün sayfasını düzenle",
       "description": "Bölümleri gizleyin ya da sürükleyerek sıralayın. Düzen tüm ekip için geçerlidir; gizlenen bölümün bilgileri silinmez.",
       "main": "Ana sütun",
+      "tabs": "Ürün verileri sekmeleri",
       "side": "Yan sütun",
       "locked": "Hep görünür",
       "conditional": "Yalnız kullanıldığında görünür",
@@ -4240,7 +4241,7 @@
       "shownRevealed": "Gizlenen bölüm: bu ziyaret için gösteriliyor.",
       "parts": {
         "general": "Genel bilgiler",
-        "variants": "Varyantlar ve fiyat",
+        "variants": "Varyantlar",
         "media": "Görseller",
         "description": "Açıklama",
         "shortDescription": "Kısa açıklama",
@@ -4249,13 +4250,15 @@
         "seo": "Arama motoru görünümü",
         "attributes": "Özellikler",
         "faq": "Sık sorulan sorular",
-        "addons": "Ek seçenekler",
-        "priceHistory": "Fiyat geçmişi",
         "summary": "Özet",
         "advisor": "SEO danışmanı",
         "organize": "Kategori, marka ve KDV",
         "catalog": "Katalog bilgileri",
-        "shipping": "Paket ölçüleri"
+        "shipping": "Kargo (paket ölçüleri)",
+        "data": "Ürün verileri",
+        "pricing": "Genel (fiyat)",
+        "stock": "Stok",
+        "advanced": "Gelişmiş (ek seçenekler, fiyat geçmişi)"
       },
       "presets": "Hazır düzenler",
       "preset": {
@@ -4264,9 +4267,9 @@
         "advanced": "Gelişmiş"
       },
       "presetHint": {
-        "basic": "Genel bilgiler, varyantlar ve fiyat, görseller, açıklama ve SEO danışmanı. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
+        "basic": "Genel bilgiler, görseller, açıklama, SEO danışmanı ve ürün verilerinde fiyat, stok ve varyantlar. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
         "standard": "İlk düzen: seyrek bölümler sayfanın altında kapalı durur.",
-        "advanced": "Her bölüm görünür; arama motoru görünümü, özellikler, SSS, ek seçenekler ve fiyat geçmişi açık gelir.",
+        "advanced": "Her bölüm ve sekme görünür; arama motoru görünümü ve SSS açık gelir.",
         "custom": "Elle düzenlendi."
       },
       "shortcuts": "Kısayollar",
@@ -4296,6 +4299,32 @@
         }
       },
       "shortcutSave": "Değişiklikleri kaydet"
+    },
+    "data": {
+      "title": "Ürün verileri",
+      "type": "Ürün tipi",
+      "types": {
+        "simple": "Basit ürün",
+        "variable": "Varyantlı ürün"
+      },
+      "kind": {
+        "digital": "Dijital ürün: kargo yok",
+        "service": "Hizmet: kargo yok"
+      },
+      "variableLocked_one": "Bu ürünün {{count}} varyantı var.",
+      "variableLocked_other": "Bu ürünün {{count}} varyantı var; basit ürüne dönmek için önce varyantları bire indirin.",
+      "tabs": {
+        "pricing": "Genel",
+        "stock": "Stok",
+        "shipping": "Kargo",
+        "attributes": "Özellikler",
+        "variants": "Varyantlar",
+        "catalog": "Katalog",
+        "advanced": "Gelişmiş"
+      },
+      "pricesOnVariants": "Fiyatlar her varyantta ayrı girilir.",
+      "stockOnVariants": "Stok ve kodlar her varyantta ayrı girilir.",
+      "goVariants": "Varyantlara git"
     },
     "variant": {
       "title": "Varyantı düzenle",

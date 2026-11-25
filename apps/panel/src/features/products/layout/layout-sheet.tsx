@@ -14,7 +14,7 @@ import {
 import { errorText } from "@/lib/errors"
 import { useSaveProductLayout } from "./api"
 import { LayoutList } from "./layout-list"
-import { DEFAULT_LAYOUT, sameLayout } from "./parts"
+import { DEFAULT_LAYOUT, TAB_KEYS, sameLayout } from "./parts"
 import { PresetPicker, ShortcutsHint } from "./preset-picker"
 import type { PartKey, ProductLayout } from "./parts"
 
@@ -85,6 +85,8 @@ export function LayoutSheet({
               }}
               onToggle={toggle}
             />
+            {/* The data card's tabs keep their order: only shown or hidden */}
+            <LayoutList title={t(`${L}.tabs`)} order={TAB_KEYS} hidden={hidden} onToggle={toggle} />
             <LayoutList
               title={t(`${L}.side`)}
               order={layout.side}

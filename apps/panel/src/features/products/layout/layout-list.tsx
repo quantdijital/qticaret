@@ -13,13 +13,7 @@ import type { PartKey } from "./parts"
 const L = "products.layout"
 
 // Parts drawn only when the product or the shop uses them
-const CONDITIONAL: ReadonlySet<PartKey> = new Set([
-  "departures",
-  "program",
-  "faq",
-  "addons",
-  "shipping",
-])
+const CONDITIONAL: ReadonlySet<PartKey> = new Set(["departures", "program", "faq", "shipping"])
 
 // The upper half of a row drops before it, the lower half after
 const placeOf = (event: DragEvent<HTMLElement>): DropPlace => {
@@ -42,7 +36,8 @@ export function LayoutList<K extends PartKey>({
   title: string
   order: readonly K[]
   hidden: ReadonlySet<PartKey>
-  onOrder: (order: K[]) => void
+  /** None: a fixed order (the data card's tabs), only shown or hidden. */
+  onOrder?: ((order: K[]) => void) | undefined
   onToggle: (key: K) => void
 }) {
   const { t } = useTranslation()
@@ -53,7 +48,7 @@ export function LayoutList<K extends PartKey>({
     const [item] = next.splice(from, 1)
     if (item !== undefined) {
       next.splice(to, 0, item)
-      onOrder(next)
+      onOrder?.(next)
     }
   }
   return (
@@ -98,9 +93,12 @@ export function LayoutList<K extends PartKey>({
                 />
               ) : null}
               <span
-                draggable
+                draggable={onOrder !== undefined}
                 aria-hidden="true"
-                className="flex h-8 w-6 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
+                className={cn(
+                  "h-8 w-6 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing",
+                  onOrder ? "flex" : "hidden"
+                )}
                 onDragStart={(event) => {
                   event.dataTransfer.effectAllowed = "move"
                   // Firefox starts a drag only with data
@@ -118,7 +116,7 @@ export function LayoutList<K extends PartKey>({
               >
                 <GripVertical className="size-4" />
               </span>
-              <div className="flex min-w-0 flex-1 flex-col">
+              <div className={cn("flex min-w-0 flex-1 flex-col", onOrder ? "" : "pl-2")}>
                 <span
                   className={cn("truncate text-sm", !shown && "text-muted-foreground line-through")}
                 >
@@ -130,30 +128,34 @@ export function LayoutList<K extends PartKey>({
                   </span>
                 ) : null}
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                disabled={index === 0}
-                aria-label={t(`${L}.moveUp`, { name })}
-                onClick={() => {
-                  move(index, index - 1)
-                }}
-              >
-                <ArrowUp />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                disabled={index === order.length - 1}
-                aria-label={t(`${L}.moveDown`, { name })}
-                onClick={() => {
-                  move(index, index + 1)
-                }}
-              >
-                <ArrowDown />
-              </Button>
+              {onOrder ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={index === 0}
+                    aria-label={t(`${L}.moveUp`, { name })}
+                    onClick={() => {
+                      move(index, index - 1)
+                    }}
+                  >
+                    <ArrowUp />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={index === order.length - 1}
+                    aria-label={t(`${L}.moveDown`, { name })}
+                    onClick={() => {
+                      move(index, index + 1)
+                    }}
+                  >
+                    <ArrowDown />
+                  </Button>
+                </>
+              ) : null}
               {locked ? (
                 <span className="flex w-8 justify-center text-muted-foreground">
                   <Lock className="size-4" aria-hidden="true" />

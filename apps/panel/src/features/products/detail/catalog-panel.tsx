@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import type { TFunction } from "i18next"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
-import { findingsNote } from "@/features/content/section-findings"
-import type { SectionFindings } from "@/features/content/section-findings"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
 import { BOOKING_FLAG } from "@/features/products/api/booking"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
@@ -19,10 +17,6 @@ import { bookingFailureText } from "@/features/products/booking/booking-failure"
 import { BookingOffConfirm } from "@/features/products/booking/booking-off-confirm"
 import { CatalogFields } from "./catalog-fields"
 import type { CatalogShown, CatalogValues } from "./catalog-fields"
-import { PRODUCT_SECTIONS } from "./sections"
-import { SideCard } from "./side-card"
-import type { SideRow } from "./side-card"
-import { SideForm } from "./side-form"
 
 const catalogValuesOf = (catalog: ProductCatalog): CatalogValues => ({
   condition: catalog.condition,
@@ -58,18 +52,20 @@ function CatalogForm({
   productId,
   catalog,
   shown,
-  onClose,
 }: {
   productId: string
   catalog: ProductCatalog
   shown: CatalogShown
-  onClose: () => void
 }) {
   const { t } = useTranslation()
   const save = useSaveCatalog(productId)
   // Marking it refused (the shop's gift cards off): said beside the switch, with where to turn them on
   const [giftFailure, setGiftFailure] = useState<string | null>(null)
-  const form = useForm<CatalogValues>({ defaultValues: catalogValuesOf(catalog) })
+  const saved = catalogValuesOf(catalog)
+  const form = useForm<CatalogValues>({
+    values: saved,
+    resetOptions: { keepDirtyValues: true },
+  })
   const { dirtyFields } = form.formState
   // Leaving dated sale waits on its warning (adr/0076 Ek D2): the values asked about
   const [confirming, setConfirming] = useState<CatalogValues | null>(null)
@@ -95,8 +91,8 @@ function CatalogForm({
       },
       {
         onSuccess: () => {
+          form.reset(values, FULL_RESET)
           toast.success(t("products.detail.saved"))
-          onClose()
         },
         onError: (failure) => {
           if (dirtyFields.is_gift_card && values.is_gift_card && refused(failure)) {
@@ -117,14 +113,18 @@ function CatalogForm({
   })
 
   return (
-    <SideForm
-      label={t("products.catalog.card")}
-      hint={t("products.catalog.hint")}
+    <CardForm
+      bare
+      title={t("products.catalog.card")}
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}
-      onCancel={onClose}
+      onReset={() => {
+        setGiftFailure(null)
+        form.reset(saved, FULL_RESET)
+      }}
     >
+      <p className="text-[13px] text-muted-foreground">{t("products.catalog.hint")}</p>
       <CatalogFields
         form={form}
         catalog={catalog}
@@ -146,71 +146,20 @@ function CatalogForm({
           }}
         />
       ) : null}
-    </SideForm>
+    </CardForm>
   )
 }
 
-/** What is saved, a fact to a line: the kind (when the shop sells others), condition, primary category… */
-function catalogRows(t: TFunction, catalog: ProductCatalog, shown: CatalogShown): SideRow[] {
-  const primary = catalog.categories.find((category) => category.id === catalog.primary_category_id)
-  return [
-    ...(shown.kinds
-      ? [{ label: t("products.catalog.kind"), value: t(`products.catalog.kinds.${catalog.kind}`) }]
-      : []),
-    {
-      label: t("products.catalog.condition"),
-      value: t(`products.catalog.conditions.${catalog.condition}`),
-    },
-    {
-      label: t("products.catalog.primaryCategory"),
-      value: primary?.name ?? t("products.catalog.noPrimary"),
-      empty: !primary,
-    },
-    ...(catalog.restriction
-      ? [
-          {
-            label: t("restrictions.label"),
-            value: t(`restrictions.options.${catalog.restriction}`),
-          },
-        ]
-      : []),
-    ...(catalog.is_gift_card
-      ? [{ label: t("products.catalog.giftCard"), value: t("products.side.yes") }]
-      : []),
-    ...(catalog.booking_mode === "departure"
-      ? [{ label: t("products.booking.mode.label"), value: t("products.side.yes") }]
-      : []),
-    ...(catalog.badge ? [{ label: t("products.catalog.badge"), value: catalog.badge }] : []),
-    {
-      label: t("products.side.withdrawal"),
-      value: t(
-        catalog.withdrawal_excluded ? "products.side.withdrawalOut" : "products.side.withdrawalIn"
-      ),
-    },
-  ]
-}
-
 /**
- * Condition and primary category, the fields search results and feeds read
- * (F3.1), whether the product is sold to adults only and is outside the
- * right of withdrawal (F13.4, F13.6), and whether it sells gift cards
- * (adr/0025 Ek 2026-11-03): a line each in the product page's narrow
- * column; "Düzenle" turns the card into their form.
+ * The "Katalog" tab of the "Ürün verileri" card (docs/06 "Ürün sayfası"):
+ * condition and primary category, the fields search results and feeds
+ * read (F3.1), whether the product is sold to adults only and is outside
+ * the right of withdrawal (F13.4, F13.6), and whether it sells gift cards
+ * (adr/0025 Ek 2026-11-03), always as their form; its save shows once
+ * something changes, the page's save bar saves it too.
  */
-export function CatalogCard({
-  productId,
-  findings,
-}: {
-  productId: string
-  /** The advisor's findings for it, counted under its facts. */
-  findings?: SectionFindings
-}) {
-  const { t } = useTranslation()
+export function CatalogPanel({ productId }: { productId: string }) {
   const catalog = useQuery(productCatalogQuery(productId))
-  const [editing, setEditing] = useState(false)
-  useRevealTarget(PRODUCT_SECTIONS.catalog, () => {
-    setEditing(true)
-  })
   const flags = {
     kinds: useFeature("catalog.non_physical"),
     restricted: useFeature("catalog.restricted"),
@@ -229,25 +178,5 @@ export function CatalogCard({
     booking: flags.booking || (catalog.data.booking_mode ?? "none") !== "none",
     badge: manualBadgesOn(badges.data) || !!catalog.data.badge,
   }
-  return (
-    <SideCard
-      id={PRODUCT_SECTIONS.catalog}
-      title={t("products.catalog.card")}
-      rows={catalogRows(t, catalog.data, shown)}
-      findings={findings && findingsNote(t, findings)}
-      editing={editing}
-      onEdit={() => {
-        setEditing(true)
-      }}
-    >
-      <CatalogForm
-        productId={productId}
-        catalog={catalog.data}
-        shown={shown}
-        onClose={() => {
-          setEditing(false)
-        }}
-      />
-    </SideCard>
-  )
+  return <CatalogForm productId={productId} catalog={catalog.data} shown={shown} />
 }

@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import { usePageCommands } from "@/components/layout/page-commands"
 import type { PageCommand } from "@/components/layout/page-commands"
 import { fieldsShown } from "./go-to-entries"
+import { TAB_KEYS } from "./parts"
 import type { PartKey, ProductLayout } from "./parts"
 
 const L = "products.layout"
@@ -16,23 +17,30 @@ export function useGoToCommands({
   draws,
   goToKey,
   goTo,
+  simple = false,
 }: {
   layout: ProductLayout
   draws: (key: PartKey) => boolean
   goToKey: (key: PartKey) => void
   goTo: (target: string) => void
+  /** A product without variants: no Varyantlar tab to go to. */
+  simple?: boolean
 }): void {
   const { t } = useTranslation()
   const hidden = new Set<PartKey>(layout.hidden)
-  const sections: PageCommand[] = [...layout.main, ...layout.side].filter(draws).map((key) => ({
-    key: `part.${key}`,
-    label: hidden.has(key)
-      ? t(`${L}.go.hiddenPart`, { name: t(`${L}.parts.${key}`) })
-      : t(`${L}.parts.${key}`),
-    run: () => {
-      goToKey(key)
-    },
-  }))
+  // The data card's tabs after its parts; Varyantlar for a product with variants only
+  const tabs = TAB_KEYS.filter((key) => key !== "variants" || !simple)
+  const sections: PageCommand[] = [...layout.main, ...layout.side, ...tabs]
+    .filter(draws)
+    .map((key) => ({
+      key: `part.${key}`,
+      label: hidden.has(key)
+        ? t(`${L}.go.hiddenPart`, { name: t(`${L}.parts.${key}`) })
+        : t(`${L}.parts.${key}`),
+      run: () => {
+        goToKey(key)
+      },
+    }))
   const fields: PageCommand[] = fieldsShown(draws).map((entry) => ({
     key: `field.${entry.key}`,
     label: t(`${L}.go.fields.${entry.key}`),

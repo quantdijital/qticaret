@@ -16,6 +16,7 @@ import { ProductStatusBadge } from "@/features/products/components/product-statu
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
 import { usePartDraws } from "@/features/products/detail/use-part-draws"
+import { useDataCard } from "@/features/products/detail/use-data-card"
 import { usePartAttention, usePartMarks } from "@/features/products/detail/use-product-findings"
 import { LayoutSheet } from "@/features/products/layout/layout-sheet"
 import { PartNav } from "@/features/products/layout/part-nav"
@@ -44,12 +45,13 @@ function DetailSkeleton() {
 }
 
 /**
- * One product (docs/06 "Ürün sayfası"): what is edited most first (its
- * name and address, its variants, each opening in a dialog, its pictures,
- * its description), its search appearance and seldom-edited parts folded
- * under them to a line each; beside them, following the scroll, its
- * facts, the SEO advisor and short cards for categories, catalog details
- * and the parcel, each edited in place. Every card saves on its own. The
+ * One product (docs/06 "Ürün sayfası"; WooCommerce's layout): what is
+ * edited most first (its name and address, its pictures, its description),
+ * the "Ürün verileri" card with its type and tabs (price, stock, parcel,
+ * attributes, variants, catalog, add-ons and price history), its search
+ * appearance folded to a line; beside them, a narrow column following the
+ * scroll with its facts, the SEO advisor and its categories, edited in
+ * place. Every form saves on its own and on the one save bar. The
  * shop lays the page out for its team ("Sayfayı düzenle"): each column's
  * order and the parts it hides.
  */
@@ -88,7 +90,8 @@ function ProductPage({
 }) {
   const attention = usePartAttention(product)
   const draws = usePartDraws(product.id)
-  const page = usePageLayout(attention, draws)
+  const data = useDataCard(product)
+  const page = usePageLayout(attention, draws, { simple: data.simple, open: data.open })
   const marks = usePartMarks(product)
   const wide = useSideBySide()
   // The layout is the shop's: whoever may change its settings arranges it
@@ -97,7 +100,13 @@ function ProductPage({
     const why = page.shownWhy(key)
     return why === "off" ? undefined : why
   }
-  useGoToCommands({ layout: page.layout, draws, goToKey: page.goToKey, goTo: page.goTo })
+  useGoToCommands({
+    layout: page.layout,
+    draws,
+    goToKey: page.goToKey,
+    goTo: page.goTo,
+    simple: data.simple,
+  })
   const shown = (keys: readonly PartKey[]) => keys.filter((key) => slot(key) !== undefined)
   // Side by side, the bar heads the main column and names its parts; narrower, the whole page's
   const nav = (
@@ -133,6 +142,7 @@ function ProductPage({
           />
           {wide ? null : nav}
           <EditorLayout
+            narrowSide
             main={
               <>
                 {wide ? nav : null}
@@ -140,7 +150,11 @@ function ProductPage({
                   const why = slot(key)
                   return why === undefined ? null : (
                     <PartSlot key={key} part={key} why={why}>
-                      <MainPartView part={key} product={product} />
+                      <MainPartView
+                        part={key}
+                        product={product}
+                        data={{ state: data, slot, draws, marks }}
+                      />
                     </PartSlot>
                   )
                 })}
