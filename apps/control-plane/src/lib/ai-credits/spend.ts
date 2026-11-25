@@ -5,7 +5,8 @@ import {
   isAiCreditTask,
 } from "@qticaret/types/control-plane"
 import type { AiCreditCapability } from "@qticaret/types/control-plane"
-import type { OperationMeasures, SpendOutcome } from "../../modules/ai-credits/service-operations"
+import type { OperationMeasures } from "../../modules/ai-credits/service-closing"
+import type { SpendOutcome } from "../../modules/ai-credits/service-operations"
 import { aiCreditsIn } from "../../workflows/modules"
 import { withCurrentMonth } from "./rollover"
 

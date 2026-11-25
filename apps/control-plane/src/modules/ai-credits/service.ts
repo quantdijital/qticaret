@@ -10,7 +10,7 @@ import { aiCreditPackSchema } from "@qticaret/types/control-plane"
 import type { AiCreditPack, PaymentMethod } from "@qticaret/types/control-plane"
 import { isStale, rowsOf } from "./sql"
 import type { Executor, Stale, WalletClock } from "./sql"
-import { AiCreditOperations } from "./service-operations"
+import { AiCreditClosing } from "./service-closing"
 
 export interface AiCreditOrderRow {
   id: string
@@ -57,11 +57,11 @@ const orderNotFound = () =>
 /**
  * The AI platform credits (adr/0085 §1): wallets, the append-only ledger,
  * the charged operations and the top-up requests. Every change goes
- * through the methods here (service-wallet.ts, service-operations.ts),
+ * through the methods here (service-wallet.ts, service-operations.ts, service-closing.ts),
  * each one transaction with conditional statements; the generated writers
  * are closed.
  */
-class AiCreditsModuleService extends AiCreditOperations {
+class AiCreditsModuleService extends AiCreditClosing {
   /**
    * A top-up asked for (K11): the pack as it is now, copied. A shop with a
    * request still pending gets `cp.ai_credit_order_pending` (the partial
