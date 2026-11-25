@@ -1,4 +1,6 @@
 import {
+  Bot,
+  Coins,
   CreditCard,
   GitBranch,
   KeyRound,
@@ -22,6 +24,8 @@ export interface NavItem {
     | "/tenants"
     | "/packages"
     | "/payments"
+    | "/ai-orders"
+    | "/ai-settings"
     | "/releases"
     | "/staff"
     | "/audit-log"
@@ -54,6 +58,8 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { key: "shops", icon: Store, to: "/tenants" },
       { key: "packages", icon: Package, to: "/packages" },
       { key: "payments", icon: CreditCard, to: "/payments" },
+      // adr/0085 K11: the top-up requests, the owner's alone
+      { key: "aiOrders", icon: Coins, to: "/ai-orders", roles: OWNER },
       { key: "releases", icon: GitBranch, to: "/releases" },
     ],
   },
@@ -63,6 +69,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { key: "staff", icon: Users, to: "/staff", roles: OWNER },
       { key: "audit", icon: ScrollText, to: "/audit-log", roles: OWNER },
       { key: "keys", icon: KeyRound, to: "/keys", roles: OWNER },
+      { key: "aiSettings", icon: Bot, to: "/ai-settings", roles: OWNER },
     ],
   },
 ]

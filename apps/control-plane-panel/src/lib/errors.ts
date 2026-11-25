@@ -8,6 +8,39 @@ import { isStepUpCancelled } from "./step-up"
  * both languages in step with this list.
  */
 export const CP_ERROR_CODES = [
+  // The AI credits' (adr/0085): their validators, the module's inputs, ai-conflicts.ts
+  "ai_credit_actor_invalid",
+  "ai_credit_actor_required",
+  "ai_credit_amount_invalid",
+  "ai_credit_balance_short",
+  "ai_credit_bucket_invalid",
+  "ai_credit_daily_cap_invalid",
+  "ai_credit_grant_ref_conflict",
+  "ai_credit_grant_ref_invalid",
+  "ai_credit_grant_ref_reserved",
+  "ai_credit_key_invalid",
+  "ai_credit_note_invalid",
+  "ai_credit_note_required",
+  "ai_credit_order_closed",
+  "ai_credit_order_not_found",
+  "ai_credit_order_pending",
+  "ai_credit_reference_invalid",
+  "ai_credit_requested_by_invalid",
+  "ai_credit_setting_missing",
+  "ai_credit_wallet_missing",
+  "ai_credit_wallet_stale",
+  "ai_credit_write_refused",
+  "ai_key_invalid",
+  "ai_pack_duplicate",
+  "ai_pack_invalid",
+  "ai_pack_unknown",
+  "ai_packs_too_many",
+  "ai_route_capability_unknown",
+  "ai_route_capability_unsupported",
+  "ai_route_model_not_allowed",
+  "ai_route_service_unknown",
+  "ai_route_uncapped",
+  "ai_service_unknown",
   "amount_zero",
   "audit_kind_invalid",
   "audit_unavailable",
@@ -171,6 +204,9 @@ export const API_ERROR_CODES = [
   "too_many_requests",
 ] as const
 
+// The AI credits' tenant-facing keys (adr/0085): `errors.ai_credits.<name>`
+export const AI_CREDITS_CODES = ["pack_unknown", "unavailable"] as const
+
 // The password rule shared with the shop (server-kit, adr/0043): `errors.password.<problem>`
 export const PASSWORD_PROBLEMS = ["too_short", "too_long", "common", "contains_email"] as const
 
@@ -178,6 +214,7 @@ const CP_KEY = /\bcp\.([a-z_]+)\b/
 const PASSWORD_KEY = /\bauth\.password_([a-z_]+)\b/
 const API_KEY = /^errors\.([a-z_]+)$/
 const PROVISIONING_KEY = /^provisioning\.([a-z_]+)$/
+const AI_CREDITS_KEY = /\bai_credits\.([a-z_]+)\b/
 
 const known = <T extends string>(list: readonly T[], name: string | undefined): name is T =>
   name !== undefined && (list as readonly string[]).includes(name)
@@ -199,6 +236,10 @@ export function errorKey(error: unknown): string | null {
   const provisioning = PROVISIONING_KEY.exec(error.code)?.[1]
   if (known(PROVISIONING_CODES, provisioning)) {
     return `errors.provisioning.${provisioning}`
+  }
+  const aiCredits = AI_CREDITS_KEY.exec(error.code)?.[1]
+  if (known(AI_CREDITS_CODES, aiCredits)) {
+    return `errors.ai_credits.${aiCredits}`
   }
   const password = PASSWORD_KEY.exec(error.code)?.[1]
   if (known(PASSWORD_PROBLEMS, password)) {

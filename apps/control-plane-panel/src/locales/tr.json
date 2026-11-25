@@ -139,7 +139,9 @@
       "platform": "Platform",
       "admin": "Yönetim"
     },
-    "keys": "Anahtarlar"
+    "keys": "Anahtarlar",
+    "aiOrders": "Kredi talepleri",
+    "aiSettings": "Yapay zekâ"
   },
   "common": {
     "menu": "Menü",
@@ -810,7 +812,43 @@
       "tenant_closed": "Kapanan ya da kapatılmış bir mağazanın hedef sürümü değiştirilemez.",
       "tenant_unknown": "Mağaza bulunamadı.",
       "text_invalid": "Metinde kullanılamayan karakterler var.",
-      "vkn_invalid": "Vergi kimlik no geçerli değil."
+      "vkn_invalid": "Vergi kimlik no geçerli değil.",
+      "ai_credit_actor_invalid": "İşlemi yapan kişi tanınmadı; yeniden giriş yapın.",
+      "ai_credit_actor_required": "İşlemi yapan kişi belirlenemedi; yeniden giriş yapın.",
+      "ai_credit_amount_invalid": "Kredi miktarı geçerli değil: 0 olamaz, tek seferde en çok 1.000.000 kredi.",
+      "ai_credit_balance_short": "Bakiye yetmiyor: düşülecek kredi seçilen bakiyeden fazla.",
+      "ai_credit_bucket_invalid": "Bakiye türü geçerli değil.",
+      "ai_credit_daily_cap_invalid": "Günlük tavan geçerli değil.",
+      "ai_credit_grant_ref_conflict": "Bu işlem anahtarı başka bir yükleme için kullanılmış. Önce mağazanın hesap dökümüne bakın; düzeltme orada yoksa pencereyi kapatıp yeniden açın.",
+      "ai_credit_grant_ref_invalid": "Yükleme referansı geçerli değil.",
+      "ai_credit_grant_ref_reserved": "Bu referans biçimi sisteme ayrılmış.",
+      "ai_credit_key_invalid": "Düzeltme anahtarı geçerli değil; pencereyi kapatıp yeniden açın.",
+      "ai_credit_note_invalid": "Not geçerli değil: en çok 500 karakter, denetim karakteri olmadan.",
+      "ai_credit_note_required": "Not zorunlu; neden düzeltildiğini yazın.",
+      "ai_credit_order_closed": "Bu talep artık beklemiyor: ödenmiş ya da iptal edilmiş.",
+      "ai_credit_order_not_found": "Talep bulunamadı.",
+      "ai_credit_order_pending": "Mağazanın bekleyen bir talebi zaten var.",
+      "ai_credit_reference_invalid": "Referans geçerli değil: en çok 256 karakter, tek satır.",
+      "ai_credit_requested_by_invalid": "Talep eden kişinin bilgisi geçerli değil.",
+      "ai_credit_setting_missing": "Kredi ayarları okunamadı; biraz sonra yeniden deneyin.",
+      "ai_credit_wallet_missing": "Mağazanın kredi cüzdanı bulunamadı.",
+      "ai_credit_wallet_stale": "Cüzdan bu arada değişti; yeniden deneyin.",
+      "ai_credit_write_refused": "Kredi hareketi yazılamadı; biraz sonra yeniden deneyin.",
+      "ai_key_invalid": "Anahtar geçerli değil: 8–512 karakter, boşluksuz; yalnız İngilizce harf, rakam ve işaret.",
+      "ai_pack_duplicate": "Aynı paket iki kez gönderildi; sayfayı yenileyip yeniden deneyin.",
+      "ai_pack_invalid": "Paket geçerli değil: ad, 1 ile 1.000.000 arası kredi ve en az 0,01 ₺ tutar gerekli.",
+      "ai_pack_unknown": "Paket bu arada değişti ya da silindi; sayfayı yenileyip yeniden deneyin.",
+      "ai_packs_too_many": "En çok 10 paket tanımlanabilir.",
+      "ai_route_capability_unknown": "Bilinmeyen iş türü.",
+      "ai_route_capability_unsupported": "Bu servis bu iş türünü yapamıyor.",
+      "ai_route_model_not_allowed": "Bu model bu iş türü için seçilemez.",
+      "ai_route_service_unknown": "Bilinmeyen servis.",
+      "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
+      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
+    },
+    "ai_credits": {
+      "pack_unknown": "Paket bulunamadı ya da satışta değil.",
+      "unavailable": "Platform kredisi bu mağazada kullanılamıyor."
     },
     "provisioning": {
       "api_url_refused": "Mağazanın iç adresi izin verilen adreslerden değil.",
@@ -1497,6 +1535,242 @@
       "none": "Henüz ödeme talimatı yazılmadı.",
       "updated": "Son değişiklik {{at}}, {{by}}",
       "done": "Ödeme talimatı kaydedildi; mağazalara gönderiliyor."
+    }
+  },
+  "aiCredits": {
+    "unit": "kredi",
+    "credits_one": "{{value}} kredi",
+    "credits_other": "{{value}} kredi",
+    "buckets": {
+      "plan": "Aylık hak",
+      "purchased": "Satın alınan"
+    },
+    "capabilities": {
+      "text": "Metin yazma",
+      "vision": "Görsel okuma",
+      "image_edit": "Görsel düzenleme"
+    },
+    "services": {
+      "deepseek": "DeepSeek",
+      "minimax": "MiniMax",
+      "gemini": "Google Gemini",
+      "photoroom": "Photoroom",
+      "fake": "Sahte servis (yalnız test)"
+    },
+    "tab": {
+      "label": "Yapay zekâ kredisi",
+      "title": "Yapay zekâ kredisi",
+      "text": "Mağazanın aylık hakkı, satın aldığı kredi ve bugünkü harcaması.",
+      "off": "Bu mağazada platform kredisi kapalı: bayrağı kapalı ya da mağaza etkin değil. Cüzdan görünür ve düzeltilebilir; mağaza krediyi kullanamaz."
+    },
+    "wallet": {
+      "plan": "Aylık hak (kalan / toplam)",
+      "planValue": "{{left}} / {{total}}",
+      "planHint": "{{month}} dönemi · {{day}} yenilenir",
+      "purchased": "Satın alınan",
+      "expires": "Son kullanma: {{day}}",
+      "noneBought": "Satın alınmış kredi yok",
+      "today": "Bugünkü harcama / günlük tavan",
+      "todayValue": "{{spent}} / {{cap}}",
+      "capPlatform": "Tavan: genel varsayılan",
+      "capOwn": "Tavan: bu mağazaya özel"
+    },
+    "ledger": {
+      "title": "Kredi hareketleri",
+      "empty": "Henüz hareket yok.",
+      "system": "Sistem",
+      "you": "{{name}} (siz)",
+      "columns": {
+        "at": "Tarih",
+        "kind": "Tür",
+        "amount": "Kredi",
+        "note": "Not",
+        "actor": "Kim"
+      },
+      "kinds": {
+        "grant_purchase": "Satın alma yüklemesi",
+        "grant_plan_monthly": "Aylık hak yenilendi",
+        "spend": "Harcama",
+        "release": "İade",
+        "expire": "Süresi doldu",
+        "adjust": "Elle düzeltme"
+      }
+    },
+    "adjust": {
+      "open": "Kredi ekle / düş",
+      "title": "Kredi ekle / düş",
+      "text": "{{shop}} mağazasının kredisini elle düzeltin. Hareket deftere notuyla ve adınızla yazılır.",
+      "sign": "İşlem",
+      "add": "Kredi ekle",
+      "take": "Kredi düş",
+      "amount": "Kredi miktarı",
+      "amountHelp": "Tam sayı; tek seferde en çok {{max}} kredi.",
+      "bucket": "Hangi bakiye",
+      "note": "Not",
+      "noteHelp": "Zorunlu. Neden düzeltildiğini yazın; mağaza bu notu görmez.",
+      "submit": {
+        "add": "Kredi ekle",
+        "take": "Kredi düş"
+      },
+      "done": "Kredi düzeltmesi yazıldı.",
+      "already": "Bu düzeltme zaten yazılmıştı; ikinci kez yazılmadı.",
+      "unsure": "Önceki deneme kaydedilmiş olabilir. Yeniden denerseniz aynı işlem bir kez yazılır; farklı bir tutar için önce hesap dökümüne bakın.",
+      "retry": "Yeniden dene"
+    },
+    "dailyCap": {
+      "open": "Günlük tavanı değiştir",
+      "title": "Günlük tavanı değiştir",
+      "text": "Mağazanın bir günde harcayabileceği en çok kredi. Genel varsayılan: {{cap}} kredi.",
+      "textUnknown": "Mağazanın bir günde harcayabileceği en çok kredi.",
+      "platform": "genel varsayılan",
+      "label": "Bu mağazanın günlük tavanı",
+      "help": "Boş bırakırsanız genel varsayılan geçerli olur. 0 yazarsanız mağaza kredi harcayamaz.",
+      "done": "Günlük tavan kaydedildi."
+    },
+    "orders": {
+      "title": "Kredi talepleri",
+      "text": "Mağazaların kredi yükleme talepleri. Ödemeyi aldığınızda \"Ödendi\" olarak işaretleyin; kredi o anda yüklenir.",
+      "list": "Talepler",
+      "tabsLabel": "Talep durumu",
+      "statuses": {
+        "pending": "Bekleyen",
+        "paid": "Ödenen",
+        "cancelled": "İptal"
+      },
+      "columns": {
+        "shop": "Mağaza",
+        "pack": "Paket",
+        "credits": "Kredi",
+        "amount": "Tutar",
+        "requested": "Talep tarihi",
+        "decided": "Sonuç tarihi",
+        "actions": "İşlemler"
+      },
+      "empty": {
+        "pending": "Bekleyen talep yok.",
+        "paid": "Ödenmiş talep yok.",
+        "cancelled": "İptal edilmiş talep yok."
+      },
+      "paid": {
+        "open": "Ödendi olarak işaretle",
+        "title": "Ödendi olarak işaretle",
+        "text": "{{shop}} mağazasına {{credits}} yüklenecek ({{pack}}, {{amount}}). Bu işlem geri alınamaz.",
+        "method": "Ödeme yolu",
+        "reference": "Dekont / referans",
+        "referenceHelp": "İsteğe bağlı: havale açıklaması ya da dekont numarası.",
+        "submit": "Ödendi, krediyi yükle",
+        "done": "Talep ödendi olarak işaretlendi; kredi yüklendi.",
+        "already": "Bu talep zaten ödenmişti; kredi ikinci kez yüklenmedi."
+      },
+      "cancel": {
+        "open": "İptal et",
+        "title": "Talep iptal edilsin mi?",
+        "text": "{{shop}} mağazasının {{pack}} talebi ({{credits}}, {{amount}}) iptal edilecek. Kredi yüklenmez; mağaza yeni talep açabilir.",
+        "confirm": "Talebi iptal et",
+        "done": "Talep iptal edildi."
+      }
+    },
+    "settings": {
+      "title": "Yapay zekâ sağlayıcıları",
+      "text": "Platform kredisiyle çalışan işlerin sağlayıcı anahtarları, yönlendirmesi, paketleri ve genel sınırları.",
+      "updated": "Son değişiklik: {{day}}",
+      "moved": "Ayarlar bu arada değişti. Sayfayı yenileyip yeniden deneyin."
+    },
+    "providers": {
+      "title": "Sağlayıcı anahtarları",
+      "text": "Anahtar yalnız yazılır; hiçbir zaman geri gösterilmez.",
+      "empty": "Tanımlı servis yok.",
+      "columns": {
+        "service": "Servis",
+        "key": "Anahtar",
+        "routed": "Kullanıldığı işler",
+        "actions": "İşlemler"
+      },
+      "held": "Var · sürüm {{version}}",
+      "heldOn": "{{day}} tarihinde yazıldı",
+      "none": "Yok",
+      "write": "Anahtar yaz",
+      "replace": "Anahtarı değiştir",
+      "delete": "Anahtarı sil",
+      "test": "Bağlantıyı dene",
+      "testing": "Deneniyor",
+      "keyDialog": {
+        "title": "{{service}} anahtarı",
+        "text": "Sağlayıcının panelinden aldığınız anahtarı yapıştırın. Kaydettikten sonra anahtar bir daha gösterilmez.",
+        "label": "API anahtarı",
+        "help": "8–512 karakter, boşluksuz.",
+        "tooLong": "Anahtar {{max}} karakterden uzun olamaz.",
+        "submit": "Anahtarı kaydet",
+        "done": "Anahtar kaydedildi."
+      },
+      "deleteDialog": {
+        "title": "{{service}} anahtarı silinsin mi?",
+        "text": "Anahtar ve bu servise giden yönlendirmeler kaldırılır; platform kredisiyle bu servis kullanılamaz. Anahtar sızdıysa önce sağlayıcının panelinden iptal edin.",
+        "confirm": "Anahtarı sil",
+        "done": "Anahtar silindi."
+      },
+      "check": {
+        "ok": "{{service}}: bağlandı.",
+        "no_key": "{{service}}: anahtar yok.",
+        "rejected": "{{service}}: sağlayıcı anahtarı reddetti.",
+        "unreachable": "{{service}}: sağlayıcıya ulaşılamadı; biraz sonra yeniden deneyin.",
+        "timeout": "{{service}}: sağlayıcı zamanında yanıt vermedi.",
+        "unexpected": "{{service}}: sağlayıcıdan beklenmeyen bir yanıt geldi."
+      }
+    },
+    "routing": {
+      "title": "Yönlendirme",
+      "text": "Her iş türü hangi servisin hangi modeliyle çalışsın. Yalnız anahtarı olan servisler seçilebilir.",
+      "none": "Kapalı (platform kredisiyle çalışmaz)",
+      "label": "{{capability}}: servis ve model",
+      "noKey": "{{service}} (anahtar yok)",
+      "uncapped": "{{service}}: bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
+      "done": "Yönlendirme kaydedildi."
+    },
+    "general": {
+      "title": "Genel ayarlar",
+      "text": "Tüm mağazalar için geçerli sınırlar.",
+      "dailyCap": "Genel günlük tavan",
+      "dailyCapHelp": "Kendi tavanı olmayan her mağaza bir günde en çok bu kadar kredi harcar.",
+      "lifetime": "Satın alınan kredinin ömrü",
+      "lifetimeHelp": "Son yüklemeden itibaren ay; her yükleme satın alınan bakiyenin tamamının süresini uzatır.",
+      "months": "ay",
+      "done": "Genel ayarlar kaydedildi."
+    },
+    "packs": {
+      "title": "Yükleme paketleri",
+      "text": "Mağaza panelinde \"Kredi yükle\" altında görünen paketler.",
+      "add": "Paket ekle",
+      "empty": "Paket yok. Mağazalar kredi talebi açamaz; \"bize yazın\" notunu görür.",
+      "max": "En çok 10 paket tanımlanabilir.",
+      "columns": {
+        "name": "Paket",
+        "credits": "Kredi",
+        "amount": "Tutar",
+        "active": "Durum",
+        "actions": "İşlemler"
+      },
+      "on": "Satışta",
+      "off": "Satışta değil",
+      "edit": "Düzenle",
+      "delete": "Sil",
+      "dialog": {
+        "new": "Yeni paket",
+        "edit": "Paketi düzenle",
+        "name": "Paket adı",
+        "credits": "Kredi",
+        "amount": "Tutar",
+        "active": "Satışta",
+        "activeHelp": "Satışta olmayan paket mağazalara gösterilmez.",
+        "idNote": "Fiyatı değişen paket yeni paket sayılır; bekleyen talepler eski fiyatla kalır.",
+        "done": "Paket kaydedildi."
+      },
+      "deleteDialog": {
+        "title": "{{name}} paketi silinsin mi?",
+        "text": "Paket mağazalara gösterilmez. Bu paketle açılmış bekleyen talepler kendi fiyatıyla kalır ve ödenebilir.",
+        "confirm": "Paketi sil",
+        "done": "Paket silindi."
+      }
     }
   },
   "releases": {
