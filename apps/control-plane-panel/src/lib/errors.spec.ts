@@ -3,6 +3,7 @@ import en from "../locales/en.json" with { type: "json" }
 import tr from "../locales/tr.json" with { type: "json" }
 import { ApiError } from "./api"
 import {
+  AI_CREDITS_CODES,
   API_ERROR_CODES,
   CP_ERROR_CODES,
   PASSWORD_PROBLEMS,
@@ -108,6 +109,25 @@ describe("the control plane's refusals in words", () => {
       expect(trKeys).toContain(`errors.provisioning.${code}`)
       expect(enKeys).toContain(`errors.provisioning.${code}`)
     }
+    for (const code of AI_CREDITS_CODES) {
+      expect(trKeys).toContain(`errors.ai_credits.${code}`)
+      expect(enKeys).toContain(`errors.ai_credits.${code}`)
+    }
+  })
+
+  it("puts the AI credits' refusals into words (adr/0085: validators, conflicts, gateway)", () => {
+    expect(errorText(t, new ApiError(409, "cp.ai_credit_order_closed", "conflict"))).toBe(
+      "Bu talep artık beklemiyor: ödenmiş ya da iptal edilmiş."
+    )
+    const blank = new ApiError(
+      400,
+      "Invalid request: Value for field 'note': cp.ai_credit_note_required",
+      "invalid_data"
+    )
+    expect(errorKey(blank)).toBe("errors.cp.ai_credit_note_required")
+    expect(errorKey(new ApiError(404, "ai_credits.pack_unknown", "not_found"))).toBe(
+      "errors.ai_credits.pack_unknown"
+    )
   })
 })
 
