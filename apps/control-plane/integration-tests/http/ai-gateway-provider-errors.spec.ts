@@ -122,5 +122,32 @@ medusaIntegrationTestRunner({
       }
       expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 100 })
     })
+
+    // Second review N5: the words of a 400 may echo the shop's input; only its fields count
+    it("keeps the credits of a 400 that only says a key is refused in its words", async () => {
+      const who = await shop()
+      const operation = randomUUID()
+      const echoed = "API_KEY_INVALID API key not valid invalid_api_key"
+      provider.answer({
+        status: 400,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          error: { code: 400, message: echoed, status: "INVALID_ARGUMENT", details: [] },
+        }),
+      })
+      const { result: reply, output } = await captureOutput(
+        () => callAs(http, who, chatBody(), { operation }),
+        getContainer()
+      )
+      expect([reply.status, reply.headers["x-qt-ai-refusal"], charged(reply)]).toEqual([
+        400,
+        undefined,
+        "1",
+      ])
+      expect(jsonOf(reply)).toEqual({ error: { code: 400 } })
+      expect(await statusOf(operation)).toBe("charged")
+      expect(output).not.toContain('"platform_fault":true')
+      expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 99 })
+    })
   },
 })

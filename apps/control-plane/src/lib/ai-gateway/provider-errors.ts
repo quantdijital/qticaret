@@ -92,23 +92,54 @@ export function normalizedErrorBody(service: string, status: number, body: Buffe
   )
 }
 
+/**
+ * The 2xx answers the shop can read: JSON, or a raster picture its
+ * connectors take (Photoroom's PNG, JPEG or WebP). Never an SVG (a note of
+ * the second security review): a document that runs script, not a picture.
+ */
+const READABLE_ANSWER_TYPES: ReadonlySet<string> = new Set([
+  "application/json",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+])
+
 /** A 2xx answer the shop can read: JSON, or a picture. */
 export function readableAnswerType(contentType: string): boolean {
-  const type = (contentType.split(";")[0] ?? "").trim().toLowerCase()
-  return type === "application/json" || /^image\/[a-z0-9.+-]+$/.test(type)
+  return READABLE_ANSWER_TYPES.has((contentType.split(";")[0] ?? "").trim().toLowerCase())
 }
 
-// A provider saying the platform's key is not valid in a 400 (Gemini), not the shop's request
-const KEY_REFUSED = [/API_KEY_INVALID/, /API key not valid/i, /API key expired/i, /invalid_api_key/]
+/**
+ * A provider saying the platform's key is not valid in a 400, read from
+ * the error's structured fields alone (second security review N5): Google
+ * RPC's `error.details[].reason`, an OpenAI-compatible `error.code`. The
+ * message is never searched: a provider may echo the shop's input in it.
+ */
+const KEY_REFUSED_REASONS: ReadonlySet<string> = new Set(["API_KEY_INVALID", "API_KEY_EXPIRED"])
+const KEY_REFUSED_CODES: ReadonlySet<string> = new Set(["invalid_api_key"])
+
+function keyRefused(body: Buffer): boolean {
+  const value = parsed(body)
+  const outer: unknown = Array.isArray(value) ? value[0] : value
+  const error = isRecord(outer) ? outer["error"] : undefined
+  if (!isRecord(error)) {
+    return false
+  }
+  const code = error["code"]
+  if (typeof code === "string" && KEY_REFUSED_CODES.has(code)) {
+    return true
+  }
+  const details: unknown[] = Array.isArray(error["details"]) ? error["details"] : []
+  return details.some((detail) => {
+    const reason = isRecord(detail) ? detail["reason"] : undefined
+    return typeof reason === "string" && KEY_REFUSED_REASONS.has(reason)
+  })
+}
 
 /** The platform's own failure: the model or endpoint gone, or its key refused in a 400. */
 export function platformFault(status: number, body: Buffer): boolean {
   if (status === 404) {
     return true
   }
-  if (status !== 400 || body.length > MAX_READ_BYTES) {
-    return false
-  }
-  const text = body.toString("utf8")
-  return KEY_REFUSED.some((pattern) => pattern.test(text))
+  return status === 400 && keyRefused(body)
 }
