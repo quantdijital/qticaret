@@ -19,6 +19,16 @@
     "up": "Up",
     "down": "Down"
   },
+  "filterBar": {
+    "back": "Back to filters",
+    "clearAll": "Clear all",
+    "count": "Filter · {{count}}",
+    "description": "Pick a filter to narrow the list.",
+    "filter": "Filter",
+    "findOption": "Search options",
+    "noOption": "No matching option",
+    "remove": "Remove the {{name}} filter"
+  },
   "formDialog": {
     "discard": "Discard changes",
     "discardText": "The changes in this window are not saved; they are lost if you go on.",

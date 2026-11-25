@@ -6,13 +6,17 @@ import {
   AI_CREDITS_PATHS,
   AI_GATEWAY_REFUSALS,
 } from "@qticaret/types/control-plane"
-import type { AiCreditsStatus, AiGatewayRefusalCode } from "@qticaret/types/control-plane"
+import type {
+  AiCreditPack,
+  AiCreditsStatus,
+  AiGatewayRefusalCode,
+} from "@qticaret/types/control-plane"
 import { TENANT_ID } from "@qticaret/types/control-plane/testing"
 import { shop } from "./control-plane"
 
 /**
  * A stand-in control plane for the platform's credits (adr/0085, P4b-1):
- * the status route and the call route, each verifying the shop's
+ * the status route, the call route and (P4b-2) the top-up request route, each verifying the shop's
  * signature over the very path and bytes it got. It records what came
  * and answers in turn what the test queued (an answer passed on from a
  * provider, or the gateway's own refusal). Nothing leaves the machine.
@@ -102,20 +106,49 @@ export const refusalAnswer = (code: AiGatewayRefusalCode): GatewayAnswer => ({
   body: JSON.stringify({ qt_ai_gateway: { code } }),
 })
 
+/** A pack the platform offers (P4b-2). */
+export const PACK_500 = {
+  id: "pack-500",
+  name: "500 kredi",
+  credits: 500,
+  amount: 25_000,
+  currency: "TRY",
+} as const satisfies AiCreditPack
+
+/** The order the control plane opens for `pack`, as its `POST …/ai/orders` answers it. */
+export const orderAnswer = (pack: AiCreditPack = PACK_500): GatewayAnswer => ({
+  status: 201,
+  headers: {},
+  body: JSON.stringify({
+    order: { id: "aicord_01", pack, status: "pending", requested_at: "2026-11-25T10:00:00.000Z" },
+  }),
+})
+
+/** The control plane's own error answer (its 409s and Medusa's error handler say a key). */
+export const keyAnswer = (status: number, message: string): GatewayAnswer => ({
+  status,
+  headers: {},
+  body: JSON.stringify({ type: "conflict", message }),
+})
+
 export function fakeAiGateway() {
   const nonces = new MemoryNonceStore()
   const calls: GatewayCall[] = []
+  // Top-up requests (P4b-2), apart from the provider calls
+  const orders: GatewayCall[] = []
   const state: {
     status: AiCreditsStatus
     statusAsks: number
     answers: GatewayAnswer[]
     fallback: GatewayAnswer
+    order: GatewayAnswer
   } = {
     status: availableStatus(),
     statusAsks: 0,
     answers: [],
     // A title the SEO gate takes (ai-seo.spec.ts)
     fallback: chatAnswer(GATED_TITLE),
+    order: orderAnswer(),
   }
 
   const server: Server = createServer((req, res) => {
@@ -137,6 +170,15 @@ export function fakeAiGateway() {
         if (url.pathname === AI_CREDITS_PATHS.credits) {
           state.statusAsks += 1
           answer = { status: 200, headers: {}, body: JSON.stringify(state.status) }
+        } else if (url.pathname === AI_CREDITS_PATHS.orders) {
+          orders.push({
+            path: url.pathname,
+            query: url.searchParams,
+            headers: req.headers,
+            body: body.toString("utf8"),
+            signed: verified.ok,
+          })
+          answer = state.order
         } else if (url.pathname !== AI_CREDITS_PATHS.calls) {
           // The shop's other control plane traffic (a plan pull, a usage report): not this test's
           answer = { status: 404, headers: {}, body: "{}" }
@@ -158,5 +200,5 @@ export function fakeAiGateway() {
       })
     })
   })
-  return { server, calls, state }
+  return { server, calls, orders, state }
 }

@@ -969,13 +969,10 @@
       "emptyFiltered": "No entry matches these filters.",
       "filters": {
         "actor": "By",
-        "anyone": "Anyone",
         "people": "Team",
         "others": "Other",
         "resource": "Resource",
-        "anything": "All resources",
         "rangeHint": "Turkey time; either end may stay empty.",
-        "clear": "Clear",
         "groups": {
           "sales": "Sales",
           "catalog": "Catalog",
@@ -984,7 +981,8 @@
           "settings": "Settings and connections",
           "people": "Team and security",
           "other": "Other"
-        }
+        },
+        "days": "Date"
       },
       "detail": {
         "title": "Entry details",
@@ -4285,18 +4283,15 @@
     },
     "filters": {
       "category": "Category",
-      "anyCategory": "All categories",
       "brand": "Brand",
       "anyBrand": "All brands",
       "stock": "Stock",
-      "anyStock": "Any stock",
       "stocks": {
         "in": "In stock",
         "low": "Low",
         "out": "Sold out"
       },
       "missing": "Missing",
-      "anyMissing": "Missing info: any",
       "missings": {
         "image": "No image",
         "price": "No price",
@@ -4304,7 +4299,6 @@
         "seo": "Weak SEO"
       },
       "kind": "Kind",
-      "anyKind": "All kinds",
       "kinds": {
         "physical": "Physical",
         "digital": "Digital",
@@ -4322,7 +4316,6 @@
         "stock": "Stock (lowest first)",
         "stock_desc": "Stock (highest first)"
       },
-      "clear": "Clear filters",
       "limited": "This filter looks at the newest 5,000 products; older ones are not listed."
     },
     "tags": {
@@ -4997,7 +4990,6 @@
       "saved": "Delivery address updated."
     },
     "filters": {
-      "any": "{{what}}: any",
       "payment": "Payment",
       "shipping": "Shipping",
       "payments": {
@@ -5029,7 +5021,7 @@
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
-      "clear": "Clear filters"
+      "days": "Order date"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",

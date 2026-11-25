@@ -188,6 +188,13 @@ describe("staff roles", () => {
     expect(table("readonly")).toEqual([true, false, false, false, false, false, false, false])
   })
 
+  it("shows the platform's credits to the owner and admin; a top-up request is the owner's (adr/0085 §3)", () => {
+    for (const role of ["owner", "admin", "operations", "readonly"] as const) {
+      expect(allowed(role, "GET", "/admin/ai/credits")).toBe(role === "owner" || role === "admin")
+      expect(allowed(role, "POST", "/admin/ai/credits/orders")).toBe(role === "owner")
+    }
+  })
+
   it("keeps the bulk SEO fill the owner's and admin's (adr/0074 §5 madde 7)", () => {
     for (const [method, path] of [
       ["GET", "/admin/ai/seo-fill"],
@@ -630,6 +637,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/ai/guidance/preview": false,
   // The bulk SEO fill: the search text tasks are owner and admin's (adr/0074 §5 madde 7)
   "POST /admin/ai/seo-fill": false,
+  // adr/0085 K11: a request to buy the platform's credits is the owner's
+  "POST /admin/ai/credits/orders": false,
   // adr/0079 §8: the panel assistant, every role; its tools are narrowed by role
   "POST /admin/ai/assistant/turns": true,
   "DELETE /admin/ai/assistant/conversations/:id": true,

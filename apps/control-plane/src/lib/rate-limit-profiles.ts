@@ -62,6 +62,14 @@ export const CP_RATE_LIMIT_PROFILES = {
   tckn_reveal: { name: "cp_tckn_reveal", perIdentityAnyIp: { max: 20, windowMs: HOUR } },
 } as const satisfies Record<string, RateLimitProfile>
 
+/**
+ * PR #374 review Y1: the tenant API requests one address may have in
+ * flight at once before a signature vouches for them; past it a request
+ * is refused 429 before the store, the guard or the database is asked
+ * (tenant-api-address.ts). Counted in this process only.
+ */
+export const CP_TENANT_API_MAX_IN_FLIGHT_PER_ADDRESS = 50
+
 /** Each kind of /auth/* route (`authRouteKind`) and the profile it counts in. */
 export const CP_AUTH_PROFILES: Readonly<Record<AuthRouteKind, RateLimitProfile>> = {
   token_refresh: CP_RATE_LIMIT_PROFILES.token_refresh,

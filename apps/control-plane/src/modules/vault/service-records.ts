@@ -10,7 +10,11 @@ import { openEnvelope, parseEnvelope, sealEnvelope, serializeEnvelope } from "@q
 import { masterKeyWrapper } from "../../lib/vault/keks"
 import { emptyTally, olderKekIds, rewrapRows } from "../../lib/vault/rewrap"
 import type { RewrapTally } from "../../lib/vault/rewrap"
-import { assertSecretAddress, secretContext } from "../../lib/vault/secret-names"
+import {
+  aiProviderOfKeyName,
+  assertSecretAddress,
+  secretContext,
+} from "../../lib/vault/secret-names"
 import { retire } from "./retire"
 import { SecretEscrow } from "./models/secret-escrow"
 import { SecretRecord } from "./models/secret-record"
@@ -209,7 +213,12 @@ export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, Cp
     return rows.length > 0
   }
 
-  /** Every version of `owner`/`name` destroyed (a retired signing key). */
+  /**
+   * Every version of `owner`/`name` destroyed (a retired signing key).
+   * Never an AI provider's key (PR #374 review Y2): its rows are only
+   * retired (`retireSecret`), so the next version counts them and its
+   * number is never reused; the unique index covers live rows only.
+   */
   @InjectTransactionManager()
   async destroySecret(
     owner: string,
@@ -217,6 +226,9 @@ export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, Cp
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     assertSecretAddress(owner, name)
+    if (aiProviderOfKeyName(name) !== null) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.secret_retire_only")
+    }
     await (sharedContext.transactionManager as Executor).execute(
       "DELETE FROM secret_record WHERE owner = ? AND name = ?",
       [owner, name]

@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AiCapability } from "../../lib/ai/registry/capabilities"
 import { ASSISTANT_TASK } from "../../lib/ai/registry/assistant-tasks"
-import { aiServices, verifiedToolCalls } from "../../lib/ai/registry/services"
+import { isPlatformService } from "../../lib/ai/registry/platform-service"
+import { verifiedToolCalls } from "../../lib/ai/registry/services"
 import type { AiFunding, AiTarget } from "../../lib/ai/registry/services"
 import { IMAGE_SCENE_TASK, aiTasks } from "../../lib/ai/registry/tasks"
 import { shopScenes } from "../../lib/ai/scenes"
@@ -11,7 +12,7 @@ import { AI_MODULE } from "../../modules/ai"
 import type AiModuleService from "../../modules/ai/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
-import { aiConnectionsOf, aiFlagsOf, taskFlagOpen } from "./connections"
+import { aiConnectionsOf, aiFlagsOf, aiServicesFor, taskFlagOpen } from "./connections"
 
 export interface AiServiceView {
   id: string
@@ -68,6 +69,10 @@ const backgroundsOf = (target: AiTarget | undefined): string[] =>
  * with each account reduced to its state (no key, nor any part of one),
  * each task's usable services as `usableServices` decides them and the
  * remembered choice, and whether the package opens the shop's own key.
+ * With `ai.platform_credits` on and its credits usable, `platform` comes
+ * last (adr/0085 §3, K8): `funding: "platform_credit"`, its capabilities
+ * and its data note; which service runs behind it is never named (its
+ * targets are not part of a view). The flag off, the answer is as before.
  */
 export async function aiServicesView(
   container: Pick<MedusaContainer, "resolve">,
@@ -79,12 +84,16 @@ export async function aiServicesView(
     container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId),
   ])
   const ai = container.resolve<AiModuleService>(AI_MODULE)
-  const services = aiServices().map((service): AiServiceView => ({
+  // The registry's, then `platform` while its credits are connected (flag off: never asked)
+  const offered = await aiServicesFor(flags)
+  const services = offered.map((service): AiServiceView => ({
     id: service.id,
     capabilities: Object.keys(service.capabilities) as AiCapability[],
-    status:
-      connections.find((each) => each.provider === service.credentialProvider)?.status ??
-      "not_connected",
+    // `platform` is listed only while connected; it has no account row
+    status: isPlatformService(service)
+      ? "connected"
+      : (connections.find((each) => each.provider === service.credentialProvider)?.status ??
+        "not_connected"),
     funding: service.funding,
     data_note_key: service.dataNoteKey,
     backgrounds: backgroundsOf(service.capabilities.image_edit),
@@ -104,11 +113,11 @@ export async function aiServicesView(
       ...(task.optionSource === "scenes" ? { scenes } : {}),
       // The task's own flag too (`ai.reviews`): off, the panel draws no button for it
       allowed: role !== null && task.roles.includes(role) && (await taskFlagOpen(container, task)),
-      usable: usableServices(task, connections, flags).map((service) => service.id),
+      usable: usableServices(task, connections, flags, offered).map((service) => service.id),
       preference: await ai.preferenceOf(userId, task.id),
     }))
   )
-  const assistant = usableServices(ASSISTANT_TASK, connections, flags).filter(
+  const assistant = usableServices(ASSISTANT_TASK, connections, flags, offered).filter(
     (service) => verifiedToolCalls(service) !== null
   )
   return {

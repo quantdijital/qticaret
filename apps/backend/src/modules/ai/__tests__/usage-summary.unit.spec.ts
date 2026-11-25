@@ -39,4 +39,50 @@ describe("usage summary", () => {
     ])
     expect(summary.tasks.map((line) => line.id)).toEqual(["t2", "t1"])
   })
+
+  it("adds up the month on the platform's credits apart from the shop's own key", () => {
+    const row = { status: "succeeded", currency: null, cost: 0 }
+    const summary = summaryOf("2026-11", [
+      {
+        ...row,
+        service: "platform",
+        task: "seo_title",
+        count: 3,
+        funding: "platform_credit",
+        credits: "3",
+      },
+      {
+        ...row,
+        service: "platform",
+        task: "image_scene",
+        count: 1,
+        funding: "platform_credit",
+        credits: 40,
+      },
+      {
+        ...row,
+        service: "platform",
+        task: "seo_title",
+        status: "failed",
+        count: 1,
+        funding: "platform_credit",
+        credits: null,
+      },
+      { ...row, service: "deepseek", task: "seo_title", count: 5, funding: "own_key", credits: 0 },
+      // A row read without the funding (before adr/0085) is the shop's own
+      { ...row, service: "gemini", task: "seo_title", count: 2 },
+    ])
+
+    expect(summary.platform_credits).toEqual({
+      calls: 5,
+      credits: 43,
+      tasks: [
+        { id: "image_scene", calls: 1, credits: 40 },
+        { id: "seo_title", calls: 4, credits: 3 },
+      ],
+    })
+    // The lines count every call, whichever paid
+    expect(summary.tasks.find((line) => line.id === "seo_title")?.count).toBe(11)
+    expect(summaryOf("2026-11", []).platform_credits).toEqual({ calls: 0, credits: 0, tasks: [] })
+  })
 })

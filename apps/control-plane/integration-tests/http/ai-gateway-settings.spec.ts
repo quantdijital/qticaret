@@ -125,6 +125,13 @@ medusaIntegrationTestRunner({
       expect((await call.get(S, owner)).data).toMatchObject({
         settings: { packs: [], routing: {} },
       })
+      // P3d: never routed to a service whose key is not held; nothing saved
+      const flash = { routing: { text: { service: "deepseek", model: "deepseek-flash" } } }
+      const unkeyed = await save(flash)
+      expect([unkeyed.status, keys(unkeyed)]).toEqual([409, "cp.ai_route_no_key"])
+      const unsaved = (await call.get(S, owner)).data as { settings: { routing: unknown } }
+      expect(unsaved.settings.routing).toEqual({})
+      expect((await writeKey("deepseek", `test-key-${randomUUID()}`)).status).toBe(200)
 
       const saved = await save({
         daily_cap: 120,

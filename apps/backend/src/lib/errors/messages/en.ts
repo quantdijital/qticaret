@@ -834,6 +834,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.platform_unavailable":
     "Platform credits cannot be used right now. Try again in a little while.",
   "ai.platform_busy": "Too many AI tasks are running right now. Try again in a moment.",
+  "ai.credits_order_open":
+    "You already have a credit top-up request waiting. You can open a new one once it is settled.",
+  "ai.credits_pack_unknown": "This credit pack is no longer offered. Pick another from the list.",
   "ai.unknown_entity": "The record the suggestion was asked for was not found.",
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",

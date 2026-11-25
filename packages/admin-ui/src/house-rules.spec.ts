@@ -77,11 +77,12 @@ describe("the shared admin UI's house rules (docs/18 §9)", () => {
     expect(breaches(/<input\b[^>]*\btype="number"/g, own)).toEqual([])
   })
 
-  it("draws a side sheet only as the phone's menu", () => {
-    // The owner, 2026-11-06: a record opens in the standard dialog (the apps hold the same rule)
-    expect(breaches(/from "\.\.?\/(?:ui\/)?sheet"/g, (file) => file === "ui/sidebar.tsx")).toEqual(
-      []
-    )
+  it("draws a sheet only as a phone's menu", () => {
+    // The owner, 2026-11-06: a record opens in the standard dialog (the apps hold the same rule).
+    // Menus are not records: the sidebar on a phone, and a list's filter menu from the bottom
+    // edge on a phone or a touch screen (the owner, 2026-11-25)
+    const menus = new Set(["ui/sidebar.tsx", "patterns/filter-bar.tsx"])
+    expect(breaches(/from "\.\.?\/(?:ui\/)?sheet"/g, (file) => menus.has(file))).toEqual([])
   })
 
   it("puts a notice's buttons in AlertAction and its icon level with the first line", () => {

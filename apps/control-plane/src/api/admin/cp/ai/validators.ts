@@ -119,3 +119,18 @@ export const PostAiOrderPaid = z
   })
   .strict()
 export type PostAiOrderPaidType = z.infer<typeof PostAiOrderPaid>
+
+/** "İptal et": an optional short note why (P3d), kept in the audit row. */
+export const PostAiOrderCancel = z
+  .object({
+    note: z
+      .string()
+      .trim()
+      .max(500)
+      .regex(CLEAN_TEXT, "cp.text_invalid")
+      .transform((value) => (value === "" ? null : value))
+      .nullable()
+      .optional(),
+  })
+  .strict()
+export type PostAiOrderCancelType = z.infer<typeof PostAiOrderCancel>

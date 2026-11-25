@@ -3,6 +3,7 @@ import { AI_TARGET_CAPABILITIES } from "@qticaret/types/control-plane"
 import type { AiCreditPlatformSettings } from "../../../../lib/ai-credits/platform-settings"
 import { keyedServices } from "../../../../lib/ai-gateway/keys"
 import type { AiCreditOrderRow } from "../../../../modules/ai-credits/service"
+import type { OrderShop } from "./shops"
 
 /**
  * How the AI credits' staff routes answer (adr/0085 §5). Never a
@@ -31,7 +32,11 @@ export const targetsView = () =>
     ),
   }))
 
-export const orderView = (order: AiCreditOrderRow) => ({
+/**
+ * A request as the staff routes show it; `tenant`, its shop's name, slug
+ * and primary address (P3d), null for a shop no longer on the list.
+ */
+export const orderView = (order: AiCreditOrderRow, tenant: OrderShop | null) => ({
   id: order.id,
   tenant_id: order.tenant_id,
   pack: {
@@ -48,6 +53,7 @@ export const orderView = (order: AiCreditOrderRow) => ({
   decided_by: order.decided_by,
   requested_at: order.requested_at,
   decided_at: order.decided_at,
+  tenant,
 })
 
 /** A settings change for the audit row: the values that moved, as `{ from, to }`. */

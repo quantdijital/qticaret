@@ -107,6 +107,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/features/ai.assistant" },
   // Shoppers' search sentences sent to the AI service (adr/0077 §7)
   { methods: WRITES, path: "/admin/features/ai.storefront_search" },
+  // A request to buy the platform's AI credits, a payment the shop owes (adr/0085 §3, K11)
+  { methods: WRITES, path: "/admin/ai/credits/orders" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
@@ -171,6 +173,9 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/ai/usage" },
   // How often each task's suggestions are taken (adr/0074 §4): beside the usage, the same roles
   { methods: "*", path: "/admin/ai/acceptance" },
+  // The platform's credits: the wallet, the packs, the open top-up (adr/0085 §3); a top-up
+  // request is the owner's alone (OWNER_ONLY)
+  { methods: "*", path: "/admin/ai/credits*" },
   // "Dene" with the writing guidance not yet saved (adr/0074 §2): those who write the setting
   { methods: "*", path: "/admin/ai/guidance*" },
   // The open suggestions to review (docs/22 "Aşama 5"): the task's roles; the route checks them too
