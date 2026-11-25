@@ -11344,6 +11344,17 @@
           "label": "Show icons",
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
+        },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Why us). Empty, none is drawn.",
+        "note": "Hand note",
+        "noteHint": "A short tilted handwritten note beside the heading, a brush stroke under it. Empty, none is drawn.",
+        "item_style": {
+          "label": "Item look",
+          "term": "style",
+          "hint": "A large figure, or an icon on a light round ground with a bold title and one line.",
+          "figure": "Large figure",
+          "feature": "Icon item"
         }
       },
       "steps": {

@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { optional, shopText, text, title } from "../layout-fields"
+import { handNote } from "./hand-note"
 import { sectionIcon } from "./icons"
 import { bodyFields } from "./look"
 
@@ -13,6 +14,7 @@ import { bodyFields } from "./look"
 export const STATS_LIMITS = {
   items: { min: 2, max: 6 },
   value: 16,
+  eyebrow: 60,
   label: 48,
   text: 120,
 } as const
@@ -21,6 +23,7 @@ export const STATS_SETTINGS = {
   dividers: ["on", "off"],
   // Each figure's icon over its value (adr/0077 §10 Ek); off, the strip as it came
   icons: ["off", "on"],
+  item_style: ["figure", "feature"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof STATS_SETTINGS
@@ -29,6 +32,7 @@ type Step<S extends Setting> = (typeof STATS_SETTINGS)[S][number]
 export const STATS_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   dividers: "on",
   icons: "off",
+  item_style: "figure",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -62,6 +66,10 @@ export const stats = z
       .max(STATS_LIMITS.items.max),
     dividers: setting("dividers"),
     icons: setting("icons"),
+    item_style: setting("item_style"),
+    // Absent until written: a strip saved before them prints as it did
+    eyebrow: shopText(STATS_LIMITS.eyebrow).nullable().optional(),
+    note: handNote.optional(),
   })
   .strict()
 

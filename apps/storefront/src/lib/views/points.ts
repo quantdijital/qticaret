@@ -13,6 +13,7 @@ import type {
   StepsSectionView,
   Translate,
 } from "@qticaret/ui"
+import { handNoteView } from "./accent"
 import { layoutImage, layoutLink } from "./layout"
 
 /**
@@ -20,8 +21,14 @@ import { layoutImage, layoutLink } from "./layout"
  * figures as saved, its steps as the contract knows them (an unknown one,
  * from a newer backend, read as the default). No figure: no strip.
  */
-export function statsView(section: StoreStatsSection, t: Translate): StatsSectionView | null {
+export function statsView(
+  section: StoreStatsSection,
+  t: Translate,
+  /** The hand note in the shop's accent face (`noteInHand`); absent: not. */
+  hand = false
+): StatsSectionView | null {
   const settings = statsSettingsOf(section)
+  const note = handNoteView(section.note, hand)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -36,6 +43,8 @@ export function statsView(section: StoreStatsSection, t: Translate): StatsSectio
           ...(settings.icons === "on" ? { icon: sectionIconOf(item.icon) } : {}),
         })),
         ...settings,
+        ...(section.eyebrow ? { eyebrow: section.eyebrow } : {}),
+        ...(note ? { note } : {}),
       }
     : null
 }

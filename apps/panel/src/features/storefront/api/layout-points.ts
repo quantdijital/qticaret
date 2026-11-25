@@ -27,6 +27,10 @@ export type StatsSection = BodySectionBase & {
   type: "stats"
   title: string | null
   items: StatsItem[]
+  /** A small upper-case line over the heading; absent or null: none. */
+  eyebrow?: string | null
+  /** A short hand note beside the heading; absent or null: none. */
+  note?: string | null
 } & StatsSettings
 
 /** One step: its title and an optional line; the theme numbers it. */

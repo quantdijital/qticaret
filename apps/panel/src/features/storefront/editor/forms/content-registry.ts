@@ -2,6 +2,7 @@ import {
   FEATURED_PRODUCT_SETTINGS,
   PHOTO_COLLAGE_SETTINGS,
   RICH_TEXT_IMAGE_SIDES,
+  STATS_SETTINGS,
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
@@ -61,6 +62,7 @@ export type ContentField =
   | "steps_layout"
   | "numbers"
   | "show_icons"
+  | "stats_style"
   | "lift"
   | "disc"
   | "icons_phone"
@@ -144,7 +146,20 @@ export const STEPS_FIELDS = [
 function pointsFields(section: AnySection): RegistryField[] {
   if (section.type === "stats") {
     const D = `${E}.stats.dividers`
-    return [{ ...entry(section, "dividers", `${D}.label`, [], "layout"), term: `${D}.term` }]
+    const I = `${E}.stats.item_style`
+    return [
+      {
+        ...entry(
+          section,
+          "stats_style",
+          `${I}.label`,
+          STATS_SETTINGS.item_style.map((step) => `${I}.${step}`),
+          "layout"
+        ),
+        term: `${I}.term`,
+      },
+      { ...entry(section, "dividers", `${D}.label`, [], "layout"), term: `${D}.term` },
+    ]
   }
   return STEPS_FIELDS.map(([name, field]) => {
     const P = `${E}.steps.${name}`

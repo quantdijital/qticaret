@@ -36,6 +36,9 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
       })),
       dividers: section.dividers,
       icons: section.icons,
+      item_style: section.item_style,
+      ...(section.eyebrow ? { eyebrow: at.fill(section.eyebrow) } : {}),
+      ...(section.note ? { note: section.note } : {}),
     }
   }
   return {

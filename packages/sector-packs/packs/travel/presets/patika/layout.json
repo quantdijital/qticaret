@@ -157,35 +157,38 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Neden bizimle yürümeli?",
+      "title": "Bir turdan fazlası",
+      "eyebrow": "Neden bizimle yolculuk",
+      "note": "Yol seni değiştirir",
       "items": [
         {
           "value": "12 kişi",
-          "label": "En kalabalık grup",
-          "text": "Patikada sıra beklemeden, rehberinizle tanışarak.",
+          "label": "Küçük gruplar",
+          "text": "En fazla 12 kişiyle yürüyoruz.",
           "icon": "users"
         },
         {
           "value": "Yerel",
-          "label": "Rehberler",
-          "text": "Bölgeyi bilen, yolu yürümüş rehberler.",
+          "label": "Yerel rehberler",
+          "text": "Yolu yürümüş, bölgeyi bilen ekip.",
           "icon": "compass"
         },
         {
           "value": "Açık",
-          "label": "Program",
-          "text": "Günlük mesafe, zorluk ve konaklama tur sayfasında yazılı.",
+          "label": "Açık program",
+          "text": "Mesafe ve konaklama baştan belli.",
           "icon": "map_pin"
         },
         {
           "value": "7/24",
           "label": "Yolda destek",
-          "text": "Tur boyunca bize her an ulaşabilirsiniz.",
-          "icon": "headset"
+          "text": "Tur boyunca her an yanınızdayız.",
+          "icon": "heart"
         }
       ],
       "dividers": "on",
-      "icons": "on"
+      "icons": "on",
+      "item_style": "feature"
     },
     {
       "id": "seciliturlar",

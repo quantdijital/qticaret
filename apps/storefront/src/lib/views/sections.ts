@@ -205,7 +205,8 @@ async function sectionView(
     case "strip_gallery":
       return stripGalleryView(section, t)
     case "stats":
-      return statsView(section, t)
+      // The hand note's face is read only for a strip that has a note
+      return statsView(section, t, section.note ? await noteInHand(section.note) : false)
     case "photo_collage":
       return collageView(section, t)
     case "steps":

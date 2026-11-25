@@ -11344,6 +11344,17 @@
           "label": "İkon göster",
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
+        },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Neden bizimle). Boşsa çizilmez.",
+        "note": "El yazısı not",
+        "noteHint": "Başlığın sağında eğik, el yazısı kısa not; altında fırça çizgisi olur. Boşsa çizilmez.",
+        "item_style": {
+          "label": "Öge görünümü",
+          "term": "style",
+          "hint": "Büyük rakam ya da açık zeminli yuvarlak ikon, kalın başlık ve tek satır açıklama.",
+          "figure": "Büyük rakam",
+          "feature": "İkonlu madde"
         }
       },
       "steps": {

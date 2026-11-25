@@ -1,5 +1,12 @@
 import { useTranslation } from "react-i18next"
-import { STEPS_DEFAULTS, STEPS_SETTINGS, statsSettingsOf, stepsSettingsOf } from "@qticaret/types"
+import {
+  STATS_DEFAULTS,
+  STATS_SETTINGS,
+  STEPS_DEFAULTS,
+  STEPS_SETTINGS,
+  statsSettingsOf,
+  stepsSettingsOf,
+} from "@qticaret/types"
 import type { StatsSection, StepsSection } from "@/features/storefront/api/layout"
 import { PanelGroup } from "../panel-header"
 import { SwitchRow } from "../theme-fields"
@@ -29,6 +36,20 @@ export function PointsGroups({
     <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       {section.type === "stats" ? (
         <>
+          {/* A large figure, or a feature: an icon on a disc over a bold label and a line */}
+          <StepChoice<string>
+            id={FIELD_IDS.content(section.id, "stats_style")}
+            label={t("storefront.editor.stats.item_style.label")}
+            term={t("storefront.editor.stats.item_style.term")}
+            hint={t("storefront.editor.stats.item_style.hint")}
+            steps={STATS_SETTINGS.item_style}
+            value={statsSettingsOf(section).item_style}
+            fallback={STATS_DEFAULTS.item_style}
+            nameOf={(step) => t(`storefront.editor.stats.item_style.${step}`)}
+            onChange={(step) => {
+              onChange({ ...section, item_style: step as StatsSection["item_style"] })
+            }}
+          />
           <SwitchRow
             id={FIELD_IDS.content(section.id, "dividers")}
             label={t("storefront.editor.stats.dividers.label")}
