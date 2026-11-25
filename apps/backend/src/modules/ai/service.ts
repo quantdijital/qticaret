@@ -33,6 +33,8 @@ export interface AiUsageInput {
   images?: number | null
   estimated_cost_micros?: number | null
   currency?: string | null
+  /** `platform_credit` only: the credits the gateway said it charged (never worked out here). */
+  credits?: number | null
   entity_type?: string | null
   entity_id?: string | null
   suggestion_id?: string | null
@@ -197,11 +199,12 @@ class AiModuleService extends MedusaService({ AiUsage, AiPreference, AiDailyUsag
   ): Promise<AiUsageSummary> {
     const { from, to } = turkeyMonthBounds(month)
     const rows: SummaryRow[] = await managerOf(sharedContext).execute(
-      `SELECT service, task, status, currency, count(*)::int AS count,
-              coalesce(sum(estimated_cost_micros), 0)::bigint AS cost
+      `SELECT service, task, status, currency, funding, count(*)::int AS count,
+              coalesce(sum(estimated_cost_micros), 0)::bigint AS cost,
+              coalesce(sum(credits), 0)::bigint AS credits
        FROM ai_usage
        WHERE deleted_at IS NULL AND created_at >= ? AND created_at < ?
-       GROUP BY service, task, status, currency`,
+       GROUP BY service, task, status, currency, funding`,
       [from, to]
     )
     return summaryOf(month, rows)

@@ -49,6 +49,7 @@ export const recordUsageStep = createStep(
         images: outcome.images,
         duration_ms: outcome.duration_ms,
         error_code: outcome.error_code,
+        credits: outcome.credits,
       },
       ...(correction ? [correction] : []),
     ]
@@ -68,6 +69,7 @@ export const recordUsageStep = createStep(
           images: call.images,
           estimated_cost_micros: cost?.micros ?? null,
           currency: cost?.currency ?? null,
+          credits: usageCredits(input.funding, call.credits),
           entity_type: input.entity_type,
           entity_id: input.entity_id,
           suggestion_id: input.suggestion_id,
@@ -99,6 +101,17 @@ export const recordUsageStep = createStep(
     return new StepResponse({ usage_id: ids[ids.length - 1] ?? "", usage_ids: ids })
   }
 )
+
+/**
+ * A row's `credits` (adr/0085 §3): on the platform's credits what the
+ * gateway's header said it charged the call (0 for a later call of the
+ * operation; null when it named none), never worked out here; on the
+ * shop's own key none.
+ */
+export const usageCredits = (
+  funding: AiFunding,
+  credits: number | null | undefined
+): number | null => (funding === "platform_credit" ? (credits ?? null) : null)
 
 /** One call's row: the first, or the correction's. */
 type UsageCall = Omit<CorrectionUsage, "status"> & { status: CallOutcome["status"] }

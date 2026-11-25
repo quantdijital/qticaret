@@ -26,6 +26,8 @@ import { redactPersonalData } from "../../../lib/ai/redact"
 import type { StaffRole } from "../../../lib/staff/permissions"
 import { claimAssistantCall, releaseAssistantCall } from "./assistant-claims"
 import type { AssistantClaim } from "./assistant-claims"
+import { chargeTally } from "../charge-tally"
+import type { ChargeTally } from "../charge-tally"
 import { transportFor } from "../transport-for"
 import type { AiRoute } from "../transport-for"
 
@@ -63,6 +65,8 @@ export interface CallRecord {
   output_tokens: number | null
   duration_ms: number
   error_code: string | null
+  /** On credits: what the gateway charged this call (3 on the first, 0 after). */
+  credits?: number | null | undefined
 }
 
 export interface AssistantRunOutput {
@@ -80,7 +84,7 @@ export interface AssistantRunOutput {
 }
 
 /** The loop's model calls, as `ai_usage` rows read them. */
-function callRecords(loop: LoopResult, reply: Reply | null): CallRecord[] {
+function callRecords(loop: LoopResult, reply: Reply | null, tally: ChargeTally): CallRecord[] {
   return loop.calls.map((call, index) => {
     const failed = call.error === null ? null : failureOf(call.error)
     const last = index === loop.calls.length - 1
@@ -91,6 +95,7 @@ function callRecords(loop: LoopResult, reply: Reply | null): CallRecord[] {
       output_tokens: call.usage.outputTokens ?? null,
       duration_ms: call.duration_ms,
       error_code: failed?.code ?? null,
+      credits: tally.at(index),
     }
   })
 }
@@ -128,6 +133,7 @@ export const assistantRunStep = createStep(
       model: textTargetOf(input.service, "text")?.target.model ?? "",
     }
     let route: AiRoute
+    const tally = chargeTally()
     try {
       // One transport for the turn: its every model call carries the turn's operation
       route = await transportFor(container, {
@@ -135,6 +141,7 @@ export const assistantRunStep = createStep(
         capability: "text",
         task: ASSISTANT_TASK.id,
         operation: input.operation,
+        onCharge: tally.onCharge,
       })
     } catch (caught) {
       const failure = failureOf(caught)
@@ -179,7 +186,7 @@ export const assistantRunStep = createStep(
       return new StepResponse<AssistantRunOutput>({
         ...base,
         error,
-        calls: callRecords(loop, null),
+        calls: callRecords(loop, null, tally),
         tool_counts: loop.toolCounts,
       })
     }
@@ -193,7 +200,7 @@ export const assistantRunStep = createStep(
       return new StepResponse<AssistantRunOutput>({
         ...base,
         error: { kind: "refused", key, code: loop.status },
-        calls: callRecords(loop, null),
+        calls: callRecords(loop, null, tally),
         tool_counts: loop.toolCounts,
       })
     }
@@ -216,7 +223,7 @@ export const assistantRunStep = createStep(
       record,
       reply,
       error: null,
-      calls: callRecords(loop, reply),
+      calls: callRecords(loop, reply, tally),
       tool_counts: loop.toolCounts,
     })
   }

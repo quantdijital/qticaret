@@ -32,6 +32,7 @@ import { runTextTask } from "../../../lib/ai/run-text"
 import type { CampaignAllowed } from "../../../lib/ai/campaign-text"
 import { isCampaignTask, runCampaignTask } from "../../../lib/ai/run-campaign"
 import { PLATFORM_SERVICE_ID } from "../../../lib/ai/registry/platform-service"
+import { chargeTally } from "../charge-tally"
 import { transportFor } from "../transport-for"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
 
@@ -76,6 +77,8 @@ export interface CallOutcome {
   error_key: AiErrorKey | null
   error_code: string | null
   retry_after_ms: number | null
+  /** On credits: what the gateway charged the (first) call; null or absent otherwise. */
+  credits?: number | null | undefined
 }
 
 /** The correction call's usage row: how it ended and what it counted. */
@@ -86,6 +89,8 @@ export interface CorrectionUsage {
   images: number | null
   duration_ms: number
   error_code: string | null
+  /** On credits: what the gateway charged the correction (0 within the operation's charge). */
+  credits?: number | null | undefined
 }
 
 /**
@@ -151,6 +156,8 @@ export const callServiceStep = createStep(
       error_code: null,
       retry_after_ms: null,
     }
+    // What each call on credits was charged, for its usage row
+    const tally = chargeTally()
     try {
       const known = own !== null || input.service === PLATFORM_SERVICE_ID
       if (!task || !known || !runsAs(task, input.capability)) {
@@ -165,6 +172,7 @@ export const callServiceStep = createStep(
         capability,
         task: task.id,
         operation: input.operation ?? randomUUID(),
+        onCharge: tally.onCharge,
       })
       const connector = textConnectorWith(route.service.id, capability, route.transport)
       const images =
@@ -264,7 +272,8 @@ export const callServiceStep = createStep(
         status: result.status,
         text: result.status === "succeeded" ? result.text : null,
         candidates: result.status === "succeeded" ? result.candidates : [],
-        correction,
+        correction: correction && { ...correction, credits: tally.at(1) },
+        credits: tally.at(0),
         problems: result.status === "refused" ? result.problems : [],
         input_tokens: result.usage.inputTokens ?? null,
         output_tokens: result.usage.outputTokens ?? null,
@@ -281,6 +290,7 @@ export const callServiceStep = createStep(
         error_key: failure.key,
         error_code: failure.code,
         retry_after_ms: retryAfterOf(error),
+        credits: tally.at(0),
       }
       return new StepResponse(outcome)
     }
