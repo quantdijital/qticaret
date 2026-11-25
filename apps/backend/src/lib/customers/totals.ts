@@ -82,8 +82,8 @@ export function customerTotals(
     if (!tally.lastAt || at > tally.lastAt) {
       tally.lastAt = at
       tally.city = cityOf(order.shipping_address) ?? tally.city
-    } else if (!tally.city) {
-      tally.city = cityOf(order.shipping_address)
+    } else {
+      tally.city ??= cityOf(order.shipping_address)
     }
   }
   return customerIds.map((id) => {

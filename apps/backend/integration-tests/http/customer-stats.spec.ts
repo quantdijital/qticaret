@@ -9,6 +9,7 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
+import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(180 * 1000)
 
@@ -60,8 +61,8 @@ medusaIntegrationTestRunner({
           first_name: "Ayşe",
           last_name: "Yılmaz",
           address_1: "Demo Sokak 1",
-          province: "İzmir",
-          city: "Bornova",
+          province: "İstanbul",
+          city: "Kadıköy",
         },
         beforeComplete,
       })
@@ -74,6 +75,8 @@ medusaIntegrationTestRunner({
 
     beforeEach(async () => {
       const container = getContainer()
+      // The carts' il and ilçe are checked against the address data (F1.4)
+      await loadTrAddressFixture(container)
       shop = await stockShop(container)
       storefront = await createStorefront(container)
       admin = await createAdminUser(http, container)
@@ -110,7 +113,7 @@ medusaIntegrationTestRunner({
           orders: 2,
           spent: spent.toFixed(2),
           average: (spent / 2).toFixed(2),
-          city: "İzmir",
+          city: "İstanbul",
         }),
         expect.objectContaining({ customer_id: other.customer_id, orders: 1 }),
       ])
