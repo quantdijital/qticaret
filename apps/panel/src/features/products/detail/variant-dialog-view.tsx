@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/
 import { useStoreUnits } from "@/features/products/use-units"
 import type { MeasureName } from "./measures"
 import { CodeFields, MeasureFields, PriceFields, StockFields } from "./variant-fields"
+import type { SaleTarget } from "./variant-fields"
 import { VariantPictures } from "./variant-pictures"
 import { FIELD_TABS, fieldId } from "./variant-values"
 import type { StockFacts, VariantField, VariantValues } from "./variant-values"
@@ -54,6 +55,8 @@ export interface VariantDialogViewProps {
   ties: ReadonlyMap<string, readonly string[]>
   /** Alt texts can be written (a saved product's pictures have media records). */
   alts?: boolean
+  /** A saved variant: its sale price under its price (adr/0086). */
+  saleTarget?: SaleTarget | null
 }
 
 /**
@@ -84,6 +87,7 @@ export function VariantDialogView({
   measures,
   ties,
   alts = true,
+  saleTarget = null,
 }: VariantDialogViewProps) {
   const { t } = useTranslation()
   const units = useStoreUnits()
@@ -203,7 +207,13 @@ export function VariantDialogView({
         </TabsList>
         <TabsContent value="prices" forceMount className={TAB_BODY}>
           <DialogBody>
-            <PriceFields form={form} idPrefix={ID} sale={sale} others={total - 1} />
+            <PriceFields
+              form={form}
+              idPrefix={ID}
+              sale={sale}
+              others={total - 1}
+              saleTarget={saleTarget}
+            />
             <StockFields
               form={form}
               idPrefix={ID}

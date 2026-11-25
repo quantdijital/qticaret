@@ -4205,6 +4205,43 @@
       "table": "{{from}} tarihinden bugüne fiyatlar",
       "unchanged": "Son 90 günde fiyat değişmedi."
     },
+    "sale": {
+      "label": "İndirimli fiyat",
+      "hint": "Boş bırakırsanız indirim yok. Vitrinde üstü çizili fiyat, indirimden önceki 10 günün en düşük fiyatıdır.",
+      "percent": "%{{percent}} indirim",
+      "schedule": "Zamanla",
+      "unschedule": "Zamanlamayı kaldır",
+      "starts": "Başlangıç",
+      "ends": "Bitiş",
+      "running": "İndirim sürüyor.",
+      "runsUntil": "İndirim {{date}} tarihine kadar sürer.",
+      "startsOn": "İndirim {{date}} tarihinde başlar.",
+      "remove": "İndirimi kaldır",
+      "apply": "İndirimi kaydet",
+      "cancel": "Vazgeç",
+      "saved": "İndirimli fiyat kaydedildi.",
+      "errors": {
+        "amount": "Geçerli bir fiyat girin.",
+        "noRegular": "Önce normal fiyatı kaydedin.",
+        "notBelow": "İndirimli fiyat normal fiyattan düşük olmalı.",
+        "datesOrder": "Bitiş, başlangıçtan önce olamaz.",
+        "ended": "Bitiş tarihi geçmiş; ileri bir tarih seçin."
+      },
+      "bulk": {
+        "action": "İndirimli fiyat",
+        "title": "İndirimli fiyat",
+        "description_one": "Seçili {{count}} varyant",
+        "description_other": "Seçili {{count}} varyant",
+        "mode": "İndirim türü",
+        "percent": "Yüzde indir",
+        "price": "Fiyat gir",
+        "percentLabel": "İndirim oranı",
+        "apply_one": "{{count}} varyanta uygula",
+        "apply_other": "{{count}} varyanta uygula",
+        "done_one": "{{count}} varyantın indirimi güncellendi.",
+        "done_other": "{{count}} varyantın indirimi güncellendi."
+      }
+    },
     "interest": {
       "title": "Müşteri ilgisi",
       "wishlist": "Favorisine ekleyen",
@@ -4347,8 +4384,8 @@
       "listHint": "Seçenekleri yazıp varyantları oluşturun; bir varyantın fiyatını, stoğunu, kodlarını ve görsellerini satırına tıklayarak yerinde düzenleyin.",
       "singleTitle": "Fiyat, stok ve kodlar",
       "price": "Fiyat",
-      "sellingPrice": "Satış fiyatı",
-      "priceHint": "KDV dahil; vitrinde bu fiyat görünür.",
+      "sellingPrice": "Normal fiyat",
+      "priceHint": "KDV dahil. İndirimli fiyat yoksa vitrinde bu fiyat görünür.",
       "applyAll_one": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "applyAll_other": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "stock": "Stok",
@@ -4431,7 +4468,7 @@
         "filter": "Hangi varyantlar",
         "every": "Tüm varyantlar",
         "fields": {
-          "price": "Satış fiyatı",
+          "price": "Normal fiyat",
           "cost": "Maliyet",
           "stock": "Stok adedi"
         },
