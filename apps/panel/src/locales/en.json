@@ -3325,7 +3325,8 @@
       "category": "Category",
       "updated": "Last change",
       "price": "Price",
-      "actions": "Actions"
+      "actions": "Actions",
+      "sku": "Stock code (SKU)"
     },
     "errors": {
       "title": "The product name needs at least 2 characters.",
@@ -4061,6 +4062,19 @@
       "selectAll_one": "Select the {{formatted}} matching product",
       "selectAll_other": "Select all {{formatted}} matching products",
       "clear": "Clear selection",
+      "delete": {
+        "action": "Delete",
+        "working": "Deleting… {{done}}/{{total}}",
+        "title_one": "Delete {{formatted}} product?",
+        "title_other": "Delete {{formatted}} products?",
+        "description": "The products are deleted with their variants and stock records. This cannot be undone. Products that cannot be deleted are skipped with the reason.",
+        "confirm_one": "Delete {{formatted}} product",
+        "confirm_other": "Delete {{formatted}} products",
+        "done_one": "{{formatted}} product deleted.",
+        "done_other": "{{formatted}} products deleted.",
+        "skipped_one": "{{formatted}} product could not be deleted; it stays selected.",
+        "skipped_other": "{{formatted}} products could not be deleted; they stay selected."
+      },
       "edit": "Bulk edit",
       "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
       "scope_one": "Applies to the {{formatted}} selected product. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
@@ -4435,6 +4449,13 @@
       }
     },
     "rowActions": "Actions for {{title}}",
+    "listOptions": {
+      "label": "View",
+      "perPage": "Per page",
+      "pageSize_one": "{{count}} product",
+      "pageSize_other": "{{count}} products",
+      "columns": "Columns"
+    },
     "duplicate": {
       "action": "Duplicate",
       "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
