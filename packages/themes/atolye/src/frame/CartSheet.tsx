@@ -139,7 +139,7 @@ export function CartSheetBody({
           <span className="font-semibold">{words.subtotal}</span>
           <span className="tabular text-lg font-extrabold">{cart.subtotal}</span>
         </p>
-        <p className="text-xs text-text-3">{cart.taxNote ?? words.note}</p>
+        <p className="text-xs text-text-3">{cart.taxNote ?? cart.note ?? words.note}</p>
         <CheckoutLink
           id={`${id}-odeme-engeli`}
           label={words.checkout}

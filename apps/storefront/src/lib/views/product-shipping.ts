@@ -98,8 +98,14 @@ const DELIVERY_ICONS: ReadonlySet<TrustBadgeView["icon"]> = new Set(["truck", "c
 export const promisesFor = (
   product: StoreProduct,
   badges: readonly TrustBadgeView[]
+): TrustBadgeView[] => shippedPromises(isShipped(product), badges)
+
+/** The same rule for a whole cart: with nothing in it to ship (only tours, services), no delivery promise. */
+export const shippedPromises = (
+  ships: boolean,
+  badges: readonly TrustBadgeView[]
 ): TrustBadgeView[] =>
-  isShipped(product) ? [...badges] : badges.filter((badge) => !DELIVERY_ICONS.has(badge.icon))
+  ships ? [...badges] : badges.filter((badge) => !DELIVERY_ICONS.has(badge.icon))
 
 export interface ProductShippingInput {
   product: StoreProduct
