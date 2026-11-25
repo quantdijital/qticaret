@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { reconcileAiCredits } from "../lib/ai-credits/reconcile"
 
 /**
@@ -34,7 +34,7 @@ export default async function aiCreditReconcileJob(container: MedusaContainer): 
       )
     }
   } catch (error) {
-    logger.error(`cp.ai_credit_reconcile_failed ${JSON.stringify({ err: errorSummary(error) })}`)
+    logger.error(`cp.ai_credit_reconcile_failed ${JSON.stringify({ err: codeSummary(error) })}`)
   }
 }
 

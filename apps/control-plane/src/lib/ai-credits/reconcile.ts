@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import type { LedgerMismatch } from "../../modules/ai-credits/service"
 import { aiCreditsIn } from "../../workflows/modules"
 import { AI_STALE_OPERATION_MINUTES, AI_STALE_RELEASE_BATCH } from "./settings"
@@ -49,7 +49,7 @@ export async function reconcileAiCredits(
     } catch (error) {
       failed += 1
       logger.error(
-        `cp.ai_credit_release_failed ${JSON.stringify({ tenant_id: stale.tenant_id, err: errorSummary(error) })}`
+        `cp.ai_credit_release_failed ${JSON.stringify({ tenant_id: stale.tenant_id, err: codeSummary(error) })}`
       )
     }
   }
