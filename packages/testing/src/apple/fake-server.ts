@@ -167,7 +167,14 @@ export async function startFakeApple(
     sockets.add(socket)
     socket.on("close", () => sockets.delete(socket))
   })
-  await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
+  // A named port already taken fails at once, never leaves the hook waiting out its timeout
+  await new Promise<void>((resolve, reject) => {
+    server.once("error", reject)
+    server.listen(options.port ?? 0, "127.0.0.1", () => {
+      server.off("error", reject)
+      resolve()
+    })
+  })
   const address = server.address() as AddressInfo
 
   return {
