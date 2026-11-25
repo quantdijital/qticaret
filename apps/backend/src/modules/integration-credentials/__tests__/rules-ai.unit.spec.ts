@@ -23,11 +23,11 @@ const reasonOf = (run: () => unknown): unknown => {
 
 // Plainly fake and fresh per run (docs/04)
 const key = () => `test-key-${fakeSecret()}`
-const AI = ["deepseek", "minimax", "gemini", "photoroom"] as const
+const AI = ["deepseek", "minimax", "gemini", "photoroom", "bria"] as const
 
 describe("AI service accounts (adr/0071 §3)", () => {
   it("are providers of their own, after the others and in the registry's order", () => {
-    expect(CREDENTIAL_PROVIDER_NAMES.slice(-5)).toEqual([...AI, "fake"])
+    expect(CREDENTIAL_PROVIDER_NAMES.slice(-6)).toEqual([...AI, "fake"])
     for (const provider of AI) {
       expect(isCredentialProvider(provider)).toBe(true)
       expect(isAiCredentialProvider(provider)).toBe(true)

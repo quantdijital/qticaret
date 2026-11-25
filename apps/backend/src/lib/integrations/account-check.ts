@@ -194,5 +194,6 @@ export const CHECK_FIELDS = {
   minimax: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   gemini: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   photoroom: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  bria: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   fake: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>
