@@ -75,6 +75,12 @@ export interface AiUsageAnswer {
   tasks: AiUsageLine[]
   monthly: AiCeiling
   daily: Record<"text" | "image" | "video", AiCeiling>
+  /**
+   * The month's calls on the platform's credits and the credits the
+   * gateway charged them (adr/0085 §3). Optional: a server of before
+   * adr/0085 does not send it.
+   */
+  platform_credits?: { calls: number; credits: number }
 }
 
 /** Every AI read lives under this key: an account saved, checked or removed refreshes them. */

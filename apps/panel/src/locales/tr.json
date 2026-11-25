@@ -13321,7 +13321,9 @@
       },
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · sınır yok",
-      "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır."
+      "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır.",
+      "platformCredits_one": "Bu ay platform kredisinden {{amount}} kredi harcandı.",
+      "platformCredits_other": "Bu ay platform kredisinden {{amount}} kredi harcandı."
     },
     "suggest": {
       "button": "Yapay zekâ ile öner",

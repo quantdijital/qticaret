@@ -4,6 +4,7 @@ import { aiTargetServiceIds } from "@qticaret/types/control-plane"
 import { unrouteService } from "../ai-credits/platform-settings"
 import { PLATFORM_OWNER, aiProviderKeyName, aiProviderOfKeyName } from "../vault/secret-names"
 import { vaultIn } from "../../workflows/modules"
+import { PartlyDoneError } from "./partly-done"
 import { isKnownService } from "./routing"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -95,15 +96,43 @@ export async function writeProviderKey(
  * key (vault module) are each changed in their own module's transaction.
  * A save that commits after this second pass checks the keys again itself
  * (`saveAiSettingsWithKeys`), so nothing stays routed to a keyless service.
+ *
+ * A step failing once something has changed (the routing taken out, the
+ * key retired) throws `PartlyDoneError` with what is done, so the audit
+ * row says it (`notingPartlyDone`); a first unroute failing changed
+ * nothing and throws as it is.
  */
 export async function deleteProviderKey(
   container: Container,
   service: string,
   actor: string
-): Promise<{ deleted: boolean; unrouted: string[] }> {
+): Promise<ProviderKeyDeletion> {
   const id = knownService(service)
-  const unrouted = await unrouteService(container, id, actor)
-  const deleted = await vaultIn(container).retireSecret(PLATFORM_OWNER, aiProviderKeyName(id))
-  const late = await unrouteService(container, id, actor)
-  return { deleted, unrouted: [...new Set([...unrouted, ...late])] }
+  let done: ProviderKeyDeletion = {
+    deleted: false,
+    unrouted: await unrouteService(container, id, actor),
+  }
+  // The step under way, named in the audit row when it fails (no key held retires nothing)
+  let step: "retire" | "unroute_again" = "retire"
+  try {
+    done = {
+      ...done,
+      deleted: await vaultIn(container).retireSecret(PLATFORM_OWNER, aiProviderKeyName(id)),
+    }
+    step = "unroute_again"
+    const late = await unrouteService(container, id, actor)
+    return { ...done, unrouted: [...new Set([...done.unrouted, ...late])] }
+  } catch (error) {
+    if (!done.deleted && done.unrouted.length === 0) {
+      throw error
+    }
+    throw new PartlyDoneError(done, step, error)
+  }
+}
+
+export interface ProviderKeyDeletion {
+  /** Whether a key was held and is now retired. */
+  deleted: boolean
+  /** The capabilities whose routing to the service was taken out. */
+  unrouted: string[]
 }

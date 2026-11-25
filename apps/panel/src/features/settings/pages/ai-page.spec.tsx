@@ -185,6 +185,27 @@ describe("AiPage", () => {
     expect(screen.getByText("0 / 100")).toBeInTheDocument()
   })
 
+  it.each([
+    ["spent", { calls: 7, credits: 1_250 }, "Bu ay platform kredisinden 1.250 kredi harcandı."],
+    ["none spent", { calls: 0, credits: 0 }, null],
+    ["a server without the field", undefined, null],
+  ])("the platform's credits under the table: %s", async (_, credits, line) => {
+    serve(true)
+    const base = fetchMock.getMockImplementation() as (url: string) => Promise<unknown>
+    fetchMock.mockImplementation((url: string) =>
+      url === "/admin/ai/usage"
+        ? Promise.resolve({ ...usage, platform_credits: credits })
+        : base(url)
+    )
+    renderPage()
+    expect(await screen.findByText("Deneme metni")).toBeInTheDocument()
+    if (line) {
+      expect(screen.getByText(line)).toBeInTheDocument()
+    } else {
+      expect(screen.queryByText(/platform kredisinden/)).toBeNull()
+    }
+  })
+
   it("says when the package leaves the shop's own key out", async () => {
     serve(false)
     renderPage()

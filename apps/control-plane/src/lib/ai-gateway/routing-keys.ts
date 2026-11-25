@@ -7,6 +7,7 @@ import {
 } from "../ai-credits/platform-settings"
 import type { AiCreditPlatformSettings, AiSettingsChange } from "../ai-credits/platform-settings"
 import { providerKeysHeld } from "./keys"
+import { PartlyDoneError } from "./partly-done"
 import { checkedRouting } from "./routing"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -23,12 +24,16 @@ type Container = Pick<MedusaContainer, "resolve">
  * would leave a routing to a keyless service: the keys are read again
  * once saved, and a routing to one no longer held is taken out (P6b). The
  * answer is then the settings as they stand, without that routing.
+ *
+ * Once saved, a failure of that second read or its cleanup throws
+ * `PartlyDoneError` with the change as saved: the save stands, the audit
+ * row says so, the answer is still the error.
  */
 export async function saveAiSettingsWithKeys(
   container: Container,
   change: AiSettingsChange,
   actor: string
-): Promise<{ before: AiCreditPlatformSettings; after: AiCreditPlatformSettings }> {
+): Promise<Saved> {
   // The table's own refusals (an unknown service, a model off it) come first, as before
   const routes = Object.values(change.routing === undefined ? {} : checkedRouting(change.routing))
   if (routes.length === 0) {
@@ -39,6 +44,21 @@ export async function saveAiSettingsWithKeys(
     throw new MedusaError(MedusaError.Types.CONFLICT, "cp.ai_route_no_key")
   }
   const saved = await saveAiCreditSettings(container, change, actor)
+  try {
+    return await keyedOnly(container, saved, actor)
+  } catch (error) {
+    // Saved already: the audit row keeps the change as saved (`notingPartlyDone`)
+    throw new PartlyDoneError(saved, "recheck_keys", error)
+  }
+}
+
+interface Saved {
+  before: AiCreditPlatformSettings
+  after: AiCreditPlatformSettings
+}
+
+/** The saved settings, a routing to a service whose key is no longer held taken out. */
+async function keyedOnly(container: Container, saved: Saved, actor: string): Promise<Saved> {
   const heldNow = await providerKeysHeld(container)
   const routed = new Set(Object.values(saved.after.routing).map((route) => route.service))
   const gone = [...routed].filter((service) => !heldNow.has(service))
