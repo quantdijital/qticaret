@@ -14,6 +14,7 @@ import {
   quotaLeft,
 } from "../../lib/ai/bulk-seo"
 import type { SeoFillScope } from "../../lib/ai/bulk-seo"
+import type { AiFunding } from "../../lib/ai/registry/services"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { ValidationError } from "../../lib/errors"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
@@ -36,11 +37,13 @@ const TASK_OF = { seo_title: "seo_title", seo_description: "seo_description" } a
  * ask for every task the scope names (the first was authorised by
  * `authorizeTaskStep` with the package's flags), the advisor's findings
  * pick at most `SEO_FILL_MAX` pages, and the quota left covers one credit
- * per ask; otherwise a plain error and no job. Reads only.
+ * per ask (the month's only on the shop's own key: on the platform's
+ * credits the day's ceiling alone, as each ask claims); otherwise a plain
+ * error and no job. Reads only.
  */
 const checkSeoFillStep = createStep(
   "ai-check-seo-fill",
-  async (input: { scope: SeoFillScope; user_id: string }, { container }) => {
+  async (input: { scope: SeoFillScope; user_id: string; funding: AiFunding }, { container }) => {
     const fields = fieldsOfScope(input.scope)
     const role = await container
       .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
@@ -63,7 +66,13 @@ const checkSeoFillStep = createStep(
         total + target.tasks.reduce((sum, id) => sum + (findAiTask(id)?.credits ?? 1), 0),
       0
     )
-    const left = quotaLeft(await readQuota(container))
+    const quota = await readQuota(container)
+    // On the platform's credits the month is not counted here (adr/0085 K9): the day's ceiling is
+    const left = quotaLeft(
+      input.funding === "platform_credit"
+        ? { ...quota, monthly: { ...quota.monthly, limit: null } }
+        : quota
+    )
     if (needed > left) {
       throw new ValidationError("ai.seo_fill_quota_short", {
         values: { needed: String(needed), left: String(left) },
@@ -104,7 +113,11 @@ export const requestSeoFillWorkflow = createWorkflow(
       }))
     )
     const checked = checkSeoFillStep(
-      transform({ input }, ({ input }) => ({ scope: input.scope, user_id: input.user_id }))
+      transform({ input, chosen }, ({ input, chosen }) => ({
+        scope: input.scope,
+        user_id: input.user_id,
+        funding: chosen.funding,
+      }))
     )
     const job = enqueueAsyncJobWorkflow.runAsStep({
       input: transform({ input, chosen, checked }, ({ input, chosen, checked }) => ({

@@ -11,7 +11,7 @@ import { AI_PLATFORM_CREDITS } from "../../src/modules/platform-settings/feature
 import { SEO_ADVISOR_MODULE } from "../../src/modules/seo-advisor"
 import type SeoAdvisorModuleService from "../../src/modules/seo-advisor/service"
 import { createAdminUser } from "../helpers/admin"
-import { aiProduct, askFor, connectFake, pushPlan } from "../helpers/ai"
+import { aiProduct, aiRecords, askFor, connectFake, pushPlan } from "../helpers/ai"
 import { GATED_TITLE, availableStatus, fakeAiGateway } from "../helpers/ai-gateway"
 import { listen, managedForThisFile } from "../helpers/control-plane"
 import { eventually } from "../helpers/eventually"
@@ -152,6 +152,24 @@ medusaIntegrationTestRunner({
         stopped: "ai.service_unavailable",
       })
       expect(gateway.calls).toHaveLength(0)
+    })
+
+    it("queues a fill on the platform's credits past the month's quota, the day's holding", async () => {
+      await pagesWithFindings(2)
+      // Two asks against one credit a month: the shop's own key would be refused (ai-seo-fill.spec.ts)
+      await pushPlan(http, true, { llm_credits_per_month: 1 }, { [AI_PLATFORM_CREDITS]: true })
+      const queued = await settle(
+        http.post<{ job_id: string; service: string }>(
+          "/admin/ai/seo-fill",
+          { scope: "title" },
+          { headers: owner.headers }
+        )
+      )
+      expect([queued.status, queued.data.service]).toEqual([202, "platform"])
+      expect(await jobInput(queued.data.job_id)).toMatchObject({ funding: "platform_credit" })
+      const job = await finished(queued.data.job_id)
+      expect(job?.result_summary).toMatchObject({ asked: 2, suggested: 2, stopped: null })
+      expect(await aiRecords(getContainer()).monthly()).toBe(0)
     })
 
     it("keeps the bulk alt text job's way of paying the server's, never the request's", async () => {
