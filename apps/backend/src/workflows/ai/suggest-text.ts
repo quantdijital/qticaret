@@ -67,7 +67,10 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
   )
   // The call's capability is the chosen service's way of running it: `vision` with a picture
   const claimed = claimQuotaStep(
-    transform({ chosen }, ({ chosen }) => ({ capability: chosen.capability }))
+    transform({ chosen }, ({ chosen }) => ({
+      capability: chosen.capability,
+      funding: chosen.funding,
+    }))
   )
   const outcome = callServiceStep(
     transform({ authorized, chosen, prompt }, ({ authorized, chosen, prompt }) => ({
@@ -79,6 +82,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       image_file_id: prompt.image_file_id,
       allowed: prompt.allowed,
       campaign: prompt.campaign ?? null,
+      operation: chosen.operation,
     }))
   )
   // Straight after the call: a later failure neither skips it nor undoes a call the service did

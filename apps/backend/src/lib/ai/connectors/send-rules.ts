@@ -145,7 +145,7 @@ export async function sendByRules<T>(call: RuledSend<T>): Promise<T> {
         ) {
           throw aiProviderError({ service: error.provider, key: "ai.timeout", code: "timeout" })
         }
-        throw error as Error
+        throw error
       }
       return { ok: false, failure: failureOfThrown(service, error, deadline.aborted) }
     }

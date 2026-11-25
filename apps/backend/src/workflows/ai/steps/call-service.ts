@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { DEFAULT_CIRCUIT_BREAKER } from "../../../lib/clients/circuit-breaker"
 import { correctionFailure, withAiBreaker } from "../../../lib/ai/breaker"
-import { textConnectorFor, textTargetOf } from "../../../lib/ai/connector-of"
+import { textConnectorWith, textTargetOf } from "../../../lib/ai/connector-of"
 import type { AiImageInput } from "../../../lib/ai/connectors/types"
 import { aiProviderError } from "../../../lib/ai/errors"
 import type { AiErrorKey } from "../../../lib/ai/errors"
@@ -30,10 +31,9 @@ import {
 import { runTextTask } from "../../../lib/ai/run-text"
 import type { CampaignAllowed } from "../../../lib/ai/campaign-text"
 import { isCampaignTask, runCampaignTask } from "../../../lib/ai/run-campaign"
+import { PLATFORM_SERVICE_ID } from "../../../lib/ai/registry/platform-service"
+import { transportFor } from "../transport-for"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
-import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
-import { isCredentialProvider } from "../../../modules/integration-credentials/providers"
-import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
 
 export interface CallServiceInput {
   task: string
@@ -47,6 +47,8 @@ export interface CallServiceInput {
   allowed?: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | PostDraftAllowed | null
   /** A bulk message's limits (its figures, an SMS's end), read on the server (task-input). */
   campaign?: CampaignAllowed | null
+  /** The run's operation (select-service), its correction call carrying the same; none given, one is made here. */
+  operation?: string | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -84,25 +86,6 @@ export interface CorrectionUsage {
   images: number | null
   duration_ms: number
   error_code: string | null
-}
-
-/**
- * The shop's key for the service, read here and nowhere else: it is no
- * part of a step's input or output (`workflow_execution` keeps those), of
- * a log or of an error. A service without a readable key cannot be called.
- */
-export async function apiKeyOf(
-  container: Pick<MedusaContainer, "resolve">,
-  credentialProvider: string
-): Promise<string | null> {
-  if (!isCredentialProvider(credentialProvider)) {
-    return null
-  }
-  const account = await container
-    .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-    .read(credentialProvider)
-  const key = account?.secrets["api_key"]
-  return typeof key === "string" && key !== "" ? key : null
 }
 
 /**
@@ -153,9 +136,10 @@ export const callServiceStep = createStep(
     const started = Date.now()
     const task = findAiTask(input.task)
     const capability = input.capability === "vision" ? "vision" : "text"
-    const resolved = textTargetOf(input.service, capability)
+    // The platform's own target is the routed service's, known once the route is
+    const own = textTargetOf(input.service, capability)
     const base = {
-      model: resolved?.target.model ?? "",
+      model: own?.target.model ?? "",
       text: null,
       candidates: [],
       correction: null,
@@ -168,22 +152,22 @@ export const callServiceStep = createStep(
       retry_after_ms: null,
     }
     try {
-      if (!task || !resolved || !runsAs(task, input.capability)) {
+      const known = own !== null || input.service === PLATFORM_SERVICE_ID
+      if (!task || !known || !runsAs(task, input.capability)) {
         throw aiProviderError({
           service: input.service,
           key: "ai.service_unavailable",
           code: "not_registered",
         })
       }
-      const apiKey = await apiKeyOf(container, resolved.service.credentialProvider)
-      if (apiKey === null) {
-        throw aiProviderError({
-          service: input.service,
-          key: "ai.service_unavailable",
-          code: "no_credentials",
-        })
-      }
-      const connector = textConnectorFor(input.service, capability, apiKey)
+      const route = await transportFor(container, {
+        service: input.service,
+        capability,
+        task: task.id,
+        operation: input.operation ?? randomUUID(),
+      })
+      base.model = textTargetOf(route.service.id, capability)?.target.model ?? base.model
+      const connector = textConnectorWith(route.service.id, capability, route.transport)
       const images =
         capability === "vision"
           ? [await pictureOf(container, input.image_file_id ?? null, input.service)]
