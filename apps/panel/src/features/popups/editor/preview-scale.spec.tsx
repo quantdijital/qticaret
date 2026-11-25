@@ -4,24 +4,37 @@ import "@/lib/i18n"
 import type { PopupDesign, PopupLayout } from "@/features/popups/api/types"
 import type { PreviewContent } from "./preview-box"
 import { PageFrame } from "./preview-card"
-import { boxWidth, fitScale, scaledHeight } from "./preview-scale"
+import { boxWidth, fitScale, previewScreen, scaledHeight } from "./preview-scale"
 import type { Device } from "./preview-scale"
 
 describe("the pop-up preview's scale", () => {
-  it("scales a laptop's 1280 px screen down to the room, rounded down", () => {
-    expect(fitScale(320, 1280)).toBe(0.25)
-    expect(fitScale(333, 1280)).toBe(0.26)
+  it("scales the screen down to the room, rounded down", () => {
+    expect(fitScale(288, 576)).toBe(0.5)
+    expect(fitScale(300, 576)).toBe(0.52)
     expect(fitScale(224, 390)).toBe(0.574)
   })
 
+  it("crops a laptop's page around the pop-up: its width and a margin each side", () => {
+    expect(previewScreen("desktop", "modal", "classic", true)).toEqual({ width: 576, height: 360 })
+    expect(previewScreen("desktop", "modal", "split", true)).toEqual({ width: 816, height: 360 })
+    expect(previewScreen("desktop", "corner", "split", true)).toEqual({ width: 448, height: 440 })
+    expect(previewScreen("mobile", "modal", "split", true)).toEqual({ width: 390, height: 844 })
+  })
+
+  it("lands a window around half its size in the ~300 px sticky column", () => {
+    const scale = fitScale(300, previewScreen("desktop", "modal", "classic", false).width)
+    expect(scale).toBeGreaterThanOrEqual(0.5)
+    expect(scale).toBeLessThan(0.6)
+  })
+
   it("never draws the screen larger than it is, nor at all while the room is unmeasured", () => {
-    expect(fitScale(2000, 1280)).toBe(1)
-    expect(fitScale(0, 1280)).toBe(0)
+    expect(fitScale(2000, 576)).toBe(1)
+    expect(fitScale(0, 576)).toBe(0)
   })
 
   it("takes the viewport's height, or the taller screen a long pop-up made", () => {
-    expect(scaledHeight(0, 800, 0.25)).toBe(200)
-    expect(scaledHeight(1100, 800, 0.25)).toBe(275)
+    expect(scaledHeight(0, 360, 0.5)).toBe(180)
+    expect(scaledHeight(1100, 360, 0.5)).toBe(550)
   })
 
   it("draws the pop-up as wide as the storefront does", () => {
@@ -45,7 +58,7 @@ const content = (design: PopupDesign, imageUrl: string): PreviewContent => ({
   code: "KIS20",
 })
 
-/** The room is 320 px wide; the screen is as tall as `screenHeight` (a long pop-up's). */
+/** The room is 288 px wide; the screen is as tall as `screenHeight` (a long pop-up's). */
 let screenHeight = 0
 const descriptors = {
   clientWidth: Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth"),
@@ -57,7 +70,7 @@ describe("the pop-up preview's screen", () => {
     Object.defineProperty(HTMLElement.prototype, "clientWidth", {
       configurable: true,
       get(this: HTMLElement) {
-        return this.dataset["previewRoom"] ? 320 : 0
+        return this.dataset["previewRoom"] ? 288 : 0
       },
     })
     Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
@@ -92,12 +105,12 @@ describe("the pop-up preview's screen", () => {
   it("grows with a long pop-up instead of cutting it: the room is the screen's height scaled", () => {
     screenHeight = 1100
     const { room, screen } = draw("desktop", "modal", "classic", "/kis.jpg")
-    expect(screen.style.transform).toBe("scale(0.25)")
-    expect(screen.style.width).toBe("1280px")
+    expect(screen.style.transform).toBe("scale(0.5)")
+    expect(screen.style.width).toBe("576px")
     // A minimum, never a fixed height: the screen grows with what it holds
-    expect(screen.style.minHeight).toBe("800px")
+    expect(screen.style.minHeight).toBe("360px")
     expect(screen.style.height).toBe("")
-    expect(room.style.height).toBe("275px")
+    expect(room.style.height).toBe("550px")
   })
 
   it("keeps the viewport's height for a short pop-up, a phone's screen at 390 px", () => {
@@ -105,8 +118,8 @@ describe("the pop-up preview's screen", () => {
     const { room, screen } = draw("mobile", "modal", "minimal", "")
     expect(screen.style.width).toBe("390px")
     expect(screen.style.minHeight).toBe("844px")
-    // 320 / 390, rounded down to a thousandth, of 844 px
-    expect(room.style.height).toBe(`${String(Math.ceil(844 * 0.82))}px`)
+    // 288 / 390, rounded down to a thousandth, of 844 px
+    expect(room.style.height).toBe(`${String(Math.ceil(844 * 0.738))}px`)
   })
 
   it.each(

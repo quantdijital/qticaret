@@ -3,11 +3,17 @@ import type { PopupDesign, PopupLayout } from "@/features/popups/api/types"
 
 export type Device = "desktop" | "mobile"
 
-/** The screen the pop-up is laid out on before it is scaled down: a laptop and a phone. */
-export const VIEWPORTS: Record<Device, { width: number; height: number }> = {
-  desktop: { width: 1280, height: 800 },
-  mobile: { width: 390, height: 844 },
-}
+/** The phone's whole screen: its sheet spans it. */
+const PHONE = { width: 390, height: 844 }
+
+/** The page shown around a laptop's pop-up on each side: the window's, the corner card's. */
+export const MARGINS: Record<PopupLayout, number> = { modal: 48, corner: 32 }
+
+/**
+ * The least height of a laptop's crop: the window a little page above
+ * and below, the corner card a hint of page above it.
+ */
+const MIN_HEIGHTS: Record<PopupLayout, number> = { modal: 360, corner: 440 }
 
 /**
  * The pop-up's width on a laptop's storefront (Atölye's `PopupDialog`):
@@ -19,6 +25,27 @@ export function boxWidth(layout: PopupLayout, design: PopupDesign, picture: bool
     return 384
   }
   return design === "split" && picture ? 720 : 480
+}
+
+/**
+ * The screen the pop-up is laid out on before it is scaled down: a phone's
+ * whole screen, or on a laptop the part of the page around the pop-up (its
+ * storefront width and a margin each side), so the words stay readable in
+ * a narrow column. Its height is a minimum: a long pop-up grows it.
+ */
+export function previewScreen(
+  device: Device,
+  layout: PopupLayout,
+  design: PopupDesign,
+  picture: boolean
+): { width: number; height: number } {
+  if (device === "mobile") {
+    return PHONE
+  }
+  return {
+    width: boxWidth(layout, design, picture) + 2 * MARGINS[layout],
+    height: MIN_HEIGHTS[layout],
+  }
 }
 
 /**
@@ -35,10 +62,10 @@ export function fitScale(room: number, width: number): number {
 
 /**
  * The height the scaled screen takes in the page: the screen's own height
- * (its viewport, or more when a long pop-up grew it) times the scale.
+ * (its minimum, or more when a long pop-up grew it) times the scale.
  */
-export function scaledHeight(screenHeight: number, viewportHeight: number, scale: number): number {
-  return Math.ceil(Math.max(screenHeight, viewportHeight) * scale)
+export function scaledHeight(screenHeight: number, minHeight: number, scale: number): number {
+  return Math.ceil(Math.max(screenHeight, minHeight) * scale)
 }
 
 /**
@@ -46,7 +73,7 @@ export function scaledHeight(screenHeight: number, viewportHeight: number, scale
  * with its pop-up), both as they are resized; a transform does not change
  * an element's own layout size, so the screen is measured as laid out.
  */
-export function useScaledScreen(device: Device) {
+export function useScaledScreen(screenSize: { width: number; height: number }) {
   const room = useRef<HTMLDivElement>(null)
   const screen = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ room: 0, screen: 0 })
@@ -70,13 +97,12 @@ export function useScaledScreen(device: Device) {
     return () => {
       observer.disconnect()
     }
-  }, [device])
-  const viewport = VIEWPORTS[device]
-  const scale = fitScale(size.room, viewport.width)
+  }, [screenSize.width, screenSize.height])
+  const scale = fitScale(size.room, screenSize.width)
   return {
     room,
     screen,
     scale,
-    height: scaledHeight(size.screen, viewport.height, scale),
+    height: scaledHeight(size.screen, screenSize.height, scale),
   }
 }

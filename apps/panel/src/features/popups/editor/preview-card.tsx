@@ -12,16 +12,17 @@ import type { PopupValues } from "@/features/popups/form"
 import { PopupBox } from "./preview-box"
 import type { PreviewContent } from "./preview-box"
 import { PageStandIn } from "./preview-page"
-import { VIEWPORTS, boxWidth, useScaledScreen } from "./preview-scale"
+import { MARGINS, boxWidth, previewScreen, useScaledScreen } from "./preview-scale"
 import type { Device } from "./preview-scale"
 
 const V = "popups.preview"
 
 /**
- * The pop-up on a whole screen (a 1280 px laptop or a 390 px phone) laid
- * out at its storefront size and scaled down as one to the card's width.
- * A pop-up taller than the screen makes the screen taller (the storefront
- * scrolls it inside) rather than cut it.
+ * The pop-up at its storefront size on the page around it (on a laptop
+ * the part of the page beside the window or the corner card, on a phone
+ * its whole 390 px screen), scaled down as one to the card's width. A
+ * pop-up taller than that makes it taller (the storefront scrolls it
+ * inside) rather than cut it.
  */
 export function PageFrame({
   device,
@@ -34,8 +35,9 @@ export function PageFrame({
 }) {
   const phone = device === "mobile"
   const modal = layout === "modal" && !phone
-  const viewport = VIEWPORTS[device]
-  const { room, screen, scale, height } = useScaledScreen(device)
+  const picture = content.imageUrl !== ""
+  const viewport = previewScreen(device, layout, content.design, picture)
+  const { room, screen, scale, height } = useScaledScreen(viewport)
   return (
     <div className={cn("mx-auto w-full rounded-md border", phone && "max-w-64")}>
       <div
@@ -55,18 +57,19 @@ export function PageFrame({
             transform: `scale(${String(scale)})`,
           }}
         >
-          <PageStandIn phone={phone} />
+          <PageStandIn view={phone ? "phone" : layout === "corner" ? "corner" : "window"} />
           {modal ? <div aria-hidden="true" className="absolute inset-0 bg-foreground/25" /> : null}
           <div
             className={cn(
               "relative flex flex-1",
-              phone ? "items-end" : modal ? "items-center justify-center p-4" : "items-end p-6"
+              phone ? "items-end" : modal ? "items-center justify-center" : "items-end"
             )}
+            style={phone ? undefined : { padding: MARGINS[layout] }}
           >
             <PopupBox
               content={content}
               place={phone ? "sheet" : modal ? "modal" : "corner"}
-              width={phone ? null : boxWidth(layout, content.design, content.imageUrl !== "")}
+              width={phone ? null : boxWidth(layout, content.design, picture)}
             />
           </div>
         </div>
