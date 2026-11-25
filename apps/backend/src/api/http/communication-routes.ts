@@ -15,6 +15,21 @@ const RESEND: RateLimitProfile = {
   perIdentityAnyIp: { max: 30, windowMs: 60 * 60 * 1000 },
 }
 
+/** Notes e-mailed to customers (Batch 9 / O3): staff's own words in a customer's inbox. */
+const NOTE_TO_CUSTOMER: RateLimitProfile = {
+  name: "order_note_to_customer",
+  perIdentityAnyIp: { max: 20, windowMs: 60 * 60 * 1000 },
+}
+
+/** Only a note that goes to the customer spends the budget; the team's own notes do not. */
+const limitNoteToCustomer = rateLimit(
+  (req) =>
+    (req.validatedBody as { notify_customer?: boolean } | undefined)?.notify_customer === true
+      ? NOTE_TO_CUSTOMER
+      : null,
+  { identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id }
+)
+
 /**
  * F12.8: the team's notes on an order and what its customer was sent.
  * People only: a note has an author, and an integration key reads neither.
@@ -28,7 +43,11 @@ export const COMMUNICATION_ROUTES = [
   {
     matcher: "/admin/orders/:id/notes",
     methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminPostOrderNote)],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(AdminPostOrderNote),
+      limitNoteToCustomer,
+    ],
   },
   {
     matcher: "/admin/orders/:id/notes/:note_id",

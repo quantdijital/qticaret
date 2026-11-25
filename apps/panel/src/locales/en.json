@@ -1777,7 +1777,8 @@
             "shipped": "Order shipped",
             "delivered": "Order delivered",
             "access_link": "Order link",
-            "invoiced": "Invoice issued"
+            "invoiced": "Invoice issued",
+            "note": "Order note (sent to the customer)"
           },
           "return": {
             "requested": "Return requested",
@@ -5281,7 +5282,7 @@
     },
     "notes": {
       "title": "Internal notes",
-      "text": "Only the team sees them; never shown to the customer.",
+      "text": "Only the team sees them; only a note marked \"Send to customer\" is e-mailed to the customer.",
       "empty": "No notes yet.",
       "new": "New note",
       "placeholder": "For example: the customer called and asked for the parcel to be left at the door.",
@@ -5292,7 +5293,19 @@
       "removeText": "The note is removed for the team; who removed it stays on record.",
       "removed": "Note removed.",
       "unnamed": "Team member",
-      "formerMember": "Former team member"
+      "formerMember": "Former team member",
+      "notify": "Send to customer",
+      "notifyHint": "The note is e-mailed to the order's address in the shop's name and shows in the message history.",
+      "addAndSend": "Add and send",
+      "sent": "Note added and sent to the customer.",
+      "notSent": {
+        "templateOff": "Note added but not sent: this message is turned off in Settings > Customer messages.",
+        "noAddress": "Note added but not sent: the order has no valid e-mail address.",
+        "failed": "Note added; the e-mail could not go now and will be tried again.",
+        "other": "Note added but not sent; the reason is in the message history."
+      },
+      "badgeSent": "Sent to customer",
+      "badgeNotSent": "Not sent"
     },
     "contracts": {
       "title": "Contract consent",
