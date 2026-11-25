@@ -3,8 +3,10 @@ import { Migration } from "@medusajs/framework/mikro-orm/migrations"
 /**
  * The AI platform credits (adr/0085 §1): wallets, the append-only ledger,
  * the charged operations and the top-up requests, with the checks that
- * keep money whole (no negative balance, no row of 0 credits) and a
- * trigger refusing a ledger row's update or delete. Down drops them all.
+ * keep money whole (no negative balance, no row of 0 credits, a row's sign
+ * follows its kind, bought credits have a last day) and triggers refusing
+ * a ledger row's update or delete and the ledger's truncation. Down drops
+ * them all, but stops while the ledger has a row.
  */
 export class Migration20261125011726 extends Migration {
   override async up(): Promise<void> {
@@ -102,18 +104,36 @@ export class Migration20261125011726 extends Migration {
     this.addSql(
       `alter table if exists "ai_credit_order" add constraint "ai_credit_order_credits_check" check ("credits" > 0 and "amount" >= 0);`
     )
+    // A row's sign follows its kind: a spend or an expiry takes, a grant or a
+    // release gives back, a staff correction goes either way
+    this.addSql(
+      `alter table if exists "ai_credit_entry" add constraint "ai_credit_entry_kind_sign_check" check (("kind" in ('spend', 'expire') and "amount" < 0) or ("kind" in ('grant_purchase', 'grant_plan_monthly', 'release') and "amount" > 0) or ("kind" = 'adjust' and "amount" <> 0));`
+    )
+    // Bought credits always have a last day (a spend's condition reads it)
+    this.addSql(
+      `alter table if exists "ai_credit_wallet" add constraint "ai_credit_wallet_purchased_expiry_check" check ("purchased_balance" = 0 or "purchased_expires_at" is not null);`
+    )
 
-    // The ledger is append-only for every writer, the module's own included
-    // (a row is never changed or removed; TRUNCATE, a whole table's reset, is not a row's)
+    // The ledger is append-only for every writer, the module's own included:
+    // a row is never changed or removed, nor the table emptied at once
     this.addSql(
       `create or replace function "ai_credit_entry_append_only"() returns trigger language plpgsql as $$ begin raise exception 'ai_credit_entry is append-only' using errcode = 'restrict_violation'; end; $$;`
     )
     this.addSql(
       `create trigger "ai_credit_entry_append_only" before update or delete on "ai_credit_entry" for each row execute function "ai_credit_entry_append_only"();`
     )
+    this.addSql(
+      `create trigger "ai_credit_entry_no_truncate" before truncate on "ai_credit_entry" for each statement execute function "ai_credit_entry_append_only"();`
+    )
   }
 
   override async down(): Promise<void> {
+    // The ledger is the record of money: a ledger with rows is never dropped
+    // by a rollback; it is moved aside by hand first, knowingly
+    this.addSql(
+      `do $$ begin if to_regclass('ai_credit_entry') is not null then if exists (select 1 from "ai_credit_entry") then raise exception 'ai_credit_entry has rows: the ledger is not dropped by a rollback' using errcode = 'restrict_violation'; end if; end if; end $$;`
+    )
+    this.addSql(`drop trigger if exists "ai_credit_entry_no_truncate" on "ai_credit_entry";`)
     this.addSql(`drop trigger if exists "ai_credit_entry_append_only" on "ai_credit_entry";`)
     this.addSql(`drop function if exists "ai_credit_entry_append_only"();`)
     this.addSql(`drop table if exists "ai_credit_entry" cascade;`)
