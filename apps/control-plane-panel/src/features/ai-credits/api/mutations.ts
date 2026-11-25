@@ -91,17 +91,24 @@ export const useMarkPaid = (order: AiOrder) =>
   )
 
 /**
- * "İptal et": the server takes no note (its body is empty). The request
- * comes with each call, so the page that stays on screen owns the
- * mutation and its answer is said after the confirmation has closed.
+ * "İptal et" with an optional note why (P3d; the audit row keeps it): a
+ * blank note is not sent (`{}`). The request comes with each call, so the
+ * page that stays on screen owns the mutation and its answer is said
+ * after the confirmation has closed.
  */
 export const useCancelOrder = () =>
   useChange(
-    (order: AiOrder) =>
-      withStepUp((headers) =>
-        read(orderAnswerSchema, orderPath(order, "cancel"), post({}, headers))
-      ),
-    (order) => [ORDERS_KEY, walletKey(order.tenant_id)]
+    ({ order, note }: { order: AiOrder; note?: string }) => {
+      const why = note?.trim() ?? ""
+      return withStepUp((headers) =>
+        read(
+          orderAnswerSchema,
+          orderPath(order, "cancel"),
+          post(why === "" ? {} : { note: why }, headers)
+        )
+      )
+    },
+    ({ order }) => [ORDERS_KEY, walletKey(order.tenant_id)]
   )
 
 const providerPath = (service: string, rest = "") =>

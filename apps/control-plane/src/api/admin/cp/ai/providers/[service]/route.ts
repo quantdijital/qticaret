@@ -23,7 +23,8 @@ export async function POST(
 
 /**
  * DELETE /admin/cp/ai/providers/:service (owner, step-up): every routing
- * to the service taken out, then its key destroyed (every version).
+ * to the service taken out, then its key destroyed (every version), then
+ * its routing taken out once more (a save racing the delete, P6b).
  */
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const service = serviceParam(req)

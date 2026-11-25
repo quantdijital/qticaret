@@ -38,6 +38,7 @@ export const CP_ERROR_CODES = [
   "ai_route_capability_unknown",
   "ai_route_capability_unsupported",
   "ai_route_model_not_allowed",
+  "ai_route_no_key",
   "ai_route_service_unknown",
   "ai_route_uncapped",
   "ai_service_unknown",

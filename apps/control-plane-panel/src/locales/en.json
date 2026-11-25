@@ -843,6 +843,7 @@
       "ai_route_capability_unsupported": "This service cannot do this kind of work.",
       "ai_route_model_not_allowed": "This model cannot be chosen for this kind of work.",
       "ai_route_service_unknown": "Unknown service.",
+      "ai_route_no_key": "This service has no key; write its key first.",
       "ai_route_uncapped": "This service documents no output limit, so it cannot run on platform credits.",
       "ai_service_unknown": "Unknown AI service."
     },
@@ -1567,6 +1568,7 @@
       "plan": "Monthly grant (left / total)",
       "planValue": "{{left}} / {{total}}",
       "planHint": "{{month}} · renews {{day}}",
+      "planBar": "Monthly grant left: {{value}}%",
       "purchased": "Purchased",
       "expires": "Expires: {{day}}",
       "noneBought": "No purchased credits",
@@ -1580,6 +1582,7 @@
       "empty": "No moves yet.",
       "system": "System",
       "you": "{{name}} (you)",
+      "unnamed": "Removed staff member",
       "columns": {
         "at": "Date",
         "kind": "Kind",
@@ -1667,6 +1670,8 @@
         "title": "Cancel the request?",
         "text": "{{shop}}'s {{pack}} request ({{credits}}, {{amount}}) will be cancelled. No credits are added; the shop may open a new request.",
         "confirm": "Cancel the request",
+        "note": "Note (optional)",
+        "noteHelp": "You may say briefly why it was cancelled; only the audit log shows it, the shop does not see it.",
         "done": "Request cancelled."
       }
     },
