@@ -1556,6 +1556,7 @@
       "minimax": "MiniMax",
       "gemini": "Google Gemini",
       "photoroom": "Photoroom",
+      "bria": "Bria",
       "fake": "Fake service (tests only)"
     },
     "tab": {

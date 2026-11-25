@@ -55,7 +55,7 @@ describe("the AI credits' words", () => {
       ...["grant_purchase", "grant_plan_monthly", "spend", "release", "expire", "adjust"].map(
         (kind) => `aiCredits.ledger.kinds.${kind}`
       ),
-      ...["deepseek", "minimax", "gemini", "photoroom", "fake"].map(
+      ...["deepseek", "minimax", "gemini", "photoroom", "bria", "fake"].map(
         (service) => `aiCredits.services.${service}`
       ),
       "nav.aiOrders",

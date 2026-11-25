@@ -70,7 +70,7 @@ export function actorOf(
   return { text: row.actor }
 }
 
-const SERVICES = ["deepseek", "minimax", "gemini", "photoroom", "fake"] as const
+const SERVICES = ["deepseek", "minimax", "gemini", "photoroom", "bria", "fake"] as const
 
 /** A service by its name ("Google Gemini"); one this panel does not know yet by its id. */
 export const serviceName = (t: TFunction, service: string) =>
