@@ -8,7 +8,7 @@ import { deleteProviderKey, keyedServices, writeProviderKey } from "../keys"
  */
 describe("provider keys outside test and development", () => {
   const nodeEnv = process.env["NODE_ENV"]
-  const vault = { putSecret: jest.fn(), destroySecret: jest.fn(), listSecretMeta: jest.fn() }
+  const vault = { putSecret: jest.fn(), retireSecret: jest.fn(), listSecretMeta: jest.fn() }
   const container = { resolve: jest.fn(() => vault) }
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe("provider keys outside test and development", () => {
       })
     }
     expect(vault.putSecret).not.toHaveBeenCalled()
-    expect(vault.destroySecret).not.toHaveBeenCalled()
+    expect(vault.retireSecret).not.toHaveBeenCalled()
   })
 
   it("lists the fake service under test", () => {

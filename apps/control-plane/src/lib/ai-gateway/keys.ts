@@ -47,8 +47,10 @@ function knownService(service: string): string {
 }
 
 /**
- * A new version of the service's key sealed; its metadata back. The value
- * goes to the vault and nowhere else: no answer, error or log carries it.
+ * A new version of the service's key sealed, the older ones retired in the
+ * same transaction (a replaced key is not kept sealed); its metadata back.
+ * The value goes to the vault and nowhere else: no answer, error or log
+ * carries it.
  */
 export async function writeProviderKey(
   container: Container,
@@ -59,15 +61,18 @@ export async function writeProviderKey(
     owner: PLATFORM_OWNER,
     name: aiProviderKeyName(knownService(service)),
     value,
+    retireOlder: true,
   })
   return { version: meta.version, written_at: meta.created_at }
 }
 
 /**
- * The service's key destroyed, every version, and every routing to it
+ * The service's key retired, every version (emptied, its numbers kept: a
+ * key written later is not "version 1" again), and every routing to it
  * taken out first: from the moment the key is gone nothing routes there
  * (a failure between the two leaves the key unrouted, never routed and
  * keyless). Whether a key was held and the capabilities unrouted come back.
+ * Retiring is not revoking: a leaked key is revoked at the provider first.
  */
 export async function deleteProviderKey(
   container: Container,
@@ -76,9 +81,6 @@ export async function deleteProviderKey(
 ): Promise<{ deleted: boolean; unrouted: string[] }> {
   const id = knownService(service)
   const unrouted = await unrouteService(container, id, actor)
-  const held = (await providerKeysHeld(container)).has(id)
-  if (held) {
-    await vaultIn(container).destroySecret(PLATFORM_OWNER, aiProviderKeyName(id))
-  }
-  return { deleted: held, unrouted }
+  const deleted = await vaultIn(container).retireSecret(PLATFORM_OWNER, aiProviderKeyName(id))
+  return { deleted, unrouted }
 }

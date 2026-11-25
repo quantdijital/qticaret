@@ -3,7 +3,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { pgOf } from "../helpers/ai-credits"
 import { anyStatus, makeMember } from "../helpers/staff"
 import type { Answer, HttpClient, Member } from "../helpers/staff"
-import { client, proved } from "../helpers/tenants"
+import { auditRows, client, proved } from "../helpers/tenants"
 import { captureOutput, tablesHolding } from "../helpers/vault"
 
 jest.setTimeout(240 * 1000)
@@ -108,6 +108,48 @@ medusaIntegrationTestRunner({
       expect(await tablesHolding(getContainer(), [secret, part])).toEqual([])
       expect((await remove(`${P}/fake`)).status).toBe(200)
       expect(await tablesHolding(getContainer(), [secret, part])).toEqual([])
+    })
+
+    it("keeps no replaced version sealed and never numbers a key twice", async () => {
+      const versions = async () => {
+        const { rows } = await pgOf(getContainer()).raw(
+          `SELECT version, sealed <> '' AS sealed, deleted_at IS NOT NULL AS retired
+             FROM secret_record WHERE owner = 'platform' AND name = 'ai.fake.api_key'
+            ORDER BY version`
+        )
+        return rows as { version: number; sealed: boolean; retired: boolean }[]
+      }
+      const written = async () => {
+        const answer = await post(`${P}/fake`, { api_key: `test-key-${randomUUID()}` })
+        expect(answer.status).toBe(200)
+        return (answer.data as { provider: { version: number } }).provider.version
+      }
+      const first = await written()
+      const second = await written()
+      expect(second).toBe(first + 1)
+      // Only the key in force can be opened; the replaced one is emptied in the same write
+      expect((await versions()).filter((row) => row.sealed)).toEqual([
+        { version: second, sealed: true, retired: false },
+      ])
+      expect((await versions()).find((row) => row.version === first)).toEqual({
+        version: first,
+        sealed: false,
+        retired: true,
+      })
+      expect((await remove(`${P}/fake`)).data).toMatchObject({ deleted: true })
+      expect((await versions()).every((row) => !row.sealed && row.retired)).toBe(true)
+      expect((await remove(`${P}/fake`)).data).toMatchObject({ deleted: false })
+      // Written again after it is gone: the next number, not "version 1" again
+      const third = await written()
+      expect(third).toBe(second + 1)
+      const listed = await call.get(P, owner)
+      expect(
+        (listed.data as { providers: { service: string; version: number | null }[] }).providers
+      ).toContainEqual(expect.objectContaining({ service: "fake", version: third }))
+      const audited = (
+        await auditRows(getContainer(), { action: `POST ${P}/:service`, outcome: 200 })
+      ).map((row) => (row.changes as { key: { to: { version: number } } }).key.to.version)
+      expect(new Set(audited).size).toBe(audited.length)
     })
   },
 })
