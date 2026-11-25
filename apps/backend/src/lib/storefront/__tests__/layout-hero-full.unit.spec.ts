@@ -86,6 +86,10 @@ describe("the opening's full image (adr/0077 §9)", () => {
       align: "start",
       image_side: "end",
       edge: "wave",
+      second_button: "play",
+      title_style: "stacked",
+      trust_place: "inside",
+      note_place: "corner",
       show_trust: true,
     })
 
@@ -99,6 +103,10 @@ describe("the opening's full image (adr/0077 §9)", () => {
       align: "start",
       image_side: "end",
       edge: "wave",
+      second_button: "play",
+      title_style: "stacked",
+      trust_place: "inside",
+      note_place: "corner",
       show_trust: true,
     })
     expect(section.links).toHaveLength(2)
@@ -118,6 +126,8 @@ describe("the opening's full image (adr/0077 §9)", () => {
       issues({ home: [full({ title_accent: "a".repeat(HERO_FULL_LIMITS.title_accent + 1) })] })
     ).not.toEqual([])
     expect(issues({ home: [full({ show_trust: "on" })] })).not.toEqual([])
+    expect(issues({ home: [full({ second_button: "video" })] })).not.toEqual([])
+    expect(issues({ home: [hero({ title_style: "stacked" })] })).not.toEqual([])
     expect(issues({ home: [full({ list: { kind: "top" } })] })).not.toEqual([])
   })
 

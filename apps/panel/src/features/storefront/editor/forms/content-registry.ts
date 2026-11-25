@@ -82,6 +82,10 @@ export type ContentField =
   | "button_icon"
   | "accent_mark"
   | "ornament"
+  | "second_button"
+  | "title_style"
+  | "trust_place"
+  | "note_place"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {

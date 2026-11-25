@@ -10,6 +10,13 @@ const PREFIX = "qt.panel.section"
  */
 export const SectionOwner = createContext<() => string | undefined>(() => undefined)
 
+/**
+ * How the page around would have a section start, by its remembered name
+ * (the shop's layout opening its folded parts, "Gelişmiş"); undefined
+ * leaves the section's own default. A person's own choice still wins.
+ */
+export const SectionDefaults = createContext<(name: string) => boolean | undefined>(() => undefined)
+
 const keyOf = (user: string, name: string) => `${PREFIX}:${user}:${name}`
 
 /** The person's last choice for a section, or none; storage may refuse (private mode, blocked). */
@@ -101,12 +108,21 @@ interface SectionOpenOptions {
 export function useSectionOpen({ id, name, attention, defaultOpen }: SectionOpenOptions) {
   // The signed-in person, as the app already loaded them; none in a test
   const user = useContext(SectionOwner)() ?? "anyone"
-  const [open, setOpen] = useState(() => attention || (readSectionOpen(user, name) ?? defaultOpen))
+  const preferred = useContext(SectionDefaults)(name) ?? defaultOpen
+  const [open, setOpen] = useState(() => attention || (readSectionOpen(user, name) ?? preferred))
   const [needed, setNeeded] = useState(attention)
   if (attention !== needed) {
     setNeeded(attention)
     if (attention) {
       setOpen(true)
+    }
+  }
+  // The page's default changed (its layout loaded, or a preset is tried): followed until the person chose
+  const [wanted, setWanted] = useState(preferred)
+  if (preferred !== wanted) {
+    setWanted(preferred)
+    if (readSectionOpen(user, name) === null) {
+      setOpen(attention || preferred)
     }
   }
   useEffect(() => {

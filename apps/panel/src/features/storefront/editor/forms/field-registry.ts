@@ -219,6 +219,7 @@ export const FIELD_IDS = {
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
   toolLabels: (sectionId: string) => `${sectionId}-tool-labels`,
+  toolsStyle: (sectionId: string) => `${sectionId}-tools-style`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,

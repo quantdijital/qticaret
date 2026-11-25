@@ -14,7 +14,8 @@ import type { ProductCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import type { Assessment, SeoIssue } from "@/features/seo/api/advisor"
 import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
-import { ProductSections, ProductSideCards } from "./product-sections"
+import type { MainPart, SidePart } from "@/features/products/layout/parts"
+import { MainPartView, SidePartView } from "./product-sections"
 import { PRODUCT_TARGETS } from "./sections"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
@@ -202,6 +203,28 @@ function answer(url: string, { catalog, attributes, issues, history, features }:
   return {}
 }
 
+// The folded parts under the main cards and the narrow column's cards, in their default order
+const FOLDED: readonly MainPart[] = [
+  "departures",
+  "program",
+  "seo",
+  "attributes",
+  "faq",
+  "addons",
+  "priceHistory",
+]
+const SHORT: readonly SidePart[] = ["organize", "catalog", "shipping"]
+
+function ProductSections({ product }: { product: ProductDetail }) {
+  return FOLDED.map((key) => <MainPartView key={key} part={key} product={product} />)
+}
+
+function ProductSideCards({ product }: { product: ProductDetail }) {
+  return SHORT.map((key) => (
+    <SidePartView key={key} part={key} product={product} onTarget={revealSection} />
+  ))
+}
+
 function renderWith(
   Part: typeof ProductSections,
   answers: Answers = {},
@@ -342,28 +365,45 @@ describe("ProductSideCards", () => {
     })
   })
 
-  it("edits a card in its own dialog, a refused measure beside it, asking before a change is lost", async () => {
+  it("edits a card in place, a refused measure beside it, asking before a change is lost", async () => {
     const user = userEvent.setup()
     renderSide({}, { ...PRODUCT, weight: null, length: null, height: null })
     await waitFor(() => {
       expect(screen.getByText("Girilmedi; varsayılan paket kullanılır")).toBeInTheDocument()
     })
     await user.click(screen.getByRole("button", { name: "Paket ölçüleri: düzenle" }))
-    const dialog = screen.getByRole("dialog", { name: "Paket ölçüleri" })
-    expect(dialog).toHaveAttribute("data-size", "sm")
-    await user.type(within(dialog).getByLabelText("Ağırlık"), "0")
-    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+    // The card turns into its form: no dialog, the first field takes the focus
+    expect(screen.queryByRole("dialog")).toBeNull()
+    const form = within(card("Paket ölçüleri")).getByRole("form", { name: "Paket ölçüleri" })
+    const weight = within(form).getByLabelText("Ağırlık")
+    expect(weight).toHaveFocus()
+    await user.type(weight, "0")
+    await user.click(within(form).getByRole("button", { name: "Kaydet" }))
+    expect(await within(form).findByRole("alert")).toHaveTextContent(
       "Sıfırdan büyük bir sayı girin"
     )
 
     // Leaving with the change asks first
-    await user.click(within(dialog).getByRole("button", { name: "Vazgeç" }))
+    await user.click(within(form).getByRole("button", { name: "Vazgeç" }))
     await user.click(screen.getByRole("button", { name: "Değişiklikleri at" }))
-    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(screen.queryByRole("form")).toBeNull()
+    expect(card("Paket ölçüleri")).toHaveTextContent("Girilmedi; varsayılan paket kullanılır")
   })
 
-  it("opens the categories' dialog for the advisor's missing category, and has no parcel for a digital product", async () => {
+  it("lets go of an unchanged form with Esc, the focus back on its Düzenle", async () => {
+    const user = userEvent.setup()
+    renderSide()
+    await waitFor(() => {
+      expect(card("Paket ölçüleri")).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole("button", { name: "Paket ölçüleri: düzenle" }))
+    expect(screen.getByRole("form", { name: "Paket ölçüleri" })).toBeInTheDocument()
+    await user.keyboard("{Escape}")
+    expect(screen.queryByRole("form")).toBeNull()
+    expect(screen.getByRole("button", { name: "Paket ölçüleri: düzenle" })).toHaveFocus()
+  })
+
+  it("opens the categories' form for the advisor's missing category, and has no parcel for a digital product", async () => {
     renderSide({ catalog: { ...CATALOG, kind: "digital" } })
     await waitFor(() => {
       expect(card("Katalog bilgileri")).toHaveTextContent("Dijital ürün")
@@ -373,6 +413,7 @@ describe("ProductSideCards", () => {
     act(() => {
       revealSection(PRODUCT_TARGETS["edit_categories"] ?? "")
     })
-    expect(await screen.findByRole("dialog", { name: "Kategori, marka ve KDV" })).toBeVisible()
+    expect(await screen.findByRole("form", { name: "Kategori, marka ve KDV" })).toBeVisible()
+    expect(screen.queryByRole("dialog")).toBeNull()
   })
 })

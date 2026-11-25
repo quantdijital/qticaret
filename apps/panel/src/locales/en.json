@@ -4221,6 +4221,82 @@
       "withdrawalOut": "Excluded",
       "withdrawalIn": "Applies"
     },
+    "layout": {
+      "customize": "Customise page",
+      "title": "Customise the product page",
+      "description": "Hide sections or drag them into order. The layout applies to the whole team; a hidden section keeps its data.",
+      "main": "Main column",
+      "side": "Side column",
+      "locked": "Always shown",
+      "conditional": "Shown only when used",
+      "show": "Show {{name}}",
+      "moveUp": "Move {{name}} up",
+      "moveDown": "Move {{name}} down",
+      "reset": "Back to default",
+      "saved": "Page layout saved.",
+      "hiddenLine": "Hidden sections: {{names}}",
+      "showHidden": "Show",
+      "shownAttention": "Hidden section: shown because something in it needs attention.",
+      "shownRevealed": "Hidden section: shown for this visit.",
+      "parts": {
+        "general": "General",
+        "variants": "Variants and price",
+        "media": "Pictures",
+        "description": "Description",
+        "shortDescription": "Short description",
+        "departures": "Dates and capacity",
+        "program": "Program",
+        "seo": "Search appearance",
+        "attributes": "Attributes",
+        "faq": "FAQ",
+        "addons": "Add-ons",
+        "priceHistory": "Price history",
+        "summary": "Summary",
+        "advisor": "SEO advisor",
+        "organize": "Categories, brand and VAT",
+        "catalog": "Catalog details",
+        "shipping": "Parcel"
+      },
+      "presets": "Ready layouts",
+      "preset": {
+        "basic": "Simple",
+        "standard": "Standard",
+        "advanced": "Advanced"
+      },
+      "presetHint": {
+        "basic": "General details, variants and price, pictures, description and the SEO advisor. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
+        "standard": "The first layout: seldom parts stay closed under the page.",
+        "advanced": "Every part shown; search appearance, attributes, FAQ, add-ons and price history start open.",
+        "custom": "Arranged by hand."
+      },
+      "shortcuts": "Shortcuts",
+      "shortcutGo": "Go to field",
+      "modKey": "⌘ / Ctrl",
+      "nav": {
+        "label": "The page's sections",
+        "placeholder": "Go to section",
+        "mark": {
+          "complete": "complete",
+          "missing": "something missing",
+          "urgent": "needs attention"
+        }
+      },
+      "go": {
+        "heading": "Go to field",
+        "hiddenPart": "{{name}} (hidden)",
+        "fields": {
+          "title": "Product name",
+          "handle": "Page address",
+          "price": "Price and stock",
+          "barcode": "Barcode and SKU",
+          "altText": "Picture alt text",
+          "seoTitle": "SEO title",
+          "categories": "Category and brand",
+          "weight": "Weight and dimensions"
+        }
+      },
+      "shortcutSave": "Save changes"
+    },
     "variant": {
       "title": "Edit variant",
       "listTitle": "Variants",
@@ -4234,7 +4310,7 @@
       "stock": "Stock",
       "stockHint": "The quantity at the shop's default location.",
       "onHand": "Stock quantity",
-      "untracked": "This variant's stock is not tracked.",
+      "untracked": "Stock not tracked: this variant is always sold.",
       "backorderHint": "Orders are taken after it sells out too (preorder).",
       "codes": "Codes",
       "measures": "Measures",
@@ -4274,7 +4350,9 @@
         "soldOut": "Out of stock",
         "preorder": "Preorder",
         "noBarcode": "No barcode"
-      }
+      },
+      "details": "All variant details",
+      "detailsDirty": "Save or undo this card's changes first."
     },
     "rowActions": "Actions for {{title}}",
     "duplicate": {
@@ -4343,7 +4421,9 @@
         "empty": "The question and the answer cannot be empty.",
         "not_a_question": "The question must end with a question mark.",
         "too_long": "A question can be at most 120 characters, an answer at most 400."
-      }
+      },
+      "summary": "A question and answer draft from the product's details",
+      "summaryOpen": "Draft open"
     },
     "addonTemplates": {
       "title": "Add-on groups",
@@ -6533,7 +6613,8 @@
         "titleAuto": "Title (automatic) {{length}}/{{limit}}",
         "description": "Description {{length}}/{{limit}}",
         "descriptionAuto": "Description (automatic) {{length}}/{{limit}}",
-        "noDescription": "No description"
+        "noDescription": "No description",
+        "keywords": "Focus: {{keywords}}"
       },
       "noDescription": "No description; the search engine picks a snippet from the page.",
       "seoTitle": "SEO title",
@@ -6541,7 +6622,7 @@
       "seoDescription": "Meta description",
       "seoDescriptionHint": "The short text under the result; about 155 characters show.",
       "focusKeyword": "Focus keyword",
-      "focusKeywordHint": "Used in the panel and its suggestions only; never shown in the shop.",
+      "focusKeywordHint": "Used only in the panel and in suggestions; not shown in the shop. Add with Enter or a comma; the first is the main keyword (it belongs in the title), the others are secondary.",
       "robots": "Search engine indexing",
       "robotsDefault": "Follow the page's state (recommended)",
       "robotsOptions": {
@@ -6556,7 +6637,15 @@
       "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results.",
       "aiTitle": "Suggest a title with AI",
       "aiDescription": "Suggest a description with AI",
-      "aiKeyword": "Suggest a focus keyword with AI"
+      "aiKeyword": "Suggest a focus keyword with AI",
+      "keywords": {
+        "placeholder": "Type, press Enter to add",
+        "primary": "Main",
+        "makePrimary": "Make “{{keyword}}” the main keyword",
+        "remove": "Remove “{{keyword}}”",
+        "limit": "At most {{max}} focus keywords; the rest were not added.",
+        "length": "A keyword is at most {{length}} characters; the rest was cut."
+      }
     },
     "redirectsCard": {
       "title": "Redirects and 404s",
@@ -6921,8 +7010,8 @@
         },
         "KW-01": {
           "title": "The focus keyword \"{{keyword}}\" is missing from: {{missing}}.",
-          "why": "When the chosen word is in the title, the description and the start of the text, the page matches that search better.",
-          "how": "Add the word where it is missing, in a natural sentence."
+          "why": "When the main keyword is in the title and one of your focus keywords is in the description and the start of the text, the page matches those searches better.",
+          "how": "Add the main keyword to the title, and one of your focus keywords to the description and the start of the text, in a natural sentence."
         },
         "ROBOTS-01": {
           "title": "The page is closed to search engines (noindex).",
@@ -10013,6 +10102,10 @@
           "date_words": {
             "label": "Write \"Add date\" on an empty date",
             "hint": "An empty day reads \"Add date\" instead of the browser's date box, a chosen one like 12.12.2026. The calendar opens the same."
+          },
+          "boxed_fields": {
+            "label": "Boxed fields",
+            "hint": "Each field's name on top and the field in a light grey box, with room between them. Off, a hairline divides the fields."
           }
         }
       },
@@ -10533,6 +10626,13 @@
           "show": "With words",
           "hide": "Icons only",
           "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
+        },
+        "tools_style": {
+          "label": "Icons on the right",
+          "term": "icons",
+          "hint": "In the one-row header the search, account and cart in round frames, or as small plain icons; plain, the action button ends the row as a pill with an arrow, favourites in the menu and the account.",
+          "round": "Round frames",
+          "plain": "Plain, with button"
         },
         "search_style": {
           "label": "Search look",
@@ -11527,7 +11627,8 @@
           "term": "overlay",
           "hint": "The dark veil over the image, so the text reads on any picture.",
           "light": "Light",
-          "strong": "Strong"
+          "strong": "Strong",
+          "side": "From the side"
         },
         "edge": {
           "label": "Image edge",
@@ -11563,6 +11664,34 @@
           "hint": "A small sprig of leaves beside the words, in a light tint of your main colour (1024 px and up).",
           "none": "None",
           "leaves": "Sprig of leaves"
+        },
+        "second_button": {
+          "label": "Second button",
+          "term": "button",
+          "hint": "The second button (and the video's) with a thin frame, or without one, a round play mark before its words.",
+          "quiet": "Framed",
+          "play": "With play mark"
+        },
+        "title_style": {
+          "label": "Heading",
+          "term": "heading",
+          "hint": "The heading as written, or larger in a narrow column, a word or two to a line.",
+          "standard": "Normal",
+          "stacked": "Large, line by line"
+        },
+        "trust_place": {
+          "label": "Trust badges' place",
+          "term": "trust badges",
+          "hint": "The badges in a white box on the opening's bottom edge, or in a row under the buttons, icon on top, hairlines between them.",
+          "foot": "Box on the edge",
+          "inside": "Row under the buttons"
+        },
+        "note_place": {
+          "label": "Hand note's place",
+          "term": "hand note",
+          "hint": "The note over the heading, or in the opening's top right corner with a brush stroke under it (1024 px and up; over the heading on a phone).",
+          "heading": "Over the heading",
+          "corner": "Top right corner"
         }
       },
       "trustCard": {
@@ -13500,7 +13629,8 @@
       "refused": "No suitable suggestion came out. You can try again.",
       "note": "Use only fills the field; saving is up to you.",
       "choices": "Suggestions",
-      "mainChoice": "main suggestion"
+      "mainChoice": "main suggestion",
+      "useAll": "Add all"
     },
     "hint": {
       "text": "Connect an AI service to fill this field in one click.",

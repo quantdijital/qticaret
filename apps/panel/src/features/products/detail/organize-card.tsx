@@ -4,11 +4,9 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
-import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
 import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
-import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { AiPicks } from "@/features/ai/components/ai-picks"
 import { brandOptions, useSetProductBrand } from "@/features/brands/api/brands"
 import { collectionOptions } from "@/features/collections/api/collections"
@@ -26,6 +24,7 @@ import { dropTags, tagIds, tagsOf } from "./tag-values"
 import type { TagValue } from "./tag-values"
 import { PRODUCT_SECTIONS, someNames } from "./sections"
 import { SideCard } from "./side-card"
+import { SideForm } from "./side-form"
 
 interface Values {
   category_ids: string[]
@@ -53,11 +52,11 @@ const savedOf = (product: ProductDetail): Values => ({
 })
 
 /**
- * Categories, tags, brand, collection and KDV group in a dialog; each saved
- * where it is kept. Beside categories and tags the AI picks from the shop's
- * own lists (adr/0074 §5 madde 2); a pick only fills the form.
+ * Categories, tags, brand, collection and KDV group, in the card's place;
+ * each saved where it is kept. Beside categories and tags the AI picks from
+ * the shop's own lists (adr/0074 §5 madde 2); a pick only fills the form.
  */
-function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
+function OrganizeForm({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const setBrand = useSetProductBrand(product.id)
@@ -105,116 +104,109 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
   })
 
   return (
-    <FormDialog
-      open
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      title={t("products.detail.organize")}
-      description={t("products.side.organizeHint")}
+    <SideForm
+      label={t("products.detail.organize")}
+      hint={t("products.side.organizeHint")}
       dirty={form.formState.isDirty}
       saving={update.isPending || setBrand.isPending}
       onSubmit={() => void submit()}
+      onCancel={onClose}
     >
-      <DialogBody>
-        <Field label={t("products.wizard.categories")} hint={t("products.wizard.categoriesHint")}>
+      <Field label={t("products.wizard.categories")} hint={t("products.wizard.categoriesHint")}>
+        <Controller
+          control={form.control}
+          name="category_ids"
+          render={({ field }) => (
+            <div className="flex flex-col gap-2">
+              <AiPicks
+                task="product_category"
+                entity={{ type: "product", id: product.id }}
+                label={t("products.detail.aiCategories")}
+                has={(pick) => pick.kind === "record" && field.value.includes(pick.id)}
+                onPick={(pick) => {
+                  if (pick.kind === "record" && !field.value.includes(pick.id)) {
+                    field.onChange([...field.value, pick.id])
+                  }
+                }}
+              />
+              <CategoryTree value={field.value} onChange={field.onChange} />
+            </div>
+          )}
+        />
+      </Field>
+      <Field label={t("products.tags.field")} hint={t("products.tags.hint")}>
+        <Controller
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <TagsField productId={product.id} value={field.value} onChange={field.onChange} />
+          )}
+        />
+      </Field>
+      <Field label={t("brands.field")} htmlFor="detail-brand" hint={t("brands.fieldHint")}>
+        <Controller
+          control={form.control}
+          name="brand"
+          render={({ field }) => (
+            <SearchPicker
+              id="detail-brand"
+              value={field.value}
+              onChange={field.onChange}
+              search={brandOptions}
+              queryKey={["brands", "options"]}
+              placeholder={t("brands.pick")}
+              empty={t("brands.noneFound")}
+              inactiveNote={t("brands.inactive")}
+            />
+          )}
+        />
+      </Field>
+      {collectionsOn ? (
+        <Field
+          label={t("collections.field")}
+          htmlFor="detail-collection"
+          hint={t("collections.fieldHint")}
+        >
           <Controller
             control={form.control}
-            name="category_ids"
-            render={({ field }) => (
-              <div className="flex flex-col gap-2">
-                <AiPicks
-                  task="product_category"
-                  entity={{ type: "product", id: product.id }}
-                  label={t("products.detail.aiCategories")}
-                  has={(pick) => pick.kind === "record" && field.value.includes(pick.id)}
-                  onPick={(pick) => {
-                    if (pick.kind === "record" && !field.value.includes(pick.id)) {
-                      field.onChange([...field.value, pick.id])
-                    }
-                  }}
-                />
-                <CategoryTree value={field.value} onChange={field.onChange} />
-              </div>
-            )}
-          />
-        </Field>
-        <Field label={t("products.tags.field")} hint={t("products.tags.hint")}>
-          <Controller
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <TagsField productId={product.id} value={field.value} onChange={field.onChange} />
-            )}
-          />
-        </Field>
-        <Field label={t("brands.field")} htmlFor="detail-brand" hint={t("brands.fieldHint")}>
-          <Controller
-            control={form.control}
-            name="brand"
+            name="collection"
             render={({ field }) => (
               <SearchPicker
-                id="detail-brand"
+                id="detail-collection"
                 value={field.value}
                 onChange={field.onChange}
-                search={brandOptions}
-                queryKey={["brands", "options"]}
-                placeholder={t("brands.pick")}
-                empty={t("brands.noneFound")}
-                inactiveNote={t("brands.inactive")}
+                search={collectionOptions}
+                queryKey={["collections", "options"]}
+                placeholder={t("collections.pick")}
+                empty={t("collections.noneFound")}
+                inactiveNote={t("collections.inactive")}
               />
             )}
           />
         </Field>
-        {collectionsOn ? (
-          <Field
-            label={t("collections.field")}
-            htmlFor="detail-collection"
-            hint={t("collections.fieldHint")}
-          >
-            <Controller
-              control={form.control}
-              name="collection"
-              render={({ field }) => (
-                <SearchPicker
-                  id="detail-collection"
-                  value={field.value}
-                  onChange={field.onChange}
-                  search={collectionOptions}
-                  queryKey={["collections", "options"]}
-                  placeholder={t("collections.pick")}
-                  empty={t("collections.noneFound")}
-                  inactiveNote={t("collections.inactive")}
-                />
-              )}
-            />
-          </Field>
-        ) : null}
-        <Field
-          label={t("products.wizard.vat")}
-          htmlFor="detail-vat"
-          hint={t("products.wizard.vatHint")}
-        >
-          <Controller
-            control={form.control}
-            name="type_id"
-            render={({ field }) => (
-              <VatSelect id="detail-vat" value={field.value} onChange={field.onChange} />
-            )}
-          />
-        </Field>
-      </DialogBody>
-    </FormDialog>
+      ) : null}
+      <Field
+        label={t("products.wizard.vat")}
+        htmlFor="detail-vat"
+        hint={t("products.wizard.vatHint")}
+      >
+        <Controller
+          control={form.control}
+          name="type_id"
+          render={({ field }) => (
+            <VatSelect id="detail-vat" value={field.value} onChange={field.onChange} />
+          )}
+        />
+      </Field>
+    </SideForm>
   )
 }
 
 /**
  * Where the product is listed, under which brand and in which collection,
  * and which KDV group it is taxed in, in the page's narrow column (docs/06
- * "Ürün sayfası"): a line each, "Düzenle" opens them in a dialog, as does the advisor's
- * "Alana git" for a missing category or brand.
+ * "Ürün sayfası"): a line each; "Düzenle" turns the card into their form,
+ * as does the advisor's "Alana git" for a missing category or brand.
  */
 export function OrganizeCard({
   product,
@@ -225,9 +217,9 @@ export function OrganizeCard({
   findings?: SectionFindings
 }) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
   useRevealTarget(PRODUCT_SECTIONS.organize, () => {
-    setOpen(true)
+    setEditing(true)
   })
   const rates = useQuery(vatRatesQuery()).data
   const collectionsOn = useCollectionsOn()
@@ -270,18 +262,17 @@ export function OrganizeCard({
         { label: t("products.wizard.vat"), value: rate ? vatLabelOf(rate) : "—" },
       ]}
       findings={findings && findingsNote(t, findings)}
+      editing={editing}
       onEdit={() => {
-        setOpen(true)
+        setEditing(true)
       }}
     >
-      {open ? (
-        <OrganizeDialog
-          product={product}
-          onClose={() => {
-            setOpen(false)
-          }}
-        />
-      ) : null}
+      <OrganizeForm
+        product={product}
+        onClose={() => {
+          setEditing(false)
+        }}
+      />
     </SideCard>
   )
 }

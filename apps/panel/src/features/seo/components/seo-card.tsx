@@ -16,6 +16,7 @@ import {
 } from "@qticaret/admin-ui/ui/select"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useAiFill } from "@/features/seo/advisor/ai-fill"
+import { parseFocusKeywords } from "@/features/seo/focus-keywords"
 import { ROBOTS_OVERRIDES, seoMetaQuery, useSaveSeoMeta } from "@/features/seo/api/seo-meta"
 import type { SeoEntityType, SeoMeta } from "@/features/seo/api/seo-meta"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -28,7 +29,8 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import { DESCRIPTION_LIMIT, SEO_MAX, TITLE_LIMIT } from "./seo-limits"
 import { seoSummary } from "./seo-summary"
 import type { SeoCollapse } from "./seo-summary"
-import { FocusKeywordField, SeoTextFields } from "./seo-text-fields"
+import { FocusKeywordField } from "./focus-keyword-field"
+import { SeoTextFields } from "./seo-text-fields"
 
 // Other cards measure their texts the same way
 export { Counter } from "./seo-text-fields"
@@ -79,9 +81,9 @@ function SeoForm({
     robots_override: saved.robots_override ?? DEFAULT_ROBOTS,
   }
   const form = useForm<Values>({ values, resetOptions: { keepDirtyValues: true } })
-  const [title, description] = useWatch({
+  const [title, description, keywords] = useWatch({
     control: form.control,
-    name: ["seo_title", "seo_description"],
+    name: ["seo_title", "seo_description", "focus_keyword"],
   })
 
   // The template fills what is left empty, as the storefront will (F3.4b); a blog archive is titled as a post
@@ -160,6 +162,7 @@ function SeoForm({
           summary: seoSummary(t, {
             title: { own: title, shown: shownTitle, limit: TITLE_LIMIT },
             description: { own: description, shown: shownDescription, limit: DESCRIPTION_LIMIT },
+            keywords: parseFocusKeywords(keywords),
             note: collapse.note,
           }),
         }
@@ -195,13 +198,12 @@ function SeoForm({
         onUse={use}
       />
       <div className="grid gap-5 sm:grid-cols-2">
-        <FocusKeywordField
-          type={type}
-          id={id}
-          field={form.register("focus_keyword")}
-          onUse={(keyword) => {
-            form.setValue("focus_keyword", keyword, { shouldDirty: true })
-          }}
+        <Controller
+          control={form.control}
+          name="focus_keyword"
+          render={({ field }) => (
+            <FocusKeywordField type={type} id={id} value={field.value} onChange={field.onChange} />
+          )}
         />
         <Field label={t("seo.card.robots")} htmlFor={`seo-robots-${id}`}>
           <Controller

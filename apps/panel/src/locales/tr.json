@@ -4221,6 +4221,82 @@
       "withdrawalOut": "Dışında",
       "withdrawalIn": "Var"
     },
+    "layout": {
+      "customize": "Sayfayı düzenle",
+      "title": "Ürün sayfasını düzenle",
+      "description": "Bölümleri gizleyin ya da sürükleyerek sıralayın. Düzen tüm ekip için geçerlidir; gizlenen bölümün bilgileri silinmez.",
+      "main": "Ana sütun",
+      "side": "Yan sütun",
+      "locked": "Hep görünür",
+      "conditional": "Yalnız kullanıldığında görünür",
+      "show": "{{name}}: göster",
+      "moveUp": "{{name}}: yukarı taşı",
+      "moveDown": "{{name}}: aşağı taşı",
+      "reset": "Varsayılana dön",
+      "saved": "Sayfa düzeni kaydedildi.",
+      "hiddenLine": "Gizli bölümler: {{names}}",
+      "showHidden": "Göster",
+      "shownAttention": "Gizlenen bölüm: ilgilenilmesi gereken bir şey olduğu için gösteriliyor.",
+      "shownRevealed": "Gizlenen bölüm: bu ziyaret için gösteriliyor.",
+      "parts": {
+        "general": "Genel bilgiler",
+        "variants": "Varyantlar ve fiyat",
+        "media": "Görseller",
+        "description": "Açıklama",
+        "shortDescription": "Kısa açıklama",
+        "departures": "Tarihler ve kontenjan",
+        "program": "Program",
+        "seo": "Arama motoru görünümü",
+        "attributes": "Özellikler",
+        "faq": "Sık sorulan sorular",
+        "addons": "Ek seçenekler",
+        "priceHistory": "Fiyat geçmişi",
+        "summary": "Özet",
+        "advisor": "SEO danışmanı",
+        "organize": "Kategori, marka ve KDV",
+        "catalog": "Katalog bilgileri",
+        "shipping": "Paket ölçüleri"
+      },
+      "presets": "Hazır düzenler",
+      "preset": {
+        "basic": "Basit",
+        "standard": "Standart",
+        "advanced": "Gelişmiş"
+      },
+      "presetHint": {
+        "basic": "Genel bilgiler, varyantlar ve fiyat, görseller, açıklama ve SEO danışmanı. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
+        "standard": "İlk düzen: seyrek bölümler sayfanın altında kapalı durur.",
+        "advanced": "Her bölüm görünür; arama motoru görünümü, özellikler, SSS, ek seçenekler ve fiyat geçmişi açık gelir.",
+        "custom": "Elle düzenlendi."
+      },
+      "shortcuts": "Kısayollar",
+      "shortcutGo": "Alana git",
+      "modKey": "⌘ / Ctrl",
+      "nav": {
+        "label": "Sayfanın bölümleri",
+        "placeholder": "Bölüme git",
+        "mark": {
+          "complete": "tamam",
+          "missing": "eksik var",
+          "urgent": "ilgilenilmeli"
+        }
+      },
+      "go": {
+        "heading": "Alana git",
+        "hiddenPart": "{{name}} (gizli)",
+        "fields": {
+          "title": "Ürün adı",
+          "handle": "Sayfa adresi",
+          "price": "Fiyat ve stok",
+          "barcode": "Barkod ve stok kodu",
+          "altText": "Görsel alt metni",
+          "seoTitle": "SEO başlığı",
+          "categories": "Kategori ve marka",
+          "weight": "Ağırlık ve ölçüler"
+        }
+      },
+      "shortcutSave": "Değişiklikleri kaydet"
+    },
     "variant": {
       "title": "Varyantı düzenle",
       "listTitle": "Varyantlar",
@@ -4234,7 +4310,7 @@
       "stock": "Stok",
       "stockHint": "Mağazanın varsayılan depo adresindeki adet.",
       "onHand": "Stok adedi",
-      "untracked": "Bu varyantın stoğu takip edilmiyor.",
+      "untracked": "Stok takibi yok: bu varyant her zaman satılır.",
       "backorderHint": "Stok bitince de sipariş alınır (ön sipariş).",
       "codes": "Kodlar",
       "measures": "Ölçüler",
@@ -4274,7 +4350,9 @@
         "soldOut": "Stokta yok",
         "preorder": "Ön sipariş",
         "noBarcode": "Barkod yok"
-      }
+      },
+      "details": "Tüm varyant ayrıntıları",
+      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın."
     },
     "rowActions": "{{title}} işlemleri",
     "duplicate": {
@@ -4343,7 +4421,9 @@
         "empty": "Soru ve yanıt boş olamaz.",
         "not_a_question": "Soru, soru işaretiyle bitmeli.",
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
-      }
+      },
+      "summary": "Ürün bilgilerinden soru ve yanıt taslağı",
+      "summaryOpen": "Taslak açık"
     },
     "addonTemplates": {
       "title": "Ek seçenek grupları",
@@ -6533,7 +6613,8 @@
         "titleAuto": "Başlık (otomatik) {{length}}/{{limit}}",
         "description": "Açıklama {{length}}/{{limit}}",
         "descriptionAuto": "Açıklama (otomatik) {{length}}/{{limit}}",
-        "noDescription": "Açıklama yok"
+        "noDescription": "Açıklama yok",
+        "keywords": "Odak: {{keywords}}"
       },
       "noDescription": "Açıklama yok; arama motoru sayfadan bir parça seçer.",
       "seoTitle": "SEO başlığı",
@@ -6541,7 +6622,7 @@
       "seoDescription": "Meta açıklama",
       "seoDescriptionHint": "Arama sonucundaki kısa açıklama; yaklaşık 155 karakter görünür.",
       "focusKeyword": "Odak anahtar kelime",
-      "focusKeywordHint": "Yalnızca panelde ve önerilerde kullanılır; mağazada görünmez.",
+      "focusKeywordHint": "Yalnızca panelde ve önerilerde kullanılır; mağazada görünmez. Enter ya da virgülle ekleyin; ilki ana kelimedir (başlıkta geçmeli), diğerleri ikincildir.",
       "robots": "Arama motoru dizini",
       "robotsDefault": "Sayfanın durumuna göre (önerilen)",
       "robotsOptions": {
@@ -6556,7 +6637,15 @@
       "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür.",
       "aiTitle": "Başlık için yapay zekâ ile öner",
       "aiDescription": "Açıklama için yapay zekâ ile öner",
-      "aiKeyword": "Odak anahtar kelime için yapay zekâ ile öner"
+      "aiKeyword": "Odak anahtar kelime için yapay zekâ ile öner",
+      "keywords": {
+        "placeholder": "Yazın, Enter ile ekleyin",
+        "primary": "Ana",
+        "makePrimary": "“{{keyword}}” ana kelime olsun",
+        "remove": "“{{keyword}}” kelimesini kaldır",
+        "limit": "En çok {{max}} odak kelime eklenir; fazlası alınmadı.",
+        "length": "Bir kelime en çok {{length}} karakter olur; uzun kısım kesildi."
+      }
     },
     "redirectsCard": {
       "title": "Yönlendirmeler ve 404",
@@ -6921,8 +7010,8 @@
         },
         "KW-01": {
           "title": "Odak kelime \"{{keyword}}\" şurada yok: {{missing}}.",
-          "why": "Seçtiğiniz kelime başlıkta, açıklamada ve metnin başında geçtiğinde sayfa o aramayla daha iyi eşleşir.",
-          "how": "Kelimeyi doğal bir cümleyle eksik yerlere ekleyin."
+          "why": "Ana kelime başlıkta, odak kelimelerinizden biri açıklamada ve metnin başında geçtiğinde sayfa o aramalarla daha iyi eşleşir.",
+          "how": "Ana kelimeyi başlığa, odak kelimelerinizden birini açıklamaya ve metnin başına doğal bir cümleyle ekleyin."
         },
         "ROBOTS-01": {
           "title": "Sayfa arama motorlarına kapalı (noindex).",
@@ -10013,6 +10102,10 @@
           "date_words": {
             "label": "Boş tarihte \"Tarih ekle\" yazsın",
             "hint": "Seçilmemiş gün tarayıcının gg.aa.yyyy kutusu yerine \"Tarih ekle\" diye, seçilen gün 12.12.2026 gibi yazılır. Takvim aynı açılır."
+          },
+          "boxed_fields": {
+            "label": "Kutulu alanlar",
+            "hint": "Her alanın adı üstte, kendisi açık gri bir kutuda; alanlar arasında boşluk olur. Kapalıyken alanlar ince çizgiyle ayrılır."
           }
         }
       },
@@ -10533,6 +10626,13 @@
           "show": "Yazılı",
           "hide": "Yalnız simge",
           "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
+        },
+        "tools_style": {
+          "label": "Sağdaki simgeler",
+          "term": "icons",
+          "hint": "Tek satır üst bilgide arama, hesap ve sepet yuvarlak çerçeveli ya da sade küçük simgeler; sadede eylem düğmesi oklu hap olarak sonda durur, favoriler menüde ve hesabınızda.",
+          "round": "Yuvarlak çerçeveli",
+          "plain": "Sade, düğmeli"
         },
         "search_style": {
           "label": "Arama görünümü",
@@ -11527,7 +11627,8 @@
           "term": "overlay",
           "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
           "light": "Hafif",
-          "strong": "Güçlü"
+          "strong": "Güçlü",
+          "side": "Soldan geçiş"
         },
         "edge": {
           "label": "Görselin kenarı",
@@ -11563,6 +11664,34 @@
           "hint": "Yazının yanında, ana renginizin açık tonunda küçük bir yaprak dalı (1024 px ve üstü).",
           "none": "Yok",
           "leaves": "Yaprak dalı"
+        },
+        "second_button": {
+          "label": "İkinci düğme",
+          "term": "button",
+          "hint": "İkinci düğme (ve video düğmesi) ince çerçeveli ya da çerçevesiz, yazısının önünde yuvarlak bir oynat simgesiyle.",
+          "quiet": "Çerçeveli",
+          "play": "Oynat simgeli"
+        },
+        "title_style": {
+          "label": "Başlık",
+          "term": "heading",
+          "hint": "Başlık yazıldığı gibi ya da daha büyük ve dar bir sütunda, her satırda bir iki sözcük.",
+          "standard": "Normal",
+          "stacked": "Büyük, satır satır"
+        },
+        "trust_place": {
+          "label": "Güven rozetlerinin yeri",
+          "term": "trust badges",
+          "hint": "Rozetler kapağın alt kenarında beyaz bir kutuda ya da düğmelerin altında, ikon üstte, ince çizgilerle ayrılmış bir sırada.",
+          "foot": "Alt kenarda kutu",
+          "inside": "Düğmelerin altında sıra"
+        },
+        "note_place": {
+          "label": "El yazısı notun yeri",
+          "term": "hand note",
+          "hint": "Not başlığın üstünde ya da kapağın sağ üst köşesinde, altında fırça çizgisiyle (1024 px ve üstü; telefonda başlığın üstünde).",
+          "heading": "Başlığın üstünde",
+          "corner": "Sağ üst köşe"
         }
       },
       "trustCard": {
@@ -13500,7 +13629,8 @@
       "refused": "Uygun bir öneri çıkmadı. Yeniden deneyebilirsiniz.",
       "note": "Kullan yalnız alanı doldurur; kaydetmek size kalır.",
       "choices": "Öneriler",
-      "mainChoice": "ana öneri"
+      "mainChoice": "ana öneri",
+      "useAll": "Hepsini ekle"
     },
     "hint": {
       "text": "Yapay zekâ bağlarsanız bu alanı tek tıkla doldurabilirsiniz.",

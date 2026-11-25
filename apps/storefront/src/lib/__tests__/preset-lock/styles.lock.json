@@ -62,11 +62,11 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "f73c2302b6711db914f689a1be2fb2fafc876c0030e125897cc3fae1b12c5195",
+      "sha256": "f6bd41322804947ea20412facd0faead72e24871506074163b4685723f8c3b9b",
       "file": "header-inline.css"
     },
     {
-      "sha256": "3c7419a14554d5dbd06e60609a59f5e59937786d52d613b8634ae6025bed8bab",
+      "sha256": "71272ebb86609034a61444c003d4f955b5387acb31915797fdfe3c0076586a29",
       "file": "hero-full.css"
     },
     {
@@ -122,6 +122,10 @@
       "file": "scroller.css"
     },
     {
+      "sha256": "9d60eeac379809e39efc235e34f5e11e5044cd32380b7365b5988d70751e7e8f",
+      "file": "search-boxed.css"
+    },
+    {
       "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
       "file": "search-toggle.css"
     },
@@ -154,7 +158,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "8abdd0a9fdbec8002650c0f386dd9f638d7ec00c4ac86e8d87e30c6843322f38",
+      "sha256": "d2511f26b57b13c26381d362e6ce10af7c4a27e6a0210aa2c0b932f946d322cc",
       "file": "styles.css"
     },
     {

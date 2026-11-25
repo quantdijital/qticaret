@@ -25,12 +25,23 @@ interface ChipInputProps {
   placeholder?: string | undefined
   invalid?: boolean
   className?: string | undefined
+  /**
+   * The first chip is the primary one (a page's main focus keyword): it
+   * carries this short mark ("Ana"). Left out: every chip is alike.
+   */
+  primaryLabel?: string | undefined
+  /** With `primaryLabel`: another chip's text is a button that makes it the primary. */
+  onMakePrimary?: ((index: number) => void) | undefined
+  /** That button's name for a screen reader: "Make “red” primary". */
+  makePrimaryLabel?: ((label: string) => string) | undefined
 }
 
 /**
  * Values typed as chips (docs/18 §7): Enter or a comma turns the text into
  * chips, Backspace in an empty field takes the last one back. The owner
- * decides what a chip is: the field only reports what was typed.
+ * decides what a chip is: the field only reports what was typed. With
+ * `primaryLabel` the first chip is marked as the primary, and another one
+ * can be made the primary by its text (a button, reachable by keyboard).
  */
 export function ChipInput({
   chips,
@@ -43,6 +54,9 @@ export function ChipInput({
   placeholder,
   invalid = false,
   className,
+  primaryLabel,
+  onMakePrimary,
+  makePrimaryLabel,
   ...aria
 }: ChipInputProps) {
   const input = useRef<HTMLInputElement>(null)
@@ -71,9 +85,31 @@ export function ChipInput({
       {chips.map((chip, index) => (
         <span
           key={chip.key}
-          className="flex max-w-full min-w-0 items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-[13px] text-accent-foreground"
+          className={cn(
+            "flex max-w-full min-w-0 items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-[13px] text-accent-foreground",
+            primaryLabel && index === 0 && "font-medium ring-1 ring-border ring-inset"
+          )}
         >
-          <span className="truncate">{chip.label}</span>
+          {primaryLabel && index === 0 ? (
+            <span className="shrink-0 text-[11px] font-normal text-muted-foreground">
+              {primaryLabel}
+            </span>
+          ) : null}
+          {primaryLabel && index > 0 && onMakePrimary ? (
+            <button
+              type="button"
+              title={makePrimaryLabel?.(chip.label)}
+              aria-label={makePrimaryLabel?.(chip.label)}
+              onClick={() => {
+                onMakePrimary(index)
+              }}
+              className="min-w-0 truncate rounded-sm hover:underline"
+            >
+              {chip.label}
+            </button>
+          ) : (
+            <span className="truncate">{chip.label}</span>
+          )}
           <button
             type="button"
             aria-label={removeLabel(chip.label)}

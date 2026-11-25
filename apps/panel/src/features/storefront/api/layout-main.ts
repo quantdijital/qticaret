@@ -7,6 +7,7 @@ import type {
   HeaderMenuImages,
   HeaderSearchStyle,
   HeaderToolLabels,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -52,6 +53,8 @@ interface HeaderBarCommon extends MainBase {
   search_style: HeaderSearchStyle
   /** The one-row header's tools with words or as round icons only; absent (a bar saved before it): `show`. */
   tool_labels?: HeaderToolLabels
+  /** The one-row header's tools (`inline` only); absent: `round`. */
+  tools_style?: HeaderToolsStyle
   /**
    * The header's action button, on every variant (the catalog header's
    * highlighted link): its words and where it goes; null or absent: none.

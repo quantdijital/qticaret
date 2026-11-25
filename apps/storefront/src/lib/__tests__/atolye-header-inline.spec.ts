@@ -70,14 +70,56 @@ describe("the one-row header", () => {
 
   it("draws the tools as round icons only when the shop hides their words, names kept", () => {
     const words = page().querySelector('[data-gf-head][data-variant="inline"]')
-    expect(words?.hasAttribute("data-tools")).toBe(false)
+    expect(words?.hasAttribute("data-tool-words")).toBe(false)
 
     const icons = page({ headerBar: { ...bar, toolLabels: "hide" } }).querySelector(
       '[data-gf-head][data-variant="inline"]'
     )
-    expect(icons?.getAttribute("data-tools")).toBe("icons")
+    expect(icons?.getAttribute("data-tool-words")).toBe("hidden")
+    expect(icons?.hasAttribute("data-tools")).toBe(false)
     const cart = icons?.querySelector('a[href="/sepet"]')
     expect(cart?.getAttribute("aria-label")).toBeTruthy()
+  })
+
+  it("draws plain tools and the action pill only when the shop chose them", () => {
+    const round = page({
+      headerBar: { ...bar, highlight: { label: "Tur planla", path: "/iletisim" } },
+    })
+    expect(round.querySelector("[data-tools]")).toBeNull()
+    expect(round.body.innerHTML).not.toContain("Tur planla")
+
+    const plain = page({
+      headerBar: {
+        ...bar,
+        toolsStyle: "plain",
+        highlight: { label: "Tur planla", path: "/iletisim" },
+      },
+    })
+    const header = plain.querySelector('[data-gf-head][data-variant="inline"]')
+    expect(header?.getAttribute("data-tools")).toBe("plain")
+    expect(header?.querySelector('a[href="/hesap"]')?.className).toContain("gf-icon-btn")
+    const pill = header?.querySelector('a.gf-btn[href="/iletisim"]')
+    expect(pill?.textContent).toContain("Tur planla")
+    // Favourites leave the desktop row; the phone row still has them
+    expect(header?.querySelector('a[href="/hesap/favoriler"]')?.className).toContain("lg:hidden")
+  })
+
+  it("draws the plain tools whole when their words are hidden too: two marks, one drawing", () => {
+    const html = (headerBar: HeaderBarView) =>
+      page({ headerBar: { ...headerBar, highlight: { label: "Tur planla", path: "/iletisim" } } })
+    const plain = html({ ...bar, toolsStyle: "plain" })
+    const both = html({ ...bar, toolsStyle: "plain", toolLabels: "hide" })
+    const header = both.querySelector('[data-gf-head][data-variant="inline"]')
+    if (header === null) throw new Error("no one-row header")
+
+    expect(header.getAttribute("data-tools")).toBe("plain")
+    expect(header.getAttribute("data-tool-words")).toBe("hidden")
+    // The words rule (`header-inline.css`) finds no word among the plain tools: the same row and pill
+    expect(header.querySelector('.gf-tool > span[aria-hidden="true"]')).toBeNull()
+    const row = (doc: Document) => doc.querySelector("[data-gf-head-row]")?.innerHTML
+    expect(row(both)).toBe(row(plain))
+    expect(header.querySelector('a.gf-btn[href="/iletisim"]')?.textContent).toContain("Tur planla")
+    expect(header.querySelector('a[href="/sepet"]')?.getAttribute("aria-label")).toBeTruthy()
   })
 
   it("leaves the other headers' markup as it was", () => {

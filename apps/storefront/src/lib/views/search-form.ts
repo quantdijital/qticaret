@@ -126,6 +126,7 @@ export function searchFormView(
     action: SEARCH_FORM_ACTION,
     label: t("search.label"),
     submit: t("search.submit"),
+    ...(settings.boxed_fields ? { boxed: true as const } : {}),
     hidden: where && values.q ? [{ name: "q", value: values.q }] : [],
     words: where
       ? null

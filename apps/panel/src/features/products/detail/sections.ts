@@ -19,6 +19,7 @@ export const PRODUCT_SECTIONS = {
   catalog: "product-catalog",
   addons: "product-addons",
   priceHistory: "product-price-history",
+  faq: "product-faq",
 } as const
 
 export type ProductSection = keyof typeof PRODUCT_SECTIONS

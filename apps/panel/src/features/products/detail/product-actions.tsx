@@ -1,5 +1,13 @@
 import { useNavigate } from "@tanstack/react-router"
-import { Copy, EllipsisVertical, EyeOff, Loader2, Send, Trash2 } from "lucide-react"
+import {
+  Copy,
+  EllipsisVertical,
+  EyeOff,
+  LayoutPanelLeft,
+  Loader2,
+  Send,
+  Trash2,
+} from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -22,9 +30,17 @@ import { errorText } from "@/lib/errors"
  * storefront beside it (live, or a draft's preview); copying and deleting
  * sit in the menu, deleting behind a question (docs/06 §6). The server
  * holds the publish rules (the SEO gate; measures are optional,
- * adr/0054), so a refusal comes back as its sentence.
+ * adr/0054), so a refusal comes back as its sentence. "Sayfayı düzenle"
+ * (`onCustomize`, for a role that may change the shop's settings) lays the
+ * page out for the whole team.
  */
-export function ProductActions({ product }: { product: ProductDetail }) {
+export function ProductActions({
+  product,
+  onCustomize,
+}: {
+  product: ProductDetail
+  onCustomize?: (() => void) | undefined
+}) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const update = useUpdateProduct(product.id)
@@ -77,6 +93,12 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          {onCustomize ? (
+            <DropdownMenuItem onSelect={onCustomize}>
+              <LayoutPanelLeft />
+              {t("products.layout.customize")}
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem
             disabled={duplicate.pending}
             onSelect={() => {

@@ -18,8 +18,8 @@ export const HERO_FULL_SETTINGS = {
   search_position: ["inside", "overlap"],
   /** `screen`: about the screen's height; `tall`: about two thirds of it. */
   height: ["screen", "tall"],
-  /** The veil over the photograph, under the words. */
-  scrim: ["light", "strong"],
+  /** The veil over the photograph, under the words; `side` darkest on the words' side, fading across. */
+  scrim: ["light", "strong", "side"],
   align: ["center", "start"],
   /**
    * `full`: the photograph behind the words; `end`: beside them, the words on
@@ -37,6 +37,14 @@ export const HERO_FULL_SETTINGS = {
   accent_mark: ["none", "swash"],
   /** A drawn sprig of leaves by the words, for the eye only. */
   ornament: ["none", "leaves"],
+  /** The second button (and the video's): quiet, or clear with a ringed play mark before its words. */
+  second_button: ["quiet", "play"],
+  /** The heading as written, or larger in a narrow column: a word or two to a line. */
+  title_style: ["standard", "stacked"],
+  /** The trust badges as a box over the bottom edge, or a row of icons under the buttons. */
+  trust_place: ["foot", "inside"],
+  /** The hand note over the heading, or in the opening's top corner with a brush stroke under it. */
+  note_place: ["heading", "corner"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -55,6 +63,10 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   button_icon: "none",
   accent_mark: "none",
   ornament: "none",
+  second_button: "quiet",
+  title_style: "standard",
+  trust_place: "foot",
+  note_place: "heading",
 }
 
 export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
@@ -90,6 +102,10 @@ export function heroFullSettingsOf(
     button_icon: heroFullStepOf("button_icon", section.button_icon),
     accent_mark: heroFullStepOf("accent_mark", section.accent_mark),
     ornament: heroFullStepOf("ornament", section.ornament),
+    second_button: heroFullStepOf("second_button", section.second_button),
+    title_style: heroFullStepOf("title_style", section.title_style),
+    trust_place: heroFullStepOf("trust_place", section.trust_place),
+    note_place: heroFullStepOf("note_place", section.note_place),
   }
 }
 

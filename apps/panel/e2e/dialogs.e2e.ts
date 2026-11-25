@@ -123,13 +123,6 @@ const CASES: Case[] = [
         .click()
     }),
   },
-  {
-    name: "product catalog",
-    path: "/products",
-    open: productAction(async (page) => {
-      await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
-    }),
-  },
   // The owner, 2026-11-06: the side sheets that showed a record became the standard dialog
   { name: "audit entry", path: "/settings/audit", open: firstRow },
   { name: "contact message", path: "/customers/contact-messages", open: firstRow },

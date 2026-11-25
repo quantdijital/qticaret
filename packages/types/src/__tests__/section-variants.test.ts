@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest"
 import {
   CARD_VARIANTS,
+  HEADER_TOOLS_STYLES,
   SECTION_VARIANTS,
   cardVariantOf,
   defaultVariant,
+  headerToolsStyleOf,
   hasVariants,
   variantOf,
 } from "../store/section-variants.js"
@@ -44,5 +46,14 @@ describe("card variants (adr/0049 Ek 2026-11-14 §3.3)", () => {
     expect(cardVariantOf("framed")).toBe("framed")
     expect(cardVariantOf("technical")).toBe("standard")
     expect(cardVariantOf(undefined)).toBe("standard")
+  })
+})
+
+describe("one-row header tools style", () => {
+  it("lists today's round tools first and reads anything but plain as them", () => {
+    expect(HEADER_TOOLS_STYLES).toEqual(["round", "plain"])
+    expect(headerToolsStyleOf("plain")).toBe("plain")
+    expect(headerToolsStyleOf("square")).toBe("round")
+    expect(headerToolsStyleOf(undefined)).toBe("round")
   })
 })

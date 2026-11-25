@@ -144,6 +144,18 @@ describe("staff roles", () => {
     expect(allowed("admin", method, path)).toBe(true)
   })
 
+  it("lets the owner and an admin lay out the product page, not operations or readonly", () => {
+    const path = "/admin/platform-settings/panel_layout"
+    expect(allowed("owner", "POST", path)).toBe(true)
+    expect(allowed("admin", "POST", path)).toBe(true)
+    expect(allowed("operations", "POST", path)).toBe(false)
+    expect(allowed("readonly", "POST", path)).toBe(false)
+    // Everyone reads it: the page is drawn as the shop laid it out
+    for (const role of STAFF_ROLES) {
+      expect(allowed(role, "GET", path)).toBe(true)
+    }
+  })
+
   it("lets every role use the assistant; only the owner turns it on (adr/0079 §8)", () => {
     for (const role of STAFF_ROLES) {
       expect(allowed(role, "POST", "/admin/ai/assistant/turns")).toBe(true)

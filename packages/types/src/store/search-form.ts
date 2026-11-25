@@ -44,6 +44,11 @@ export interface SearchFormSettings {
    * Only with JavaScript: without it the plain date fields stay.
    */
   date_words: boolean
+  /**
+   * Each field's label over its own light-filled box, the boxes apart
+   * (today's off: the fields side by side with a hairline between them).
+   */
+  boxed_fields: boolean
   category_style: SearchFormCategoryStyle
   /**
    * The words field's hint before a search ("Nereye gitmek istersiniz?");
@@ -60,6 +65,7 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   show_people: true,
   flexible_month: true,
   date_words: false,
+  boxed_fields: false,
   category_style: "select",
   placeholder: null,
 }
@@ -86,6 +92,7 @@ export function searchFormOf(
     show_people: flag(value?.show_people, SEARCH_FORM_DEFAULTS.show_people),
     flexible_month: flag(value?.flexible_month, SEARCH_FORM_DEFAULTS.flexible_month),
     date_words: flag(value?.date_words, SEARCH_FORM_DEFAULTS.date_words),
+    boxed_fields: flag(value?.boxed_fields, SEARCH_FORM_DEFAULTS.boxed_fields),
     category_style: (SEARCH_FORM_CATEGORY_STYLES as readonly unknown[]).includes(style)
       ? (style as SearchFormCategoryStyle)
       : SEARCH_FORM_DEFAULTS.category_style,

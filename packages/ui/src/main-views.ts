@@ -8,6 +8,7 @@ import type {
   HeaderMenuImages,
   HeaderSearchStyle,
   HeaderToolLabels,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -48,6 +49,8 @@ export interface HeaderBarView {
   searchStyle?: HeaderSearchStyle
   /** The one-row header's tools with words (`show`) or as round icons only (`hide`). Absent: `show`. */
   toolLabels?: HeaderToolLabels
+  /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */
+  toolsStyle?: HeaderToolsStyle
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**

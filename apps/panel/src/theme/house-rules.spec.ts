@@ -91,11 +91,13 @@ describe("the panel's house rules (docs/18 §9)", () => {
     // The owner, 2026-11-06: a row opens one dialog on the size scale. The phone's menu
     // (admin-ui's sidebar) and the full-screen theme editor's own drawers stay sheets. The
     // assistant opens no record: it is a side panel by the owner's wish (adr/0079, "like VS
-    // Code's side bar"), on the phone a sheet.
+    // Code's side bar"), on the phone a sheet. "Sayfayı düzenle" opens no record either: it
+    // arranges the product page, which follows it behind (the owner, 2026-11-25: not a modal).
     const drawers = new Set([
       "features/storefront/editor/editor-shell.tsx",
       "features/storefront/editor/revisions-sheet.tsx",
       "features/assistant/assistant-panel.tsx",
+      "features/products/layout/layout-sheet.tsx",
     ])
     expect(breaches(/from "@qticaret\/admin-ui\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual(
       []
