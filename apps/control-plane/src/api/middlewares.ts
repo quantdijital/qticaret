@@ -16,6 +16,7 @@ import { rejectAmbiguousPath, requestBasics, routeAllowlist } from "./http/guard
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
 import { gateRegistration } from "./http/register-gate"
 import { noteSessionEnd, noteSessionStart } from "./http/sessions"
+import { readRawBody } from "./http/raw-body"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
 import { guardTenantApi, tenantCallerOf } from "./http/tenant-api"
@@ -87,6 +88,8 @@ export default defineMiddlewares({
       matcher: "/tenant-api/*",
       middlewares: [
         rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api),
+        // adr/0085 §2: a provider body read as its bytes (JSON or a form), before the signature
+        readRawBody,
         guardTenantApi,
         // C13 review M1: then per verified shop, whatever its address
         rateLimit(
@@ -111,6 +114,12 @@ export default defineMiddlewares({
       matcher: AI_CREDITS_PATHS.orders,
       methods: ["POST"],
       bodyParser: { sizeLimit: AI_CREDIT_ORDER_MAX_BYTES, preserveRawBody: true },
+    },
+    // adr/0085 §2: the gateway call: no body parser, its bytes read raw (`readRawBody`)
+    {
+      matcher: AI_CREDITS_PATHS.calls,
+      methods: ["POST"],
+      bodyParser: false,
     },
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,

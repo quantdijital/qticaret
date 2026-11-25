@@ -153,6 +153,8 @@ describe("the gateway's shapes", () => {
       "credits_exhausted",
       "daily_cap",
       "not_offered",
+      "provider_timeout",
+      "provider_unreachable",
       "task_mismatch",
       "unavailable",
     ])
