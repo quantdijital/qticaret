@@ -7,14 +7,12 @@ import {
   TARGET_REASON_MAX,
   TARGET_REASON_MIN,
 } from "../../../../lib/fleet/releases"
+import { CLEAN_TEXT } from "../../../../lib/clean-text"
 
 /**
  * What the release routes take (Ek C18), strictly: a release's version,
  * commit and note; a shop's target and why.
  */
-
-// Control and invisible format characters never make text; a note keeps its line breaks
-const CLEAN_TEXT = /^(?:[^\p{Cc}\p{Cf}\u2028\u2029]|\n)*$/u
 
 /** A release's id as the module makes it (`rel_` and a ULID). */
 const RELEASE_ID = /^rel_[0-9A-Z]{26}$/

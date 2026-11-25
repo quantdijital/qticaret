@@ -7,8 +7,7 @@ import {
   isPlatformFlag,
 } from "@qticaret/types/control-plane"
 import { limitValue } from "../tenants/validators"
-
-const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
+import { CLEAN } from "../../../../lib/clean-text"
 
 const name = z.string().trim().min(1, "cp.name_required").max(100).regex(CLEAN, "cp.name_invalid")
 

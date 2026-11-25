@@ -1,8 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { CP_INVITABLE_ROLES, CP_STAFF_ROLES } from "../../../lib/staff/roles"
-
-// Control and invisible format characters never make a name
-const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
+import { CLEAN } from "../../../lib/clean-text"
 
 const token = z.string().min(16).max(4096)
 const name = z.string().trim().min(1, "cp.name_required").max(100).regex(CLEAN, "cp.name_invalid")
