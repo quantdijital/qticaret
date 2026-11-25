@@ -80,6 +80,7 @@ export function geminiImageBody(body: Record<string, unknown>, input: BodyInput)
     throw new BodyRefused("contents_refused")
   }
   const pictures: Pictures = { count: 0, bytes: 0 }
+  // The target's fixed fields last: no field the shop sent is written over them
   const rebuilt = {
     contents: contents.map((turn) => turnOf(turn, pictures)),
     ...input.target.fixedBody,

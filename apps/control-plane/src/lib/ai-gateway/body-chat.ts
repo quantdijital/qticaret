@@ -159,7 +159,6 @@ export function chatBody(body: Record<string, unknown>, input: BodyInput): Rebui
   }
   const pictures: Pictures = { count: 0, bytes: 0 }
   const rebuilt: Record<string, unknown> = {
-    ...target.fixedBody,
     model: target.model,
     messages: messages.map((message) => messageOf(message, tools, pictures)),
     stream: false,
@@ -191,5 +190,10 @@ export function chatBody(body: Record<string, unknown>, input: BodyInput): Rebui
       rebuilt["tool_choice"] = choice
     }
   }
-  return { body: rebuilt, images: pictures.count, imageBytes: pictures.bytes }
+  // The target's fixed fields last: no field the shop sent is written over them
+  return {
+    body: { ...rebuilt, ...target.fixedBody },
+    images: pictures.count,
+    imageBytes: pictures.bytes,
+  }
 }
