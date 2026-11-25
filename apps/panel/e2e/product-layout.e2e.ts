@@ -129,7 +129,15 @@ test.describe("product page layout", () => {
     await expect(page.locator('main [data-part="general"]')).toBeAttached()
     const bar = page.getByRole("navigation", { name: "Sayfanın bölümleri" })
     await expect(bar).toBeVisible()
-    await expect(bar.getByRole("button", { name: /^Arama motoru görünümü/ })).toHaveCount(0)
+    // A hidden tab the advisor never points at is gone from the data card
+    await expect(page.locator("#product-data").getByRole("tab", { name: "Gelişmiş" })).toHaveCount(
+      0
+    )
+    // The hidden search appearance leaves the bar, unless an urgent advisor finding shows it
+    // anyway (docs/06 "Sayfa düzeni"), its card then saying why
+    const seoChip = bar.getByRole("button", { name: /^Arama motoru görünümü/ })
+    const seoNeeded = page.locator('main [data-part="seo"][data-shown-hidden="attention"]')
+    await expect.poll(async () => (await seoChip.count()) === (await seoNeeded.count())).toBe(true)
     const media = bar.getByRole("button", { name: /^Görseller/ })
     await media.click()
     await expect(page.locator("#product-media")).toBeInViewport()
