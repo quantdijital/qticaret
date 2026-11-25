@@ -203,21 +203,42 @@ export type AiCreditsStatus = z.infer<typeof aiCreditsStatusSchema>
 /** The status answer is held to this before it is parsed. */
 export const AI_CREDITS_STATUS_MAX_BYTES = 16 * 1024
 
-/** `POST …/ai/calls`' own headers, lowercase as Node holds them; the body is the provider's. */
-export const AI_CALL_HEADERS = {
-  task: "x-qt-ai-task",
-  capability: "x-qt-ai-capability",
-  service: "x-qt-ai-service",
-  operation: "x-qt-ai-operation",
+/**
+ * `POST …/ai/calls`' own values, in its query: the task, the capability,
+ * the service and the operation decide what is charged, so they ride in
+ * the request target the signature covers (never in a header it does
+ * not). The body is the provider's.
+ */
+export const AI_CALL_PARAMS = {
+  task: "task",
+  capability: "capability",
+  service: "service",
+  operation: "operation",
 } as const
 
-export const aiCallHeadersSchema = z.strictObject({
-  [AI_CALL_HEADERS.task]: aiTaskNameSchema,
-  [AI_CALL_HEADERS.capability]: aiCapabilityNameSchema,
-  [AI_CALL_HEADERS.service]: aiServiceIdSchema,
-  [AI_CALL_HEADERS.operation]: aiOperationIdSchema,
+/**
+ * A call's query, each name once: a parameter the contract does not name
+ * is refused, and so is a repeated one (read as a list, it fails the
+ * string's rule).
+ */
+export const aiCallParamsSchema = z.strictObject({
+  [AI_CALL_PARAMS.task]: aiTaskNameSchema,
+  [AI_CALL_PARAMS.capability]: aiCapabilityNameSchema,
+  [AI_CALL_PARAMS.service]: aiServiceIdSchema,
+  [AI_CALL_PARAMS.operation]: aiOperationIdSchema,
 })
-export type AiCallHeaders = z.infer<typeof aiCallHeadersSchema>
+export type AiCallParams = z.infer<typeof aiCallParamsSchema>
+
+/** The call's target as the shop signs and sends it: the path, then the four values in this order. */
+export function aiCallPath(params: AiCallParams): string {
+  const query = new URLSearchParams([
+    [AI_CALL_PARAMS.task, params.task],
+    [AI_CALL_PARAMS.capability, params.capability],
+    [AI_CALL_PARAMS.service, params.service],
+    [AI_CALL_PARAMS.operation, params.operation],
+  ])
+  return `${AI_CREDITS_PATHS.calls}?${query.toString()}`
+}
 
 /**
  * The gateway's headers on a call's answer: the credits this call charged

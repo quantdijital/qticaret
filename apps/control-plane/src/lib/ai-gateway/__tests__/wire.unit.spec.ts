@@ -1,4 +1,4 @@
-import { answerContentType, callHeadersOf, providerHeaders } from "../headers"
+import { answerContentType, callParamsOf, providerHeaders } from "../headers"
 import { forwardCall, notTaken } from "../forward"
 import type { ForwardOutcome, ProviderFetch } from "../forward"
 import { measuresOf } from "../measures"
@@ -21,23 +21,21 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     process.env = { ...env }
   })
 
-  it("reads the call's four headers to the contract, nothing else", () => {
-    const headers = {
-      "x-qt-ai-task": "seo_title",
-      "x-qt-ai-capability": "text",
-      "x-qt-ai-service": "deepseek",
-      "x-qt-ai-operation": OP,
-      "x-qt-tenant": "ten_other",
-    }
-    expect(callHeadersOf(headers)).toEqual({
-      "x-qt-ai-task": "seo_title",
-      "x-qt-ai-capability": "text",
-      "x-qt-ai-service": "deepseek",
-      "x-qt-ai-operation": OP,
+  it("reads the call's four values from the signed target's query, nothing else", () => {
+    const path = "/tenant-api/v1/ai/calls"
+    const query = `task=seo_title&capability=text&service=deepseek&operation=${OP}`
+    expect(callParamsOf(`${path}?${query}`)).toEqual({
+      task: "seo_title",
+      capability: "text",
+      service: "deepseek",
+      operation: OP,
     })
-    expect(callHeadersOf({ ...headers, "x-qt-ai-operation": "not-a-uuid" })).toBeNull()
-    expect(callHeadersOf({ ...headers, "x-qt-ai-task": ["seo_title", "post_draft"] })).toBeNull()
-    expect(callHeadersOf({ ...headers, "x-qt-ai-service": undefined })).toBeNull()
+    expect(callParamsOf(`http://cp.example${path}?${query}`)?.task).toBe("seo_title")
+    expect(callParamsOf(path)).toBeNull()
+    expect(callParamsOf(`${path}?${query.replace(OP, "not-a-uuid")}`)).toBeNull()
+    expect(callParamsOf(`${path}?${query}&task=post_draft`)).toBeNull()
+    expect(callParamsOf(`${path}?${query}&model=big`)).toBeNull()
+    expect(callParamsOf(`${path}?${query.replace("&service=deepseek", "")}`)).toBeNull()
   })
 
   it("sends three headers: the type, accept, and the key in its service's header", () => {

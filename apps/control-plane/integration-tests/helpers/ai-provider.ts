@@ -109,10 +109,18 @@ export interface CallOptions {
   service?: string
   operation?: string
   contentType?: string
+  /** The query as signed and sent, written out (a broken or repeated value). */
+  query?: string
+  /** The query sent in place of the signed one (changed after signing). */
+  sentQuery?: string
+  /** The bytes sent in place of the signed ones (changed after signing). */
+  sentBody?: string | Buffer
   /** Headers added after signing (a shop's own that must never reach the provider). */
   extra?: Record<string, string>
   /** Signed as this shop's id but with `shop`'s key (a forgery). */
   tenantId?: string
+  /** No signature at all. */
+  unsigned?: boolean
   /** The shop hangs up after this long. */
   timeoutMs?: number
 }
@@ -123,38 +131,69 @@ export interface CallReply {
   headers: Record<string, string | string[] | undefined>
 }
 
-/** `POST /ai/calls` with these exact bytes, signed by `shop`. */
+/** The call's query in the contract's order; the values as given (a test may break one). */
+export const callQuery = (options: CallOptions = {}): string =>
+  new URLSearchParams([
+    ["task", options.task ?? "seo_title"],
+    ["capability", options.capability ?? "text"],
+    ["service", options.service ?? "fake"],
+    ["operation", options.operation ?? randomUUID()],
+  ]).toString()
+
+/** What `callAs` sends: the target, the bytes and the headers, signed by `shop`. */
+export function signedCall(
+  shop: AiShop,
+  body: string | Buffer,
+  options: CallOptions = {}
+): { path: string; bytes: Buffer; headers: Record<string, string> } {
+  const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body)
+  const query = options.query ?? callQuery(options)
+  const signed = options.unsigned
+    ? {}
+    : signRequest({
+        method: "POST",
+        path: `${CALLS}?${query}`,
+        tenantId: options.tenantId ?? shop.id,
+        body: bytes,
+        signer: shop.signer,
+      })
+  const sent = options.sentBody
+  return {
+    path: `${CALLS}?${options.sentQuery ?? query}`,
+    bytes: sent === undefined ? bytes : Buffer.isBuffer(sent) ? sent : Buffer.from(sent),
+    headers: {
+      ...signed,
+      "content-type": options.contentType ?? "application/json",
+      ...options.extra,
+    },
+  }
+}
+
+/** Sends a call as `signedCall` built it (twice, for a replay). */
+export function sendCall(
+  http: HttpClient,
+  call: { path: string; bytes: Buffer; headers: Record<string, string> },
+  timeoutMs?: number
+): Promise<CallReply> {
+  return http.post(call.path, call.bytes, {
+    ...anyStatus,
+    ...(timeoutMs === undefined ? {} : { timeout: timeoutMs }),
+    responseType: "arraybuffer",
+    // The bytes as they are: axios must not turn them into anything else
+    transformRequest: [(data: unknown) => data],
+    transformResponse: [(data: unknown) => data],
+    headers: call.headers,
+  })
+}
+
+/** `POST /ai/calls?…` with these exact bytes, signed by `shop` over its target and bytes. */
 export function callAs(
   http: HttpClient,
   shop: AiShop,
   body: string | Buffer,
   options: CallOptions = {}
 ): Promise<CallReply> {
-  const bytes = Buffer.isBuffer(body) ? body : Buffer.from(body)
-  const signed = signRequest({
-    method: "POST",
-    path: CALLS,
-    tenantId: options.tenantId ?? shop.id,
-    body: bytes,
-    signer: shop.signer,
-  })
-  return http.post(CALLS, bytes, {
-    ...anyStatus,
-    ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
-    responseType: "arraybuffer",
-    // The bytes as they are: axios must not turn them into anything else
-    transformRequest: [(data: unknown) => data],
-    transformResponse: [(data: unknown) => data],
-    headers: {
-      ...signed,
-      "content-type": options.contentType ?? "application/json",
-      "x-qt-ai-task": options.task ?? "seo_title",
-      "x-qt-ai-capability": options.capability ?? "text",
-      "x-qt-ai-service": options.service ?? "fake",
-      "x-qt-ai-operation": options.operation ?? randomUUID(),
-      ...options.extra,
-    },
-  })
+  return sendCall(http, signedCall(shop, body, options), options.timeoutMs)
 }
 
 /** A chat body as the shop's connector builds it. */

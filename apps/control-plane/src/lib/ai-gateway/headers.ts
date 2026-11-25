@@ -1,30 +1,39 @@
-import { AI_CALL_HEADERS, aiCallHeadersSchema } from "@qticaret/types/control-plane"
-import type { AiCallHeaders, AiTargetAuth } from "@qticaret/types/control-plane"
+import { aiCallParamsSchema } from "@qticaret/types/control-plane"
+import type { AiCallParams, AiTargetAuth } from "@qticaret/types/control-plane"
 
 /**
- * The headers on either side of the gateway (adr/0085 "Güvenlik"). To the
- * provider go exactly three: the body's type, what is accepted, and the
- * key in the one header the service reads; none of the shop's (its
- * signature, cookies, a key of its own, a host) is ever passed on. Back
- * to the shop goes the answer's type alone: no cookie, no account or
+ * What a call says and what crosses the gateway (adr/0085 "Güvenlik"). The
+ * call's four values come from the signed target's query alone. To the
+ * provider go exactly three headers: the body's type, what is accepted,
+ * and the key in the one header the service reads; none of the shop's
+ * (its signature, cookies, a key of its own, a host) is ever passed on.
+ * Back to the shop goes the answer's type alone: no cookie, no account or
  * rate header, nothing the provider calls `x-qt-*`.
  */
 
-type IncomingHeaders = Record<string, string | string[] | undefined>
-
-const single = (value: string | string[] | undefined): string | undefined =>
-  Array.isArray(value) ? undefined : value
+// Any base: only the query of the target is read (an absolute-form target keeps its own)
+const BASE = "http://gateway.invalid"
 
 /**
- * The call's four headers (task, capability, service, operation), held to
- * the contract; null when one is missing, repeated or not of its shape.
- * Only these are read: the signature's own headers are the guard's.
+ * The call's four values (task, capability, service, operation) from the
+ * request target the signature covered, held to the contract; null when
+ * one is missing, repeated, not of its shape, or the query names anything
+ * else. No header is read for them: a header is not signed.
  */
-export function callHeadersOf(headers: IncomingHeaders): AiCallHeaders | null {
-  const picked = Object.fromEntries(
-    Object.values(AI_CALL_HEADERS).map((name) => [name, single(headers[name])])
-  )
-  const parsed = aiCallHeadersSchema.safeParse(picked)
+export function callParamsOf(target: string): AiCallParams | null {
+  let search: URLSearchParams
+  try {
+    search = new URL(target, BASE).searchParams
+  } catch {
+    return null
+  }
+  const picked: Record<string, string | string[]> = {}
+  for (const name of new Set(search.keys())) {
+    const values = search.getAll(name)
+    const [only] = values
+    picked[name] = values.length === 1 && only !== undefined ? only : values
+  }
+  const parsed = aiCallParamsSchema.safeParse(picked)
   return parsed.success ? parsed.data : null
 }
 

@@ -82,6 +82,10 @@ medusaIntegrationTestRunner({
             "x-api-key": "shop-x-api-key",
             "x-goog-api-key": "shop-goog-key",
             "x-qt-custom": "shop",
+            // The old headers name nothing now: only the signed query does
+            "x-qt-ai-task": "post_draft",
+            "x-qt-ai-capability": "vision",
+            "x-qt-ai-operation": "not-a-uuid",
             "x-forwarded-for": "10.0.0.1",
           },
         })

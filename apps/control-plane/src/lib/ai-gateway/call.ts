@@ -1,10 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import {
-  AI_TASK_CAPABILITIES,
-  AI_CALL_HEADERS,
-  isAiCreditTask,
-} from "@qticaret/types/control-plane"
+import { AI_TASK_CAPABILITIES, isAiCreditTask } from "@qticaret/types/control-plane"
 import type { AiCreditCapability, AiGatewayRefusalCode } from "@qticaret/types/control-plane"
 import { vaultIn } from "../../workflows/modules"
 import { aiCreditSettingsOf } from "../ai-credits/platform-settings"
@@ -16,7 +12,7 @@ import { mayEchoKey, passedOn, refusal } from "./errors"
 import type { CreditNote, GatewayAnswer } from "./errors"
 import { forwardCall, notTaken } from "./forward"
 import type { ForwardOutcome, ProviderFetch } from "./forward"
-import { callHeadersOf } from "./headers"
+import { callParamsOf } from "./headers"
 import { providerKeysHeld } from "./keys"
 import { AI_PROVIDER_MAX_ANSWER_BYTES, AI_PROVIDER_TIMEOUT_MS } from "./limits"
 import { measuresOf } from "./measures"
@@ -29,7 +25,7 @@ type Container = Pick<MedusaContainer, "resolve">
 /**
  * `POST /tenant-api/v1/ai/calls` (adr/0085 §2): one provider call on the
  * platform's credits. Every call reads afresh the shop's status and flag,
- * the routing and whether its key is held; the call's headers name a task,
+ * the routing and whether its key is held; the signed target's query names a task,
  * a capability, a service and an operation, and the service is only
  * compared with the routing's, never chosen by it. The body is made safe
  * (body.ts), the credits are taken (or the operation's call counted),
@@ -43,7 +39,8 @@ type Container = Pick<MedusaContainer, "resolve">
 
 export interface GatewayCallInput {
   tenantId: string
-  headers: Record<string, string | string[] | undefined>
+  /** The request target as signed (path and query): the call's values are its query's. */
+  target: string
   raw: Buffer
   contentType: string
   /** Tests only: the provider's fetch. */
@@ -170,15 +167,12 @@ export async function gatewayCall(
     note({ refused: "unavailable", reason: "flag_or_status" })
     return refusal("unavailable")
   }
-  const headers = callHeadersOf(input.headers)
-  if (headers === null) {
-    note({ refused: "body_refused", reason: "headers" })
+  const params = callParamsOf(input.target)
+  if (params === null) {
+    note({ refused: "body_refused", reason: "params" })
     return refusal("body_refused")
   }
-  const task = headers[AI_CALL_HEADERS.task]
-  const capabilityName = headers[AI_CALL_HEADERS.capability]
-  const service = headers[AI_CALL_HEADERS.service]
-  const operationId = headers[AI_CALL_HEADERS.operation]
+  const { task, capability: capabilityName, service, operation: operationId } = params
   const meta = { task, capability: capabilityName, service }
   if (!isAiCreditTask(task)) {
     note({ ...meta, refused: "not_offered" })
