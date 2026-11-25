@@ -56,8 +56,15 @@ test.describe("product page save bar", () => {
     await name.fill(`${title} Pro`)
     const handle = page.locator("#detail-handle")
     const address = await handle.inputValue()
-    // A second card: the search appearance, opened from its folded line
-    await page.getByRole("button", { name: "Arama motoru görünümü", exact: true }).click()
+    // A second card: the search appearance, opened from its folded line (the
+    // section bar above carries a link-button of the same name). An urgent
+    // advisor finding opens it by itself: a click then would fold it again.
+    const fold = page
+      .locator("#product-seo")
+      .getByRole("button", { name: "Arama motoru görünümü", exact: true })
+    if ((await fold.getAttribute("aria-expanded")) === "false") {
+      await fold.click()
+    }
     const seoTitle = page.locator("#product-seo input").first()
     const seoBefore = await seoTitle.inputValue()
     await seoTitle.fill(`${title} – özel`)
