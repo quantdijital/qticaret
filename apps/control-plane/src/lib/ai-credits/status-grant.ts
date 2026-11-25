@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { aiCreditsStatusSchema } from "@qticaret/types/control-plane"
 import type { AiCreditsStatus } from "@qticaret/types/control-plane"
 import { monthlyGrantOf } from "./rollover"
 
@@ -13,7 +14,8 @@ type Container = Pick<MedusaContainer, "resolve">
  * empty grant reads as no bar. A month granted before the package was
  * lowered (or a grant adjusted by hand) may have more left than the
  * package gives now: the whole is then at least what is left, never a
- * remainder larger than its whole.
+ * remainder larger than its whole. The answer is held to the contract
+ * once more, as the status was before the grant was written into it.
  */
 export async function withMonthlyGrant(
   container: Container,
@@ -26,8 +28,8 @@ export async function withMonthlyGrant(
   }
   const { plan } = status.balance
   const grant = await monthlyGrantOf(container, tenantId, now)
-  return {
+  return aiCreditsStatusSchema.parse({
     ...status,
     balance: { ...status.balance, plan: { ...plan, granted: Math.max(grant, plan.remaining) } },
-  }
+  })
 }
