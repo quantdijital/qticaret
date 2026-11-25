@@ -46,7 +46,11 @@ describe("the free rows footer (adr/0070)", () => {
       divider: false,
     })
     // The variant's own ground and marks under the brand columns' names
-    expect(FOOTER_ROWS_SETTINGS).toEqual(FOOTER_COLUMNS_SETTINGS)
+    // (the brand columns' own block and line settings stay theirs)
+    expect(FOOTER_ROWS_SETTINGS).toEqual({
+      ground: FOOTER_COLUMNS_SETTINGS.ground,
+      badge_style: FOOTER_COLUMNS_SETTINGS.badge_style,
+    })
     expect(FOOTER_ROWS_DEFAULTS).toEqual({
       ground: "well",
       badge_style: "card",

@@ -52,6 +52,20 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
     ).toEqual({ topStrip: true, about: null, ground: "well", badgeStyle: "card" })
   })
 
+  it("brings the newsletter's column, the bare brand block and the centred line only off their defaults", () => {
+    expect(
+      footerColumnsOf({ news_place: "column", brand_contact: "hide", bottom_align: "center" })
+    ).toMatchObject({ newsPlace: "column", brandContact: "hide", bottomAlign: "center" })
+    const odd = footerColumnsOf({
+      news_place: "aside" as never,
+      brand_contact: "show",
+      bottom_align: "spread",
+    })
+    expect(odd).not.toHaveProperty("newsPlace")
+    expect(odd).not.toHaveProperty("brandContact")
+    expect(odd).not.toHaveProperty("bottomAlign")
+  })
+
   it("keeps the ledger's ways to pay in words, with no settings of the variant", () => {
     const ledger = footerBarOf(
       {
