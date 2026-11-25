@@ -19,6 +19,18 @@ const ROLES: ReadonlySet<string> = new Set(["system", "user", "assistant", "tool
 const ANSWER_FORMATS: ReadonlySet<string> = new Set(["json_object", "text"])
 const TOOL_CHOICES: ReadonlySet<string> = new Set(["auto", "none"])
 
+/**
+ * The fields a chat body's gateway writes itself, last (third security
+ * review of P3b, D1): no target's `fixedBody` writes over the model, the
+ * messages, the stream or the output cap (a test holds the table to it).
+ */
+export const chatGatewayFields = (maxTokensField: string | null): string[] => [
+  "model",
+  "messages",
+  "stream",
+  ...(maxTokensField === null ? [] : [maxTokensField]),
+]
+
 interface Pictures {
   count: number
   bytes: number
@@ -190,9 +202,13 @@ export function chatBody(body: Record<string, unknown>, input: BodyInput): Rebui
       rebuilt["tool_choice"] = choice
     }
   }
-  // The target's fixed fields last: no field the shop sent is written over them
+  // The target's fixed fields over every field the shop sent; the gateway's
+  // own (model, messages, stream, output cap) over those (third review D1)
+  const own = Object.fromEntries(
+    chatGatewayFields(target.maxTokensField).map((field) => [field, rebuilt[field]])
+  )
   return {
-    body: { ...rebuilt, ...target.fixedBody },
+    body: { ...rebuilt, ...target.fixedBody, ...own },
     images: pictures.count,
     imageBytes: pictures.bytes,
   }

@@ -49,17 +49,19 @@ export const PostAiSettings = z
   .refine((body) => Object.keys(body).length > 0, "cp.nothing_to_save")
 export type PostAiSettingsType = z.infer<typeof PostAiSettings>
 
+const PROVIDER_KEY = /^[\x21-\x7e]{8,512}$/
+
 /**
  * A provider's key as the owner pastes it: printable ASCII without spaces,
- * 8 to 512 characters. The refusal never repeats it.
+ * 8 to 512 characters. The refusal never repeats it: one custom check, as
+ * the framework's own wording of a wrong type or length quotes the value
+ * it got ("Expected type: 'string' …, got: '…'").
  */
 export const PostProviderKey = z
   .object({
-    api_key: z
-      .string({ error: "cp.ai_key_invalid" })
-      .min(8, "cp.ai_key_invalid")
-      .max(512, "cp.ai_key_invalid")
-      .regex(/^[\x21-\x7e]+$/, "cp.ai_key_invalid"),
+    api_key: z.custom<string>((value) => typeof value === "string" && PROVIDER_KEY.test(value), {
+      error: "cp.ai_key_invalid",
+    }),
   })
   .strict()
 export type PostProviderKeyType = z.infer<typeof PostProviderKey>

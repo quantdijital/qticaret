@@ -141,6 +141,25 @@ export const AI_GATEWAY_MAX_IN_FLIGHT = 32
 export const AI_GATEWAY_MAX_BODY_READS = 16
 
 /**
+ * Bodies read at once from one client address (third security review of
+ * P3b, O1): a sender alone cannot take the process's 16 slow reads. The
+ * slot is held only while a body arrives, never while the provider works,
+ * so shops leaving through one address still read four at a time.
+ */
+export const AI_GATEWAY_MAX_BODY_READS_PER_ADDRESS = 4
+
+/**
+ * The slowest a body may arrive (O1): from 2 s into the read, the bytes
+ * received must keep up with 32 KB a second of the time spent (a body
+ * already ended is never cut); a slower sender is answered 408 and its
+ * connection closed, checked twice a second. A shop's 6 MB picture over
+ * a poor uplink (1 Mbit/s, ~128 KB/s) stays well above it.
+ */
+export const AI_GATEWAY_BODY_MIN_BYTES_PER_SECOND = 32 * 1024
+export const AI_GATEWAY_BODY_GRACE_MS = 2_000
+export const AI_GATEWAY_BODY_PACE_CHECK_MS = 500
+
+/**
  * How long a call's body may take to arrive (O2): past it the request is
  * answered 408 and its connection closed, before the signature is checked.
  */

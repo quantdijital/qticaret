@@ -105,3 +105,22 @@ describe("AI service targets (adr/0085 §2)", () => {
     expect(aiTargetModels("__proto__", "text", "production")).toBeNull()
   })
 })
+
+describe("the target tables are frozen all the way down (PR #371 D5)", () => {
+  const unfrozen = (value: unknown, path: string): string[] =>
+    typeof value !== "object" || value === null
+      ? []
+      : [
+          ...(Object.isFrozen(value) ? [] : [path]),
+          ...Object.entries(value).flatMap(([key, child]) => unfrozen(child, `${path}.${key}`)),
+        ]
+
+  it("leaves no object or list open to change", () => {
+    expect(unfrozen(AI_SERVICE_TARGETS, "targets")).toEqual([])
+    expect(unfrozen(AI_SERVICE_CHECKS, "checks")).toEqual([])
+    expect(unfrozen(AI_FAKE_TARGET, "fake")).toEqual([])
+    const hosts = AI_SERVICE_TARGETS.deepseek.hosts as unknown as string[]
+    expect(() => hosts.push("evil.example.com")).toThrow(TypeError)
+    expect(AI_SERVICE_TARGETS.deepseek.hosts).toEqual(["api.deepseek.com"])
+  })
+})

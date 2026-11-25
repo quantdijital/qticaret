@@ -38,6 +38,13 @@ export const AI_ROUTES: RouteRule[] = [
     stepUp: true,
     resource: PROVIDER,
   },
+  // "Bağlantıyı dene": writes nothing (no step-up), its own narrow rate (ai_provider_check)
+  {
+    method: "POST",
+    path: "/admin/cp/ai/providers/:service/test",
+    access: OWNER,
+    resource: PROVIDER,
+  },
   { method: "GET", path: WALLET, access: OWNER, resource: TENANT },
   { method: "POST", path: `${WALLET}/adjust`, access: OWNER, stepUp: true, resource: TENANT },
   { method: "POST", path: `${WALLET}/daily-cap`, access: OWNER, stepUp: true, resource: TENANT },

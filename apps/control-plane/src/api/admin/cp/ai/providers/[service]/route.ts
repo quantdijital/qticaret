@@ -1,7 +1,8 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { deleteProviderKey, writeProviderKey } from "../../../../../../lib/ai-gateway/keys"
 import { noteAuditChanges } from "../../../../../http/audit"
-import { actorOf, paramOf } from "../../../tenants/params"
+import { actorOf } from "../../../tenants/params"
+import { serviceParam } from "../../params"
 import type { PostProviderKeyType } from "../../validators"
 
 /**
@@ -13,7 +14,7 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostProviderKeyType>,
   res: MedusaResponse
 ): Promise<void> {
-  const service = paramOf(req, "service")
+  const service = serviceParam(req)
   const meta = await writeProviderKey(req.scope, service, req.validatedBody.api_key)
   noteAuditChanges(req, { key: { to: { version: meta.version } } })
   res.setHeader("Cache-Control", "no-store")
@@ -25,7 +26,7 @@ export async function POST(
  * to the service taken out, then its key destroyed (every version).
  */
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const service = paramOf(req, "service")
+  const service = serviceParam(req)
   const done = await deleteProviderKey(req.scope, service, actorOf(req))
   noteAuditChanges(req, { key: { deleted: done.deleted }, unrouted: done.unrouted })
   res.json({ provider: { service, has_key: false }, ...done })

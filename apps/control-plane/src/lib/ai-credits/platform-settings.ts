@@ -88,6 +88,10 @@ const newPackId = () => `pack_${randomBytes(8).toString("hex")}`
  * The packs as given, checked: at most 10; a kept pack named by its id
  * (`cp.ai_pack_unknown` for an id never made here, `cp.ai_pack_duplicate`
  * for one named twice), a new one given a new id; the currency is TRY.
+ * A kept pack whose credits or amount change is a new pack with a new id
+ * (PR #371 D3): what a shop was shown under an id is what that id buys,
+ * so a request made with the old id is refused, never priced anew. Its
+ * name and whether it is offered change in place.
  */
 function checkedPacks(given: readonly AiPackInput[], kept: readonly AiPackSetting[]) {
   if (given.length > AI_PACKS_MAX) {
@@ -95,17 +99,22 @@ function checkedPacks(given: readonly AiPackInput[], kept: readonly AiPackSettin
   }
   const seen = new Set<string>()
   return given.map((pack): AiPackSetting => {
+    let id = newPackId()
     if (pack.id !== undefined) {
-      if (!kept.some((each) => each.id === pack.id)) {
+      const before = kept.find((each) => each.id === pack.id)
+      if (!before) {
         throw refuse("cp.ai_pack_unknown")
       }
       if (seen.has(pack.id)) {
         throw refuse("cp.ai_pack_duplicate")
       }
       seen.add(pack.id)
+      if (before.credits === pack.credits && before.amount === pack.amount) {
+        id = before.id
+      }
     }
     const parsed = storedPack.safeParse({
-      id: pack.id ?? newPackId(),
+      id,
       name: pack.name,
       credits: pack.credits,
       amount: pack.amount,

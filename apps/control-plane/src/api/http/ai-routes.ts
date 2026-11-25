@@ -1,6 +1,9 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import type { defineMiddlewares } from "@medusajs/framework/http"
+import { CP_RATE_LIMIT_PROFILES } from "../../lib/rate-limit-profiles"
 import { NoBody, NoQuery } from "../admin/cp/validators"
+import { userIdOf } from "./caller"
+import { rateLimit } from "./rate-limit"
 import {
   GetAiOrders,
   GetAiWallet,
@@ -47,6 +50,15 @@ export const AI_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query(`${A}/providers`, NoQuery),
   body(`${A}/providers/:service`, PostProviderKey),
   query(`${A}/providers/:service`, NoQuery, "DELETE"),
+  {
+    matcher: `${A}/providers/:service/test`,
+    methods: ["POST"],
+    // Per staff member, every address together: each one calls a provider with the platform's key
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.ai_provider_check, { identity: userIdOf }),
+      validateAndTransformBody(NoBody),
+    ],
+  },
   query(W, GetAiWallet),
   body(`${W}/adjust`, PostAiAdjust),
   body(`${W}/daily-cap`, PostAiDailyCap),

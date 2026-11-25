@@ -74,6 +74,21 @@ export interface AiServiceTarget {
 export const endpointUrl = (endpoint: AiEndpointTarget): string =>
   `${endpoint.baseUrl}${endpoint.path}`
 
+/**
+ * `value` frozen all the way down (PR #371 D5): no importer can add a host
+ * to a service's list or swap an address in place. Objects shared between
+ * entries are frozen once more, harmlessly; the table has no cycles.
+ */
+function deepFrozen<T>(value: T): T {
+  if (typeof value === "object" && value !== null) {
+    for (const child of Object.values(value)) {
+      deepFrozen(child)
+    }
+    Object.freeze(value)
+  }
+  return value
+}
+
 const tokens = (input: number, output: number) =>
   ({ currency: "USD", inputPerMillionTokens: input, outputPerMillionTokens: output }) as const
 
@@ -129,7 +144,7 @@ const GEMINI_IMAGE = {
 } as const
 
 /** The networked services, by the shop registry's service id. */
-export const AI_SERVICE_TARGETS = Object.freeze({
+export const AI_SERVICE_TARGETS = deepFrozen({
   deepseek: {
     hosts: ["api.deepseek.com"],
     capabilities: { text: DEEPSEEK_CHAT, vision: DEEPSEEK_CHAT },
@@ -148,8 +163,9 @@ export const AI_SERVICE_TARGETS = Object.freeze({
       image_edit: {
         protocol: "gemini-image",
         auth: "x-goog-api-key",
-        // The shop's connector's own (an image asked for alone), and one answer only
-        fixedBody: { generationConfig: { responseModalities: ["IMAGE"], candidateCount: 1 } },
+        // The shop's connector's own (an image asked for alone); the one answer
+        // (`candidateCount: 1`) is the gateway's own field, written last
+        fixedBody: { generationConfig: { responseModalities: ["IMAGE"] } },
         ...GEMINI_IMAGE,
         scene: GEMINI_IMAGE,
       },
@@ -192,7 +208,7 @@ export interface AiServiceCheck {
   documented?: false
 }
 
-export const AI_SERVICE_CHECKS = Object.freeze({
+export const AI_SERVICE_CHECKS = deepFrozen({
   deepseek: { url: "https://api.deepseek.com/models", auth: "bearer", answer: "model_list" },
   minimax: { url: "https://api.minimax.io/v1/models", auth: "bearer", answer: "model_list" },
   gemini: {
@@ -213,7 +229,7 @@ export const AI_SERVICE_CHECKS = Object.freeze({
  * address; it never leaves the machine. Listed so either app's tests can
  * route to it.
  */
-export const AI_FAKE_TARGET = Object.freeze({
+export const AI_FAKE_TARGET = deepFrozen({
   id: "fake",
   capabilities: {
     text: { model: "fake-text" },

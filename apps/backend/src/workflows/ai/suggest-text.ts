@@ -4,6 +4,7 @@ import { readProductCard } from "../../lib/ai/product-card"
 import { readFaqSuggestions } from "../../lib/ai/product-faq"
 import { readPostDraft } from "../../lib/ai/post-draft"
 import { isPickTask, readProductPicks } from "../../lib/ai/product-picks"
+import type { AiFunding } from "../../lib/ai/registry/services"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import { authorizeTaskStep } from "./steps/authorize-task"
 import { callServiceStep } from "./steps/call-service"
@@ -19,6 +20,8 @@ export interface SuggestTextInput {
   entity_type: AiEntityType
   entity_id: string
   service?: string | null | undefined
+  /** A bulk job's item: the way of paying it was queued with (`selectServiceStep`). */
+  funding?: AiFunding | undefined
   option?: string | null | undefined
   /** A product card's template (Aşama 6): its attributes are the only ones the card may fill. */
   template_id?: string | null | undefined
@@ -50,6 +53,7 @@ export const suggestTextWorkflow = createWorkflow("ai-suggest-text", (input: Sug
       task: input.task,
       user_id: input.user_id,
       service: input.service,
+      funding: input.funding,
       // A `photo` task (a product's attributes) reads the product's picture where the service sees
       entity_type: input.entity_type,
       entity_id: input.entity_id,

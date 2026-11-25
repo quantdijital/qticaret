@@ -7,6 +7,8 @@ import type { Executor } from "./sql"
 import { ORDER_COLUMNS } from "./service-orders"
 import type { AiCreditOrderRow } from "./service-orders"
 import { AiCreditSettings } from "./service-settings"
+import { WALLET_COLUMNS } from "./service-wallet"
+import type { WalletRow } from "./service-wallet"
 
 /** A ledger row as staff read it. */
 export interface AiCreditEntryView {
@@ -103,6 +105,24 @@ export class AiCreditReads extends AiCreditSettings {
       [tenantId]
     )
     return row?.daily_cap ?? null
+  }
+
+  /**
+   * A shop's wallet as it stands, without a lock and without making it
+   * current (no month rolled, nothing expired); null without a wallet. A
+   * read for the status alone: a change goes through `touch`.
+   */
+  @InjectManager()
+  async walletAsIs(
+    tenantId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<WalletRow | null> {
+    const [row] = await rowsOf<WalletRow>(
+      sharedContext.manager as Executor,
+      `SELECT ${WALLET_COLUMNS} FROM ai_credit_wallet WHERE tenant_id = ? AND deleted_at IS NULL`,
+      [tenantId]
+    )
+    return row ?? null
   }
 
   /** A shop's pending request, or null (a shop has at most one). */

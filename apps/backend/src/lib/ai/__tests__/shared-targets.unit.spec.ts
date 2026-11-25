@@ -12,6 +12,14 @@ import type { AiService, AiTarget } from "../registry/services"
 
 const services = aiServices("production")
 
+// Written out, not read from the table: a host added there must show here too
+const HOSTS: Record<string, string[]> = {
+  deepseek: ["api.deepseek.com"],
+  minimax: ["api.minimax.io"],
+  gemini: ["generativelanguage.googleapis.com"],
+  photoroom: ["sdk.photoroom.com", "image-api.photoroom.com"],
+}
+
 const AUTH_OF: Record<string, AiCapabilityTarget["auth"]> = {
   "openai-compatible": "bearer",
   photoroom: "x-api-key",
@@ -37,7 +45,9 @@ describe("the registry's targets come from the shared table", () => {
     (id, service) => {
       const shared = (AI_SERVICE_TARGETS as Record<string, AiServiceTarget>)[id]
       expect(shared).toBeDefined()
-      expect([...service.hosts]).toEqual([...(shared?.hosts ?? [])])
+      expect(HOSTS[id]).toBeDefined()
+      expect([...service.hosts]).toEqual(HOSTS[id])
+      expect([...(shared?.hosts ?? [])]).toEqual(HOSTS[id])
       const capabilities = Object.keys(service.capabilities)
       expect(capabilities.sort()).toEqual(Object.keys(shared?.capabilities ?? {}).sort())
       for (const capability of capabilities) {

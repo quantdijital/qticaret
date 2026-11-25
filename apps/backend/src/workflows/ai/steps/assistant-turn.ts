@@ -152,7 +152,10 @@ export const assistantRunStep = createStep(
     const monthly = route.transport.funding === "own_key"
     const inner = toolConnectorWith(route.service.id, route.transport)
     const connector: ToolConnector = {
-      converse: (request) => withAiBreaker(input.service, () => inner.converse(request)),
+      converse: (request) =>
+        withAiBreaker({ service: input.service, capability: "text" }, () =>
+          inner.converse(request)
+        ),
     }
     const claims: AssistantClaim[] = []
     // Set inside the claim: an object, so the check after the loop is not narrowed away
