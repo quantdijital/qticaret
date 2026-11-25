@@ -31,10 +31,10 @@ const CATALOG: ProductCatalog = {
   variants: [],
 }
 
-/** The card says what is saved; its fields are in the dialog "Düzenle" opens. */
+/** The card says what is saved; its fields take its place once "Düzenle" is pressed. */
 async function openDialog() {
   await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+  return screen.getByRole("form", { name: "Katalog bilgileri" })
 }
 
 describe("CatalogCard", () => {
@@ -64,9 +64,9 @@ describe("CatalogCard", () => {
         body: { withdrawal_excluded: true },
       })
     })
-    // Saved, the dialog closes and the card says it
+    // Saved, the form closes and the card says it
     await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull()
+      expect(screen.queryByRole("form")).toBeNull()
     })
     expect(screen.getByText("Dışında")).toBeInTheDocument()
   })

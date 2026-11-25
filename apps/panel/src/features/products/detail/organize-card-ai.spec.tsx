@@ -139,7 +139,7 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
   it("adds a suggested category as a chip click, recorded once, and saves it with the form", async () => {
     const user = setup()
     await user.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await user.click(await within(dialog).findByRole("button", { name: "Kategori öner" }))
     await user.click(await within(dialog).findByRole("button", { name: "Giyim > Gömlek ekle" }))
 
@@ -163,7 +163,7 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
   it("adds an existing tag and a new one; the new one is created only on Save", async () => {
     const user = setup()
     await user.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
     // The product's own tag is drawn as added
     expect(await within(dialog).findByRole("button", { name: "pamuklu eklendi" })).toBeDisabled()
@@ -185,7 +185,7 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
   it("dismisses a suggestion closed with nothing taken, and takes a tag off", async () => {
     const user = setup()
     await user.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
     await within(dialog).findByRole("button", { name: "keten ekle" })
     await user.click(within(dialog).getByRole("button", { name: "Önerileri kapat" }))
@@ -208,7 +208,7 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
       ],
     })
     await user.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
     await user.click(await within(dialog).findByRole("button", { name: "yaz sezonu (yeni) ekle" }))
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
@@ -225,7 +225,7 @@ describe("OrganizeCard's AI picks (adr/0074 §5 madde 2)", () => {
     const user = setup()
     admin.product.update.mockRejectedValue(new Error("boom"))
     await user.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await user.click(await within(dialog).findByRole("button", { name: "Etiket öner" }))
     await user.click(await within(dialog).findByRole("button", { name: "yaz sezonu (yeni) ekle" }))
     await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))

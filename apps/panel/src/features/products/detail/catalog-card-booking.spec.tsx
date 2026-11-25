@@ -59,7 +59,7 @@ function setup(catalog: Partial<ProductCatalog>, flags: Record<string, boolean>)
 
 async function openDialog() {
   await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+  return screen.getByRole("form", { name: "Katalog bilgileri" })
 }
 
 const ON = { "catalog.non_physical": true, "catalog.booking": true }

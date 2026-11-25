@@ -5,11 +5,9 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
-import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { findingsNote } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
@@ -23,6 +21,7 @@ import { MEASURES, measureSchema, measureText, sizesLine } from "./measures"
 import type { MeasureName } from "./measures"
 import { PRODUCT_SECTIONS } from "./sections"
 import { SideCard } from "./side-card"
+import { SideForm } from "./side-form"
 
 const schema = z.object({
   weight: measureSchema,
@@ -39,7 +38,7 @@ const valuesOf = (product: Pick<ProductDetail, MeasureName>): Values => ({
   height: measureText(product.height),
 })
 
-function ParcelDialog({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
+function ParcelForm({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const units = useStoreUnits()
@@ -60,45 +59,38 @@ function ParcelDialog({ product, onClose }: { product: ProductDetail; onClose: (
   })
 
   return (
-    <FormDialog
-      open
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      size="sm"
-      title={t("products.wizard.shippingCard")}
-      description={t("products.detail.shippingHint")}
+    <SideForm
+      label={t("products.wizard.shippingCard")}
+      hint={t("products.detail.shippingHint")}
       dirty={form.formState.isDirty}
       saving={update.isPending}
       onSubmit={() => void submit()}
+      onCancel={onClose}
     >
-      <DialogBody>
-        <div className="grid grid-cols-2 gap-4">
-          {MEASURES.map(({ name, unit }) => {
-            const error = errors[name]?.message
-            return (
-              <Field
-                key={name}
-                label={t(`products.wizard.measures.${name}`)}
-                htmlFor={`detail-${name}`}
-                error={error ? t(error) : undefined}
-              >
-                <NumberField
-                  decimals={3}
-                  min={0}
-                  suffix={units[unit]}
-                  id={`detail-${name}`}
-                  aria-invalid={Boolean(error)}
-                  {...form.register(name)}
-                />
-              </Field>
-            )
-          })}
-        </div>
-      </DialogBody>
-    </FormDialog>
+      {/* Two to a row where the card is wide enough for the fields' +/− buttons */}
+      <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2">
+        {MEASURES.map(({ name, unit }) => {
+          const error = errors[name]?.message
+          return (
+            <Field
+              key={name}
+              label={t(`products.wizard.measures.${name}`)}
+              htmlFor={`detail-${name}`}
+              error={error ? t(error) : undefined}
+            >
+              <NumberField
+                decimals={3}
+                min={0}
+                suffix={units[unit]}
+                id={`detail-${name}`}
+                aria-invalid={Boolean(error)}
+                {...form.register(name)}
+              />
+            </Field>
+          )
+        })}
+      </div>
+    </SideForm>
   )
 }
 
@@ -107,7 +99,7 @@ function ParcelDialog({ product, onClose }: { product: ProductDetail; onClose: (
  * column: variants without their own take these. Optional, published or
  * not (adr/0054): without them shipping is priced by the shop's default
  * parcel. Not drawn for a digital product or a service (nothing to
- * measure). "Düzenle" and the advisor's "Alana git" open the dialog.
+ * measure). "Düzenle" and the advisor's "Alana git" turn the card into its form.
  */
 export function ShippingCard({
   product,
@@ -120,9 +112,9 @@ export function ShippingCard({
   const { t } = useTranslation()
   const units = useStoreUnits()
   const catalog = useQuery(productCatalogQuery(product.id))
-  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
   useRevealTarget(PRODUCT_SECTIONS.shipping, () => {
-    setOpen(true)
+    setEditing(true)
   })
   if (!catalog.data) {
     return <Skeleton className="h-32 rounded-lg" />
@@ -148,18 +140,17 @@ export function ShippingCard({
       ]}
       note={entered ? undefined : t("products.sections.defaultParcel")}
       findings={findings && findingsNote(t, findings)}
+      editing={editing}
       onEdit={() => {
-        setOpen(true)
+        setEditing(true)
       }}
     >
-      {open ? (
-        <ParcelDialog
-          product={product}
-          onClose={() => {
-            setOpen(false)
-          }}
-        />
-      ) : null}
+      <ParcelForm
+        product={product}
+        onClose={() => {
+          setEditing(false)
+        }}
+      />
     </SideCard>
   )
 }
