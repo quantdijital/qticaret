@@ -90,4 +90,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0082 | Tarihli üründe kapora ve bakiye tahsilatı (numara ayrıldı: Oğuzhan, taslak yazılıyor) | — |
 | 0083 | Tarihli üründe oda dağılımı ve tek kişi farkı (numara ayrıldı: Oğuzhan, taslak yazılıyor) | — |
 | 0084 | Tarih aralığı kipi: konaklama ve kiralama (numara ayrıldı: Oğuzhan, taslak yazılıyor) | — |
-| 0085 | Yapay zekâ platform kredisi: üst panelde ağ geçidi, kredi defteri, paket hakkı ve yükleme (numara ayrıldı: Oğuzhan, taslak yazılıyor) | — |
+| 0085 | [Yapay zekâ platform kredisi: üst panelde ağ geçidi, kredi defteri, paket hakkı ve yükleme](0085-yapay-zeka-platform-kredisi.md) | — |

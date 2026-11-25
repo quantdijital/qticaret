@@ -65,9 +65,45 @@
 - **Testler:** `seo-card.spec.tsx`: öneri forma düşer, kaydetmeden çıkınca kaybolur, piksel genişliği göstergesi öneriyle güncellenir.
 - **Kabul:** tarayıcı denetimi; servis yokken ipucu.
 
-## Kredi satışı (Aşama 1'den sonra)
+## Kredi satışı: platform kredisi (adr/0085)
 
-ADR eki + F16 ile birlikte. Kapsam: `ai.platform_credits` bayrağı, `ai_free_credits_per_month` limit anahtarı, `ai_credit_entry` migration'ı, `platform` servisi, ayır/kesinleştir/geri ver adımları, günlük kredi tavanı, `GET /admin/ai/credits`, panelde bakiye. Önkoşullar: Aşama 1'den en az birkaç haftalık `ai_usage` verisi; docs/12'deki yeniden satış izni; açık karar 2 (anahtarların yeri). **Güvenlik incelemesi:** evet (para, migration).
+Karar: `adr/0085-yapay-zeka-platform-kredisi.md` (sahip yönü 2026-11-25'te onayladı: önden kredi, iş başına kredi, anahtar üst panelde, yeniden fiyatlanabilir). Defter ve anahtarlar **üst panelde**dir; mağaza sunucusu çağrıyı imzalı istekle ağ geçidinden geçirir. Hepsi `ai.platform_credits` bayrağının arkasında, varsayılan kapalı. Her dilimde **güvenlik incelemesi** (para, migration, kimlik bilgisi, dış çağrı). Yollar: üst panel `apps/control-plane/src/`, üst panel arayüzü `apps/control-plane-panel/src/`.
+
+### PR P1: ortak tipler, bayrak, limit anahtarı
+
+- **Dosyalar:** `packages/types/src/control-plane/platform-flags.ts` + `apps/backend/src/modules/platform-settings/features.ts` (`ai.platform_credits`, varsayılan kapalı; aynı değişiklikte), bayrak i18n; `packages/types/src/control-plane/registry.ts` (`ai_free_credits_per_month`: sayı, aylık, `block`), üst panel `modules/plans` (limit anahtarı enum migration'ı, `models/{package-limit,tenant-override}.ts`, `service.ts`, `lib/plans/limits.ts`, doğrulayıcılar), iki panelin limit alanları ve çevirileri, mağaza `lib/plan-limits/{summary,check,usage}.ts`; yeni `packages/types/src/control-plane/ai-credits.ts` (kredi tablosu `AI_TASK_CREDITS`, iş başına çağrı tavanı, uç şemaları: durum, çağrı başlıkları, talep; hata kodları).
+- **Testler:** bayrak eşitlik testleri (var olanlar), şema ve vektör testleri, limit özetinde yeni anahtar; mağazada eşitlik testi: kayıttaki her işin kredi tablosunda satırı var ya da bilerek dışarıda (`search_intent`, `test_text`).
+- **Kabul:** bayrak kapalıyken hiçbir davranış değişmez; migration adı benzersiz; Deniz'e not (plan modülü migration'ı, `platform-flags.ts`).
+
+### PR P2: üst panel cüzdanı ve defteri (dış çağrı yok)
+
+- **Dosyalar (yeni):** `modules/ai-credits/{index.ts,service.ts,models/*,migrations/*}` (`ai_credit_wallet`, `ai_credit_entry`, `ai_credit_operation`, `ai_credit_order`); `lib/ai-credits/{spend,grant,rollover,expire,reconcile}.ts`; `jobs/ai-credit-reconcile.ts` (defter toplamı ile cüzdan karşılaştırması, 15 dakikadan eski açık işlemlerin kapatılması).
+- **Testler:** adr/0085 kabul testleri 1–6 (eşzamanlı harcama yarışı gerçek veritabanında; geri verme; işlem kimliğiyle ikinci çağrı ve çağrı tavanı; ay dönümü; `grant_ref` tekrarı; günlük tavan), son kullanma ve yüklemeyle uzama, denetim işinin farkı yazması.
+- **Kabul:** harcama tek deyim; defter yalnız eklenir; modül tek başına (uç olmadan) testlerle çalışır.
+
+### PR P3: sağlayıcı anahtarları ve ağ geçidi uçları
+
+- **Dosyalar:** servis hedeflerinin (adres, yol, kimlik başlığı biçimi, model) ortak pakete taşınması (mağaza kaydı oradan okur; davranış değişmez); `lib/ai-gateway/{routing,forward,limits,errors}.ts`; `api/tenant-api/v1/ai/{credits,calls,orders}/route.ts`; `lib/fleet/tenant-api-routes.ts`; `lib/rate-limit-profiles.ts` (`tenant_api_ai`); `api/middlewares.ts` (gövde tavanı 6 MB, ham gövde); kasada `ai/<servis>/api_key`; `api/admin/cp/ai/{providers,routing}/**` (yalnız sahip rolü, denetim kaydı).
+- **Testler:** kabul testleri 7–10; sahte sağlayıcıyla uçtan uca (kredi ayrılır, sağlayıcı yanıtı aynen döner, başlıklarda kredi ve bakiye); 5xx'te geri verme; model ve çıktı tavanının ağ geçidince yazılması; yetenek uyuşmazlığı reddi; hız ve gövde sınırı; anahtarın hiçbir yanıtta ve günlükte olmaması; bayrak kapalı ya da yönlendirme boşken "kullanılamaz".
+- **Kabul:** ağ geçidi istekten adres almaz; içerik saklanmaz; `docs/kvkk-envanter.md` satırı.
+
+### PR P4: mağaza sunucusu
+
+- **Dosyalar:** `lib/ai/transport/{types,own-key,platform}.ts` (bağlayıcıların gönderimi taşıyıcıya ayrılır), `lib/ai/connector-of.ts`, `image-connector-of.ts`, `steps/{call-service,edit-image,assistant-turn}.ts` (tek fabrika); `lib/ai/registry/services.ts` (`platform`), `lib/control-plane/ai-credits.ts` (durum okuma, 60 sn önbellek, imzalı çağrı), `workflows/ai/connections.ts` (`platformCredits`, platformun "bağlı" sayılması), `steps/claim-quota.ts` (platform yolunda aylık sayaç alınmaz), `steps/record-usage.ts` + `assistant-record.ts` (`funding`, `credits`), `lib/ai/errors.ts` + iletiler (`ai.credits_exhausted`, `ai.credits_daily_cap`, `ai.platform_unavailable`), `api/admin/ai/credits/**`, `workflows/ai/services-view.ts`.
+- **Testler:** sahte ağ geçidiyle http: yalnız platform; platform + kendi anahtar (varsayılan kendi anahtar); bakiye yok; günlük tavan; ağ geçidi kapalı; `ai_usage` satırı; vitrin araması platformu görmez; kendi anahtar yolunun var olan testleri değişmeden yeşil.
+- **Kabul:** bayrak kapalıyken `GET /admin/ai/services` yanıtı bugünküyle aynı.
+
+### PR P5: mağaza paneli
+
+- **Dosyalar:** `features/settings/components/ai-credits-card.tsx`, `ai-credit-topup-dialog.tsx`, `features/ai/api/credits.ts`, `features/ai/services.ts` (`platform` adı), `ai-button.tsx` (1'den büyük kredi notu), `ai-suggestion-box.tsx` ("Kredi yükle"), `locales/{tr,en}.json`.
+- **Testler:** kart durumları (hak var, bitti, satın alınan var, talep bekliyor, paket yok → "bize yazın"), `owner` olmayan talep düğmesi görmez, Vazgeç kırmızı, bayrak kapalıyken iz yok.
+
+### PR P6: üst panel arayüzü
+
+- **Dosyalar:** mağaza ayrıntısında cüzdan ve defter, "Kredi ekle / düş", talepler listesi ("Ödendi", "İptal"), Ayarlar › Yapay zekâ sağlayıcıları (anahtar, yönlendirme), yükleme paketleri, genel günlük tavan ve kredi ömrü, maliyet raporu; ilgili `api/admin/cp/ai/**` uçları.
+- **Testler:** rol tablosu, notsuz düzeltme reddi, talep onayında tek `grant_purchase`, anahtar alanı geri doldurulmaz.
+
+**Satış açılmadan önce (sahip):** yeniden satış izni (docs/12), mali müşavir (ön ödemeli kredi faturası, süresi dolan kredi), paket fiyatları ve aylık haklar, sözleşme metni. Kartla çevrim içi satın alma F16 ile.
 
 ## Aşama 2: ürün açıklaması taslağı
 

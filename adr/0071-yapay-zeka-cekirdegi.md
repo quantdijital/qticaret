@@ -142,6 +142,8 @@ Sunucuda tek saf işlev karar verir (`lib/ai/select.ts`): `usable(task) = bağl�
 
 **(a) Kendi anahtarım (ilk).** Çağrı mağazanın mühürlü anahtarıyla, mağazanın servis hesabına yazılır. Platform yalnız sayar ve tahmini maliyeti gösterir.
 
+> **Güncelleme 2026-11-25:** bu bölümün yerini adr/0085 aldı: defter ve anahtarlar üst panelde, mağaza çağrıyı ağ geçidinden geçirir; aşağıdaki `ai_credit_entry` mağaza tarafında yapılmaz.
+
 **(b) Platform kredisi (sonra; veri modeli şimdi).** Platform hesabı kayıtta `platform` kimlikli bir servistir: yetenekleri platformun arkada seçtiği servislerin birleşimidir, seçicide "Platform kredisi" adıyla görünür, hangi alt servisin çalıştığı kiracıya söylenmez. Seçim kuralı (§4) aynen işler.
 
 Cüzdan bir **defterdir**; bakiye tutulmaz, satırlardan toplanır:
@@ -299,7 +301,7 @@ Ayrıntılı PR planı, dosyalar, testler ve kabul ölçütleri: `docs/22-yapay-
 ## Sahibe sorulacak açık kararlar (önerilen varsayılanla)
 
 1. **Tercih düzeyi:** öneri kullanıcı başına, mağazanın son seçimi yedek (§4). Alternatif: yalnız mağaza düzeyi.
-2. **Platform anahtarlarının yeri (kredi aşaması):** öneri üst panelde bir ağ geçidi (anahtar mağaza sunucusuna hiç inmez, günlük sınır ve defter tek yerde); bedeli üst panelin çalışma anında bağımlılık olması. Alternatif: anahtarlar mağaza örneğinin ortamında, defter mağaza veritabanında, yüklemeler imzalı belgeyle. Karar F16 faturalamasıyla birlikte, Deniz ile.
+2. **Platform anahtarlarının yeri (kredi aşaması):** **karara bağlandı (adr/0085, 2026-11-25): üst panelde ağ geçidi.** Eski metin: öneri üst panelde bir ağ geçidi (anahtar mağaza sunucusuna hiç inmez, günlük sınır ve defter tek yerde); bedeli üst panelin çalışma anında bağımlılık olması. Alternatif: anahtarlar mağaza örneğinin ortamında, defter mağaza veritabanında, yüklemeler imzalı belgeyle. Karar F16 faturalamasıyla birlikte, Deniz ile.
 3. **`ai.own_keys` varsayılanı ve alt paketler:** öneri kredi satışı başlayana kadar bütün paketlerde açık (alt paketin başka yolu yok), kredi çıkınca alt paketlerde kapatılır; kapatılan mağazanın anahtarı silinmez, kullanılmaz.
 
 ## Ek 2026-11-19: sahne görselinde kendi sahneleri
