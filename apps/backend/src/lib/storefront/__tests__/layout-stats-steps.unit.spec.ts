@@ -50,6 +50,8 @@ describe("the figures strip (adr/0077 §10)", () => {
       ],
       dividers: "on",
       icons: "off",
+      arrangement: "stacked",
+      social: "off",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "stats", dividers: "on" })
   })
@@ -195,6 +197,19 @@ describe("the figures strip and the steps on the storefront", () => {
         width: null,
       },
     })
+    expect(shown).not.toHaveProperty("arrangement")
+    expect(shown).not.toHaveProperty("social")
+  })
+
+  it("prints the row and the profiles only when the shop picks them", async () => {
+    const shown = await hydrateSection(
+      stats.parse(strip({ arrangement: "row", social: "on" })),
+      context()
+    )
+    expect(shown).toMatchObject({ type: "stats", arrangement: "row", social: "on" })
+    expect(issues({ home: [strip({ arrangement: "grid" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
   })
 
   it("prints the steps with their link placed, a broken one null", async () => {

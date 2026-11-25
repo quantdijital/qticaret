@@ -26,6 +26,29 @@ const common = {
 
 const grid = z.object({ ...common, variant: defaultVariant("posts") }).strict()
 
+/**
+ * The intro panel's look: its tone, a leaf sprig and the covers' shape;
+ * mirrors `@qticaret/types`' `POSTS_PANEL_SETTINGS` (each list's first: the
+ * default, the panel as it was).
+ */
+export const POSTS_PANEL_SETTINGS = {
+  panel_tone: ["ground", "tint"],
+  ornament: ["none", "leaves"],
+  cover_ratio: ["standard", "wide"],
+} as const
+
+type PanelSetting = keyof typeof POSTS_PANEL_SETTINGS
+
+const panelStep = <S extends PanelSetting>(setting: S) => {
+  const listed: readonly unknown[] = POSTS_PANEL_SETTINGS[setting]
+  return z
+    .custom<(typeof POSTS_PANEL_SETTINGS)[S][number]>(
+      (value) => listed.includes(value),
+      VARIANT_ERROR
+    )
+    .default(POSTS_PANEL_SETTINGS[setting][0])
+}
+
 const introPanel = z
   .object({
     ...common,
@@ -34,6 +57,9 @@ const introPanel = z
     intro: optional(shopText(POSTS_INTRO_LIMITS.intro)),
     /** The panel's button; none: the storefront's "every post". */
     link: optional(storefrontLink),
+    panel_tone: panelStep("panel_tone"),
+    ornament: panelStep("ornament"),
+    cover_ratio: panelStep("cover_ratio"),
   })
   .strict()
 

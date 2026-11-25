@@ -41,6 +41,7 @@ const help: HomeSectionView = {
 const ICONS: CategoryIconsView = {
   disc: "tint",
   phone: "scroll",
+  row_style: "stacked",
   items: [
     { label: "Macera", path: "/macera", icon: "mountain", image: null, initial: "M" },
     {
@@ -107,6 +108,16 @@ describe("the categories' icon row", () => {
     const html = home([row({ ...ICONS, phone: "wrap", disc: "line" })])
     expect(html).not.toContain("gf-rail")
     expect(html).toContain("border-rule")
+  })
+
+  it("draws a strip as one row, the disc beside its name, the heading for readers only", () => {
+    const today = home([row(ICONS)])
+    expect(today).toContain('<h2 id="bolum-ikonsira01">Gezi türleri</h2>')
+    expect(today).toContain("flex-col items-center")
+    const html = home([row({ ...ICONS, row_style: "strip" })])
+    expect(html).toMatch(/<h2[^>]*class="sr-only"[^>]*>Gezi türleri<\/h2>/)
+    expect(html).toContain("flex items-center gap-3")
+    expect(html).not.toContain("flex-col items-center")
   })
 })
 

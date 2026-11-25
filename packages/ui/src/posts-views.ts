@@ -21,4 +21,10 @@ export interface PostsSectionView {
   eyebrow?: string | null
   /** `intro_panel`: the words under the heading; null: none. */
   intro?: string | null
+  /** `intro_panel`: a light tint of the main colour over the ground; absent: the ground. */
+  panelTone?: "tint"
+  /** `intro_panel`: a leaf sprig at the panel's lower right; absent: none. */
+  ornament?: "leaves"
+  /** `intro_panel`: the covers 2:1; absent: 16:10. */
+  coverRatio?: "wide"
 }

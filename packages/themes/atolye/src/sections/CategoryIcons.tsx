@@ -46,16 +46,26 @@ export function CategoryIcons({
   marks?: boolean | undefined
 }) {
   const scroll = view.phone === "scroll"
+  // One quiet row across the page: the name beside a smaller disc, the heading a reader's only
+  const strip = view.row_style === "strip"
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
-        <SectionHead id={id} title={title} more={all} ownMore={ownAll} marks={marks} />
+        {strip ? (
+          <h2 id={id} className="sr-only">
+            {title}
+          </h2>
+        ) : (
+          <SectionHead id={id} title={title} more={all} ownMore={ownAll} marks={marks} />
+        )}
         <ul
           data-variant="icons"
           className={cn(
             "flex gap-x-(--gap-columns) gap-y-(--gap-rows) lg:flex-wrap",
             // A few discs stand together in the middle, a disc's width apart; more share the row
-            view.items.length <= FEW ? "lg:justify-center lg:gap-x-28" : "lg:justify-between",
+            view.items.length <= FEW && !strip
+              ? "lg:justify-center lg:gap-x-28"
+              : "lg:justify-between",
             scroll
               ? "gf-rail -mx-(--gutter) overflow-x-auto scroll-px-(--gutter) px-(--gutter) lg:mx-0 lg:overflow-visible lg:px-0"
               : "flex-wrap justify-center"
@@ -65,17 +75,26 @@ export function CategoryIcons({
             <li key={item.path} className="shrink-0">
               <a
                 href={item.path}
-                className="group flex w-22 flex-col items-center gap-2 text-center lg:w-28"
+                className={
+                  strip
+                    ? "group flex items-center gap-3 text-left"
+                    : "group flex w-22 flex-col items-center gap-2 text-center lg:w-28"
+                }
               >
                 <span
                   className={cn(
-                    "flex size-16 items-center justify-center overflow-hidden rounded-pill transition-colors lg:size-20",
+                    strip
+                      ? "flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-pill transition-colors lg:size-14"
+                      : "flex size-16 items-center justify-center overflow-hidden rounded-pill transition-colors lg:size-20",
                     // A picture sits on the photo well (adr/0067 S4), an icon or a letter on the disc
                     !item.icon && item.image ? "bg-media" : DISC[view.disc]
                   )}
                 >
                   {item.icon ? (
-                    <SectionIcon icon={item.icon} className="size-7 shrink-0 lg:size-8" />
+                    <SectionIcon
+                      icon={item.icon}
+                      className={strip ? "size-6 shrink-0 lg:size-7" : "size-7 shrink-0 lg:size-8"}
+                    />
                   ) : item.image ? (
                     <ResponsiveImage
                       image={{ ...item.image, alt: "" }}

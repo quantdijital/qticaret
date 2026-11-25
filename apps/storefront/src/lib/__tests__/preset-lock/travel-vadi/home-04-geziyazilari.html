@@ -4,7 +4,8 @@
     <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
       <div
         data-ground="well"
-        class="gf-ground grid items-center gap-(--gap-columns) rounded-tile p-5 sm:p-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:p-10"
+        data-tone="tint"
+        class="gf-ground grid items-center gap-(--gap-columns) rounded-tile p-5 sm:p-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:p-10 relative"
       >
         <div class="flex flex-col items-start gap-3">
           <p class="text-sm font-semibold text-text-2">
@@ -27,7 +28,7 @@
             <article
               class="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane"
             >
-              <div class="relative aspect-[16/10] bg-media-deep">
+              <div class="relative aspect-[2/1] bg-media-deep">
                 <picture>
                   <img
                     src="https://cdn.example.com/b/1.webp"
@@ -66,7 +67,7 @@
             <article
               class="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane"
             >
-              <div class="relative aspect-[16/10] bg-media-deep">
+              <div class="relative aspect-[2/1] bg-media-deep">
                 <picture>
                   <img
                     src="https://cdn.example.com/b/2.webp"
@@ -102,6 +103,49 @@
             </article>
           </li>
         </ul>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 90 120"
+          class="gf-panel-leaves pointer-events-none absolute -right-4 -bottom-5 hidden h-28 w-20 lg:block"
+        >
+          <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M20 118C34 92 46 64 72 10">
+            </path>
+          </g>
+          <g fill="currentColor">
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(66 22) rotate(40) scale(0.42)"
+            >
+            </path>
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(56 44) rotate(-30) scale(0.5)"
+            >
+            </path>
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(58 48) rotate(62) scale(0.48)"
+            >
+            </path>
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(42 72) rotate(-44) scale(0.55)"
+            >
+            </path>
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(46 76) rotate(56) scale(0.5)"
+            >
+            </path>
+            <path
+              d="M0 0C-11-20-10-46 0-68C10-46 11-20 0 0Z"
+              transform="translate(30 98) rotate(-50) scale(0.45)"
+            >
+            </path>
+          </g>
+        </svg>
       </div>
     </div>
   </section>

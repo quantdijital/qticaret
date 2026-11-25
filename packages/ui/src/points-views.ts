@@ -1,5 +1,5 @@
 import type { SectionIcon, StatsSettings, StepsSettings } from "@qticaret/types"
-import type { LinkView } from "./views"
+import type { LinkView, SocialLinkView } from "./views"
 
 /**
  * The figures strip as a theme draws it (`stats`, adr/0077 §10): two to
@@ -17,6 +17,11 @@ export interface StatsSectionView extends StatsSettings {
   /** The list's name for a screen reader while there is no heading. */
   label: string
   items: StatsItemView[]
+  /**
+   * The shop's social profiles at the row's end (`social: on`) under their
+   * line ("Bizi izleyin"); absent: none (the setting off, or no profile).
+   */
+  follow?: { title: string; profiles: SocialLinkView[] }
 }
 
 export interface StatsItemView {

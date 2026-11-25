@@ -1,0 +1,66 @@
+/*
+ * Every clickable thing answers a pointer softly (owner 2026-11-26): its
+ * colour change eases over 200 ms instead of jumping, and the places that
+ * showed nothing under a pointer show something. Movement (a lift, a
+ * zoom) only for a visitor who has not asked for less motion; colour
+ * alone otherwise. The cards' own lift and photo zoom stay `motion.css`'s.
+ */
+
+/*
+ * The default: a link, a button, a disclosure or a tab with no transition
+ * of its own eases its colours (the footer's links and profiles, the
+ * listing's filter heads, the header's wordmark). Zero specificity and a
+ * layer under the utilities, so any element's own transition wins.
+ */
+@layer components {
+  :where(a[href], button, summary, [role="tab"], label:has(> input[type="radio"])) {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+}
+
+/*
+ * The category discs (`CategoryIcons`, `data-variant="icons"`): under a
+ * pointer the disc darkens a little inside a soft halo in the shop's colour
+ * and, with motion,
+ * rises a little and grows by 4 %, so the row reads as links. Unlayered:
+ * it answers the disc's own `transition-colors`.
+ */
+ul[data-variant="icons"] > li > a > span:first-child {
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+@media (hover: hover) {
+  ul[data-variant="icons"] > li > a:hover > span:first-child {
+    box-shadow:
+      inset 0 0 0 999px rgb(0 0 0 / 0.05),
+      0 0 0 4px color-mix(in oklab, var(--color-signal) 28%, transparent);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  ul[data-variant="icons"] > li > a:hover > span:first-child {
+    transform: translateY(-2px) scale(1.04);
+  }
+}
+
+/*
+ * The listing's subcategory row (`gf-subtile`, lined) and its filter
+ * heads: a pale ground under a pointer, the tile's rule a step darker.
+ */
+[data-surface="lined"] .gf-subtile {
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+@media (hover: hover) {
+  [data-surface="lined"] .gf-subtile:hover {
+    background: var(--color-paper-2);
+    box-shadow: inset 0 0 0 1px var(--color-edge);
+  }
+  details[class~="group/filter"] > summary:hover {
+    background-color: var(--color-paper-2);
+  }
+}

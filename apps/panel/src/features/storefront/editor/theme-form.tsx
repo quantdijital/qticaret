@@ -9,6 +9,7 @@ import { ATOLYE_COLORS } from "@/theme/atolye"
 import { useProblemText } from "./forms/problem-text"
 import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
+import { KitChoice } from "./theme-style-kit-fields"
 import { ListingTextGroup } from "./theme-listing-text-fields"
 import { SearchFormGroup } from "./theme-search-form-fields"
 import { BackgroundField, ColorInput } from "./theme-fields"
@@ -99,6 +100,7 @@ export function ThemeForm({
           fallback={ATOLYE_COLORS.text}
           error={problem(problems["theme.colors.accent"])}
         />
+        <KitChoice field="accent_ink" theme={theme} variants={variants} onChange={onChange} />
         <BackgroundField
           id={THEME_IDS["colors.background"]}
           value={colors.background}

@@ -2,6 +2,7 @@ import { fieldKey, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { HandNote } from "../parts/HandNote"
+import { BandFlower } from "./band-art"
 import { BandPicture } from "./BandPicture"
 import { buttonClass } from "./campaign-steps"
 import type { Of } from "./plan"
@@ -91,7 +92,10 @@ export function CampaignSplit({
               <a
                 key={`${link.path}-${String(drawn)}`}
                 href={link.path}
-                className={buttonClass(section.button_style, drawn === 1)}
+                className={cn(
+                  buttonClass(section.button_style, drawn === 1),
+                  drawn === 0 && section.buttonTone === "accent" && "gf-btn--accent"
+                )}
                 {...qf(drawn === 0 && !slide.secondFirst ? "link" : "second_link")}
               >
                 {link.label}
@@ -102,11 +106,21 @@ export function CampaignSplit({
       </div>
     </div>
   )
+  // The flower spray leans out past the box's edge: beside it, not inside its clip
+  const flowered =
+    section.ornament === "flower" ? (
+      <div className="relative">
+        {box}
+        <BandFlower />
+      </div>
+    ) : (
+      box
+    )
   // Opening the page it sits under the header as the hero does; edge to edge, right against it
   const top = !first ? "gf-section" : full ? undefined : "pt-3 lg:pt-6"
   return (
     <section aria-label={label} className={top}>
-      {full ? box : <Container>{box}</Container>}
+      {full ? flowered : <Container>{flowered}</Container>}
     </section>
   )
 }

@@ -3325,7 +3325,8 @@
       "category": "Category",
       "updated": "Last change",
       "price": "Price",
-      "actions": "Actions"
+      "actions": "Actions",
+      "sku": "Stock code (SKU)"
     },
     "errors": {
       "title": "The product name needs at least 2 characters.",
@@ -4061,6 +4062,19 @@
       "selectAll_one": "Select the {{formatted}} matching product",
       "selectAll_other": "Select all {{formatted}} matching products",
       "clear": "Clear selection",
+      "delete": {
+        "action": "Delete",
+        "working": "Deleting… {{done}}/{{total}}",
+        "title_one": "Delete {{formatted}} product?",
+        "title_other": "Delete {{formatted}} products?",
+        "description": "The products are deleted with their variants and stock records. This cannot be undone. Products that cannot be deleted are skipped with the reason.",
+        "confirm_one": "Delete {{formatted}} product",
+        "confirm_other": "Delete {{formatted}} products",
+        "done_one": "{{formatted}} product deleted.",
+        "done_other": "{{formatted}} products deleted.",
+        "skipped_one": "{{formatted}} product could not be deleted; it stays selected.",
+        "skipped_other": "{{formatted}} products could not be deleted; they stay selected."
+      },
       "edit": "Bulk edit",
       "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
       "scope_one": "Applies to the {{formatted}} selected product. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
@@ -4472,6 +4486,13 @@
       }
     },
     "rowActions": "Actions for {{title}}",
+    "listOptions": {
+      "label": "View",
+      "perPage": "Per page",
+      "pageSize_one": "{{count}} product",
+      "pageSize_other": "{{count}} products",
+      "columns": "Columns"
+    },
     "duplicate": {
       "action": "Duplicate",
       "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
@@ -5179,12 +5200,35 @@
     },
     "address": {
       "edit": "Edit",
-      "title": "Delivery address of #{{number}}",
-      "description": "The delivery address can change until the order is packed.",
+      "title": {
+        "shipping": "Delivery address",
+        "billing": "Billing address"
+      },
+      "hint": {
+        "shipping": "The delivery address can change until the order is packed.",
+        "billing": "The billing address can change until the invoice is issued."
+      },
+      "saved": {
+        "shipping": "Delivery address updated.",
+        "billing": "Billing address updated."
+      },
+      "editOf": {
+        "shipping": "Edit the delivery address",
+        "billing": "Edit the billing address"
+      },
       "firstName": "First name",
       "lastName": "Last name",
       "nameRequired": "First and last name are required.",
-      "saved": "Delivery address updated."
+      "company": "Company name",
+      "sameAsDelivery": "Same as the delivery address.",
+      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "email": "E-mail",
+      "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
+      "emailRequired": "E-mail is required.",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailSaved": "E-mail updated.",
+      "editEmail": "Edit the e-mail",
+      "noEmail": "No e-mail."
     },
     "filters": {
       "payment": "Payment",
@@ -5218,7 +5262,12 @@
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
-      "days": "Order date"
+      "days": "Order date",
+      "customer": "Customer",
+      "customerOrders": "This customer's other orders",
+      "anyCustomer": "Search by name or e-mail",
+      "noCustomer": "No customer found.",
+      "customerUnknown": "Customer not found"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",
@@ -5681,7 +5730,8 @@
       "tabs": {
         "label": "Customer records",
         "orders": "Orders"
-      }
+      },
+      "allOrders": "All their orders"
     },
     "consents": {
       "title": "Message consent",
@@ -9654,6 +9704,20 @@
           "hint": "Where the picture meets the panel.",
           "straight": "Straight",
           "curved": "Curved"
+        },
+        "button_tone": {
+          "label": "Button colour",
+          "term": "button colour",
+          "hint": "The first button in the main colour or the accent colour.",
+          "primary": "Main",
+          "accent": "Accent"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small flower spray in the accent colour at the panel's lower right (wide screens).",
+          "none": "None",
+          "flower": "Flower"
         }
       },
       "products": {
@@ -10010,6 +10074,24 @@
               "lively": "Lively"
             },
             "hint": "Calm is the theme's own short transitions. Lively zooms a product card's photo slightly and lifts the card while pointed at, eases sections and products in as the page scrolls, fades images in as they load and presses buttons down a little. A visitor who asks for less motion sees none of it."
+          },
+          "page_width": {
+            "label": "Page width",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standard",
+              "narrow": "Narrow"
+            },
+            "hint": "The column the content sits in. Standard is 1440 px, Narrow 1344 px: a tighter, easier column for a showcase."
+          },
+          "accent_ink": {
+            "label": "Words on the accent",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Automatic",
+              "light": "Always white"
+            },
+            "hint": "Automatic sets the words on the accent colour (a button, a pill) white or dark, whichever reads better. Always white keeps bold white words on a bright accent such as orange: the colour should give at least 3:1 against white."
           }
         },
         "card": "Product card",
@@ -10073,7 +10155,8 @@
           "text_positionHint": "Over the photo: the name and price stand on a dark fade at the photo's foot. Standard cards only.",
           "textPositions": {
             "below": "Under the photo",
-            "over": "Over the photo"
+            "over": "Over the photo",
+            "over_split": "Over the photo, price at the right"
           },
           "rating_badge": "Show the rating as a badge on the photo",
           "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
@@ -10704,6 +10787,13 @@
           "submenus": "In submenus",
           "off": "None"
         },
+        "tool_labels": {
+          "label": "Icon words",
+          "term": "tool labels",
+          "show": "With words",
+          "hide": "Icons only",
+          "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
+        },
         "tools_style": {
           "label": "Icons on the right",
           "term": "icons",
@@ -10871,6 +10961,25 @@
           "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
           "card": "On cards",
           "plain": "Plain"
+        },
+        "news_place": {
+          "label": "Newsletter place",
+          "term": "newsletter place",
+          "brand": "Under the brand",
+          "column": "Last column"
+        },
+        "brand_contact": {
+          "label": "Contact in the brand column",
+          "term": "brand contact",
+          "hint": "Hidden: no address, phone or e-mail in the brand column; the Contact page stays.",
+          "show": "Show",
+          "hide": "Hide"
+        },
+        "bottom_align": {
+          "label": "Bottom line",
+          "term": "bottom line",
+          "spread": "Spread",
+          "center": "Centred"
         },
         "bottom_badges": {
           "label": "Payment logos in the bottom line",
@@ -11518,6 +11627,18 @@
           "label": "Show icons",
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
+        },
+        "arrangement": {
+          "label": "Arrangement",
+          "term": "arrangement",
+          "hint": "Row: the icon at the left, the figure and its label beside it, one tight row.",
+          "stacked": "Stacked",
+          "row": "Row"
+        },
+        "social": {
+          "label": "Show social profiles",
+          "term": "social",
+          "hint": "At the row's end, \"Follow us\" and the social profiles from the store details. Only in the Row arrangement."
         }
       },
       "steps": {
@@ -11575,7 +11696,28 @@
         "intro": "Intro",
         "link": "Button",
         "linkTerm": "button",
-        "linkHint": "Left empty, the button leads to every post."
+        "linkHint": "Left empty, the button leads to every post.",
+        "panel_tone": {
+          "label": "Panel tone",
+          "term": "panel tone",
+          "hint": "The panel on the section's ground, or a light tint of your main colour over it.",
+          "ground": "Ground",
+          "tint": "Light tint"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small leaf sprig at the panel's lower right corner (wide screens).",
+          "none": "None",
+          "leaves": "Leaves"
+        },
+        "cover_ratio": {
+          "label": "Cover ratio",
+          "term": "cover ratio",
+          "hint": "The shape of the post cards' cover pictures.",
+          "standard": "16:10",
+          "wide": "Wide (2:1)"
+        }
       },
       "heroFull": {
         "accent": {
@@ -11746,6 +11888,13 @@
           "hint": "Categories that do not fit a narrow screen slide sideways or wrap onto a new row.",
           "scroll": "Slide sideways",
           "wrap": "Wrap"
+        },
+        "row_style": {
+          "label": "Arrangement",
+          "term": "row style",
+          "hint": "Stacked shows the name under the icon and the section heading. Strip sets the categories in one row across the page with the name beside the icon; the heading stays for screen readers only.",
+          "stacked": "Stacked, with heading",
+          "strip": "Strip"
         }
       },
       "icons": {

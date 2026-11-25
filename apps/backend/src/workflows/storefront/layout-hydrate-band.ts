@@ -49,6 +49,9 @@ export function hydrateBanner(section: BannerSection, at: BandContext) {
           edge: section.edge,
           // The hand note is plain text, no shop tokens to fill (`hand-note.ts`)
           note: section.note,
+          // Printed only off the default, so a split before them reads as it did
+          ...(section.button_tone !== "primary" ? { button_tone: section.button_tone } : {}),
+          ...(section.ornament !== "none" ? { ornament: section.ornament } : {}),
         }
       : {}),
   }
@@ -70,6 +73,10 @@ export function hydratePosts(section: PostsSection, at: BandContext) {
         eyebrow: at.fill(section.eyebrow),
         intro: at.fill(section.intro),
         link: at.link(section.link),
+        // Printed only off the default, so a panel before them reads as it did
+        ...(section.panel_tone !== "ground" ? { panel_tone: section.panel_tone } : {}),
+        ...(section.ornament !== "none" ? { ornament: section.ornament } : {}),
+        ...(section.cover_ratio !== "standard" ? { cover_ratio: section.cover_ratio } : {}),
       }
     : printed
 }

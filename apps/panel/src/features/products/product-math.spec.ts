@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { availableStock, priceRange } from "./product-math"
+import { availableStock, listSku, priceRange } from "./product-math"
 
 const variant = (amount: number, available: number, managed = true) => ({
   manage_inventory: managed,
@@ -28,5 +28,19 @@ describe("availableStock", () => {
 
   it("is null when no variant tracks stock", () => {
     expect(availableStock([variant(1, 3, false)])).toBeNull()
+  })
+})
+
+describe("listSku", () => {
+  it("shows the first variant's code and how many others have one", () => {
+    expect(listSku([{ sku: " BC-1 " }, { sku: "" }, { sku: "BC-3" }])).toEqual({
+      sku: "BC-1",
+      more: 1,
+    })
+  })
+
+  it("is null when no variant has a code", () => {
+    expect(listSku([{ sku: null }, null])).toBeNull()
+    expect(listSku(undefined)).toBeNull()
   })
 })
