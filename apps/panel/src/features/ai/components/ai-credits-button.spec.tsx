@@ -116,6 +116,26 @@ describe("AiButton on the platform's credits", () => {
     expect(sdkFetch).not.toHaveBeenCalledWith("/admin/ai/credits")
   })
 
+  it("never reads the wallet for a role that may not, nor says a price", async () => {
+    staff.role = "operations"
+    const user = setup(["platform"], 3)
+    await open(user)
+    await screen.findByText("Çelik şef bıçağı 20 cm")
+    expect(screen.queryByText("3 kredi")).toBeNull()
+    expect(sdkFetch).not.toHaveBeenCalledWith("/admin/ai/credits")
+  })
+
+  it("tells a role that may not read the wallet to let the owner know, asking nothing", async () => {
+    staff.role = "operations"
+    failWith("ai.credits_exhausted", 402)
+    const user = setup(["platform"])
+    await open(user)
+    expect(await screen.findByText("Krediniz bitti.")).toBeInTheDocument()
+    expect(screen.getByText("Mağaza sahibine haber verin.")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Kredi yükle" })).toBeNull()
+    expect(sdkFetch).not.toHaveBeenCalledWith("/admin/ai/credits")
+  })
+
   it("offers the owner Kredi yükle when the credits ran out, opening the dialog", async () => {
     failWith("ai.credits_exhausted", 402)
     const user = setup(["platform"])

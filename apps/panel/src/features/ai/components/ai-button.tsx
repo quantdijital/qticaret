@@ -6,7 +6,8 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { aiServicesQuery } from "@/features/ai/api/ai"
-import { PLATFORM_SERVICE, aiCreditsQuery } from "@/features/ai/api/credits"
+import { PLATFORM_SERVICE, aiCreditsQuery, mayReadCredits } from "@/features/ai/api/credits"
+import { useStaff } from "@/features/auth/api/staff"
 import { AiCreditTopupDialog } from "@/features/settings/components/ai-credit-topup-dialog"
 import type { AiEntity } from "@/features/ai/api/suggestions"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
@@ -70,9 +71,12 @@ export function AiButton({
   const suggestion = useAiSuggestion(task, entity)
   const [hintGone, setHintGone] = useState(hintClosed)
   const [topUp, setTopUp] = useState(false)
-  // On the platform's credits, a task dearer than one credit says its price (adr/0085 §5)
+  // On the platform's credits, a task dearer than one credit says its price (adr/0085 §5);
+  // a role that may not read the wallet never asks for it (its run-out words come from the error key)
+  const role = useStaff()?.role
   const onPlatform = service === PLATFORM_SERVICE
-  const wallet = useQuery({ ...aiCreditsQuery(), enabled: onPlatform, retry: false })
+  const readsWallet = onPlatform && mayReadCredits(role)
+  const wallet = useQuery({ ...aiCreditsQuery(), enabled: readsWallet, retry: false })
   const cost = onPlatform && wallet.data?.available ? wallet.data.tasks[task] : undefined
 
   if (!view?.allowed) {
