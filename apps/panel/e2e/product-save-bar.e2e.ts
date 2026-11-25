@@ -55,12 +55,18 @@ test.describe("product page save bar", () => {
     await name.fill(`${title} Pro`)
     const handle = page.locator("#detail-handle")
     const address = await handle.inputValue()
-    // A second card: the search appearance, opened from its folded line
-    // The fold's own header (the section bar has a chip of the same name)
-    await page
+    // A second card: the search appearance, opened from its fold's own header (the section bar
+    // has a chip of the same name). It may start open (docs/06: a fold with a critical or high
+    // advisor finding, or the shop's "Gelişmiş" layout), and a click on an open fold closes it;
+    // its default is known once the page's requests have settled
+    await page.waitForLoadState("networkidle")
+    const fold = page
       .locator("main section > header h2")
       .getByRole("button", { name: "Arama motoru görünümü", exact: true })
-      .click()
+    if ((await fold.getAttribute("aria-expanded")) !== "true") {
+      await fold.click()
+    }
+    await expect(fold).toHaveAttribute("aria-expanded", "true")
     const seoTitle = page.locator("#product-seo input").first()
     const seoBefore = await seoTitle.inputValue()
     await seoTitle.fill(`${title} – özel`)
