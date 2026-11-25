@@ -81,6 +81,12 @@ export interface StoreMainSections {
      * older backend prints none: a reader takes `field` (`headerSearchStyleOf`).
      */
     search_style?: HeaderSearchStyle
+    /**
+     * The one-row header (`inline`) over a full photograph opening: true,
+     * see-through with light words while the page's first section is that
+     * opening; absent: on its own ground, as before.
+     */
+    over_cover?: boolean
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
     /**

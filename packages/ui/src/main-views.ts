@@ -45,6 +45,12 @@ export interface HeaderBarView {
    * drops it down). Absent: `field`.
    */
   searchStyle?: HeaderSearchStyle
+  /**
+   * The one-row header over the page's first section when that is a full
+   * photograph opening: see-through, its words light, until the page
+   * scrolls; absent: on its own ground, as before.
+   */
+  overCover?: true
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**

@@ -80,6 +80,8 @@ export function headerBarOf(
     menuImages: headerMenuImagesOf(bar.menu_images),
     // A backend before the search's look prints none: the box, as drawn before
     searchStyle: headerSearchStyleOf(bar.search_style),
+    // The one-row header over the opening only once chosen: a bar without it is the view it was
+    ...(variant === "inline" && bar.over_cover === true ? { overCover: true as const } : {}),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

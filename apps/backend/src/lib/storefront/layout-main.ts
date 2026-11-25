@@ -134,6 +134,8 @@ export function mainSectionsOf<L>(
       sticky: header.sticky,
       menu_images: header.menu_images,
       search_style: header.search_style,
+      // Over the opening only once switched on: a bar without it prints as before
+      ...(header.over_cover ? { over_cover: true } : {}),
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
       // The other variants' action button (the catalog prints it in its own): only once set
       ...(header.variant !== "catalog" && header.highlight_link

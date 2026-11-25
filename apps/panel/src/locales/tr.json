@@ -10521,6 +10521,9 @@
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
         "stickyTerm": "sticky",
+        "overCover": "Kapak görselinin üstünde",
+        "overCoverHint": "Sayfa tam görselli bir kapakla açılıyorsa üst bilgi zeminsiz, açık renk yazıyla fotoğrafın üstünde durur; sayfa kaydırılınca kendi zeminine döner.",
+        "overCoverTerm": "transparent header",
         "search_placeholder": {
           "label": "Arama kutusundaki yazı",
           "term": "placeholder",

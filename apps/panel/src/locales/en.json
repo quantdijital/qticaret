@@ -10521,6 +10521,9 @@
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
         "stickyTerm": "sticky",
+        "overCover": "Over the cover photo",
+        "overCoverHint": "When the page opens with a full photo cover, the header has no ground and light words over the photo; once the page scrolls it takes its own ground again.",
+        "overCoverTerm": "transparent header",
         "search_placeholder": {
           "label": "Search box text",
           "term": "placeholder",

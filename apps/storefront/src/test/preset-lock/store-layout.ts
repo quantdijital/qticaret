@@ -191,6 +191,8 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     ...(bar["menu_images"] === undefined ? {} : { menu_images: bar["menu_images"] }),
     // The search's look likewise; none: the box (`field`)
     ...(bar["search_style"] === undefined ? {} : { search_style: bar["search_style"] }),
+    // Over the opening only once the preset says so (`mainSectionsOf`)
+    ...(bar["over_cover"] === true ? { over_cover: true } : {}),
     ...(bar["variant"] === "catalog"
       ? { catalog: Object.fromEntries(CATALOG_FIELDS.map((key) => [key, bar[key] ?? null])) }
       : {}),

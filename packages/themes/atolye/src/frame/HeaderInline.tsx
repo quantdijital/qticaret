@@ -29,6 +29,8 @@ const TOOL = "gf-icon-btn gf-tool"
  * wordmark, favourites, the cart), the search dropping from the bottom
  * bar's "Ara" (`SearchDrop`). Sticky unless the shop says not; it folds
  * while the page scrolls down on a phone, as the others (`frame.css`).
+ * Over the opening (`overCover`): marked for `header-over.css`, which lays
+ * it see-through over a first full photograph opening until the page scrolls.
  */
 export function HeaderInline({
   shop,
@@ -56,6 +58,7 @@ export function HeaderInline({
       {...sectionMark(shop.headerBar?.id)}
       className={cn("z-(--z-sticky-nav) bg-paper", sticky ? "gf-head sticky top-0" : "relative")}
       data-variant="inline"
+      data-over-cover={shop.headerBar?.overCover ? "" : undefined}
     >
       <Container
         data-gf-head-row=""

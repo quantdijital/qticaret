@@ -186,4 +186,23 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       }).success
     ).toBe(false)
   })
+  it("prints the one-row header over the opening only once switched on, and refuses a non-boolean", () => {
+    const header = (extra: Record<string, unknown>) =>
+      mainSectionsOf(
+        withMainSections(
+          layoutDocument.parse({
+            header: [{ id: "mainheader", type: "header_bar", variant: "inline", ...extra }],
+          }),
+          LEFT
+        )
+      ).header_bar
+    expect(header({ over_cover: true })).toMatchObject({ variant: "inline", over_cover: true })
+    expect(header({})).not.toHaveProperty("over_cover")
+    expect(header({ over_cover: false })).not.toHaveProperty("over_cover")
+    expect(
+      layoutDocument.safeParse({
+        header: [{ id: "mainheader", type: "header_bar", variant: "inline", over_cover: "yes" }],
+      }).success
+    ).toBe(false)
+  })
 })
