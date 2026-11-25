@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { AI_TASK_CREDITS } from "@qticaret/types/control-plane"
 import { balanceOf } from "../../src/lib/ai-credits/balance"
 import { grantPurchase } from "../../src/lib/ai-credits/grant"
 import { reconcileAiCredits } from "../../src/lib/ai-credits/reconcile"
@@ -17,9 +18,9 @@ import {
 
 jest.setTimeout(240 * 1000)
 
-// A picture edited: 40 credits, two calls an operation
+// A picture set in a scene: the table's credits, two calls an operation
 const TASK = "image_scene"
-const COST = 40
+const COST = AI_TASK_CREDITS[TASK]
 
 /**
  * The credits on the calendar (PR #368 review D6, D7 and its missing
@@ -42,21 +43,22 @@ medusaIntegrationTestRunner({
       const ahead = istanbul("2026-11-11", "00:05")
       const behind = istanbul("2026-11-10", "23:59")
       await balanceOf(c(), tenantId, ahead)
-      await pgOf(c()).raw("UPDATE ai_credit_wallet SET daily_cap = 80 WHERE tenant_id = ?", [
+      await pgOf(c()).raw("UPDATE ai_credit_wallet SET daily_cap = ? WHERE tenant_id = ?", [
+        2 * COST,
         tenantId,
       ])
       expect((await call(tenantId, ahead)).kind).toBe("charged")
       expect((await call(tenantId, behind)).kind).toBe("charged")
       expect(await walletOf(c(), tenantId)).toMatchObject({
         spent_day: "2026-11-11",
-        spent_today: 80,
+        spent_today: 2 * COST,
       })
       // The cap holds on both clocks: the counter was not started again
       expect((await call(tenantId, behind)).kind).toBe("daily_cap")
       expect((await call(tenantId, ahead)).kind).toBe("daily_cap")
       expect((await balanceOf(c(), tenantId, behind)).daily).toEqual({
-        cap: 80,
-        spent: 80,
+        cap: 2 * COST,
+        spent: 2 * COST,
         remaining: 0,
       })
       await expectLedgerMatchesWallet(c(), tenantId)
@@ -109,7 +111,7 @@ medusaIntegrationTestRunner({
       expect((await call(tenantId, istanbul("2026-11-10", "11:55"), operationId)).kind).toBe(
         "charged"
       )
-      expect((await walletOf(c(), tenantId))?.purchased_balance).toBe(10)
+      expect((await walletOf(c(), tenantId))?.purchased_balance).toBe(50 - COST)
       const done = await release(c(), {
         tenantId,
         operationId,
@@ -126,7 +128,7 @@ medusaIntegrationTestRunner({
       expect(bought.map((each) => [each.kind, each.amount])).toEqual([
         ["grant_purchase", 50],
         ["spend", -COST],
-        ["expire", -10],
+        ["expire", -(50 - COST)],
         ["release", COST],
         ["expire", -COST],
       ])

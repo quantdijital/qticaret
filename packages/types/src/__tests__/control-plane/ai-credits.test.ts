@@ -38,7 +38,7 @@ const STATUS = {
   },
   daily: { cap: 300, remaining: 260 },
   services: { text: "deepseek", vision: "gemini", image_edit: "photoroom" },
-  table: { seo_title: 1, image_scene: 40 },
+  table: { seo_title: 1, image_scene: 20 },
   packs: [PACK],
   pending_order: ORDER,
 }
@@ -55,8 +55,8 @@ describe("the credit table (adr/0085)", () => {
       image_alt_text: 2,
       product_from_photo: 3,
       assistant: 3,
-      image_background: 10,
-      image_scene: 40,
+      image_background: 5,
+      image_scene: 20,
     })
   })
 
