@@ -548,11 +548,13 @@
       "staff": "Personel",
       "storage_mb": "Depolama",
       "llm_credits_per_month": "Aylık içerik kredisi",
-      "custom_domains": "Özel alan adı"
+      "custom_domains": "Özel alan adı",
+      "ai_free_credits_per_month": "Aylık ücretsiz yapay zekâ kredisi"
     },
     "unlimited": "Sınırsız",
     "megabytes": "{{value}} MB",
-    "warnOnly": "Aşılınca engellenmez, uyarılır."
+    "warnOnly": "Aşılınca engellenmez, uyarılır.",
+    "grantHint": "Her ay yenilenir, devretmez; 0: hak yok."
   },
   "notes": {
     "title": "Notlar",
@@ -743,6 +745,7 @@
       "invite_member": "Bu adresin zaten bir hesabı var.",
       "invite_pending": "Bu adrese gönderilmiş açık bir davet var; önce onu geri çekin.",
       "last_owner": "Son etkin sahip rolünü ya da erişimini kaybedemez. Önce başka bir üyeye sahip rolü verin.",
+      "limit_grant_unlimited": "Ücretsiz kredi sınırsız olamaz; bir sayı girin (0: hak yok).",
       "member_unknown": "Üye bulunamadı.",
       "mfa_already_enabled": "İki adımlı doğrulama zaten açık.",
       "mfa_code_invalid": "Kod doğru değil; uygulamadaki güncel kodu girin.",

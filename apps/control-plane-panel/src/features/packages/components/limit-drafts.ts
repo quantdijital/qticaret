@@ -1,4 +1,4 @@
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { LIMIT_KEYS, isGrantLimit } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { parseCountInput } from "@qticaret/admin-ui/lib/money-input"
@@ -11,10 +11,14 @@ export interface LimitDraft {
 
 export type LimitDrafts = Record<LimitKey, LimitDraft>
 
+/** A grant (adr/0085 K5) is never "no limit": without a value it is 0. */
+const valueOf = (key: LimitKey, value: number | null | undefined) =>
+  isGrantLimit(key) ? (value ?? 0) : value
+
 export const draftsOf = (limits: Partial<Record<LimitKey, number | null>> | null): LimitDrafts =>
   Object.fromEntries(
     LIMIT_KEYS.map((key) => {
-      const value = limits?.[key]
+      const value = valueOf(key, limits?.[key])
       return [
         key,
         {

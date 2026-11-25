@@ -7,7 +7,7 @@ import {
 } from "@medusajs/framework/utils"
 import { LIMIT_KEYS } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
-import { fullLimits } from "../../lib/plans/limits"
+import { fullLimits, limitDefault } from "../../lib/plans/limits"
 import type { LimitValues } from "../../lib/plans/limits"
 import { PlansFeatures } from "./service-features"
 import { PACKAGE_FIELDS, OVERRIDE_FIELDS } from "./types"
@@ -139,12 +139,21 @@ class PlansModuleService extends PlansFeatures {
       await this.updatePackages({ id, ...fields }, sharedContext)
     }
     if (limits) {
+      // A key added to the registry after the package was made has no row yet
+      const rows = (await this.listPackageLimits(
+        { package_id: id },
+        { select: ["id", "key"], take: LIMIT_KEYS.length },
+        sharedContext
+      )) as unknown as { id: string; key: LimitKey }[]
       for (const key of LIMIT_KEYS) {
         if (key in limits) {
-          await this.updatePackageLimits(
-            { selector: { package_id: id, key }, data: { value: limits[key] ?? null } },
-            sharedContext
-          )
+          const value = limits[key] ?? limitDefault(key)
+          const row = rows.find((each) => each.key === key)
+          if (row) {
+            await this.updatePackageLimits({ id: row.id, value }, sharedContext)
+          } else {
+            await this.createPackageLimits([{ package_id: id, key, value }], sharedContext)
+          }
         }
       }
     }

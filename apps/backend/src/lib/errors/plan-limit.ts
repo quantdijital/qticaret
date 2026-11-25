@@ -1,5 +1,5 @@
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { LimitKey } from "@qticaret/types/control-plane"
+import { COUNTED_LIMIT_KEYS } from "@qticaret/types/control-plane"
+import type { CountedLimitKey } from "@qticaret/types/control-plane"
 
 /** The key every plan limit refusal answers with (adr/0061 §5.3). */
 export const PLAN_LIMIT_MESSAGE = "plan.limit_reached"
@@ -7,8 +7,8 @@ export const PLAN_LIMIT_MESSAGE = "plan.limit_reached"
 export interface PlanLimitErrorShape {
   readonly qtErrorKind: "plan_limit"
   readonly safeMessage: string
-  /** Which of the plan's limits (`products`, `staff`, …). */
-  readonly limit: LimitKey
+  /** Which of the plan's limits (`products`, `staff`, …); never a grant. */
+  readonly limit: CountedLimitKey
   /** What the shop uses now, before the refused write. */
   readonly used: number
   /** What its package allows. */
@@ -27,11 +27,11 @@ export class PlanLimitError extends Error implements PlanLimitErrorShape {
   override readonly name = "PlanLimitError"
   readonly qtErrorKind = "plan_limit"
   readonly safeMessage = PLAN_LIMIT_MESSAGE
-  readonly limit: LimitKey
+  readonly limit: CountedLimitKey
   readonly used: number
   readonly max: number
 
-  constructor(limit: LimitKey, used: number, max: number) {
+  constructor(limit: CountedLimitKey, used: number, max: number) {
     super(`plan limit reached: ${limit} ${String(used)}/${String(max)}`)
     this.limit = limit
     this.used = used
@@ -50,7 +50,7 @@ export function isPlanLimitError(value: unknown): value is PlanLimitErrorShape {
   return (
     fields["qtErrorKind"] === "plan_limit" &&
     fields["safeMessage"] === PLAN_LIMIT_MESSAGE &&
-    (LIMIT_KEYS as readonly unknown[]).includes(fields["limit"]) &&
+    (COUNTED_LIMIT_KEYS as readonly unknown[]).includes(fields["limit"]) &&
     isCount(fields["used"]) &&
     isCount(fields["max"])
   )

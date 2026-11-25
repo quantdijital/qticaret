@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { LIMIT_REGISTRY } from "@qticaret/types/control-plane"
-import type { LimitKey } from "@qticaret/types/control-plane"
+import type { CountedLimitKey } from "@qticaret/types/control-plane"
 import { CONTROL_PLANE_MODULE } from "../../modules/control-plane"
 import type ControlPlaneModuleService from "../../modules/control-plane/service"
 import type { PlanState } from "../../modules/control-plane/service"
@@ -24,7 +24,10 @@ export const planStateOf = (container: Resolver): Promise<PlanState> =>
   container.resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE).planState()
 
 /** The limit a write is held to, or null: unmanaged, unlimited, or not a blocking limit. */
-export async function blockingLimit(container: Resolver, key: LimitKey): Promise<number | null> {
+export async function blockingLimit(
+  container: Resolver,
+  key: CountedLimitKey
+): Promise<number | null> {
   if (LIMIT_REGISTRY[key].enforcement !== "block") {
     return null
   }

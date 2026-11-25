@@ -94,6 +94,8 @@ medusaIntegrationTestRunner({
         storage_mb: null,
         llm_credits_per_month: null,
         custom_domains: null,
+        // A grant is never "no limit": absent, none (adr/0085 K5)
+        ai_free_credits_per_month: 0,
       })
       expect((await newPlan(finance, { limits: { seats: 3 } })).status).toBe(400)
       expect(JSON.stringify((await newPlan(finance, { code: "Paket 1" })).data)).toContain(
@@ -139,6 +141,27 @@ medusaIntegrationTestRunner({
           expect.objectContaining({ "limits.products": { from: 500, to: 800 } }),
         ])
       )
+    })
+
+    it("sets a monthly grant, also on a package made before its key, and refuses an unlimited one", async () => {
+      const made = planOf(await newPlan(finance))
+      const key = "ai_free_credits_per_month"
+      // A package from before the key: no row for it
+      const plans = getContainer().resolve<{
+        listPackageLimits: (filter: object) => Promise<{ id: string }[]>
+        deletePackageLimits: (ids: string[]) => Promise<void>
+      }>("plans")
+      const rows = await plans.listPackageLimits({ package_id: made.id, key })
+      await plans.deletePackageLimits(rows.map((row) => row.id))
+
+      const path = `/admin/cp/plans/${made.id}`
+      const unlimited = await call.post(path, { limits: { [key]: null } }, finance)
+      const granted = await call.post(path, { limits: { [key]: 300 } }, finance)
+
+      expect(unlimited.status).toBe(400)
+      expect(JSON.stringify(unlimited.data)).toContain("cp.limit_grant_unlimited")
+      expect(planOf(granted).limits[key]).toBe(300)
+      expect(await plans.listPackageLimits({ package_id: made.id, key })).toHaveLength(1)
     })
 
     it("changes the trial and grace days only with a step-up, never with the name (Ek C19 L1)", async () => {
@@ -252,6 +275,10 @@ medusaIntegrationTestRunner({
       expect(
         (await call.post(path, { key: "seats", value: 1, reason: "Deneme" }, operator)).status
       ).toBe(400)
+      const unlimitedGrant = { key: "ai_free_credits_per_month", value: null, reason: "Deneme" }
+      expect(JSON.stringify((await call.post(path, unlimitedGrant, operator)).data)).toContain(
+        "cp.limit_grant_unlimited"
+      )
       expect(
         (
           await call.post(

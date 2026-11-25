@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { LimitStanding } from "@/features/settings/api/plan"
-import { isFull, ratioOf, shownLimits, toneOf } from "./plan-rules"
+import { isFull, platformCredits, ratioOf, shownLimits, toneOf } from "./plan-rules"
 
 const standing = (more: Partial<LimitStanding>): LimitStanding => ({
   key: "products",
@@ -40,12 +40,33 @@ describe("plan limit rules (adr/0061 Ek C14)", () => {
     expect(toneOf(standing({ used: 0, max: 0 }))).toBe("full")
   })
 
-  it("lists every limit but the ones not applied yet", () => {
+  it("lists every limit but the ones not applied yet and the grants", () => {
     expect(
       shownLimits([
         standing({}),
         standing({ key: "custom_domains", kind: "later", used: null, max: 1 }),
+        standing({ key: "ai_free_credits_per_month", kind: "grant", used: null, max: 300 }),
       ]).map((limit) => limit.key)
     ).toEqual(["products"])
+  })
+
+  it("names the platform credits only while the package turns them on (adr/0085)", () => {
+    const grant = standing({
+      key: "ai_free_credits_per_month",
+      kind: "grant",
+      used: null,
+      max: 300,
+    })
+    const on = [{ key: "ai.platform_credits", enabled: true }]
+
+    expect(platformCredits({ features: on, limits: [grant] })).toBe(300)
+    expect(platformCredits({ features: on, limits: [] })).toBe(0)
+    expect(
+      platformCredits({
+        features: [{ key: "ai.platform_credits", enabled: false }],
+        limits: [grant],
+      })
+    ).toBeNull()
+    expect(platformCredits({ limits: [grant] })).toBeNull()
   })
 })

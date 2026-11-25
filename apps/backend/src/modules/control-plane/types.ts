@@ -1,5 +1,6 @@
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { COUNTED_LIMIT_KEYS } from "@qticaret/types/control-plane"
 import type {
+  CountedLimitKey,
   PlanBillingSummary,
   PlanDocument,
   PlanLimits,
@@ -37,7 +38,10 @@ export interface PlanState {
   /** `active` until a signed document says otherwise; never from unreachability. */
   status: TenantStatus
   package_code: string | null
-  /** Every registry key; null is unlimited (all null without a document). */
+  /**
+   * Every counted registry key, null unlimited (all null without a
+   * document); a grant only where the document gives one (absent: 0).
+   */
   limits: PlanLimits
   /** As the document carries them; the flag registry decides which apply. */
   platform_flags: Record<string, boolean>
@@ -50,9 +54,9 @@ export interface PlanState {
   source: PlanSource | null
 }
 
-export const NO_LIMITS = Object.freeze(
-  Object.fromEntries(LIMIT_KEYS.map((key) => [key, null]))
-) as PlanLimits
+export const NO_LIMITS: PlanLimits = Object.freeze(
+  Object.fromEntries(COUNTED_LIMIT_KEYS.map((key) => [key, null])) as Record<CountedLimitKey, null>
+)
 
 /** Unmanaged, or managed before the first document: selling as today. */
 export const DEFAULT_PLAN_STATE = (managed: boolean): PlanState => ({

@@ -15,6 +15,15 @@ export const LIMITS: LimitStanding[] = [
     max: 100,
   },
   { key: "custom_domains", kind: "later", unit: "count", monthly: false, used: null, max: 1 },
+  // What the package gives a month (adr/0085 K5): no use counted
+  {
+    key: "ai_free_credits_per_month",
+    kind: "grant",
+    unit: "count",
+    monthly: true,
+    used: null,
+    max: 300,
+  },
 ]
 
 export function planOf(
@@ -32,6 +41,7 @@ export function planOf(
     features: [
       { key: "catalog.product_videos", enabled: true },
       { key: "ai.own_keys", enabled: false },
+      { key: "ai.platform_credits", enabled: false },
     ],
     billing: {
       status: "active",

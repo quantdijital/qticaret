@@ -12720,7 +12720,8 @@
       "staff": "Team",
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content drafts",
-      "custom_domains": "Custom domains"
+      "custom_domains": "Custom domains",
+      "ai_free_credits_per_month": "Free AI credits"
     },
     "notice": {
       "products": {
@@ -12817,7 +12818,9 @@
       "notIncluded": "not included",
       "feature": {
         "productVideos": "Product videos",
-        "aiOwnKeys": "Your own AI key"
+        "aiOwnKeys": "Your own AI key",
+        "platformCredits": "Platform credits",
+        "platformCreditsMonthly": "Platform credits: {{value}} free a month"
       },
       "groups": {
         "totals": "Shop totals",

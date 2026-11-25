@@ -86,6 +86,9 @@ describe("PackagesPage: the packages (adr/0061 §2, C7)", () => {
     }
     // The last limit, custom domains, without a limit
     const unlimited = within(dialog).getAllByRole("checkbox", { name: "Sınırsız" })
+    // The monthly free AI credits are a number, never unlimited (adr/0085 K5); 0 to start
+    expect(unlimited).toHaveLength(6)
+    expect(within(dialog).getByLabelText(/^Aylık ücretsiz yapay zekâ kredisi/)).toHaveValue("0")
     const last = unlimited.at(-1)
     if (!last) {
       throw new Error("no limit row")
@@ -116,6 +119,7 @@ describe("PackagesPage: the packages (adr/0061 §2, C7)", () => {
           storage_mb: 102400,
           llm_credits_per_month: 10000,
           custom_domains: null,
+          ai_free_credits_per_month: 0,
         },
       })
     })

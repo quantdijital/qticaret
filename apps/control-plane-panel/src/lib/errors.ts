@@ -34,6 +34,7 @@ export const CP_ERROR_CODES = [
   "invite_member",
   "invite_pending",
   "last_owner",
+  "limit_grant_unlimited",
   "member_unknown",
   "mfa_already_enabled",
   "mfa_code_invalid",

@@ -7,6 +7,7 @@ const LIMITS = {
   staff: 10,
   storage_mb: 20480,
   llm_credits_per_month: 2000,
+  ai_free_credits_per_month: 300,
   custom_domains: 3,
 }
 
@@ -161,6 +162,7 @@ export const SHOP: TenantDetail = {
     { key: "storage_mb", package: 20480, value: 20480 },
     { key: "llm_credits_per_month", package: 2000, value: 2000 },
     { key: "custom_domains", package: 3, value: 3 },
+    { key: "ai_free_credits_per_month", package: 300, value: 300 },
   ],
   platform_flags: [{ key: "test.platform_sample", default: true }],
   features: [{ key: "test.platform_sample", default: true, package: false, value: false }],

@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import type { PlanLimits } from "@qticaret/types/control-plane"
 import { AI_MODULE } from "../../src/modules/ai"
 import type AiModuleService from "../../src/modules/ai/service"
@@ -44,7 +44,7 @@ export async function pushPlan(
   ownKeys: boolean,
   limits: Partial<PlanLimits> = {}
 ): Promise<void> {
-  const all = Object.fromEntries(LIMIT_KEYS.map((name) => [name, null])) as PlanLimits
+  const all = { ...NO_LIMITS }
   const pushed = await settle(
     http.post(
       "/hooks/control-plane/plan",

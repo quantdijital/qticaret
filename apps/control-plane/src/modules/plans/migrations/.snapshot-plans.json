@@ -436,7 +436,8 @@
             "staff",
             "storage_mb",
             "llm_credits_per_month",
-            "custom_domains"
+            "custom_domains",
+            "ai_free_credits_per_month"
           ],
           "mappedType": "enum"
         },
@@ -824,7 +825,8 @@
             "staff",
             "storage_mb",
             "llm_credits_per_month",
-            "custom_domains"
+            "custom_domains",
+            "ai_free_credits_per_month"
           ],
           "mappedType": "enum"
         },

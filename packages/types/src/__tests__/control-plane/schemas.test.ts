@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest"
 import {
   comparePlanSerial,
+  grantOf,
   planDocumentSchema,
   signedPlanDocumentSchema,
 } from "../../control-plane/plan-document.js"
 import {
+  COUNTED_LIMIT_KEYS,
+  GRANT_LIMIT_KEYS,
   LIMIT_KEYS,
   LIMIT_REGISTRY,
   TENANT_STATUSES,
   TENANT_STATUS_TRANSITIONS,
   canTransitionTenant,
+  isGrantLimit,
 } from "../../control-plane/registry.js"
 import {
   SIGNED_REQUEST_HEADERS,
@@ -97,9 +101,36 @@ describe("plan document schema", () => {
   })
 
   it("takes null as unlimited", () => {
-    const limits = Object.fromEntries(LIMIT_KEYS.map((key) => [key, null]))
+    const limits = Object.fromEntries(COUNTED_LIMIT_KEYS.map((key) => [key, null]))
 
     expect(planDocumentSchema.safeParse({ ...planDocument, limits }).success).toBe(true)
+  })
+
+  it("takes a document with and without the monthly AI credit grant, never an unlimited one", () => {
+    const withGrant = { ...planDocument.limits, ai_free_credits_per_month: 300 }
+
+    // An older document has no grant: none (adr/0085 K5)
+    expect("ai_free_credits_per_month" in planDocument.limits).toBe(false)
+    expect(
+      grantOf(planDocumentSchema.parse(planDocument).limits, "ai_free_credits_per_month")
+    ).toBe(0)
+    expect(
+      grantOf(
+        planDocumentSchema.parse({ ...planDocument, limits: withGrant }).limits,
+        "ai_free_credits_per_month"
+      )
+    ).toBe(300)
+    for (const value of [null, -1, 1.5]) {
+      const limits = { ...planDocument.limits, ai_free_credits_per_month: value }
+      expect(planDocumentSchema.safeParse({ ...planDocument, limits }).success).toBe(false)
+    }
+    // Every counted limit stays required
+    const withoutProducts = Object.fromEntries(
+      Object.entries(planDocument.limits).filter(([key]) => key !== "products")
+    )
+    expect(planDocumentSchema.safeParse({ ...planDocument, limits: withoutProducts }).success).toBe(
+      false
+    )
   })
 })
 
@@ -186,5 +217,19 @@ describe("registries", () => {
     expect(Object.keys(LIMIT_REGISTRY).sort()).toEqual([...LIMIT_KEYS].sort())
     // Orders are never blocked (adr/0061 §5.3)
     expect(LIMIT_REGISTRY.orders_per_month.enforcement).toBe("warn")
+  })
+
+  it("keeps the grants apart from the counted limits (adr/0085 K5)", () => {
+    const grants = LIMIT_KEYS.filter((key) => LIMIT_REGISTRY[key].enforcement === "grant")
+
+    expect([...GRANT_LIMIT_KEYS]).toEqual(grants)
+    expect(grants).toEqual(["ai_free_credits_per_month"])
+    expect([...COUNTED_LIMIT_KEYS, ...GRANT_LIMIT_KEYS].sort()).toEqual([...LIMIT_KEYS].sort())
+    expect(COUNTED_LIMIT_KEYS.some((key) => isGrantLimit(key))).toBe(false)
+    expect(LIMIT_REGISTRY.ai_free_credits_per_month).toEqual({
+      unit: "count",
+      monthly: true,
+      enforcement: "grant",
+    })
   })
 })

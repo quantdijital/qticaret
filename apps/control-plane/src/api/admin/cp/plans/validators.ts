@@ -1,5 +1,10 @@
 import { z } from "@medusajs/framework/zod"
-import { BILLING_PERIODS, LIMIT_KEYS, isPlatformFlag } from "@qticaret/types/control-plane"
+import {
+  BILLING_PERIODS,
+  GRANT_LIMIT_KEYS,
+  LIMIT_KEYS,
+  isPlatformFlag,
+} from "@qticaret/types/control-plane"
 import { limitValue } from "../tenants/validators"
 
 const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
@@ -10,8 +15,14 @@ const name = z.string().trim().min(1, "cp.name_required").max(100).regex(CLEAN, 
 const price = z.number().int().min(0).max(100_000_000)
 const days = (max: number) => z.number().int().min(0).max(max)
 
-/** Any of the registry's limits; a key not in it is refused. */
-const limits = z.partialRecord(z.enum(LIMIT_KEYS), limitValue)
+/** Any of the registry's limits; a key not in it is refused, and a grant is never unlimited. */
+const limits = z.partialRecord(z.enum(LIMIT_KEYS), limitValue).superRefine((value, ctx) => {
+  for (const key of GRANT_LIMIT_KEYS) {
+    if (value[key] === null) {
+      ctx.addIssue({ code: "custom", path: [key], message: "cp.limit_grant_unlimited" })
+    }
+  }
+})
 
 /**
  * A package's platform flags (Ek C9): keys of the shared list only, on or

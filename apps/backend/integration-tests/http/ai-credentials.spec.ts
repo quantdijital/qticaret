@@ -1,7 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakeSecret } from "@qticaret/testing"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { PlanLimits } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import { AI_OWN_KEYS } from "../../src/modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
@@ -54,7 +53,7 @@ medusaIntegrationTestRunner({
           "/hooks/control-plane/plan",
           signed(
             doc(nextSerial(), {
-              limits: Object.fromEntries(LIMIT_KEYS.map((name) => [name, null])) as PlanLimits,
+              limits: { ...NO_LIMITS },
               platform_flags: { [AI_OWN_KEYS]: on },
             })
           )
