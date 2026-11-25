@@ -27,7 +27,10 @@
       "sticky": true,
       "menu_images": "off",
       "search_style": "icon",
-      "highlight_link": { "$href": "/magaza", "label": "Tur bul" }
+      "highlight_link": {
+        "$href": "/magaza",
+        "label": "Tur bul"
+      }
     }
   ],
   "home": [
@@ -38,26 +41,38 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "full_image",
-      "eyebrow": "Yürüyüş ve doğa turları",
-      "heading": "Patikada adım adım",
-      "title_accent": "Anadolu",
-      "text": "Likya Yolu'ndan Kaçkarlara, rehberli ve küçük gruplarla yürüyüş turları. Tur türünü seçin, gidilecek yeri ve tarihi yazın.",
+      "eyebrow": "Keşfet. Yaşa. Ait ol.",
+      "heading": "Sınırların Ötesine",
+      "title_accent": "Yolculuk",
+      "text": "Anadolu'nun en nefes kesen rotalarına özenle hazırlanmış yolculuklar. Çünkü hayat keşfetmek için var.",
       "links": [
-        { "$href": "/magaza", "label": "Turları incele" },
-        { "$href": "/blog", "label": "Hikâyemizi okuyun" }
+        {
+          "$href": "/magaza",
+          "label": "Tur planla"
+        },
+        {
+          "$href": "/blog",
+          "label": "Hikâyemizi keşfedin"
+        }
       ],
       "image": {
         "$image": "images/kapak-likya.webp",
         "alt": "Kaş yakınında denize inen Likya Yolu patikası"
       },
-      "action": "search",
+      "action": "both",
       "search_position": "overlap",
-      "height": "screen",
-      "scrim": "strong",
+      "height": "tall",
+      "scrim": "side",
       "align": "start",
       "image_side": "full",
       "edge": "straight",
-      "show_trust": true
+      "show_trust": true,
+      "button_icon": "arrow",
+      "second_button": "play",
+      "title_style": "stacked",
+      "trust_place": "inside",
+      "note": "Anı biriktir, eşya değil",
+      "note_place": "corner"
     },
     {
       "id": "rotakartlari",
@@ -74,7 +89,9 @@
             "alt": "Gün batımında Kapadokya'nın peri bacaları ve vadileri"
           },
           "caption": "Kapadokya",
-          "link": { "$href": "/magaza" }
+          "link": {
+            "$href": "/magaza"
+          }
         },
         {
           "image": {
@@ -82,7 +99,9 @@
             "alt": "Yukarıdan bakışla Ölüdeniz lagünü ve kumsal"
           },
           "caption": "Ege ve Akdeniz",
-          "link": { "$href": "/magaza" }
+          "link": {
+            "$href": "/magaza"
+          }
         },
         {
           "image": {
@@ -90,7 +109,9 @@
             "alt": "Ormanlı yamaçlar arasında Uzungöl ve kıyısındaki köy"
           },
           "caption": "Karadeniz",
-          "link": { "$href": "/magaza" }
+          "link": {
+            "$href": "/magaza"
+          }
         },
         {
           "image": {
@@ -98,7 +119,9 @@
             "alt": "Pamukkale'nin beyaz traverten havuzları"
           },
           "caption": "Pamukkale",
-          "link": { "$href": "/magaza" }
+          "link": {
+            "$href": "/magaza"
+          }
         },
         {
           "image": {
@@ -106,7 +129,9 @@
             "alt": "Ovanın ardında karlı Ağrı Dağı"
           },
           "caption": "Doğu Anadolu",
-          "link": { "$href": "/magaza" }
+          "link": {
+            "$href": "/magaza"
+          }
         }
       ],
       "layout": "even",
@@ -156,9 +181,14 @@
       "ends_at": null,
       "variant": "grid",
       "title": "Sizin için seçtiklerimiz",
-      "source": { "kind": "newest" },
+      "source": {
+        "kind": "newest"
+      },
       "limit": 8,
-      "more": { "$href": "/magaza", "label": "Tüm turlar" },
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm turlar"
+      },
       "card_variant": null,
       "columns": 4,
       "columns_mobile": 1
@@ -179,7 +209,10 @@
           "mobile_image": null,
           "heading": "Yaylalarda bir hafta",
           "text": "Kaçkarların eteğinde yürüyüş, yayla evlerinde konaklama. Yaz kalkışları açıldı.",
-          "link": { "$href": "/magaza", "label": "Kalkışları gör" },
+          "link": {
+            "$href": "/magaza",
+            "label": "Kalkışları gör"
+          },
           "second_link": null,
           "tone": "light"
         }
@@ -350,7 +383,9 @@
       "ends_at": null,
       "variant": "grid",
       "title": "Bunlara da göz atın",
-      "source": { "kind": "same_category" },
+      "source": {
+        "kind": "same_category"
+      },
       "limit": 4,
       "card_variant": null,
       "columns": 4,

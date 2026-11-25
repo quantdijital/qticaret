@@ -9989,6 +9989,10 @@
           "date_words": {
             "label": "Write \"Add date\" on an empty date",
             "hint": "An empty day reads \"Add date\" instead of the browser's date box, a chosen one like 12.12.2026. The calendar opens the same."
+          },
+          "boxed_fields": {
+            "label": "Boxed fields",
+            "hint": "Each field's name on top and the field in a light grey box, with room between them. Off, a hairline divides the fields."
           }
         }
       },
@@ -11444,7 +11448,8 @@
           "term": "overlay",
           "hint": "The dark veil over the image, so the text reads on any picture.",
           "light": "Light",
-          "strong": "Strong"
+          "strong": "Strong",
+          "side": "From the side"
         },
         "edge": {
           "label": "Image edge",
@@ -11480,6 +11485,34 @@
           "hint": "A small sprig of leaves beside the words, in a light tint of your main colour (1024 px and up).",
           "none": "None",
           "leaves": "Sprig of leaves"
+        },
+        "second_button": {
+          "label": "Second button",
+          "term": "button",
+          "hint": "The second button (and the video's) with a thin frame, or without one, a round play mark before its words.",
+          "quiet": "Framed",
+          "play": "With play mark"
+        },
+        "title_style": {
+          "label": "Heading",
+          "term": "heading",
+          "hint": "The heading as written, or larger in a narrow column, a word or two to a line.",
+          "standard": "Normal",
+          "stacked": "Large, line by line"
+        },
+        "trust_place": {
+          "label": "Trust badges' place",
+          "term": "trust badges",
+          "hint": "The badges in a white box on the opening's bottom edge, or in a row under the buttons, icon on top, hairlines between them.",
+          "foot": "Box on the edge",
+          "inside": "Row under the buttons"
+        },
+        "note_place": {
+          "label": "Hand note's place",
+          "term": "hand note",
+          "hint": "The note over the heading, or in the opening's top right corner with a brush stroke under it (1024 px and up; over the heading on a phone).",
+          "heading": "Over the heading",
+          "corner": "Top right corner"
         }
       },
       "trustCard": {

@@ -9989,6 +9989,10 @@
           "date_words": {
             "label": "Boş tarihte \"Tarih ekle\" yazsın",
             "hint": "Seçilmemiş gün tarayıcının gg.aa.yyyy kutusu yerine \"Tarih ekle\" diye, seçilen gün 12.12.2026 gibi yazılır. Takvim aynı açılır."
+          },
+          "boxed_fields": {
+            "label": "Kutulu alanlar",
+            "hint": "Her alanın adı üstte, kendisi açık gri bir kutuda; alanlar arasında boşluk olur. Kapalıyken alanlar ince çizgiyle ayrılır."
           }
         }
       },
@@ -11444,7 +11448,8 @@
           "term": "overlay",
           "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
           "light": "Hafif",
-          "strong": "Güçlü"
+          "strong": "Güçlü",
+          "side": "Soldan geçiş"
         },
         "edge": {
           "label": "Görselin kenarı",
@@ -11480,6 +11485,34 @@
           "hint": "Yazının yanında, ana renginizin açık tonunda küçük bir yaprak dalı (1024 px ve üstü).",
           "none": "Yok",
           "leaves": "Yaprak dalı"
+        },
+        "second_button": {
+          "label": "İkinci düğme",
+          "term": "button",
+          "hint": "İkinci düğme (ve video düğmesi) ince çerçeveli ya da çerçevesiz, yazısının önünde yuvarlak bir oynat simgesiyle.",
+          "quiet": "Çerçeveli",
+          "play": "Oynat simgeli"
+        },
+        "title_style": {
+          "label": "Başlık",
+          "term": "heading",
+          "hint": "Başlık yazıldığı gibi ya da daha büyük ve dar bir sütunda, her satırda bir iki sözcük.",
+          "standard": "Normal",
+          "stacked": "Büyük, satır satır"
+        },
+        "trust_place": {
+          "label": "Güven rozetlerinin yeri",
+          "term": "trust badges",
+          "hint": "Rozetler kapağın alt kenarında beyaz bir kutuda ya da düğmelerin altında, ikon üstte, ince çizgilerle ayrılmış bir sırada.",
+          "foot": "Alt kenarda kutu",
+          "inside": "Düğmelerin altında sıra"
+        },
+        "note_place": {
+          "label": "El yazısı notun yeri",
+          "term": "hand note",
+          "hint": "Not başlığın üstünde ya da kapağın sağ üst köşesinde, altında fırça çizgisiyle (1024 px ve üstü; telefonda başlığın üstünde).",
+          "heading": "Başlığın üstünde",
+          "corner": "Sağ üst köşe"
         }
       },
       "trustCard": {

@@ -25,6 +25,11 @@
  *   accent colour and its measured ink, a step darker on hover (the
  *   button's own hover rule, given the accent's deep step).
  * - The leaves (`ornament: leaves`): a light tint of the shop's colour.
+ * - Veil from the side (`data-scrim="side"`): deep under the words, clear
+ *   across the rest of the photograph from 1024 px; an even veil below it.
+ * - The stacked heading (`title_style: stacked`): a step larger in a narrow
+ *   column, a word or two to a line.
+ * - The play button (`second_button: play`): clear, the play mark in a ring.
  */
 @layer components {
   .gf-cover {
@@ -67,6 +72,46 @@
     content: "";
   }
 
+  /* From the words' side: the stage deep under the words, the photograph clear across the rest */
+  .gf-cover[data-side="full"][data-scrim="side"] .gf-cover-media::after {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--color-stage) 72%, transparent),
+        color-mix(in oklab, var(--color-stage) 58%, transparent) 40%,
+        transparent 72%
+      ),
+      linear-gradient(
+        0deg,
+        color-mix(in oklab, var(--color-stage) 34%, transparent),
+        transparent 30%
+      );
+  }
+
+  .gf-cover-title--stacked {
+    max-width: 11ch;
+    font-size: clamp(2.5rem, 3.4vw + 1.5rem, 4.5rem);
+    line-height: 1;
+  }
+
+  /* The second button clear, its play mark in a ring (`second_button: play`) */
+  .gf-cover .gf-btn--play {
+    padding-block: 0;
+    padding-inline: 0 var(--space-sm);
+    border-color: transparent;
+    background: transparent;
+  }
+  .gf-cover .gf-play-ring {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid currentColor;
+    border-radius: 9999px;
+  }
+
   .gf-cover .gf-btn--accent {
     /* The button's own hover (`ui.css`) reads its deep step: here the accent's */
     --color-signal-deep: color-mix(in oklab, var(--highlight) 86%, black);
@@ -90,6 +135,13 @@
       100% var(--cover-wave),
       100% calc(100% - var(--cover-wave) + 1px);
     mask-repeat: no-repeat;
+  }
+
+  /* On a phone the words run across the photograph: an even veil under them */
+  @media (width < 64rem) {
+    .gf-cover[data-side="full"][data-scrim="side"] .gf-cover-media::after {
+      background: color-mix(in oklab, var(--color-stage) 58%, transparent);
+    }
   }
 
   @media (width >= 64rem) {
