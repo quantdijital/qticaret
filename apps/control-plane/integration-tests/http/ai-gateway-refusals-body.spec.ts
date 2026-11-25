@@ -85,6 +85,25 @@ medusaIntegrationTestRunner({
       expect(JSON.parse(provider.seen[0]?.body.toString("utf8") ?? "{}")).toHaveProperty("tools")
     })
 
+    it("sends a body rebuilt from the allow-list: no costly field reaches the provider", async () => {
+      const who = await shop()
+      const costly = {
+        reasoning_effort: "high",
+        extra_body: { google: { thinking_config: { thinking_budget: 24_576 } } },
+        service_tier: "priority",
+        store: true,
+        web_search_options: {},
+        modalities: ["text", "audio"],
+        n: 4,
+        max_tokens: 99_999,
+      }
+      const reply = await callAs(http, who, chatBody(costly))
+      expect(reply.status).toBe(200)
+      const seen = JSON.parse(provider.seen[0]?.body.toString("utf8") ?? "{}") as object
+      expect(Object.keys(seen).sort()).toEqual(["max_tokens", "messages", "model", "stream"])
+      expect(seen).toMatchObject({ model: "fake-text", stream: false, max_tokens: 360 })
+    })
+
     it("takes as many pictures as the task does: one for an alt text", async () => {
       const who = await shop()
       const two = await callAs(http, who, visionBody(2), {
@@ -107,7 +126,7 @@ medusaIntegrationTestRunner({
     it("refuses more than a text task's input and more than 6 MB, free", async () => {
       const who = await shop()
       const long = chatBody({
-        messages: [{ role: "user", content: "a".repeat(256 * 1024 + 1) }],
+        messages: [{ role: "user", content: "a".repeat(64 * 1024 + 1) }],
       })
       expect(refusalOf(await callAs(http, who, long))).toEqual(refused(413, "body_too_large"))
       // Past the gateway's 6 MB the bytes are not even read to the signature

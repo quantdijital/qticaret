@@ -14,7 +14,6 @@ const target = (service: string, capability: AiCreditCapability, task: AiCreditT
 
 const DEEPSEEK = target("deepseek", "text", "seo_title")
 const MINIMAX = target("minimax", "text", "seo_title")
-const GEMINI_CHAT = target("gemini", "text", "seo_title")
 const GEMINI_IMAGE = target("gemini", "image_edit", "image_background")
 const PHOTOROOM = target("photoroom", "image_edit", "image_background")
 
@@ -79,16 +78,21 @@ describe("the provider body the gateway sends (adr/0085 K2)", () => {
     const minimax = sent(send(chat({ max_tokens: 50_000 }), { to: MINIMAX }))
     expect(minimax).toMatchObject({ max_completion_tokens: 360 })
     expect(minimax).not.toHaveProperty("max_tokens")
-    // A target that takes none gets none, whatever was sent
-    const gemini = sent(send(chat({ max_completion_tokens: 50_000 }), { to: GEMINI_CHAT }))
-    expect(gemini).not.toHaveProperty("max_completion_tokens")
-    expect(gemini).not.toHaveProperty("max_tokens")
     expect(sent(send(chat({ max_tokens: 1e9 }), { task: "post_draft" })).max_tokens).toBe(8_000)
+  })
+
+  it("has no target for a chat no field caps (Gemini's text and vision)", () => {
+    expect(gatewayTargetOf("gemini", "text", "seo_title")).toBeNull()
+    expect(gatewayTargetOf("gemini", "vision", "image_alt_text")).toBeNull()
+    // A chat body for a target without its field is refused once more
+    const uncapped = { ...DEEPSEEK, maxTokensField: null }
+    expect(send(chat(), { to: uncapped })).toMatchObject({ ok: false, reason: "uncapped" })
   })
 
   it("turns streaming off and asks for one answer", () => {
     const body = sent(send(chat({ stream: true, stream_options: { x: 1 }, n: 8 })))
-    expect(body).toMatchObject({ stream: false, n: 1 })
+    expect(body).toMatchObject({ stream: false })
+    expect(body).not.toHaveProperty("n")
     expect(body).not.toHaveProperty("stream_options")
     expect(sent(send(chat())).stream).toBe(false)
   })

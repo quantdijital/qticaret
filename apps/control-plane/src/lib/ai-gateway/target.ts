@@ -30,6 +30,8 @@ export interface GatewayTarget {
   price: AiUnitPrice | null
   /** A 200 body code meaning the service did no work (MiniMax). */
   notTakenBodyCodes: readonly number[]
+  /** The body fields the gateway writes over the shop's (the table's `fixedBody`). */
+  fixedBody: Readonly<Record<string, unknown>>
   /** The fake service's own time, in tests only. */
   timeoutMs?: number
 }
@@ -73,6 +75,7 @@ function fakeTarget(capability: AiCreditCapability, task: AiCreditTask): Gateway
       ? { currency: "USD", perImage: 1_000 }
       : { currency: "USD", inputPerMillionTokens: 1_000_000, outputPerMillionTokens: 2_000_000 },
     notTakenBodyCodes: [],
+    fixedBody: {},
     ...fakeTimeout(),
   }
 }
@@ -103,7 +106,8 @@ export function gatewayTargetOf(
     serviceId as keyof typeof AI_SERVICE_TARGETS
   ] as AiServiceTarget
   const target = service.capabilities[capability]
-  if (target === undefined) {
+  // A chat whose output no field caps is not called on credits (ai-targets.ts `GEMINI_CHAT`)
+  if (target === undefined || (target.protocol === "openai-chat" && !target.maxTokensField)) {
     return null
   }
   const endpoint = task === "image_scene" ? target.scene : target
@@ -123,5 +127,6 @@ export function gatewayTargetOf(
     maxTokensField: target.maxTokensField ?? null,
     price: endpoint.price ?? target.price ?? null,
     notTakenBodyCodes: service.notTakenBodyCodes ?? [],
+    fixedBody: target.fixedBody ?? {},
   }
 }

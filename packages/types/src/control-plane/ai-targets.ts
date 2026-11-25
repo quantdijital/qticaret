@@ -42,9 +42,18 @@ export interface AiCapabilityTarget extends AiEndpointTarget {
   auth: AiTargetAuth
   /**
    * `openai-chat` only: the body field holding the output budget; null
-   * where the target takes none (the field is then left out).
+   * where the target takes none (the field is then left out). A chat
+   * target without one is never routed on the platform's credits: its
+   * output could not be capped (adr/0085 "çıktı tavanını istekten almaz").
    */
   maxTokensField?: "max_tokens" | "max_completion_tokens" | null
+  /**
+   * The body fields the service documents for this endpoint and the
+   * gateway writes whatever a shop sent (thinking off, reasoning apart,
+   * one picture asked for). The shop's registry writes the same ones for
+   * a chat target (`body`, a parity test in the control plane).
+   */
+  fixedBody?: Readonly<Record<string, unknown>>
   /** `image_edit` only: a product set in a scene (`image_scene`), its own endpoint. */
   scene?: AiEndpointTarget
 }
@@ -90,6 +99,8 @@ const DEEPSEEK_CHAT = {
   baseUrl: "https://api.deepseek.com",
   path: "/chat/completions",
   maxTokensField: "max_tokens",
+  // Thinking is on unless turned off
+  fixedBody: { thinking: { type: "disabled" } },
   price: tokens(300_000, 1_200_000),
 } as const
 
@@ -100,9 +111,19 @@ const MINIMAX_CHAT = {
   baseUrl: "https://api.minimax.io/v1",
   path: "/chat/completions",
   maxTokensField: "max_completion_tokens",
+  // The model always thinks; its thinking goes to its own field, not into the text
+  fixedBody: { reasoning_split: true, reasoning_effort: "low" },
   price: tokens(150_000, 600_000),
 } as const
 
+/*
+ * Not on the platform's credits (adr/0085, security review of P3b): the
+ * OpenAI-compatible endpoint documents no field that caps the output
+ * (aistudio.google.com/docs/openai, read 2026-11-25) and Gemini 4's
+ * thinking cannot be turned off, so one credit's call could run to any
+ * length. Routing refuses it (`cp.ai_route_uncapped`) and the gateway
+ * answers `unavailable`; opened once a documented cap is written here.
+ */
 const GEMINI_CHAT = {
   protocol: "openai-chat",
   auth: "bearer",
@@ -110,6 +131,8 @@ const GEMINI_CHAT = {
   baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
   path: "/chat/completions",
   maxTokensField: null,
+  // Thinking cannot be turned off on this model; the lowest documented effort
+  fixedBody: { reasoning_effort: "low" },
   price: tokens(1_500_000, 7_500_000),
 } as const
 
@@ -140,6 +163,8 @@ export const AI_SERVICE_TARGETS = deepFrozen({
       image_edit: {
         protocol: "gemini-image",
         auth: "x-goog-api-key",
+        // The shop's connector's own (an image asked for alone), and one answer only
+        fixedBody: { generationConfig: { responseModalities: ["IMAGE"], candidateCount: 1 } },
         ...GEMINI_IMAGE,
         scene: GEMINI_IMAGE,
       },
@@ -219,6 +244,21 @@ const fakeListed = (nodeEnv: string | undefined): boolean =>
 export function aiTargetServiceIds(nodeEnv: string | undefined): readonly string[] {
   const ids = Object.keys(AI_SERVICE_TARGETS)
   return fakeListed(nodeEnv) ? [...ids, AI_FAKE_TARGET.id] : ids
+}
+
+/**
+ * A chat target whose output no documented field caps: never routed on
+ * the platform's credits (see `GEMINI_CHAT`). False for any other, and
+ * for a service or capability not in the table.
+ */
+export function aiTargetUncapped(service: string, capability: string): boolean {
+  if (!Object.hasOwn(AI_SERVICE_TARGETS, service)) {
+    return false
+  }
+  const target: AiCapabilityTarget | undefined = (
+    AI_SERVICE_TARGETS[service as AiNetworkServiceId] as AiServiceTarget
+  ).capabilities[capability as AiTargetCapability]
+  return target?.protocol === "openai-chat" && (target.maxTokensField ?? null) === null
 }
 
 /** What a capability of a service may be routed to: the models it runs, or null where it has none. */

@@ -11,6 +11,7 @@ import { prepareBody } from "./body"
 import { mayEchoKey, passedOn, refusal } from "./errors"
 import type { CreditNote, GatewayAnswer } from "./errors"
 import { forwardCall, notTaken } from "./forward"
+import { holdCallSlot } from "./in-flight"
 import type { ForwardOutcome, ProviderFetch } from "./forward"
 import { callParamsOf } from "./headers"
 import { providerKeysHeld } from "./keys"
@@ -151,17 +152,14 @@ function answerOf(outcome: ForwardOutcome, echoes: boolean, note: CreditNote): G
   return refusal(outcome.kind === "timeout" ? "provider_timeout" : "provider_unreachable", note)
 }
 
-export async function gatewayCall(
+type Note = (fields: Record<string, unknown>) => void
+
+/** The call, its slot held (`gatewayCall`). */
+async function heldCall(
   container: Container,
-  input: GatewayCallInput
+  input: GatewayCallInput,
+  note: Note
 ): Promise<GatewayAnswer> {
-  const started = Date.now()
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  const note = (fields: Record<string, unknown>) => {
-    logger.info(
-      `cp.ai_gateway_call ${JSON.stringify({ tenant_id: input.tenantId, ms: Date.now() - started, ...fields })}`
-    )
-  }
   const { tenantId } = input
   if (!(await platformCreditsOn(container, tenantId, new Date()))) {
     note({ refused: "unavailable", reason: "flag_or_status" })
@@ -233,4 +231,32 @@ export async function gatewayCall(
     charged: credit.charged,
   })
   return answerOf(outcome, echoes, credit)
+}
+
+/**
+ * One call, in one of the shop's slots (in-flight.ts): past its four (or
+ * the process's 32) it is refused `busy` before anything is read or
+ * charged; the slot is given back however the call ends.
+ */
+export async function gatewayCall(
+  container: Container,
+  input: GatewayCallInput
+): Promise<GatewayAnswer> {
+  const started = Date.now()
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
+  const note: Note = (fields) => {
+    logger.info(
+      `cp.ai_gateway_call ${JSON.stringify({ tenant_id: input.tenantId, ms: Date.now() - started, ...fields })}`
+    )
+  }
+  const giveBack = holdCallSlot(input.tenantId)
+  if (giveBack === null) {
+    note({ refused: "busy" })
+    return refusal("busy")
+  }
+  try {
+    return await heldCall(container, input, note)
+  } finally {
+    giveBack()
+  }
 }

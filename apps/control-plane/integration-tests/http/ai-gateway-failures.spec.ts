@@ -95,7 +95,9 @@ medusaIntegrationTestRunner({
         provider.answer({ status: 200, body: JSON.stringify({ echo: TEST_KEY }) })
         const echoed = await callAs(http, who, chatBody())
         return [refused, echoed]
-      })
+      }, getContainer())
+      // The lines were seen, so their lacking the key means something
+      expect(output).toContain("cp.ai_gateway_call")
       for (const reply of result) {
         expect(reply.status).toBe(503)
         expect(Buffer.from(reply.data).toString("utf8")).not.toContain(TEST_KEY.slice(9))

@@ -73,22 +73,25 @@ medusaIntegrationTestRunner({
         },
         body: chatAnswer("Şam Çeliği Şef Bıçağı"),
       })
-      const { result: reply, output } = await captureOutput(() =>
-        callAs(http, who, chatBody({ model: "gpt-dear-9", max_tokens: 50_000, stream: true }), {
-          operation,
-          extra: {
-            authorization: "Bearer shop-own-key",
-            cookie: "sid=shop",
-            "x-api-key": "shop-x-api-key",
-            "x-goog-api-key": "shop-goog-key",
-            "x-qt-custom": "shop",
-            // The old headers name nothing now: only the signed query does
-            "x-qt-ai-task": "post_draft",
-            "x-qt-ai-capability": "vision",
-            "x-qt-ai-operation": "not-a-uuid",
-            "x-forwarded-for": "10.0.0.1",
-          },
-        })
+      const { result: reply, output } = await captureOutput(
+        () =>
+          callAs(http, who, chatBody({ model: "gpt-dear-9", max_tokens: 50_000, stream: true }), {
+            operation,
+            extra: {
+              authorization: "Bearer shop-own-key",
+              cookie: "sid=shop",
+              "x-api-key": "shop-x-api-key",
+              "x-goog-api-key": "shop-goog-key",
+              "x-qt-custom": "shop",
+              // The old headers name nothing now: only the signed query does
+              "x-qt-ai-task": "post_draft",
+              "x-qt-ai-capability": "vision",
+              "x-qt-ai-operation": "not-a-uuid",
+              "x-forwarded-for": "10.0.0.1",
+            },
+          }),
+        // The logger itself, wherever it writes (CI's console is silenced)
+        getContainer()
       )
 
       // The provider's answer as it came: status, type, bytes
