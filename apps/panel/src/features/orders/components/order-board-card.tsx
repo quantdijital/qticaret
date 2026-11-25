@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { FilterBar } from "@qticaret/admin-ui/patterns/filter-bar"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
@@ -15,7 +16,11 @@ import type { BoardOrder, OrderBoard, OrderFilters as Filters } from "@/features
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { BulkBar } from "@/features/orders/components/bulk-bar"
 import { useColumns } from "@/features/orders/components/order-columns"
-import { OrderFilters } from "@/features/orders/components/order-filters"
+import { useOrderFilters } from "@/features/orders/components/order-filters"
+import type {
+  ExtraOrderFilters,
+  OrderFilterChange,
+} from "@/features/orders/components/order-filters"
 import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
 import { isFiltered } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
@@ -27,12 +32,12 @@ interface OrderBoardCardProps {
   search: OrderListSearch
   /** A new search (same filters, another page or text). */
   onSearch: (next: OrderListSearch) => void
-  /** Another view: what was picked may not be in it. */
-  onRefilter: (next: OrderListSearch) => void
+  /** Another view: what was picked may not be in it. A page's own filters come in it too. */
+  onRefilter: (next: OrderFilterChange) => void
   /** Columns after the list's own (the wholesaler on the wholesale list). */
   extraColumns?: Column<BoardOrder>[]
-  /** Controls beside the list's own filters (the wholesaler picker). */
-  toolbar?: ReactNode
+  /** Filters after the list's own, in its menu and chips (the wholesaler). */
+  extraFilters?: ExtraOrderFilters
   /** A line under the filters, from the board's answer (a search found elsewhere). */
   notice?: (board: OrderBoard) => ReactNode
 }
@@ -50,7 +55,7 @@ export function OrderBoardCard({
   onSearch,
   onRefilter,
   extraColumns = [],
-  toolbar,
+  extraFilters,
   notice,
 }: OrderBoardCardProps) {
   const { t } = useTranslation()
@@ -63,10 +68,14 @@ export function OrderBoardCard({
     list: ShipResult[]
     orders: Map<string, BoardOrder>
   } | null>(null)
-  const refilter = (next: OrderListSearch) => {
+  const refilter = (next: OrderFilterChange) => {
     setPicked(new Map())
     onRefilter(next)
   }
+  const filterBar = useOrderFilters(search, refilter, extraFilters)
+  const narrowed =
+    isFiltered(search) ||
+    (extraFilters?.filters ?? []).some((filter) => extraFilters?.values[filter.key] !== undefined)
   return (
     <>
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
@@ -82,24 +91,28 @@ export function OrderBoardCard({
             count: board.data?.counts[key],
           }))}
         />
-        <div className="grid grid-cols-1 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:items-center">
-          <SearchInput
-            className="sm:w-80 sm:max-w-none"
-            value={filters.q}
-            placeholder={t("orders.search")}
-            onChange={(text) => {
-              onSearch({ q: text, page: 1 })
-            }}
-          />
-          {toolbar}
-          <OrderFilters search={search} onChange={refilter} />
-          {board.data?.limited ? (
-            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-              <Info className="h-lh w-3.5 shrink-0" aria-hidden="true" />
-              {t("orders.limited")}
-            </p>
-          ) : null}
-        </div>
+        <FilterBar
+          className="px-5 py-3"
+          {...filterBar}
+          search={
+            <SearchInput
+              className="sm:max-w-none"
+              value={filters.q}
+              placeholder={t("orders.search")}
+              onChange={(text) => {
+                onSearch({ q: text, page: 1 })
+              }}
+            />
+          }
+          note={
+            board.data?.limited ? (
+              <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                <Info className="h-lh w-3.5 shrink-0" aria-hidden="true" />
+                {t("orders.limited")}
+              </p>
+            ) : null
+          }
+        />
         {board.data && notice ? notice(board.data) : null}
         {picked.size > 0 ? (
           <BulkBar
@@ -150,7 +163,7 @@ export function OrderBoardCard({
                 <div className="flex flex-col items-center gap-3 text-center">
                   <Inbox className="size-8 text-muted-foreground" aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">
-                    {filters.q || isFiltered(search)
+                    {filters.q || narrowed
                       ? t("orders.noMatch")
                       : filters.stage === "all"
                         ? t("orders.empty")

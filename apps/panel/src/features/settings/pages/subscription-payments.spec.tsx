@@ -166,6 +166,23 @@ describe("SubscriptionPage: terms and payments (adr/0061 Ek C20)", () => {
     expect(within(includes).getByText("Ürün videoları")).toBeInTheDocument()
     expect(within(includes).getByText("Kendi yapay zekâ anahtarınız")).toBeInTheDocument()
     expect(within(includes).getAllByText("dahil değil")).toHaveLength(1)
+    // adr/0085: the platform credits leave no trace while the package keeps them off
+    expect(within(includes).queryByText(/Platform kredisi/)).toBeNull()
+  })
+
+  it("names the platform credits with the month's free ones while the package turns them on", async () => {
+    serve(
+      planOf({
+        billing: billingOf({}),
+        features: [{ key: "ai.platform_credits", enabled: true }],
+      }),
+      { payments: { state: "ok", records: [] } }
+    )
+    renderPage()
+
+    await screen.findByText("Standart")
+    const includes = packageCard().getByRole("list", { name: "Pakete dahil" })
+    expect(within(includes).getByText("Platform kredisi: ayda 300 ücretsiz")).toBeInTheDocument()
   })
 
   it("says there is no payment yet, and leaves out a feature it cannot name", async () => {

@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { sectorPack, summaryOf } from "@qticaret/sector-packs"
 import { fakeState } from "../../src/lib/provisioning/fake-provisioner"
 import { PROVISIONING_MODULE } from "../../src/modules/provisioning"
 import type ProvisioningModuleService from "../../src/modules/provisioning/service"
@@ -11,6 +12,21 @@ import type { HttpClient, Member } from "../helpers/staff"
 import { auditRows, client, freshSlug, makeTenant, proved } from "../helpers/tenants"
 
 jest.setTimeout(240 * 1000)
+
+// The cutlery pack as this release ships it. Its version and counts move with
+// its data (each new ready-made look raises both), so they are read from the
+// package, not written down here: the tests check that the control plane
+// passes on what the pack holds
+const cutleryPack = sectorPack("cutlery")
+if (!cutleryPack) {
+  throw new Error("the cutlery pack is missing from @qticaret/sector-packs")
+}
+const CUTLERY = summaryOf(cutleryPack)
+// A first apply adds every item but the looks: those are offered in the
+// shop's theme editor, not written by the pack (adr/0063)
+const CUTLERY_ITEMS = Object.entries(CUTLERY.counts)
+  .filter(([kind]) => kind !== "presets")
+  .reduce((sum, [, n]) => sum + n, 0)
 
 interface Run {
   id: string
@@ -106,20 +122,11 @@ medusaIntegrationTestRunner({
         expect(packs[0]?.code).toBe("general")
         const cutlery = packs.find((pack) => pack.code === "cutlery")
         expect(cutlery?.description).toContain("namlu çeliği")
-        expect({ ...cutlery, description: undefined }).toEqual({
-          code: "cutlery",
-          version: 1,
-          name: "Bıçak ve çatal-bıçak",
-          description: undefined,
-          counts: {
-            attribute_templates: 2,
-            attributes: 31,
-            categories: 16,
-            flags: 2,
-            seo_templates: 1,
-            presets: 0,
-          },
-        })
+        expect(cutlery?.name).toBe("Bıçak ve çatal-bıçak")
+        expect(cutlery).toEqual(CUTLERY)
+        for (const n of Object.values(cutlery?.counts ?? {})) {
+          expect(n).toBeGreaterThan(0)
+        }
       }
       expect((await call.get("/admin/cp/sector-packs?code=general", owner)).status).toBe(400)
     })
@@ -142,10 +149,15 @@ medusaIntegrationTestRunner({
       const { id, created } = await setUp("cutlery")
       const step = created.steps?.find((each) => each.name === "sector_pack")
       expect(step).toMatchObject({ status: "succeeded", created: false })
-      expect(step?.output).toMatchObject({ pack: "cutlery", version: 1, added: 52, kept: 0 })
+      expect(step?.output).toMatchObject({
+        pack: "cutlery",
+        version: CUTLERY.version,
+        added: CUTLERY_ITEMS,
+        kept: 0,
+      })
       const detail = await call.get(`/admin/cp/tenants/${id}`, readonly)
       expect(detail.data).toMatchObject({
-        tenant: { sector_pack: "cutlery", sector_pack_version: 1 },
+        tenant: { sector_pack: "cutlery", sector_pack_version: CUTLERY.version },
       })
       expect(
         (detail.data as { tenant: { sector_pack_applied_at: string | null } }).tenant
@@ -162,7 +174,7 @@ medusaIntegrationTestRunner({
         ["sector_pack", "skipped"],
       ])
       expect(again.steps?.[0]?.output).toMatchObject({ pack: "cutlery", added: 0 })
-      expect(fakeState().shops.get(id)?.packs).toEqual({ cutlery: 1 })
+      expect(fakeState().shops.get(id)?.packs).toEqual({ cutlery: CUTLERY.version })
       const rows = await auditRows(container(), { resource_id: id })
       expect(rows.map((row) => (row as { action: string }).action)).toContain(
         "POST /admin/cp/tenants/:id/provisioning/apply-pack"

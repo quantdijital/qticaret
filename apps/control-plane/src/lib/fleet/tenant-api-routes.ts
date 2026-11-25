@@ -12,7 +12,12 @@
  * route files to each other.
  */
 
-import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
+import {
+  AI_CREDITS_PATHS,
+  AI_CREDIT_ORDER_MAX_BYTES,
+  USAGE_REPORT_MAX_BYTES,
+} from "@qticaret/types/control-plane"
+import { AI_GATEWAY_MAX_BODY_BYTES } from "../ai-gateway/limits"
 
 export interface TenantApiRule {
   method: "GET" | "POST"
@@ -20,6 +25,12 @@ export interface TenantApiRule {
   path: string
   /** The largest body accepted, in bytes; 0 for none (a GET). */
   maxBodyBytes: number
+  /**
+   * The body is a provider's, JSON or a form (`POST …/ai/calls`): read as
+   * raw bytes before the signature is checked (`api/http/raw-body.ts`),
+   * the body parsers off; its signature covers those exact bytes.
+   */
+  rawBody?: true
 }
 
 export const TENANT_API_ROUTES: readonly TenantApiRule[] = [
@@ -29,6 +40,16 @@ export const TENANT_API_ROUTES: readonly TenantApiRule[] = [
   { method: "POST", path: "/tenant-api/v1/usage", maxBodyBytes: USAGE_REPORT_MAX_BYTES },
   // Ek C20: the shop's own payment history, bound to the request's nonce
   { method: "GET", path: "/tenant-api/v1/billing", maxBodyBytes: 0 },
+  // adr/0085 §2: the platform AI credits' status and a top-up request (their own rate profile)
+  { method: "GET", path: AI_CREDITS_PATHS.credits, maxBodyBytes: 0 },
+  { method: "POST", path: AI_CREDITS_PATHS.orders, maxBodyBytes: AI_CREDIT_ORDER_MAX_BYTES },
+  // adr/0085 §2: the gateway's call, a provider's body passed on (6 MB, raw: JSON or a form)
+  {
+    method: "POST",
+    path: AI_CREDITS_PATHS.calls,
+    maxBodyBytes: AI_GATEWAY_MAX_BODY_BYTES,
+    rawBody: true,
+  },
 ]
 
 /** The table's row for a request (HEAD as GET), or null. */

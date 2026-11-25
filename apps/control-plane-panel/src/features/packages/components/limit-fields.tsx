@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { LIMIT_KEYS, isGrantLimit } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
@@ -9,7 +9,8 @@ import type { LimitDraft, LimitDrafts } from "./limit-drafts"
 /**
  * Every registry limit of a package, one row each: a whole number (or
  * megabytes) or "Sınırsız". Orders are never blocked, only warned about
- * (adr/0061 §5.3); the row says so.
+ * (adr/0061 §5.3); the row says so. A grant (adr/0085 K5) is a number,
+ * never "Sınırsız".
  */
 export function LimitFields({
   drafts,
@@ -38,6 +39,9 @@ export function LimitFields({
               {key === "orders_per_month" ? (
                 <span className="text-[13px] text-muted-foreground">{t("limits.warnOnly")}</span>
               ) : null}
+              {isGrantLimit(key) ? (
+                <span className="text-[13px] text-muted-foreground">{t("limits.grantHint")}</span>
+              ) : null}
             </Label>
             <NumberField
               id={`limit-${key}`}
@@ -49,19 +53,24 @@ export function LimitFields({
                 onChange(key, { ...draft, text: event.target.value })
               }}
             />
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id={`limit-${key}-unlimited`}
-                disabled={disabled}
-                checked={draft.unlimited}
-                onCheckedChange={(checked) => {
-                  onChange(key, { ...draft, unlimited: checked === true })
-                }}
-              />
-              <Label htmlFor={`limit-${key}-unlimited`} className="font-normal">
-                {t("limits.unlimited")}
-              </Label>
-            </div>
+            {/* A grant is a number of credits, never unlimited (adr/0085 K5) */}
+            {isGrantLimit(key) ? (
+              <div aria-hidden="true" />
+            ) : (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id={`limit-${key}-unlimited`}
+                  disabled={disabled}
+                  checked={draft.unlimited}
+                  onCheckedChange={(checked) => {
+                    onChange(key, { ...draft, unlimited: checked === true })
+                  }}
+                />
+                <Label htmlFor={`limit-${key}-unlimited`} className="font-normal">
+                  {t("limits.unlimited")}
+                </Label>
+              </div>
+            )}
           </div>
         )
       })}

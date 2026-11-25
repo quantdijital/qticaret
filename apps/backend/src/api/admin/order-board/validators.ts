@@ -20,9 +20,34 @@ const day = z
   .refine((value) => turkishDayStart(value) !== null, "orders.range_invalid")
 
 /**
+ * One or more of a filter's choices (an order paid or refunded): a comma
+ * list (`?payment=paid,refunded`), the parameter repeated, a JSON array
+ * (the export's body, a queued job's stored input) or the single value
+ * older links have. Repeats are dropped; an empty list is no filter.
+ */
+export function choiceList<T extends readonly [string, ...string[]]>(values: T) {
+  return z
+    .preprocess(
+      (input) => {
+        // A text or list longer than every choice together is refused as it is
+        const list = typeof input === "string" && input.length <= 200 ? input.split(",") : input
+        if (!Array.isArray(list) || list.length > 20) {
+          return list
+        }
+        const trimmed = list.map((one: unknown) => (typeof one === "string" ? one.trim() : one))
+        return [...new Set(trimmed)].filter((one) => one !== "")
+      },
+      z.array(z.enum(values)).max(values.length)
+    )
+    .transform((list) => (list.length > 0 ? list : undefined))
+    .optional()
+}
+
+/**
  * What the order list is narrowed by, the export too: a tab, Medusa's
  * order search (number, e-mail, name, place), one customer's orders, where
- * the money and the parcel stand (F12.3), how it was paid, who carries it,
+ * the money and the parcel stand (F12.3), how it was paid, who carries it
+ * (each one choice or several, an order matching any of them),
  * the days it was placed on (Turkish days, both included; either alone),
  * and whose orders (ADR-0068 Ek 2026-11-15 (2)): retail ones by default,
  * wholesale ones (one wholesaler's), or both (a customer's page).
@@ -32,10 +57,10 @@ export const ORDER_FILTER_FIELDS = {
   q: z.string().trim().max(100).optional(),
   // One customer's orders, for their page
   customer_id: z.string().min(1).max(64).optional(),
-  payment: z.enum(PAYMENT_FILTERS).optional(),
-  shipping: z.enum(SHIPPING_FILTERS).optional(),
-  method: z.enum(PAYMENT_METHODS).optional(),
-  carrier: z.enum(CARRIER_FILTERS).optional(),
+  payment: choiceList(PAYMENT_FILTERS),
+  shipping: choiceList(SHIPPING_FILTERS),
+  method: choiceList(PAYMENT_METHODS),
+  carrier: choiceList(CARRIER_FILTERS),
   from: day.optional(),
   to: day.optional(),
   segment: z.enum(ORDER_SEGMENTS).default("retail"),

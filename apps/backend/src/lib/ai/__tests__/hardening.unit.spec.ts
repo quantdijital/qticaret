@@ -16,8 +16,11 @@ import { TEST_TASK } from "../registry/tasks"
 
 /** Security review of PR 0b-1 (2026-11-17): bounds on what a model and a shop may send. */
 
-// Generous for a slow CI machine, far below what a quadratic scan of these inputs takes
-const QUICK_MS = 1_000
+// Seconds of slack for a loaded CI runner (three workers, adr/0081), far
+// below what a quadratic scan of the refused answer below takes (a lazy
+// pattern over 200,000 characters of it took 2.5 s; that answer is seven
+// times as long, about fifty times as slow)
+const QUICK_MS = 5_000
 
 // A scan of the whole input is judged by how its time grows (eight times the
 // input, about eight times as long when linear, sixty-four when quadratic),
@@ -56,7 +59,9 @@ function deepseek(): { service: AiService; target: OpenAiCompatibleTarget } {
 
 describe("model output bounds (O1, O2, D4)", () => {
   it("refuses an answer over the ceiling before scanning it", () => {
-    const unclosed = "<think>".repeat(Math.ceil(200_000 / 7))
+    // 1.4 MB, under the 2 MB an answer is read up to: refused by its length
+    // in milliseconds, a quadratic scan of it would take minutes
+    const unclosed = "<think>".repeat(200_000)
     const { result, ms } = timed(() => readCompletion(bodyOf(unclosed)))
 
     expect(result).toEqual({

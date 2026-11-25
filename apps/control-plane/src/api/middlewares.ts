@@ -1,6 +1,12 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
-import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
+import {
+  AI_CREDITS_PATHS,
+  AI_CREDIT_ORDER_MAX_BYTES,
+  USAGE_REPORT_MAX_BYTES,
+} from "@qticaret/types/control-plane"
+import { routePath } from "./http/request"
 import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
+import { AI_ROUTE_MIDDLEWARES } from "./http/ai-routes"
 import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
 import { csrfProtection } from "./http/csrf"
@@ -10,9 +16,11 @@ import { rejectAmbiguousPath, requestBasics, routeAllowlist } from "./http/guard
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
 import { gateRegistration } from "./http/register-gate"
 import { noteSessionEnd, noteSessionStart } from "./http/sessions"
+import { readRawBody } from "./http/raw-body"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
 import { guardTenantApi, tenantCallerOf } from "./http/tenant-api"
+import { releaseVerifiedAddressSlot, tenantApiAddressLimit } from "./http/tenant-api-address"
 import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
 import { VAULT_ROUTE_MIDDLEWARES } from "./http/vault-routes"
 
@@ -80,12 +88,23 @@ export default defineMiddlewares({
     {
       matcher: "/tenant-api/*",
       middlewares: [
-        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api),
+        // PR #371 D4: per address only what no signature vouched for
+        tenantApiAddressLimit(),
+        // adr/0085 §2: a provider body read as its bytes (JSON or a form), before the signature
+        readRawBody,
         guardTenantApi,
+        // PR #374 review Y1: a verified shop's request no longer holds its address's slot
+        releaseVerifiedAddressSlot,
         // C13 review M1: then per verified shop, whatever its address
-        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api_signer, {
-          identity: (req) => tenantCallerOf(req)?.tenantId,
-        }),
+        rateLimit(
+          (req) =>
+            routePath(req).startsWith("/tenant-api/v1/ai/")
+              ? CP_RATE_LIMIT_PROFILES.tenant_api_ai
+              : CP_RATE_LIMIT_PROFILES.tenant_api_signer,
+          {
+            identity: (req) => tenantCallerOf(req)?.tenantId,
+          }
+        ),
       ],
     },
     // Ek C13: the usage report's signature covers its exact bytes; held to 4 KB (413 past it)
@@ -94,9 +113,22 @@ export default defineMiddlewares({
       methods: ["POST"],
       bodyParser: { sizeLimit: USAGE_REPORT_MAX_BYTES, preserveRawBody: true },
     },
+    // adr/0085 K11: a top-up request's signature covers its exact bytes; held to 1 KB
+    {
+      matcher: AI_CREDITS_PATHS.orders,
+      methods: ["POST"],
+      bodyParser: { sizeLimit: AI_CREDIT_ORDER_MAX_BYTES, preserveRawBody: true },
+    },
+    // adr/0085 §2: the gateway call: no body parser, its bytes read raw (`readRawBody`)
+    {
+      matcher: AI_CREDITS_PATHS.calls,
+      methods: ["POST"],
+      bodyParser: false,
+    },
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,
     ...VAULT_ROUTE_MIDDLEWARES,
     ...FLEET_ROUTE_MIDDLEWARES,
+    ...AI_ROUTE_MIDDLEWARES,
   ],
 })

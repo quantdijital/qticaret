@@ -27,7 +27,7 @@ export function turkeyMonthBounds(month: string): { from: Date; to: Date } {
   }
 }
 
-/** A row of the summary query: one service, task, status and currency. */
+/** A row of the summary query: one service, task, status, currency and funding. */
 export interface SummaryRow {
   service: string
   task: string
@@ -35,6 +35,29 @@ export interface SummaryRow {
   currency: string | null
   count: number | string
   cost: number | string | null
+  /** Absent reads as `own_key` (a row of before adr/0085). */
+  funding?: string | null
+  /** The credits the gateway said it charged the rows (`platform_credit`). */
+  credits?: number | string | null
+}
+
+/** A task's calls on the platform's credits this month and the credits they were charged. */
+export interface AiCreditLine {
+  id: string
+  calls: number
+  credits: number
+}
+
+/**
+ * The month on the platform's credits (adr/0085 §3): its calls and the
+ * credits the gateway charged them (its headers, never worked out here),
+ * in all and by task. The control plane's ledger is the wallet's truth;
+ * this is what the shop's own rows say.
+ */
+export interface AiPlatformCredits {
+  calls: number
+  credits: number
+  tasks: AiCreditLine[]
 }
 
 export interface AiUsageLine {
@@ -53,6 +76,7 @@ export interface AiUsageSummary {
   month: string
   services: AiUsageLine[]
   tasks: AiUsageLine[]
+  platform_credits: AiPlatformCredits
 }
 
 const emptyLine = (id: string): AiUsageLine => ({
@@ -87,11 +111,30 @@ function add(lines: Map<string, AiUsageLine>, id: string, row: SummaryRow): void
 export function summaryOf(month: string, rows: readonly SummaryRow[]): AiUsageSummary {
   const services = new Map<string, AiUsageLine>()
   const tasks = new Map<string, AiUsageLine>()
+  const credited = new Map<string, AiCreditLine>()
   for (const row of rows) {
     add(services, row.service, row)
     add(tasks, row.task, row)
+    if (row.funding === "platform_credit") {
+      const line = credited.get(row.task) ?? { id: row.task, calls: 0, credits: 0 }
+      line.calls += Number(row.count)
+      line.credits += Number(row.credits ?? 0)
+      credited.set(row.task, line)
+    }
   }
   const sorted = (lines: Map<string, AiUsageLine>) =>
     [...lines.values()].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id))
-  return { month, services: sorted(services), tasks: sorted(tasks) }
+  const creditTasks = [...credited.values()].sort(
+    (a, b) => b.credits - a.credits || a.id.localeCompare(b.id)
+  )
+  return {
+    month,
+    services: sorted(services),
+    tasks: sorted(tasks),
+    platform_credits: {
+      calls: creditTasks.reduce((sum, line) => sum + line.calls, 0),
+      credits: creditTasks.reduce((sum, line) => sum + line.credits, 0),
+      tasks: creditTasks,
+    },
+  }
 }

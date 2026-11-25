@@ -9,6 +9,8 @@ const limits: EffectiveLimit[] = [
   { key: "storage_mb", value: null },
   { key: "llm_credits_per_month", value: 0 },
   { key: "custom_domains", value: 1 },
+  // A grant (adr/0085 K5): nothing to count, no row
+  { key: "ai_free_credits_per_month", value: 300 },
 ]
 const counts = {
   products: 399,

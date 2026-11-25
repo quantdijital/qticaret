@@ -20,7 +20,7 @@ export const cartSheetWords = (t: Translate, count: number): CartSheetWords => (
     group: t("cart.quantity_of", { title: "{title}" }),
     decrease: t("product.decrease"),
     increase: t("product.increase"),
-    before: t("price.before"),
+    before: t("cart.line_before_promotion"),
     nonWithdrawable: t("addons.line_non_withdrawable"),
   },
 })

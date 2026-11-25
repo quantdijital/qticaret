@@ -75,6 +75,25 @@ describe("AiServiceRow", () => {
     expect(await screen.findByRole("tooltip")).toHaveTextContent(/Kişisel veri gönderilmez/)
   })
 
+  it("Qwen: its name, what it does and where its data goes (Singapore, no mainland nodes)", () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <AiServicesTable
+          services={[
+            { ...service("not_connected"), id: "qwen", data_note_key: "ai.data_note.qwen" },
+          ]}
+          ownKeys
+          keyConfigured
+        />
+      </QueryClientProvider>
+    )
+    const row = screen.getByRole("row", { name: /Qwen \(Alibaba\)/ })
+    expect(within(row).getByText(/metin ve görsel okuma servisi/)).toBeInTheDocument()
+    const tip = screen.getByRole("button", { name: "Bilgi: Qwen (Alibaba) verisi nereye gider" })
+    expect(tip).toHaveAccessibleDescription(/Singapur'da saklanır.*Çin anakarası dışındaki/)
+  })
+
   it("connected: change the key, test it, remove it from the menu", async () => {
     renderRow("connected")
     expect(screen.getByText("Bağlı")).toBeInTheDocument()

@@ -139,7 +139,9 @@
       "platform": "Platform",
       "admin": "Administration"
     },
-    "keys": "Keys"
+    "keys": "Keys",
+    "aiOrders": "Credit requests",
+    "aiSettings": "AI"
   },
   "common": {
     "menu": "Menu",
@@ -548,11 +550,13 @@
       "staff": "Staff",
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content credits a month",
-      "custom_domains": "Custom domains"
+      "custom_domains": "Custom domains",
+      "ai_free_credits_per_month": "Free AI credits a month"
     },
     "unlimited": "Unlimited",
     "megabytes": "{{value}} MB",
-    "warnOnly": "Never blocked; a warning when passed."
+    "warnOnly": "Never blocked; a warning when passed.",
+    "grantHint": "Renewed each month, never carried over; 0: none."
   },
   "notes": {
     "title": "Notes",
@@ -743,6 +747,7 @@
       "invite_member": "This address already has an account.",
       "invite_pending": "This address has an open invitation; withdraw it first.",
       "last_owner": "The last active owner cannot lose the role or access. Make another member an owner first.",
+      "limit_grant_unlimited": "Free credits cannot be unlimited; enter a number from 0 to 100,000 (0: none).",
       "member_unknown": "The member was not found.",
       "mfa_already_enabled": "Two-step verification is already on.",
       "mfa_code_invalid": "The code is wrong; enter the app's current code.",
@@ -807,7 +812,44 @@
       "tenant_closed": "A closing or closed shop's target release cannot change.",
       "tenant_unknown": "Shop not found.",
       "text_invalid": "The text holds characters that cannot be used.",
-      "vkn_invalid": "The tax number is not valid."
+      "vkn_invalid": "The tax number is not valid.",
+      "ai_credit_actor_invalid": "The person acting was not recognised; sign in again.",
+      "ai_credit_actor_required": "The person acting could not be told; sign in again.",
+      "ai_credit_amount_invalid": "The credit amount is not valid: it cannot be 0, and at most 1,000,000 credits at once.",
+      "ai_credit_balance_short": "Not enough balance: the credits to take exceed the chosen balance.",
+      "ai_credit_bucket_invalid": "The balance type is not valid.",
+      "ai_credit_daily_cap_invalid": "The daily cap is not valid.",
+      "ai_credit_grant_ref_conflict": "This operation key was used for another top-up. Check the shop's account statement first; if the correction is not there, close the dialog and open it again.",
+      "ai_credit_grant_ref_invalid": "The top-up reference is not valid.",
+      "ai_credit_grant_ref_reserved": "This reference form is reserved for the system.",
+      "ai_credit_key_invalid": "The correction key is not valid; close the dialog and open it again.",
+      "ai_credit_note_invalid": "The note is not valid: at most 500 characters, no control characters.",
+      "ai_credit_note_required": "A note is required; write why the credits are corrected.",
+      "ai_credit_order_closed": "This request is no longer pending: it was paid or cancelled.",
+      "ai_credit_order_not_found": "Request not found.",
+      "ai_credit_order_pending": "The shop already has a pending request.",
+      "ai_credit_reference_invalid": "The reference is not valid: at most 256 characters, one line.",
+      "ai_credit_requested_by_invalid": "The requester's details are not valid.",
+      "ai_credit_setting_missing": "The credit settings could not be read; try again shortly.",
+      "ai_credit_wallet_missing": "The shop's credit wallet was not found.",
+      "ai_credit_wallet_stale": "The wallet changed meanwhile; try again.",
+      "ai_credit_write_refused": "The credit move could not be written; try again shortly.",
+      "ai_key_invalid": "The key is not valid: 8–512 characters, no spaces; English letters, digits and symbols only.",
+      "ai_pack_duplicate": "The same pack was sent twice; reload the page and try again.",
+      "ai_pack_invalid": "The pack is not valid: a name, 1 to 1,000,000 credits and at least ₺0.01 are required.",
+      "ai_pack_unknown": "The pack changed or was deleted meanwhile; reload the page and try again.",
+      "ai_packs_too_many": "At most 10 packs can be set up.",
+      "ai_route_capability_unknown": "Unknown kind of work.",
+      "ai_route_capability_unsupported": "This service cannot do this kind of work.",
+      "ai_route_model_not_allowed": "This model cannot be chosen for this kind of work.",
+      "ai_route_service_unknown": "Unknown service.",
+      "ai_route_no_key": "This service has no key; write its key first.",
+      "ai_route_uncapped": "This service documents no output limit, so it cannot run on platform credits.",
+      "ai_service_unknown": "Unknown AI service."
+    },
+    "ai_credits": {
+      "pack_unknown": "Pack not found or not on sale.",
+      "unavailable": "Platform credits are not available for this shop."
     },
     "provisioning": {
       "api_url_refused": "The shop's internal address is not among the allowed ones.",
@@ -956,6 +998,7 @@
     "names": {
       "catalog_product_videos": "Product videos",
       "ai_own_keys": "AI with own service key (BYOK)",
+      "ai_platform_credits": "AI with platform credits",
       "test_platform_sample": "Sample platform feature"
     }
   },
@@ -1493,6 +1536,247 @@
       "none": "No payment instruction written yet.",
       "updated": "Last changed {{at}}, {{by}}",
       "done": "Payment instruction saved; it is on its way to the shops."
+    }
+  },
+  "aiCredits": {
+    "unit": "credits",
+    "credits_one": "{{value}} credit",
+    "credits_other": "{{value}} credits",
+    "buckets": {
+      "plan": "Monthly grant",
+      "purchased": "Purchased"
+    },
+    "capabilities": {
+      "text": "Writing text",
+      "vision": "Reading images",
+      "image_edit": "Editing images"
+    },
+    "services": {
+      "deepseek": "DeepSeek",
+      "minimax": "MiniMax",
+      "qwen": "Qwen (Alibaba)",
+      "gemini": "Google Gemini",
+      "photoroom": "Photoroom",
+      "fake": "Fake service (tests only)"
+    },
+    "tab": {
+      "label": "AI credits",
+      "title": "AI credits",
+      "text": "The shop's monthly grant, its purchased credits and today's spend.",
+      "off": "Platform credits are off for this shop: its flag is off or the shop is not active. The wallet is shown and can be corrected; the shop cannot use credits."
+    },
+    "wallet": {
+      "plan": "Monthly grant (left / total)",
+      "planValue": "{{left}} / {{total}}",
+      "planHint": "{{month}} · renews {{day}}",
+      "planBar": "Monthly grant left: {{value}}%",
+      "purchased": "Purchased",
+      "expires": "Expires: {{day}}",
+      "noneBought": "No purchased credits",
+      "today": "Spent today / daily cap",
+      "todayValue": "{{spent}} / {{cap}}",
+      "capPlatform": "Cap: platform default",
+      "capOwn": "Cap: this shop's own"
+    },
+    "ledger": {
+      "title": "Credit moves",
+      "empty": "No moves yet.",
+      "system": "System",
+      "you": "{{name}} (you)",
+      "unnamed": "Removed staff member",
+      "columns": {
+        "at": "Date",
+        "kind": "Kind",
+        "amount": "Credits",
+        "note": "Note",
+        "actor": "Who"
+      },
+      "kinds": {
+        "grant_purchase": "Purchase top-up",
+        "grant_plan_monthly": "Monthly grant renewed",
+        "spend": "Spend",
+        "release": "Refund",
+        "expire": "Expired",
+        "adjust": "Manual correction"
+      }
+    },
+    "adjust": {
+      "open": "Add / take credits",
+      "title": "Add / take credits",
+      "text": "Correct {{shop}}'s credits by hand. The move is written to the ledger with its note and your name.",
+      "sign": "Action",
+      "add": "Add credits",
+      "take": "Take credits",
+      "amount": "Credits",
+      "amountHelp": "A whole number; at most {{max}} credits at once.",
+      "bucket": "Which balance",
+      "note": "Note",
+      "noteHelp": "Required. Write why; the shop does not see this note.",
+      "submit": {
+        "add": "Add credits",
+        "take": "Take credits"
+      },
+      "done": "Credit correction written.",
+      "already": "This correction was already written; it was not written twice.",
+      "unsure": "The last try may have been recorded. Trying again writes the same correction once; for a different amount, check the account statement first.",
+      "retry": "Try again"
+    },
+    "dailyCap": {
+      "open": "Change daily cap",
+      "title": "Change daily cap",
+      "text": "The most credits the shop may spend in a day. Platform default: {{cap}} credits.",
+      "textUnknown": "The most credits the shop may spend in a day.",
+      "platform": "platform default",
+      "label": "This shop's daily cap",
+      "help": "Leave it empty for the platform default. 0 means the shop cannot spend credits.",
+      "done": "Daily cap saved."
+    },
+    "orders": {
+      "title": "Credit requests",
+      "text": "The shops' top-up requests. Mark one paid once the payment arrives; the credits are added at once.",
+      "list": "Requests",
+      "tabsLabel": "Request status",
+      "statuses": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "cancelled": "Cancelled"
+      },
+      "columns": {
+        "shop": "Shop",
+        "pack": "Pack",
+        "credits": "Credits",
+        "amount": "Amount",
+        "requested": "Requested",
+        "decided": "Decided",
+        "actions": "Actions"
+      },
+      "empty": {
+        "pending": "No pending requests.",
+        "paid": "No paid requests.",
+        "cancelled": "No cancelled requests."
+      },
+      "paid": {
+        "open": "Mark paid",
+        "title": "Mark paid",
+        "text": "{{credits}} will be added to {{shop}} ({{pack}}, {{amount}}). This cannot be undone.",
+        "method": "Payment method",
+        "reference": "Receipt / reference",
+        "referenceHelp": "Optional: the transfer's description or the receipt number.",
+        "submit": "Paid, add the credits",
+        "done": "Request marked paid; credits added.",
+        "already": "This request was already paid; the credits were not added twice."
+      },
+      "cancel": {
+        "open": "Cancel",
+        "title": "Cancel the request?",
+        "text": "{{shop}}'s {{pack}} request ({{credits}}, {{amount}}) will be cancelled. No credits are added; the shop may open a new request.",
+        "confirm": "Cancel the request",
+        "note": "Note (optional)",
+        "noteHelp": "You may say briefly why it was cancelled; only the audit log shows it, the shop does not see it.",
+        "done": "Request cancelled."
+      }
+    },
+    "settings": {
+      "title": "AI providers",
+      "text": "Provider keys, routing, packs and platform limits for work on platform credits.",
+      "updated": "Last changed: {{day}}",
+      "moved": "The settings changed in the meantime. Reload the page and try again."
+    },
+    "providers": {
+      "title": "Provider keys",
+      "text": "A key is only written; it is never shown back.",
+      "empty": "No services defined.",
+      "columns": {
+        "service": "Service",
+        "key": "Key",
+        "routed": "Used for",
+        "actions": "Actions"
+      },
+      "held": "Held · version {{version}}",
+      "heldOn": "Written {{day}}",
+      "none": "None",
+      "write": "Write key",
+      "replace": "Replace key",
+      "delete": "Delete key",
+      "test": "Test connection",
+      "testing": "Testing",
+      "keyDialog": {
+        "title": "{{service}} key",
+        "text": "Paste the key from the provider's console. Once saved it is never shown again.",
+        "label": "API key",
+        "help": "8–512 characters, no spaces.",
+        "tooLong": "The key cannot be longer than {{max}} characters.",
+        "submit": "Save key",
+        "done": "Key saved."
+      },
+      "deleteDialog": {
+        "title": "Delete the {{service}} key?",
+        "text": "The key and the routings to this service are removed; the service cannot be used on platform credits. If the key leaked, revoke it in the provider's console first.",
+        "confirm": "Delete key",
+        "done": "Key deleted."
+      },
+      "check": {
+        "ok": "{{service}}: connected.",
+        "no_key": "{{service}}: no key.",
+        "rejected": "{{service}}: the provider rejected the key.",
+        "unreachable": "{{service}}: the provider could not be reached; try again shortly.",
+        "timeout": "{{service}}: the provider did not answer in time.",
+        "unexpected": "{{service}}: the provider gave an unexpected answer."
+      }
+    },
+    "routing": {
+      "title": "Routing",
+      "text": "Which service and model each kind of work runs on. Only services with a key can be chosen.",
+      "none": "Off (does not run on platform credits)",
+      "label": "{{capability}}: service and model",
+      "noKey": "{{service}} (no key)",
+      "uncapped": "{{service}}: this service documents no output limit, so it cannot run on platform credits.",
+      "done": "Routing saved."
+    },
+    "general": {
+      "title": "General settings",
+      "text": "Limits for every shop.",
+      "dailyCap": "Platform daily cap",
+      "dailyCapHelp": "A shop without its own cap spends at most this many credits a day.",
+      "lifetime": "Purchased credits' lifetime",
+      "lifetimeHelp": "Months from the last top-up; each top-up extends the whole purchased balance.",
+      "months": "months",
+      "done": "General settings saved."
+    },
+    "packs": {
+      "title": "Top-up packs",
+      "text": "The packs shown under \"Buy credits\" in the shop panel.",
+      "add": "Add pack",
+      "empty": "No packs. Shops cannot request credits; they see a \"write to us\" note.",
+      "max": "At most 10 packs can be set up.",
+      "columns": {
+        "name": "Pack",
+        "credits": "Credits",
+        "amount": "Amount",
+        "active": "Status",
+        "actions": "Actions"
+      },
+      "on": "On sale",
+      "off": "Not on sale",
+      "edit": "Edit",
+      "delete": "Delete",
+      "dialog": {
+        "new": "New pack",
+        "edit": "Edit pack",
+        "name": "Pack name",
+        "credits": "Credits",
+        "amount": "Amount",
+        "active": "On sale",
+        "activeHelp": "A pack not on sale is not shown to shops.",
+        "idNote": "A pack whose price changes counts as a new pack; pending requests keep the old price.",
+        "done": "Pack saved."
+      },
+      "deleteDialog": {
+        "title": "Delete the {{name}} pack?",
+        "text": "The pack is no longer shown to shops. Pending requests opened with it keep their own price and can still be paid.",
+        "confirm": "Delete pack",
+        "done": "Pack deleted."
+      }
     }
   },
   "releases": {

@@ -60,7 +60,10 @@ medusaIntegrationTestRunner({
         package_code: null,
         billing: null,
       })
-      expect(data.plan.limits.every((limit) => limit.max === null)).toBe(true)
+      // No limit; a grant (adr/0085 K5) gives none without a plan
+      expect(
+        data.plan.limits.every((limit) => limit.max === (limit.kind === "grant" ? 0 : null))
+      ).toBe(true)
       expect(data.plan.limits.find((limit) => limit.key === "products")?.used).toBe(2)
       // Ek C15: the panel's strip and the storefront's edge hear an open shop
       const me = await http.get<{ plan: { status: string } }>("/admin/staff/me", {

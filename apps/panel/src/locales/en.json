@@ -777,6 +777,11 @@
             "summary": "AI services are connected with the shop's own key.",
             "description": "AI services are connected with the key of the shop's own account; the service bills the shop directly. Connections are under Settings > AI."
           },
+          "platform_credits": {
+            "label": "Platform credits",
+            "summary": "AI tasks run on the platform's credits; the shop needs no service key of its own.",
+            "description": "AI tasks run on the platform's credits; the shop needs no service key of its own. Your package may give free credits each month; more can be topped up."
+          },
           "storefront_search": {
             "label": "Search in your own words",
             "summary": "Shoppers can search the storefront in their own words.",
@@ -964,13 +969,10 @@
       "emptyFiltered": "No entry matches these filters.",
       "filters": {
         "actor": "By",
-        "anyone": "Anyone",
         "people": "Team",
         "others": "Other",
         "resource": "Resource",
-        "anything": "All resources",
         "rangeHint": "Turkey time; either end may stay empty.",
-        "clear": "Clear",
         "groups": {
           "sales": "Sales",
           "catalog": "Catalog",
@@ -979,7 +981,8 @@
           "settings": "Settings and connections",
           "people": "Team and security",
           "other": "Other"
-        }
+        },
+        "days": "Date"
       },
       "detail": {
         "title": "Entry details",
@@ -4280,18 +4283,15 @@
     },
     "filters": {
       "category": "Category",
-      "anyCategory": "All categories",
       "brand": "Brand",
       "anyBrand": "All brands",
       "stock": "Stock",
-      "anyStock": "Any stock",
       "stocks": {
         "in": "In stock",
         "low": "Low",
         "out": "Sold out"
       },
       "missing": "Missing",
-      "anyMissing": "Missing info: any",
       "missings": {
         "image": "No image",
         "price": "No price",
@@ -4299,7 +4299,6 @@
         "seo": "Weak SEO"
       },
       "kind": "Kind",
-      "anyKind": "All kinds",
       "kinds": {
         "physical": "Physical",
         "digital": "Digital",
@@ -4317,7 +4316,6 @@
         "stock": "Stock (lowest first)",
         "stock_desc": "Stock (highest first)"
       },
-      "clear": "Clear filters",
       "limited": "This filter looks at the newest 5,000 products; older ones are not listed."
     },
     "tags": {
@@ -4992,7 +4990,6 @@
       "saved": "Delivery address updated."
     },
     "filters": {
-      "any": "{{what}}: any",
       "payment": "Payment",
       "shipping": "Shipping",
       "payments": {
@@ -5024,7 +5021,7 @@
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
-      "clear": "Clear filters"
+      "days": "Order date"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",
@@ -6113,6 +6110,7 @@
       "perCustomer": "Uses per customer",
       "perCustomerHint": "How many times one customer may use it. Empty means no limit.",
       "perCustomerLocked": "This campaign's budget is set elsewhere; change it in the advanced dashboard.",
+      "budgetNotShown": "A campaign with a budget is not shown on the product card; the cart applies it.",
       "previewScope": {
         "categories_one": "In {{count}} selected category",
         "categories_other": "In {{count}} selected categories",
@@ -12157,6 +12155,20 @@
       "layout": {
         "modal": "Centred window",
         "corner": "Corner card"
+      },
+      "design": {
+        "classic": "Classic",
+        "split": "Side by side",
+        "hero": "Large picture",
+        "minimal": "Plain",
+        "coupon": "Coupon"
+      },
+      "designHint": {
+        "classic": "Picture on top, words below; the first design.",
+        "split": "On a wide screen the picture left, the words right; without a picture it looks classic.",
+        "hero": "A tall picture on top, the title large and centred.",
+        "minimal": "No picture; a large title and short words, centred.",
+        "coupon": "The discount code large, like a ticket; without a code the title sits in the ticket."
       }
     },
     "form": {
@@ -12196,7 +12208,8 @@
       "frequencyDays": "Every how many days",
       "daysUnit": "days",
       "look": "Look",
-      "layout": "Layout",
+      "design": "Design",
+      "layout": "Placement",
       "advanced": "Advanced",
       "priority": "Priority",
       "priorityHint": "When more than one pop-up fits a page, the larger number shows first.",
@@ -12234,13 +12247,19 @@
       "codePlaceholder": "CODE",
       "device": "Preview device",
       "desktop": "Desktop",
-      "mobile": "Mobile"
+      "mobile": "Mobile",
+      "copy": "Copy"
     },
     "stats": {
       "title": "Results",
       "clickRate": "Click rate {{rate}}",
       "last30": "Views, last 30 days",
       "daily": "Last 30 days, daily views"
+    },
+    "facts": {
+      "title": "Summary",
+      "created": "Created",
+      "updated": "Last changed"
     }
   },
   "paymentLinks": {
@@ -12715,7 +12734,8 @@
       "staff": "Team",
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content drafts",
-      "custom_domains": "Custom domains"
+      "custom_domains": "Custom domains",
+      "ai_free_credits_per_month": "Free AI credits"
     },
     "notice": {
       "products": {
@@ -12812,7 +12832,9 @@
       "notIncluded": "not included",
       "feature": {
         "productVideos": "Product videos",
-        "aiOwnKeys": "Your own AI key"
+        "aiOwnKeys": "Your own AI key",
+        "platformCredits": "Platform credits",
+        "platformCreditsMonthly": "Platform credits: {{value}} free a month"
       },
       "groups": {
         "totals": "Shop totals",
@@ -13065,7 +13087,7 @@
       "wholesaler": "Wholesaler",
       "unnamed": "Unnamed wholesaler",
       "pick": "Wholesaler",
-      "every": "All wholesalers"
+      "picked": "Selected wholesaler"
     },
     "password": {
       "generate": "Generate a strong password",
@@ -13169,6 +13191,14 @@
           "secret_invalid": "MiniMax did not accept the key. Copy it again and enter it."
         }
       },
+      "qwen": {
+        "name": "Qwen (Alibaba)",
+        "description": "Low-cost text and image reading service (Alibaba Cloud, Singapore).",
+        "rejected": "Qwen refused the stored key. Change the key or check the balance and payment status of your Alibaba Cloud account.",
+        "checks": {
+          "secret_invalid": "Qwen did not accept the key. Copy it again from the Singapore region and enter it."
+        }
+      },
       "gemini": {
         "name": "Gemini",
         "description": "Google's text service.",
@@ -13192,18 +13222,25 @@
         "checks": {
           "secret_invalid": "The test service did not accept the key."
         }
+      },
+      "platform": {
+        "name": "Platform credits",
+        "description": "With the platform's credits, no key of your own."
       }
     },
     "data_note": {
       "deepseek": "Data is processed and stored in China. DeepSeek's privacy policy lists training its models as a use of the data.",
       "minimax": "Where data is processed and whether it trains models is not stated.",
+      "qwen": "Data is stored in Singapore and processed on nodes outside the Chinese mainland. Alibaba does not train models on the content without separate consent.",
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
       "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
-      "fake": "Data never leaves this computer."
+      "fake": "Data never leaves this computer.",
+      "platform": "Content goes to one of the AI services the platform works with; the platform does not keep it. The shop agreement names those services."
     },
     "data_detail": {
       "deepseek": "DeepSeek processes and stores the text sent on servers in the People's Republic of China. Its privacy policy lists improving (training) its models among the uses of the data. Only content published on your storefront, such as products, categories and pages, is sent.",
       "minimax": "MiniMax's international platform is used. Where data is processed and whether it trains models could not be verified from the service's documentation; we suggest reading MiniMax's own terms before connecting. Only content published on your storefront is sent.",
+      "qwen": "Alibaba Cloud Model Studio's Singapore region (the \"International\" scope) is used: requests are stored in Singapore and processed on nodes outside the Chinese mainland. Under Alibaba's retention policy prompts and answers are kept for at most 30 days and are not used to train models without separate consent. A key works only in the region it was made in: take it from the Singapore region. Only content published on your storefront is sent.",
       "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
       "photoroom": "Photoroom processes the image on its servers in the USA and deletes it after answering. Photoroom's pages differ on whether images are used to train models; we suggest reading its own terms before connecting. Only the image to edit leaves your shop.",
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
@@ -13232,7 +13269,8 @@
       "product_faq": "FAQ draft",
       "post_draft": "Blog post draft",
       "campaign_email": "Newsletter e-mail text",
-      "campaign_sms": "SMS campaign text"
+      "campaign_sms": "SMS campaign text",
+      "image_scene": "Place in a scene"
     },
     "options": {
       "short": "Short",
@@ -13293,7 +13331,9 @@
       },
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · no limit",
-      "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight."
+      "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight.",
+      "platformCredits_one": "{{amount}} credit from the platform's credits was spent this month.",
+      "platformCredits_other": "{{amount}} credits from the platform's credits were spent this month."
     },
     "suggest": {
       "button": "Suggest with AI",
@@ -13334,7 +13374,13 @@
       "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow.",
       "reviews_off": "AI on reviews and questions is off. It can be turned on under Settings › AI.",
       "feature_off": "This feature is off for the shop.",
-      "not_enough_reviews": "A summary needs at least 3 approved reviews of this product."
+      "not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",
+      "credits_exhausted": "You have run out of credits.",
+      "credits_daily_cap": "Today's limit is reached. You can try again tomorrow.",
+      "platform_busy": "Busy right now; try again in a little while.",
+      "platform_unavailable": "Platform credits cannot be used right now.",
+      "credits_order_open": "You already have a request waiting.",
+      "credits_pack_unknown": "This pack is no longer offered; refresh the list."
     },
     "background": {
       "button": "Edit image",
@@ -13581,6 +13627,40 @@
       "added": "{{name}} added",
       "note": "A suggestion you click is added to the field; saving is up to you.",
       "close": "Close suggestions"
+    },
+    "credits": {
+      "title": "Platform credits",
+      "description": "AI work runs on these credits, with no key of your own.",
+      "plan": "{{remaining}} credits left this month",
+      "planRenews": "Renews on {{date}}",
+      "planUsedUp": "This month's credits are used up; they renew on {{date}}.",
+      "planOf": "{{remaining}} of {{granted}} credits left this month",
+      "planBar": "This month's credits left",
+      "planBarValue": "{{remaining}} of {{granted}} credits left",
+      "purchased": "Topped-up credits: {{remaining}}",
+      "purchasedExpires": "Expires: {{date}}",
+      "exhausted": "You have run out of credits.",
+      "dailyReached": "Today's limit is reached; it renews tomorrow.",
+      "pending": "Request received; your credits are added once the payment is confirmed.",
+      "requested": "Request received. Your credits are added once the payment is confirmed.",
+      "pendingWait": "You have a pending request; your credits are added once the payment is confirmed.",
+      "pendingPack": "{{credits}} credits · {{amount}}",
+      "noPacks": "Write to us to top up credits.",
+      "topUp": "Top up credits",
+      "tellOwner": "Let the shop owner know.",
+      "cost": "{{credits}} credits",
+      "costEach": "{{credits}} credits per item; {{total}} at most.",
+      "costs": "How many credits does a task take?",
+      "costsTask": "Task",
+      "costsCredits": "Credits",
+      "dialog": {
+        "title": "Top up credits",
+        "description": "Your request reaches us; we contact you about the payment. Once it is confirmed, the credits are added.",
+        "packs": "Pack",
+        "packCredits": "{{credits}} credits",
+        "submit": "Send request",
+        "refresh": "Refresh the list"
+      }
     }
   }
 }

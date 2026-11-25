@@ -68,5 +68,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/provisioning" },
     // C16 (adr/0061 §7): subscriptions, charges, reminders, the payment instruction
     { resolve: "./src/modules/billing" },
+    // adr/0085 §1: the AI platform credits' wallets and ledger
+    { resolve: "./src/modules/ai-credits" },
   ],
 })

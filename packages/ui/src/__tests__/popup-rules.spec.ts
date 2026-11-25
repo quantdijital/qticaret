@@ -28,6 +28,7 @@ const popup = (patch: Partial<PopupView> = {}): PopupView => ({
   trigger: { kind: "delay", value: 5 },
   frequency: { kind: "session", days: null },
   layout: "modal",
+  design: "classic",
   priority: 0,
   endsAt: null,
   ...patch,

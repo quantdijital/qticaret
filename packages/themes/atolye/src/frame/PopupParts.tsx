@@ -3,6 +3,7 @@
 import { useRef, useState } from "react"
 import type { PlaceOrderResult, PopupView } from "@qticaret/ui"
 import { copyText } from "@qticaret/ui/lib/popup-client"
+import { cn } from "@qticaret/ui/lib/utils"
 import { NewsletterForm } from "./NewsletterForm"
 import type { PopupWords } from "./popup-words"
 
@@ -16,16 +17,25 @@ type Copied = "idle" | "copied" | "failed"
 export function CampaignCode({
   promotion,
   words,
+  ticket = false,
   onCopy,
 }: {
   promotion: NonNullable<PopupView["promotion"]>
   words: PopupWords
+  /** The coupon design's: a dashed ticket, the code large and centred, the button under it. */
+  ticket?: boolean
   onCopy: () => void
 }) {
   const [copied, setCopied] = useState<Copied>("idle")
   const code = useRef<HTMLElement>(null)
   if (promotion.code === null) {
-    return <p className="text-sm font-semibold">{words.automatic}</p>
+    return ticket ? (
+      <p className="rounded-inner border-2 border-dashed border-edge px-4 py-4 text-center text-md font-semibold">
+        {words.automatic}
+      </p>
+    ) : (
+      <p className="text-sm font-semibold">{words.automatic}</p>
+    )
   }
   const text = promotion.code
   const copy = async () => {
@@ -39,6 +49,35 @@ export function CampaignCode({
       window.getSelection()?.removeAllRanges()
       window.getSelection()?.addRange(range)
     }
+  }
+  const status = (
+    <p role="status" className={cn("min-h-[1lh] text-xs font-semibold", ticket && "text-center")}>
+      {copied === "copied" ? words.copied : copied === "failed" ? words.copyFailed : null}
+    </p>
+  )
+  if (ticket) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <div
+          data-popup-ticket=""
+          className="relative flex flex-col items-center gap-3 rounded-inner border-2 border-dashed border-edge bg-paper-2 px-6 py-5 before:absolute before:top-1/2 before:-left-2.5 before:size-5 before:-translate-y-1/2 before:rounded-full before:bg-paper after:absolute after:top-1/2 after:-right-2.5 after:size-5 after:-translate-y-1/2 after:rounded-full after:bg-paper"
+        >
+          <span className="text-xs font-semibold tracking-wider text-text-2 uppercase">
+            {words.code}
+          </span>
+          <code
+            ref={code}
+            className="max-w-full truncate font-mono text-display font-bold tracking-widest select-all"
+          >
+            {text}
+          </code>
+          <button type="button" onClick={() => void copy()} className="gf-btn max-sm:w-full">
+            {words.copy}
+          </button>
+        </div>
+        {status}
+      </div>
+    )
   }
   return (
     <div className="flex flex-col gap-1.5">
@@ -54,9 +93,7 @@ export function CampaignCode({
           {words.copy}
         </button>
       </div>
-      <p role="status" className="min-h-[1lh] text-xs font-semibold">
-        {copied === "copied" ? words.copied : copied === "failed" ? words.copyFailed : null}
-      </p>
+      {status}
     </div>
   )
 }

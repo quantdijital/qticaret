@@ -47,6 +47,7 @@ const stored: StorePopup = {
   trigger: { kind: "scroll", value: 40 },
   frequency: { kind: "days", days: 7 },
   layout: "corner",
+  design: "coupon",
   priority: 5,
   ends_at: "2026-12-01T00:00:00.000Z",
 }
@@ -93,10 +94,20 @@ describe("GET /api/popups", () => {
         trigger: stored.trigger,
         frequency: stored.frequency,
         layout: "corner",
+        design: "coupon",
         priority: 5,
         endsAt: "2026-12-01T00:00:00.000Z",
       },
     ])
+  })
+
+  it("draws a design it does not know, or none, as classic", async () => {
+    state.popups = [
+      { ...stored, design: "fullscreen" as never },
+      { ...stored, id: "popup_02", design: undefined as never },
+    ]
+    const { popups } = (await (await list.GET()).json()) as { popups: { design: string }[] }
+    expect(popups.map((each) => each.design)).toEqual(["classic", "classic"])
   })
 
   it("answers none with the shop's pop-ups off, without asking the backend", async () => {

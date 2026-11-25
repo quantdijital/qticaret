@@ -1,143 +1,113 @@
-import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { DayRangeFilter } from "@qticaret/admin-ui/patterns/day-range-filter"
-import { Button } from "@qticaret/admin-ui/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@qticaret/admin-ui/ui/select"
+import type { DayRange } from "@qticaret/admin-ui/patterns/day-range-filter"
+import type { FilterDef, FilterValue, FilterValues } from "@qticaret/admin-ui/patterns/filter-bar"
 import {
   CARRIER_FILTERS,
   PAYMENT_FILTERS,
   PAYMENT_METHODS,
   SHIPPING_FILTERS,
 } from "@/features/orders/api/orders"
-import { isFiltered } from "@/features/orders/search"
+import { choicesOf, choicesText } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
 
-const ANY = "__any"
+/**
+ * The address's change for the list: its own filters and a page's extra
+ * ones (the wholesaler) in one, so they go into the address at once.
+ */
+export type OrderFilterChange = OrderListSearch & Readonly<Record<string, unknown>>
 
-/** A filter beside the search: its choices, "any" first. */
-function FilterSelect<T extends string>({
-  label,
-  value,
-  options,
-  text,
-  onChange,
-}: {
-  label: string
-  value: T | undefined
-  options: readonly T[]
-  text: (option: T) => string
-  onChange: (next: T | undefined) => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <Select
-      value={value ?? ANY}
-      onValueChange={(next) => {
-        onChange(next === ANY ? undefined : (next as T))
-      }}
-    >
-      <SelectTrigger className="w-full sm:w-56" aria-label={label}>
-        {/* The chosen value with what it filters: "Kargo: Yolda" */}
-        <SelectValue>
-          {value ? `${label}: ${text(value)}` : t("orders.filters.any", { what: label })}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ANY}>{t("orders.filters.any", { what: label })}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option} value={option}>
-            {text(option)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
+const CLEARED: OrderFilterChange = {
+  payment: undefined,
+  shipping: undefined,
+  method: undefined,
+  carrier: undefined,
+  from: undefined,
+  to: undefined,
 }
 
-type FilterKey = "payment" | "shipping" | "method" | "carrier" | "from" | "to"
+/** A page's own filters beside the list's (the wholesaler on the wholesale list). */
+export interface ExtraOrderFilters {
+  filters: FilterDef[]
+  values: FilterValues
+  /** The address's change when one of them is set or cleared. */
+  change: (key: string, value: FilterValue) => Readonly<Record<string, unknown>>
+  /** The address's change when every one is cleared. */
+  cleared: Readonly<Record<string, unknown>>
+}
+
+const MULTI_KEYS: readonly string[] = ["payment", "shipping", "method", "carrier"]
 
 /**
- * The order list's filters (F12.3): where the money and the parcel stand,
- * how it was paid, who carries it and the days it was placed on. One row
- * of equal controls, wrapping on a phone; every choice goes into the address.
+ * The order list's filters (F12.3) for its filter bar: where the money and
+ * the parcel stand, how it was paid and who carries it (several choices
+ * each, an order matching any), and the days it was placed on; a page's
+ * own filters after them. Every choice goes into the address.
  */
-export function OrderFilters({
-  search,
-  onChange,
-}: {
-  search: OrderListSearch
-  onChange: (next: Pick<OrderListSearch, FilterKey>) => void
-}) {
+export function useOrderFilters(
+  search: OrderListSearch,
+  onChange: (next: OrderFilterChange) => void,
+  extra?: ExtraOrderFilters
+): {
+  filters: FilterDef[]
+  values: FilterValues
+  onChange: (key: string, value: FilterValue) => void
+  onClear: () => void
+} {
   const { t } = useTranslation()
   const F = "orders.filters"
-  return (
-    <>
-      <FilterSelect
-        label={t(`${F}.payment`)}
-        value={search.payment}
-        options={PAYMENT_FILTERS}
-        text={(option) => t(`${F}.payments.${option}`)}
-        onChange={(payment) => {
-          onChange({ payment })
-        }}
-      />
-      <FilterSelect
-        label={t(`${F}.shipping`)}
-        value={search.shipping}
-        options={SHIPPING_FILTERS}
-        text={(option) => t(`${F}.shippings.${option}`)}
-        onChange={(shipping) => {
-          onChange({ shipping })
-        }}
-      />
-      <FilterSelect
-        label={t(`${F}.method`)}
-        value={search.method}
-        options={PAYMENT_METHODS}
-        text={(option) => t(`${F}.methods.${option}`)}
-        onChange={(method) => {
-          onChange({ method })
-        }}
-      />
-      <FilterSelect
-        label={t(`${F}.carrier`)}
-        value={search.carrier}
-        options={CARRIER_FILTERS}
-        text={(option) => t(`${F}.carriers.${option}`)}
-        onChange={(carrier) => {
-          onChange({ carrier })
-        }}
-      />
-      <DayRangeFilter
-        value={{ from: search.from, to: search.to }}
-        hint={t(`${F}.daysHint`)}
-        onChange={onChange}
-      />
-      {isFiltered(search) ? (
-        <Button
-          variant="ghost"
-          className="w-full sm:w-auto"
-          onClick={() => {
-            onChange({
-              payment: undefined,
-              shipping: undefined,
-              method: undefined,
-              carrier: undefined,
-              from: undefined,
-              to: undefined,
-            })
-          }}
-        >
-          <X aria-hidden="true" />
-          {t(`${F}.clear`)}
-        </Button>
-      ) : null}
-    </>
-  )
+  const choices = (options: readonly string[], words: string) =>
+    options.map((value) => ({ value, label: t(`${F}.${words}.${value}`) }))
+  return {
+    filters: [
+      {
+        key: "payment",
+        label: t(`${F}.payment`),
+        kind: "multi",
+        options: choices(PAYMENT_FILTERS, "payments"),
+      },
+      {
+        key: "shipping",
+        label: t(`${F}.shipping`),
+        kind: "multi",
+        options: choices(SHIPPING_FILTERS, "shippings"),
+      },
+      {
+        key: "method",
+        label: t(`${F}.method`),
+        kind: "multi",
+        options: choices(PAYMENT_METHODS, "methods"),
+      },
+      {
+        key: "carrier",
+        label: t(`${F}.carrier`),
+        kind: "multi",
+        options: choices(CARRIER_FILTERS, "carriers"),
+      },
+      { key: "days", label: t(`${F}.days`), kind: "days", hint: t(`${F}.daysHint`) },
+      ...(extra?.filters ?? []),
+    ],
+    values: {
+      ...choicesOf(search),
+      days: { from: search.from, to: search.to },
+      ...extra?.values,
+    },
+    onChange: (key, value) => {
+      if (key === "days") {
+        const days = value as DayRange | undefined
+        onChange({ from: days?.from, to: days?.to })
+        return
+      }
+      if (MULTI_KEYS.includes(key)) {
+        // The bar only hands back a filter's own choices, in its order; a comma text in the address
+        onChange({ [key]: choicesText(value as readonly string[] | undefined) })
+        return
+      }
+      if (extra) {
+        onChange(extra.change(key, value))
+      }
+    },
+    onClear: () => {
+      onChange({ ...CLEARED, ...extra?.cleared })
+    },
+  }
 }

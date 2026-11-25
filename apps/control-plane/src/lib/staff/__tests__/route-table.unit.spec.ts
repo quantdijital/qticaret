@@ -123,8 +123,13 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     )
 
     expect(stepUps.sort()).toEqual([
+      "DELETE /admin/cp/ai/providers/:service",
       "DELETE /admin/cp/me/mfa",
       "DELETE /admin/cp/me/sessions/:id",
+      "POST /admin/cp/ai/orders/:id/cancel",
+      "POST /admin/cp/ai/orders/:id/paid",
+      "POST /admin/cp/ai/providers/:service",
+      "POST /admin/cp/ai/settings",
       "POST /admin/cp/billing-settings",
       "POST /admin/cp/keys/rewrap",
       "POST /admin/cp/keys/signing/prepare",
@@ -143,6 +148,8 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/staff/members/:id/reactivate",
       "POST /admin/cp/staff/members/:id/reset-mfa",
       "POST /admin/cp/tenants",
+      "POST /admin/cp/tenants/:id/ai-credits/adjust",
+      "POST /admin/cp/tenants/:id/ai-credits/daily-cap",
       "POST /admin/cp/tenants/:id/charges/:charge_id/amount",
       "POST /admin/cp/tenants/:id/charges/:charge_id/pay",
       "POST /admin/cp/tenants/:id/charges/:charge_id/void",

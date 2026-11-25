@@ -114,6 +114,42 @@ describe("AiPage", () => {
     expect(screen.getByRole("button", { name: "DeepSeek işlemleri" })).toBeInTheDocument()
     expect(screen.getAllByRole("button", { name: "Bağla" })).toHaveLength(2)
     expect(screen.queryByText(/Paketiniz kendi anahtarınızla/)).toBeNull()
+    // The credits off (this stand-in answers no wallet): no trace of them
+    expect(screen.queryByRole("heading", { name: "Platform kredisi" })).toBeNull()
+  })
+
+  it("keeps the platform's credits out of the key table, in a card of their own", async () => {
+    serve(true)
+    const base = fetchMock.getMockImplementation()
+    fetchMock.mockImplementation((url: string) => {
+      if (url === "/admin/ai/services") {
+        const answer = services(true)
+        answer.services.push({
+          id: "platform",
+          capabilities: ["text"],
+          status: "connected",
+          funding: "platform_credit",
+          data_note_key: "ai.data_note.platform",
+        })
+        return Promise.resolve(answer)
+      }
+      if (url === "/admin/ai/credits") {
+        return Promise.resolve({
+          available: true,
+          plan: { remaining: 40, renews_on: "2026-12-01" },
+          purchased: { remaining: 0, expires_on: null },
+          daily: { cap: 300, remaining: 300 },
+          tasks: { seo_title: 1 },
+          packs: [],
+          pending_order: null,
+        })
+      }
+      return (base as (url: string) => Promise<unknown>)(url)
+    })
+    renderPage()
+    expect(await screen.findByRole("heading", { name: "Platform kredisi" })).toBeInTheDocument()
+    const table = screen.getByRole("table", { name: "Servisler" })
+    expect(within(table).queryByRole("row", { name: /Platform kredisi/ })).toBeNull()
   })
 
   it("the reviews switch is a line, its words behind the (i)", async () => {
@@ -147,6 +183,27 @@ describe("AiPage", () => {
     expect(await screen.findByText("Bu ay yapay zekâ henüz kullanılmadı.")).toBeInTheDocument()
     expect(screen.queryByRole("columnheader", { name: "Tahmini maliyet" })).toBeNull()
     expect(screen.getByText("0 / 100")).toBeInTheDocument()
+  })
+
+  it.each([
+    ["spent", { calls: 7, credits: 1_250 }, "Bu ay platform kredisinden 1.250 kredi harcandı."],
+    ["none spent", { calls: 0, credits: 0 }, null],
+    ["a server without the field", undefined, null],
+  ])("the platform's credits under the table: %s", async (_, credits, line) => {
+    serve(true)
+    const base = fetchMock.getMockImplementation() as (url: string) => Promise<unknown>
+    fetchMock.mockImplementation((url: string) =>
+      url === "/admin/ai/usage"
+        ? Promise.resolve({ ...usage, platform_credits: credits })
+        : base(url)
+    )
+    renderPage()
+    expect(await screen.findByText("Deneme metni")).toBeInTheDocument()
+    if (line) {
+      expect(screen.getByText(line)).toBeInTheDocument()
+    } else {
+      expect(screen.queryByText(/platform kredisinden/)).toBeNull()
+    }
   })
 
   it("says when the package leaves the shop's own key out", async () => {

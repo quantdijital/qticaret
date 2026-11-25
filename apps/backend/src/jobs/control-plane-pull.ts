@@ -2,17 +2,15 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { controlPlaneConfig } from "../lib/control-plane/config"
 import { pullPlanDocument, warnIfStale } from "../lib/control-plane/pull"
 import { errorSummary, logger } from "../lib/logging"
-import { registerProcessCache } from "../lib/cache/process-caches"
 
 /** The pull's rhythm (adr/0061 §3.2): every 15 minutes, and once at boot. */
 export const PULL_EVERY_MS = 15 * 60 * 1000
 
-// This process's last pull; none yet after a boot, so the first run pulls
+// This process's last pull; none yet after a boot, so the first run pulls.
+// Not forgotten between a bundled test run's spec files (process-caches.ts):
+// forgotten, the job pulled again after every file, at a minute's tick of
+// its own, and its session stood in the way of the next file's snapshot
 let lastPull: number | null = null
-// A bundled test run's next spec file starts as after a boot
-registerProcessCache(() => {
-  lastPull = null
-})
 
 /** Whether a run at `now` pulls: the first after boot, then every 15 minutes. */
 export function pullDue(last: number | null, now: number): boolean {

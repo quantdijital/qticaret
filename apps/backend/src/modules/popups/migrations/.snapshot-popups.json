@@ -388,6 +388,22 @@
           "enumItems": ["modal", "corner"],
           "mappedType": "enum"
         },
+        "design": {
+          "name": "design",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'classic'",
+          "comment": null,
+          "enumItems": ["classic", "split", "hero", "minimal", "coupon"],
+          "mappedType": "enum"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",

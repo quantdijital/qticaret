@@ -19,7 +19,7 @@ const sdkFetch = vi.hoisted(() => vi.fn())
 const can = vi.hoisted(() => ({ edit: true }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.edit }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.edit, useStaff: () => undefined }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
 }))

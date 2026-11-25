@@ -149,6 +149,7 @@ const CHECKERS = {
   // adr/0071 §3: the model list, nothing generated (lib/ai/account-check.ts)
   deepseek: aiAccountChecker("deepseek"),
   minimax: aiAccountChecker("minimax"),
+  qwen: aiAccountChecker("qwen"),
   gemini: aiAccountChecker("gemini"),
   photoroom: aiAccountChecker("photoroom"),
   fake: aiAccountChecker("fake"),
@@ -191,6 +192,7 @@ export const CHECK_FIELDS = {
   // One key: whatever an AI service refuses is the key
   deepseek: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   minimax: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
+  qwen: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   gemini: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   photoroom: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },
   fake: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.api_key" },

@@ -15,7 +15,7 @@ import { GalleryTile } from "@/features/products/components/gallery-tile"
 
 const sdkFetch = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true, useStaff: () => undefined }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
 }))

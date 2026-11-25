@@ -341,6 +341,20 @@
       "ends_at": null,
       "variant": "timeline",
       "title": "Yürüyüş programı"
+    },
+    {
+      "id": "patikabenzer",
+      "type": "related_products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "grid",
+      "title": "Bunlara da göz atın",
+      "source": { "kind": "same_category" },
+      "limit": 4,
+      "card_variant": null,
+      "columns": 4,
+      "columns_mobile": 2
     }
   ]
 }

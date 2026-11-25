@@ -25,6 +25,14 @@ export const AI_ERROR_KEYS = [
   "ai.input_unsupported",
   "ai.daily_limit_reached",
   "ai.credits_exhausted",
+  // adr/0085: the platform's credits; the day's cap reached, the gateway unusable now
+  "ai.credits_daily_cap",
+  "ai.platform_unavailable",
+  // adr/0085 Ek (P3b) (d) `busy`: too many calls in flight, no credit taken; again shortly
+  "ai.platform_busy",
+  // adr/0085 K11: a top-up request while one is open, or for a pack no longer offered
+  "ai.credits_order_open",
+  "ai.credits_pack_unknown",
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",

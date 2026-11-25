@@ -1,4 +1,3 @@
-import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import {
   conversationKey,
@@ -12,29 +11,25 @@ import { runAssistantLoop } from "../../../lib/ai/assistant/loop"
 import type { LoopResult } from "../../../lib/ai/assistant/loop"
 import { noReply, replyOf } from "../../../lib/ai/assistant/reply"
 import type { Reply } from "../../../lib/ai/assistant/reply"
-import { screenFeatures, visibleScreens } from "../../../lib/ai/assistant/screens"
+import { visibleScreens } from "../../../lib/ai/assistant/screens"
 import { assistantSystem, screenContextBlock } from "../../../lib/ai/assistant/system"
-import { ASSISTANT_TOOLS, toolsFor } from "../../../lib/ai/assistant/tools"
+import { toolsFor } from "../../../lib/ai/assistant/tools"
 import type { AssistantLocale } from "../../../lib/ai/assistant/tools"
 import { withAiBreaker } from "../../../lib/ai/breaker"
-import { textTargetOf, toolConnectorFor } from "../../../lib/ai/connector-of"
+import { textTargetOf, toolConnectorWith } from "../../../lib/ai/connector-of"
 import type { ToolConnector } from "../../../lib/ai/connectors/types"
 import { aiProviderError, aiValidationError } from "../../../lib/ai/errors"
 import type { AiErrorKey } from "../../../lib/ai/errors"
 import { failureOf, notTakenByService } from "../../../lib/ai/outcome"
 import { ASSISTANT_TASK } from "../../../lib/ai/registry/assistant-tasks"
-import { verifiedToolCalls } from "../../../lib/ai/registry/services"
 import { redactPersonalData } from "../../../lib/ai/redact"
-import { chooseService, usableServices } from "../../../lib/ai/select"
 import type { StaffRole } from "../../../lib/staff/permissions"
-import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
-import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
-import { STAFF_ROLES_MODULE } from "../../../modules/staff-roles"
-import type StaffRolesModuleService from "../../../modules/staff-roles/service"
-import { aiConnectionsOf, aiFlagsOf, taskFlagOpen } from "../connections"
 import { claimAssistantCall, releaseAssistantCall } from "./assistant-claims"
 import type { AssistantClaim } from "./assistant-claims"
-import { apiKeyOf } from "./call-service"
+import { chargeTally } from "../charge-tally"
+import type { ChargeTally } from "../charge-tally"
+import { transportFor } from "../transport-for"
+import type { AiRoute } from "../transport-for"
 
 /**
  * The assistant's turn, step by step (adr/0079 §2, adr/0071 §8): who
@@ -47,58 +42,15 @@ import { apiKeyOf } from "./call-service"
 /** A turn waits for its answer at most this long (adr/0079 §2). */
 export const TURN_TIMEOUT_MS = 60_000
 
-/** The role, the service and the flags that narrow the screens and tools. */
-export const assistantAccessStep = createStep(
-  "ai-assistant-access",
-  async (input: { user_id: string; service?: string | null }, { container }) => {
-    const role = await container
-      .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-      .roleOf(input.user_id)
-    if (role === null || !ASSISTANT_TASK.roles.includes(role)) {
-      throw new MedusaError(MedusaError.Types.FORBIDDEN, "staff.forbidden")
-    }
-    if (!(await taskFlagOpen(container, ASSISTANT_TASK))) {
-      throw aiValidationError("ai.assistant_off")
-    }
-    const flags = await aiFlagsOf(container)
-    if (!flags.ownKeys && flags.platformCredits !== true) {
-      throw new MedusaError(MedusaError.Types.FORBIDDEN, "ai.own_keys_not_in_plan")
-    }
-    // Only a service whose tool calling is verified in the registry (adr/0079 §2)
-    const usable = usableServices(ASSISTANT_TASK, await aiConnectionsOf(container), flags).filter(
-      (service) => verifiedToolCalls(service) !== null
-    )
-    if (usable.length === 0) {
-      throw aiValidationError("ai.assistant_no_tool_service")
-    }
-    const choice = chooseService({ task: ASSISTANT_TASK, usable, requested: input.service })
-    if (!choice.ok) {
-      throw aiValidationError(choice.error)
-    }
-    const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    const named = [
-      ...screenFeatures(),
-      ...ASSISTANT_TOOLS.flatMap((tool) => (tool.flag ? [tool.flag] : [])),
-    ]
-    const features: string[] = []
-    for (const key of new Set(named)) {
-      if (await settings.isFeatureEnabled(key)) {
-        features.push(key)
-      }
-    }
-    return new StepResponse({
-      role,
-      service: choice.service.id,
-      funding: choice.service.funding,
-      features,
-    })
-  }
-)
+// Who asks and which service runs the turn: its own file, here for the workflow
+export { assistantAccessStep } from "./assistant-access"
 
 export interface AssistantRunInput {
   user_id: string
   role: StaffRole
   service: string
+  /** The turn's operation (the access step's); on credits every model call carries it. */
+  operation?: string | null | undefined
   features: string[]
   conversation_id: string | null
   message: string
@@ -113,6 +65,8 @@ export interface CallRecord {
   output_tokens: number | null
   duration_ms: number
   error_code: string | null
+  /** On credits: what the gateway charged this call (3 on the first, 0 after). */
+  credits?: number | null | undefined
 }
 
 export interface AssistantRunOutput {
@@ -130,7 +84,7 @@ export interface AssistantRunOutput {
 }
 
 /** The loop's model calls, as `ai_usage` rows read them. */
-function callRecords(loop: LoopResult, reply: Reply | null): CallRecord[] {
+function callRecords(loop: LoopResult, reply: Reply | null, tally: ChargeTally): CallRecord[] {
   return loop.calls.map((call, index) => {
     const failed = call.error === null ? null : failureOf(call.error)
     const last = index === loop.calls.length - 1
@@ -141,6 +95,7 @@ function callRecords(loop: LoopResult, reply: Reply | null): CallRecord[] {
       output_tokens: call.usage.outputTokens ?? null,
       duration_ms: call.duration_ms,
       error_code: failed?.code ?? null,
+      credits: tally.at(index),
     }
   })
 }
@@ -170,23 +125,37 @@ export const assistantRunStep = createStep(
           }
         : null
     const userText = redactPersonalData(input.message)
-    const resolved = textTargetOf(input.service, "text")
     const base = {
       conversation_id: conversationId,
       record: null,
       reply: null,
       user_text: userText,
-      model: resolved?.target.model ?? "",
+      model: textTargetOf(input.service, "text")?.target.model ?? "",
     }
-    const apiKey = resolved ? await apiKeyOf(container, resolved.service.credentialProvider) : null
-    if (apiKey === null) {
-      const code = resolved ? "no_credentials" : "not_registered"
-      const error = { kind: "provider" as const, key: "ai.service_unavailable" as const, code }
+    let route: AiRoute
+    const tally = chargeTally()
+    try {
+      // One transport for the turn: its every model call carries the turn's operation
+      route = await transportFor(container, {
+        service: input.service,
+        capability: "text",
+        task: ASSISTANT_TASK.id,
+        operation: input.operation,
+        onCharge: tally.onCharge,
+      })
+    } catch (caught) {
+      const failure = failureOf(caught)
+      const error = { kind: "provider" as const, key: failure.key, code: failure.code }
       return new StepResponse<AssistantRunOutput>({ ...base, error, calls: [], tool_counts: {} })
     }
-    const inner = toolConnectorFor(input.service, apiKey)
+    // On the platform's credits the month is not claimed (adr/0085 K9)
+    const monthly = route.transport.funding === "own_key"
+    const inner = toolConnectorWith(route.service.id, route.transport)
     const connector: ToolConnector = {
-      converse: (request) => withAiBreaker(input.service, () => inner.converse(request)),
+      converse: (request) =>
+        withAiBreaker({ service: input.service, capability: "text" }, () =>
+          inner.converse(request)
+        ),
     }
     const claims: AssistantClaim[] = []
     // Set inside the claim: an object, so the check after the loop is not narrowed away
@@ -200,7 +169,7 @@ export const assistantRunStep = createStep(
       tools: toolsFor(input.role, features),
       context: { role: input.role, locale: input.locale, screens },
       claim: async () => {
-        const claimed = await claimAssistantCall(container, input.user_id)
+        const claimed = await claimAssistantCall(container, input.user_id, new Date(), monthly)
         if (!claimed.ok) {
           refused.by = claimed.reason
           return false
@@ -220,7 +189,7 @@ export const assistantRunStep = createStep(
       return new StepResponse<AssistantRunOutput>({
         ...base,
         error,
-        calls: callRecords(loop, null),
+        calls: callRecords(loop, null, tally),
         tool_counts: loop.toolCounts,
       })
     }
@@ -234,7 +203,7 @@ export const assistantRunStep = createStep(
       return new StepResponse<AssistantRunOutput>({
         ...base,
         error: { kind: "refused", key, code: loop.status },
-        calls: callRecords(loop, null),
+        calls: callRecords(loop, null, tally),
         tool_counts: loop.toolCounts,
       })
     }
@@ -257,7 +226,7 @@ export const assistantRunStep = createStep(
       record,
       reply,
       error: null,
-      calls: callRecords(loop, reply),
+      calls: callRecords(loop, reply, tally),
       tool_counts: loop.toolCounts,
     })
   }

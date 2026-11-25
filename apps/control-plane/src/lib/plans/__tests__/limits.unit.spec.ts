@@ -1,4 +1,4 @@
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { LIMIT_KEYS, isGrantLimit } from "@qticaret/types/control-plane"
 import { packageChanges } from "../../../api/admin/cp/plans/changes"
 import type { PackageRecord } from "../../../modules/plans/types"
 import { effectiveLimits, fullLimits } from "../limits"
@@ -11,6 +11,8 @@ describe("the limits a shop has (adr/0061 §2)", () => {
   it("names every registry key, null where the package gives none", () => {
     expect(Object.keys(pkg).sort()).toEqual([...LIMIT_KEYS].sort())
     expect(pkg.orders_per_month).toBeNull()
+    // A grant is never "no limit": not given, none (adr/0085 K5)
+    expect(pkg.ai_free_credits_per_month).toBe(0)
   })
 
   it("takes the package's value, an exception's over it while it holds", () => {
@@ -33,9 +35,9 @@ describe("the limits a shop has (adr/0061 §2)", () => {
     expect(of("storage_mb")?.override).toBeNull()
   })
 
-  it("has no limit without a package, as the shop's unmanaged mode", () => {
+  it("has no limit without a package, as the shop's unmanaged mode, and no grant", () => {
     for (const limit of effectiveLimits(null, [], NOW)) {
-      expect(limit.value).toBeNull()
+      expect(limit.value).toBe(isGrantLimit(limit.key) ? 0 : null)
       expect(limit.package).toBeUndefined()
     }
   })

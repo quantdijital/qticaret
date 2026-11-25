@@ -10,7 +10,12 @@ import { openEnvelope, parseEnvelope, sealEnvelope, serializeEnvelope } from "@q
 import { masterKeyWrapper } from "../../lib/vault/keks"
 import { emptyTally, olderKekIds, rewrapRows } from "../../lib/vault/rewrap"
 import type { RewrapTally } from "../../lib/vault/rewrap"
-import { assertSecretAddress, secretContext } from "../../lib/vault/secret-names"
+import {
+  aiProviderOfKeyName,
+  assertSecretAddress,
+  secretContext,
+} from "../../lib/vault/secret-names"
+import { retire } from "./retire"
 import { SecretEscrow } from "./models/secret-escrow"
 import { SecretRecord } from "./models/secret-record"
 import { CpSigningKey } from "./models/signing-key"
@@ -67,10 +72,14 @@ export async function lockName(sharedContext: Context, name: string): Promise<vo
  * carries one except `openSecret`'s answer to its caller.
  */
 export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, CpSigningKey }) {
-  /** A new version of `owner`/`name`, sealed; its metadata back. */
+  /**
+   * A new version of `owner`/`name`, sealed; its metadata back. With
+   * `retireOlder`, every older version is retired in the same transaction
+   * (`retireSecret`): only the new one can be opened.
+   */
   @InjectTransactionManager()
   async putSecret(
-    input: { owner: string; name: string; value: string | Buffer },
+    input: { owner: string; name: string; value: string | Buffer; retireOlder?: boolean },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<SecretMeta> {
     const { owner, name } = input
@@ -91,6 +100,9 @@ export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, Cp
       [{ owner, name, version, kek_id: envelope.kekId, sealed: serializeEnvelope(envelope) }],
       sharedContext
     )
+    if (input.retireOlder === true) {
+      await retire(sharedContext, owner, name, version)
+    }
     return this.secretMeta(created as unknown as SecretMeta)
   }
 
@@ -201,7 +213,12 @@ export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, Cp
     return rows.length > 0
   }
 
-  /** Every version of `owner`/`name` destroyed (a retired signing key). */
+  /**
+   * Every version of `owner`/`name` destroyed (a retired signing key).
+   * Never an AI provider's key (PR #374 review Y2): its rows are only
+   * retired (`retireSecret`), so the next version counts them and its
+   * number is never reused; the unique index covers live rows only.
+   */
   @InjectTransactionManager()
   async destroySecret(
     owner: string,
@@ -209,10 +226,29 @@ export class VaultRecords extends MedusaService({ SecretRecord, SecretEscrow, Cp
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     assertSecretAddress(owner, name)
+    if (aiProviderOfKeyName(name) !== null) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.secret_retire_only")
+    }
     await (sharedContext.transactionManager as Executor).execute(
       "DELETE FROM secret_record WHERE owner = ? AND name = ?",
       [owner, name]
     )
+  }
+
+  /**
+   * Every version of `owner`/`name` retired: its sealed form emptied and
+   * the row soft-deleted, its number kept so a later version never reuses
+   * it (an AI provider's key, adr/0085). Whether one was held.
+   */
+  @InjectTransactionManager()
+  async retireSecret(
+    owner: string,
+    name: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    assertSecretAddress(owner, name)
+    await lockName(sharedContext, `secret_record:${owner}:${name}`)
+    return (await retire(sharedContext, owner, name)) > 0
   }
 
   /** A shop's escrow copy, its next version. */

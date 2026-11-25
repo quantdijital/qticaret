@@ -777,6 +777,11 @@
             "summary": "Yapay zekâ servislerine mağazanın kendi anahtarıyla bağlanılır.",
             "description": "Yapay zekâ servislerine mağazanın kendi hesabının anahtarıyla bağlanılır; kullanım ücretini servis doğrudan mağazaya yansıtır. Bağlantılar Ayarlar > Yapay zekâ'da."
           },
+          "platform_credits": {
+            "label": "Platform kredisi",
+            "summary": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez.",
+            "description": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez. Paketiniz her ay ücretsiz kredi verebilir; ek kredi yüklenebilir."
+          },
           "storefront_search": {
             "label": "Kendi cümlesiyle arama",
             "summary": "Müşteri vitrinde aradığını kendi cümlesiyle yazabilir.",
@@ -964,13 +969,10 @@
       "emptyFiltered": "Bu süzgeçlere uyan kayıt yok.",
       "filters": {
         "actor": "Yapan",
-        "anyone": "Herkes",
         "people": "Ekip",
         "others": "Diğer",
         "resource": "Kaynak",
-        "anything": "Tüm kaynaklar",
         "rangeHint": "Türkiye saatiyle; bir uç boş kalabilir.",
-        "clear": "Temizle",
         "groups": {
           "sales": "Satış",
           "catalog": "Katalog",
@@ -979,7 +981,8 @@
           "settings": "Ayarlar ve bağlantılar",
           "people": "Ekip ve güvenlik",
           "other": "Diğer"
-        }
+        },
+        "days": "Tarih"
       },
       "detail": {
         "title": "Kayıt ayrıntısı",
@@ -4280,18 +4283,15 @@
     },
     "filters": {
       "category": "Kategori",
-      "anyCategory": "Tüm kategoriler",
       "brand": "Marka",
       "anyBrand": "Tüm markalar",
       "stock": "Stok",
-      "anyStock": "Tüm stok durumları",
       "stocks": {
         "in": "Stokta",
         "low": "Az kaldı",
         "out": "Tükendi"
       },
       "missing": "Eksik",
-      "anyMissing": "Eksik bilgi: tümü",
       "missings": {
         "image": "Görseli yok",
         "price": "Fiyatı yok",
@@ -4299,7 +4299,6 @@
         "seo": "SEO'su zayıf"
       },
       "kind": "Tür",
-      "anyKind": "Tüm ürün türleri",
       "kinds": {
         "physical": "Fiziksel",
         "digital": "Dijital",
@@ -4317,7 +4316,6 @@
         "stock": "Stok (az olan önce)",
         "stock_desc": "Stok (çok olan önce)"
       },
-      "clear": "Filtreleri temizle",
       "limited": "Bu filtre en yeni 5.000 ürüne bakar; daha eskiler listede görünmüyor."
     },
     "tags": {
@@ -4992,7 +4990,6 @@
       "saved": "Teslimat adresi güncellendi."
     },
     "filters": {
-      "any": "{{what}}: tümü",
       "payment": "Ödeme",
       "shipping": "Kargo",
       "payments": {
@@ -5024,7 +5021,7 @@
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
-      "clear": "Filtreleri temizle"
+      "days": "Sipariş tarihi"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",
@@ -6113,6 +6110,7 @@
       "perCustomer": "Müşteri başına kullanım",
       "perCustomerHint": "Bir müşterinin bu kampanyayı kaç kez kullanabileceği. Boşsa sınırsız.",
       "perCustomerLocked": "Bu kampanyanın bütçesi başka bir yerde tanımlı; gelişmiş panelden değiştirin.",
+      "budgetNotShown": "Bütçeli kampanyanın indirimi ürün kartında gösterilmez, sepette uygulanır.",
       "previewScope": {
         "categories_one": "Seçili {{count}} kategoride",
         "categories_other": "Seçili {{count}} kategoride",
@@ -12157,6 +12155,20 @@
       "layout": {
         "modal": "Ortada pencere",
         "corner": "Köşede kart"
+      },
+      "design": {
+        "classic": "Klasik",
+        "split": "Yan yana",
+        "hero": "Büyük görsel",
+        "minimal": "Sade",
+        "coupon": "Kupon"
+      },
+      "designHint": {
+        "classic": "Görsel üstte, metin altında; ilk tasarım.",
+        "split": "Geniş ekranda görsel solda, metin sağda; görsel yoksa klasik gibi görünür.",
+        "hero": "Uzun görsel üstte, başlık büyük ve ortada.",
+        "minimal": "Görselsiz; büyük başlık ve kısa metin ortada.",
+        "coupon": "İndirim kodu bilet gibi büyük gösterilir; kod yoksa başlık biletin içinde yer alır."
       }
     },
     "form": {
@@ -12196,7 +12208,8 @@
       "frequencyDays": "Kaç günde bir",
       "daysUnit": "gün",
       "look": "Görünüm",
-      "layout": "Biçim",
+      "design": "Tasarım",
+      "layout": "Yerleşim",
       "advanced": "Gelişmiş",
       "priority": "Öncelik",
       "priorityHint": "Aynı sayfada birden çok pop-up uyarsa büyük sayı önce gösterilir.",
@@ -12234,13 +12247,19 @@
       "codePlaceholder": "KOD",
       "device": "Önizleme cihazı",
       "desktop": "Masaüstü",
-      "mobile": "Mobil"
+      "mobile": "Mobil",
+      "copy": "Kopyala"
     },
     "stats": {
       "title": "Sonuçlar",
       "clickRate": "Tıklama oranı {{rate}}",
       "last30": "Son 30 gün gösterim",
       "daily": "Son 30 gün, günlük gösterim"
+    },
+    "facts": {
+      "title": "Özet",
+      "created": "Oluşturuldu",
+      "updated": "Son değişiklik"
     }
   },
   "paymentLinks": {
@@ -12715,7 +12734,8 @@
       "staff": "Ekip",
       "storage_mb": "Depolama",
       "llm_credits_per_month": "İçerik taslakları",
-      "custom_domains": "Özel alan adları"
+      "custom_domains": "Özel alan adları",
+      "ai_free_credits_per_month": "Ücretsiz yapay zekâ kredisi"
     },
     "notice": {
       "products": {
@@ -12812,7 +12832,9 @@
       "notIncluded": "dahil değil",
       "feature": {
         "productVideos": "Ürün videoları",
-        "aiOwnKeys": "Kendi yapay zekâ anahtarınız"
+        "aiOwnKeys": "Kendi yapay zekâ anahtarınız",
+        "platformCredits": "Platform kredisi",
+        "platformCreditsMonthly": "Platform kredisi: ayda {{value}} ücretsiz"
       },
       "groups": {
         "totals": "Mağaza geneli",
@@ -13065,7 +13087,7 @@
       "wholesaler": "Toptancı",
       "unnamed": "Adı olmayan toptancı",
       "pick": "Toptancı",
-      "every": "Tüm toptancılar"
+      "picked": "Seçili toptancı"
     },
     "password": {
       "generate": "Güçlü şifre üret",
@@ -13169,6 +13191,14 @@
           "secret_invalid": "MiniMax anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
         }
       },
+      "qwen": {
+        "name": "Qwen (Alibaba)",
+        "description": "Uygun fiyatlı metin ve görsel okuma servisi (Alibaba Cloud, Singapur).",
+        "rejected": "Qwen kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Alibaba Cloud hesabınızda bakiye ve ödeme durumuna bakın.",
+        "checks": {
+          "secret_invalid": "Qwen anahtarı kabul etmedi. Anahtarı Singapur bölgesinden yeniden kopyalayıp girin."
+        }
+      },
       "gemini": {
         "name": "Gemini",
         "description": "Google'ın metin servisi.",
@@ -13192,18 +13222,25 @@
         "checks": {
           "secret_invalid": "Deneme servisi anahtarı kabul etmedi."
         }
+      },
+      "platform": {
+        "name": "Platform kredisi",
+        "description": "Kendi anahtarınız olmadan, platformun kredisiyle."
       }
     },
     "data_note": {
       "deepseek": "Veri Çin'de işlenir ve saklanır. DeepSeek, gizlilik metninde verinin model eğitiminde kullanılabileceğini yazar.",
       "minimax": "Verinin nerede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş.",
+      "qwen": "Veri Singapur'da saklanır, Çin anakarası dışındaki düğümlerde işlenir. Alibaba ayrıca onay verilmeden içeriği model eğitiminde kullanmaz.",
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
       "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
-      "fake": "Veri bu bilgisayardan çıkmaz."
+      "fake": "Veri bu bilgisayardan çıkmaz.",
+      "platform": "İçerik, platformun anlaşmalı yapay zekâ servislerinden birine gönderilir; platform içeriği saklamaz. Bu servisler mağaza sözleşmesinde yazılıdır."
     },
     "data_detail": {
       "deepseek": "DeepSeek gönderilen metni Çin Halk Cumhuriyeti'ndeki sunucularında işler ve saklar. Gizlilik metninde modellerini geliştirmek (eğitmek) de verinin kullanım amaçları arasında sayılır. Mağazanızdan yalnız ürün, kategori, sayfa gibi vitrinde yayımlanan içerik gider.",
       "minimax": "MiniMax'ın uluslararası platformu kullanılır. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı servisin belgelerinden doğrulanamadı; bağlamadan önce MiniMax'ın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
+      "qwen": "Alibaba Cloud Model Studio'nun Singapur bölgesi (\"International\" kapsamı) kullanılır: istek Singapur'da saklanır, Çin anakarası dışındaki düğümlerde işlenir. Alibaba'nın saklama politikasına göre istek ve yanıt en çok 30 gün tutulur; ayrıca onay verilmeden model eğitiminde kullanılmaz. Anahtar yalnız oluşturulduğu bölgede çalışır: Singapur bölgesinden alınmalıdır. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "photoroom": "Photoroom görseli ABD'deki sunucularında işler ve yanıtı verdikten sonra siler. Görsellerin model eğitiminde kullanılıp kullanılmadığı Photoroom'un sayfalarında çelişkili anlatılıyor; bağlamadan önce kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
@@ -13232,7 +13269,8 @@
       "product_faq": "SSS taslağı",
       "post_draft": "Blog yazısı taslağı",
       "campaign_email": "E-posta bülteni metni",
-      "campaign_sms": "SMS kampanya metni"
+      "campaign_sms": "SMS kampanya metni",
+      "image_scene": "Sahneye yerleştirme"
     },
     "options": {
       "short": "Kısa",
@@ -13293,7 +13331,9 @@
       },
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · sınır yok",
-      "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır."
+      "ceilingNote": "Sınıra ulaşınca yeni öneri istenemez; günlük sınır gece yarısı sıfırlanır.",
+      "platformCredits_one": "Bu ay platform kredisinden {{amount}} kredi harcandı.",
+      "platformCredits_other": "Bu ay platform kredisinden {{amount}} kredi harcandı."
     },
     "suggest": {
       "button": "Yapay zekâ ile öner",
@@ -13334,7 +13374,13 @@
       "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
       "reviews_off": "Yorum ve sorularda yapay zekâ kapalı. Ayarlar › Yapay zekâ sayfasından açılabilir.",
       "feature_off": "Bu özellik mağazada kapalı.",
-      "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı."
+      "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı.",
+      "credits_exhausted": "Krediniz bitti.",
+      "credits_daily_cap": "Bugünkü sınıra ulaşıldı. Yarın yeniden deneyebilirsiniz.",
+      "platform_busy": "Şu an yoğun, biraz sonra yeniden deneyin.",
+      "platform_unavailable": "Platform kredisi şu an kullanılamıyor.",
+      "credits_order_open": "Bekleyen bir talebiniz var.",
+      "credits_pack_unknown": "Bu paket artık sunulmuyor; listeyi yenileyin."
     },
     "background": {
       "button": "Görseli düzenle",
@@ -13581,6 +13627,40 @@
       "added": "{{name}} eklendi",
       "note": "Tıkladığınız öneri alana eklenir; kaydetmek size kalır.",
       "close": "Önerileri kapat"
+    },
+    "credits": {
+      "title": "Platform kredisi",
+      "description": "Yapay zekâ işleri kendi anahtarınız olmadan, bu krediyle çalışır.",
+      "plan": "Bu ay {{remaining}} kredi kaldı",
+      "planRenews": "{{date}} tarihinde yenilenir",
+      "planUsedUp": "Bu ayın kredisi bitti; {{date}} tarihinde yenilenir.",
+      "planOf": "Bu ay {{remaining}} / {{granted}} kredi kaldı",
+      "planBar": "Bu ayın kalan kredisi",
+      "planBarValue": "{{granted}} krediden {{remaining}} kredi kaldı",
+      "purchased": "Yüklenen kredi: {{remaining}}",
+      "purchasedExpires": "Son kullanma: {{date}}",
+      "exhausted": "Krediniz bitti.",
+      "dailyReached": "Bugünkü sınıra ulaşıldı, yarın yenilenir.",
+      "pending": "Talebiniz alındı; ödeme onaylanınca krediniz yüklenir.",
+      "requested": "Talebiniz alındı. Ödeme onaylanınca krediniz yüklenir.",
+      "pendingWait": "Bekleyen talebiniz var; ödeme onaylanınca krediniz yüklenir.",
+      "pendingPack": "{{credits}} kredi · {{amount}}",
+      "noPacks": "Kredi yüklemek için bize yazın.",
+      "topUp": "Kredi yükle",
+      "tellOwner": "Mağaza sahibine haber verin.",
+      "cost": "{{credits}} kredi",
+      "costEach": "Öğe başına {{credits}} kredi; en çok {{total}} kredi.",
+      "costs": "Bir işlem kaç kredi?",
+      "costsTask": "İş",
+      "costsCredits": "Kredi",
+      "dialog": {
+        "title": "Kredi yükle",
+        "description": "Talebiniz bize ulaşır; ödeme bilgisi için sizinle iletişime geçeriz. Ödeme onaylanınca kredi yüklenir.",
+        "packs": "Paket",
+        "packCredits": "{{credits}} kredi",
+        "submit": "Talep gönder",
+        "refresh": "Listeyi yenile"
+      }
     }
   }
 }

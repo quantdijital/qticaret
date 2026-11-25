@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { aiServicesQuery } from "@/features/ai/api/ai"
+import { AiCreditTopupDialog } from "@/features/settings/components/ai-credit-topup-dialog"
 import type { AiEntity } from "@/features/ai/api/suggestions"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
+import { AiCreditCost } from "@/features/ai/components/ai-credit-cost"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { AiSuggestionBox } from "@/features/ai/components/ai-suggestion-box"
 import { hintClosed } from "@/features/ai/hint-state"
@@ -66,6 +68,7 @@ export function AiButton({
   const [open, setOpen] = useState(false)
   const suggestion = useAiSuggestion(task, entity)
   const [hintGone, setHintGone] = useState(hintClosed)
+  const [topUp, setTopUp] = useState(false)
 
   if (!view?.allowed) {
     return null
@@ -142,41 +145,58 @@ export function AiButton({
   }
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      {trigger}
-      <PopoverContent
-        align="end"
-        aria-label={name}
-        className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-3"
-      >
-        {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
-        <AiServicePicker
-          services={usable}
-          value={service}
-          disabled={suggestion.state.status === "loading"}
-          onChange={(id) => {
-            setPicked(id)
-            ask({ service: id, option })
+    <>
+      <Popover open={open} onOpenChange={onOpenChange}>
+        {trigger}
+        <PopoverContent
+          align="end"
+          aria-label={name}
+          className="flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-3"
+        >
+          {note ? <p className="text-xs text-muted-foreground">{note}</p> : null}
+          {/* On the platform's credits a task dearer than one credit says its price (adr/0085 §5);
+              a role that may not read the wallet never asks for it (its run-out words come from the error key) */}
+          <AiCreditCost tasks={[task]} service={service} />
+          <AiServicePicker
+            services={usable}
+            value={service}
+            disabled={suggestion.state.status === "loading"}
+            onChange={(id) => {
+              setPicked(id)
+              ask({ service: id, option })
+            }}
+          />
+          <AiSuggestionBox
+            state={suggestion.state}
+            options={offered}
+            option={option}
+            onOption={(next) => {
+              setOption(next)
+              ask({ option: next })
+            }}
+            onUse={(candidate) => void use(candidate)}
+            onRetry={() => {
+              ask({ option })
+            }}
+            onTryWith={tryWith}
+            onDismiss={() => {
+              onOpenChange(false)
+            }}
+            onTopUp={() => {
+              // The dialog lives beside the layer, which closes: it would take the dialog with it
+              onOpenChange(false)
+              setTopUp(true)
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+      {topUp ? (
+        <AiCreditTopupDialog
+          onClose={() => {
+            setTopUp(false)
           }}
         />
-        <AiSuggestionBox
-          state={suggestion.state}
-          options={offered}
-          option={option}
-          onOption={(next) => {
-            setOption(next)
-            ask({ option: next })
-          }}
-          onUse={(candidate) => void use(candidate)}
-          onRetry={() => {
-            ask({ option })
-          }}
-          onTryWith={tryWith}
-          onDismiss={() => {
-            onOpenChange(false)
-          }}
-        />
-      </PopoverContent>
-    </Popover>
+      ) : null}
+    </>
   )
 }

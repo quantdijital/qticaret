@@ -8,6 +8,8 @@ import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
+import { canManageAiCredits } from "@/features/ai-credits/api/queries"
+import { AiCreditsTab } from "@/features/ai-credits/components/ai-credits-tab"
 import { useMe } from "@/features/auth/api"
 import { SubscriptionTab } from "@/features/billing/components/subscription-tab"
 import { UsageHealthTab } from "@/features/monitoring/components/usage-health-tab"
@@ -43,6 +45,16 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
   const me = useMe()
   const setup: PageTab[] = canManageShops(me?.role)
     ? [{ key: "setup", label: t("setup.title"), content: <SetupTab shop={shop} /> }]
+    : []
+  // adr/0085 §5: the owner's alone (route-table-ai.ts)
+  const aiCredits: PageTab[] = canManageAiCredits(me?.role)
+    ? [
+        {
+          key: "ai-credits",
+          label: t("aiCredits.tab.label"),
+          content: <AiCreditsTab shop={shop} />,
+        },
+      ]
     : []
   return (
     <PageTabs
@@ -82,6 +94,7 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
         { key: "usage", label: t("usage.tab"), content: <UsageHealthTab shop={shop} /> },
         // Ek C18: what it runs and its target release, every role's (the change by role)
         { key: "version", label: t("version.tab"), content: <VersionCard shop={shop} /> },
+        ...aiCredits,
         ...setup,
         {
           key: "notes",

@@ -1,6 +1,25 @@
 import type { IncomingMessage } from "node:http"
 import { Readable } from "node:stream"
-import { MAX_CONCURRENT_DRAINS, activeDrains, drainBody } from "../drain"
+import { DRAIN_MAX_MS, MAX_CONCURRENT_DRAINS, activeDrains, drainBody } from "../drain"
+
+/**
+ * Whether `promise` has settled before the event loop's next turn: an answer
+ * given at once has, one that waits for a body, a timer or an event has not.
+ * No clock, so a busy CI runner cannot fail it (adr/0081).
+ */
+async function settledAtOnce(promise: Promise<unknown>): Promise<boolean> {
+  let settled = false
+  void promise.then(
+    () => {
+      settled = true
+    },
+    () => {
+      settled = true
+    }
+  )
+  await new Promise((resolve) => setImmediate(resolve))
+  return settled
+}
 
 /** A request body that sends `bytes` now and then nothing more until `end()`. */
 function body(declared: number, bytes = 0) {
@@ -43,7 +62,9 @@ describe("draining a refused upload's body (security review B1, B4)", () => {
     const { req } = body(2 * MB, MB)
     const started = Date.now()
     await expect(drainBody(req, { maxBytes: 4 * MB, maxMs: 50 })).resolves.toBe(false)
-    expect(Date.now() - started).toBeLessThan(1_000)
+    // Its own 50 ms, not the default 30 s: the bound leaves a loaded runner
+    // seconds of slack and is still far below the default
+    expect(Date.now() - started).toBeLessThan(DRAIN_MAX_MS / 10)
     expect(activeDrains()).toBe(0)
   })
 
@@ -68,9 +89,13 @@ describe("draining a refused upload's body (security review B1, B4)", () => {
     const held = Array.from({ length: MAX_CONCURRENT_DRAINS }, () => body(2 * MB))
     const waiting = held.map(({ req }) => drainBody(req, { maxBytes: 4 * MB }))
     expect(activeDrains()).toBe(MAX_CONCURRENT_DRAINS)
-    const started = Date.now()
-    await expect(drainBody(body(2 * MB).req, { maxBytes: 4 * MB })).resolves.toBe(false)
-    expect(Date.now() - started).toBeLessThan(100)
+    // Answered before the loop turns, and its body never read: no clock
+    const extra = body(2 * MB)
+    const refused = drainBody(extra.req, { maxBytes: 4 * MB })
+    expect(await settledAtOnce(refused)).toBe(true)
+    await expect(refused).resolves.toBe(false)
+    expect(extra.stream.readableFlowing).toBeNull()
+    expect(extra.stream.listenerCount("end")).toBe(0)
     for (const { end } of held) {
       end()
     }

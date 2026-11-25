@@ -31,6 +31,7 @@ describe("AI registries (adr/0071 §2)", () => {
         "minimax",
         "gemini",
         "photoroom",
+        "qwen",
       ])
       expect(findAiService("fake", env)).toBeNull()
     }
@@ -136,6 +137,7 @@ describe("AI registries (adr/0071 §2)", () => {
       minimax: ["text", "vision"],
       gemini: ["text", "vision", "image_edit"],
       photoroom: ["image_edit"],
+      qwen: ["text", "vision"],
     })
     // No result address is fetched from any service yet: both answer with the bytes
     for (const service of aiServices("production")) {
@@ -244,8 +246,13 @@ describe("service selection (adr/0071 §4)", () => {
     expect(usable(connected("deepseek", "gemini"), { ownKeys: false })).toEqual([])
     const platform: AiService = { ...FAKE_SERVICE, id: "platform", funding: "platform_credit" }
     const withPlatform = [...services, { ...platform, credentialProvider: "platform" }]
+    // A task the credits price (adr/0085 K4): the key test is not one
+    const priced = findAiTask("seo_title", "test")
+    if (!priced) {
+      throw new Error("no seo_title task")
+    }
     const open = (flags: { ownKeys: boolean; platformCredits?: boolean }) =>
-      usableServices(TEST_TASK, connected("deepseek", "platform"), flags, withPlatform).map(
+      usableServices(priced, connected("deepseek", "platform"), flags, withPlatform).map(
         (each) => each.id
       )
     expect(open({ ownKeys: false, platformCredits: true })).toEqual(["platform"])

@@ -10,7 +10,7 @@ const sdkFetch = vi.hoisted(() => vi.fn())
 const can = vi.hoisted(() => ({ owner: true }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: sdkFetch } } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.owner }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => can.owner, useStaff: () => undefined }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>

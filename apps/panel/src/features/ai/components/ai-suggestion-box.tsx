@@ -6,7 +6,8 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { AiCandidates } from "@/features/ai/components/ai-candidates"
 import { AiTryOthers } from "@/features/ai/components/ai-try-others"
-import { aiFailureText, serviceName } from "@/features/ai/failure-text"
+import { AiCreditsExhausted } from "@/features/ai/components/ai-credits-exhausted"
+import { aiFailureText, failureCodeOf, serviceName } from "@/features/ai/failure-text"
 import type { AiSuggestionState } from "@/features/ai/use-ai-suggestion"
 
 export interface AiSuggestionBoxProps {
@@ -20,6 +21,8 @@ export interface AiSuggestionBoxProps {
   onRetry: () => void
   onTryWith: (service: string) => void
   onDismiss: () => void
+  /** The credits ran out: the owner's "Kredi yükle" opens the caller's top-up dialog; left out: no button. */
+  onTopUp?: (() => void) | undefined
   /** A structured suggestion (a product card) drawn by its task; left out: the text, line by line. */
   preview?: ReactNode
 }
@@ -43,6 +46,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
     onTryWith,
     onDismiss,
     preview,
+    onTopUp,
   } = props
   const { t } = useTranslation()
   // The pick belongs to one suggestion: a new one starts at its first candidate
@@ -124,6 +128,9 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
           <p className="text-sm text-destructive">
             {aiFailureText(t, state.failure, state.service)}
           </p>
+        ) : null}
+        {state.status === "error" && failureCodeOf(state.failure) === "ai.credits_exhausted" ? (
+          <AiCreditsExhausted onTopUp={onTopUp} />
         ) : null}
       </div>
 

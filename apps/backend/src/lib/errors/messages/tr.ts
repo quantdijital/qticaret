@@ -836,6 +836,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.input_unsupported": "Bu görselin türü ya da boyutu bu iş için uygun değil.",
   "ai.daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyin.",
   "ai.credits_exhausted": "Yapay zekâ krediniz bitti. Devam etmek için kredi yükleyin.",
+  "ai.credits_daily_cap": "Bugünkü kredi sınırına ulaşıldı. Yarın yeniden deneyin.",
+  "ai.platform_unavailable": "Platform kredisi şu an kullanılamıyor. Biraz sonra yeniden deneyin.",
+  "ai.platform_busy": "Şu anda çok fazla yapay zekâ işi sürüyor. Biraz sonra yeniden deneyin.",
+  "ai.credits_order_open":
+    "Bekleyen bir kredi yükleme talebiniz var. Sonuçlanınca yenisini açabilirsiniz.",
+  "ai.credits_pack_unknown": "Bu kredi paketi artık sunulmuyor. Listeden başka bir paket seçin.",
   "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",
@@ -889,6 +895,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "DeepSeek bu API anahtarını kabul etmedi. Anahtarı DeepSeek platformundaki API anahtarları sayfasından yeniden kopyalayın.",
   "minimax.secret_invalid":
     "MiniMax bu API anahtarını kabul etmedi. Anahtarı MiniMax platformundaki API anahtarları sayfasından yeniden kopyalayın.",
+  "qwen.secret_invalid":
+    "Qwen bu API anahtarını kabul etmedi. Anahtarı Alibaba Model Studio'nun (Singapur bölgesi) API anahtarları sayfasından yeniden kopyalayın.",
   "gemini.secret_invalid":
     "Gemini bu API anahtarını kabul etmedi. Anahtarı Google AI Studio'daki API anahtarları sayfasından yeniden kopyalayın.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",

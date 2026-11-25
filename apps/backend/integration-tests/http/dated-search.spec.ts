@@ -328,13 +328,20 @@ medusaIntegrationTestRunner({
       for (const { productId } of [promoted, coded]) {
         await staff(`/admin/products/${productId}`, { categories: [{ id: categoryId }] })
       }
-      const offer = (code: string, automatic: boolean, value: number, productId: string) =>
+      const offer = (
+        code: string,
+        automatic: boolean,
+        value: number,
+        productId: string,
+        campaign?: string
+      ) =>
         staff("/admin/promotions", {
           code,
           type: "standard",
           status: "active",
           is_automatic: automatic,
           is_tax_inclusive: true,
+          ...(campaign ? { campaign_id: campaign } : {}),
           application_method: {
             type: "percentage",
             target_type: "items",
@@ -345,6 +352,14 @@ medusaIntegrationTestRunner({
         })
       expect((await offer("TUR20", true, 20, promoted.productId)).status).toBe(200)
       expect((await offer("TURKOD30", false, 30, coded.productId)).status).toBe(200)
+      // adr/0076 Ek 2026-11-25: an automatic one on a campaign with a budget is the cart's alone
+      const budget = await staff("/admin/campaigns", {
+        name: "Sınırlı",
+        campaign_identifier: "sinirli-tur",
+        budget: { type: "usage", limit: 100 },
+      })
+      const campaignId = (budget.data as { campaign: { id: string } }).campaign.id
+      expect((await offer("TURBUTCE25", true, 25, coded.productId, campaignId)).status).toBe(200)
       // Dates no other test asks: a date search's products and prices are kept 30 seconds
       const tarih = `${dayAhead(3)}_${dayAhead(19)}`
       const cards = async (extra: string) =>
@@ -369,7 +384,7 @@ medusaIntegrationTestRunner({
         before: 1500,
         in_range: true,
       })
-      // A code's promotion stays in the cart: the card is as it was
+      // A code's promotion, and a budgeted one, stay in the cart: the card is as it was
       expect(plain[coded.productId]?.booking).toMatchObject({ from_price: 1500 })
       expect(plain[coded.productId]?.booking).not.toHaveProperty("before")
       // The index and the date search filter by the price the card says
@@ -408,6 +423,8 @@ medusaIntegrationTestRunner({
       expect(shown.jsonld).toBe("1200.00")
       // And the cart charges it: a guest's place on that departure, through the booking route
       expect(await bookedTotal(promoted.variantId, promoted.slotIds[0] ?? "")).toBe(1200)
+      // The budgeted one is the cart's: 1.500 less 25%, though no surface above shows it
+      expect(await bookedTotal(coded.variantId, coded.slotIds[0] ?? "")).toBe(1125)
     })
   },
 })

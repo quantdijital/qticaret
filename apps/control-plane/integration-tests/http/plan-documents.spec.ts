@@ -19,6 +19,8 @@ const FLAG = "test.platform_sample"
 // adr/0069: the first business flag, on by default
 const VIDEOS = "catalog.product_videos"
 const AI_OWN_KEYS = "ai.own_keys"
+// adr/0085: AI with the platform's credits, off by default
+const AI_PLATFORM_CREDITS = "ai.platform_credits"
 
 interface Detail {
   features: { key: string; value: boolean; package?: boolean; override?: boolean }[]
@@ -134,11 +136,13 @@ medusaIntegrationTestRunner({
       expect(detail.features).toEqual([
         expect.objectContaining({ key: VIDEOS, value: true }),
         expect.objectContaining({ key: AI_OWN_KEYS, value: true }),
+        expect.objectContaining({ key: AI_PLATFORM_CREDITS, value: false }),
         expect.objectContaining({ key: FLAG, package: false, override: true, value: true }),
       ])
       expect(detail.platform_flags).toEqual([
         { key: VIDEOS, default: true },
         { key: AI_OWN_KEYS, default: true },
+        { key: AI_PLATFORM_CREDITS, default: false },
         { key: FLAG, default: true },
       ])
 

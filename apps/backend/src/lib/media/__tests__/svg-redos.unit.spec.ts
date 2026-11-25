@@ -1,7 +1,28 @@
+import type * as Jsdom from "jsdom"
 import { SVG_MAX_BYTES } from "../svg"
 import { SvgRefusal, cleanSvg } from "../svg-clean"
 import { cleanDeclarations, cleanStyleSheet, valueReachesOut } from "../svg-css"
 import { looksLikeSvg, plainNumber, prescan } from "../svg-scan"
+
+// Every parse through a jsdom window's DOMParser (DOMPurify's too), counted:
+// a refusal before parsing shows as none, with no clock (as in svg.unit.spec.ts)
+const mockParses = { count: 0 }
+jest.mock("jsdom", () => {
+  const actual = jest.requireActual<typeof Jsdom>("jsdom")
+  class CountedJsdom extends actual.JSDOM {
+    constructor(...args: ConstructorParameters<typeof actual.JSDOM>) {
+      super(...args)
+      class CountedParser extends this.window.DOMParser {
+        override parseFromString(...input: Parameters<DOMParser["parseFromString"]>): Document {
+          mockParses.count += 1
+          return super.parseFromString(...input)
+        }
+      }
+      this.window.DOMParser = CountedParser
+    }
+  }
+  return { ...actual, JSDOM: CountedJsdom }
+})
 
 /**
  * The security review's payloads (2026-11-16), each of which held the old
@@ -15,12 +36,16 @@ import { looksLikeSvg, plainNumber, prescan } from "../svg-scan"
  * takes a millisecond or less, the old patterns seconds or for ever, and a
  * busy shared CI runner can pause any one call for hundreds of ms (GC, its
  * neighbours: 388 ms seen on a 100 ms limit). Two seconds tells them apart;
- * that a read is linear the size test shows with no clock limit. YENİ-4
- * keeps a second on purpose: there the cleaner must refuse before it
- * parses, and a parse of that tree alone takes more (1.3 s and up).
+ * that a read is linear the size test shows with no clock limit. YENİ-4,
+ * where the cleaner must refuse before it parses, counts the parses
+ * instead (none).
  */
 
 const HANG_MS = 2_000
+// The whole cleaner on a 200 KB generated input parses it, cleans it with
+// DOMPurify and reads the result back: up to 1.5 s on an idle machine, past
+// 2 s with three test workers beside it (adr/0081). A hang is far more
+const CLEAN_HANG_MS = 10_000
 
 const timed = <T>(run: () => T): { value: T; ms: number } => {
   const started = performance.now()
@@ -73,9 +98,11 @@ describe("the review's payloads, under a hard time limit", () => {
     const text = `<svg><!-->${"<a>".repeat(4_000)}`
     expect(prescan(text)).toBe("upload.svg_too_complex")
     expect(prescan(`<svg><!--->${"<g>".repeat(100)}`)).toBe("upload.svg_too_complex")
-    const { value, ms } = timed(() => cleaned(text))
-    expect(value).toBe("upload.svg_too_complex")
-    expect(ms).toBeLessThan(1_000)
+    // Refused before the cleaner parses (a parse of this tree alone takes
+    // 1.3 s and up): counted, not timed
+    mockParses.count = 0
+    expect(cleaned(text)).toBe("upload.svg_too_complex")
+    expect(mockParses.count).toBe(0)
   })
 
   it.each([
@@ -245,7 +272,7 @@ describe("generated inputs (fixed seed): an answer, never a hang", () => {
         "upload.svg_too_complex",
         "upload.svg_too_large",
       ]).toContain(value)
-      expect(ms).toBeLessThan(HANG_MS)
+      expect(ms).toBeLessThan(CLEAN_HANG_MS)
     }
   })
 })

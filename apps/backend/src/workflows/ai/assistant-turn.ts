@@ -39,6 +39,7 @@ export const assistantTurnWorkflow = createWorkflow(
         user_id: input.user_id,
         role: access.role,
         service: access.service,
+        operation: access.operation,
         features: access.features,
         conversation_id: input.conversation_id ?? null,
         message: input.message,

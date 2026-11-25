@@ -48,9 +48,13 @@ export type BillingPeriod = (typeof BILLING_PERIODS)[number]
 /**
  * How the shop applies a limit (adr/0061 §5.3): `block` answers 403
  * `plan.limit_reached` on the write that would pass it; `warn` never blocks
- * (orders), it warns at 80% and 100%; `later` is not enforced yet.
+ * (orders), it warns at 80% and 100%; `later` is not enforced yet. `grant`
+ * is not a cap but what the package gives each month (the AI platform
+ * credits, adr/0085 K5): the shop counts no use of it and refuses nothing,
+ * the control plane's wallet spends it. A grant is a whole number, never
+ * "no limit"; a package or document without it grants 0.
  */
-export type LimitEnforcement = "block" | "warn" | "later"
+export type LimitEnforcement = "block" | "warn" | "later" | "grant"
 
 export interface LimitDefinition {
   unit: "count" | "mb"
@@ -66,8 +70,29 @@ export const LIMIT_KEYS = [
   "storage_mb",
   "llm_credits_per_month",
   "custom_domains",
+  "ai_free_credits_per_month",
 ] as const
 export type LimitKey = (typeof LIMIT_KEYS)[number]
+
+/** The keys whose enforcement is `grant` (a test holds this list to the registry). */
+export const GRANT_LIMIT_KEYS = ["ai_free_credits_per_month"] as const satisfies readonly LimitKey[]
+export type GrantLimitKey = (typeof GRANT_LIMIT_KEYS)[number]
+
+/**
+ * The most a grant may be: "never unlimited" means little while a billion
+ * passes, and a wallet is filled with this number every month (adr/0085).
+ */
+export const GRANT_LIMIT_MAX = 100_000
+
+/** The keys that cap something the shop counts: every one but the grants. */
+export type CountedLimitKey = Exclude<LimitKey, GrantLimitKey>
+
+export const isGrantLimit = (key: LimitKey): key is GrantLimitKey =>
+  (GRANT_LIMIT_KEYS as readonly LimitKey[]).includes(key)
+
+export const COUNTED_LIMIT_KEYS: readonly CountedLimitKey[] = LIMIT_KEYS.filter(
+  (key): key is CountedLimitKey => !isGrantLimit(key)
+)
 
 export const LIMIT_REGISTRY: Readonly<Record<LimitKey, LimitDefinition>> = {
   products: { unit: "count", monthly: false, enforcement: "block" },
@@ -77,6 +102,8 @@ export const LIMIT_REGISTRY: Readonly<Record<LimitKey, LimitDefinition>> = {
   llm_credits_per_month: { unit: "count", monthly: true, enforcement: "block" },
   // Custom domains arrive with F16.7
   custom_domains: { unit: "count", monthly: false, enforcement: "later" },
+  // AI platform credits given each month (adr/0085 K5): renewed, never carried over
+  ai_free_credits_per_month: { unit: "count", monthly: true, enforcement: "grant" },
 }
 
 /** A share of a limit at which the panel warns (adr/0061 §5.3). */

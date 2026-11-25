@@ -3,9 +3,10 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
-import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
+import { formatCount, formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { PackageFeature, PaymentRecord, PlanSummary } from "@/features/settings/api/plan"
+import { platformCredits } from "@/features/settings/plan-rules"
 import { periodLabel } from "@/features/settings/subscription-rules"
 
 /** The platform flags the page can name; a key it does not know yet is left out, not shown raw. */
@@ -64,6 +65,7 @@ export function PlanFacts({
       ? null
       : `${formatMoney(billing.price / 100, billing.currency)} ${t(`plan.hero.per.${cycle}`)}`
   const features = namedFeatures(plan.features)
+  const credits = platformCredits(plan)
   return (
     <div className="flex flex-col gap-4 border-t bg-muted/40 px-5 py-4 sm:px-6">
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-4">
@@ -95,7 +97,7 @@ export function PlanFacts({
           {periodLabel(plan.period)}
         </Fact>
       </dl>
-      {features.length > 0 ? (
+      {features.length > 0 || credits !== null ? (
         <div className="flex flex-wrap items-center gap-2 border-t pt-3">
           <span className="text-[12px] font-medium text-muted-foreground">
             {t("plan.details.includes")}
@@ -123,6 +125,17 @@ export function PlanFacts({
                 </li>
               )
             })}
+            {credits === null ? null : (
+              <li className="inline-flex h-7 items-center gap-1.5 rounded-full border bg-background px-2.5 text-[13px] font-medium">
+                <Check className="size-3.5 text-success" aria-hidden="true" />
+                {credits > 0
+                  ? t("plan.details.feature.platformCreditsMonthly", {
+                      value: formatCount(credits),
+                    })
+                  : t("plan.details.feature.platformCredits")}
+                <span className="sr-only">{t("plan.details.included")}</span>
+              </li>
+            )}
           </ul>
         </div>
       ) : null}

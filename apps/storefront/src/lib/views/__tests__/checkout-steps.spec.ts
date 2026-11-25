@@ -168,5 +168,9 @@ describe("checkout steps from the cart", () => {
 
     expect(shipped?.freeShipping).not.toBeNull()
     expect(unshipped?.freeShipping).toBeNull()
+    // Nor the drawer's "shipping is worked out at the payment step"
+    expect(shipped).not.toHaveProperty("note")
+    expect(unshipped?.note).toBe(t("cart.drawer_note_unshipped"))
+    expect(unshipped?.note).not.toMatch(/Kargo/)
   })
 })

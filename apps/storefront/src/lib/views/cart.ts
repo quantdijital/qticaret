@@ -69,6 +69,8 @@ export function cartLinesOf(
       detail: line.variant_title ?? line.subtitle,
       quantity: line.quantity,
       total: formatLira(taxNote ? lineNetOf(line) : line.total),
+      // Before the promotions' adjustments only: a price list's sale is already the unit price,
+      // so the theme reads it as "Promosyon indirimi", never as a price before (adr/0076 Ek 2026-11-25)
       original:
         !taxNote && differs(line.original_total, line.total)
           ? formatLira(line.original_total)
@@ -101,11 +103,13 @@ export function miniCartOf(
     return null
   }
   const net = vatExcluded ? netTotalsOf(cart) : null
+  const ships = cartShips(cart.items)
   return {
     lines: cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
     subtotal: formatLira(net ? net.net / 100 : cart.item_total),
-    // Nothing to ship (adr/0076 §6): no free shipping meter
-    freeShipping: cartShips(cart.items) ? freeShippingOf(cart.item_total, threshold, t) : null,
+    // Nothing to ship (adr/0076 §6): no free shipping meter, no word of shipping
+    freeShipping: ships ? freeShippingOf(cart.item_total, threshold, t) : null,
+    ...(ships ? {} : { note: t("cart.drawer_note_unshipped") }),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
     ...(checkoutBlocked ? { checkoutBlocked } : {}),

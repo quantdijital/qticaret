@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import type { PlanLimits } from "@qticaret/types/control-plane"
 import { AI_MODULE } from "../../src/modules/ai"
 import type AiModuleService from "../../src/modules/ai/service"
@@ -42,16 +42,18 @@ export interface AiAnswer {
 export async function pushPlan(
   http: HttpClient,
   ownKeys: boolean,
-  limits: Partial<PlanLimits> = {}
+  limits: Partial<PlanLimits> = {},
+  /** Other platform flags the package sets (e.g. `ai.platform_credits`). */
+  flags: Record<string, boolean> = {}
 ): Promise<void> {
-  const all = Object.fromEntries(LIMIT_KEYS.map((name) => [name, null])) as PlanLimits
+  const all = { ...NO_LIMITS }
   const pushed = await settle(
     http.post(
       "/hooks/control-plane/plan",
       signed(
         doc(nextSerial(), {
           limits: { ...all, ...limits },
-          platform_flags: { [AI_OWN_KEYS]: ownKeys },
+          platform_flags: { ...flags, [AI_OWN_KEYS]: ownKeys },
         })
       )
     )

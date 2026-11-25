@@ -50,6 +50,14 @@ export const AI_CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
+  // Alibaba Model Studio, Singapore region > API keys (a key works only in its own region)
+  qwen: {
+    settings: z.object({}).strict(),
+    secrets: ["api_key"],
+    secret: apiKey,
+    identity: [],
+    optional: [],
+  },
   // The fake AI service's account (`lib/ai` registry): development and tests only, see
   // `LOCAL_ONLY_PROVIDERS`. Its check never leaves the machine
   fake: {

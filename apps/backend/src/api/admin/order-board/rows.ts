@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { LIFECYCLE_FIELDS, lifecycleOf, turkishDayStart } from "../../../lib/dashboard"
-import { paymentFilterOf, shippingFilterOf } from "../../../lib/dashboard/board-filters"
+import { oneOf, paymentFilterOf, shippingFilterOf } from "../../../lib/dashboard/board-filters"
 import type { LifecycleOrder } from "../../../lib/dashboard"
 import { createSingleFlight } from "../../../lib/cache"
 import { PAYMENT_METHOD_FIELDS, paymentMethodOf } from "../../../lib/orders/payment-method"
@@ -39,7 +39,7 @@ function createdWithin(filters: Pick<OrderFilters, "from" | "to">) {
 
 /**
  * The orders where the money, the method, the carrier and the parcel stand
- * as asked (F12.3), before the stages are counted: the tabs count what the
+ * as asked (F12.3; any of a filter's choices), before the stages are counted: the tabs count what the
  * filters leave. Options and parcels are read only when their filter asks.
  */
 async function filtered(
@@ -49,16 +49,16 @@ async function filtered(
 ): Promise<StageRow[]> {
   let kept = rows
   if (filters.payment) {
-    kept = kept.filter((row) => paymentFilterOf(row) === filters.payment)
+    kept = kept.filter((row) => oneOf(filters.payment, paymentFilterOf(row)))
   }
   if (filters.method) {
-    kept = kept.filter((row) => paymentMethodOf(row) === filters.method)
+    kept = kept.filter((row) => oneOf(filters.method, paymentMethodOf(row)))
   }
   if (filters.carrier) {
     const deliveries = await deliveriesOf(scope, kept)
     kept = kept.filter((row) => {
       const delivery = deliveries.get(row.id)
-      return delivery ? (delivery.carrier ?? "own") === filters.carrier : false
+      return delivery ? oneOf(filters.carrier, delivery.carrier ?? "own") : false
     })
   }
   if (filters.shipping) {
@@ -66,9 +66,11 @@ async function filtered(
       scope,
       kept.map((row) => row.id)
     )
-    kept = kept.filter(
-      (row) =>
-        shippingFilterOf(lifecycleOf(row), parcels.get(row.id)?.status ?? null) === filters.shipping
+    kept = kept.filter((row) =>
+      oneOf(
+        filters.shipping,
+        shippingFilterOf(lifecycleOf(row), parcels.get(row.id)?.status ?? null)
+      )
     )
   }
   return kept

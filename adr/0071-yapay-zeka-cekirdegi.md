@@ -67,6 +67,7 @@ Yerleşim:
 | MiniMax | `text`, `image_generate`, `video` | OpenAI uyumlu metin ucu ve bölgesel taban adresleri (uluslararası ve Çin ayrı); görsel üretim ve fotoğraftan video uçları, uzak iş sorgulama biçimi; görsel okuma ve görsel düzenleme olup olmadığı; sonuç dosyalarının indirildiği alan adları |
 | Gemini | `text`, `vision`, `image_edit`, `image_generate`, `video` | OpenAI uyumluluk ucunun kapsamı (metin ve görsel girdi); görsel düzenleme ve üretimin yalnız kendi API'siyle mi sunulduğu; video üretiminin aynı anahtarla ve hangi ücret katmanında açık olduğu; anahtarın başlıkla gönderilmesi; ücretsiz katmanda verinin eğitimde kullanımı; üretilen görseldeki filigran |
 | Photoroom | `image_edit` | arka plan temizleme ve düzenleme uçları, alan adları, başlık adı; deneme (sandbox) kipi; beyaz zemin ve sahne parametreleri; çıktı boyut sınırları |
+| Qwen (Alibaba Model Studio, Singapur; 2026-11-25'te eklendi) | `text`, `vision` | Doğrulandı 2026-11-25: yalnız Singapur bölgesinin ortak alan adı (`dashscope-intl.aliyuncs.com`, "International" kapsamı, Çin anakarası düğümleri yok; "Global" kapsamı ve hesap kimlikli çalışma alanı adresi kullanılmaz); `qwen3.8-flash`; düşünme kipi varsayılan açık, `enable_thinking: false`; çıktı tavanı `max_completion_tokens`; yalnız `json_object`; araç çağırmada `tool_choice: "required"` yok. Kayıt: `lib/ai/registry/service-qwen.ts` |
 
 ### 3. Servis bağlantısı: `integration-credentials`, yeni tablo yok
 
@@ -141,6 +142,8 @@ Sunucuda tek saf işlev karar verir (`lib/ai/select.ts`): `usable(task) = bağl�
 ### 7. Ödeme yolları
 
 **(a) Kendi anahtarım (ilk).** Çağrı mağazanın mühürlü anahtarıyla, mağazanın servis hesabına yazılır. Platform yalnız sayar ve tahmini maliyeti gösterir.
+
+> **Güncelleme 2026-11-25:** bu bölümün yerini adr/0085 aldı: defter ve anahtarlar üst panelde, mağaza çağrıyı ağ geçidinden geçirir; aşağıdaki `ai_credit_entry` mağaza tarafında yapılmaz.
 
 **(b) Platform kredisi (sonra; veri modeli şimdi).** Platform hesabı kayıtta `platform` kimlikli bir servistir: yetenekleri platformun arkada seçtiği servislerin birleşimidir, seçicide "Platform kredisi" adıyla görünür, hangi alt servisin çalıştığı kiracıya söylenmez. Seçim kuralı (§4) aynen işler.
 
@@ -299,7 +302,7 @@ Ayrıntılı PR planı, dosyalar, testler ve kabul ölçütleri: `docs/22-yapay-
 ## Sahibe sorulacak açık kararlar (önerilen varsayılanla)
 
 1. **Tercih düzeyi:** öneri kullanıcı başına, mağazanın son seçimi yedek (§4). Alternatif: yalnız mağaza düzeyi.
-2. **Platform anahtarlarının yeri (kredi aşaması):** öneri üst panelde bir ağ geçidi (anahtar mağaza sunucusuna hiç inmez, günlük sınır ve defter tek yerde); bedeli üst panelin çalışma anında bağımlılık olması. Alternatif: anahtarlar mağaza örneğinin ortamında, defter mağaza veritabanında, yüklemeler imzalı belgeyle. Karar F16 faturalamasıyla birlikte, Deniz ile.
+2. **Platform anahtarlarının yeri (kredi aşaması):** **karara bağlandı (adr/0085, 2026-11-25): üst panelde ağ geçidi.** Eski metin: öneri üst panelde bir ağ geçidi (anahtar mağaza sunucusuna hiç inmez, günlük sınır ve defter tek yerde); bedeli üst panelin çalışma anında bağımlılık olması. Alternatif: anahtarlar mağaza örneğinin ortamında, defter mağaza veritabanında, yüklemeler imzalı belgeyle. Karar F16 faturalamasıyla birlikte, Deniz ile.
 3. **`ai.own_keys` varsayılanı ve alt paketler:** öneri kredi satışı başlayana kadar bütün paketlerde açık (alt paketin başka yolu yok), kredi çıkınca alt paketlerde kapatılır; kapatılan mağazanın anahtarı silinmez, kullanılmaz.
 
 ## Ek 2026-11-19: sahne görselinde kendi sahneleri

@@ -84,7 +84,10 @@ describe("DesignCard", () => {
     card(AUTO)
 
     const name = "Sade, 17 Kas 2026 14:20, düzenlenmiş"
-    expect(screen.getByRole("article", { name })).toContainElement(screen.getByText("Otomatik"))
+    const article = screen.getByRole("article", { name })
+    expect(article).toContainElement(screen.getByText("Otomatik"))
+    // Its date and time once, in its name: no date line under it repeats them
+    expect(article.textContent.match(/17 Kas 2026/g)).toHaveLength(1)
     await user.click(screen.getByRole("button", { name: `‘${name}’ için işlemler` }))
     await user.click(await screen.findByRole("menuitem", { name: "Adıyla sakla" }))
     const dialog = await screen.findByRole("dialog", { name: "Adıyla sakla" })

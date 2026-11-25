@@ -45,7 +45,11 @@ const RULE = ["attribute", "operator", "values.value"]
 // Any minimum a cart offer asks is met in the reading: its target products are what it tells
 const ANY_CART = 1_000_000_000
 
-/** The shop's automatic promotions that may show before the cart, by code: read once per pricing. */
+/**
+ * The shop's automatic promotions that may show before the cart, by code:
+ * read once per pricing. None with a budget or a limit of uses (`offerOf`):
+ * the cart alone applies those (adr/0076 Ek 2026-11-25).
+ */
 export async function shownOffers(
   container: Resolver,
   currency: string
@@ -59,6 +63,7 @@ export async function shownOffers(
       "is_automatic",
       "is_tax_inclusive",
       "created_at",
+      "limit",
       ...RULE.map((field) => `rules.${field}`),
       "application_method.type",
       "application_method.target_type",
@@ -69,6 +74,7 @@ export async function shownOffers(
       "application_method.buy_rules_min_quantity",
       "campaign.starts_at",
       "campaign.budget.type",
+      "campaign.budget.limit",
     ],
     filters: { is_automatic: true, status: "active" },
   })
@@ -91,8 +97,8 @@ export interface PricedUnit {
 /**
  * The automatic promotions on each unit at its selling price now, for a
  * shopper with no customer and a cart holding one of it: Medusa's own
- * promotion module decides which apply (status, dates, limits, budget,
- * target products), as it will in the cart. Units are keyed as the caller
+ * promotion module decides which apply (status, dates, target products),
+ * as it will in the cart. Units are keyed as the caller
  * likes (a variant's id, or a departure's place: one variant at several
  * prices); each is a line of its variant. A unit no offer touches is not
  * in the answer. `read` gives the shown promotions when the caller prices
@@ -157,9 +163,13 @@ export async function automaticOffers(
     items,
     shipping_methods: [],
   }
+  // Only the shown promotions, by code: one left to the cart (a budget, say) takes nothing off
+  // first, so a shown one counts on the price as it will when the other no longer applies
   const actions = (await container
     .resolve(Modules.PROMOTION)
-    .computeActions([], context)) as unknown as ItemAdjustment[]
+    .computeActions([...offers.keys()], context, {
+      prevent_auto_promotions: true,
+    })) as unknown as ItemAdjustment[]
   const taken = new Map<string, MedusaAmount>()
   for (const action of actions) {
     const offer = action.code ? offers.get(action.code) : undefined

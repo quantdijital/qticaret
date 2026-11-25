@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { isGrantLimit } from "@qticaret/types/control-plane"
 import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -135,18 +136,21 @@ export function OverrideDialog({
               }}
             />
           </div>
-          <div className="flex items-center gap-2 sm:pt-7">
-            <Checkbox
-              id="override-unlimited"
-              checked={unlimited}
-              onCheckedChange={(checked) => {
-                setUnlimited(checked === true)
-              }}
-            />
-            <Label htmlFor="override-unlimited" className="font-normal">
-              {t("limits.unlimited")}
-            </Label>
-          </div>
+          {/* A grant is a number of credits, never unlimited (adr/0085 K5) */}
+          {isGrantLimit(limit.key) ? null : (
+            <div className="flex items-center gap-2 sm:pt-7">
+              <Checkbox
+                id="override-unlimited"
+                checked={unlimited}
+                onCheckedChange={(checked) => {
+                  setUnlimited(checked === true)
+                }}
+              />
+              <Label htmlFor="override-unlimited" className="font-normal">
+                {t("limits.unlimited")}
+              </Label>
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="override-reason">{t("override.reason")}</Label>

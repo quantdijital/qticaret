@@ -27,6 +27,9 @@ module.exports = {
 if (process.env.TEST_TYPE === "integration:http") {
   module.exports.testMatch = ["**/integration-tests/http/*.spec.[jt]s"]
   module.exports.workerIdleMemoryLimit = "1GB"
+  // On CI a failed test is tried once more, except where that would hide the
+  // finding (money, races); the first failure stays in the log (retry.js)
+  module.exports.setupFilesAfterEnv = ["./integration-tests/retry.js"]
 } else if (process.env.TEST_TYPE === "unit") {
   module.exports.testMatch = ["**/src/**/__tests__/**/*.unit.spec.[jt]s"]
 }

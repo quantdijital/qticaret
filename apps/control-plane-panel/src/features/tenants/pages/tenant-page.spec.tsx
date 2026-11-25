@@ -242,6 +242,18 @@ describe("TenantPage: one shop (adr/0061 §2, C7)", () => {
     })
   })
 
+  it("offers the AI credits tab to an owner only (adr/0085 §5, route-table-ai.ts)", async () => {
+    stubApi(controlPlane(SHOP))
+    for (const role of ["readonly", "operator", "finance"] as const) {
+      const view = page(role)
+      await screen.findByRole("heading", { level: 1, name: "Kahve Durağı" })
+      expect(screen.queryByRole("tab", { name: /Yapay zekâ kredisi/ })).toBeNull()
+      view.unmount()
+    }
+    page("owner")
+    expect(await screen.findByRole("tab", { name: /Yapay zekâ kredisi/ })).toBeInTheDocument()
+  })
+
   it("reads the activity with who and what moved", async () => {
     routerState.search = { part: "activity" }
     stubApi(controlPlane(SHOP))

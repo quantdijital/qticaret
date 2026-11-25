@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { DEFAULT_CIRCUIT_BREAKER } from "../../../lib/clients/circuit-breaker"
 import { correctionFailure, withAiBreaker } from "../../../lib/ai/breaker"
-import { textConnectorFor, textTargetOf } from "../../../lib/ai/connector-of"
+import { textConnectorWith, textTargetOf } from "../../../lib/ai/connector-of"
 import type { AiImageInput } from "../../../lib/ai/connectors/types"
 import { aiProviderError } from "../../../lib/ai/errors"
 import type { AiErrorKey } from "../../../lib/ai/errors"
@@ -30,10 +31,10 @@ import {
 import { runTextTask } from "../../../lib/ai/run-text"
 import type { CampaignAllowed } from "../../../lib/ai/campaign-text"
 import { isCampaignTask, runCampaignTask } from "../../../lib/ai/run-campaign"
+import { PLATFORM_SERVICE_ID } from "../../../lib/ai/registry/platform-service"
+import { chargeTally } from "../charge-tally"
+import { transportFor } from "../transport-for"
 import { correctionClaim, correctionUsageOf } from "./correction-claim"
-import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
-import { isCredentialProvider } from "../../../modules/integration-credentials/providers"
-import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
 
 export interface CallServiceInput {
   task: string
@@ -47,6 +48,8 @@ export interface CallServiceInput {
   allowed?: CardAllowed | PickAllowed | AttributeAllowed | FaqAllowed | PostDraftAllowed | null
   /** A bulk message's limits (its figures, an SMS's end), read on the server (task-input). */
   campaign?: CampaignAllowed | null
+  /** The run's operation (select-service), its correction call carrying the same; none given, one is made here. */
+  operation?: string | null
 }
 
 /** How the call ended; never the key, the service's own words or its raw answer. */
@@ -74,6 +77,8 @@ export interface CallOutcome {
   error_key: AiErrorKey | null
   error_code: string | null
   retry_after_ms: number | null
+  /** On credits: what the gateway charged the (first) call; null or absent otherwise. */
+  credits?: number | null | undefined
 }
 
 /** The correction call's usage row: how it ended and what it counted. */
@@ -84,25 +89,8 @@ export interface CorrectionUsage {
   images: number | null
   duration_ms: number
   error_code: string | null
-}
-
-/**
- * The shop's key for the service, read here and nowhere else: it is no
- * part of a step's input or output (`workflow_execution` keeps those), of
- * a log or of an error. A service without a readable key cannot be called.
- */
-export async function apiKeyOf(
-  container: Pick<MedusaContainer, "resolve">,
-  credentialProvider: string
-): Promise<string | null> {
-  if (!isCredentialProvider(credentialProvider)) {
-    return null
-  }
-  const account = await container
-    .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-    .read(credentialProvider)
-  const key = account?.secrets["api_key"]
-  return typeof key === "string" && key !== "" ? key : null
+  /** On credits: what the gateway charged the correction (0 within the operation's charge). */
+  credits?: number | null | undefined
 }
 
 /**
@@ -153,9 +141,10 @@ export const callServiceStep = createStep(
     const started = Date.now()
     const task = findAiTask(input.task)
     const capability = input.capability === "vision" ? "vision" : "text"
-    const resolved = textTargetOf(input.service, capability)
+    // The model recorded is the own service's; on credits none: the routed service never shows
+    const own = textTargetOf(input.service, capability)
     const base = {
-      model: resolved?.target.model ?? "",
+      model: own?.target.model ?? "",
       text: null,
       candidates: [],
       correction: null,
@@ -167,23 +156,25 @@ export const callServiceStep = createStep(
       error_code: null,
       retry_after_ms: null,
     }
+    // What each call on credits was charged, for its usage row
+    const tally = chargeTally()
     try {
-      if (!task || !resolved || !runsAs(task, input.capability)) {
+      const known = own !== null || input.service === PLATFORM_SERVICE_ID
+      if (!task || !known || !runsAs(task, input.capability)) {
         throw aiProviderError({
           service: input.service,
           key: "ai.service_unavailable",
           code: "not_registered",
         })
       }
-      const apiKey = await apiKeyOf(container, resolved.service.credentialProvider)
-      if (apiKey === null) {
-        throw aiProviderError({
-          service: input.service,
-          key: "ai.service_unavailable",
-          code: "no_credentials",
-        })
-      }
-      const connector = textConnectorFor(input.service, capability, apiKey)
+      const route = await transportFor(container, {
+        service: input.service,
+        capability,
+        task: task.id,
+        operation: input.operation ?? randomUUID(),
+        onCharge: tally.onCharge,
+      })
+      const connector = textConnectorWith(route.service.id, capability, route.transport)
       const images =
         capability === "vision"
           ? [await pictureOf(container, input.image_file_id ?? null, input.service)]
@@ -195,7 +186,7 @@ export const callServiceStep = createStep(
       const allowed = input.allowed ?? null
       // A product card and a pick are read against their closed schemas and the shop's lists, never as free text
       const result = await withAiBreaker(
-        input.service,
+        { service: input.service, capability: input.capability },
         () =>
           isCampaignTask(task)
             ? runCampaignTask({
@@ -281,7 +272,8 @@ export const callServiceStep = createStep(
         status: result.status,
         text: result.status === "succeeded" ? result.text : null,
         candidates: result.status === "succeeded" ? result.candidates : [],
-        correction,
+        correction: correction && { ...correction, credits: tally.at(1) },
+        credits: tally.at(0),
         problems: result.status === "refused" ? result.problems : [],
         input_tokens: result.usage.inputTokens ?? null,
         output_tokens: result.usage.outputTokens ?? null,
@@ -298,6 +290,7 @@ export const callServiceStep = createStep(
         error_key: failure.key,
         error_code: failure.code,
         retry_after_ms: retryAfterOf(error),
+        credits: tally.at(0),
       }
       return new StepResponse(outcome)
     }

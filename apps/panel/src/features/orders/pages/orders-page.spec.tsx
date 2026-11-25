@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -85,10 +85,10 @@ describe("OrdersPage", () => {
     )
   })
 
-  it("asks the server for the address's filters: the days, the method, the carrier", async () => {
+  it("asks the server for the address's filters: the days, the methods, the carrier", async () => {
     search.current = {
       stage: "to_ship",
-      method: "cod",
+      method: "cod,card",
       carrier: "aras",
       from: "2026-11-01",
       to: "2026-11-06",
@@ -99,18 +99,22 @@ describe("OrdersPage", () => {
     expect(fetchMock).toHaveBeenCalledWith("/admin/order-board", {
       query: {
         stage: "to_ship",
-        method: "cod",
+        method: "cod,card",
         carrier: "aras",
         from: "2026-11-01",
         to: "2026-11-06",
         offset: 0,
       },
     })
-    expect(screen.getByRole("combobox", { name: "Ödeme yöntemi" })).toHaveTextContent(
-      "Ödeme yöntemi: Kapıda ödeme"
-    )
+    // What is set shows as chips under the search, counted on the filter button
+    expect(
+      screen.getByRole("button", { name: "Ödeme yöntemi: Kapıda ödeme, Kart" })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Kargo firması: Aras Kargo" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /^Sipariş tarihi: / })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Filtrele · 3" })).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole("button", { name: "Filtreleri temizle" }))
+    await userEvent.click(screen.getByRole("button", { name: "Tümünü temizle" }))
     expect(navigate).toHaveBeenCalledWith({
       to: "/orders",
       search: expect.objectContaining({
@@ -120,6 +124,48 @@ describe("OrdersPage", () => {
         from: undefined,
         to: undefined,
       }) as unknown,
+      replace: true,
+    })
+  })
+
+  it("ticks several choices from the Filtrele menu into the address, from the first page", async () => {
+    search.current = { stage: "to_ship", payment: "paid", page: 3 }
+    renderPage()
+
+    await screen.findByText("#1042")
+    expect(fetchMock).toHaveBeenCalledWith("/admin/order-board", {
+      query: { stage: "to_ship", payment: "paid", offset: 40 },
+    })
+    await userEvent.click(screen.getByRole("button", { name: "Filtrele · 1" }))
+    const menu = await screen.findByRole("dialog")
+    await userEvent.click(
+      within(menu).getByRole("button", { name: /^Ödeme(?! yöntemi| filtresini)/ })
+    )
+    await userEvent.click(screen.getByRole("checkbox", { name: "İade edildi" }))
+    expect(navigate).toHaveBeenLastCalledWith({
+      to: "/orders",
+      search: expect.objectContaining({
+        stage: "to_ship",
+        payment: "paid,refunded",
+        page: undefined,
+      }) as unknown,
+      replace: true,
+    })
+    // The menu stays open for another choice
+    expect(screen.getByRole("checkbox", { name: "Ödendi" })).toBeChecked()
+  })
+
+  it("clears one filter's choices with its chip's ×", async () => {
+    search.current = { shipping: "none,label" }
+    renderPage()
+
+    await screen.findByText("#1042")
+    const chip = screen.getByRole("button", { name: "Kargo: Gönderilmedi, Etiket hazır" })
+    expect(chip).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Kargo filtresini kaldır" }))
+    expect(navigate).toHaveBeenLastCalledWith({
+      to: "/orders",
+      search: expect.objectContaining({ shipping: undefined }) as unknown,
       replace: true,
     })
   })
@@ -157,7 +203,7 @@ describe("OrdersPage", () => {
   })
 
   it("exports the filtered list for the owner, and offers it to no one else", async () => {
-    search.current = { stage: "to_ship", method: "card" }
+    search.current = { stage: "to_ship", method: "card,cod", carrier: "own" }
     const { unmount } = renderPage()
 
     await userEvent.click(await screen.findByRole("button", { name: "Dışa aktar" }))
@@ -165,7 +211,7 @@ describe("OrdersPage", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/order-board/export", {
         method: "POST",
-        body: { stage: "to_ship", method: "card", format: "xlsx" },
+        body: { stage: "to_ship", method: "card,cod", carrier: "own", format: "xlsx" },
       })
     })
     unmount()

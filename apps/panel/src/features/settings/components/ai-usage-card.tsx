@@ -86,13 +86,16 @@ function Group({
  * small table by service and by task with what it may have cost at the
  * service (an estimate from the list prices, not an invoice), and the
  * package's monthly and today's ceilings beside the title; what the
- * estimate and the ceilings mean behind (i). Owner and admin
+ * estimate and the ceilings mean behind (i); under them, the credits
+ * spent from the platform's this month when there are any. Owner and admin
  * (`GET /admin/ai/usage`).
  */
 export function AiUsageCard({ className }: { className?: string }) {
   const { t } = useTranslation()
   const usage = useQuery(aiUsageQuery())
   const data = usage.data
+  // The month's credits on the platform (adr/0085 §3); a server without the field reads as none
+  const spent = data?.platform_credits?.credits ?? 0
   const tip = (
     <span className="flex flex-col gap-1.5">
       <span>{t(`${U}.estimateHint`)}</span>
@@ -153,6 +156,11 @@ export function AiUsageCard({ className }: { className?: string }) {
           </TableBody>
         </Table>
       )}
+      {data && spent > 0 ? (
+        <p className="border-t px-5 py-3 text-[13px] text-muted-foreground">
+          {t(`${U}.platformCredits`, { count: spent, amount: formatCount(spent) })}
+        </p>
+      ) : null}
     </SectionCard>
   )
 }

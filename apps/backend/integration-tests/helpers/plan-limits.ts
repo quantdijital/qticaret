@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { PlanLimits, TenantStatus } from "@qticaret/types/control-plane"
+import { COUNTED_LIMIT_KEYS } from "@qticaret/types/control-plane"
+import type { CountedLimitKey, PlanLimits, TenantStatus } from "@qticaret/types/control-plane"
 import { CONTROL_PLANE_MODULE } from "../../src/modules/control-plane"
 import type ControlPlaneModuleService from "../../src/modules/control-plane/service"
 import { doc, signed } from "./control-plane"
@@ -19,7 +19,11 @@ export async function setPlanLimits(
   limits: Partial<PlanLimits>
 ): Promise<void> {
   serial += 1
-  const all = Object.fromEntries(LIMIT_KEYS.map((key) => [key, null])) as PlanLimits
+  // A grant (adr/0085 K5) is never null: left out, none
+  const all = Object.fromEntries(COUNTED_LIMIT_KEYS.map((key) => [key, null])) as Record<
+    CountedLimitKey,
+    null
+  >
   await container
     .resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
     .storePlanDocument(signed(doc(serial, { limits: { ...all, ...limits } })), "push")

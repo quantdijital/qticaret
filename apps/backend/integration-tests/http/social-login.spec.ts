@@ -5,6 +5,7 @@ import type { FakeApple } from "@qticaret/testing"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { namedPort } from "../helpers/port"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
 
@@ -13,7 +14,7 @@ jest.setTimeout(120 * 1000)
 // The auth providers are read when the app starts, before any hook: the
 // fake Apple's address and client are set here, its server started later
 const account = fakeAppleAccount()
-const port = 20_000 + Math.floor(Math.random() * 20_000)
+const port = namedPort()
 const CALLBACK = "https://magaza.example.com/hesap/giris/apple"
 Object.assign(process.env, {
   APPLE_AUTH_CLIENT_ID: account.clientId,

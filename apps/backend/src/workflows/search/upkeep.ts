@@ -11,8 +11,8 @@ import { queueOnOfferChange } from "./promotion-state"
 /**
  * The index's upkeep (adr/0056): what no event tells of. Each minute: a
  * price list that began or ended (its products' prices changed with no
- * write), the automatic promotions changed (a campaign began or ended, a
- * budget ran out: every product's `on_sale` again, promotion-state.ts),
+ * write), the automatic promotions changed (a campaign began or ended, one
+ * gained or lost a budget: every product's `on_sale` again, promotion-state.ts),
  * claims a stopped process left, and the first build of a shop's index.
  * Each night: every product indexed again (what a missed event or a
  * template's change left behind), the popularity of the last 30 days

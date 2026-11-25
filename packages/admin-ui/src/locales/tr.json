@@ -19,6 +19,16 @@
     "up": "Artış",
     "down": "Azalış"
   },
+  "filterBar": {
+    "back": "Filtrelere dön",
+    "clearAll": "Tümünü temizle",
+    "count": "Filtrele · {{count}}",
+    "description": "Listeyi daraltmak için bir filtre seçin.",
+    "filter": "Filtrele",
+    "findOption": "Seçeneklerde ara",
+    "noOption": "Eşleşen seçenek yok",
+    "remove": "{{name}} filtresini kaldır"
+  },
   "formDialog": {
     "discard": "Değişiklikleri at",
     "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",

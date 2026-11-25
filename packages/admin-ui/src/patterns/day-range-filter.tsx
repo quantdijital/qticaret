@@ -65,6 +65,8 @@ export function DayRangeFilter({
           className="flex flex-col gap-3"
           onSubmit={(event) => {
             event.preventDefault()
+            // In a portal, yet bubbled up the React tree: never send a form around it
+            event.stopPropagation()
             if (valid) {
               setOpen(false)
               onChange({ from: from || undefined, to: to || undefined })
