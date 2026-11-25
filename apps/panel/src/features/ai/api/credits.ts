@@ -53,6 +53,10 @@ export type AiCreditsWallet = Extract<AiCreditsAnswer, { available: true }>
 
 export const AI_CREDITS_KEY = [...AI_KEY, "credits"] as const
 
+/** Who reads the wallet (`GET /admin/ai/credits`: owner, admin); others never ask. */
+export const mayReadCredits = (role: string | null | undefined): boolean =>
+  role === "owner" || role === "admin"
+
 /** Short-lived and read again on focus: a wallet is not kept long (#376 review). */
 export const aiCreditsQuery = () =>
   queryOptions({
@@ -81,6 +85,8 @@ export function useRequestCreditTopUp() {
         client.invalidateQueries({ queryKey: AI_CREDITS_KEY }),
         client.invalidateQueries({ queryKey: aiServicesQuery().queryKey }),
       ]),
+    // A request already open, a pack gone: the wallet as it stands now
+    onError: () => client.invalidateQueries({ queryKey: AI_CREDITS_KEY }),
   })
 }
 
