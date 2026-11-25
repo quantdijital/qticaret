@@ -56,7 +56,11 @@ test.describe("product page save bar", () => {
     const handle = page.locator("#detail-handle")
     const address = await handle.inputValue()
     // A second card: the search appearance, opened from its folded line
-    await page.getByRole("button", { name: "Arama motoru görünümü", exact: true }).click()
+    // The fold's own header (the section bar has a chip of the same name)
+    await page
+      .locator("main section > header h2")
+      .getByRole("button", { name: "Arama motoru görünümü", exact: true })
+      .click()
     const seoTitle = page.locator("#product-seo input").first()
     const seoBefore = await seoTitle.inputValue()
     await seoTitle.fill(`${title} – özel`)

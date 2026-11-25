@@ -13,6 +13,33 @@ const D = "products.variant"
 export const VARIANT_COLUMNS =
   "grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-x-3 sm:grid-cols-[2.5rem_minmax(0,1fr)_8rem_7.5rem_minmax(0,9.5rem)_1rem]"
 
+/**
+ * The box picking a row for a bulk change. Its whole strip beside the row
+ * is the target, as tall as the row: the box never stands beside the row
+ * as a control of another height (docs/18 §2 "Denge").
+ */
+export function PickBox({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean | "indeterminate"
+  onChange: (on: boolean) => void
+  label: string
+}) {
+  return (
+    <label className="flex shrink-0 cursor-pointer items-center self-stretch pr-3 pl-5">
+      <Checkbox
+        checked={checked}
+        onCheckedChange={(next) => {
+          onChange(next === true)
+        }}
+        aria-label={label}
+      />
+    </label>
+  )
+}
+
 /** Untracked stock is always sold (platform rule): said in the stock's place. */
 function StockText({ stock }: { stock: number | null }) {
   const { t } = useTranslation()
@@ -55,13 +82,11 @@ export function VariantListRow({
   ))
   return (
     <li data-variant-item="" className={cn(open && "bg-muted/20")}>
-      <div className="flex items-center pl-5">
-        <Checkbox
+      <div className="flex items-stretch">
+        <PickBox
           checked={selected}
-          onCheckedChange={(checked) => {
-            onSelect(checked === true)
-          }}
-          aria-label={t(`${D}.bulk.pick`, { name: facts.name })}
+          onChange={onSelect}
+          label={t(`${D}.bulk.pick`, { name: facts.name })}
         />
         <button
           type="button"
@@ -69,7 +94,7 @@ export function VariantListRow({
           disabled={disabled}
           aria-expanded={open}
           onClick={onToggle}
-          className={`${VARIANT_COLUMNS} min-w-0 flex-1 py-2.5 pr-5 pl-3 text-left text-[13px] outline-hidden transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring disabled:cursor-progress`}
+          className={`${VARIANT_COLUMNS} min-w-0 flex-1 py-2.5 pr-5 text-left text-[13px] outline-hidden transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring disabled:cursor-progress`}
         >
           <span className="flex size-10 items-center justify-center overflow-hidden rounded-md border bg-muted">
             {facts.thumb ? (
