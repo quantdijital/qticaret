@@ -5,7 +5,7 @@ import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18next } from "@/lib/i18n"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
-import { CatalogCard } from "./catalog-card"
+import { CatalogPanel } from "./catalog-panel"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -31,13 +31,12 @@ const CATALOG: ProductCatalog = {
   variants: [],
 }
 
-/** The card says what is saved; its fields take its place once "Düzenle" is pressed. */
-async function openDialog() {
-  await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("form", { name: "Katalog bilgileri" })
+/** The tab is its form, always: no "Düzenle" first. */
+function openDialog() {
+  return screen.findByRole("form", { name: "Katalog bilgileri" })
 }
 
-describe("CatalogCard", () => {
+describe("CatalogPanel", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     fetchMock.mockImplementation((url: string, init?: { body?: Partial<ProductCatalog> }) =>
@@ -48,7 +47,7 @@ describe("CatalogCard", () => {
   it("marks a product outside the right of withdrawal, sending only that", async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <CatalogCard productId="prod_1" />
+        <CatalogPanel productId="prod_1" />
       </QueryClientProvider>
     )
     await openDialog()
@@ -64,17 +63,17 @@ describe("CatalogCard", () => {
         body: { withdrawal_excluded: true },
       })
     })
-    // Saved, the form closes and the card says it
+    // Saved, the form stays and its save goes until the next change
     await waitFor(() => {
-      expect(screen.queryByRole("form")).toBeNull()
+      expect(screen.getByRole("button", { name: "Kaydet" }).parentElement).toHaveClass("hidden")
     })
-    expect(screen.getByText("Dışında")).toBeInTheDocument()
+    expect(screen.getByRole("switch", { name: "Cayma hakkı dışında" })).toBeChecked()
   })
 
   it("explains the mark: a sealed good when physical, out outright when digital or a service", async () => {
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <CatalogCard productId="prod_1" />
+        <CatalogPanel productId="prod_1" />
       </QueryClientProvider>
     )
     await openDialog()
@@ -111,7 +110,7 @@ describe("CatalogCard", () => {
     )
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <CatalogCard productId="prod_1" />
+        <CatalogPanel productId="prod_1" />
       </QueryClientProvider>
     )
     await openDialog()
@@ -146,7 +145,7 @@ describe("CatalogCard", () => {
     const renderCard = async () => {
       render(
         <QueryClientProvider client={new QueryClient()}>
-          <CatalogCard productId="prod_1" />
+          <CatalogPanel productId="prod_1" />
         </QueryClientProvider>
       )
       await openDialog()

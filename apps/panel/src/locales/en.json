@@ -4263,6 +4263,7 @@
       "title": "Customise the product page",
       "description": "Hide sections or drag them into order. The layout applies to the whole team; a hidden section keeps its data.",
       "main": "Main column",
+      "tabs": "Product data tabs",
       "side": "Side column",
       "locked": "Always shown",
       "conditional": "Shown only when used",
@@ -4277,7 +4278,7 @@
       "shownRevealed": "Hidden section: shown for this visit.",
       "parts": {
         "general": "General",
-        "variants": "Variants and price",
+        "variants": "Variants",
         "media": "Pictures",
         "description": "Description",
         "shortDescription": "Short description",
@@ -4286,13 +4287,15 @@
         "seo": "Search appearance",
         "attributes": "Attributes",
         "faq": "FAQ",
-        "addons": "Add-ons",
-        "priceHistory": "Price history",
         "summary": "Summary",
         "advisor": "SEO advisor",
         "organize": "Categories, brand and VAT",
         "catalog": "Catalog details",
-        "shipping": "Parcel"
+        "shipping": "Shipping (parcel)",
+        "data": "Product data",
+        "pricing": "General (price)",
+        "stock": "Inventory",
+        "advanced": "Advanced (add-ons, price history)"
       },
       "presets": "Ready layouts",
       "preset": {
@@ -4301,9 +4304,9 @@
         "advanced": "Advanced"
       },
       "presetHint": {
-        "basic": "General details, variants and price, pictures, description and the SEO advisor. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
+        "basic": "General details, pictures, description, the SEO advisor, and price, stock and variants in the product data. The rest is hidden; the advisor's \"Go to field\" still reaches it.",
         "standard": "The first layout: seldom parts stay closed under the page.",
-        "advanced": "Every part shown; search appearance, attributes, FAQ, add-ons and price history start open.",
+        "advanced": "Every part and tab is shown; search appearance and FAQ start open.",
         "custom": "Arranged by hand."
       },
       "shortcuts": "Shortcuts",
@@ -4334,10 +4337,36 @@
       },
       "shortcutSave": "Save changes"
     },
+    "data": {
+      "title": "Product data",
+      "type": "Product type",
+      "types": {
+        "simple": "Simple product",
+        "variable": "Variable product"
+      },
+      "kind": {
+        "digital": "Digital product: no shipping",
+        "service": "Service: no shipping"
+      },
+      "variableLocked_one": "This product has {{count}} variant.",
+      "variableLocked_other": "This product has {{count}} variants; reduce them to one to make it a simple product.",
+      "tabs": {
+        "pricing": "General",
+        "stock": "Inventory",
+        "shipping": "Shipping",
+        "attributes": "Attributes",
+        "variants": "Variants",
+        "catalog": "Catalog",
+        "advanced": "Advanced"
+      },
+      "pricesOnVariants": "Prices are entered on each variant.",
+      "stockOnVariants": "Stock and codes are entered on each variant.",
+      "goVariants": "Go to variants"
+    },
     "variant": {
       "title": "Edit variant",
       "listTitle": "Variants",
-      "listHint": "Click a variant to edit its price, stock, codes and images.",
+      "listHint": "Type the options and create the variants; click a variant's row to edit its price, stock, codes and pictures in place.",
       "singleTitle": "Price, stock and codes",
       "price": "Price",
       "sellingPrice": "Selling price",
@@ -4389,7 +4418,58 @@
         "noBarcode": "No barcode"
       },
       "details": "All variant details",
-      "detailsDirty": "Save or undo this card's changes first."
+      "detailsDirty": "Save or undo this card's changes first.",
+      "untrackedShort": "Stock not tracked — always sold",
+      "groupCount_one": "{{count}} variant",
+      "groupCount_other": "{{count}} variants",
+      "options": {
+        "title": "Options",
+        "none": "This product has no options. Add options such as colour or size to create its variants.",
+        "add": "Add options",
+        "edit": "Edit options",
+        "hint": "Type each option's values and press Enter. \"Create variants\" adds every missing combination; existing variants are never deleted or created twice.",
+        "preview_one": "{{count}} variant will be created; you enter its price afterwards.",
+        "preview_other": "{{count}} variants will be created; you enter their prices afterwards.",
+        "nothingNew": "No new variant to create.",
+        "fill_one": "{{count}} variant gets the new option's first value.",
+        "fill_other": "{{count}} variants get the new option's first value.",
+        "create_one": "Create {{count}} variant",
+        "create_other": "Create {{count}} variants",
+        "save": "Save options",
+        "created_one": "{{count}} variant created. Enter its price.",
+        "created_other": "{{count}} variants created. Enter their prices.",
+        "saved": "Options saved.",
+        "valueUsed": "A variant uses \"{{value}}\"; it cannot be removed.",
+        "optionUsed": "A variant uses this option; it cannot be removed.",
+        "problems": {
+          "name": "Every option with values needs a name.",
+          "duplicate": "Two options cannot have the same name."
+        }
+      },
+      "bulk": {
+        "title": "Bulk change",
+        "field": "Field to change",
+        "value": "New value",
+        "filter": "Which variants",
+        "every": "All variants",
+        "fields": {
+          "price": "Selling price",
+          "cost": "Cost",
+          "stock": "Stock count"
+        },
+        "applyAll_one": "Apply to {{count}} variant",
+        "applyAll_other": "Apply to {{count}} variants",
+        "applySelected_one": "Apply to {{count}} selected variant",
+        "applySelected_other": "Apply to {{count}} selected variants",
+        "applied_one": "{{count}} variant updated.",
+        "applied_other": "{{count}} variants updated.",
+        "untracked_one": "{{count}} variant without stock tracking skipped.",
+        "untracked_other": "{{count}} variants without stock tracking skipped.",
+        "nothing": "Nothing to change: the variants already have this value or their stock is not tracked.",
+        "pick": "Select variant {{name}}",
+        "pickAll": "Select all variants",
+        "pickGroup": "Select group {{name}}"
+      }
     },
     "rowActions": "Actions for {{title}}",
     "duplicate": {
