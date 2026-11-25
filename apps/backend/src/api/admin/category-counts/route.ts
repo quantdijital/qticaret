@@ -1,7 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { categoryProductCounts } from "../../../lib/catalog/category-counts"
-import type { CountedCategory } from "../../../lib/catalog/category-counts"
 
 /**
  * GET /admin/category-counts (docs/06 "Kategoriler"): how many products
@@ -14,5 +13,5 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
     entity: "product_category",
     fields: ["id", "parent_category_id", "products.id"],
   })
-  res.json({ counts: categoryProductCounts(data as CountedCategory[]) })
+  res.json({ counts: categoryProductCounts(data) })
 }
