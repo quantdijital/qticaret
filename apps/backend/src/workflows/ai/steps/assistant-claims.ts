@@ -17,8 +17,8 @@ const NO_MONTHLY_CEILING = 2_147_483_647
 export interface AssistantClaim {
   day: string
   user_day: string
-  /** `YYYY-MM`, the month whose operation was claimed. */
-  month: string
+  /** `YYYY-MM`, the month whose operation was claimed; null on the platform's credits (none is). */
+  month: string | null
 }
 
 export type ClaimResult =
@@ -32,12 +32,15 @@ export const assistantLimitsInForce = (env = parseEnv()) =>
  * Claims one model call before it is made (adr/0079 §8, adr/0071 §8.4):
  * the shop's `assistant` day, then the person's own, then one of the
  * month's AI operations (`llm_credits_per_month`), each in one statement.
- * A refusal gives back what was claimed before it.
+ * A refusal gives back what was claimed before it. On the platform's
+ * credits (`monthly: false`) the month is not claimed: the credits bound
+ * it, the day's ceilings hold the same (adr/0085 K9).
  */
 export async function claimAssistantCall(
   container: Resolver,
   userId: string,
-  now: Date = new Date()
+  now: Date = new Date(),
+  monthly = true
 ): Promise<ClaimResult> {
   const limits = assistantLimitsInForce()
   const ai = container.resolve<AiModuleService>(AI_MODULE)
@@ -49,6 +52,9 @@ export async function claimAssistantCall(
   if (userDay === null) {
     await ai.releaseDaily(ASSISTANT_GROUP, day)
     return { ok: false, reason: "daily_limit" }
+  }
+  if (!monthly) {
+    return { ok: true, claim: { day, user_day: userDay, month: null } }
   }
   const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
   let taken = false
@@ -77,6 +83,9 @@ export async function releaseAssistantCall(
   const ai = container.resolve<AiModuleService>(AI_MODULE)
   await ai.releaseDaily(ASSISTANT_GROUP, claim.day)
   await ai.releaseDaily(assistantUserGroup(userId), claim.user_day)
+  if (claim.month === null) {
+    return
+  }
   await container
     .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
     .releaseQuota(claim.month)

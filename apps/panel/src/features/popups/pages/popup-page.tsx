@@ -16,6 +16,7 @@ import { ActiveSwitch } from "@/features/popups/components/active-switch"
 import { useCanWritePopups } from "@/features/popups/api/access"
 import { PopupsGate } from "@/features/popups/components/popups-gate"
 import { PopupForm } from "@/features/popups/editor/popup-form"
+import { FactsCard } from "@/features/popups/editor/facts-card"
 import { StatsCard } from "@/features/popups/editor/stats-card"
 import { errorText } from "@/lib/errors"
 
@@ -96,13 +97,25 @@ function PopupDetailView({ id }: { id: string }) {
         back={back}
         action={canWrite ? <Actions popup={popup} /> : null}
       />
-      <StatsCard popup={popup} />
-      <PopupForm key={popup.id} existing={popup} canWrite={canWrite} />
+      <PopupForm
+        key={popup.id}
+        existing={popup}
+        canWrite={canWrite}
+        aside={
+          <>
+            <FactsCard popup={popup} />
+            <StatsCard popup={popup} />
+          </>
+        }
+      />
     </div>
   )
 }
 
-/** One pop-up (adr/0080 S2): its counts, then the same form as a new one. */
+/**
+ * One pop-up (adr/0080 S2): the same form as a new one, its preview, facts
+ * and counts beside it in the right column.
+ */
 export function PopupPage() {
   const { id } = route.useParams()
   return (

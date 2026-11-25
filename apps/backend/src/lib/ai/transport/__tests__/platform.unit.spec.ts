@@ -1,7 +1,7 @@
 import { SIGNED_REQUEST_HEADERS } from "@qticaret/server-kit"
-import { AI_CREDITS_PATHS } from "@qticaret/types/control-plane"
+import { AI_CREDITS_PATHS, aiCallPath } from "@qticaret/types/control-plane"
 import { isProviderError } from "../../../errors/errors"
-import { aiCallPath, aiGatewayEndpoint } from "../../../control-plane/ai-gateway"
+import { aiGatewayEndpoint } from "../../../control-plane/ai-gateway"
 import { findAiService } from "../../registry/services"
 import type { AiService, OpenAiCompatibleTarget } from "../../registry/services"
 import { AI_GATEWAY_MAX_BODY_BYTES, isAiGatewayRefusal, platformTransport } from "../platform"
@@ -173,15 +173,13 @@ describe("platform transport: a provider's answer", () => {
             },
           })
       )
-      const transport = transportOn(fetch)
-      expect(transport.lastCharge()).toBeNull()
-      const answer = await transport.send(request())
+      const answer = await transportOn(fetch).send(request())
       expect(answer).toEqual({
         status,
         headers: { "content-type": "text/plain" },
         body: Buffer.from("provider said this"),
+        charge: { credits: status === 200 ? 2 : 0, balance: 41 },
       })
-      expect(transport.lastCharge()).toEqual({ credits: status === 200 ? 2 : 0, balance: 41 })
     }
   )
 })
@@ -248,10 +246,18 @@ describe("platform transport: the gateway's refusals", () => {
     ["unavailable", "ai.platform_unavailable"],
     ["task_mismatch", "ai.platform_unavailable"],
     ["not_offered", "ai.platform_unavailable"],
+    ["busy", "ai.platform_busy"],
     ["a_code_from_the_future", "ai.platform_unavailable"],
   ])("%s → %s", async (code, key) => {
     const { fetch } = gateway(() => refusal(code, charged(0, 7)))
-    const transport = transportOn(fetch)
+    const charges: unknown[] = []
+    const transport = platformTransport({
+      ...TERMS,
+      endpoint: ENDPOINT,
+      fetch,
+      now,
+      onCharge: (charge) => charges.push(charge),
+    })
     const error = await thrown(transport.send(request()))
     expect(isAiGatewayRefusal(error)).toBe(true)
     expect(isAiGatewayRefusal(error) && error.refusal).toBe(code)
@@ -261,7 +267,7 @@ describe("platform transport: the gateway's refusals", () => {
       key,
     ])
     expect(error.providerMessage).toBeUndefined()
-    expect(transport.lastCharge()).toEqual({ credits: 0, balance: 7 })
+    expect(charges).toEqual([{ credits: 0, balance: 7 }])
   })
 
   it.each([

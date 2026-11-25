@@ -8,6 +8,8 @@ import {
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { aiValidationError } from "../../lib/ai/errors"
 import { imageTargetOf } from "../../lib/ai/image-connector-of"
+import { PLATFORM_SERVICE_ID, platformBackingOf } from "../../lib/ai/registry/platform-service"
+import { aiCreditsStatus } from "../../lib/control-plane/ai-credits"
 import { findAiTask } from "../../lib/ai/registry/tasks"
 import type { AiTask } from "../../lib/ai/registry/tasks"
 import { IMAGE_BACKGROUNDS } from "../../lib/ai/registry/services"
@@ -38,6 +40,21 @@ export interface RequestImageEditInput {
 type JobOption = { background: ImageBackground } | { scene: string } | { custom: string }
 
 /**
+ * The service whose image endpoint edits for this choice: the chosen one,
+ * or on the platform's credits the one the status routes image editing to
+ * (adr/0085 §3; the edit step resolves it the same way, `transportFor`).
+ */
+async function imageServiceOf(service: string): Promise<string> {
+  if (service !== PLATFORM_SERVICE_ID) {
+    return service
+  }
+  const status = await aiCreditsStatus()
+  return status.available
+    ? (platformBackingOf(status.services, "image_edit")?.id ?? service)
+    : service
+}
+
+/**
  * What the job is asked to do: a background the endpoint makes, one of
  * the shop's scenes (its own saved ones, then its packs'), or a scene
  * typed for this once, cleaned (`cleanSceneText`) before it is queued.
@@ -48,7 +65,7 @@ async function optionOf(
   service: string,
   input: { option?: string | null | undefined; custom?: string | null | undefined }
 ): Promise<JobOption> {
-  const target = imageTargetOf(service)?.target
+  const target = imageTargetOf(await imageServiceOf(service))?.target
   if (task.optionSource === "scenes") {
     if (!target?.scene) {
       throw aiValidationError("ai.service_unavailable")

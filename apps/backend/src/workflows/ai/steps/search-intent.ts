@@ -17,7 +17,7 @@ import { logger } from "../../../lib/logging"
 import { AI_MODULE } from "../../../modules/ai"
 import type AiModuleService from "../../../modules/ai/service"
 import { aiConnectionsOf, aiFlagsOf, taskFlagOpen } from "../connections"
-import { apiKeyOf } from "./call-service"
+import { apiKeyOf } from "../transport-for"
 
 /**
  * The search intent's steps (adr/0077 §7, adr/0071 §8): the same life as

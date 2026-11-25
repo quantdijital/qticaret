@@ -833,6 +833,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "ai.credits_daily_cap": "Today's credit limit has been reached. Try again tomorrow.",
   "ai.platform_unavailable":
     "Platform credits cannot be used right now. Try again in a little while.",
+  "ai.platform_busy": "Too many AI tasks are running right now. Try again in a moment.",
   "ai.unknown_entity": "The record the suggestion was asked for was not found.",
   "ai.unknown_task": "There is no such AI task.",
   "ai.suggestion_not_open": "This suggestion is no longer waiting for a decision.",

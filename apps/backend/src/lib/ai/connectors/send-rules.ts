@@ -31,6 +31,26 @@ export interface Failure extends AiProviderFailure {
   retry: boolean
 }
 
+// What a service says of the shop's own account: its key, its balance, its quota
+const OWN_ACCOUNT_KEYS: ReadonlySet<AiErrorKey> = new Set([
+  "ai.key_rejected",
+  "ai.provider_balance",
+  "ai.provider_quota",
+])
+
+/**
+ * A failure as the shop is told it, by who pays (adr/0085 §3). On the
+ * platform's credits the account behind the call is the platform's: "check
+ * your key" or "your service has no balance" would point the shop at an
+ * account it does not have, so these read "platform credits unavailable"
+ * (the code stays, for the logs). The shop's own key: as the service said.
+ */
+export function fundedFailure<F extends AiProviderFailure>(transport: AiTransport, failure: F): F {
+  return transport.funding === "platform_credit" && OWN_ACCOUNT_KEYS.has(failure.key)
+    ? { ...failure, key: "ai.platform_unavailable" }
+    : failure
+}
+
 export const waitFor = (ms: number, signal: AbortSignal): Promise<void> =>
   new Promise((resolve, reject) => {
     if (signal.aborted) {
@@ -117,6 +137,14 @@ export async function sendByRules<T>(call: RuledSend<T>): Promise<T> {
     } catch (error) {
       // The transport's own refusal carries our key already (the platform's, a host off the list)
       if (isProviderError(error)) {
+        // This call's own deadline reaches the transport as its signal let go: a timeout (P4a D1)
+        if (
+          deadline.aborted &&
+          error.safeMessage === "ai.timeout" &&
+          error.providerCode === "aborted"
+        ) {
+          throw aiProviderError({ service: error.provider, key: "ai.timeout", code: "timeout" })
+        }
         throw error
       }
       return { ok: false, failure: failureOfThrown(service, error, deadline.aborted) }
@@ -130,7 +158,7 @@ export async function sendByRules<T>(call: RuledSend<T>): Promise<T> {
   }
   const waitMs = first.failure.retryAfterMs ?? DEFAULT_RETRY_WAIT_MS
   if (!call.transport.retries || !first.failure.retry || waitMs > MAX_RETRY_WAIT_MS) {
-    throw aiProviderError(first.failure)
+    throw aiProviderError(fundedFailure(call.transport, first.failure))
   }
   try {
     await call.wait(waitMs, signal)
@@ -145,5 +173,5 @@ export async function sendByRules<T>(call: RuledSend<T>): Promise<T> {
   if (second.ok) {
     return second.result
   }
-  throw aiProviderError(second.failure)
+  throw aiProviderError(fundedFailure(call.transport, second.failure))
 }

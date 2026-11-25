@@ -11,7 +11,7 @@ import { PopupStateBadge } from "@/features/popups/components/popup-badges"
 const P = "popups"
 
 /** "12 Ara – 31 Ara", "12 Ara'dan", "31 Ara'ya kadar" or "Süresiz". */
-function datesText(t: TFunction, popup: Popup): string {
+export function datesText(t: TFunction, popup: Popup): string {
   const { starts_at: starts, ends_at: ends } = popup
   return starts && ends
     ? `${formatDate(starts)} – ${formatDate(ends)}`

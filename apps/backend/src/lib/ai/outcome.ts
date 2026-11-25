@@ -79,6 +79,11 @@ const NOT_TAKEN_KEYS: ReadonlySet<AiErrorKey> = new Set([
   "ai.unknown_entity",
   // Ours too: the picture could not be read or sent, so no call was made
   "ai.input_unsupported",
+  // The platform's gateway refused before a provider was asked, or gave the credit back (adr/0085)
+  "ai.credits_exhausted",
+  "ai.credits_daily_cap",
+  "ai.platform_unavailable",
+  "ai.platform_busy",
 ])
 
 // No connection, an open circuit, or a 5xx (adr/0071 §8: the service did not take the job)

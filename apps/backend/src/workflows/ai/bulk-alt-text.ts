@@ -29,6 +29,8 @@ export const AiAltTextInput = z
   .object({
     media_ids: z.array(z.string().regex(MEDIA_ID)).min(1).max(IMAGE_ALT_BULK_MAX),
     service: z.string().regex(NAME).optional(),
+    // Set on the server when queued (never the request's): each item is paid that way or not asked
+    funding: z.enum(["own_key", "platform_credit"]).optional(),
   })
   .strict()
 export type AiAltTextInput = z.infer<typeof AiAltTextInput>
@@ -130,6 +132,7 @@ export function bulkAltText(
             entity_type: "media",
             entity_id: id,
             service: input.service,
+            funding: input.funding,
             user_id: input.user_id,
           },
         })
