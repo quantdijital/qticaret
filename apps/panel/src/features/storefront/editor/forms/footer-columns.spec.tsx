@@ -85,7 +85,22 @@ describe("the brand columns footer's settings", () => {
     expect(changes.at(-1)).toMatchObject({ badge_style: "plain" })
   })
 
+  it("moves the newsletter, hides the brand's contact and centres the line under Stil", async () => {
+    const user = userEvent.setup()
+    const { changes } = renderPanel(columns(), "footer")
+    await openGroup(user, "Yazı ve zemin")
+    expect(screen.getByRole("radio", { name: "Marka altında" })).toHaveAttribute("data-state", "on")
+    await user.click(screen.getByRole("radio", { name: "Son sütun" }))
+    expect(changes.at(-1)).toMatchObject({ news_place: "column" })
+    await user.click(screen.getByRole("radio", { name: "Gizle" }))
+    expect(changes.at(-1)).toMatchObject({ brand_contact: "hide" })
+    await user.click(screen.getByRole("radio", { name: "Ortalı" }))
+    expect(changes.at(-1)).toMatchObject({ bottom_align: "center" })
+  })
+
   it("is found by its everyday words only while the footer is drawn as it", () => {
+    expect(search("bülten yeri", columns())).toContain("footer.news_place")
+    expect(search("bülten yeri", ledger)).not.toContain("footer.news_place")
     expect(search("zemin", columns())).toContain("footer.ground")
     expect(search("tanıtım", columns())).toContain("footer.about")
     expect(search("yalın", columns())).toContain("footer.badge_style")

@@ -34,12 +34,12 @@ export const FIELD_ENTRIES: readonly FieldEntry[] = [
   // One variant: the caret in its price in the card; several: the first without a price opens
   {
     key: "price",
-    part: "variants",
+    part: "data",
     target: "product-variants",
     focus: "#single-price",
     keywords: ["fiyat", "stok"],
   },
-  { key: "barcode", part: "variants", target: VARIANT_CODES_TARGET, keywords: ["gtin", "sku"] },
+  { key: "barcode", part: "data", target: VARIANT_CODES_TARGET, keywords: ["gtin", "sku"] },
   { key: "altText", part: "media", target: MEDIA_ALT_TARGET, keywords: ["görsel"] },
   {
     key: "seoTitle",

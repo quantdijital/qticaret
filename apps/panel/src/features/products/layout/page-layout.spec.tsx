@@ -5,13 +5,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { LayoutSheet } from "./layout-sheet"
 import { HiddenLine, PartSlot } from "./part-slot"
-import { DEFAULT_LAYOUT } from "./parts"
-import type { PartKey, StoredLayout } from "./parts"
+import { DEFAULT_LAYOUT, TAB_KEYS } from "./parts"
+import type { PartKey, StoredLayout, TabPart } from "./parts"
 import { usePageLayout } from "./use-page-layout"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+
+const openTab = vi.fn<(tab: TabPart) => void>()
 
 // Each part as a plain card under its advisor target's id
 const TARGET: Partial<Record<PartKey, string>> = {
@@ -23,7 +25,8 @@ const TARGET: Partial<Record<PartKey, string>> = {
 function Page({ urgent = [], blank = [] }: { urgent?: PartKey[]; blank?: PartKey[] }) {
   const page = usePageLayout(
     (key) => urgent.includes(key),
-    (key) => !blank.includes(key)
+    (key) => !blank.includes(key),
+    { simple: true, open: openTab }
   )
   const draw = (key: PartKey) => {
     const why = page.shownWhy(key)
@@ -54,8 +57,18 @@ function Page({ urgent = [], blank = [] }: { urgent?: PartKey[]; blank?: PartKey
       >
         go to seo
       </button>
+      {/* The advisor's "Alana git" for a simple product's missing barcode */}
+      <button
+        type="button"
+        onClick={() => {
+          page.goTo("product-variant-codes")
+        }}
+      >
+        go to barcode
+      </button>
       <main>{page.layout.main.map(draw)}</main>
       <aside>{page.layout.side.map(draw)}</aside>
+      <section>{TAB_KEYS.map(draw)}</section>
       <HiddenLine parts={page.away} onShow={page.showAll} />
       <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
     </>
@@ -95,16 +108,28 @@ describe("product page layout", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     scroll.mockReset()
+    openTab.mockReset()
     Element.prototype.scrollIntoView = scroll
   })
 
+  it("opens the data card's tab a target is in, a hidden tab drawn first", async () => {
+    renderPage({ main: [], side: [], hidden: ["stock"] })
+    await waitFor(() => {
+      expect(drawn()).not.toContain("stock")
+    })
+    // A simple product's barcode is in its Stok tab, not its variants
+    await userEvent.click(screen.getByRole("button", { name: "go to barcode" }))
+    expect(openTab).toHaveBeenCalledWith("stock")
+    expect(drawn()).toContain("stock")
+  })
+
   it("draws the parts in the shop's order and leaves the hidden ones out, named under the page", async () => {
-    // The pictures moved up over the variants
-    const main: string[] = DEFAULT_LAYOUT.main.filter((key) => key !== "media")
-    main.splice(1, 0, "media")
+    // The product data moved up over the pictures
+    const main: string[] = DEFAULT_LAYOUT.main.filter((key) => key !== "data")
+    main.splice(1, 0, "data")
     renderPage({ main, side: [], hidden: ["faq", "seo"] })
     await waitFor(() => {
-      expect(drawn().slice(0, 3)).toEqual(["general", "media", "variants"])
+      expect(drawn().slice(0, 3)).toEqual(["general", "data", "media"])
     })
     expect(drawn()).not.toContain("seo")
     expect(
@@ -119,7 +144,7 @@ describe("product page layout", () => {
   })
 
   it("leaves out of the hidden line a part that would draw nothing for this product", async () => {
-    renderPage({ main: [], side: [], hidden: ["addons", "seo"] }, [], ["addons"])
+    renderPage({ main: [], side: [], hidden: ["shipping", "seo"] }, [], ["shipping"])
     expect(await screen.findByText("Gizli bölümler: Arama motoru görünümü")).toBeInTheDocument()
   })
 
@@ -156,6 +181,12 @@ describe("product page layout", () => {
     // The name, the variants and the advisor are always shown: no switch to turn them off
     expect(within(sheet).queryByRole("switch", { name: "Genel bilgiler: göster" })).toBeNull()
     expect(within(sheet).queryByRole("switch", { name: "SEO danışmanı: göster" })).toBeNull()
+    expect(within(sheet).queryByRole("switch", { name: "Ürün verileri: göster" })).toBeNull()
+    // The data card's tabs: shown or hidden, never moved; its prices and variants always shown
+    const tabs = within(within(sheet).getByRole("list", { name: "Ürün verileri sekmeleri" }))
+    expect(tabs.queryByRole("switch", { name: "Genel (fiyat): göster" })).toBeNull()
+    expect(tabs.queryByRole("button", { name: /taşı/ })).toBeNull()
+    await user.click(tabs.getByRole("switch", { name: "Kargo (paket ölçüleri): göster" }))
 
     await user.click(within(sheet).getByRole("switch", { name: "Arama motoru görünümü: göster" }))
     await user.click(within(sheet).getByRole("button", { name: "Görseller: yukarı taşı" }))
@@ -166,21 +197,18 @@ describe("product page layout", () => {
         body: {
           product: {
             main: [
-              "general",
               "media",
-              "variants",
+              "general",
               "description",
+              "data",
               "shortDescription",
               "departures",
               "program",
               "seo",
-              "attributes",
               "faq",
-              "addons",
-              "priceHistory",
             ],
-            side: ["summary", "advisor", "organize", "catalog", "shipping"],
-            hidden: ["seo"],
+            side: ["summary", "advisor", "organize"],
+            hidden: ["shipping", "seo"],
             open: [],
           },
         },
@@ -189,8 +217,9 @@ describe("product page layout", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull()
     })
-    expect(drawn().slice(0, 3)).toEqual(["general", "media", "variants"])
+    expect(drawn().slice(0, 3)).toEqual(["media", "general", "description"])
     expect(drawn()).not.toContain("seo")
+    expect(drawn()).not.toContain("shipping")
   })
 
   it("goes back to the default, saved as empty lists", async () => {
@@ -234,7 +263,7 @@ describe("product page layout", () => {
         body: {
           product: expect.objectContaining({
             hidden: [],
-            open: ["seo", "attributes", "faq", "addons", "priceHistory"],
+            open: ["seo", "faq"],
           }) as unknown,
         },
       })

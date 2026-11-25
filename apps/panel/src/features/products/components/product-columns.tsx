@@ -7,7 +7,7 @@ import type { ProductListItem } from "@/features/products/api/products"
 import { ProductRowMenu } from "@/features/products/components/product-row-menu"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
-import { availableStock, priceRange } from "@/features/products/product-math"
+import { availableStock, listSku, priceRange } from "@/features/products/product-math"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
 import type { StoredAssessment } from "@/features/seo/api/advisor"
 import { GRADE_TEXT } from "@/features/seo/advisor/grades"
@@ -19,40 +19,52 @@ const CURRENCY = "try"
 const LOW_STOCK = 5
 
 /**
- * The product list's columns: picture and name, status, stock, variants,
- * category, SEO, price, and the row's ⋯ menu (copying it).
+ * The product list's columns: picture and name (the stock code under it),
+ * status, stock, variants, category, SEO, price, and the row's ⋯ menu.
  */
 export function useProductColumns(
   scores: ReadonlyMap<string, StoredAssessment>,
-  onDuplicate: (product: ProductListItem) => void
+  onDuplicate: (product: ProductListItem) => void,
+  /** The columns the person turned off in "Görünüm" (`list-prefs.ts`). */
+  hidden: readonly string[] = []
 ): Column<ProductListItem>[] {
   const { t } = useTranslation()
   const prefix = useProductPathPrefix()
-  return [
+  const columns: Column<ProductListItem>[] = [
     {
       key: "product",
       header: t("products.columns.product"),
-      cell: (product) => (
-        <div className="flex min-w-0 items-center gap-3">
-          <ProductThumb src={product.thumbnail} />
-          <div className="flex min-w-0 flex-col">
-            <Link
-              to="/products/$id"
-              params={{ id: product.id }}
-              className="truncate font-medium hover:underline"
-              onClick={(event) => {
-                event.stopPropagation()
-              }}
-            >
-              {product.title}
-            </Link>
-            <span className="truncate text-xs text-muted-foreground">
-              {prefix}
-              {product.handle}
-            </span>
+      cell: (product) => {
+        const sku = listSku(product.variants)
+        return (
+          <div className="flex min-w-0 items-center gap-3">
+            <ProductThumb src={product.thumbnail} />
+            <div className="flex min-w-0 flex-col">
+              <Link
+                to="/products/$id"
+                params={{ id: product.id }}
+                className="truncate font-medium hover:underline"
+                onClick={(event) => {
+                  event.stopPropagation()
+                }}
+              >
+                {product.title}
+              </Link>
+              <span className="truncate text-xs text-muted-foreground">
+                {sku ? (
+                  <span className="text-foreground/80" title={t("products.columns.sku")}>
+                    {sku.sku}
+                    {sku.more > 0 ? ` +${String(sku.more)}` : ""}
+                    {" · "}
+                  </span>
+                ) : null}
+                {prefix}
+                {product.handle}
+              </span>
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: "status",
@@ -161,4 +173,5 @@ export function useProductColumns(
       cell: (product) => <ProductRowMenu product={product} onDuplicate={onDuplicate} />,
     },
   ]
+  return columns.filter((column) => !hidden.includes(column.key))
 }

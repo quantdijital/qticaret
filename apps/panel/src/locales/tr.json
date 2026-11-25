@@ -3325,7 +3325,8 @@
       "category": "Kategori",
       "updated": "Son değişiklik",
       "price": "Fiyat",
-      "actions": "İşlemler"
+      "actions": "İşlemler",
+      "sku": "Stok kodu (SKU)"
     },
     "errors": {
       "title": "Ürün adı en az 2 karakter olmalı.",
@@ -4061,6 +4062,19 @@
       "selectAll_one": "Eşleşen {{formatted}} ürünün hepsini seç",
       "selectAll_other": "Eşleşen {{formatted}} ürünün hepsini seç",
       "clear": "Seçimi kaldır",
+      "delete": {
+        "action": "Sil",
+        "working": "Siliniyor… {{done}}/{{total}}",
+        "title_one": "{{formatted}} ürün silinsin mi?",
+        "title_other": "{{formatted}} ürün silinsin mi?",
+        "description": "Ürünler, varyantları ve stok kayıtlarıyla birlikte silinir. Bu işlem geri alınamaz. Silinemeyen ürünler atlanır, nedeni yazılır.",
+        "confirm_one": "{{formatted}} ürünü sil",
+        "confirm_other": "{{formatted}} ürünü sil",
+        "done_one": "{{formatted}} ürün silindi.",
+        "done_other": "{{formatted}} ürün silindi.",
+        "skipped_one": "{{formatted}} ürün silinemedi; seçili bırakıldı.",
+        "skipped_other": "{{formatted}} ürün silinemedi; seçili bırakıldı."
+      },
       "edit": "Toplu düzenle",
       "tooMany": "Bir seferde en fazla {{max}} ürün düzenlenebilir; aramayı ya da görünümü daraltın.",
       "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
@@ -4205,6 +4219,43 @@
       "table": "{{from}} tarihinden bugüne fiyatlar",
       "unchanged": "Son 90 günde fiyat değişmedi."
     },
+    "sale": {
+      "label": "İndirimli fiyat",
+      "hint": "Boş bırakırsanız indirim yok. Vitrinde üstü çizili fiyat, indirimden önceki 10 günün en düşük fiyatıdır.",
+      "percent": "%{{percent}} indirim",
+      "schedule": "Zamanla",
+      "unschedule": "Zamanlamayı kaldır",
+      "starts": "Başlangıç",
+      "ends": "Bitiş",
+      "running": "İndirim sürüyor.",
+      "runsUntil": "İndirim {{date}} tarihine kadar sürer.",
+      "startsOn": "İndirim {{date}} tarihinde başlar.",
+      "remove": "İndirimi kaldır",
+      "apply": "İndirimi kaydet",
+      "cancel": "Vazgeç",
+      "saved": "İndirimli fiyat kaydedildi.",
+      "errors": {
+        "amount": "Geçerli bir fiyat girin.",
+        "noRegular": "Önce normal fiyatı kaydedin.",
+        "notBelow": "İndirimli fiyat normal fiyattan düşük olmalı.",
+        "datesOrder": "Bitiş, başlangıçtan önce olamaz.",
+        "ended": "Bitiş tarihi geçmiş; ileri bir tarih seçin."
+      },
+      "bulk": {
+        "action": "İndirimli fiyat",
+        "title": "İndirimli fiyat",
+        "description_one": "Seçili {{count}} varyant",
+        "description_other": "Seçili {{count}} varyant",
+        "mode": "İndirim türü",
+        "percent": "Yüzde indir",
+        "price": "Fiyat gir",
+        "percentLabel": "İndirim oranı",
+        "apply_one": "{{count}} varyanta uygula",
+        "apply_other": "{{count}} varyanta uygula",
+        "done_one": "{{count}} varyantın indirimi güncellendi.",
+        "done_other": "{{count}} varyantın indirimi güncellendi."
+      }
+    },
     "interest": {
       "title": "Müşteri ilgisi",
       "wishlist": "Favorisine ekleyen",
@@ -4226,6 +4277,7 @@
       "title": "Ürün sayfasını düzenle",
       "description": "Bölümleri gizleyin ya da sürükleyerek sıralayın. Düzen tüm ekip için geçerlidir; gizlenen bölümün bilgileri silinmez.",
       "main": "Ana sütun",
+      "tabs": "Ürün verileri sekmeleri",
       "side": "Yan sütun",
       "locked": "Hep görünür",
       "conditional": "Yalnız kullanıldığında görünür",
@@ -4240,7 +4292,7 @@
       "shownRevealed": "Gizlenen bölüm: bu ziyaret için gösteriliyor.",
       "parts": {
         "general": "Genel bilgiler",
-        "variants": "Varyantlar ve fiyat",
+        "variants": "Varyantlar",
         "media": "Görseller",
         "description": "Açıklama",
         "shortDescription": "Kısa açıklama",
@@ -4249,13 +4301,15 @@
         "seo": "Arama motoru görünümü",
         "attributes": "Özellikler",
         "faq": "Sık sorulan sorular",
-        "addons": "Ek seçenekler",
-        "priceHistory": "Fiyat geçmişi",
         "summary": "Özet",
         "advisor": "SEO danışmanı",
         "organize": "Kategori, marka ve KDV",
         "catalog": "Katalog bilgileri",
-        "shipping": "Paket ölçüleri"
+        "shipping": "Kargo (paket ölçüleri)",
+        "data": "Ürün verileri",
+        "pricing": "Genel (fiyat)",
+        "stock": "Stok",
+        "advanced": "Gelişmiş (ek seçenekler, fiyat geçmişi)"
       },
       "presets": "Hazır düzenler",
       "preset": {
@@ -4264,9 +4318,9 @@
         "advanced": "Gelişmiş"
       },
       "presetHint": {
-        "basic": "Genel bilgiler, varyantlar ve fiyat, görseller, açıklama ve SEO danışmanı. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
+        "basic": "Genel bilgiler, görseller, açıklama, SEO danışmanı ve ürün verilerinde fiyat, stok ve varyantlar. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
         "standard": "İlk düzen: seyrek bölümler sayfanın altında kapalı durur.",
-        "advanced": "Her bölüm görünür; arama motoru görünümü, özellikler, SSS, ek seçenekler ve fiyat geçmişi açık gelir.",
+        "advanced": "Her bölüm ve sekme görünür; arama motoru görünümü ve SSS açık gelir.",
         "custom": "Elle düzenlendi."
       },
       "shortcuts": "Kısayollar",
@@ -4297,14 +4351,40 @@
       },
       "shortcutSave": "Değişiklikleri kaydet"
     },
+    "data": {
+      "title": "Ürün verileri",
+      "type": "Ürün tipi",
+      "types": {
+        "simple": "Basit ürün",
+        "variable": "Varyantlı ürün"
+      },
+      "kind": {
+        "digital": "Dijital ürün: kargo yok",
+        "service": "Hizmet: kargo yok"
+      },
+      "variableLocked_one": "Bu ürünün {{count}} varyantı var.",
+      "variableLocked_other": "Bu ürünün {{count}} varyantı var; basit ürüne dönmek için önce varyantları bire indirin.",
+      "tabs": {
+        "pricing": "Genel",
+        "stock": "Stok",
+        "shipping": "Kargo",
+        "attributes": "Özellikler",
+        "variants": "Varyantlar",
+        "catalog": "Katalog",
+        "advanced": "Gelişmiş"
+      },
+      "pricesOnVariants": "Fiyatlar her varyantta ayrı girilir.",
+      "stockOnVariants": "Stok ve kodlar her varyantta ayrı girilir.",
+      "goVariants": "Varyantlara git"
+    },
     "variant": {
       "title": "Varyantı düzenle",
       "listTitle": "Varyantlar",
-      "listHint": "Fiyatını, stoğunu, kodlarını ve görsellerini düzenlemek için bir varyanta tıklayın.",
+      "listHint": "Seçenekleri yazıp varyantları oluşturun; bir varyantın fiyatını, stoğunu, kodlarını ve görsellerini satırına tıklayarak yerinde düzenleyin.",
       "singleTitle": "Fiyat, stok ve kodlar",
       "price": "Fiyat",
-      "sellingPrice": "Satış fiyatı",
-      "priceHint": "KDV dahil; vitrinde bu fiyat görünür.",
+      "sellingPrice": "Normal fiyat",
+      "priceHint": "KDV dahil. İndirimli fiyat yoksa vitrinde bu fiyat görünür.",
       "applyAll_one": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "applyAll_other": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "stock": "Stok",
@@ -4352,9 +4432,67 @@
         "noBarcode": "Barkod yok"
       },
       "details": "Tüm varyant ayrıntıları",
-      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın."
+      "detailsDirty": "Önce bu karttaki değişiklikleri kaydedin ya da geri alın.",
+      "untrackedShort": "Stok takibi yok — her zaman satılır",
+      "groupCount_one": "{{count}} varyant",
+      "groupCount_other": "{{count}} varyant",
+      "options": {
+        "title": "Seçenekler",
+        "none": "Bu ürünün seçeneği yok. Renk, beden gibi seçenekler ekleyip varyantlarını oluşturabilirsiniz.",
+        "add": "Seçenek ekle",
+        "edit": "Seçenekleri düzenle",
+        "hint": "Her seçeneğin değerlerini yazıp Enter'a basın. \"Varyantları oluştur\" eksik bütün birleşimleri ekler; var olan varyantlar silinmez, aynısı ikinci kez oluşturulmaz.",
+        "preview_one": "{{count}} varyant oluşturulacak; fiyatını oluşturduktan sonra girersiniz.",
+        "preview_other": "{{count}} varyant oluşturulacak; fiyatlarını oluşturduktan sonra girersiniz.",
+        "nothingNew": "Oluşturulacak yeni varyant yok.",
+        "fill_one": "{{count}} varyanta yeni seçeneğin ilk değeri verilecek.",
+        "fill_other": "{{count}} varyanta yeni seçeneğin ilk değeri verilecek.",
+        "create_one": "{{count}} varyantı oluştur",
+        "create_other": "{{count}} varyantı oluştur",
+        "save": "Seçenekleri kaydet",
+        "created_one": "{{count}} varyant oluşturuldu. Fiyatını girin.",
+        "created_other": "{{count}} varyant oluşturuldu. Fiyatlarını girin.",
+        "saved": "Seçenekler kaydedildi.",
+        "valueUsed": "\"{{value}}\" değerini kullanan varyant var; bu değer kaldırılamaz.",
+        "optionUsed": "Bu seçeneği kullanan varyant var; kaldırılamaz.",
+        "problems": {
+          "name": "Değer yazılan her seçeneğin bir adı olmalı.",
+          "duplicate": "Aynı adla iki seçenek olamaz."
+        }
+      },
+      "bulk": {
+        "title": "Toplu değişiklik",
+        "field": "Değiştirilecek alan",
+        "value": "Yeni değer",
+        "filter": "Hangi varyantlar",
+        "every": "Tüm varyantlar",
+        "fields": {
+          "price": "Normal fiyat",
+          "cost": "Maliyet",
+          "stock": "Stok adedi"
+        },
+        "applyAll_one": "{{count}} varyanta uygula",
+        "applyAll_other": "{{count}} varyanta uygula",
+        "applySelected_one": "Seçilen {{count}} varyanta uygula",
+        "applySelected_other": "Seçilen {{count}} varyanta uygula",
+        "applied_one": "{{count}} varyant güncellendi.",
+        "applied_other": "{{count}} varyant güncellendi.",
+        "untracked_one": "Stoğu sayılmayan {{count}} varyant atlandı.",
+        "untracked_other": "Stoğu sayılmayan {{count}} varyant atlandı.",
+        "nothing": "Değişecek bir şey yok: varyantlar zaten bu değerde ya da stokları sayılmıyor.",
+        "pick": "{{name}} varyantını seç",
+        "pickAll": "Tüm varyantları seç",
+        "pickGroup": "{{name}} grubunu seç"
+      }
     },
     "rowActions": "{{title}} işlemleri",
+    "listOptions": {
+      "label": "Görünüm",
+      "perPage": "Sayfa başına",
+      "pageSize_one": "{{count}} ürün",
+      "pageSize_other": "{{count}} ürün",
+      "columns": "Sütunlar"
+    },
     "duplicate": {
       "action": "Kopyala",
       "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
@@ -5062,12 +5200,35 @@
     },
     "address": {
       "edit": "Düzenle",
-      "title": "#{{number}} teslimat adresi",
-      "description": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+      "title": {
+        "shipping": "Teslimat adresi",
+        "billing": "Fatura adresi"
+      },
+      "hint": {
+        "shipping": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+        "billing": "Fatura kesilene kadar fatura adresi değiştirilebilir."
+      },
+      "saved": {
+        "shipping": "Teslimat adresi güncellendi.",
+        "billing": "Fatura adresi güncellendi."
+      },
+      "editOf": {
+        "shipping": "Teslimat adresini düzenle",
+        "billing": "Fatura adresini düzenle"
+      },
       "firstName": "Ad",
       "lastName": "Soyad",
       "nameRequired": "Ad ve soyad gerekli.",
-      "saved": "Teslimat adresi güncellendi."
+      "company": "Firma adı",
+      "sameAsDelivery": "Teslimat adresiyle aynı.",
+      "invoiced": "Fatura kesildi; fatura adresi artık değişmez.",
+      "email": "E-posta",
+      "emailHint": "Siparişin iletileri bundan sonra bu adrese gider. Müşterinin hesabındaki e-posta değişmez.",
+      "emailRequired": "E-posta gerekli.",
+      "emailInvalid": "Geçerli bir e-posta adresi yazın.",
+      "emailSaved": "E-posta güncellendi.",
+      "editEmail": "E-postayı düzenle",
+      "noEmail": "E-posta yok."
     },
     "filters": {
       "payment": "Ödeme",
@@ -5101,7 +5262,12 @@
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
-      "days": "Sipariş tarihi"
+      "days": "Sipariş tarihi",
+      "customer": "Müşteri",
+      "customerOrders": "Bu müşterinin diğer siparişleri",
+      "anyCustomer": "Ad ya da e-posta ile arayın",
+      "noCustomer": "Müşteri bulunamadı.",
+      "customerUnknown": "Bulunamayan müşteri"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",
@@ -5564,7 +5730,8 @@
       "tabs": {
         "label": "Müşterinin kayıtları",
         "orders": "Siparişler"
-      }
+      },
+      "allOrders": "Tüm siparişleri"
     },
     "consents": {
       "title": "İleti izinleri",
@@ -9537,6 +9704,20 @@
           "hint": "Görselin panele değdiği kenar.",
           "straight": "Düz",
           "curved": "Yuvarlak"
+        },
+        "button_tone": {
+          "label": "Düğme rengi",
+          "term": "button colour",
+          "hint": "İlk düğme ana renkte ya da vurgu renginde.",
+          "primary": "Ana",
+          "accent": "Vurgu"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ altında vurgu renginde küçük bir çiçek demeti (geniş ekranda).",
+          "none": "Yok",
+          "flower": "Çiçek"
         }
       },
       "products": {
@@ -9893,6 +10074,24 @@
               "lively": "Canlı"
             },
             "hint": "Sakin, temanın kendi kısa geçişleridir. Canlı'da ürün kartının fotoğrafı üzerine gelince hafifçe büyür ve kart yükselir, bölümler ve ürünler sayfa kaydıkça yumuşakça belirir, görseller yüklenince süzülerek gelir, düğmeler basılınca hafifçe çöker. Hareketi azaltmayı seçmiş ziyaretçide hiçbiri oynamaz."
+          },
+          "page_width": {
+            "label": "Sayfa genişliği",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standart",
+              "narrow": "Dar"
+            },
+            "hint": "İçeriğin sığdığı sütun. Standart 1440 px, Dar 1344 px: vitrin rahat okunan, daha toplu bir sütunda durur."
+          },
+          "accent_ink": {
+            "label": "Vurgu üstündeki yazı",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Otomatik",
+              "light": "Hep beyaz"
+            },
+            "hint": "Otomatik'te vurgu renginin üstündeki yazı (düğme, etiket) hangisi daha iyi okunuyorsa beyaz ya da koyudur. Hep beyaz, parlak bir turuncu gibi açık vurgularda beyaz kalın yazı ister: renk beyazla en az 3:1 vermeli."
           }
         },
         "card": "Ürün kartı",
@@ -9956,7 +10155,8 @@
           "text_positionHint": "Görsel üstünde: ürün adı ve fiyat fotoğrafın altındaki koyu geçişin üstünde durur. Yalnız standart kartta geçer.",
           "textPositions": {
             "below": "Görselin altında",
-            "over": "Görselin üstünde"
+            "over": "Görselin üstünde",
+            "over_split": "Görselin üstünde, fiyat sağda"
           },
           "rating_badge": "Puanı görselde rozet olarak göster",
           "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
@@ -10608,6 +10808,13 @@
           "submenus": "Alt menülerde",
           "off": "Yok"
         },
+        "tool_labels": {
+          "label": "Simge yazıları",
+          "term": "tool labels",
+          "show": "Yazılı",
+          "hide": "Yalnız simge",
+          "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
+        },
         "tools_style": {
           "label": "Sağdaki simgeler",
           "term": "icons",
@@ -10775,6 +10982,25 @@
           "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
           "card": "Kart içinde",
           "plain": "Yalın"
+        },
+        "news_place": {
+          "label": "E-bülten yeri",
+          "term": "newsletter place",
+          "brand": "Marka altında",
+          "column": "Son sütun"
+        },
+        "brand_contact": {
+          "label": "Marka sütununda iletişim",
+          "term": "brand contact",
+          "hint": "Gizlerseniz adres, telefon ve e-posta marka sütununda görünmez; İletişim sayfası yerinde kalır.",
+          "show": "Göster",
+          "hide": "Gizle"
+        },
+        "bottom_align": {
+          "label": "Alt satır",
+          "term": "bottom line",
+          "spread": "Yayık",
+          "center": "Ortalı"
         },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
@@ -11422,6 +11648,18 @@
           "label": "İkon göster",
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
+        },
+        "arrangement": {
+          "label": "Dizilim",
+          "term": "arrangement",
+          "hint": "Satır: ikon solda, rakam ve etiketi yanında, tek sıkı satır.",
+          "stacked": "Alt alta",
+          "row": "Satır"
+        },
+        "social": {
+          "label": "Sosyal hesapları göster",
+          "term": "social",
+          "hint": "Satırın sonunda \"Bizi izleyin\" ve mağaza bilgilerindeki sosyal hesaplar. Yalnız Satır dizilimde görünür."
         }
       },
       "steps": {
@@ -11479,7 +11717,28 @@
         "intro": "Giriş",
         "link": "Düğme",
         "linkTerm": "button",
-        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
+        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür.",
+        "panel_tone": {
+          "label": "Panel tonu",
+          "term": "panel tone",
+          "hint": "Panel bölümün zemininde ya da üstünde ana renginizin açık bir tonuyla.",
+          "ground": "Zemin",
+          "tint": "Açık ton"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ alt köşesinde küçük bir yaprak dalı (geniş ekranda).",
+          "none": "Yok",
+          "leaves": "Yaprak"
+        },
+        "cover_ratio": {
+          "label": "Kapak oranı",
+          "term": "cover ratio",
+          "hint": "Yazı kartlarındaki kapak görselinin biçimi.",
+          "standard": "16:10",
+          "wide": "Geniş (2:1)"
+        }
       },
       "heroFull": {
         "accent": {
@@ -11650,6 +11909,13 @@
           "hint": "Dar ekranda sığmayan kategoriler yana kayar ya da alt satıra iner.",
           "scroll": "Yana kaydır",
           "wrap": "Alt satıra geç"
+        },
+        "row_style": {
+          "label": "Dizilim",
+          "term": "row style",
+          "hint": "Alt alta, başlıklı'da ad ikonun altında ve bölüm başlığı görünür. Şerit'te kategoriler sayfa boyunca tek sırada durur, ad ikonun yanındadır; başlık yalnız ekran okuyucuya kalır.",
+          "stacked": "Alt alta, başlıklı",
+          "strip": "Şerit"
         }
       },
       "icons": {

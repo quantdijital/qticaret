@@ -35,6 +35,8 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   media_ground: saved.media_ground,
   density: saved.density,
   motion: saved.motion,
+  page_width: saved.page_width,
+  accent_ink: saved.accent_ink,
 })
 
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */

@@ -26,6 +26,8 @@ interface Frame {
     media_ground: string
     density: string
     motion: string
+    page_width: string
+    accent_ink: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
     listing_page: { default_view: string; view_switch: string; breadcrumb_current: string }
     search_form: Record<string, unknown>
@@ -40,6 +42,9 @@ const KIT = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  // The page's width and the words on the accent, at today's (adr/0067 Ek 2026-11-25)
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */

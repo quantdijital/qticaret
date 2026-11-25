@@ -1,5 +1,6 @@
 import "server-only"
 import type { StorePostsSection } from "@qticaret/types"
+import { postsPanelStepOf } from "@qticaret/types/section-posts"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { PostsSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
@@ -37,5 +38,10 @@ export async function postsView(
     eyebrow: section.eyebrow ?? null,
     intro: section.intro ?? null,
     more: layoutLink(section.link ?? null, t) ?? all,
+    ...(postsPanelStepOf("panel_tone", section.panel_tone) === "tint" ? { panelTone: "tint" } : {}),
+    ...(postsPanelStepOf("ornament", section.ornament) === "leaves" ? { ornament: "leaves" } : {}),
+    ...(postsPanelStepOf("cover_ratio", section.cover_ratio) === "wide"
+      ? { coverRatio: "wide" }
+      : {}),
   }
 }

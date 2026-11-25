@@ -17,6 +17,6 @@ describe("the product card's choices", () => {
     // The quick view button: on hover first, today's nothing being the switch off
     expect(CARD_QUICK_VIEW_TRIGGERS).toEqual(["hover", "icon"])
     // adr/0077 Ek "tur kartı": today's words under the photo first
-    expect(CARD_TEXT_POSITIONS).toEqual(["below", "over"])
+    expect(CARD_TEXT_POSITIONS).toEqual(["below", "over", "over_split"])
   })
 })

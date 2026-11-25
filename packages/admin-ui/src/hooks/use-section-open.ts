@@ -37,6 +37,34 @@ function writeSectionOpen(user: string, name: string, open: boolean): void {
   }
 }
 
+/**
+ * A person's last choice among a few (a card's open tab), remembered per
+ * user in this browser beside the sections' (`name`: "product.dataTab");
+ * the fallback until they chose, or when storage refuses.
+ */
+export function useRememberedChoice<T extends string>(
+  name: string,
+  fallback: T
+): [string, (next: T) => void] {
+  const user = useContext(SectionOwner)() ?? "anyone"
+  const [value, setValue] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem(keyOf(user, name)) ?? fallback
+    } catch {
+      return fallback
+    }
+  })
+  const choose = (next: T) => {
+    setValue(next)
+    try {
+      window.localStorage.setItem(keyOf(user, name), next)
+    } catch {
+      // Not remembered: the next visit starts on the fallback
+    }
+  }
+  return [value, choose]
+}
+
 // The sections on the page by their element id: a jump to a field inside a closed one opens it first
 const openers = new Map<string, () => void>()
 

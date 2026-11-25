@@ -218,6 +218,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   media_ground: kitField("media_ground", "surfaces"),
   menu_style: kitField("menu_style", "surfaces"),
   motion: kitField("motion", "surfaces"),
+  page_width: { ...kitField("page_width", "spacing"), keywords: `${C}.spacingWords` },
+  accent_ink: kitField("accent_ink", "colors"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,

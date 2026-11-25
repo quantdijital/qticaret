@@ -1,11 +1,18 @@
 {
   "settings_version": 2,
   "theme": "atolye",
-  "colors": { "primary": "#264f33", "accent": "#b44f14", "background": "warm" },
-  "typography": { "heading": "manrope", "body": "manrope" },
+  "colors": {
+    "primary": "#264f33",
+    "accent": "#e9730c",
+    "background": "warm"
+  },
+  "typography": {
+    "heading": "plus-jakarta",
+    "body": "plus-jakarta"
+  },
   "radius": "round",
   "product_card": {
-    "ratio": "3:4",
+    "ratio": "4:5",
     "show_brand": false,
     "show_rating": true,
     "variant": "standard",
@@ -13,14 +20,17 @@
     "delivery_note": false,
     "full_button": false,
     "no_reviews": "hide",
-    "text_position": "over",
+    "text_position": "over_split",
     "rating_badge": true,
-    "duration_row": true,
-    "per_person": true
+    "duration_row": false,
+    "per_person": false
   },
-  "header": { "layout": "left", "sticky": true },
+  "header": {
+    "layout": "left",
+    "sticky": true
+  },
   "buttons": "pill",
-  "section_spacing": "normal",
+  "section_spacing": "tight",
   "surface_style": "filled",
   "search_form": {
     "attribute_key": "gidilecek_yer",
@@ -36,6 +46,8 @@
   "menu_style": "underline",
   "shadow": "float",
   "media_ground": "well",
-  "density": "airy",
-  "motion": "lively"
+  "density": "balanced",
+  "motion": "lively",
+  "page_width": "narrow",
+  "accent_ink": "light"
 }

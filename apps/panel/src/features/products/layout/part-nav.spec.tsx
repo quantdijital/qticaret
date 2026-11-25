@@ -15,12 +15,12 @@ const MARKS: Partial<Record<PartKey, PartMark>> = {
   attributes: "urgent",
 }
 
-/** The page's parts as `PartSlot` draws them; add-ons draw nothing here. */
+/** The page's parts as `PartSlot` draws them; the FAQ draws nothing here. */
 function Page({ wide = true, onGo = vi.fn() }: { wide?: boolean; onGo?: (key: PartKey) => void }) {
   return (
     <main>
       <PartNav
-        parts={["general", "seo", "attributes", "addons"]}
+        parts={["general", "seo", "attributes", "faq"]}
         marks={(key) => MARKS[key] ?? null}
         wide={wide}
         onGo={onGo}
@@ -34,7 +34,7 @@ function Page({ wide = true, onGo = vi.fn() }: { wide?: boolean; onGo?: (key: Pa
       <div data-part="attributes" style={{ display: "contents" }}>
         <section id="product-attributes">attributes</section>
       </div>
-      <div data-part="addons" style={{ display: "contents" }} />
+      <div data-part="faq" style={{ display: "contents" }} />
     </main>
   )
 }

@@ -4,10 +4,11 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
-import type { ProductCatalog } from "@/features/products/api/product-edit"
+import { DirtyRegistryProvider, useDirtyRegistry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import type { ProductDetail } from "@/features/products/api/products"
 import { VARIANT_CODES_TARGET } from "./sections"
 import { VariantsCard } from "./variants-card"
+import { answer, PRODUCT, variant } from "./variants-card.fixture"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
 const batchVariants = vi.hoisted(() => vi.fn<(id: string, body: unknown) => Promise<unknown>>())
@@ -21,84 +22,36 @@ vi.mock("@/lib/sdk", () => ({
     admin: {
       store: { list: () => Promise.resolve({ stores: [{ default_location_id: "sloc_1" }] }) },
       shippingProfile: { list: () => Promise.resolve({ shipping_profiles: [] }) },
-      product: { batchVariants, batchVariantImages, update: vi.fn() },
+      product: { batchVariants, batchVariantImages, update: vi.fn(), linkOptions: vi.fn() },
       inventoryItem: { batchInventoryItemsLocationLevels: vi.fn() },
     },
   },
 }))
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }))
 
-const variant = (
-  id: string,
-  value: string,
-  codes: Record<string, string | null> = {},
-  amount = 3100
-) => ({
-  id,
-  title: value,
-  variant_rank: Number(id.slice(-1)),
-  manage_inventory: false,
-  allow_backorder: false,
-  sku: null,
-  ean: null,
-  upc: null,
-  barcode: null,
-  options: [{ value, option_id: "opt_color" }],
-  ...codes,
-  prices: [{ id: `price_${id}`, amount, currency_code: "try" }],
-  inventory_items: [],
-})
-
-const PRODUCT = {
-  id: "prod_1",
-  title: "Yatağan Çakı",
-  updated_at: "2026-11-05T09:00:00Z",
-  options: [{ id: "opt_color", title: "Renk" }],
-  images: [
-    { id: "img_1", url: "https://cdn/1.jpg", rank: 0, variants: [] },
-    { id: "img_2", url: "https://cdn/2.jpg", rank: 1, variants: [{ id: "variant_2" }] },
-  ],
-  media_assets: [
-    { id: "media_2", url: "https://cdn/2.jpg", alt: "", file_id: "f2", derived_at: null },
-  ],
-  variants: [
-    variant("variant_1", "Sarı", { sku: "MYL-1", ean: "8690000000005" }),
-    variant("variant_2", "Pembe", { sku: "MYL-2", barcode: "RAF-25" }),
-    variant("variant_3", "Mor", { sku: "MYL-3", ean: "8690000000005" }),
-  ],
-} as unknown as ProductDetail
-
-const CATALOG = {
-  variants: [
-    { id: "variant_1", title: "Sarı", sku: "MYL-1", mpn: null, cost: null, gtin: "8690000000005" },
-    { id: "variant_2", title: "Pembe", sku: "MYL-2", mpn: null, cost: null, gtin: null },
-    { id: "variant_3", title: "Mor", sku: "MYL-3", mpn: "M-3", cost: null, gtin: null },
-  ],
-} as unknown as ProductCatalog
-
-function answer(url: string): unknown {
-  if (url === "/admin/features") {
-    return { features: [] }
-  }
-  if (url.startsWith("/admin/platform-settings/")) {
-    return { values: { weight_unit: "g", dimension_unit: "cm" } }
-  }
-  if (url.endsWith("/price-history")) {
-    return { currency_code: "try", rule_version: "2025", window_days: 10, variants: [] }
-  }
-  return CATALOG
+/** The page's save bar, as far as the card is concerned: its count and its "Kaydet". */
+function BarProbe() {
+  const registry = useDirtyRegistry()
+  return (
+    <button type="button" onClick={() => registry?.submitAll()}>
+      {`Bar: ${String(registry?.now.dirty ?? 0)}`}
+    </button>
+  )
 }
 
 function renderCard(product: ProductDetail = PRODUCT) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <VariantsCard product={product} />
+      <DirtyRegistryProvider>
+        <VariantsCard product={product} />
+        <BarProbe />
+      </DirtyRegistryProvider>
     </QueryClientProvider>
   )
 }
 
-/** The rows wait for the catalog (unit costs, MPNs): the dialog starts from them. */
+/** The rows wait for the catalog (unit costs, MPNs): the form starts from them. */
 async function row(name: RegExp) {
   const button = await screen.findByRole("button", { name })
   await waitFor(() => {
@@ -106,6 +59,8 @@ async function row(name: RegExp) {
   })
   return button
 }
+
+const form = () => screen.getByRole("form", { name: "Varyantı düzenle" })
 
 beforeEach(() => {
   fetchMock.mockReset()
@@ -116,9 +71,9 @@ beforeEach(() => {
   batchVariantImages.mockResolvedValue({})
 })
 
-/** The owner, 2026-11-05: "bu ürünü koyarsın, üzerine tıklarız, modal açılır, … düzenler, girer". */
+/** The owner, 2026-11-25: WooCommerce's variations, each row opening in place, no dialog. */
 describe("the variants card", () => {
-  it("lists each variant as a row and opens its dialog on a click", async () => {
+  it("lists each variant as a row and opens its form in place on a click", async () => {
     const user = userEvent.setup()
     renderCard()
     const pembe = await row(/Renk: Pembe/)
@@ -126,63 +81,58 @@ describe("the variants card", () => {
     expect(pembe).toHaveTextContent("MYL-2")
     expect(pembe).toHaveTextContent("3.100,00")
     expect(pembe).toHaveTextContent("Barkod yok")
+    // Untracked stock is always sold (platform rule)
+    expect(pembe).toHaveTextContent("Stok takibi yok — her zaman satılır")
+    expect(pembe).toHaveAttribute("aria-expanded", "false")
 
     await user.click(pembe)
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    expect(dialog).toHaveAccessibleDescription("Renk: Pembe · MYL-2")
-    expect(within(dialog).getByLabelText("Satış fiyatı")).toHaveValue("3.100,00")
-    expect(within(dialog).getByText("2 / 3")).toBeInTheDocument()
-    // The size scale's `lg`, its body scrolling between a fixed header and footer
-    expect(dialog).toHaveAttribute("data-size", "lg")
-    expect(dialog).toHaveAttribute("data-pane")
+    expect(pembe).toHaveAttribute("aria-expanded", "true")
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(within(form()).getByLabelText("Normal fiyat")).toHaveValue("3.100,00")
+    // Codes, parcel and pictures in the same place, one under another
+    expect(within(form()).getByLabelText("Barkod (GTIN)")).toBeInTheDocument()
+    expect(within(form()).getByRole("heading", { name: "Ölçüler" })).toBeInTheDocument()
+
+    await user.click(pembe)
+    expect(screen.queryByRole("form")).toBeNull()
   })
 
-  it("walks to the next variant, asking before an unsaved change is lost", async () => {
+  it("asks before another row's opening loses an unsaved change", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Sarı/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-
-    await user.click(within(dialog).getByRole("button", { name: "Sonraki varyant" }))
-    expect(dialog).toHaveAccessibleDescription("Renk: Pembe · MYL-2")
-    expect(within(dialog).getByRole("button", { name: "Önceki varyant" })).toBeEnabled()
-
-    const price = within(dialog).getByLabelText("Satış fiyatı")
+    const price = within(form()).getByLabelText("Normal fiyat")
     await user.clear(price)
     await user.type(price, "2.900")
-    await user.click(within(dialog).getByRole("button", { name: "Sonraki varyant" }))
+    await user.click(await row(/Renk: Mor/))
     const ask = screen.getByRole("alertdialog", { name: "Kaydedilmemiş değişiklikler atılsın mı?" })
     await user.click(within(ask).getByRole("button", { name: "Değişiklikleri at" }))
 
-    expect(dialog).toHaveAccessibleDescription("Renk: Mor · MYL-3")
-    expect(within(dialog).getByLabelText("Satış fiyatı")).toHaveValue("3.100,00")
-    expect(within(dialog).getByRole("button", { name: "Sonraki varyant" })).toBeDisabled()
+    expect(await row(/Renk: Mor/)).toHaveAttribute("aria-expanded", "true")
+    expect(within(form()).getByLabelText("Normal fiyat")).toHaveValue("3.100,00")
     expect(batchVariants).not.toHaveBeenCalled()
   })
 
-  it("gives the price to every variant when asked", async () => {
+  it("joins the page's save bar: an edit counts there and the bar saves it", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Sarı/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    const price = within(dialog).getByLabelText("Satış fiyatı")
+    const price = within(form()).getByLabelText("Normal fiyat")
     await user.clear(price)
     await user.type(price, "2.900")
-    await user.click(within(dialog).getByRole("checkbox", { name: /diğer 2 varyanta da uygula/ }))
-    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await user.click(screen.getByRole("button", { name: "Bar: 1" }))
 
     await waitFor(() => {
       expect(batchVariants).toHaveBeenCalledWith("prod_1", {
-        update: ["variant_1", "variant_2", "variant_3"].map((id) => ({
-          id,
-          prices: [{ id: `price_${id}`, currency_code: "try", amount: 2900 }],
-        })),
+        update: [
+          {
+            id: "variant_1",
+            prices: [{ id: "price_variant_1", currency_code: "try", amount: 2900 }],
+          },
+        ],
       })
     })
-    // Saved, it closes
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull()
-    })
+    await screen.findByRole("button", { name: "Bar: 0" })
   })
 
   it("opens the first variant without a barcode on its codes for the advisor's jump", async () => {
@@ -196,13 +146,8 @@ describe("the variants card", () => {
       revealSection(VARIANT_CODES_TARGET)
     })
 
-    const dialog = await screen.findByRole("dialog", { name: "Varyantı düzenle" })
-    expect(dialog).toHaveAccessibleDescription("Renk: Pembe · MYL-2")
-    expect(within(dialog).getByRole("tab", { name: "Kodlar ve ölçüler" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    )
-    const barcode = within(dialog).getByLabelText("Barkod (GTIN)")
+    expect(await row(/Renk: Pembe/)).toHaveAttribute("aria-expanded", "true")
+    const barcode = within(form()).getByLabelText("Barkod (GTIN)")
     await waitFor(() => {
       expect(barcode).toHaveFocus()
     })
@@ -210,20 +155,35 @@ describe("the variants card", () => {
     expect(barcode).toHaveValue("")
   })
 
-  it("refuses a mistyped barcode next to its field, back on its tab, and sends nothing", async () => {
+  it("opens the first variant without a price on its price for the advisor's jump", async () => {
+    renderCard({
+      ...PRODUCT,
+      variants: [variant("variant_1", "Sarı"), variant("variant_2", "Pembe", {}, null)],
+    } as unknown as ProductDetail)
+    await row(/Renk: Pembe/)
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/products/prod_1/catalog")
+    })
+    act(() => {
+      revealSection("product-variants")
+    })
+    expect(await row(/Renk: Pembe/)).toHaveAttribute("aria-expanded", "true")
+    await waitFor(() => {
+      expect(within(form()).getByLabelText("Normal fiyat")).toHaveFocus()
+    })
+  })
+
+  it("refuses a mistyped barcode next to its field and sends nothing", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Pembe/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    await user.click(within(dialog).getByRole("tab", { name: "Kodlar ve ölçüler" }))
-    await user.type(within(dialog).getByLabelText("Barkod (GTIN)"), "8690000000001")
-    await user.click(within(dialog).getByRole("tab", { name: "Fiyat ve stok" }))
-    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await user.type(within(form()).getByLabelText("Barkod (GTIN)"), "8690000000001")
+    await user.click(within(form()).getByRole("button", { name: "Kaydet" }))
 
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+    expect(await within(form()).findByRole("alert")).toHaveTextContent(
       "Barkodun son rakamı tutmuyor"
     )
-    expect(within(dialog).getByLabelText("Barkod (GTIN)")).toHaveFocus()
+    expect(within(form()).getByLabelText("Barkod (GTIN)")).toHaveFocus()
     expect(batchVariants).not.toHaveBeenCalled()
   })
 
@@ -231,11 +191,9 @@ describe("the variants card", () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Pembe/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    await user.click(within(dialog).getByRole("tab", { name: "Kodlar ve ölçüler" }))
-    await user.type(within(dialog).getByLabelText("Barkod (GTIN)"), "4006381333931")
-    await user.type(within(dialog).getByLabelText("Üretici kodu (MPN)"), "RAF-25-ST")
-    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await user.type(within(form()).getByLabelText("Barkod (GTIN)"), "4006381333931")
+    await user.type(within(form()).getByLabelText("Üretici kodu (MPN)"), "RAF-25-ST")
+    await user.click(within(form()).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(batchVariants).toHaveBeenCalledWith("prod_1", {
@@ -248,23 +206,20 @@ describe("the variants card", () => {
     })
   })
 
-  it("ties pictures to the variant and saves their alt texts, from the dialog", async () => {
+  it("ties pictures to the variant and saves their alt texts, in place", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Pembe/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    await user.click(within(dialog).getByRole("tab", { name: "Görseller (1)" }))
 
     // Its own picture, described here
-    await user.type(within(dialog).getByLabelText("1. görsel"), "Pembe kabzalı çakı, önden")
+    await user.type(within(form()).getByLabelText("1. görsel"), "Pembe kabzalı çakı, önden")
     // The product's other picture shows with every variant until one is tied to it
-    const shared = within(dialog).getByRole("button", {
+    const shared = within(form()).getByRole("button", {
       name: "1. görsel: Tüm varyantlarda görünür",
     })
     expect(shared).toHaveAttribute("aria-pressed", "false")
     await user.click(shared)
-    expect(within(dialog).getByRole("tab", { name: "Görseller (2)" })).toBeInTheDocument()
-    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await user.click(within(form()).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(batchVariantImages).toHaveBeenCalledWith("prod_1", "variant_2", {
@@ -290,11 +245,9 @@ describe("the variants card", () => {
       ],
     } as unknown as ProductDetail)
     await user.click(await row(/Renk: Sarı/))
-    const dialog = screen.getByRole("dialog", { name: "Varyantı düzenle" })
-    await user.click(within(dialog).getByRole("tab", { name: "Kodlar ve ölçüler" }))
 
-    expect(within(dialog).getByText(/Google bu barkodu kullanmaz/)).toBeInTheDocument()
-    expect(within(dialog).queryByRole("alert")).toBeNull()
+    expect(within(form()).getByText(/Google bu barkodu kullanmaz/)).toBeInTheDocument()
+    expect(within(form()).queryByRole("alert")).toBeNull()
   })
 })
 
@@ -308,7 +261,7 @@ describe("a product of one variant", () => {
     expect(await screen.findByRole("heading", { name: "Fiyat, stok ve kodlar" })).toBeVisible()
     expect(screen.queryByRole("button", { name: /Varsayılan/ })).toBeNull()
 
-    const price = screen.getByLabelText("Satış fiyatı")
+    const price = screen.getByLabelText("Normal fiyat")
     await waitFor(() => {
       expect(price).toHaveValue("3.100,00")
     })

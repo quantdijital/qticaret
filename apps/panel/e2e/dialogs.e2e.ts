@@ -48,25 +48,32 @@ const orderAction = (action: string) => async (page: Page) => {
   return false
 }
 
-/** A product of several variants from the list's newest, then an action on its page. */
-const productAction = (open: (page: Page) => Promise<void>) => async (page: Page) => {
-  const links = await page
-    .locator("main table tbody tr a")
-    .evaluateAll((anchors) => anchors.slice(0, 10).map((anchor) => anchor.getAttribute("href")))
-  for (const href of links) {
-    if (!href) {
-      continue
+/** A product (of several variants, or what `has` finds) from the list's newest, then an action on its page. */
+const productAction =
+  (open: (page: Page) => Promise<void>, has = "[data-variant-row]") =>
+  async (page: Page) => {
+    const links = await page
+      .locator("main table tbody tr a")
+      .evaluateAll((anchors) => anchors.slice(0, 10).map((anchor) => anchor.getAttribute("href")))
+    for (const href of links) {
+      if (!href) {
+        continue
+      }
+      await page.goto(href)
+      await expect(pageHeading(page)).toBeVisible()
+      await page.waitForLoadState("networkidle")
+      // The variants are a tab of the "Ürün verileri" card (a product with variants)
+      const variants = page.locator('#product-data [role="tab"][data-tab="variants"]')
+      if ((await variants.count()) > 0) {
+        await variants.click()
+      }
+      if ((await page.locator(has).count()) > 0) {
+        await open(page)
+        return true
+      }
     }
-    await page.goto(href)
-    await expect(pageHeading(page)).toBeVisible()
-    await page.waitForLoadState("networkidle")
-    if ((await page.locator("[data-variant-row]").count()) > 0) {
-      await open(page)
-      return true
-    }
+    return false
   }
-  return false
-}
 
 /** The list's first row, opening its record; false while the list is empty. */
 const firstRow = async (page: Page) => {
@@ -104,13 +111,15 @@ const CASES: Case[] = [
   { name: "new redirect", path: "/settings/seo?part=redirects", open: click("Yönlendirme ekle") },
   { name: "new menu", path: "/storefront/menus", open: click("Menü ekle") },
   { name: "new location", path: "/settings/shipping?part=locations", open: click("Depo ekle") },
-  // The owner, 2026-11-05: a variant in one dialog, the media dialog on the size scale
+  // A product of one variant typed "Varyantlı ürün" keeps "Tüm varyant ayrıntıları" in a dialog
+  // (its Varyantlar tab; a simple product has its fields in Genel and Stok, no dialog); several
+  // variants open in their rows (the owner, 2026-11-25); the media dialog on the size scale
   {
     name: "variant",
     path: "/products",
     open: productAction(async (page) => {
-      await page.locator("[data-variant-row]").first().click()
-    }),
+      await page.locator('button:has-text("Tüm varyant ayrıntıları")').first().click()
+    }, 'button:has-text("Tüm varyant ayrıntıları")'),
   },
   {
     name: "media picker",

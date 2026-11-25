@@ -92,6 +92,8 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   media_ground: theme.media_ground,
   density: theme.density,
   motion: theme.motion,
+  page_width: theme.page_width,
+  accent_ink: theme.accent_ink,
 })
 
 /**
