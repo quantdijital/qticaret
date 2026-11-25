@@ -30,6 +30,9 @@ export const AI_ERROR_KEYS = [
   "ai.platform_unavailable",
   // adr/0085 Ek (P3b) (d) `busy`: too many calls in flight, no credit taken; again shortly
   "ai.platform_busy",
+  // adr/0085 K11: a top-up request while one is open, or for a pack no longer offered
+  "ai.credits_order_open",
+  "ai.credits_pack_unknown",
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",
