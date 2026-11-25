@@ -12,8 +12,16 @@
 export const AI_TARGET_CAPABILITIES = ["text", "vision", "image_edit"] as const
 export type AiTargetCapability = (typeof AI_TARGET_CAPABILITIES)[number]
 
-/** How the key travels: `Authorization: Bearer …`, `x-api-key`, `x-goog-api-key`. Never in the address. */
-export const AI_TARGET_AUTH_HEADERS = ["bearer", "x-api-key", "x-goog-api-key"] as const
+/**
+ * How the key travels: `Authorization: Bearer …`, `x-api-key`,
+ * `x-goog-api-key`, `api_token` (Bria). Never in the address.
+ */
+export const AI_TARGET_AUTH_HEADERS = [
+  "bearer",
+  "x-api-key",
+  "x-goog-api-key",
+  "api_token",
+] as const
 export type AiTargetAuth = (typeof AI_TARGET_AUTH_HEADERS)[number]
 
 /**
@@ -34,11 +42,19 @@ export interface AiEndpointTarget {
   path: string
   /** A scene endpoint's own price; its capability's when left out. */
   price?: AiUnitPrice
+  /**
+   * The body fields the service documents for this endpoint and the
+   * gateway writes whatever a shop sent (thinking off, reasoning apart,
+   * one picture asked for, a synchronous answer). A scene endpoint's own,
+   * or its capability's when left out. The shop's registry writes the
+   * same ones (a parity test in the control plane).
+   */
+  fixedBody?: Readonly<Record<string, unknown>>
 }
 
 export interface AiCapabilityTarget extends AiEndpointTarget {
   /** The request's shape: OpenAI-compatible chat completions, or the service's own. */
-  protocol: "openai-chat" | "photoroom" | "gemini-image"
+  protocol: "openai-chat" | "photoroom" | "gemini-image" | "bria"
   auth: AiTargetAuth
   /**
    * `openai-chat` only: the body field holding the output budget; null
@@ -47,13 +63,6 @@ export interface AiCapabilityTarget extends AiEndpointTarget {
    * output could not be capped (adr/0085 "çıktı tavanını istekten almaz").
    */
   maxTokensField?: "max_tokens" | "max_completion_tokens" | null
-  /**
-   * The body fields the service documents for this endpoint and the
-   * gateway writes whatever a shop sent (thinking off, reasoning apart,
-   * one picture asked for). The shop's registry writes the same ones for
-   * a chat target (`body`, a parity test in the control plane).
-   */
-  fixedBody?: Readonly<Record<string, unknown>>
   /** `image_edit` only: a product set in a scene (`image_scene`), its own endpoint. */
   scene?: AiEndpointTarget
 }
@@ -143,6 +152,32 @@ const GEMINI_IMAGE = {
   price: tokens(1_500_000, 30_000_000),
 } as const
 
+/*
+ * Bria's v2 image editing (read 2026-11-25; the pages: the shop's registry,
+ * `lib/ai/registry/service-bria.ts`). JSON with the picture as base64, the
+ * key in `api_token`; asynchronous unless `sync: true`, which the gateway
+ * writes itself (the shop reads no status address). A cut-out pins RMBG
+ * 2.0 (`model`, the default); a scene is Replace Background in `fibo2`
+ * mode, where the product's own pixels are pasted back, at the input's
+ * size (`original_quality`).
+ */
+const BRIA_IMAGE = {
+  protocol: "bria",
+  auth: "api_token",
+  model: "RMBG2",
+  baseUrl: "https://engine.prod.bria-api.com",
+  path: "/v2/image/edit/remove_background",
+  fixedBody: { model: "RMBG2", sync: true },
+  price: { currency: "USD", perImage: 18_000 },
+  scene: {
+    model: "fibo2",
+    baseUrl: "https://engine.prod.bria-api.com",
+    path: "/v2/image/edit/replace_background",
+    fixedBody: { mode: "fibo2", original_quality: true, sync: true },
+    price: { currency: "USD", perImage: 32_000 },
+  },
+} as const
+
 /** The networked services, by the shop registry's service id. */
 export const AI_SERVICE_TARGETS = deepFrozen({
   deepseek: {
@@ -190,6 +225,10 @@ export const AI_SERVICE_TARGETS = deepFrozen({
       },
     },
   },
+  bria: {
+    hosts: ["engine.prod.bria-api.com"],
+    capabilities: { image_edit: BRIA_IMAGE },
+  },
 } as const satisfies Record<string, AiServiceTarget>)
 
 export type AiNetworkServiceId = keyof typeof AI_SERVICE_TARGETS
@@ -197,16 +236,26 @@ export type AiNetworkServiceId = keyof typeof AI_SERVICE_TARGETS
 /**
  * "Test the connection" (adr/0071 §3, adr/0085 §2): each service's
  * cheapest call that proves a key and generates nothing, the model list
- * (Photoroom, which has none: its account). Verified as the shop's
- * `lib/ai/account-check.ts` says (2026-11-17, 2026-11-18). `documented:
- * false`: the check is not fully documented, so only a 401 refuses the key.
+ * (Photoroom, which has none: its account; Bria, which has neither: the
+ * status of a request that does not exist, `bria_status`). Verified as
+ * the shop's `lib/ai/account-check.ts` says (2026-11-17, 2026-11-18,
+ * 2026-11-25). `documented: false`: the check is not fully documented, so
+ * only a 401 refuses the key.
  */
 export interface AiServiceCheck {
   url: string
-  auth: "bearer" | "x-api-key"
-  answer: "model_list" | "photoroom_account"
+  auth: "bearer" | "x-api-key" | "api_token"
+  answer: "model_list" | "photoroom_account" | "bria_status"
   documented?: false
 }
+
+/**
+ * The request id Bria's check asks the status of: one no call of ours
+ * makes (Bria's are 32 hex characters), so the answer is "no such
+ * request" (a 404, or `status: "UNKNOWN"`) for a key it took, 401 for
+ * one it refused. Reading a status generates nothing.
+ */
+export const BRIA_CHECK_REQUEST_ID = "qticaret-key-check"
 
 export const AI_SERVICE_CHECKS = deepFrozen({
   deepseek: { url: "https://api.deepseek.com/models", auth: "bearer", answer: "model_list" },
@@ -220,6 +269,12 @@ export const AI_SERVICE_CHECKS = deepFrozen({
     url: "https://image-api.photoroom.com/v2/account",
     auth: "x-api-key",
     answer: "photoroom_account",
+    documented: false,
+  },
+  bria: {
+    url: `https://engine.prod.bria-api.com/v2/status/${BRIA_CHECK_REQUEST_ID}`,
+    auth: "api_token",
+    answer: "bria_status",
     documented: false,
   },
 } as const satisfies Record<AiNetworkServiceId, AiServiceCheck>)

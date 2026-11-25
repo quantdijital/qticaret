@@ -8,6 +8,7 @@ import {
 import type { AiServiceCheck, AiServiceTarget } from "@qticaret/types/control-plane"
 import { PLATFORM_OWNER, aiProviderKeyName } from "../vault/secret-names"
 import { vaultIn } from "../../workflows/modules"
+import { credentialHeader } from "./headers"
 import { providerKeysHeld } from "./keys"
 import type { ProviderFetch } from "./forward"
 import { FAKE_URL_ENV } from "./target"
@@ -17,7 +18,8 @@ type Container = Pick<MedusaContainer, "resolve">
 /**
  * "Test the connection" (adr/0071 §3, adr/0085 §2): the platform's key
  * for a service proved by the service's cheapest call that generates
- * nothing (`AI_SERVICE_CHECKS`: a model list, Photoroom's account), as the
+ * nothing (`AI_SERVICE_CHECKS`: a model list, Photoroom's account, the
+ * status of a request Bria never had), as the
  * shop's own check does (apps/backend lib/ai/account-check.ts). The
  * address is the table's alone, `https`, on the service's hosts; no
  * redirect followed; a short time and a small answer cap. The key is
@@ -98,12 +100,18 @@ export function checkTargetOf(service: string): CheckTarget | null {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
-/** A documented answer: `{ object: "list", data: [...] }`, or Photoroom's `images`. */
+/**
+ * A documented answer: `{ object: "list", data: [...] }`, Photoroom's
+ * `images`, or a Bria status (`status`, `UNKNOWN` for a request it never had).
+ */
 function isDocumented(answer: CheckTarget["answer"], body: Buffer): boolean {
   try {
     const parsed: unknown = JSON.parse(body.toString("utf8"))
     if (!isRecord(parsed)) {
       return false
+    }
+    if (answer === "bria_status") {
+      return typeof parsed["status"] === "string"
     }
     return answer === "model_list"
       ? parsed["object"] === "list" && Array.isArray(parsed["data"])
@@ -139,6 +147,10 @@ function verdictOf(target: CheckTarget, status: number, body: Buffer | null): Pr
   }
   if (status === 408 || status === 429 || status >= 500) {
     return { ok: false, reason: "unreachable" }
+  }
+  // Bria: "the request_id does not exist" is said only to a key it took (a 401 otherwise)
+  if (status === 404 && target.answer === "bria_status") {
+    return { ok: true }
   }
   if (status >= 200 && status < 300 && body !== null && isDocumented(target.answer, body)) {
     return { ok: true }
@@ -204,10 +216,7 @@ export async function checkProviderKey(
     const value = key.toString("utf8")
     const response = await (options.fetch ?? fetch)(target.url, {
       method: "GET",
-      headers:
-        target.auth === "bearer"
-          ? { authorization: `Bearer ${value}`, accept: "application/json" }
-          : { "x-api-key": value, accept: "application/json" },
+      headers: { ...credentialHeader(target.auth, value), accept: "application/json" },
       redirect: "error",
       signal: deadline,
     })

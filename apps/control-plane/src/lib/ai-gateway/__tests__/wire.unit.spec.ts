@@ -49,6 +49,11 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
       Object.keys(providerHeaders("x-api-key", key, "multipart/form-data; boundary=b"))
     ).toEqual(["content-type", "accept", "x-api-key"])
     expect(providerHeaders("x-goog-api-key", key, "application/json")["x-goog-api-key"]).toBe(KEY)
+    expect(providerHeaders("api_token", key, "application/json")).toEqual({
+      "content-type": "application/json",
+      accept: "application/json, image/*",
+      api_token: KEY,
+    })
   })
 
   it("passes a plain answer type on, anything odd as octet-stream", () => {
@@ -74,6 +79,20 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
       "edit-v2-ai-background",
     ])
     expect(gatewayTargetOf("photoroom", "text", "seo_title")).toBeNull()
+    const cut = must(gatewayTargetOf("bria", "image_edit", "image_background"))
+    expect([cut.url.href, cut.model, cut.auth, cut.fixedBody]).toEqual([
+      "https://engine.prod.bria-api.com/v2/image/edit/remove_background",
+      "RMBG2",
+      "api_token",
+      { model: "RMBG2", sync: true },
+    ])
+    // The scene's own fixed fields, not the cut-out's
+    const briaScene = must(gatewayTargetOf("bria", "image_edit", "image_scene"))
+    expect([briaScene.url.href, briaScene.model, briaScene.fixedBody]).toEqual([
+      "https://engine.prod.bria-api.com/v2/image/edit/replace_background",
+      "fibo2",
+      { mode: "fibo2", original_quality: true, sync: true },
+    ])
     expect(gatewayTargetOf("openai", "text", "seo_title")).toBeNull()
     expect(gatewayTargetOf("__proto__", "text", "seo_title")).toBeNull()
   })
@@ -197,6 +216,18 @@ describe("the gateway's wire (adr/0085 §2, Güvenlik)", () => {
     expect(
       measuresOf(photoroom, { contentType: "image/png", body: Buffer.from("png") }, 1)
     ).toMatchObject({ images: 1, estimatedCostMicros: 100_000 })
+    const bria = must(gatewayTargetOf("bria", "image_edit", "image_scene"))
+    const named = (body: unknown) => ({
+      contentType: "application/json",
+      body: Buffer.from(JSON.stringify(body)),
+    })
+    expect(
+      measuresOf(bria, named({ result: { image_url: "https://x/r.png" }, request_id: "r" }), 1)
+    ).toMatchObject({ model: "fibo2", images: 1, estimatedCostMicros: 32_000 })
+    expect(measuresOf(bria, named({ request_id: "r", status_url: "https://x" }), 1)).toMatchObject({
+      images: null,
+      estimatedCostMicros: null,
+    })
     expect(
       measuresOf(deepseek, { contentType: "text/plain", body: Buffer.from("x") }, 0)
     ).toMatchObject({ inputTokens: null, estimatedCostMicros: null })

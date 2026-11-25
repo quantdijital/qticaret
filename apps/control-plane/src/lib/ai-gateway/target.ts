@@ -127,6 +127,7 @@ export function gatewayTargetOf(
     maxTokensField: target.maxTokensField ?? null,
     price: endpoint.price ?? target.price ?? null,
     notTakenBodyCodes: service.notTakenBodyCodes ?? [],
-    fixedBody: target.fixedBody ?? {},
+    // A scene endpoint's own fixed fields (Bria's mode), else its capability's
+    fixedBody: endpoint.fixedBody ?? target.fixedBody ?? {},
   }
 }

@@ -52,6 +52,15 @@ function usageOf(target: GatewayTarget, contentType: string, body: Buffer, sent:
   if (answer === null) {
     return { inputTokens: null, outputTokens: null, images: null }
   }
+  if (target.protocol === "bria") {
+    // A synchronous answer names its one picture by address (`result.image_url`)
+    const result = isRecord(answer["result"]) ? answer["result"] : {}
+    return {
+      inputTokens: null,
+      outputTokens: null,
+      images: typeof result["image_url"] === "string" ? 1 : null,
+    }
+  }
   if (target.protocol === "gemini-image") {
     const usage = isRecord(answer["usageMetadata"]) ? answer["usageMetadata"] : {}
     return {

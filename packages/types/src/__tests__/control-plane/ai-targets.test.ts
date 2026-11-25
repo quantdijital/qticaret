@@ -99,10 +99,36 @@ describe("AI service targets (adr/0085 §2)", () => {
     expect(aiTargetModels("deepseek", "text", "production")).toEqual(["deepseek-flash"])
     expect(aiTargetModels("photoroom", "image_edit", "production")).toEqual(["segment-v1"])
     expect(aiTargetModels("photoroom", "text", "production")).toBeNull()
+    expect(aiTargetModels("bria", "image_edit", "production")).toEqual(["RMBG2"])
     expect(aiTargetModels("deepseek", "video", "production")).toBeNull()
     expect(aiTargetModels("openai", "text", "production")).toBeNull()
     expect(aiTargetModels("toString", "text", "production")).toBeNull()
     expect(aiTargetModels("__proto__", "text", "production")).toBeNull()
+  })
+})
+
+describe("Bria's targets", () => {
+  const edit = AI_SERVICE_TARGETS.bria.capabilities.image_edit
+
+  it("asks for a synchronous answer on both endpoints, RMBG 2.0 pinned, the scene in fibo2", () => {
+    expect(edit.auth).toBe("api_token")
+    expect(edit.fixedBody).toEqual({ model: "RMBG2", sync: true })
+    expect(edit.scene.fixedBody).toEqual({ mode: "fibo2", original_quality: true, sync: true })
+    expect(endpointUrl(edit)).toBe(
+      "https://engine.prod.bria-api.com/v2/image/edit/remove_background"
+    )
+    expect(endpointUrl(edit.scene)).toBe(
+      "https://engine.prod.bria-api.com/v2/image/edit/replace_background"
+    )
+  })
+
+  it("checks a key by a status that generates nothing, on its own host", () => {
+    expect(AI_SERVICE_CHECKS.bria).toMatchObject({
+      auth: "api_token",
+      answer: "bria_status",
+      documented: false,
+    })
+    expect(new URL(AI_SERVICE_CHECKS.bria.url).pathname).toMatch(/^\/v2\/status\/[a-z-]+$/)
   })
 })
 

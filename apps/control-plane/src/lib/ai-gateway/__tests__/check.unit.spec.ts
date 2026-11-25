@@ -15,6 +15,14 @@ describe("checkTargetOf", () => {
       answer: "photoroom_account",
       documented: false,
     })
+    expect(checkTargetOf("bria")).toMatchObject({
+      auth: "api_token",
+      answer: "bria_status",
+      documented: false,
+    })
+    expect(checkTargetOf("bria")?.url.href).toBe(
+      "https://engine.prod.bria-api.com/v2/status/qticaret-key-check"
+    )
     for (const service of ["nobody", "toString", "__proto__", "FAKE"]) {
       expect(checkTargetOf(service)).toBeNull()
     }
@@ -48,6 +56,7 @@ describe("checkProviderKey", () => {
       Promise.resolve([
         { name: "ai.deepseek.api_key", version: 1, created_at: new Date() },
         { name: "ai.photoroom.api_key", version: 1, created_at: new Date() },
+        { name: "ai.bria.api_key", version: 1, created_at: new Date() },
       ])
     ),
     openSecret: jest.fn(() => {
@@ -83,6 +92,12 @@ describe("checkProviderKey", () => {
       // Photoroom's check is not documented: only a 401 refuses its key
       ["photoroom", answering(403, "no"), { ok: false, reason: "unexpected" }],
       ["photoroom", answering(200, '{"images":{}}'), { ok: true }],
+      // Bria's: a request it never had is "not found" to a key it took, 401 to one it refused
+      ["bria", answering(404, '{"error":{"code":404}}'), { ok: true }],
+      ["bria", answering(200, '{"status":"UNKNOWN"}'), { ok: true }],
+      ["bria", answering(401, "no"), { ok: false, reason: "rejected" }],
+      ["bria", answering(403, "no"), { ok: false, reason: "unexpected" }],
+      ["bria", answering(200, "{}"), { ok: false, reason: "unexpected" }],
       ["deepseek", answering(429, ""), { ok: false, reason: "unreachable" }],
       ["deepseek", answering(502, ""), { ok: false, reason: "unreachable" }],
       ["deepseek", answering(200, "not json"), { ok: false, reason: "unexpected" }],
@@ -106,6 +121,14 @@ describe("checkProviderKey", () => {
     for (const [service, fetchFn, verdict] of cases) {
       expect(await checkProviderKey(container, service, { fetch: fetchFn })).toEqual(verdict)
     }
+  })
+
+  it("sends Bria's key in its api_token header alone", async () => {
+    const sent = jest.fn(answering(404, "{}"))
+    await checkProviderKey(container, "bria", { fetch: sent })
+    const [[url, init]] = sent.mock.calls as unknown as [[URL, RequestInit]]
+    expect(url.href).toBe("https://engine.prod.bria-api.com/v2/status/qticaret-key-check")
+    expect(Object.keys(init.headers ?? {}).sort()).toEqual(["accept", "api_token"])
   })
 
   it("says no_key without opening anything, and no_key when the key is gone meanwhile", async () => {

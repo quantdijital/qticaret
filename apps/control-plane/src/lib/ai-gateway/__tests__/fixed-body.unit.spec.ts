@@ -1,6 +1,7 @@
 import { AI_SERVICE_TARGETS } from "@qticaret/types/control-plane"
 import type { AiServiceTarget } from "@qticaret/types/control-plane"
 import { prepareBody } from "../body"
+import { BRIA_GATEWAY_FIELDS } from "../body-bria"
 import { chatGatewayFields } from "../body-chat"
 import { GEMINI_GATEWAY_FIELDS } from "../body-gemini"
 import { AI_TASK_LIMITS } from "../limits"
@@ -70,10 +71,13 @@ describe("a target's fixed fields and the gateway's own (P3b third review D1)", 
             ]
           : row.protocol === "gemini-image"
             ? GEMINI_GATEWAY_FIELDS
-            : []
-      const clashes = pathsOf(row.fixedBody ?? {}).filter((path) =>
-        own.some((field) => meet(path, field))
-      )
+            : row.protocol === "bria"
+              ? BRIA_GATEWAY_FIELDS
+              : []
+      // A scene endpoint's own fixed fields too (Bria's)
+      const clashes = [row.fixedBody ?? {}, row.scene?.fixedBody ?? {}]
+        .flatMap((fixed) => pathsOf(fixed))
+        .filter((path) => own.some((field) => meet(path, field)))
       expect([service, capability, clashes]).toEqual([service, capability, []])
       if (row.protocol === "photoroom") {
         expect(row.fixedBody).toBeUndefined()
