@@ -2,6 +2,8 @@ import { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER } from "../clients/circuit-brea
 import type { CircuitBreakerOptions } from "../clients/circuit-breaker"
 import { aiProviderError } from "./errors"
 import { failureOf } from "./outcome"
+import type { AiCapability } from "./registry/capabilities"
+import { PLATFORM_SERVICE_ID } from "./registry/platform-service"
 import { registerProcessCache } from "../cache/process-caches"
 
 /**
@@ -38,20 +40,42 @@ export const correctionFailure = (result: {
   correction: { status: string; error?: unknown } | null
 }): unknown => (result.correction?.status === "failed" ? result.correction.error : null)
 
+/** A call's service and what it asks of it: the platform's credits keep a breaker per capability. */
+export interface AiBreakerTarget {
+  service: string
+  capability: AiCapability
+}
+
 /**
- * Runs one call through the service's breaker. `laterFailure` names a
+ * The breaker a call runs through: the service's own, as before; on the
+ * platform's credits one per capability (`platform:<capability>`), since
+ * each is run by another provider behind the gateway and one unwell (the
+ * image editor) must not hold back the others (the text).
+ */
+export function aiBreakerKeyOf(target: string | AiBreakerTarget): string {
+  if (typeof target === "string") {
+    return target
+  }
+  return target.service === PLATFORM_SERVICE_ID
+    ? `${PLATFORM_SERVICE_ID}:${target.capability}`
+    : target.service
+}
+
+/**
+ * Runs one call through the service's breaker (`aiBreakerKeyOf`). `laterFailure` names a
  * failure the call returned instead of throwing (the one correction,
  * adr/0074 §4, made after the first call answered): the service's last
  * word, so an unwell one is recorded as the permit's failure, not its
  * success, and corrections that keep failing open the circuit.
  */
 export async function withAiBreaker<T>(
-  serviceId: string,
+  target: string | AiBreakerTarget,
   call: () => Promise<T>,
   options: CircuitBreakerOptions = DEFAULT_CIRCUIT_BREAKER,
   laterFailure?: (result: T) => unknown
 ): Promise<T> {
-  const breaker = breakerOf(serviceId, options)
+  const serviceId = typeof target === "string" ? target : target.service
+  const breaker = breakerOf(aiBreakerKeyOf(target), options)
   const permit = breaker.acquire()
   if (!permit) {
     throw aiProviderError({

@@ -82,7 +82,9 @@ async function runFor(
     }
     const background = input.background
     return {
-      done: await withAiBreaker(input.service, () => runImageEdit({ ...run, background })),
+      done: await withAiBreaker({ service: input.service, capability: "image_edit" }, () =>
+        runImageEdit({ ...run, background })
+      ),
       source: "edited",
     }
   }
@@ -103,7 +105,7 @@ async function runFor(
   if (!scene) {
     throw aiProviderError({ service: input.service, key: "ai.unknown_task", code: "scene_unknown" })
   }
-  const done = await withAiBreaker(input.service, () =>
+  const done = await withAiBreaker({ service: input.service, capability: "image_edit" }, () =>
     runImageScene({ ...run, setting: settingOf(scene), source: target.source })
   )
   return { done, source: target.source }

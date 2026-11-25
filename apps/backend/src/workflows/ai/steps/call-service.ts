@@ -178,7 +178,7 @@ export const callServiceStep = createStep(
       const allowed = input.allowed ?? null
       // A product card and a pick are read against their closed schemas and the shop's lists, never as free text
       const result = await withAiBreaker(
-        input.service,
+        { service: input.service, capability: input.capability },
         () =>
           isCampaignTask(task)
             ? runCampaignTask({
