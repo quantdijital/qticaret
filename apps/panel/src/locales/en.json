@@ -13214,6 +13214,10 @@
         "checks": {
           "secret_invalid": "The test service did not accept the key."
         }
+      },
+      "platform": {
+        "name": "Platform credits",
+        "description": "With the platform's credits, no key of your own."
       }
     },
     "data_note": {
@@ -13221,7 +13225,8 @@
       "minimax": "Where data is processed and whether it trains models is not stated.",
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
       "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
-      "fake": "Data never leaves this computer."
+      "fake": "Data never leaves this computer.",
+      "platform": "Content goes to one of the AI services the platform works with; the platform does not keep it. The shop agreement names those services."
     },
     "data_detail": {
       "deepseek": "DeepSeek processes and stores the text sent on servers in the People's Republic of China. Its privacy policy lists improving (training) its models among the uses of the data. Only content published on your storefront, such as products, categories and pages, is sent.",
@@ -13254,7 +13259,8 @@
       "product_faq": "FAQ draft",
       "post_draft": "Blog post draft",
       "campaign_email": "Newsletter e-mail text",
-      "campaign_sms": "SMS campaign text"
+      "campaign_sms": "SMS campaign text",
+      "image_scene": "Place in a scene"
     },
     "options": {
       "short": "Short",
@@ -13356,7 +13362,13 @@
       "daily_limit_reached": "Today's AI usage limit is reached. You can try again tomorrow.",
       "reviews_off": "AI on reviews and questions is off. It can be turned on under Settings › AI.",
       "feature_off": "This feature is off for the shop.",
-      "not_enough_reviews": "A summary needs at least 3 approved reviews of this product."
+      "not_enough_reviews": "A summary needs at least 3 approved reviews of this product.",
+      "credits_exhausted": "You have run out of credits.",
+      "credits_daily_cap": "Today's limit is reached. You can try again tomorrow.",
+      "platform_busy": "Busy right now; try again in a little while.",
+      "platform_unavailable": "Platform credits cannot be used right now.",
+      "credits_order_open": "You already have a request waiting.",
+      "credits_pack_unknown": "This pack is no longer offered; refresh the list."
     },
     "background": {
       "button": "Edit image",
@@ -13603,6 +13615,36 @@
       "added": "{{name}} added",
       "note": "A suggestion you click is added to the field; saving is up to you.",
       "close": "Close suggestions"
+    },
+    "credits": {
+      "title": "Platform credits",
+      "description": "AI work runs on these credits, with no key of your own.",
+      "plan": "{{remaining}} credits left this month",
+      "planRenews": "Renews on {{date}}",
+      "planUsedUp": "This month's credits are used up; they renew on {{date}}.",
+      "purchased": "Topped-up credits: {{remaining}}",
+      "purchasedExpires": "Expires: {{date}}",
+      "exhausted": "You have run out of credits.",
+      "dailyReached": "Today's limit is reached; it renews tomorrow.",
+      "pending": "Request received; your credits are added once the payment is confirmed.",
+      "requested": "Request received. Your credits are added once the payment is confirmed.",
+      "pendingWait": "You have a pending request; your credits are added once the payment is confirmed.",
+      "pendingPack": "{{credits}} credits · {{amount}}",
+      "noPacks": "Write to us to top up credits.",
+      "topUp": "Top up credits",
+      "tellOwner": "Let the shop owner know.",
+      "cost": "{{credits}} credits",
+      "costs": "How many credits does a task take?",
+      "costsTask": "Task",
+      "costsCredits": "Credits",
+      "dialog": {
+        "title": "Top up credits",
+        "description": "Your request reaches us; we contact you about the payment. Once it is confirmed, the credits are added.",
+        "packs": "Pack",
+        "packCredits": "{{credits}} credits",
+        "submit": "Send request",
+        "refresh": "Refresh the list"
+      }
     }
   }
 }

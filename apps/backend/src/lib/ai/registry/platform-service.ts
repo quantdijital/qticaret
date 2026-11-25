@@ -1,7 +1,7 @@
 import { aiTargetUncapped } from "@qticaret/types/control-plane"
 import type { AiCapability } from "./capabilities"
 import { FAKE_SERVICE, findAiService } from "./services"
-import type { AiService, AiTarget } from "./services"
+import type { AiService, AiTarget, ImageBackground } from "./services"
 
 /**
  * The platform's credits as a service (adr/0085 §3): `platform`, paid
@@ -75,3 +75,15 @@ export function platformServiceOf(
 
 export const isPlatformService = (service: Pick<AiService, "funding">): boolean =>
   service.funding === "platform_credit"
+
+/**
+ * The backgrounds the panel offers on credits (`GET /admin/ai/services`):
+ * the platform's own, the same whichever service runs behind it, since a
+ * backing's own list would tell which one it is. The narrowest set every
+ * registered image service makes (tested), so any backing can make it.
+ */
+export const PLATFORM_BACKGROUNDS = ["white"] as const satisfies readonly ImageBackground[]
+
+/** The platform's backgrounds where it edits images at all; none otherwise. */
+export const platformBackgroundsOf = (service: Pick<AiService, "capabilities">): string[] =>
+  service.capabilities.image_edit ? [...PLATFORM_BACKGROUNDS] : []

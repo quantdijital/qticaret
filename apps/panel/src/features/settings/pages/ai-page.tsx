@@ -12,6 +12,7 @@ import { useCan } from "@/features/auth/api/staff"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountAlert } from "@/features/settings/components/account-form"
 import { AiAcceptanceCard } from "@/features/settings/components/ai-acceptance-card"
+import { AiCreditsCard } from "@/features/settings/components/ai-credits-card"
 import { AiGuidanceTab } from "@/features/settings/components/ai-guidance-tab"
 import { AiReviewsCard } from "@/features/settings/components/ai-reviews-card"
 import { AiScenesCard } from "@/features/settings/components/ai-scenes-card"
@@ -24,7 +25,8 @@ import { errorText } from "@/lib/errors"
 
 /**
  * Settings > Yapay zekâ (adr/0071 §13): the AI services the shop can
- * connect with its own key in one compact table, the switch for AI on
+ * connect with its own key in one compact table, the platform's credits
+ * while they are offered (adr/0085 §5), the switch for AI on
  * reviews and questions (Aşama 9) and the one for search in the shopper's
  * own words (adr/0077 §7) in a line each, the shop's own scenes for
  * "Sahneye yerleştir" (Aşama 7), and this month's use under
@@ -87,6 +89,7 @@ function AiServicesTab() {
             ownKeys={ownKeys}
             keyConfigured={keyConfigured}
           />
+          <AiCreditsCard />
           <AiReviewsCard />
           <AssistantSetting />
           <AiStorefrontSearchCard ownKey={hasOwnTextKey(data.services, ownKeys)} />

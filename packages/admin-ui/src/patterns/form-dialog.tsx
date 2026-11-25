@@ -118,6 +118,9 @@ export function FormDialog({
             className="contents"
             onSubmit={(event) => {
               event.preventDefault()
+              // The dialog sits in a portal, yet React bubbles its submit up the
+              // component tree: a form around the opener would be sent with it.
+              event.stopPropagation()
               onSubmit()
             }}
           >

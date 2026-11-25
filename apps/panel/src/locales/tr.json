@@ -13214,6 +13214,10 @@
         "checks": {
           "secret_invalid": "Deneme servisi anahtarı kabul etmedi."
         }
+      },
+      "platform": {
+        "name": "Platform kredisi",
+        "description": "Kendi anahtarınız olmadan, platformun kredisiyle."
       }
     },
     "data_note": {
@@ -13221,7 +13225,8 @@
       "minimax": "Verinin nerede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş.",
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
       "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
-      "fake": "Veri bu bilgisayardan çıkmaz."
+      "fake": "Veri bu bilgisayardan çıkmaz.",
+      "platform": "İçerik, platformun anlaşmalı yapay zekâ servislerinden birine gönderilir; platform içeriği saklamaz. Bu servisler mağaza sözleşmesinde yazılıdır."
     },
     "data_detail": {
       "deepseek": "DeepSeek gönderilen metni Çin Halk Cumhuriyeti'ndeki sunucularında işler ve saklar. Gizlilik metninde modellerini geliştirmek (eğitmek) de verinin kullanım amaçları arasında sayılır. Mağazanızdan yalnız ürün, kategori, sayfa gibi vitrinde yayımlanan içerik gider.",
@@ -13254,7 +13259,8 @@
       "product_faq": "SSS taslağı",
       "post_draft": "Blog yazısı taslağı",
       "campaign_email": "E-posta bülteni metni",
-      "campaign_sms": "SMS kampanya metni"
+      "campaign_sms": "SMS kampanya metni",
+      "image_scene": "Sahneye yerleştirme"
     },
     "options": {
       "short": "Kısa",
@@ -13356,7 +13362,13 @@
       "daily_limit_reached": "Bugünkü yapay zekâ kullanım sınırına ulaşıldı. Yarın yeniden deneyebilirsiniz.",
       "reviews_off": "Yorum ve sorularda yapay zekâ kapalı. Ayarlar › Yapay zekâ sayfasından açılabilir.",
       "feature_off": "Bu özellik mağazada kapalı.",
-      "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı."
+      "not_enough_reviews": "Özet için bu ürünün en az 3 onaylı yorumu olmalı.",
+      "credits_exhausted": "Krediniz bitti.",
+      "credits_daily_cap": "Bugünkü sınıra ulaşıldı. Yarın yeniden deneyebilirsiniz.",
+      "platform_busy": "Şu an yoğun, biraz sonra yeniden deneyin.",
+      "platform_unavailable": "Platform kredisi şu an kullanılamıyor.",
+      "credits_order_open": "Bekleyen bir talebiniz var.",
+      "credits_pack_unknown": "Bu paket artık sunulmuyor; listeyi yenileyin."
     },
     "background": {
       "button": "Görseli düzenle",
@@ -13603,6 +13615,36 @@
       "added": "{{name}} eklendi",
       "note": "Tıkladığınız öneri alana eklenir; kaydetmek size kalır.",
       "close": "Önerileri kapat"
+    },
+    "credits": {
+      "title": "Platform kredisi",
+      "description": "Yapay zekâ işleri kendi anahtarınız olmadan, bu krediyle çalışır.",
+      "plan": "Bu ay {{remaining}} kredi kaldı",
+      "planRenews": "{{date}} tarihinde yenilenir",
+      "planUsedUp": "Bu ayın kredisi bitti; {{date}} tarihinde yenilenir.",
+      "purchased": "Yüklenen kredi: {{remaining}}",
+      "purchasedExpires": "Son kullanma: {{date}}",
+      "exhausted": "Krediniz bitti.",
+      "dailyReached": "Bugünkü sınıra ulaşıldı, yarın yenilenir.",
+      "pending": "Talebiniz alındı; ödeme onaylanınca krediniz yüklenir.",
+      "requested": "Talebiniz alındı. Ödeme onaylanınca krediniz yüklenir.",
+      "pendingWait": "Bekleyen talebiniz var; ödeme onaylanınca krediniz yüklenir.",
+      "pendingPack": "{{credits}} kredi · {{amount}}",
+      "noPacks": "Kredi yüklemek için bize yazın.",
+      "topUp": "Kredi yükle",
+      "tellOwner": "Mağaza sahibine haber verin.",
+      "cost": "{{credits}} kredi",
+      "costs": "Bir işlem kaç kredi?",
+      "costsTask": "İş",
+      "costsCredits": "Kredi",
+      "dialog": {
+        "title": "Kredi yükle",
+        "description": "Talebiniz bize ulaşır; ödeme bilgisi için sizinle iletişime geçeriz. Ödeme onaylanınca kredi yüklenir.",
+        "packs": "Paket",
+        "packCredits": "{{credits}} kredi",
+        "submit": "Talep gönder",
+        "refresh": "Listeyi yenile"
+      }
     }
   }
 }

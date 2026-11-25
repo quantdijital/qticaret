@@ -21,7 +21,18 @@ const OWN_WORDS = new Set([
   "reviews_off",
   "feature_off",
   "not_enough_reviews",
+  // adr/0085: the platform's credits
+  "credits_exhausted",
+  "credits_daily_cap",
+  "platform_busy",
+  "platform_unavailable",
 ])
+
+/** The backend's key of a failure (`ai.credits_exhausted`), or null. */
+export const failureCodeOf = (failure: unknown): string | null => {
+  const code = (failure as Partial<AiFailure> | null)?.code
+  return typeof code === "string" ? code : null
+}
 
 /** A service's name in the panel's words (`ai.services.<id>.name`), or its id. */
 export const serviceName = (t: TFunction, id: string | null): string =>

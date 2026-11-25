@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AiCapability } from "../../lib/ai/registry/capabilities"
 import { ASSISTANT_TASK } from "../../lib/ai/registry/assistant-tasks"
-import { isPlatformService } from "../../lib/ai/registry/platform-service"
+import { isPlatformService, platformBackgroundsOf } from "../../lib/ai/registry/platform-service"
 import { verifiedToolCalls } from "../../lib/ai/registry/services"
 import type { AiFunding, AiTarget } from "../../lib/ai/registry/services"
 import { IMAGE_SCENE_TASK, aiTasks } from "../../lib/ai/registry/tasks"
@@ -96,7 +96,10 @@ export async function aiServicesView(
         "not_connected"),
     funding: service.funding,
     data_note_key: service.dataNoteKey,
-    backgrounds: backgroundsOf(service.capabilities.image_edit),
+    // The platform's own list, never its backing's (which would name it)
+    backgrounds: isPlatformService(service)
+      ? platformBackgroundsOf(service)
+      : backgroundsOf(service.capabilities.image_edit),
     scene: canRunTask(service, IMAGE_SCENE_TASK),
   }))
   const scenes: AiSceneView[] = (await shopScenes(container)).map((scene) => ({

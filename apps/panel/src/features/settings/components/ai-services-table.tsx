@@ -45,14 +45,17 @@ export function AiServicesTable({
           </TableRow>
         </TableHeader>
         <TableBody className="max-sm:block">
-          {services.map((service) => (
-            <AiServiceRow
-              key={service.id}
-              service={service}
-              ownKeys={ownKeys}
-              keyConfigured={keyConfigured}
-            />
-          ))}
+          {/* The platform's credits have no key: their own card says them (AiCreditsCard) */}
+          {services
+            .filter((service) => service.funding === "own_key")
+            .map((service) => (
+              <AiServiceRow
+                key={service.id}
+                service={service}
+                ownKeys={ownKeys}
+                keyConfigured={keyConfigured}
+              />
+            ))}
         </TableBody>
       </Table>
     </SectionCard>
