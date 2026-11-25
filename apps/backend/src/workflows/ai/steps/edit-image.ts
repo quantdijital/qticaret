@@ -152,7 +152,7 @@ export async function editImage(
 ): Promise<EditImageOutcome> {
   const started = Date.now()
   const task = findAiTask(input.task)
-  // The platform's own target is the routed service's, known once the route is
+  // The model recorded is the own service's; on credits none: the routed service never shows
   const own = imageTargetOf(input.service)
   const modelOf = (resolved: Resolved | null): string =>
     (task?.optionSource === "scenes" ? sceneOf(resolved)?.model : undefined) ??
@@ -199,7 +199,6 @@ export async function editImage(
     if (!resolved) {
       throw notRegistered()
     }
-    base.model = modelOf(resolved)
     const connector = imageConnectorWith(route.service.id, route.transport)
     const { done, source } = await runFor(container, input, task, resolved, connector, original)
     returned = {

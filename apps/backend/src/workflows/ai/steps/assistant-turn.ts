@@ -141,7 +141,6 @@ export const assistantRunStep = createStep(
       const error = { kind: "provider" as const, key: failure.key, code: failure.code }
       return new StepResponse<AssistantRunOutput>({ ...base, error, calls: [], tool_counts: {} })
     }
-    base.model = textTargetOf(route.service.id, "text")?.target.model ?? base.model
     // On the platform's credits the month is not claimed (adr/0085 K9)
     const monthly = route.transport.funding === "own_key"
     const inner = toolConnectorWith(route.service.id, route.transport)

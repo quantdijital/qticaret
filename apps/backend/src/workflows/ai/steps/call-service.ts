@@ -136,7 +136,7 @@ export const callServiceStep = createStep(
     const started = Date.now()
     const task = findAiTask(input.task)
     const capability = input.capability === "vision" ? "vision" : "text"
-    // The platform's own target is the routed service's, known once the route is
+    // The model recorded is the own service's; on credits none: the routed service never shows
     const own = textTargetOf(input.service, capability)
     const base = {
       model: own?.target.model ?? "",
@@ -166,7 +166,6 @@ export const callServiceStep = createStep(
         task: task.id,
         operation: input.operation ?? randomUUID(),
       })
-      base.model = textTargetOf(route.service.id, capability)?.target.model ?? base.model
       const connector = textConnectorWith(route.service.id, capability, route.transport)
       const images =
         capability === "vision"
