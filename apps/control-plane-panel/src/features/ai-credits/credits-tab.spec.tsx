@@ -114,38 +114,78 @@ describe("a shop's AI credits tab (adr/0085 §5)", () => {
     expect(sent.filter((call) => call.path === `${BASE}/adjust`)).toEqual([])
   })
 
-  it("sends the form's one key again when the correction is tried twice", async () => {
-    let answers = 0
-    const sent = stubApi(
-      controlPlane(() => {
-        answers += 1
-        return answers === 1 ? refusal(500, "boom") : { status: 200, body: { applied: false } }
+  it.each<[string, () => never | Answer]>([
+    ["a 5xx", () => refusal(500, "boom")],
+    [
+      "no answer",
+      () => {
+        throw new TypeError("Failed to fetch")
+      },
+    ],
+  ])(
+    "holds the form after a lost answer (%s) and sends the same request again",
+    async (_case, lost) => {
+      let answers = 0
+      const sent = stubApi(
+        controlPlane(() => {
+          answers += 1
+          return answers === 1 ? lost() : { status: 200, body: { applied: false } }
+        })
+      )
+      renderAs(<AiCreditsTab shop={ON} />, "owner")
+
+      const form = await openAdjust()
+      await userEvent.click(within(form).getByLabelText("Kredi düş"))
+      await userEvent.type(within(form).getByLabelText("Kredi miktarı"), "40")
+      await userEvent.click(within(form).getByLabelText("Aylık hak"))
+      await userEvent.type(within(form).getByLabelText("Not"), "Yanlış yükleme")
+      await userEvent.click(within(form).getByRole("button", { name: "Kredi düş" }))
+      expect(await within(form).findByRole("alert")).toHaveTextContent(
+        "Önceki deneme kaydedilmiş olabilir. Yeniden denerseniz aynı işlem bir kez yazılır; farklı bir tutar için önce hesap dökümüne bakın."
+      )
+      // The amount, the way, the bucket and the note are held as they were sent
+      expect(within(form).getByLabelText("Kredi miktarı")).toBeDisabled()
+      expect(within(form).getByLabelText("Not")).toBeDisabled()
+      expect(within(form).getByLabelText("Kredi ekle")).toBeDisabled()
+      expect(within(form).getByLabelText("Satın alınan")).toBeDisabled()
+      await userEvent.click(within(form).getByRole("button", { name: "Yeniden dene" }))
+
+      await waitFor(() => {
+        const tries = sent.filter((call) => call.path === `${BASE}/adjust`)
+        expect(tries).toHaveLength(2)
+        const [first, second] = tries.map((call) => call.body as Record<string, unknown>)
+        expect(first).toEqual({
+          amount: -40,
+          bucket: "plan",
+          note: "Yanlış yükleme",
+          key: expect.stringMatching(/^[0-9a-f-]{36}$/) as unknown,
+        })
+        expect(second).toEqual(first)
       })
+    }
+  )
+
+  it("leaves the form open to change after a refusal (4xx)", async () => {
+    const sent = stubApi(
+      controlPlane(() => refusal(400, "cp.ai_credit_amount_invalid", "invalid_data"))
     )
     renderAs(<AiCreditsTab shop={ON} />, "owner")
 
     const form = await openAdjust()
-    await userEvent.click(within(form).getByLabelText("Kredi düş"))
     await userEvent.type(within(form).getByLabelText("Kredi miktarı"), "40")
-    await userEvent.click(within(form).getByLabelText("Aylık hak"))
-    await userEvent.type(within(form).getByLabelText("Not"), "Yanlış yükleme")
-    await userEvent.click(within(form).getByRole("button", { name: "Kredi düş" }))
-    expect(await within(form).findByRole("alert")).toHaveTextContent(
-      "İşlem tamamlanamadı. Biraz sonra tekrar deneyin."
-    )
-    await userEvent.click(within(form).getByRole("button", { name: "Kredi düş" }))
+    await userEvent.type(within(form).getByLabelText("Not"), "Telafi")
+    await userEvent.click(within(form).getByRole("button", { name: "Kredi ekle" }))
+    expect(await within(form).findByRole("alert")).toHaveTextContent("Kredi miktarı geçerli değil")
+    const amount = within(form).getByLabelText("Kredi miktarı")
+    expect(amount).toBeEnabled()
+    expect(within(form).getByLabelText("Not")).toBeEnabled()
+    await userEvent.clear(amount)
+    await userEvent.type(amount, "30")
+    await userEvent.click(within(form).getByRole("button", { name: "Kredi ekle" }))
 
     await waitFor(() => {
       const tries = sent.filter((call) => call.path === `${BASE}/adjust`)
-      expect(tries).toHaveLength(2)
-      const [first, second] = tries.map((call) => call.body as Record<string, unknown>)
-      expect(first).toEqual({
-        amount: -40,
-        bucket: "plan",
-        note: "Yanlış yükleme",
-        key: expect.stringMatching(/^[0-9a-f-]{36}$/) as unknown,
-      })
-      expect(second?.["key"]).toBe(first?.["key"])
+      expect(tries.map((call) => (call.body as { amount: number }).amount)).toEqual([40, 30])
     })
   })
 })

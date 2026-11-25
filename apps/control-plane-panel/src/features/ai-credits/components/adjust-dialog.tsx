@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { useAdjust } from "@/features/ai-credits/api/mutations"
 import type { AdjustInput } from "@/features/ai-credits/api/mutations"
+import { isApiError } from "@/lib/api"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
@@ -21,17 +22,26 @@ const NOTE_MAX = 500
 type Sign = "add" | "take"
 type Bucket = AdjustInput["bucket"]
 
+/**
+ * A try whose answer was lost (no answer, a 5xx, a time-out) may have
+ * been written; a refusal (4xx) or a cancelled step-up was not.
+ */
+const unsure = (error: unknown) =>
+  !isStepUpCancelled(error) && (!isApiError(error) || error.status >= 500 || error.status === 408)
+
 function Choice<V extends string>({
   id,
   label,
   value,
   options,
+  disabled,
   onChange,
 }: {
   id: string
   label: string
   value: V
   options: { value: V; label: string }[]
+  disabled: boolean
   onChange: (next: V) => void
 }) {
   return (
@@ -42,6 +52,7 @@ function Choice<V extends string>({
       <RadioGroup
         aria-labelledby={`${id}-label`}
         value={value}
+        disabled={disabled}
         onValueChange={(next) => {
           onChange(next as V)
         }}
@@ -65,7 +76,9 @@ function Choice<V extends string>({
  * bucket and why (required). The key is made once when the dialog opens
  * and sent with every try from it: a double click, or a retry after a
  * lost answer, writes the correction once (`applied: false` the second
- * time). Behind a step-up.
+ * time). Behind a step-up. After a try whose answer was lost the form
+ * is held as it was sent: only that same request may go again, so a
+ * different amount never rides on a key that may already be written.
  */
 export function AdjustDialog({
   tenantId,
@@ -84,8 +97,31 @@ export function AdjustDialog({
   const [amount, setAmount] = useState("")
   const [note, setNote] = useState("")
   const [failure, setFailure] = useState<string | null>(null)
+  // The request sent when its answer was lost; from then on only it goes again
+  const [held, setHeld] = useState<AdjustInput | null>(null)
   const value = parseCountInput(amount)
-  const ready = value !== null && value >= 1 && value <= MOVE_MAX && note.trim() !== ""
+  const ready =
+    held !== null || (value !== null && value >= 1 && value <= MOVE_MAX && note.trim() !== "")
+  const send = (input: AdjustInput) => {
+    setFailure(null)
+    adjust.mutate(input, {
+      onSuccess: (done) => {
+        toast.success(done.applied ? t("aiCredits.adjust.done") : t("aiCredits.adjust.already"))
+        onClose()
+      },
+      onError: (error) => {
+        if (isStepUpCancelled(error)) {
+          return
+        }
+        if (unsure(error)) {
+          setHeld(input)
+          setFailure(t("aiCredits.adjust.unsure"))
+        } else {
+          setFailure(errorText(t, error))
+        }
+      },
+    })
+  }
   return (
     <FormDialog
       open
@@ -99,28 +135,16 @@ export function AdjustDialog({
       dirty
       saving={adjust.isPending}
       canSubmit={ready}
-      submitLabel={t(`aiCredits.adjust.submit.${sign}`)}
+      submitLabel={held ? t("aiCredits.adjust.retry") : t(`aiCredits.adjust.submit.${sign}`)}
       onSubmit={() => {
-        if (!ready) {
+        if (adjust.isPending) {
           return
         }
-        setFailure(null)
-        adjust.mutate(
-          { amount: sign === "add" ? value : -value, bucket, note: note.trim(), key },
-          {
-            onSuccess: (done) => {
-              toast.success(
-                done.applied ? t("aiCredits.adjust.done") : t("aiCredits.adjust.already")
-              )
-              onClose()
-            },
-            onError: (error) => {
-              if (!isStepUpCancelled(error)) {
-                setFailure(errorText(t, error))
-              }
-            },
-          }
-        )
+        if (held) {
+          send(held)
+        } else if (ready && value !== null) {
+          send({ amount: sign === "add" ? value : -value, bucket, note: note.trim(), key })
+        }
       }}
     >
       <DialogBody>
@@ -128,6 +152,7 @@ export function AdjustDialog({
           id="adjust-sign"
           label={t("aiCredits.adjust.sign")}
           value={sign}
+          disabled={held !== null}
           onChange={setSign}
           options={[
             { value: "add", label: t("aiCredits.adjust.add") },
@@ -138,6 +163,7 @@ export function AdjustDialog({
           <Label htmlFor="adjust-amount">{t("aiCredits.adjust.amount")}</Label>
           <NumberField
             id="adjust-amount"
+            disabled={held !== null}
             min={1}
             max={MOVE_MAX}
             suffix={t("aiCredits.unit")}
@@ -154,6 +180,7 @@ export function AdjustDialog({
           id="adjust-bucket"
           label={t("aiCredits.adjust.bucket")}
           value={bucket}
+          disabled={held !== null}
           onChange={setBucket}
           options={[
             { value: "purchased", label: t("aiCredits.buckets.purchased") },
@@ -164,6 +191,7 @@ export function AdjustDialog({
           <Label htmlFor="adjust-note">{t("aiCredits.adjust.note")}</Label>
           <Textarea
             id="adjust-note"
+            disabled={held !== null}
             rows={3}
             maxLength={NOTE_MAX}
             required

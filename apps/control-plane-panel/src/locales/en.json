@@ -819,7 +819,7 @@
       "ai_credit_balance_short": "Not enough balance: the credits to take exceed the chosen balance.",
       "ai_credit_bucket_invalid": "The balance type is not valid.",
       "ai_credit_daily_cap_invalid": "The daily cap is not valid.",
-      "ai_credit_grant_ref_conflict": "This operation key was used for another top-up; close the dialog and open it again.",
+      "ai_credit_grant_ref_conflict": "This operation key was used for another top-up. Check the shop's account statement first; if the correction is not there, close the dialog and open it again.",
       "ai_credit_grant_ref_invalid": "The top-up reference is not valid.",
       "ai_credit_grant_ref_reserved": "This reference form is reserved for the system.",
       "ai_credit_key_invalid": "The correction key is not valid; close the dialog and open it again.",
@@ -1613,7 +1613,9 @@
         "take": "Take credits"
       },
       "done": "Credit correction written.",
-      "already": "This correction was already written; it was not written twice."
+      "already": "This correction was already written; it was not written twice.",
+      "unsure": "The last try may have been recorded. Trying again writes the same correction once; for a different amount, check the account statement first.",
+      "retry": "Try again"
     },
     "dailyCap": {
       "open": "Change daily cap",

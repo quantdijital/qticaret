@@ -819,7 +819,7 @@
       "ai_credit_balance_short": "Bakiye yetmiyor: düşülecek kredi seçilen bakiyeden fazla.",
       "ai_credit_bucket_invalid": "Bakiye türü geçerli değil.",
       "ai_credit_daily_cap_invalid": "Günlük tavan geçerli değil.",
-      "ai_credit_grant_ref_conflict": "Bu işlem anahtarı başka bir yükleme için kullanılmış; pencereyi kapatıp yeniden açın.",
+      "ai_credit_grant_ref_conflict": "Bu işlem anahtarı başka bir yükleme için kullanılmış. Önce mağazanın hesap dökümüne bakın; düzeltme orada yoksa pencereyi kapatıp yeniden açın.",
       "ai_credit_grant_ref_invalid": "Yükleme referansı geçerli değil.",
       "ai_credit_grant_ref_reserved": "Bu referans biçimi sisteme ayrılmış.",
       "ai_credit_key_invalid": "Düzeltme anahtarı geçerli değil; pencereyi kapatıp yeniden açın.",
@@ -1613,7 +1613,9 @@
         "take": "Kredi düş"
       },
       "done": "Kredi düzeltmesi yazıldı.",
-      "already": "Bu düzeltme zaten yazılmıştı; ikinci kez yazılmadı."
+      "already": "Bu düzeltme zaten yazılmıştı; ikinci kez yazılmadı.",
+      "unsure": "Önceki deneme kaydedilmiş olabilir. Yeniden denerseniz aynı işlem bir kez yazılır; farklı bir tutar için önce hesap dökümüne bakın.",
+      "retry": "Yeniden dene"
     },
     "dailyCap": {
       "open": "Günlük tavanı değiştir",
