@@ -46,6 +46,9 @@ const FIELDS = [
   "campaign.budget.limit",
 ]
 
+/** The rows as the fields read them; the graph's own type differs between a built checkout and a bare one. */
+const rowsOf = (data: readonly unknown[]): PromotionStateRow[] => data as PromotionStateRow[]
+
 /** The shop's automatic promotions that are a price, as they apply at `now`, in one key. */
 export async function automaticOfferState(container: MedusaContainer, now: Date): Promise<string> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
@@ -53,8 +56,7 @@ export async function automaticOfferState(container: MedusaContainer, now: Date)
     fields: FIELDS,
     filters: { is_automatic: true },
   })
-  // Typed as the fields read; the generated types may read it as any
-  return offerState(data as PromotionStateRow[], CURRENCY, now)
+  return offerState(rowsOf(data), CURRENCY, now)
 }
 
 /**
