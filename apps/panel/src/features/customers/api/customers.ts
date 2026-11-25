@@ -35,6 +35,35 @@ export type CustomerListItem = Awaited<
   ReturnType<typeof sdk.admin.customer.list>
 >["customers"][number]
 
+/** A customer's numbers (CU1, O4), counted as the sales report counts sales. */
+export interface CustomerStats {
+  customer_id: string
+  orders: number
+  /** Medusa amount strings in `currency_code`. */
+  spent: string
+  average: string
+  last_order_at: string | null
+  city: string | null
+}
+
+export interface CustomerStatsAnswer {
+  stats: CustomerStats[]
+  currency_code: string
+  capped: boolean
+}
+
+/** `GET /admin/customer-stats`: a list page's customers in one read, a recorded read (the city). */
+export const customerStatsQuery = (ids: readonly string[]) =>
+  queryOptions({
+    queryKey: ["customers", "stats", [...ids].sort()],
+    queryFn: () =>
+      sdk.client.fetch<CustomerStatsAnswer>("/admin/customer-stats", {
+        query: { ids: ids.join(",") },
+      }),
+    enabled: ids.length > 0,
+    placeholderData: keepPreviousData,
+  })
+
 /** How many customers each tab holds. */
 export const customerCountsQuery = () =>
   queryOptions({
