@@ -46,16 +46,13 @@ const order = (more: Record<string, unknown> = {}) =>
     ...more,
   }) as unknown as OrderDetail
 
-const renderCard = (detail: OrderDetail, invoiceStatus: string | null = null) => {
+const renderCard = (detail: OrderDetail, billingLocked: boolean | null = false) => {
   fetchMock.mockImplementation((url: string) =>
-    Promise.resolve(
-      url === "/admin/invoices"
-        ? {
-            invoices: invoiceStatus ? [{ id: "inv_1", kind: "sale", status: invoiceStatus }] : [],
-            count: invoiceStatus ? 1 : 0,
-          }
-        : {}
-    )
+    url === "/admin/order-board/order_1"
+      ? billingLocked === null
+        ? new Promise(() => undefined)
+        : Promise.resolve({ stage: "to_ship", billing_locked: billingLocked })
+      : Promise.resolve({})
   )
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -102,14 +99,23 @@ describe("CustomerCard", () => {
     })
   })
 
-  it("keeps the billing address once the invoice is issued", async () => {
-    renderCard(order({ billing_address: { ...address, company: "Yılmaz Ltd." } }), "issued")
+  it("keeps the billing address once the invoice provider holds it", async () => {
+    renderCard(order({ billing_address: { ...address, company: "Yılmaz Ltd." } }), true)
     expect(
-      await screen.findByText("Fatura kesildi; fatura adresi artık değişmez.")
+      await screen.findByText(
+        "Fatura kesildi ya da sağlayıcıya iletildi; fatura adresi artık değişmez."
+      )
     ).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/order-board/order_1")
     expect(screen.getByText("Yılmaz Ltd.")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: "Fatura adresini düzenle" })).toBeNull()
     // The delivery address still changes until the order is packed
+    expect(screen.getByRole("button", { name: "Teslimat adresini düzenle" })).toBeInTheDocument()
+  })
+
+  it("offers no billing change before the server says it is open", () => {
+    renderCard(order(), null)
+    expect(screen.queryByRole("button", { name: "Fatura adresini düzenle" })).toBeNull()
     expect(screen.getByRole("button", { name: "Teslimat adresini düzenle" })).toBeInTheDocument()
   })
 

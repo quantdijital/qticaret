@@ -259,10 +259,21 @@ medusaIntegrationTestRunner({
       })
       const billing = (address_1: string) =>
         post(`/admin/orders/${orderId}`, { billing_address: { address_1 } })
+      // The panel's order page reads the same rule from the order's state
+      const locked = async () =>
+        (
+          await settle(
+            http.get<{ billing_locked?: boolean }>(`/admin/order-board/${orderId}`, {
+              headers: admin.headers,
+            })
+          )
+        ).data.billing_locked
 
+      const lockedWhilePending = await locked()
       const whilePending = await billing("Fatura Sokak No 1")
       // BirFatura pulled it: the row still waits, the provider holds the old buyer
       await invoices.updateInvoices({ id: invoice.id, listed_at: new Date() })
+      const lockedWhileListed = await locked()
       const whileListed = await billing("Fatura Sokak No 1b")
       await invoices.updateInvoices({ id: invoice.id, status: "issuing" })
       const whileIssuing = await billing("Fatura Sokak No 2")
@@ -277,6 +288,7 @@ medusaIntegrationTestRunner({
         filters: { id: orderId },
       })
 
+      expect([lockedWhilePending, lockedWhileListed]).toEqual([false, true])
       expect(whilePending.status).toBe(200)
       expect(whileListed.data.message).toBe("orders.billing_invoiced")
       expect(whileIssuing.status).toBe(400)
