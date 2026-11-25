@@ -114,6 +114,42 @@ medusaIntegrationTestRunner({
       expect(await lineMetadata(lineId)).toMatchObject({ qt_addons: [{ id: "a" }] })
     })
 
+    it("keeps reserved keys when the path is percent-encoded or cased otherwise", async () => {
+      const { cartId, lineId } = await markedCart()
+      // Express decodes params and routes case-insensitively: `%63` is "c"
+      const encodedCart = `%63${cartId.slice(1)}`
+      const encodedLine = `%63${lineId.slice(1)}`
+
+      const cart = await post(`/store/carts/${encodedCart}`, { metadata: null })
+      const line = await post(`/store/carts/${cartId}/LINE-ITEMS/${encodedLine}`, {
+        quantity: 1,
+        metadata: null,
+      })
+
+      expect(cart.status).toBe(200)
+      expect(await cartMetadata(cartId)).toMatchObject(RESERVED)
+      expect(line.status).toBe(200)
+      expect(await lineMetadata(lineId)).toMatchObject({ qt_addons: [{ id: "a" }] })
+    })
+
+    it("keeps a line's reserved keys when the same variant is added again", async () => {
+      const { cartId, lineId } = await markedCart()
+      const { data } = await settle(
+        http.get<Answer>(`/store/carts/${cartId}`, { headers: store.headers })
+      )
+      const variantId =
+        (data.cart?.items?.[0] as { variant_id?: string } | undefined)?.variant_id ?? ""
+
+      await post(`/store/carts/${cartId}/line-items`, { variant_id: variantId, quantity: 1 })
+      await post(`/store/carts/${cartId}/line-items`, {
+        variant_id: variantId,
+        quantity: 1,
+        metadata: {},
+      })
+
+      expect(await lineMetadata(lineId)).toMatchObject({ qt_addons: [{ id: "a" }] })
+    })
+
     it("refuses reserved keys in a cart address's metadata", async () => {
       const { cartId } = await markedCart()
 

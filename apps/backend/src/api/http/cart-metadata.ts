@@ -53,18 +53,31 @@ export function clearedMetadata(current: Metadata | null | undefined): Metadata 
 }
 
 /**
- * The cart, and the line on a line's route, the request is for. A matcher
- * without methods mounts as a prefix (`/store/carts/:id` runs on the line
- * routes and the others under it too), so the path decides.
+ * The cart, and the line on a line's route, the request is for, as Express
+ * routed it: a matcher without methods mounts as a prefix
+ * (`/store/carts/:id` runs on the line routes and the others under it), so
+ * the rest of the path (`req.path`) says which; ids are decoded as Express
+ * decodes its params (security review 2026-11-26). Null for any other
+ * route under the cart.
  */
-const TARGET = /^\/store\/carts\/([^/]+)(?:\/line-items\/([^/]+))?\/?$/
+const LINE_REST = /^\/line-items\/([^/]+)\/?$/i
 
-export function metadataTarget(url: string): { cartId: string; lineId?: string } | null {
-  const match = TARGET.exec(url.split("?")[0] ?? "")
-  if (!match?.[1]) {
+export function metadataTarget(
+  params: Record<string, string | undefined>,
+  rest: string
+): { cartId: string; lineId?: string } | null {
+  const cartId = params["id"]
+  if (!cartId) {
     return null
   }
-  return match[2] ? { cartId: match[1], lineId: match[2] } : { cartId: match[1] }
+  if (params["line_id"]) {
+    return { cartId, lineId: params["line_id"] }
+  }
+  if (rest === "" || rest === "/") {
+    return { cartId }
+  }
+  const line = LINE_REST.exec(rest)?.[1]
+  return line ? { cartId, lineId: decodeURIComponent(line) } : null
 }
 
 async function currentMetadata(
@@ -98,8 +111,10 @@ const replaceMetadata = (holder: unknown, metadata: Metadata | undefined) => {
 /**
  * A storefront's `metadata: null` on a cart or a line clears its own keys
  * and keeps the server's (`{}` and the storefront's own keys are merged by
- * Medusa and keep them already). Both the raw and the validated body are
- * rewritten: this may run before or after Medusa's body validation.
+ * Medusa and keep them already). A `null` never goes on, even where nothing
+ * is the server's yet: a key the server writes meanwhile stays. Both the
+ * raw and the validated body are rewritten: this may run before or after
+ * Medusa's body validation.
  */
 export async function keepReservedMetadata(
   req: MedusaRequest,
@@ -110,15 +125,14 @@ export async function keepReservedMetadata(
   const validated = (req as { validatedBody?: { metadata?: unknown } }).validatedBody
   const nulled = (holder: { metadata?: unknown } | undefined) =>
     !!holder && "metadata" in holder && holder.metadata === null
-  const target = metadataTarget(req.originalUrl)
-  if (req.method !== "POST" || !target || !(nulled(body) || nulled(validated))) {
+  if (req.method !== "POST" || !(nulled(body) || nulled(validated))) {
     next()
     return
   }
   try {
-    const current = await currentMetadata(req, target)
-    if (Object.keys(current ?? {}).some(isReserved)) {
-      const cleared = clearedMetadata(current)
+    const target = metadataTarget(req.params, req.path)
+    if (target) {
+      const cleared = clearedMetadata(await currentMetadata(req, target))
       replaceMetadata(body, cleared)
       replaceMetadata(validated, cleared)
     }
