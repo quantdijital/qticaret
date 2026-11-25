@@ -3,7 +3,9 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { LinkView, PhotoCollageItemView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
-type Mark = { "data-qf"?: string }
+interface Mark {
+  "data-qf"?: string
+}
 
 /**
  * The collage's white card (`card: below`, Wanderly's "Places That

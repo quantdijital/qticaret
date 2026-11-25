@@ -93,12 +93,8 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
  * announcement bar with a button. The announcement's lines are words.
  */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  doc.header.filter(
-    (section) =>
-      section.type === "marquee" ||
-      section.type === "header_bar" ||
-      (section.type === "announcement_bar" && Boolean(section.link))
-  )
+  // The strip and the bar always; the announcement bar (the only other) with a button
+  doc.header.filter((section) => section.type !== "announcement_bar" || Boolean(section.link))
 
 /** Every record a section names by id, as a link would point at it. */
 export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {

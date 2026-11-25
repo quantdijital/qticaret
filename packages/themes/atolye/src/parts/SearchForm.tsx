@@ -50,12 +50,10 @@ function CategoryTabs({ field }: { field: SearchFormSelectView }) {
           <span
             className={cn(
               "block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text",
-              "icon" in choice && choice.icon && "flex items-center gap-2"
+              "icon" in choice && "flex items-center gap-2"
             )}
           >
-            {"icon" in choice && choice.icon && (
-              <SectionIcon icon={choice.icon} className="size-4 shrink-0" />
-            )}
+            {"icon" in choice && <SectionIcon icon={choice.icon} className="size-4 shrink-0" />}
             {choice.label}
           </span>
         </label>
