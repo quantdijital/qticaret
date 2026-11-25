@@ -1,4 +1,4 @@
-import { Modules, PromotionActions } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules, PromotionActions } from "@medusajs/framework/utils"
 import {
   createPaymentCollectionForCartWorkflow,
   updateCartPromotionsWorkflow,
@@ -125,6 +125,30 @@ medusaIntegrationTestRunner({
       expect(taken.status).toBe(200)
       expect(taken.data.cart.promotions?.map((each) => each.code)).toEqual(["SADIK"])
       expect(taken.data.cart.discount_total).toBe(10)
+
+      // A guest record in the group (added in the panel): typing its e-mail is no login
+      const record = await http.post<{ customer: { id: string } }>(
+        "/admin/customers",
+        { email: "kayitli-misafir@example.com", first_name: "Misafir" },
+        { headers: admin.headers }
+      )
+      await http.post(
+        `/admin/customer-groups/${groupId}/customers`,
+        { add: [record.data.customer.id] },
+        { headers: admin.headers }
+      )
+      const posing = await cart(store.headers, { email: "kayitli-misafir@example.com" })
+      const refused = await addCode(posing.id, "sadik")
+      expect(refused.status).toBe(400)
+      expect(refused.data.message).toBe("promotions.customer_group_login")
+      // Nor do Medusa's own rules take it, past the request's check
+      await updateCartPromotionsWorkflow(getContainer()).run({
+        input: { cart_id: posing.id, promo_codes: ["SADIK"], action: PromotionActions.ADD },
+      })
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "cart", fields: ["discount_total"], filters: { id: posing.id } })
+      expect(Number((data[0] as { discount_total: unknown }).discount_total)).toBe(0)
     })
 
     it("gives a first-order code to new buyers only, by customer and by e-mail", async () => {

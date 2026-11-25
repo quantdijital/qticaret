@@ -50,13 +50,15 @@ export function restrictionsOf(
 
 /**
  * Why a buyer may not use a promotion, as an error key; null when they may.
- * `inGroups` is null for a cart with no customer; `placedBefore` null when
+ * `groupIds` is null for a cart with no customer account; `placedBefore` null when
  * the buyer is not known yet (a guest's cart before its e-mail), which the
- * checkout decides once the e-mail is there.
+ * checkout decides once the e-mail is there; `strict` (the checkout)
+ * refuses a first-order code to a buyer still not known.
  */
 export function refusalOf(
   restrictions: Restrictions,
-  buyer: { groupIds: readonly string[] | null; placedBefore: boolean | null }
+  buyer: { groupIds: readonly string[] | null; placedBefore: boolean | null },
+  { strict = false }: { strict?: boolean } = {}
 ): string | null {
   if (restrictions.groups) {
     if (buyer.groupIds === null) {
@@ -66,7 +68,8 @@ export function refusalOf(
       return "promotions.customer_group_only"
     }
   }
-  if (restrictions.firstOrder && buyer.placedBefore === true) {
+  const unknown = strict && buyer.placedBefore === null
+  if (restrictions.firstOrder && (buyer.placedBefore === true || unknown)) {
     return "promotions.first_order_only"
   }
   return null

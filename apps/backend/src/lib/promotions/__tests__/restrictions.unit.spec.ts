@@ -36,5 +36,9 @@ describe("promotion restrictions (K1/K2)", () => {
     expect(refusalOf(first, { groupIds: null, placedBefore: false })).toBeNull()
     // Not known yet (a guest before the e-mail): the checkout decides
     expect(refusalOf(first, { groupIds: null, placedBefore: null })).toBeNull()
+    // At the checkout a buyer still not known does not get it
+    expect(refusalOf(first, { groupIds: null, placedBefore: null }, { strict: true })).toBe(
+      "promotions.first_order_only"
+    )
   })
 })

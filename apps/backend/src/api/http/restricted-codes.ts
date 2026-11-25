@@ -13,20 +13,25 @@ interface CartBuyer {
   metadata?: Record<string, unknown> | null
 }
 
-// An e-mail the same request sets on the cart is the buyer's from now on
-const sentEmail = (req: MedusaRequest): string | null => {
+// An e-mail the same request sets on the cart (making or updating it) is the
+// buyer's from now on; adding codes sets none, so it is never read from that
+// route (a probe of whether an address ordered before, review M2)
+const sentEmail = (req: MedusaRequest, mode: "replace" | "add"): string | null => {
   const email = (req.body as Record<string, unknown> | undefined)?.["email"]
-  return typeof email === "string" && email.trim() ? email.trim() : null
+  return mode === "replace" && typeof email === "string" && email.trim() && email.length <= 254
+    ? email.trim()
+    : null
 }
 
 /** The cart's buyer; null for a payment link's cart, whose code staff set (adr/0051). */
 async function buyerOf(
   req: MedusaRequest,
   res: MedusaResponse,
-  cartId: string | null
+  cartId: string | null,
+  mode: "replace" | "add"
 ): Promise<Buyer | null> {
   if (!cartId) {
-    return { customerId: await sessionCustomer(req, res), email: sentEmail(req) }
+    return { customerId: await sessionCustomer(req, res), email: sentEmail(req, mode) }
   }
   const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "cart",
@@ -37,7 +42,10 @@ async function buyerOf(
   if (!cart || linkIdOfCart(cart.metadata) !== null) {
     return null
   }
-  return { customerId: cart.customer_id ?? null, email: sentEmail(req) ?? cart.email ?? null }
+  return {
+    customerId: cart.customer_id ?? null,
+    email: sentEmail(req, mode) ?? cart.email ?? null,
+  }
 }
 
 /**
@@ -60,7 +68,7 @@ export async function refuseRestrictedCodes(
       next()
       return
     }
-    const buyer = await buyerOf(req, res, route.cartId)
+    const buyer = await buyerOf(req, res, route.cartId, route.mode)
     const refusal = buyer ? await restrictedCodeRefusal(req.scope, codes, buyer) : null
     if (refusal) {
       throw new ValidationError(refusal, { field: "promo_codes" })

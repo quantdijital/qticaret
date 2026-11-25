@@ -1,6 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { FIRST_ORDER_ATTRIBUTE, FIRST_ORDER_VALUE } from "../../lib/promotions/restrictions"
+import {
+  FIRST_ORDER_ATTRIBUTE,
+  FIRST_ORDER_VALUE,
+  restrictionsOf,
+} from "../../lib/promotions/restrictions"
+import { linkIdOfCart } from "../payment-links/cart-guard"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -45,8 +50,15 @@ export async function placedBefore(container: Container, buyer: Buyer): Promise<
 
 interface ContextCart {
   customer_id?: string | null
-  customer?: { id?: string | null; email?: string | null } | null
+  customer?: {
+    id?: string | null
+    email?: string | null
+    has_account?: boolean | null
+    groups?: unknown[] | null
+  } | null
   email?: string | null
+  metadata?: Record<string, unknown> | null
+  promotions?: ({ code?: string | null } | null)[] | null
 }
 
 export const buyerOf = (cart: ContextCart | null | undefined): Buyer => ({
@@ -55,32 +67,60 @@ export const buyerOf = (cart: ContextCart | null | undefined): Buyer => ({
 })
 
 /**
- * Whether any promotion has a "first order only" rule: the order reads
- * below run on every cart refresh only in a shop that uses one. Medusa's
- * rule filter type names ids only; the module's list takes any column.
+ * Whether the cart may meet a "first order only" rule: a code it holds or
+ * is being given has one, or an active automatic promotion does. Only then
+ * are the buyer's orders read (review L3): not on every refresh of every cart.
  */
-async function firstOrderRulesExist(container: Container): Promise<boolean> {
-  const rules = await container
-    .resolve(Modules.PROMOTION)
-    .listPromotionRules({ attribute: FIRST_ORDER_ATTRIBUTE } as unknown as { id?: string[] }, {
-      select: ["id"],
-      take: 1,
-    })
-  return rules.length > 0
+async function meetsFirstOrderRule(
+  container: Container,
+  cart: ContextCart | null | undefined,
+  sentCodes: readonly string[]
+): Promise<boolean> {
+  const promotions = container.resolve(Modules.PROMOTION)
+  const codes = [
+    ...new Set([
+      ...sentCodes,
+      ...(cart?.promotions ?? []).flatMap((each) => (each?.code ? [each.code] : [])),
+    ]),
+  ]
+  const [coded, automatic] = await Promise.all([
+    codes.length > 0
+      ? promotions.listPromotions({ code: codes }, { relations: ["rules", "rules.values"] })
+      : Promise.resolve([]),
+    promotions.listPromotions(
+      { is_automatic: true, status: ["active"] },
+      { relations: ["rules", "rules.values"] }
+    ),
+  ])
+  return [...coded, ...automatic].some(
+    (promotion) =>
+      restrictionsOf(promotion.rules).firstOrder
+  )
 }
 
 /**
- * The fact a "first order only" rule reads, laid over the cart's context.
- * A buyer not known yet counts as new: the code may sit on a guest's cart,
- * and the cart's refresh when its e-mail comes, and the checkout, decide.
+ * The facts the restriction rules read, laid over the cart's context (K1/K2):
+ * - `first_order`: a buyer not known yet counts as new (the code may sit on a
+ *   guest's cart; the refresh when its e-mail comes, and the checkout, decide);
+ *   a payment link's cart is staff's to price (adr/0051) and counts as new.
+ * - the customer's groups only for an account: a guest record (made by the
+ *   panel, an import or a guest checkout) is stood in for by anyone typing its
+ *   e-mail, so Medusa's `customer.groups.id` rule reads none for it (review M1).
  */
-export async function firstOrderContext(
+export async function restrictionContext(
   container: Container,
-  cart: ContextCart | null | undefined
-): Promise<Record<string, string>> {
-  if (!(await firstOrderRulesExist(container))) {
-    return {}
+  cart: ContextCart | null | undefined,
+  sentCodes: readonly string[] = []
+): Promise<Record<string, unknown>> {
+  const context: Record<string, unknown> = {}
+  if (cart?.customer && !cart.customer.has_account && (cart.customer.groups?.length ?? 0) > 0) {
+    context["customer"] = { ...cart.customer, groups: [] }
   }
-  const before = await placedBefore(container, buyerOf(cart))
-  return { [FIRST_ORDER_ATTRIBUTE]: before === true ? "false" : FIRST_ORDER_VALUE }
+  if (!(await meetsFirstOrderRule(container, cart, sentCodes))) {
+    return context
+  }
+  const before =
+    linkIdOfCart(cart?.metadata) === null ? await placedBefore(container, buyerOf(cart)) : false
+  context[FIRST_ORDER_ATTRIBUTE] = before === true ? "false" : FIRST_ORDER_VALUE
+  return context
 }
