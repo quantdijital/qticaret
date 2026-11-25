@@ -134,6 +134,8 @@ export function mainSectionsOf<L>(
       sticky: header.sticky,
       menu_images: header.menu_images,
       search_style: header.search_style,
+      // The one-row header's tools: only once set (absent: the round tools)
+      ...(header.tools_style ? { tools_style: header.tools_style } : {}),
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
       // The other variants' action button (the catalog prints it in its own): only once set
       ...(header.variant !== "catalog" && header.highlight_link

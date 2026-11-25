@@ -10507,6 +10507,13 @@
           "submenus": "Alt menülerde",
           "off": "Yok"
         },
+        "tools_style": {
+          "label": "Sağdaki simgeler",
+          "term": "icons",
+          "hint": "Tek satır üst bilgide arama, hesap ve sepet yuvarlak çerçeveli ya da sade küçük simgeler; sadede eylem düğmesi oklu hap olarak sonda durur, favoriler menüde ve hesabınızda.",
+          "round": "Yuvarlak çerçeveli",
+          "plain": "Sade, düğmeli"
+        },
         "search_style": {
           "label": "Arama görünümü",
           "term": "search",

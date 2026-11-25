@@ -66,6 +66,11 @@ export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
 
 type SearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
 
+/** The one-row header's tools: mirrors `@qticaret/types`' `HEADER_TOOLS_STYLES`. */
+export const HEADER_TOOLS_STYLES = ["round", "plain"] as const
+
+type ToolsStyle = (typeof HEADER_TOOLS_STYLES)[number]
+
 /**
  * The catalog header's layout choices (adr/0049 Ek 2026-11-15): mirror
  * `@qticaret/types`' `HEADER_TOOLS_PLACES`, `HEADER_TOP_LINKS_PLACES` and
@@ -80,6 +85,7 @@ export const HEADER_SEARCH_WIDTHS = ["wide", "narrow"] as const
 const HEADER_STEPS: Readonly<Record<string, readonly unknown[]>> = {
   menu_images: HEADER_MENU_IMAGES,
   search_style: HEADER_SEARCH_STYLES,
+  tools_style: HEADER_TOOLS_STYLES,
   tools_place: HEADER_TOOLS_PLACES,
   top_links: HEADER_TOP_LINKS_PLACES,
   search_width: HEADER_SEARCH_WIDTHS,
@@ -136,6 +142,17 @@ const headerCommon = {
       MAIN_ERROR
     )
     .default("field"),
+  /**
+   * The one-row header's tools (`inline`): `round` (as before: absent) or
+   * `plain` (small icons and the action button as a pill). Read by that
+   * variant only; a step off the list is dropped on reading a stored design.
+   */
+  tools_style: z
+    .custom<ToolsStyle>(
+      (value) => (HEADER_TOOLS_STYLES as readonly unknown[]).includes(value),
+      MAIN_ERROR
+    )
+    .optional(),
   /**
    * The header's action button, whatever the variant: its words and where
    * it goes (the catalog header's highlighted link, now every header's). None:

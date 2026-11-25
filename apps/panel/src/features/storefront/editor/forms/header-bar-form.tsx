@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES } from "@qticaret/types"
+import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES, HEADER_TOOLS_STYLES } from "@qticaret/types"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { PANEL_GROUPS } from "../panel-groups"
@@ -70,6 +70,23 @@ export function HeaderGroups({
       }}
     />
   )
+  // The one-row header's tools (`inline` only): round, or plain with the action button as a pill
+  const toolsStyle =
+    section.variant === "inline" ? (
+      <StepChoice
+        id={FIELD_IDS.toolsStyle(section.id)}
+        label={t(`${H}.tools_style.label`)}
+        term={t(`${H}.tools_style.term`)}
+        hint={t(`${H}.tools_style.hint`)}
+        steps={HEADER_TOOLS_STYLES}
+        value={section.tools_style ?? "round"}
+        fallback="round"
+        nameOf={(step) => t(`${H}.tools_style.${step}`)}
+        onChange={(step) => {
+          onChange({ ...section, tools_style: step })
+        }}
+      />
+    ) : null
   // The other variants' action button (the catalog header's highlighted link, its own field there)
   const actionId = FIELD_IDS.header(section.id, "highlight_link")
   const action =
@@ -122,6 +139,7 @@ export function HeaderGroups({
             <>
               {menuImages}
               {action}
+              {toolsStyle}
             </>
           ) : (
             menuImages

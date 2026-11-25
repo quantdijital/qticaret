@@ -9,6 +9,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -81,6 +82,8 @@ export interface StoreMainSections {
      * older backend prints none: a reader takes `field` (`headerSearchStyleOf`).
      */
     search_style?: HeaderSearchStyle
+    /** The one-row header's tools (`HEADER_TOOLS_STYLES`); absent: `round`. */
+    tools_style?: HeaderToolsStyle
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
     /**

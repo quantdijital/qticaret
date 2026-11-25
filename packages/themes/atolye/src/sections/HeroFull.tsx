@@ -110,6 +110,7 @@ export function HeroFull({
       data-scrim={settings.scrim}
       data-edge={settings.edge}
       data-foot={foot ? "" : undefined}
+      data-trust={inside ? "inside" : undefined}
     >
       {first && image && <Preload image={image} sizes={sizes} />}
       <div className="gf-cover-stage relative isolate flex flex-col justify-center">
@@ -236,7 +237,7 @@ export function HeroFull({
       {foot && (
         <Container className="gf-cover-foot relative z-(--z-raised) flex flex-col gap-4">
           {search && overlap && (
-            <SearchForm form={search} className={trust.length > 0 ? "w-full" : box} />
+            <SearchForm form={search} className={trust.length > 0 || inside ? "w-full" : box} />
           )}
           {trust.length > 0 && (
             <HeroTrust

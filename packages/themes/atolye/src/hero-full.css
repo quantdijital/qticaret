@@ -90,8 +90,16 @@
 
   .gf-cover-title--stacked {
     max-width: 11ch;
-    font-size: clamp(2.5rem, 3.4vw + 1.5rem, 4.5rem);
-    line-height: 1;
+    font-size: clamp(2.5rem, 3.4vw + 1.5rem, 4.375rem);
+    line-height: 0.98;
+  }
+
+  /* The badges' row inside makes the words' column taller: the room around it a step less */
+  .gf-cover[data-trust="inside"] {
+    --cover-room: clamp(2.25rem, 4vw, 3.75rem);
+  }
+  .gf-cover[data-trust="inside"][data-foot] .gf-cover-body {
+    padding-bottom: calc(var(--cover-room) * 0.5 + var(--cover-lift));
   }
 
   /* The second button clear, its play mark in a ring (`second_button: play`) */

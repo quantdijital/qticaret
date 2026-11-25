@@ -212,6 +212,7 @@ export const FIELD_IDS = {
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
+  toolsStyle: (sectionId: string) => `${sectionId}-tools-style`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,

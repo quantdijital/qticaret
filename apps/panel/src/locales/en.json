@@ -10507,6 +10507,13 @@
           "submenus": "In submenus",
           "off": "None"
         },
+        "tools_style": {
+          "label": "Icons on the right",
+          "term": "icons",
+          "hint": "In the one-row header the search, account and cart in round frames, or as small plain icons; plain, the action button ends the row as a pill with an arrow, favourites in the menu and the account.",
+          "round": "Round frames",
+          "plain": "Plain, with button"
+        },
         "search_style": {
           "label": "Search look",
           "term": "search",

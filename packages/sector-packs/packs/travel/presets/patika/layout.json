@@ -6,11 +6,8 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "lines": [
-        "Erken rezervasyonda yaz turlarının ilk kalkışlarında yer sınırlı",
-        "Küçük gruplar, yerel rehberler, açık program"
-      ],
-      "mode": "rotate",
+      "lines": ["Size özel tur planı için bize ulaşın"],
+      "mode": "first",
       "interval": "slow",
       "pause_button": "always",
       "hover_pause": "on",
@@ -23,14 +20,15 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "standard",
+      "variant": "inline",
       "sticky": true,
       "menu_images": "off",
       "search_style": "icon",
       "highlight_link": {
         "$href": "/magaza",
-        "label": "Tur bul"
-      }
+        "label": "Tur planla"
+      },
+      "tools_style": "plain"
     }
   ],
   "home": [
@@ -56,8 +54,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-likya.webp",
-        "alt": "Kaş yakınında denize inen Likya Yolu patikası"
+        "$image": "images/kapak-gol-gezgin.webp",
+        "alt": "Sırt çantalı bir gezgin, ormanla çevrili gölün üstündeki kayada oturmuş manzaraya bakıyor"
       },
       "action": "both",
       "search_position": "overlap",

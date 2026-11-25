@@ -7,6 +7,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -45,6 +46,8 @@ export interface HeaderBarView {
    * drops it down). Absent: `field`.
    */
   searchStyle?: HeaderSearchStyle
+  /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */
+  toolsStyle?: HeaderToolsStyle
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**

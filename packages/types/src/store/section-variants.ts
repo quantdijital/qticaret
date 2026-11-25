@@ -203,6 +203,23 @@ export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
 export type HeaderSearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
 
 /**
+ * The one-row header's tools (`header_bar` `inline`): `round`, each icon in
+ * a hairline ring in a 96 px row (the drawing from before the setting, so
+ * the default); `plain`, the search, account and cart as small plain icons
+ * in a 72 px row, the action button (`highlight_link`) after them as a pill
+ * with an arrow, favourites in the menu sheet and the account. Mirrored by
+ * the backend's `HEADER_TOOLS_STYLES`.
+ */
+export const HEADER_TOOLS_STYLES = ["round", "plain"] as const
+
+export type HeaderToolsStyle = (typeof HEADER_TOOLS_STYLES)[number]
+
+/** The tools' look as a reader takes it: absent or off the list, `round`. */
+export function headerToolsStyleOf(value: unknown): HeaderToolsStyle {
+  return value === "plain" ? "plain" : "round"
+}
+
+/**
  * The product page gallery's picture shape (`product_main.image_ratio`):
  * `square` (the default, as drawn before the setting), `landscape` 4:3 or
  * `portrait` 3:4. Mirrored by the backend's `PRODUCT_IMAGE_RATIOS`.

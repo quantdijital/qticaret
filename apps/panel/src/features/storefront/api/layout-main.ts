@@ -6,6 +6,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -49,6 +50,8 @@ interface HeaderBarCommon extends MainBase {
    * "Ara" drops it down); the server reads a bar saved before it as `field`.
    */
   search_style: HeaderSearchStyle
+  /** The one-row header's tools (`inline` only); absent: `round`. */
+  tools_style?: HeaderToolsStyle
   /**
    * The header's action button, on every variant (the catalog header's
    * highlighted link): its words and where it goes; null or absent: none.

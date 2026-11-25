@@ -9,6 +9,7 @@ import { lookOf } from "@qticaret/types/section-look"
 import {
   headerMenuImagesOf,
   headerSearchStyleOf,
+  headerToolsStyleOf,
   productImageRatioOf,
   variantOf,
 } from "@qticaret/types/section-variants"
@@ -80,6 +81,8 @@ export function headerBarOf(
     menuImages: headerMenuImagesOf(bar.menu_images),
     // A backend before the search's look prints none: the box, as drawn before
     searchStyle: headerSearchStyleOf(bar.search_style),
+    // The one-row header's plain tools only once chosen: a bar without them is the view it was
+    ...(headerToolsStyleOf(bar.tools_style) === "plain" ? { toolsStyle: "plain" as const } : {}),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

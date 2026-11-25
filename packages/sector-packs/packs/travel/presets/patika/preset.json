@@ -4,13 +4,13 @@
   "version": 1,
   "theme": "atolye",
   "name": "Patika",
-  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, eylem düğmeli üst bilgi, sola hizalı tam görsel kapak, sekmeli arama kutusu ve güven rozetleri; beş rota kartı, ikonlu neden biz şeridi, oklu tur kartları, geniş yayla bandı, yorum kaydırıcı, yol notları ve iletişim sütunlu koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",
+  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, yayla bandı, yorumlar ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
-      "file": "images/kapak-likya.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:2023-11-04_Lycian_Way_near_Kaş.jpg",
-      "license": "CC BY 4.0, Alexkom000 (küçültülüp WebP'ye çevrildi)"
+      "file": "images/kapak-gol-gezgin.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Backpacker_over_a_lake_(Unsplash).jpg",
+      "license": "CC0, Jeremy Yap (Unsplash; kırpılıp küçültüldü, WebP'ye çevrildi)"
     },
     {
       "file": "images/rota-kapadokya.webp",
