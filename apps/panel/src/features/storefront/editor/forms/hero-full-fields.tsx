@@ -93,7 +93,7 @@ export function HeroFullAction({
   onChange: (section: HeroFull) => void
 }) {
   const { t } = useTranslation()
-  const searching = heroFullSettingsOf(section).action === "search"
+  const searching = heroFullSettingsOf(section).action !== "button"
   return (
     <>
       <StepFields section={section} steps={HERO_FULL_CONTENT} onChange={onChange} />

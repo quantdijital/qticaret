@@ -16,7 +16,7 @@ import {
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
-import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
+import { bottomNavOf, isCheckoutPage, pathOf } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
@@ -218,6 +218,7 @@ export async function shopView(): Promise<ShopView> {
     identityLines: identityLinesOf(identity, t),
     theme: themeView(theme),
     bottomNav: bottomNavOf(url),
+    path: pathOf(url),
     checkout: isCheckoutPage(url),
     // The footer's identity slot and marks (adr/0046 Ek 2026-11-04)
     etbisQr: identity.etbis_qr ? imageView(identity.etbis_qr, t("footer.etbis_qr_alt")) : null,

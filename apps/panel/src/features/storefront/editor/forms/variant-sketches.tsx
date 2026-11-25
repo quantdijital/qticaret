@@ -147,6 +147,29 @@ const HeaderStandard = () => <HeaderRow mark={6} />
 /** The theme setting's centred header: the wordmark in the middle. */
 const HeaderCentered = () => <HeaderRow mark={47} />
 
+/** One row: the wordmark, the menu's words in the middle (the first marked), round tools. */
+function HeaderInline() {
+  return (
+    <>
+      <HeaderFrame />
+      <rect x={6} y={13} width={16} height={6} rx={1.5} className="fill-current opacity-70" />
+      {[34, 48, 62, 76].map((x, index) => (
+        <rect
+          key={x}
+          x={x}
+          y={14.5}
+          width={10}
+          height={3}
+          rx={1}
+          className={index === 0 ? "fill-current opacity-70" : "fill-current opacity-35"}
+        />
+      ))}
+      <circle cx={96} cy={16} r={3.5} className="fill-none stroke-current opacity-60" />
+      <circle cx={105} cy={16} r={3.5} className="fill-none stroke-current opacity-60" />
+    </>
+  )
+}
+
 /** N14 as it is drawn today: a thin strip, the wordmark with a wide search and the phone, a filled menu bar. */
 function HeaderCatalog() {
   return (
@@ -231,7 +254,12 @@ const SKETCHES: {
     panels: CategoriesPanels,
     icons: CategoriesIcons,
   },
-  header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
+  header_bar: {
+    standard: HeaderStandard,
+    centered: HeaderCentered,
+    catalog: HeaderCatalog,
+    inline: HeaderInline,
+  },
   footer_bar: {
     ledger: FooterLedger,
     brand_columns: FooterBrandColumns,

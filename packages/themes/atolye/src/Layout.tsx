@@ -6,6 +6,7 @@ import type {
   ShopView,
   Translate,
 } from "@qticaret/ui"
+import { drawnVariant } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
@@ -13,7 +14,7 @@ import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { FooterGroup } from "./frame/FooterGroup"
-import { Header, catalogOf } from "./frame/Header"
+import { HEADER_VARIANTS, Header, catalogOf } from "./frame/Header"
 import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
 import { layerMarks, rootMarks } from "./frame/root-marks"
@@ -90,6 +91,8 @@ export function Layout({
   // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
   // its search: not twice
   const catalog = catalogOf(shop)
+  // The one-row header keeps no top strip of links: they are in its menu sheet
+  const inline = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS) === "inline"
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
@@ -105,7 +108,7 @@ export function Layout({
           lines={shop.announcements}
           settings={shop.announcementSettings}
           mark={shop.announcementMark}
-          links={catalog?.links ? [] : shop.topLinks}
+          links={catalog?.links || inline ? [] : shop.topLinks}
           contact={
             catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
           }

@@ -17,6 +17,8 @@ export interface SearchFormSettings {
   show_category: boolean
   show_dates: boolean
   show_people: boolean
+  flexible_month: boolean
+  date_words: boolean
   category_style: (typeof SEARCH_FORM_CATEGORY_STYLES)[number]
   /** The words field's hint before a search; null: the storefront's own. */
   placeholder: string | null
@@ -28,6 +30,8 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   show_category: true,
   show_dates: true,
   show_people: true,
+  flexible_month: true,
+  date_words: false,
   category_style: "select",
   placeholder: null,
 }
@@ -55,6 +59,8 @@ export const searchFormSchema = z
     show_category: z.boolean(),
     show_dates: z.boolean(),
     show_people: z.boolean(),
+    flexible_month: z.boolean(),
+    date_words: z.boolean(),
     category_style: z.enum(SEARCH_FORM_CATEGORY_STYLES),
     // Trimmed, never empty: no hint is null (the storefront's own words)
     placeholder: z.string().trim().min(1).max(SEARCH_FORM_PLACEHOLDER_MAX).nullable(),

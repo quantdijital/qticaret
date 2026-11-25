@@ -65,7 +65,8 @@ export function SearchForm({ form, className }: { form: SearchFormView; classNam
   const tabs = form.category?.style === "tabs" ? form.category : null
   const select = form.category?.style === "select" ? form.category : null
   // Two to a phone's row: with an odd count of fields the first spans it
-  const paired = [select, form.where, ...(form.dates ? [1, 2, 3] : []), form.people]
+  const days = form.dates?.flexible === false ? [1, 2] : [1, 2, 3]
+  const paired = [select, form.where, ...(form.dates ? days : []), form.people]
   const odd = paired.filter((field) => field !== null).length % 2 === 1
   const first = select ? "select" : form.where ? "where" : form.dates ? "dates" : "people"
   const wide = (field: typeof first) => odd && first === field && WIDE

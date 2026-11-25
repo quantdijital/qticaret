@@ -124,6 +124,14 @@ export interface SearchFormDatesView {
   month: SearchFormSelectView
   /** The calendar; absent: the plain fields only, with JavaScript too. */
   calendar?: SearchFormCalendarView
+  /** `false`: no "Esnek ay" field, the two days only (`search_form.flexible_month`); absent: shown. */
+  flexible?: false
+  /**
+   * With the calendar, an empty day's words ("Tarih ekle") and a chosen
+   * one written `GG.AA.YYYY` (`search_form.date_words`); absent: the
+   * browser's own date field.
+   */
+  hint?: string
 }
 
 export interface SearchFormView {

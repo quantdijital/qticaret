@@ -152,6 +152,12 @@ const headerStandard = z.object({ ...headerCommon, variant: defaultVariant("head
 const headerCentered = z.object({ ...headerCommon, variant: z.literal("centered") }).strict()
 
 /**
+ * One row (`inline`, "Tek satır"): the wordmark, the main menu in the
+ * middle and round tools; the shared settings only.
+ */
+const headerInline = z.object({ ...headerCommon, variant: z.literal("inline") }).strict()
+
+/**
  * The catalog header's menu bar ground and words (adr/0049 Ek 2026-11-15):
  * mirrors `@qticaret/types`' `HEADER_MENU_GROUNDS` and
  * `HEADER_CATALOG_LIMITS`; a unit test keeps them equal.
@@ -221,7 +227,7 @@ const headerCatalog = z
 
 export const headerBar = z.discriminatedUnion(
   "variant",
-  [headerStandard, headerCentered, headerCatalog],
+  [headerStandard, headerCentered, headerCatalog, headerInline],
   VARIANT_ERROR
 )
 
@@ -274,7 +280,12 @@ export const categoryMain = z
 
 /** Each main section's variants' branches: what a section read as that variant keeps. */
 export const MAIN_BRANCHES = {
-  header_bar: { standard: headerStandard, centered: headerCentered, catalog: headerCatalog },
+  header_bar: {
+    standard: headerStandard,
+    centered: headerCentered,
+    catalog: headerCatalog,
+    inline: headerInline,
+  },
   footer_bar: { ledger: footerLedger, brand_columns: footerColumns, free_rows: footerFreeRows },
   product_main: { standard: productMain },
   category_main: { standard: categoryMain },

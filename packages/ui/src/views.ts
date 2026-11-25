@@ -235,6 +235,8 @@ export interface ShopView {
   theme: ThemeView
   /** The phone's bottom bar; null where it stays away (checkout, a preview). */
   bottomNav: BottomNavView | null
+  /** The page's own path (`/magaza`), so a menu can mark its link; absent: none marked. */
+  path?: string
   /**
    * The page is a step of paying (`/odeme`, its card form, the payment's
    * result): a theme may draw a focused frame without the shop's ways out

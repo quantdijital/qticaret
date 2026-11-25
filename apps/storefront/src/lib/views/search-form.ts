@@ -57,6 +57,7 @@ const listed = (options: readonly SearchFormOptionView[], value: string | null |
   value && options.some((option) => option.value === value) ? value : ""
 
 function datesOf(source: SearchFormSource, dated: DatedState, t: Translate) {
+  const { flexible_month, date_words } = source.settings
   const months = monthsFrom(source.today)
   const [from = "", to = ""] = dated.range ? dated.range.split("_") : []
   const bounds = { min: source.today, max: lastDay(months.at(-1) ?? source.today.slice(0, 7)) }
@@ -74,6 +75,9 @@ function datesOf(source: SearchFormSource, dated: DatedState, t: Translate) {
       value: dated.range ? "" : listed(options, dated.months?.split(",")[0]),
     },
     calendar: calendarView(t),
+    // Each only off its default: a box drawn as before them is the view it was
+    ...(flexible_month ? {} : { flexible: false as const }),
+    ...(date_words ? { hint: t("search.form_add_date") } : {}),
   }
 }
 

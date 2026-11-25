@@ -9107,7 +9107,8 @@
         "header_bar": {
           "standard": "Logo on the left",
           "centered": "Logo in the middle",
-          "catalog": "Classic catalogue"
+          "catalog": "Classic catalogue",
+          "inline": "One row"
         },
         "footer_bar": {
           "ledger": "Standard",
@@ -9969,7 +9970,15 @@
             "label": "People field",
             "hint": "How many people; dates with enough room come first."
           },
-          "words": "search box where date people category tabs"
+          "words": "search box where date people category tabs",
+          "flexible_month": {
+            "label": "Flexible month field",
+            "hint": "A \"Flexible month\" choice beside the dates. Off, only the two days are asked; the flexible month stays in the calendar's own tab."
+          },
+          "date_words": {
+            "label": "Write \"Add date\" on an empty date",
+            "hint": "An empty day reads \"Add date\" instead of the browser's date box, a chosen one like 12.12.2026. The calendar opens the same."
+          }
         }
       },
       "faq": {
@@ -11365,11 +11374,12 @@
         "action": {
           "label": "Under the heading",
           "term": "action",
-          "hint": "The cover holds buttons or your shop's search box.",
+          "hint": "The opening shows its buttons, your shop's search box, or both (the buttons first).",
           "button": "Buttons",
-          "search": "Search box"
+          "search": "Search box",
+          "both": "Buttons and search box"
         },
-        "searchNote": "Choose the search box's fields under Theme settings › Search box. The buttons are not drawn while the search box is chosen.",
+        "searchNote": "You choose the search box's fields under Theme settings › Search box. The buttons are not drawn while the search box alone is chosen.",
         "search_position": {
           "label": "Search box position",
           "term": "position",
@@ -11413,9 +11423,10 @@
         "image_side": {
           "label": "Image position",
           "term": "image",
-          "hint": "The image fills the cover behind the text, or stands beside it on a light ground.",
+          "hint": "The picture fills the whole opening behind the words, stands beside them on a light ground, or runs across the whole width with the words' side melting into the page in soft light waves.",
           "full": "Behind the text",
-          "end": "Beside the text"
+          "end": "Beside the text",
+          "blend": "Full width, light on the words' side"
         },
         "scrim": {
           "label": "Image overlay",
@@ -11430,6 +11441,34 @@
           "hint": "The image ends straight or in a soft wave.",
           "straight": "Straight",
           "wave": "Wavy"
+        },
+        "button_tone": {
+          "label": "Button colour",
+          "term": "button color",
+          "hint": "The opening's first button is filled with your main colour or your accent colour. You change the accent under Theme settings › Colours.",
+          "primary": "Main colour",
+          "accent": "Accent colour"
+        },
+        "button_icon": {
+          "label": "Arrow on the button",
+          "term": "icon",
+          "hint": "A small arrow after the first button's words.",
+          "none": "None",
+          "arrow": "Arrow"
+        },
+        "accent_mark": {
+          "label": "Under the accent line",
+          "term": "underline",
+          "hint": "A thin hand-drawn curl in your accent colour under the heading's second line.",
+          "none": "None",
+          "swash": "Curl"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small sprig of leaves beside the words, in a light tint of your main colour (1024 px and up).",
+          "none": "None",
+          "leaves": "Sprig of leaves"
         }
       },
       "trustCard": {

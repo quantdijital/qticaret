@@ -24,6 +24,8 @@ const field = (
     | "show_category"
     | "show_dates"
     | "show_people"
+    | "flexible_month"
+    | "date_words"
     | "category_style",
   shown?: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 ): FieldMeta => ({
@@ -39,6 +41,9 @@ const field = (
 const dated = (_theme: ThemeChoices, _variants: CardVariantsInUse, flags: ShopFlags) =>
   flags.has(DATED_FLAG)
 
+const datesShown = (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) =>
+  dated(theme, variants, flags) && theme.search_form.show_dates
+
 export const SEARCH_FORM_META = {
   "search_form.attribute_key": field("attribute_key"),
   "search_form.placeholder": field("placeholder"),
@@ -46,6 +51,9 @@ export const SEARCH_FORM_META = {
   "search_form.category_style": field("category_style", (theme) => theme.search_form.show_category),
   "search_form.show_dates": field("show_dates", dated),
   "search_form.show_people": field("show_people", dated),
+  // The dates' own two, only while the dates are shown
+  "search_form.flexible_month": field("flexible_month", datesShown),
+  "search_form.date_words": field("date_words", datesShown),
 } satisfies Record<string, FieldMeta>
 
 /** Names a listing's address keeps for itself: never an attribute's filter there (adr/0077 §2). */

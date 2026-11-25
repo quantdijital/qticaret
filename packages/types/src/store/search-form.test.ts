@@ -9,6 +9,8 @@ describe("search form settings", () => {
       show_category: true,
       show_dates: true,
       show_people: true,
+      flexible_month: true,
+      date_words: false,
       category_style: "select",
       placeholder: null,
     })
@@ -34,6 +36,8 @@ describe("search form settings", () => {
         show_category: false,
         show_dates: false,
         show_people: false,
+        flexible_month: false,
+        date_words: true,
         category_style: "tabs",
         placeholder: "  Nereye gitmek istersiniz?  ",
       })
@@ -42,6 +46,8 @@ describe("search form settings", () => {
       show_category: false,
       show_dates: false,
       show_people: false,
+      flexible_month: false,
+      date_words: true,
       category_style: "tabs",
       placeholder: "Nereye gitmek istersiniz?",
     })

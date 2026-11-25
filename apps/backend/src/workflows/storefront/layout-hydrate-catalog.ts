@@ -54,6 +54,10 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
       align: section.align,
       image_side: section.image_side,
       edge: section.edge,
+      button_tone: section.button_tone,
+      button_icon: section.button_icon,
+      accent_mark: section.accent_mark,
+      ornament: section.ornament,
       show_trust: section.show_trust,
       // The storefront takes the video's id from the link and builds the player's address itself
       video_url: section.video_url,

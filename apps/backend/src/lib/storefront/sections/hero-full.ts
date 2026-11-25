@@ -8,13 +8,21 @@
  * package); a unit test keeps them equal.
  */
 export const HERO_FULL_SETTINGS = {
-  action: ["button", "search"],
+  action: ["button", "search", "both"],
   search_position: ["inside", "overlap"],
   height: ["screen", "tall"],
   scrim: ["light", "strong"],
   align: ["center", "start"],
-  image_side: ["full", "end"],
+  image_side: ["full", "end", "blend"],
   edge: ["straight", "wave"],
+  /** The buttons' colour: the shop's main colour, or its accent (`colors.accent`). */
+  button_tone: ["primary", "accent"],
+  /** An arrow after the first button's words, for the eye only. */
+  button_icon: ["none", "arrow"],
+  /** A hand-drawn curl under the heading's second line, in the accent colour. */
+  accent_mark: ["none", "swash"],
+  /** A drawn sprig of leaves by the words, for the eye only. */
+  ornament: ["none", "leaves"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -28,6 +36,10 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   align: "center",
   image_side: "full",
   edge: "straight",
+  button_tone: "primary",
+  button_icon: "none",
+  accent_mark: "none",
+  ornament: "none",
 }
 
 /** The heading's accent line at its longest, and the trust badges the opening shows at most. */

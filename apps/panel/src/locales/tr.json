@@ -9107,7 +9107,8 @@
         "header_bar": {
           "standard": "Solda logo",
           "centered": "Ortada logo",
-          "catalog": "Klasik katalog"
+          "catalog": "Klasik katalog",
+          "inline": "Tek satır"
         },
         "footer_bar": {
           "ledger": "Standart",
@@ -9969,7 +9970,15 @@
             "label": "Kişi alanı",
             "hint": "Kaç kişi; yeterli yeri olan tarihler öne çıkar."
           },
-          "words": "arama kutu nereye tarih kişi kategori sekme"
+          "words": "arama kutu nereye tarih kişi kategori sekme",
+          "flexible_month": {
+            "label": "Esnek ay alanı",
+            "hint": "Tarihlerin yanında \"Esnek ay\" seçimi. Kapalıyken yalnız giriş ve çıkış günü sorulur; esnek ay takvimin kendi sekmesinde kalır."
+          },
+          "date_words": {
+            "label": "Boş tarihte \"Tarih ekle\" yazsın",
+            "hint": "Seçilmemiş gün tarayıcının gg.aa.yyyy kutusu yerine \"Tarih ekle\" diye, seçilen gün 12.12.2026 gibi yazılır. Takvim aynı açılır."
+          }
         }
       },
       "faq": {
@@ -11365,11 +11374,12 @@
         "action": {
           "label": "Başlığın altında",
           "term": "action",
-          "hint": "Kapakta düğmeler ya da mağazanızın arama kutusu durur.",
+          "hint": "Kapakta düğmeler, mağazanızın arama kutusu ya da ikisi birden (önce düğmeler) durur.",
           "button": "Düğmeler",
-          "search": "Arama kutusu"
+          "search": "Arama kutusu",
+          "both": "Düğmeler ve arama kutusu"
         },
-        "searchNote": "Arama kutusunun alanlarını Tema ayarları › Arama kutusu bölümünden seçersiniz. Arama kutusu seçiliyken düğmeler çizilmez.",
+        "searchNote": "Arama kutusunun alanlarını Tema ayarları › Arama kutusu bölümünden seçersiniz. Yalnız arama kutusu seçiliyken düğmeler çizilmez.",
         "search_position": {
           "label": "Arama kutusunun yeri",
           "term": "position",
@@ -11413,9 +11423,10 @@
         "image_side": {
           "label": "Görselin yeri",
           "term": "image",
-          "hint": "Görsel yazının arkasında bütün kapağı kaplar ya da açık zeminde yazının yanında durur.",
+          "hint": "Görsel yazının arkasında bütün kapağı kaplar, açık zeminde yazının yanında durur ya da bütün genişliği kaplar ve yazının olduğu yanı yumuşak, açık dalgalarla sayfa rengine karışır.",
           "full": "Yazının arkasında",
-          "end": "Yazının yanında"
+          "end": "Yazının yanında",
+          "blend": "Tam genişlik, yazı tarafı açık"
         },
         "scrim": {
           "label": "Görsel karartması",
@@ -11430,6 +11441,34 @@
           "hint": "Görselin kenarı düz biter ya da yumuşak bir dalgayla.",
           "straight": "Düz",
           "wave": "Dalgalı"
+        },
+        "button_tone": {
+          "label": "Düğme rengi",
+          "term": "button color",
+          "hint": "Kapaktaki ilk düğme ana renginizle ya da vurgu renginizle dolar. Vurgu rengini Tema ayarları › Renkler'den değiştirirsiniz.",
+          "primary": "Ana renk",
+          "accent": "Vurgu rengi"
+        },
+        "button_icon": {
+          "label": "Düğmede ok",
+          "term": "icon",
+          "hint": "İlk düğmenin yazısından sonra küçük bir ok.",
+          "none": "Yok",
+          "arrow": "Ok"
+        },
+        "accent_mark": {
+          "label": "Vurgulu satırın altı",
+          "term": "underline",
+          "hint": "Başlığın ikinci satırının altına vurgu renginizle elle çizilmiş gibi ince bir kıvrım.",
+          "none": "Yok",
+          "swash": "Kıvrım çizgi"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Yazının yanında, ana renginizin açık tonunda küçük bir yaprak dalı (1024 px ve üstü).",
+          "none": "Yok",
+          "leaves": "Yaprak dalı"
         }
       },
       "trustCard": {

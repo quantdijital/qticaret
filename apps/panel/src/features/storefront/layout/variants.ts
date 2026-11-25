@@ -119,7 +119,7 @@ export const VARIANT_FIELDS: {
     grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
     carousel: { scroller: SCROLLER_DEFAULTS },
   },
-  header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
+  header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS, inline: {} },
   // Ek 2026-11-17: the strip on, no line about the shop, the steel well, the marks on cards
   // adr/0070: the free rows footer's ground and marks; its rows are the backend's starting row
   footer_bar: {
