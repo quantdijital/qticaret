@@ -220,8 +220,8 @@ medusaIntegrationTestRunner({
         before: "1000.00",
         on_sale: true,
       })
-      // The cart gives both: never more than the card said
-      expect(await cartItems(other.variantId)).toBeLessThan(900)
+      // The cart gives both (the budgeted one alone would be 600): never more than the card said
+      expect(await cartItems(other.variantId)).toBeLessThan(600)
     })
 
     it("waits for a promotion's campaign to begin", async () => {

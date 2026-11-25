@@ -73,5 +73,8 @@ export function offerState(
     ]
   })
   entries.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0))
-  return createHash("sha256").update(JSON.stringify(entries)).digest("hex")
+  // `v` moves when what counts as shown changes, so every shop indexes once again after it
+  return createHash("sha256")
+    .update(JSON.stringify({ v: 2, entries }))
+    .digest("hex")
 }

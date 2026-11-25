@@ -72,11 +72,6 @@ export interface PromotionRow {
   } | null
 }
 
-const numberOf = (value: number | string | null | undefined): number | null => {
-  const amount = value === null || value === undefined ? Number.NaN : Number(value)
-  return Number.isFinite(amount) ? amount : null
-}
-
 /**
  * A limit Medusa holds the promotion to, as its promotion module reads it:
  * the campaign's budget (spend or uses, in all or per attribute) once it
@@ -84,8 +79,21 @@ const numberOf = (value: number | string | null | undefined): number | null => {
  * Either may run out between the card and the cart.
  */
 export function isLimited(row: Pick<PromotionRow, "limit" | "campaign">): boolean {
-  const budget = numberOf(row.campaign?.budget?.limit)
-  return (budget !== null && budget > 0) || numberOf(row.limit) !== null
+  const budget: unknown = row.campaign?.budget?.limit
+  const uses: unknown = row.limit
+  return (isSet(budget) && !isNoBudget(budget)) || isSet(uses)
+}
+
+const isSet = (value: unknown): boolean => value !== null && value !== undefined
+
+/**
+ * Zero or less is no budget to Medusa. A value this code cannot read as a
+ * number (another shape after an upgrade) counts as a budget: the card
+ * then shows no discount, which the cart can only better.
+ */
+const isNoBudget = (value: unknown): boolean => {
+  const amount = typeof value === "number" || typeof value === "string" ? Number(value) : Number.NaN
+  return Number.isFinite(amount) && amount <= 0
 }
 
 const valuesOf = (rule: RuleRow): string[] =>

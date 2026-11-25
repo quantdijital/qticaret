@@ -140,6 +140,13 @@ describe("which automatic promotions show before the cart (adr/0023 Ek 2026-11-0
     )
     expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: 0 } } }))).toBe(false)
     expect(isLimited(promotion({ limit: null }))).toBe(false)
+    // A shape this code cannot read is a budget: the card shows nothing the cart may not give
+    const odd = { value: "100", precision: 20 } as unknown as number
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: odd } } }))).toBe(true)
+    expect(isLimited(promotion({ limit: odd }))).toBe(true)
+    expect(isLimited(promotion({ campaign: { budget: { type: "spend", limit: "0" } } }))).toBe(
+      false
+    )
     const open = promotion({ campaign: { budget: { type: "usage", limit: null } } })
     expect(offerOf(open, "try")).toMatchObject({ kind: "price" })
     const minimum = promotion({
