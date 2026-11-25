@@ -15,8 +15,12 @@ import { isSimpleProduct, useDataCard } from "./use-data-card"
 import { usePartDraws } from "./use-part-draws"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
+const batchVariants = vi.hoisted(() => vi.fn<(id: string, body: unknown) => Promise<unknown>>())
+const linkOptions = vi.hoisted(() => vi.fn<(id: string, body: unknown) => Promise<unknown>>())
 
-vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+vi.mock("@/lib/sdk", () => ({
+  sdk: { client: { fetch: fetchMock }, admin: { product: { batchVariants, linkOptions } } },
+}))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
@@ -59,14 +63,35 @@ const TWO_VARIANTS = {
   options: [{ id: "opt_1", title: "Renk", values: [] }],
   variants: [
     ...(PRODUCT.variants ?? []),
-    { id: "variant_2", title: "Mor", prices: [{ amount: 3100, currency_code: "try" }] },
+    {
+      id: "variant_2",
+      title: "Mor",
+      prices: [{ amount: 3400, currency_code: "try" }],
+      manage_inventory: true,
+      inventory_items: [{ inventory: { location_levels: [{ stocked_quantity: 4 }] } }],
+    },
   ],
 } as unknown as ProductDetail
+
+// One variant, but a colour a shopper picks: not simple until its option goes
+const ONE_COLOUR = {
+  ...PRODUCT,
+  options: [{ id: "opt_1", title: "Renk", values: [{ id: "optval_1", value: "Sarı" }] }],
+} as unknown as ProductDetail
+
+const pickSimple = async (user: ReturnType<typeof userEvent.setup>) => {
+  await user.click(await screen.findByRole("combobox", { name: "Ürün tipi" }))
+  await user.click(await screen.findByRole("option", { name: "Basit ürün" }))
+}
+
+const asking = () => screen.getByRole("group", { name: "Basit ürüne geçilsin mi?" })
 
 /** The owner, 2026-11-25: WooCommerce's product data box, one card with a type and vertical tabs. */
 describe("DataCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    batchVariants.mockReset().mockResolvedValue({})
+    linkOptions.mockReset().mockResolvedValue({})
     localStorage.clear()
   })
 
@@ -78,6 +103,14 @@ describe("DataCard", () => {
         options: [{ title: "Default option" }],
       } as unknown as ProductDetail)
     ).toBe(true)
+    // The wizard's "Seçenek: Standart" is not a choice either
+    expect(
+      isSimpleProduct({
+        ...PRODUCT,
+        options: [{ title: "Seçenek", values: [{ value: "Standart" }] }],
+      } as unknown as ProductDetail)
+    ).toBe(true)
+    expect(isSimpleProduct(ONE_COLOUR)).toBe(false)
     expect(isSimpleProduct(TWO_VARIANTS)).toBe(false)
   })
 
@@ -136,17 +169,80 @@ describe("DataCard", () => {
     )
   })
 
-  it("has a product with variants keep its prices on them, and refuses to make it simple", async () => {
+  it("has a product with variants keep its prices on them", async () => {
     const user = userEvent.setup()
     renderCard({}, TWO_VARIANTS)
     await waitFor(() => {
       expect(tabNames()).toContain("Varyantlar")
     })
     expect(screen.getByRole("combobox", { name: "Ürün tipi" })).toHaveTextContent("Varyantlı ürün")
-    expect(screen.getByText(/basit ürüne dönmek için önce varyantları bire indirin/)).toBeVisible()
     expect(open()).toHaveTextContent("Fiyatlar her varyantta ayrı girilir.")
     await user.click(within(open()).getByRole("button", { name: "Varyantlara git" }))
     expect(screen.getByRole("tab", { name: "Varyantlar" })).toHaveAttribute("aria-selected", "true")
+  })
+
+  it("asks in place before making a product of several variants simple; Vazgeç changes nothing", async () => {
+    const user = userEvent.setup()
+    renderCard({}, TWO_VARIANTS)
+    await pickSimple(user)
+    const ask = asking()
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(ask).toHaveTextContent("diğer 1 varyant silinir")
+    expect(ask).toHaveTextContent("Seçenekler (Renk) kaldırılır")
+    // The first stays by default; the other's stock is said, not refused
+    expect(within(ask).getAllByRole("radio")[0]).toBeChecked()
+    expect(ask).toHaveTextContent("Silinecek 1 varyantın stoğu var (toplam 4 adet)")
+    await user.click(within(ask).getByRole("button", { name: "Vazgeç" }))
+    expect(screen.queryByRole("group", { name: "Basit ürüne geçilsin mi?" })).toBeNull()
+    expect(screen.getByRole("combobox", { name: "Ürün tipi" })).toHaveTextContent("Varyantlı ürün")
+    expect(batchVariants).not.toHaveBeenCalled()
+    expect(linkOptions).not.toHaveBeenCalled()
+  })
+
+  it("deletes the variants not kept, then takes the options off", async () => {
+    const user = userEvent.setup()
+    renderCard({}, TWO_VARIANTS)
+    await pickSimple(user)
+    const ask = asking()
+    await user.click(within(ask).getByRole("radio", { name: /Mor/ }))
+    // Keeping the one in stock: nothing counted is deleted
+    expect(ask).not.toHaveTextContent("stoğu var")
+    await user.click(within(ask).getByRole("button", { name: "1 varyantı sil ve basit ürüne geç" }))
+    await waitFor(() => {
+      expect(linkOptions).toHaveBeenCalledWith("prod_1", { remove: ["opt_1"] })
+    })
+    expect(batchVariants).toHaveBeenCalledWith("prod_1", { delete: ["variant_1"] })
+    expect(batchVariants.mock.invocationCallOrder[0]).toBeLessThan(
+      linkOptions.mock.invocationCallOrder[0] ?? 0
+    )
+  })
+
+  it("keeps the options when deleting the variants is refused, and says so in the card", async () => {
+    const user = userEvent.setup()
+    batchVariants.mockRejectedValue(new Error("refused"))
+    renderCard({}, TWO_VARIANTS)
+    await pickSimple(user)
+    const ask = asking()
+    await user.click(within(ask).getByRole("button", { name: "1 varyantı sil ve basit ürüne geç" }))
+    expect(await within(ask).findByRole("alert")).toBeVisible()
+    expect(linkOptions).not.toHaveBeenCalled()
+  })
+
+  it("takes the option off a product of one variant, its price and stock kept", async () => {
+    const user = userEvent.setup()
+    renderCard({}, ONE_COLOUR)
+    expect(await screen.findByRole("combobox", { name: "Ürün tipi" })).toHaveTextContent(
+      "Varyantlı ürün"
+    )
+    await pickSimple(user)
+    const ask = asking()
+    expect(ask).toHaveTextContent("Seçenekler (Renk) kaldırılır; fiyat, stok ve kodlar korunur.")
+    expect(within(ask).queryByRole("radio")).toBeNull()
+    await user.click(within(ask).getByRole("button", { name: "Basit ürüne geç" }))
+    await waitFor(() => {
+      expect(linkOptions).toHaveBeenCalledWith("prod_1", { remove: ["opt_1"] })
+    })
+    expect(batchVariants).not.toHaveBeenCalled()
   })
 
   it("brings the Varyantlar tab once a simple product is made one with variants", async () => {

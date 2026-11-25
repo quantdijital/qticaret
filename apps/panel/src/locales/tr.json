@@ -4311,8 +4311,23 @@
         "digital": "Dijital ürün: kargo yok",
         "service": "Hizmet: kargo yok"
       },
-      "variableLocked_one": "Bu ürünün {{count}} varyantı var.",
-      "variableLocked_other": "Bu ürünün {{count}} varyantı var; basit ürüne dönmek için önce varyantları bire indirin.",
+      "toSimple": {
+        "title": "Basit ürüne geçilsin mi?",
+        "several_one": "Basit ürüne geçince yalnız seçtiğiniz varyant kalır; diğer {{count}} varyant silinir. Siparişlerdeki kayıtlar etkilenmez.",
+        "several_other": "Basit ürüne geçince yalnız seçtiğiniz varyant kalır; diğer {{count}} varyant silinir. Siparişlerdeki kayıtlar etkilenmez.",
+        "keep": "Kalacak varyant",
+        "noPrice": "Fiyat yok",
+        "untracked": "Stok takibi yok",
+        "stock_one": "Stok: {{formatted}}",
+        "stock_other": "Stok: {{formatted}}",
+        "stockWarning_one": "Silinecek {{count}} varyantın stoğu var (toplam {{units}} adet); bu stok da silinir.",
+        "stockWarning_other": "Silinecek {{count}} varyantın stoğu var (toplam {{units}} adet); bu stok da silinir.",
+        "options": "Seçenekler ({{options}}) kaldırılır; fiyat, stok ve kodlar korunur.",
+        "cancel": "Vazgeç",
+        "switch": "Basit ürüne geç",
+        "deleteAndSwitch_one": "{{count}} varyantı sil ve basit ürüne geç",
+        "deleteAndSwitch_other": "{{count}} varyantı sil ve basit ürüne geç"
+      },
       "tabs": {
         "pricing": "Genel",
         "stock": "Stok",

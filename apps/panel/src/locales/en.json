@@ -4311,8 +4311,23 @@
         "digital": "Digital product: no shipping",
         "service": "Service: no shipping"
       },
-      "variableLocked_one": "This product has {{count}} variant.",
-      "variableLocked_other": "This product has {{count}} variants; reduce them to one to make it a simple product.",
+      "toSimple": {
+        "title": "Make it a simple product?",
+        "several_one": "As a simple product only the variant you pick stays; the other {{count}} variant is deleted. Orders keep their records.",
+        "several_other": "As a simple product only the variant you pick stays; the other {{count}} variants are deleted. Orders keep their records.",
+        "keep": "Variant to keep",
+        "noPrice": "No price",
+        "untracked": "Stock not tracked",
+        "stock_one": "Stock: {{formatted}}",
+        "stock_other": "Stock: {{formatted}}",
+        "stockWarning_one": "{{count}} variant to delete holds stock ({{units}} in all); that stock goes too.",
+        "stockWarning_other": "{{count}} variants to delete hold stock ({{units}} in all); that stock goes too.",
+        "options": "The options ({{options}}) are removed; price, stock and codes are kept.",
+        "cancel": "Cancel",
+        "switch": "Make it simple",
+        "deleteAndSwitch_one": "Delete {{count}} variant and make it simple",
+        "deleteAndSwitch_other": "Delete {{count}} variants and make it simple"
+      },
       "tabs": {
         "pricing": "General",
         "stock": "Inventory",
