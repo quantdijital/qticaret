@@ -12,6 +12,7 @@ import { isStepUpCancelled } from "@/lib/step-up"
 
 // The control plane's rule (PostProviderKey): printable ASCII, no spaces, 8 to 512
 const KEY_RULE = /^[\x21-\x7e]{8,512}$/
+const KEY_MAX = 512
 
 /**
  * "Anahtar yaz / değiştir" (adr/0085 §2): a password field never filled
@@ -31,6 +32,7 @@ export function KeyDialog({
   const write = useWriteKey(service)
   const [value, setValue] = useState("")
   const [failure, setFailure] = useState<string | null>(null)
+  const tooLong = value.length > KEY_MAX
   return (
     <FormDialog
       open
@@ -70,12 +72,19 @@ export function KeyDialog({
             type="password"
             autoComplete="off"
             spellCheck={false}
-            maxLength={512}
+            aria-invalid={tooLong || undefined}
+            aria-describedby={tooLong ? "provider-key-long" : undefined}
             value={value}
             onChange={(event) => {
               setValue(event.target.value)
             }}
           />
+          {/* Said, never cut: a key trimmed to fit would be a different, wrong key */}
+          {tooLong ? (
+            <p id="provider-key-long" className="text-[13px] text-destructive">
+              {t("aiCredits.providers.keyDialog.tooLong", { max: KEY_MAX })}
+            </p>
+          ) : null}
           <p className="text-[13px] text-muted-foreground">
             {t("aiCredits.providers.keyDialog.help")}
           </p>

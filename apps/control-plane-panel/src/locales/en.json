@@ -1697,6 +1697,7 @@
         "text": "Paste the key from the provider's console. Once saved it is never shown again.",
         "label": "API key",
         "help": "8–512 characters, no spaces.",
+        "tooLong": "The key cannot be longer than {{max}} characters.",
         "submit": "Save key",
         "done": "Key saved."
       },

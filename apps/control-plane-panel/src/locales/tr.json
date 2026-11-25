@@ -1697,6 +1697,7 @@
         "text": "Sağlayıcının panelinden aldığınız anahtarı yapıştırın. Kaydettikten sonra anahtar bir daha gösterilmez.",
         "label": "API anahtarı",
         "help": "8–512 karakter, boşluksuz.",
+        "tooLong": "Anahtar {{max}} karakterden uzun olamaz.",
         "submit": "Anahtarı kaydet",
         "done": "Anahtar kaydedildi."
       },

@@ -73,6 +73,24 @@ describe("the AI providers page (adr/0085 §2, §5)", () => {
     expect(document.body.innerHTML).not.toContain(FAKE_KEY)
   })
 
+  it("says a pasted key over 512 characters is too long, and neither cuts nor sends it", async () => {
+    const sent = stubApi(controlPlane(() => ({ ok: true })))
+    page()
+
+    await userEvent.click(await firstButton("Anahtarı değiştir"))
+    const form = await screen.findByRole("dialog", { name: "DeepSeek anahtarı" })
+    const field = within(form).getByLabelText("API anahtarı")
+    await userEvent.click(field)
+    await userEvent.paste("k".repeat(513))
+
+    expect(field).toHaveValue("k".repeat(513))
+    expect(field).toHaveAccessibleDescription("Anahtar 512 karakterden uzun olamaz.")
+    const submit = within(form).getByRole("button", { name: "Anahtarı kaydet" })
+    expect(submit).toBeDisabled()
+    await userEvent.click(submit)
+    expect(sent.filter((call) => call.method === "POST")).toEqual([])
+  })
+
   it.each<[string, Answer, string]>([
     [
       "a server error",
