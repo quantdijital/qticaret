@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { EINVOICE_MODULE } from "../../src/modules/einvoice"
+import type EinvoiceModuleService from "../../src/modules/einvoice/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { readOrderMoney } from "../../src/workflows/orders/order-money"
 import { createAdminUser } from "../helpers/admin"
@@ -239,6 +241,47 @@ medusaIntegrationTestRunner({
       expect(wrongPlace.status).toBe(400)
       expect(packed.data.message).toBe("orders.edit_after_packing")
       expect(lateAddress.data.message).toBe("orders.edit_after_packing")
+    })
+
+    it("keeps the billing address once the sale invoice is issuing or issued", async () => {
+      const { orderId } = await paidOrder(false)
+      const invoices = getContainer().resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+      const invoice = await invoices.createInvoices({
+        order_id: orderId,
+        kind: "sale",
+        source_id: orderId,
+        provider: "external",
+        status: "pending",
+        next_attempt_at: new Date(),
+        net_total: 100,
+        vat_total: 20,
+        gross_total: 120,
+      })
+      const billing = (address_1: string) =>
+        post(`/admin/orders/${orderId}`, { billing_address: { address_1 } })
+
+      const whilePending = await billing("Fatura Sokak No 1")
+      await invoices.updateInvoices({ id: invoice.id, status: "issuing" })
+      const whileIssuing = await billing("Fatura Sokak No 2")
+      const shippingStill = await post(`/admin/orders/${orderId}`, {
+        shipping_address: { address_1: "Teslimat Sokak No 3" },
+      })
+      await invoices.updateInvoices({ id: invoice.id, status: "issued" })
+      const onceIssued = await billing("Fatura Sokak No 4")
+      const { data } = await query().graph({
+        entity: "order",
+        fields: ["billing_address.address_1"],
+        filters: { id: orderId },
+      })
+
+      expect(whilePending.status).toBe(200)
+      expect(whileIssuing.status).toBe(400)
+      expect(whileIssuing.data.message).toBe("orders.billing_invoiced")
+      expect(shippingStill.status).toBe(200)
+      expect(onceIssued.data.message).toBe("orders.billing_invoiced")
+      expect(
+        (data[0] as { billing_address: { address_1: string } }).billing_address.address_1
+      ).toBe("Fatura Sokak No 1")
     })
   },
 })
