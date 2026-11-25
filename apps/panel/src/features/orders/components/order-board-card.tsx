@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { FilterBar } from "@qticaret/admin-ui/patterns/filter-bar"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
@@ -15,7 +16,7 @@ import type { BoardOrder, OrderBoard, OrderFilters as Filters } from "@/features
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { BulkBar } from "@/features/orders/components/bulk-bar"
 import { useColumns } from "@/features/orders/components/order-columns"
-import { OrderFilters } from "@/features/orders/components/order-filters"
+import { useOrderFilters } from "@/features/orders/components/order-filters"
 import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
 import { isFiltered } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
@@ -67,6 +68,7 @@ export function OrderBoardCard({
     setPicked(new Map())
     onRefilter(next)
   }
+  const filterBar = useOrderFilters(search, refilter)
   return (
     <>
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
@@ -82,24 +84,29 @@ export function OrderBoardCard({
             count: board.data?.counts[key],
           }))}
         />
-        <div className="grid grid-cols-1 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:items-center">
-          <SearchInput
-            className="sm:w-80 sm:max-w-none"
-            value={filters.q}
-            placeholder={t("orders.search")}
-            onChange={(text) => {
-              onSearch({ q: text, page: 1 })
-            }}
-          />
-          {toolbar}
-          <OrderFilters search={search} onChange={refilter} />
-          {board.data?.limited ? (
-            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-              <Info className="h-lh w-3.5 shrink-0" aria-hidden="true" />
-              {t("orders.limited")}
-            </p>
-          ) : null}
-        </div>
+        <FilterBar
+          className="px-5 py-3"
+          {...filterBar}
+          search={
+            <SearchInput
+              className="sm:max-w-none"
+              value={filters.q}
+              placeholder={t("orders.search")}
+              onChange={(text) => {
+                onSearch({ q: text, page: 1 })
+              }}
+            />
+          }
+          actions={toolbar}
+          note={
+            board.data?.limited ? (
+              <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                <Info className="h-lh w-3.5 shrink-0" aria-hidden="true" />
+                {t("orders.limited")}
+              </p>
+            ) : null
+          }
+        />
         {board.data && notice ? notice(board.data) : null}
         {picked.size > 0 ? (
           <BulkBar

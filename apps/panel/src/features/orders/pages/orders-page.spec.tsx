@@ -106,11 +106,13 @@ describe("OrdersPage", () => {
         offset: 0,
       },
     })
-    expect(screen.getByRole("combobox", { name: "Ödeme yöntemi" })).toHaveTextContent(
-      "Ödeme yöntemi: Kapıda ödeme"
-    )
+    // What is set shows as chips under the search, counted on the filter button
+    expect(screen.getByRole("button", { name: "Ödeme yöntemi: Kapıda ödeme" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Kargo firması: Aras Kargo" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /^Sipariş tarihi: / })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Filtrele · 3" })).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole("button", { name: "Filtreleri temizle" }))
+    await userEvent.click(screen.getByRole("button", { name: "Tümünü temizle" }))
     expect(navigate).toHaveBeenCalledWith({
       to: "/orders",
       search: expect.objectContaining({
@@ -119,6 +121,25 @@ describe("OrdersPage", () => {
         carrier: undefined,
         from: undefined,
         to: undefined,
+      }) as unknown,
+      replace: true,
+    })
+  })
+
+  it("filters from the Filtrele menu into the address, from the first page", async () => {
+    search.current = { stage: "to_ship", page: 3 }
+    renderPage()
+
+    await screen.findByText("#1042")
+    await userEvent.click(screen.getByRole("button", { name: "Filtrele" }))
+    await userEvent.click(await screen.findByRole("button", { name: /^Ödeme(?! yöntemi)/ }))
+    await userEvent.click(screen.getByRole("button", { name: "İade edildi" }))
+    expect(navigate).toHaveBeenLastCalledWith({
+      to: "/orders",
+      search: expect.objectContaining({
+        stage: "to_ship",
+        payment: "refunded",
+        page: undefined,
       }) as unknown,
       replace: true,
     })

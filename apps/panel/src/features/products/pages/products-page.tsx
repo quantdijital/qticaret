@@ -4,6 +4,7 @@ import { PackageOpen, Plus, Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import { FilterBar } from "@qticaret/admin-ui/patterns/filter-bar"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
@@ -19,7 +20,8 @@ import { BulkBar } from "@/features/products/bulk/bulk-bar"
 import { BulkEditDialog } from "@/features/products/bulk/bulk-edit-dialog"
 import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
 import { useProductColumns } from "@/features/products/components/product-columns"
-import { ProductFilterBar } from "@/features/products/components/product-filters"
+import { useProductFilters } from "@/features/products/components/product-filters"
+import { ProductSort } from "@/features/products/components/product-sort"
 import type { FilterValues } from "@/features/products/components/product-filters"
 import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
 import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
@@ -97,6 +99,9 @@ export function ProductsPage() {
       replace: true,
     })
   }
+  const filterBar = useProductFilters(values, (next) => {
+    setSearch({ ...next, page: 1 })
+  })
 
   return (
     <div className="flex flex-col gap-6">
@@ -175,24 +180,33 @@ export function ProductsPage() {
             { key: "draft", label: t("products.tabs.draft"), count: counts.data?.draft },
           ]}
         />
-        <div className="flex flex-col gap-3 px-5 py-3">
-          <SearchInput
-            value={q}
-            placeholder={t("products.search")}
-            onChange={(text) => {
-              setSearch({ q: text, page: 1 })
-            }}
-          />
-          <ProductFilterBar
-            values={values}
-            onChange={(next) => {
-              setSearch({ ...next, page: 1 })
-            }}
-          />
-          {list.data?.limited ? (
-            <p className="text-xs text-muted-foreground">{t("products.filters.limited")}</p>
-          ) : null}
-        </div>
+        <FilterBar
+          className="px-5 py-3"
+          {...filterBar}
+          search={
+            <SearchInput
+              className="sm:max-w-none"
+              value={q}
+              placeholder={t("products.search")}
+              onChange={(text) => {
+                setSearch({ q: text, page: 1 })
+              }}
+            />
+          }
+          actions={
+            <ProductSort
+              value={values.sort}
+              onChange={(sort) => {
+                setSearch({ sort, page: 1 })
+              }}
+            />
+          }
+          note={
+            list.data?.limited ? (
+              <p className="text-xs text-muted-foreground">{t("products.filters.limited")}</p>
+            ) : null
+          }
+        />
         {selected.size > 0 ? (
           <BulkBar
             selected={selected}
