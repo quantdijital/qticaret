@@ -9,11 +9,12 @@ import { DatePicker } from "./DatePicker"
 import type { DatesChoice, PickerMode } from "./date-picker-days"
 import { CONTROL, Cell, DAY, DayCell, SelectCell } from "./search-form-cells"
 
-// On a phone its fields join the form's grid rows; from 768 px one part of the bar.
-// From 1024 px never narrower than its three fields' own widths (`DAY`): squeezed
-// below them, the flexible month ran over the people field beside it
+// Up to 1024 px its fields join the form's grid rows (a dated bar turns one row
+// there, `BarFrom`); from 1024 px one part of the bar, never narrower than its
+// three fields' own widths (`DAY`): squeezed below them, the flexible month ran
+// over the people field beside it
 const GROUP =
-  "flex min-w-0 max-md:contents md:flex-[2.4] md:flex-row md:border-l md:border-rule lg:flex-[3] lg:min-w-fit"
+  "flex min-w-0 max-lg:contents lg:flex-[3] lg:flex-row lg:border-l lg:border-rule lg:min-w-fit"
 
 // False on the server and while hydrating, true after: the page as sent is the plain form's
 const never = () => () => undefined
@@ -54,9 +55,9 @@ export function SearchDates({
   if (!running || !calendar) {
     return (
       <div role="group" aria-label={dates.label} className={GROUP}>
-        <DayCell field={dates.from} className={wide} />
-        <DayCell field={dates.to} />
-        <SelectCell icon={CalendarRange} field={dates.month} className={DAY} />
+        <DayCell field={dates.from} className={wide} from="lg" />
+        <DayCell field={dates.to} from="lg" />
+        <SelectCell icon={CalendarRange} field={dates.month} className={DAY} from="lg" />
       </div>
     )
   }
@@ -72,7 +73,7 @@ export function SearchDates({
     }
   }
   const day = (field: SearchFormDayView, value: string, className?: string | false) => (
-    <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)}>
+    <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)} from="lg">
       <input
         key="calendar"
         type="date"
@@ -98,7 +99,7 @@ export function SearchDates({
     <div ref={group} role="group" aria-label={dates.label} className={GROUP}>
       {day(dates.from, choice.from, wide)}
       {day(dates.to, choice.to)}
-      <Cell icon={CalendarRange} label={dates.month.label} className={DAY}>
+      <Cell icon={CalendarRange} label={dates.month.label} className={DAY} from="lg">
         <button
           type="button"
           aria-haspopup="dialog"
