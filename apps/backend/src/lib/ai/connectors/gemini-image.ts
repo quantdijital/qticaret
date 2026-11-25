@@ -1,7 +1,8 @@
-import type { safeFetch } from "../../security/safe-fetch"
 import { aiProviderError } from "../errors"
 import type { AiErrorKey } from "../errors"
 import type { AiService, ImageBackground, ImageEditTarget } from "../registry/services"
+import { transportOf } from "../transport/own-key"
+import type { ConnectorSending } from "../transport/own-key"
 import { postImageCall } from "./image-call"
 import { IMAGE_TIMEOUT_MS } from "./image-types"
 import type {
@@ -41,16 +42,13 @@ const BLOCKED: ReadonlySet<string> = new Set([
   "SPII",
 ])
 
-export interface GeminiImageOptions {
+export type GeminiImageOptions = {
   service: AiService
   target: ImageEditTarget
-  /** Stays in this closure; never in a result or an error. */
-  apiKey: string
   timeoutMs?: number
   /** Tests only. */
-  fetch?: typeof safeFetch
   wait?: (ms: number, signal: AbortSignal) => Promise<void>
-}
+} & ConnectorSending
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
@@ -132,7 +130,8 @@ export function sceneInstruction(setting: string): string {
 }
 
 export function geminiImageEdit(options: GeminiImageOptions): ImageEditConnector {
-  const { service, target, apiKey } = options
+  const { service, target } = options
+  const transport = transportOf(options)
   const call = async (
     url: string,
     instruction: string,
@@ -152,9 +151,9 @@ export function geminiImageEdit(options: GeminiImageOptions): ImageEditConnector
     })
     const response = await postImageCall({
       service,
+      target,
       url,
       headers: {
-        "x-goog-api-key": apiKey,
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -162,7 +161,7 @@ export function geminiImageEdit(options: GeminiImageOptions): ImageEditConnector
       timeoutMs: options.timeoutMs ?? IMAGE_TIMEOUT_MS,
       maxResponseBytes: MAX_RESPONSE_BYTES,
       signal,
-      fetch: options.fetch,
+      transport,
       wait: options.wait,
     })
     const read = readGeminiImage(response.body)

@@ -5,11 +5,14 @@ import { photoroomImageEdit } from "./connectors/photoroom"
 import { aiProviderError } from "./errors"
 import { findAiService } from "./registry/services"
 import type { AiService, FakeImageTarget, ImageEditTarget } from "./registry/services"
+import { ownKeyTransport } from "./transport/own-key"
+import type { AiTransport } from "./transport/types"
 
 /**
  * The one way to an `image_edit` connector (adr/0071 §2, §9), as
  * `connector-of.ts` is for text: by a service's id, through the registry
- * of this instance, the key handed over here and kept in its closure.
+ * of this instance, the key handed over here and kept in its closure; or
+ * a transport (adr/0085 §3: the platform's).
  */
 
 export interface ResolvedImageTarget {
@@ -41,6 +44,15 @@ export function imageConnectorFor(
   apiKey: string,
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): ImageEditConnector {
+  return imageConnectorWith(serviceId, ownKeyTransport(apiKey), nodeEnv)
+}
+
+/** The `image_edit` connector of a registered service, sending through a transport. */
+export function imageConnectorWith(
+  serviceId: string,
+  transport: AiTransport,
+  nodeEnv: string | undefined = process.env["NODE_ENV"]
+): ImageEditConnector {
   const resolved = imageTargetOf(serviceId, nodeEnv)
   if (resolved === null) {
     throw aiProviderError({
@@ -54,6 +66,6 @@ export function imageConnectorFor(
     return fakeImageConnector
   }
   return target.connector === "photoroom"
-    ? photoroomImageEdit({ service, target, apiKey })
-    : geminiImageEdit({ service, target, apiKey })
+    ? photoroomImageEdit({ service, target, transport })
+    : geminiImageEdit({ service, target, transport })
 }
