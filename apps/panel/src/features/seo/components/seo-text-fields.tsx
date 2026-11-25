@@ -8,6 +8,7 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { AiEntity } from "@/features/ai/api/suggestions"
 import { AiButton } from "@/features/ai/components/ai-button"
 import type { SeoEntityType } from "@/features/seo/api/seo-meta"
+import { aiEntityOf } from "./ai-entity"
 import { DESCRIPTION_LIMIT, SEO_MAX, TITLE_LIMIT } from "./seo-limits"
 
 export type SeoTextField = "seo_title" | "seo_description"
@@ -25,22 +26,6 @@ export function Counter({ length, limit }: { length: number; limit: number }) {
     </span>
   )
 }
-
-/**
- * The records the AI core can write a search title and description for
- * (adr/0071 §8, docs/22 PR 1-1; adr/0074 §5): a product, a category, a
- * collection, a brand, a content page and a blog post. Any other SEO card
- * (landing, a blog archive) has no button.
- */
-const aiEntityOf = (type: SeoEntityType, id: string): AiEntity | null =>
-  type === "product" ||
-  type === "category" ||
-  type === "collection" ||
-  type === "brand" ||
-  type === "page" ||
-  type === "post"
-    ? { type, id }
-    : null
 
 /** The field and, where the AI core writes for the record, its button level beside it. */
 function WithAi({
@@ -64,55 +49,6 @@ function WithAi({
       <div className="min-w-0 flex-1">{children}</div>
       <AiButton task={task} entity={entity} onUse={onUse} size="icon" label={label} />
     </div>
-  )
-}
-
-/**
- * The focus keyword with, where the AI core writes for the record, its
- * button: the main keyword and its alternatives, each with its own
- * "Kullan" that puts it in the field as a change (the card's Save writes it).
- */
-export function FocusKeywordField({
-  type,
-  id,
-  field,
-  onUse,
-}: {
-  type: SeoEntityType
-  id: string
-  field: UseFormRegisterReturn
-  onUse: (keyword: string) => void
-}) {
-  const { t } = useTranslation()
-  const entity = aiEntityOf(type, id)
-  return (
-    <Field
-      label={t("seo.card.focusKeyword")}
-      htmlFor={`seo-keyword-${id}`}
-      hint={t("seo.card.focusKeywordHint")}
-    >
-      {entity ? (
-        <div className="flex items-start gap-1.5">
-          <Input
-            id={`seo-keyword-${id}`}
-            maxLength={SEO_MAX.keyword}
-            className="min-w-0 flex-1"
-            {...field}
-          />
-          <AiButton
-            task="focus_keyword"
-            entity={entity}
-            size="icon"
-            label={t("seo.card.aiKeyword")}
-            onUse={(keyword) => {
-              onUse(keyword.slice(0, SEO_MAX.keyword))
-            }}
-          />
-        </div>
-      ) : (
-        <Input id={`seo-keyword-${id}`} maxLength={SEO_MAX.keyword} {...field} />
-      )}
-    </Field>
   )
 }
 

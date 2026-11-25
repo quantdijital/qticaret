@@ -9,7 +9,8 @@ import { createHash } from "node:crypto"
 export const SEO_META_LIMITS = {
   seo_title: 150,
   seo_description: 320,
-  focus_keyword: 100,
+  // Up to five keywords of 60 characters, joined by ", " (focus-keywords.ts)
+  focus_keyword: 320,
   og_image_alt: 200,
 } as const
 

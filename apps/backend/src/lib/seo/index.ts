@@ -1,5 +1,13 @@
 export { SEO_META_LIMITS, isSitePath, seoTextHash } from "./meta"
 export {
+  FOCUS_KEYWORDS_MAX,
+  FOCUS_KEYWORD_LENGTH,
+  formatFocusKeywords,
+  normalizeFocusKeywords,
+  parseFocusKeywords,
+  primaryFocusKeyword,
+} from "./focus-keywords"
+export {
   RECORD_PREFIXES,
   RESERVED_ROOT_SEGMENTS,
   SYSTEM_PAGES,

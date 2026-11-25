@@ -41,13 +41,18 @@ const json = (status: number, body: unknown) =>
 
 const netFetch = vi.fn()
 
-function setup() {
+function setup(onUseAll?: (texts: string[]) => void) {
   sdkFetch.mockResolvedValue(SERVICES)
   const onUse = vi.fn()
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
-      <AiButton task="focus_keyword" entity={{ type: "category", id: "pcat_1" }} onUse={onUse} />
+      <AiButton
+        task="focus_keyword"
+        entity={{ type: "category", id: "pcat_1" }}
+        onUse={onUse}
+        onUseAll={onUseAll}
+      />
     </QueryClientProvider>
   )
   return { onUse, user: userEvent.setup() }
@@ -128,6 +133,28 @@ describe("AiButton with candidates", () => {
       candidate_index: 1,
     })
     expect(screen.queryByRole("radiogroup", { name: "Öneriler" })).not.toBeInTheDocument()
+  })
+
+  it("offers no Hepsini ekle unless the field takes a list", async () => {
+    const { user } = setup()
+    await user.click(await screen.findByRole("button", { name: "Yapay zekâ ile öner" }))
+    await screen.findByRole("radiogroup", { name: "Öneriler" })
+    expect(screen.queryByRole("button", { name: "Hepsini ekle" })).not.toBeInTheDocument()
+  })
+
+  it("hands every candidate to a list field with Hepsini ekle, recording the first as taken", async () => {
+    const onUseAll = vi.fn()
+    const { onUse, user } = setup(onUseAll)
+    await user.click(await screen.findByRole("button", { name: "Yapay zekâ ile öner" }))
+    await user.click(await screen.findByRole("button", { name: "Hepsini ekle" }))
+
+    await waitFor(() => {
+      expect(onUseAll).toHaveBeenCalledWith(CANDIDATES)
+    })
+    expect(onUse).not.toHaveBeenCalled()
+    expect(JSON.parse((netFetch.mock.calls[1]?.[1] as { body: string }).body)).toEqual({
+      candidate_index: 0,
+    })
   })
 
   it("shows one candidate as today: the text, no radios", async () => {

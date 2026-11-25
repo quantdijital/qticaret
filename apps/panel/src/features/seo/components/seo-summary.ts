@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next"
+import { focusKeywordsShort } from "@/features/seo/focus-keywords"
 
 /** The SEO card folded to a line (a content page's secondary part, docs/18 §7 CollapsibleSection). */
 export interface SeoCollapse {
@@ -23,11 +24,23 @@ interface Shown {
 /**
  * The search appearance in one line: each field's length against what
  * results show, said "(otomatik)" when the templates or the page's text
- * fill it ("Başlık 56/60 · Açıklama (otomatik) 142/155 · 2 öneri").
+ * fill it, and the focus keywords when chosen ("Başlık 56/60 · Açıklama
+ * (otomatik) 142/155 · Odak: çelik termos +1 · 2 öneri").
  */
 export function seoSummary(
   t: TFunction,
-  { title, description, note }: { title: Shown; description: Shown; note?: string | undefined }
+  {
+    title,
+    description,
+    keywords = [],
+    note,
+  }: {
+    title: Shown
+    description: Shown
+    /** The focus keywords, primary first: said as "Odak: çelik termos +2". */
+    keywords?: readonly string[]
+    note?: string | undefined
+  }
 ): string {
   const length = (field: Shown) => ({ length: field.shown.length, limit: field.limit })
   return [
@@ -40,6 +53,9 @@ export function seoSummary(
           length(description)
         )
       : t("seo.card.summary.noDescription"),
+    keywords.length > 0
+      ? t("seo.card.summary.keywords", { keywords: focusKeywordsShort(keywords) })
+      : null,
     note,
   ]
     .filter(Boolean)

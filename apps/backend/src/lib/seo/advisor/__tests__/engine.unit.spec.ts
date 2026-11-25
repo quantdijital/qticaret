@@ -142,6 +142,20 @@ describe("the advisor", () => {
     expect(issue?.params["missing"]).toBe("description,body")
   })
 
+  it("holds the title to the primary keyword, and takes any keyword in the description and opening", () => {
+    const kw = (focusKeyword: string) =>
+      findIssues(good({ focusKeyword })).find(({ ruleId }) => ruleId === "P-KW-01")
+    // "rahat kesim" is in the description, "yaz gömleği" nowhere
+    const secondary = kw("keten gömlek, rahat kesim, yaz gömleği")
+    expect(secondary?.params).toEqual({ keyword: "keten gömlek", missing: "body" })
+    // A secondary keyword in the title does not stand in for the primary
+    const primaryMissing = kw("yaz gömleği, Keten Gömlek")
+    expect(primaryMissing?.params["keyword"]).toBe("yaz gömleği")
+    expect(primaryMissing?.params["missing"]).toBe("title,description,body")
+    // Repeats and empty parts are no keywords
+    expect(kw(" , , ")).toBeUndefined()
+  })
+
   it("judges a category on its text, products and depth only", () => {
     const category = good({
       kind: "category",

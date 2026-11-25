@@ -18,6 +18,8 @@ export interface AiSuggestionBoxProps {
   onOption?: ((option: string) => void) | undefined
   /** "Kullan": with several candidates, the picked one is handed over; otherwise nothing. */
   onUse: (candidate?: string) => void
+  /** With several candidates: "Hepsini ekle" takes them all (a list field); left out, no button. */
+  onUseAll?: (() => void) | undefined
   onRetry: () => void
   onTryWith: (service: string) => void
   onDismiss: () => void
@@ -42,6 +44,7 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
     option,
     onOption,
     onUse,
+    onUseAll,
     onRetry,
     onTryWith,
     onDismiss,
@@ -148,6 +151,11 @@ export function AiSuggestionBox(props: AiSuggestionBoxProps) {
             }}
           >
             {t("ai.suggest.use")}
+          </Button>
+        ) : null}
+        {state.status === "suggestion" && several && onUseAll ? (
+          <Button type="button" size="sm" variant="outline" onClick={onUseAll}>
+            {t("ai.suggest.useAll")}
           </Button>
         ) : null}
         <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onRetry}>

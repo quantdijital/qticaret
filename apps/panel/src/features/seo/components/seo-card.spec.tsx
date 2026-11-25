@@ -79,7 +79,6 @@ describe("SeoCard", () => {
 
     expect(field("seo-title-cent_1")).toHaveAttribute("maxLength", "150")
     expect(field("seo-description-cent_1")).toHaveAttribute("maxLength", "320")
-    expect(field("seo-keyword-cent_1")).toHaveAttribute("maxLength", "100")
     await user.click(field("seo-description-cent_1"))
     await user.paste("a".repeat(400))
     expect(field("seo-description-cent_1").value).toHaveLength(320)
@@ -312,9 +311,11 @@ describe("SeoCard", () => {
       )
       await user.click(await screen.findByLabelText("yazlık keten gömlek"))
       await user.click(screen.getByRole("button", { name: "Kullan" }))
-      await waitFor(() => {
-        expect(field("seo-keyword-cent_1")).toHaveValue("yazlık keten gömlek")
-      })
+      // The pick becomes a keyword chip, the field is left for typing
+      expect(
+        await screen.findByRole("button", { name: "“yazlık keten gömlek” kelimesini kaldır" })
+      ).toBeInTheDocument()
+      expect(field("seo-keyword-cent_1")).toHaveValue("")
       expect(JSON.parse((net.mock.calls[0]?.[1] as { body: string }).body)).toEqual({
         task: "focus_keyword",
         entity_type: "page",

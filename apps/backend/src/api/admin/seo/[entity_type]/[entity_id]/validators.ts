@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isCleanText } from "../../../../../lib/security"
-import { SEO_META_LIMITS, isSitePath } from "../../../../../lib/seo"
+import { SEO_META_LIMITS, isSitePath, normalizeFocusKeywords } from "../../../../../lib/seo"
 import { ROBOTS_OVERRIDES } from "../../../../../modules/seo-meta/models/seo-meta"
 
 // An empty field clears the override: the page falls back to the template
@@ -24,7 +24,10 @@ export const AdminPutSeoMeta = z
   .object({
     seo_title: text(SEO_META_LIMITS.seo_title),
     seo_description: text(SEO_META_LIMITS.seo_description),
-    focus_keyword: text(SEO_META_LIMITS.focus_keyword),
+    // A list kept as "primary, other, …": repeats and empties dropped on the way in
+    focus_keyword: text(SEO_META_LIMITS.focus_keyword).transform((value) =>
+      value === undefined ? undefined : normalizeFocusKeywords(value)
+    ),
     canonical_override: z
       .string()
       .trim()
