@@ -1,4 +1,5 @@
 import type { AiCreditCapability, AiCreditTask } from "@qticaret/types/control-plane"
+import { AI_INLINE_IMAGE_TYPES } from "./limits"
 import type { GatewayTarget } from "./target"
 
 /** What `prepareBody` refuses a body with, by its status: 400 or 413. */
@@ -32,6 +33,22 @@ export class BodyRefused extends Error {
   constructor(readonly reason: string) {
     super(reason)
     this.name = "BodyRefused"
+  }
+}
+
+// Standard base64 (what the shop's `Buffer#toString("base64")` writes): no spaces, padding last
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/
+
+/**
+ * An inline picture's type and bytes checked (security review N1): a type
+ * the gateway takes (limits.ts) and base64 alone, or `BodyRefused`.
+ */
+export function checkInlineImage(mimeType: string, data: string): void {
+  if (!AI_INLINE_IMAGE_TYPES.has(mimeType)) {
+    throw new BodyRefused("image_type_refused")
+  }
+  if (!BASE64.test(data)) {
+    throw new BodyRefused("image_data_refused")
   }
 }
 

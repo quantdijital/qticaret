@@ -107,6 +107,20 @@ export function maxTextBytesOf(task: AiCreditTask, capability: AiCreditCapabilit
   return LONG_TEXT_TASKS.has(task) ? AI_LONG_TEXT_MAX_BYTES : AI_SHORT_TEXT_MAX_BYTES
 }
 
+/**
+ * The types an inline picture may be (second security review of P3b, N1):
+ * what the shop's connectors send today (apps/backend lib/ai/run-image.ts
+ * `imageInputOf`: a JPEG, PNG or WebP as uploaded, an AVIF turned into a
+ * PNG; lib/ai/image-input.ts: a vision call's JPEG). Anything else (text,
+ * a PDF, an SVG) is refused, so its bytes are never taken off the text a
+ * call may send as a picture's.
+ */
+export const AI_INLINE_IMAGE_TYPES: ReadonlySet<string> = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+])
+
 /** The pictures a call may send: none as plain text, the task's own otherwise. */
 export const maxImagesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>
   capability === "text" ? 0 : AI_TASK_LIMITS[task].maxImages

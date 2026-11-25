@@ -123,6 +123,32 @@ medusaIntegrationTestRunner({
       expect(one.status).toBe(200)
     })
 
+    it("takes a PNG, JPEG or WebP in base64 as a picture; any other type is refused, free", async () => {
+      const who = await shop()
+      const vision = { task: "image_alt_text", capability: "vision" } as const
+      const withUrl = (url: string) => visionBody(1).replace(PICTURE, url)
+      const bytes = Buffer.from("not really a picture").toString("base64")
+      for (const url of [
+        `data:text/plain;base64,${bytes}`,
+        `data:application/pdf;base64,${bytes}`,
+        `data:image/svg+xml;base64,${bytes}`,
+        "data:image/png;base64,not base64!",
+        `data:image/png,${bytes}`,
+      ]) {
+        const reply = await callAs(http, who, withUrl(url), vision)
+        expect([url.slice(0, 24), ...refusalOf(reply)]).toEqual([
+          url.slice(0, 24),
+          ...refused(400, "body_refused"),
+        ])
+      }
+      expect(provider.seen).toEqual([])
+      await untouched(who)
+      for (const type of ["image/jpeg", "image/webp"]) {
+        const reply = await callAs(http, who, withUrl(`data:${type};base64,${bytes}`), vision)
+        expect(reply.status).toBe(200)
+      }
+    })
+
     it("refuses more than a text task's input and more than 6 MB, free", async () => {
       const who = await shop()
       const long = chatBody({

@@ -1,12 +1,12 @@
 import { maxImagesOf } from "./limits"
-import { BodyRefused, isRecord } from "./body-shared"
+import { BodyRefused, checkInlineImage, isRecord } from "./body-shared"
 import type { BodyInput, RebuiltBody } from "./body-shared"
 
 /**
  * A Gemini picture body (`generateContent`) rebuilt from an allow-list
  * (security review of P3b C1): only `contents`, each turn's parts only a
- * text or an inline picture (`inline_data` / `inlineData`: its type and
- * base64 bytes), and the target's fixed `generationConfig` written over
+ * text or an inline picture (`inline_data` / `inlineData`: a PNG, JPEG or
+ * WebP as base64, limits.ts `AI_INLINE_IMAGE_TYPES`), and the target's fixed `generationConfig` written over
  * whatever the shop sent (an image asked for alone, one candidate). A part
  * naming a file or a function is refused; `generation_config`,
  * `systemInstruction`, `tools`, `cachedContent`, `safetySettings`, `model`
@@ -34,6 +34,8 @@ function inlineOf(part: Record<string, unknown>, pictures: Pictures): Record<str
   }
   const bytes = string(data["data"])
   const mimeType = string(snake ? data["mime_type"] : data["mimeType"])
+  // A picture's type and base64 only: the bytes left off the text are a picture's (N1)
+  checkInlineImage(mimeType, bytes)
   pictures.count += 1
   pictures.bytes += bytes.length
   return snake
