@@ -9,10 +9,15 @@ const FILE_KEY = /^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._-]{0,199}$/
 // An alt text is plain words read aloud: no markup, no address (defence in depth; it is escaped where shown)
 export const ALT_MARKUP_OR_LINK = /[<>]|https?:\/\/|\bwww\./i
 
-/** `?q=&kind=image&offset=&limit=`: the library's files, newest first. */
+/**
+ * `?q=&kind=image&view=&offset=&limit=`: the library's files, newest
+ * first; `view` narrows to the ones nothing shows (`unused`, M1) or
+ * those without an alt text (`missing_alt`).
+ */
 export const AdminGetMedia = z
   .object({
     q: z.string().trim().max(200).optional(),
+    view: z.enum(["all", "unused", "missing_alt"]).optional(),
     // Images are all the library holds today; the kind is named for what comes later
     kind: z.enum(["image"]).optional(),
     offset: z.coerce.number().int().min(0).max(100_000).default(0),
@@ -20,6 +25,21 @@ export const AdminGetMedia = z
   })
   .strict()
 export type AdminGetMediaType = z.infer<typeof AdminGetMedia>
+
+// A media record's id (`media_01J…`)
+const MEDIA_ID = /^media_[0-9A-Za-z]{1,40}$/
+
+/** Pictures to delete at once (M1): 1–100, each once; the server keeps any in use. */
+export const AdminDeleteMediaBatch = z
+  .object({
+    ids: z
+      .array(z.string().regex(MEDIA_ID, "media.id_invalid"))
+      .min(1)
+      .max(100)
+      .refine((ids) => new Set(ids).size === ids.length, "media.id_duplicate"),
+  })
+  .strict()
+export type AdminDeleteMediaBatchType = z.infer<typeof AdminDeleteMediaBatch>
 
 /** An image's detail takes no query. */
 export const AdminGetMediaAsset = z.object({}).strict()

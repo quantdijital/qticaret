@@ -200,4 +200,40 @@ describe("MediaPage", () => {
     renderPage()
     expect(await screen.findByRole("button", { name: "Alt metin önerileri" })).toBeInTheDocument()
   })
+
+  it("picks unused pictures on their view and deletes them, saying what was kept", async () => {
+    search.value = { view: "unused" }
+    const base = fetchMock.getMockImplementation()
+    fetchMock.mockImplementation(
+      (url: string, init?: { method?: string; body?: unknown; query?: unknown }) =>
+        url === "/admin/media/delete"
+          ? Promise.resolve({ deleted: ["media_1"], failed: [], in_use: ["media_2"], missing: [] })
+          : (base?.(url, init) as Promise<unknown>)
+    )
+    renderPage()
+    const user = userEvent.setup()
+
+    // The list asks for the view; a click picks rather than opens
+    await user.click(await screen.findByRole("button", { name: "vitrin-kapak.webp" }))
+    const listCall = fetchMock.mock.calls.find(([url]) => url === "/admin/media") as
+      [string, { query: Record<string, unknown> }] | undefined
+    expect(listCall?.[1].query).toMatchObject({ view: "unused" })
+    expect(screen.getByRole("button", { name: "vitrin-kapak.webp" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    )
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Bu sayfadakilerin hepsini seç" }))
+    expect(screen.getByText("2 görsel seçildi")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Kalıcı olarak sil" }))
+    const confirm = await screen.findByRole("alertdialog")
+    await user.click(within(confirm).getByRole("button", { name: "Sil" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/media/delete", {
+        method: "POST",
+        body: { ids: ["media_1", "media_2"] },
+      })
+    })
+  })
 })

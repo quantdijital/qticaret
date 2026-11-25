@@ -1,6 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
+  AdminDeleteMediaBatch,
   AdminGetMedia,
   AdminGetMediaAsset,
   AdminImportMedia,
@@ -12,8 +13,8 @@ import { guardImportStorage } from "./plan-limit-guards"
 import { rateLimit } from "./rate-limit"
 import { restrictStoreRelation } from "../validation/attribute-fields"
 
-// One image by its id; `import` is a route of its own, not an id
-const MEDIA_ENTRY = /^\/admin\/media\/(?!import$)[^/]+$/
+// One image by its id; `import` and `delete` are routes of their own, not ids
+const MEDIA_ENTRY = /^\/admin\/media\/(?!(?:import|delete)$)[^/]+$/
 
 /**
  * F3.3: images registered after upload, and their alt text. The media
@@ -42,6 +43,12 @@ export const MEDIA_ROUTES = [
       // adr/0061 Ek C14: a library at the package's storage limit fetches nothing more
       guardImportStorage,
     ],
+  },
+  // M1: pictures nothing shows, deleted at once (people only; checked again on the server)
+  {
+    matcher: "/admin/media/delete",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminDeleteMediaBatch)],
   },
   {
     matcher: MEDIA_ENTRY,
