@@ -41,10 +41,18 @@ export interface AiTransportHeaders {
   "retry-after"?: string
 }
 
+/** What a call on the platform's credits charged, and the wallet left after it (the gateway's word). */
+export interface AiCharge {
+  credits: number
+  balance: number
+}
+
 export interface AiTransportResponse {
   status: number
   headers: AiTransportHeaders
   body: Buffer
+  /** The platform's answers only: this answer's own charge, never another call's. */
+  charge?: AiCharge | undefined
 }
 
 /**

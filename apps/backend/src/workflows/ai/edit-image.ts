@@ -75,15 +75,21 @@ export const editImageWorkflow = createWorkflow(
         chosen: { service: chosen.service, funding: chosen.funding },
       }))
     )
-    const claimed = claimQuotaStep({ capability: "image_edit" })
+    const claimed = claimQuotaStep(
+      transform({ chosen }, ({ chosen }) => ({
+        capability: "image_edit" as const,
+        funding: chosen.funding,
+      }))
+    )
     const outcome = editImageStep(
-      transform({ input }, ({ input }) => ({
+      transform({ input, chosen }, ({ input, chosen }) => ({
         task: input.task,
         service: input.service,
         background: input.background ?? null,
         scene: input.scene ?? null,
         custom: input.custom ?? null,
         media_id: input.media_id,
+        operation: chosen.operation,
       }))
     )
     releaseUntakenStep(
