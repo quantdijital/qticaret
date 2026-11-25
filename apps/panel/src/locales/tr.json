@@ -13207,6 +13207,14 @@
           "secret_invalid": "Photoroom anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
         }
       },
+      "bria": {
+        "name": "Bria",
+        "description": "Arka plan temizleme ve sahne servisi.",
+        "rejected": "Bria kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Bria hesabınızda kredi olup olmadığına bakın.",
+        "checks": {
+          "secret_invalid": "Bria anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
+        }
+      },
       "fake": {
         "name": "Deneme servisi",
         "description": "Yalnız geliştirme ortamında görünür; gerçek bir servise bağlanmaz.",
@@ -13225,6 +13233,7 @@
       "minimax": "Verinin nerede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş.",
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
       "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
+      "bria": "Verinin işlendiği ülke ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş; Bria girdiyi saklamadığını, sonucu 3 gün geçici adreste tuttuğunu yazar.",
       "fake": "Veri bu bilgisayardan çıkmaz.",
       "platform": "İçerik, platformun anlaşmalı yapay zekâ servislerinden birine gönderilir; platform içeriği saklamaz. Bu servisler mağaza sözleşmesinde yazılıdır."
     },
@@ -13233,6 +13242,7 @@
       "minimax": "MiniMax'ın uluslararası platformu kullanılır. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı servisin belgelerinden doğrulanamadı; bağlamadan önce MiniMax'ın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "photoroom": "Photoroom görseli ABD'deki sunucularında işler ve yanıtı verdikten sonra siler. Görsellerin model eğitiminde kullanılıp kullanılmadığı Photoroom'un sayfalarında çelişkili anlatılıyor; bağlamadan önce kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
+      "bria": "Bria, gönderilen görseli saklamadığını ve sonucu 3 gün boyunca geçici bir adreste tuttuğunu yazar. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belgelerinde belirtilmemiş; bunun yazılı teyidi bekleniyor. Bağlamadan önce Bria'nın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
       "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
     },
     "tasks": {
@@ -13413,7 +13423,7 @@
       "afterAlt": "Sahneye yerleştirilmiş ürün",
       "note": "Görsel, sahne için {{name}} servisine gönderilir. Ürünün şekli, rengi ve yazısının değişmemesi istenir; kullanmadan önce sonuca bakın.",
       "hint": {
-        "text": "Sahne yapan bir yapay zekâ servisi (Gemini ya da Photoroom) bağlarsanız ürünü tek tıkla sahneye yerleştirebilirsiniz.",
+        "text": "Sahne yapan bir yapay zekâ servisi (Gemini, Photoroom ya da Bria) bağlarsanız ürünü tek tıkla sahneye yerleştirebilirsiniz.",
         "ownerOnly": "Sahne yapan bir yapay zekâ servisi bağlanırsa ürün tek tıkla sahneye yerleştirilebilir; mağaza sahibi bağlayabilir."
       },
       "custom": {

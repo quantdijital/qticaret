@@ -46,6 +46,7 @@ export function settingsLinkOf(id: string) {
     case "minimax":
     case "gemini":
     case "photoroom":
+    case "bria":
       return linkOptions({ to: "/settings/ai" })
     default:
       return null

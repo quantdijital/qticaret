@@ -13207,6 +13207,14 @@
           "secret_invalid": "Photoroom did not accept the key. Copy the key again and enter it."
         }
       },
+      "bria": {
+        "name": "Bria",
+        "description": "Background removal and scene service.",
+        "rejected": "Bria refused the stored key. Change the key or check for credit in your Bria account.",
+        "checks": {
+          "secret_invalid": "Bria did not accept the key. Copy the key again and enter it."
+        }
+      },
       "fake": {
         "name": "Test service",
         "description": "Shown in development only; connects to no real service.",
@@ -13225,6 +13233,7 @@
       "minimax": "Where data is processed and whether it trains models is not stated.",
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
       "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
+      "bria": "Where data is processed and whether it trains models is not stated; Bria says it does not keep the input and holds the result at a temporary address for 3 days.",
       "fake": "Data never leaves this computer.",
       "platform": "Content goes to one of the AI services the platform works with; the platform does not keep it. The shop agreement names those services."
     },
@@ -13233,6 +13242,7 @@
       "minimax": "MiniMax's international platform is used. Where data is processed and whether it trains models could not be verified from the service's documentation; we suggest reading MiniMax's own terms before connecting. Only content published on your storefront is sent.",
       "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
       "photoroom": "Photoroom processes the image on its servers in the USA and deletes it after answering. Photoroom's pages differ on whether images are used to train models; we suggest reading its own terms before connecting. Only the image to edit leaves your shop.",
+      "bria": "Bria says it does not keep the image sent and holds the result at a temporary address for 3 days. Its documents do not state the country where data is processed or whether it trains models; written confirmation is awaited. We suggest reading Bria's own terms before connecting. Only the image to edit leaves your shop.",
       "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
     },
     "tasks": {
@@ -13413,7 +13423,7 @@
       "afterAlt": "Product placed in a scene",
       "note": "The image is sent to {{name}} to make the scene. The product's shape, colour and text are asked to stay as they are; check the result before using it.",
       "hint": {
-        "text": "Connect an AI service that makes scenes (Gemini or Photoroom) to place a product in a scene in one click.",
+        "text": "Connect an AI service that makes scenes (Gemini, Photoroom or Bria) to place a product in a scene in one click.",
         "ownerOnly": "With an AI service that makes scenes connected, a product can be placed in a scene in one click; the store owner can connect one."
       },
       "custom": {
