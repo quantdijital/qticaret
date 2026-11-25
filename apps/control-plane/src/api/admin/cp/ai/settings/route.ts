@@ -3,6 +3,7 @@ import { aiCreditSettingsOf } from "../../../../../lib/ai-credits/platform-setti
 import { saveAiSettingsWithKeys } from "../../../../../lib/ai-gateway/routing-keys"
 import { answeringAiConflicts } from "../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../http/audit"
+import { notingPartlyDone } from "../../../../http/partly-done"
 import { actorOf } from "../../tenants/params"
 import type { PostAiSettingsType } from "../validators"
 import { settingsChanges, settingsView, targetsView } from "../views"
@@ -27,8 +28,13 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostAiSettingsType>,
   res: MedusaResponse
 ): Promise<void> {
+  // Saved but its keys' second read failed: the row still keeps what moved (`notingPartlyDone`)
   const saved = await answeringAiConflicts(res, () =>
-    saveAiSettingsWithKeys(req.scope, req.validatedBody, actorOf(req))
+    notingPartlyDone(
+      req,
+      () => saveAiSettingsWithKeys(req.scope, req.validatedBody, actorOf(req)),
+      (done) => settingsChanges(done.before, done.after)
+    )
   )
   if (saved === undefined) {
     return
