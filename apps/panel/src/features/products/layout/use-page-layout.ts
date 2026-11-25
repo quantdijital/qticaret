@@ -3,6 +3,7 @@ import { flushSync } from "react-dom"
 import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
 import { useProductLayout } from "./api"
 import { partOfTarget } from "./parts"
+import { goToPart, partBox } from "./use-active-part"
 import type { PartKey, ProductLayout } from "./parts"
 
 /** Why a part the shop hid is on the page anyway. */
@@ -15,7 +16,11 @@ export type ShownWhy = "attention" | "revealed"
  * git" to it shows it for this visit, as does "Göster" under the page,
  * and a part that needs the person (`attention`) is shown anyway.
  */
-export function usePageLayout(attention: (key: PartKey) => boolean) {
+export function usePageLayout(
+  attention: (key: PartKey) => boolean,
+  /** Whether a part would draw anything for this product; one that would not is not named as hidden. */
+  draws: (key: PartKey) => boolean = () => true
+) {
   const saved = useProductLayout()
   const [draft, setDraft] = useState<ProductLayout | null>(null)
   const [revealed, setRevealed] = useState<ReadonlySet<PartKey>>(new Set())
@@ -34,7 +39,9 @@ export function usePageLayout(attention: (key: PartKey) => boolean) {
   }
 
   /** The parts hidden and not drawn, in page order, for the line under the page. */
-  const away = [...layout.main, ...layout.side].filter((key) => shownWhy(key) === "off")
+  const away = [...layout.main, ...layout.side].filter(
+    (key) => shownWhy(key) === "off" && draws(key)
+  )
 
   const showAll = () => {
     setRevealed(new Set([...revealed, ...away]))
@@ -58,5 +65,21 @@ export function usePageLayout(attention: (key: PartKey) => boolean) {
     }
   }
 
-  return { saved, layout, draft, setDraft, shownWhy, away, showAll, goTo }
+  /** A part by its key (the section bar, "Alana git" in ⌘K): drawn first if hidden, then gone to. */
+  const goToKey = (key: PartKey) => {
+    if (shownWhy(key) === "off") {
+      flushSync(() => {
+        setRevealed(new Set([...revealed, key]))
+      })
+    }
+    if (partBox(key)) {
+      goToPart(key)
+    } else {
+      window.setTimeout(() => {
+        goToPart(key)
+      }, 300)
+    }
+  }
+
+  return { saved, layout, draft, setDraft, shownWhy, away, showAll, goTo, goToKey }
 }

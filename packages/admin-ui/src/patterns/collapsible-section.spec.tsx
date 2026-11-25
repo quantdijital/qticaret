@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { SectionOwner, revealSection } from "../hooks/use-section-open"
+import { SectionDefaults, SectionOwner, revealSection } from "../hooks/use-section-open"
 import { CollapsibleSection } from "./collapsible-section"
 
 function Section({
@@ -118,6 +118,28 @@ describe("CollapsibleSection", () => {
     // Opened for attention, not by choice: the closed choice stays
     expect(localStorage.getItem("qt.panel.section:user_1:test.seo")).toBe("0")
     await userEvent.click(toggle())
+    expect(toggle()).toHaveAttribute("aria-expanded", "false")
+  })
+
+  it("starts as the page's layout would have it until the person chose, and follows it", async () => {
+    const withDefault = (open: boolean | undefined) => (
+      <SectionOwner value={() => "user_1"}>
+        <SectionDefaults value={(name) => (name === "test.seo" ? open : undefined)}>
+          <Section />
+        </SectionDefaults>
+      </SectionOwner>
+    )
+    const view = render(withDefault(true))
+    expect(toggle()).toHaveAttribute("aria-expanded", "true")
+    // A preset tried in "Sayfayı düzenle": the section follows at once
+    view.rerender(withDefault(undefined))
+    expect(toggle()).toHaveAttribute("aria-expanded", "false")
+    view.rerender(withDefault(true))
+    expect(toggle()).toHaveAttribute("aria-expanded", "true")
+    // The person's own choice wins from then on
+    await userEvent.click(toggle())
+    view.rerender(withDefault(false))
+    view.rerender(withDefault(true))
     expect(toggle()).toHaveAttribute("aria-expanded", "false")
   })
 

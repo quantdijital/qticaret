@@ -4256,6 +4256,44 @@
         "organize": "Kategori, marka ve KDV",
         "catalog": "Katalog bilgileri",
         "shipping": "Paket ölçüleri"
+      },
+      "presets": "Hazır düzenler",
+      "preset": {
+        "basic": "Basit",
+        "standard": "Standart",
+        "advanced": "Gelişmiş"
+      },
+      "presetHint": {
+        "basic": "Genel bilgiler, varyantlar ve fiyat, görseller, açıklama ve SEO danışmanı. Gerisi gizlenir; danışmanın \"Alana git\"i yine ulaşır.",
+        "standard": "İlk düzen: seyrek bölümler sayfanın altında kapalı durur.",
+        "advanced": "Her bölüm görünür; arama motoru görünümü, özellikler, SSS, ek seçenekler ve fiyat geçmişi açık gelir.",
+        "custom": "Elle düzenlendi."
+      },
+      "shortcuts": "Kısayollar",
+      "shortcutGo": "Alana git",
+      "modKey": "⌘ / Ctrl",
+      "nav": {
+        "label": "Sayfanın bölümleri",
+        "placeholder": "Bölüme git",
+        "mark": {
+          "complete": "tamam",
+          "missing": "eksik var",
+          "urgent": "ilgilenilmeli"
+        }
+      },
+      "go": {
+        "heading": "Alana git",
+        "hiddenPart": "{{name}} (gizli)",
+        "fields": {
+          "title": "Ürün adı",
+          "handle": "Sayfa adresi",
+          "price": "Fiyat ve stok",
+          "barcode": "Barkod ve stok kodu",
+          "altText": "Görsel alt metni",
+          "seoTitle": "SEO başlığı",
+          "categories": "Kategori ve marka",
+          "weight": "Ağırlık ve ölçüler"
+        }
       }
     },
     "variant": {
@@ -4380,7 +4418,9 @@
         "empty": "Soru ve yanıt boş olamaz.",
         "not_a_question": "Soru, soru işaretiyle bitmeli.",
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
-      }
+      },
+      "summary": "Ürün bilgilerinden soru ve yanıt taslağı",
+      "summaryOpen": "Taslak açık"
     },
     "addonTemplates": {
       "title": "Ek seçenek grupları",

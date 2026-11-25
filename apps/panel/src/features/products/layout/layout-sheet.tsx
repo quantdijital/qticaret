@@ -15,6 +15,7 @@ import { errorText } from "@/lib/errors"
 import { useSaveProductLayout } from "./api"
 import { LayoutList } from "./layout-list"
 import { DEFAULT_LAYOUT, sameLayout } from "./parts"
+import { PresetPicker, ShortcutsHint } from "./preset-picker"
 import type { PartKey, ProductLayout } from "./parts"
 
 const L = "products.layout"
@@ -74,6 +75,7 @@ export function LayoutSheet({
             data-scroll-area="y"
             className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 pb-6"
           >
+            <PresetPicker layout={layout} onDraft={onDraft} />
             <LayoutList
               title={t(`${L}.main`)}
               order={layout.main}
@@ -92,6 +94,7 @@ export function LayoutSheet({
               }}
               onToggle={toggle}
             />
+            <ShortcutsHint />
           </div>
           <SheetFooter className="mt-0 flex-row items-center justify-between gap-2 border-t">
             <Button

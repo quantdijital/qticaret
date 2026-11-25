@@ -27,8 +27,8 @@ export function useSaveProductLayout() {
     options: { onSuccess: () => void; onError: (failure: unknown) => void }
   ) => {
     const product: StoredLayout = sameLayout(layout, DEFAULT_LAYOUT)
-      ? { main: [], side: [], hidden: [] }
-      : { main: layout.main, side: layout.side, hidden: layout.hidden }
+      ? { main: [], side: [], hidden: [], open: [] }
+      : { main: layout.main, side: layout.side, hidden: layout.hidden, open: layout.open }
     save.mutate({ product }, options)
   }
   return { isPending: save.isPending, saveLayout }

@@ -20,8 +20,11 @@ const TARGET: Partial<Record<PartKey, string>> = {
   organize: "product-organize",
 }
 
-function Page({ urgent = [] }: { urgent?: PartKey[] }) {
-  const page = usePageLayout((key) => urgent.includes(key))
+function Page({ urgent = [], blank = [] }: { urgent?: PartKey[]; blank?: PartKey[] }) {
+  const page = usePageLayout(
+    (key) => urgent.includes(key),
+    (key) => !blank.includes(key)
+  )
   const draw = (key: PartKey) => {
     const why = page.shownWhy(key)
     return why === "off" ? null : (
@@ -59,7 +62,11 @@ function Page({ urgent = [] }: { urgent?: PartKey[] }) {
   )
 }
 
-function renderPage(stored: StoredLayout, urgent: PartKey[] = []) {
+function renderPage(
+  stored: Omit<StoredLayout, "open"> & { open?: string[] },
+  urgent: PartKey[] = [],
+  blank: PartKey[] = []
+) {
   fetchMock.mockImplementation((url: string, init?: unknown) => {
     const body = (init as { body?: unknown } | undefined)?.body
     if (url === "/admin/platform-settings/panel_layout") {
@@ -75,7 +82,7 @@ function renderPage(stored: StoredLayout, urgent: PartKey[] = []) {
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
     >
-      <Page urgent={urgent} />
+      <Page urgent={urgent} blank={blank} />
     </QueryClientProvider>
   )
 }
@@ -109,6 +116,11 @@ describe("product page layout", () => {
     expect(drawn()).toContain("seo")
     expect(screen.getAllByText("Gizlenen bölüm: bu ziyaret için gösteriliyor.")).not.toHaveLength(0)
     expect(screen.queryByText(/Gizli bölümler/)).toBeNull()
+  })
+
+  it("leaves out of the hidden line a part that would draw nothing for this product", async () => {
+    renderPage({ main: [], side: [], hidden: ["addons", "seo"] }, [], ["addons"])
+    expect(await screen.findByText("Gizli bölümler: Arama motoru görünümü")).toBeInTheDocument()
   })
 
   it("shows a hidden part the advisor's Alana git leads to", async () => {
@@ -169,6 +181,7 @@ describe("product page layout", () => {
             ],
             side: ["summary", "advisor", "organize", "catalog", "shipping"],
             hidden: ["seo"],
+            open: [],
           },
         },
       })
@@ -193,7 +206,37 @@ describe("product page layout", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/panel_layout", {
         method: "POST",
-        body: { product: { main: [], side: [], hidden: [] } },
+        body: { product: { main: [], side: [], hidden: [], open: [] } },
+      })
+    })
+  })
+
+  it("fills the draft from a ready layout; the page follows and Kaydet keeps it", async () => {
+    const user = userEvent.setup()
+    renderPage({ main: [], side: [], hidden: [] })
+    await user.click(screen.getByRole("button", { name: "arrange" }))
+    const sheet = screen.getByRole("dialog", { name: "Ürün sayfasını düzenle" })
+    expect(within(sheet).getByRole("radio", { name: "Standart" })).toBeChecked()
+
+    await user.click(within(sheet).getByRole("radio", { name: "Basit" }))
+    expect(drawn()).not.toContain("seo")
+    expect(drawn()).toContain("media")
+    await user.click(within(sheet).getByRole("radio", { name: "Gelişmiş" }))
+    expect(drawn()).toContain("seo")
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/platform-settings/panel_layout",
+      expect.objectContaining({ method: "POST" })
+    )
+    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/panel_layout", {
+        method: "POST",
+        body: {
+          product: expect.objectContaining({
+            hidden: [],
+            open: ["seo", "attributes", "faq", "addons", "priceHistory"],
+          }) as unknown,
+        },
       })
     })
   })
