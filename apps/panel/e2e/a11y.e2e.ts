@@ -89,10 +89,22 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
     }
     await expect(part).toHaveAttribute("aria-expanded", "true")
   }
-  await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
-  // A variant's dialog, each of its tabs; a product of one variant has the fields in its card
+  // The "Ürün verileri" card, each of its tabs (2026-11-25)
+  const data = page.locator("#product-data")
+  for (const tab of await data.getByRole("tab").all()) {
+    await tab.click()
+    await page.waitForLoadState("networkidle")
+    expect(await seriousIssues(page)).toEqual([])
+  }
+  // A variant's dialog, each of its tabs; a simple product has the fields in its Stok tab
+  const variants = data.getByRole("tab", { name: "Varyantlar" })
+  if ((await variants.count()) > 0) {
+    await variants.click()
+  } else {
+    await data.getByRole("tab", { name: "Stok" }).click()
+  }
   const rows = page.locator("[data-variant-row]")
   if ((await rows.count()) > 0) {
     await rows.first().click()
@@ -117,8 +129,8 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   expect(await seriousIssues(page)).toEqual([])
   await page.keyboard.press("Escape")
   // A narrow column card, edited in place (2026-11-25)
-  await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
-  await expect(page.getByRole("form", { name: "Katalog bilgileri" })).toBeVisible()
+  await page.getByRole("button", { name: "Kategori, marka ve KDV: düzenle" }).click()
+  await expect(page.getByRole("form", { name: "Kategori, marka ve KDV" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
 })
 

@@ -45,12 +45,13 @@ function DetailSkeleton() {
 }
 
 /**
- * One product (docs/06 "Ürün sayfası"): what is edited most first (its
- * name and address, its variants, each opening in a dialog, its pictures,
- * its description), its search appearance and seldom-edited parts folded
- * under them to a line each; beside them, following the scroll, its
- * facts, the SEO advisor and short cards for categories, catalog details
- * and the parcel, each edited in place. Every card saves on its own. The
+ * One product (docs/06 "Ürün sayfası"; WooCommerce's layout): what is
+ * edited most first (its name and address, its pictures, its description),
+ * the "Ürün verileri" card with its type and tabs (price, stock, parcel,
+ * attributes, variants, catalog, add-ons and price history), its search
+ * appearance folded to a line; beside them, a narrow column following the
+ * scroll with its facts, the SEO advisor and its categories, edited in
+ * place. Every form saves on its own and on the one save bar. The
  * shop lays the page out for its team ("Sayfayı düzenle"): each column's
  * order and the parts it hides.
  */

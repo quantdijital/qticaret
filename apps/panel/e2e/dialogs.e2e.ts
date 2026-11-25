@@ -60,6 +60,11 @@ const productAction = (open: (page: Page) => Promise<void>) => async (page: Page
     await page.goto(href)
     await expect(pageHeading(page)).toBeVisible()
     await page.waitForLoadState("networkidle")
+    // The variants are a tab of the "Ürün verileri" card
+    const variants = page.locator('#product-data [role="tab"][data-tab="variants"]')
+    if ((await variants.count()) > 0) {
+      await variants.click()
+    }
     if ((await page.locator("[data-variant-row]").count()) > 0) {
       await open(page)
       return true
