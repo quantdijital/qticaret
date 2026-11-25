@@ -13116,7 +13116,8 @@
         "collection": "Collection picture",
         "popup": "Pop-up",
         "storefront_design": "Saved look",
-        "favicon": "Site icon"
+        "favicon": "Site icon",
+        "booking": "Tour programme"
       },
       "seoTypes": {
         "product": "product page",
@@ -13131,6 +13132,33 @@
       },
       "etbisQrLink": "The shop's ETBİS QR code",
       "faviconLink": "The shop's site icon"
+    },
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "unused": "Unused",
+      "missing_alt": "Missing alt text",
+      "empty": {
+        "unused": "No unused pictures; each one is used by a product, page, setting or the storefront.",
+        "missing_alt": "No pictures without alt text."
+      }
+    },
+    "cleanup": {
+      "hint": "No product, page, setting, campaign or storefront uses these pictures. Click to pick the ones to delete.",
+      "hintReadOnly": "No product, page, setting, campaign or storefront uses these pictures.",
+      "selected_one": "{{formatted}} picture picked",
+      "selected_other": "{{formatted}} pictures picked",
+      "selectPage": "Pick all on this page",
+      "clear": "Clear selection",
+      "delete": "Delete permanently",
+      "confirmTitle_one": "Delete {{formatted}} picture permanently?",
+      "confirmTitle_other": "Delete {{formatted}} pictures permanently?",
+      "confirmText": "The pictures are deleted with their files and cannot be brought back. Each is checked again first; one that has come into use meanwhile is kept.",
+      "confirm": "Delete",
+      "deleted_one": "{{formatted}} picture deleted.",
+      "deleted_other": "{{formatted}} pictures deleted.",
+      "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
+      "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
     }
   },
   "confirmEmail": {
