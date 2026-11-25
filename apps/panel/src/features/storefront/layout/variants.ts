@@ -169,6 +169,8 @@ const OPTIONAL_FIELDS: {
   categories: { icons: ["category_icons_by_handle"] },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
   newsletter: { split: ["joined"], image_card: ["joined"], strip: ["joined"] },
+  // The carousel cards' product picture (adr/0077 §10 Ek): the grid holds none
+  reviews: { carousel: ["product_image"] },
 }
 
 /**

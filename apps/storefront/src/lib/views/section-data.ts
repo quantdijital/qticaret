@@ -5,7 +5,6 @@ import type {
   StoreLayoutSection,
   StoreBrand,
   StoreProduct,
-  StoreReviewPhoto,
 } from "@qticaret/types"
 import type {
   CategoryCardView,
@@ -16,10 +15,9 @@ import type {
 } from "@qticaret/ui"
 import { t as words } from "@/lib/i18n"
 import { allCategories, listProducts, pathsOf, priceDisplays } from "@/lib/store-api/requests"
-import { isStoreApiError } from "@/lib/store-api/errors"
 import { cardFacts, categoryImages, latestReviewPhotos } from "@/lib/store-api/extras"
 import { storeGet } from "@/lib/store-api/server"
-import { categoryCard, customerPhotos, reviewPhotos, withCardFacts } from "./card-extras"
+import { categoryCard, customerPhotos, withCardFacts } from "./card-extras"
 import { brandLogo } from "./brands"
 import { childrenOf } from "./categories"
 import { collectionsOn } from "./collections-on"
@@ -28,15 +26,9 @@ import { cardOptions } from "./theme-settings"
 
 /**
  * What the design's sections show (adr/0049), fetched live: the products
- * of a rail, the categories and brands named, the newest reviews.
+ * of a rail, the categories and brands named (the newest reviews:
+ * `review-cards.ts`).
  */
-
-const DATE = new Intl.DateTimeFormat("tr-TR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Europe/Istanbul",
-})
 
 /** Products by id in the order given; ids with no live product are skipped. */
 export async function productsInOrder(ids: readonly string[]): Promise<StoreProduct[]> {
@@ -226,50 +218,6 @@ export async function brandLinks(ids: readonly string[]): Promise<SectionBrandVi
     }
     const logo = brandLogo(brand, brand.name)
     return logo ? [{ label: brand.name, path, logo }] : [{ label: brand.name, path }]
-  })
-}
-
-interface ReviewsAnswer {
-  reviews: {
-    product_id: string
-    product_title: string
-    rating: number
-    title: string | null
-    body: string
-    author_name: string | null
-    created_at: string
-    verified_purchase: boolean
-    photos?: StoreReviewPhoto[]
-  }[]
-}
-
-export async function reviewViews(limit: number, t: Translate) {
-  let answer: ReviewsAnswer
-  try {
-    answer = await storeGet<ReviewsAnswer>("/store/reviews", { offset: 0, limit })
-  } catch (error) {
-    if (!isStoreApiError(error)) {
-      throw error
-    }
-    return []
-  }
-  const paths = await pathsOf(
-    "product",
-    answer.reviews.map((review) => review.product_id)
-  )
-  return answer.reviews.map((review) => {
-    const path = paths[review.product_id]
-    const author = review.author_name ?? t("product.anonymous")
-    return {
-      rating: review.rating,
-      title: review.title,
-      body: review.body,
-      author,
-      date: DATE.format(new Date(review.created_at)),
-      verified: review.verified_purchase,
-      photos: reviewPhotos(review.photos, author, t),
-      product: path ? { label: review.product_title, path } : null,
-    }
   })
 }
 

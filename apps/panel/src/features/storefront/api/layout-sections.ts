@@ -12,6 +12,7 @@ import type {
   ProductSource,
   ProgramVariant,
   RelatedProductsVariant,
+  ReviewsProductImage,
   ReviewsVariant,
   ScrollerSettings,
   SectionDevice,
@@ -246,6 +247,8 @@ export interface ReviewsSection extends BodySectionBase {
   variant: ReviewsVariant
   /** `carousel`: the scroller kit's settings. */
   scroller?: ScrollerSettings
+  /** `carousel`: the reviewed product's picture on each card; absent: `none` (adr/0077 §10 Ek). */
+  product_image?: ReviewsProductImage
 }
 
 /** The latest posts or reviews: a title and how many. */

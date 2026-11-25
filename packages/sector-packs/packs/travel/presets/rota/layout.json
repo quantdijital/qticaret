@@ -149,7 +149,8 @@
         "speed": "medium",
         "loop": "off",
         "drag": "on"
-      }
+      },
+      "product_image": "thumb"
     },
     {
       "id": "kesfetkolaj",

@@ -4,7 +4,7 @@
   "version": 1,
   "theme": "atolye",
   "name": "Patika",
-  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, yayla bandı, yorumlar ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "description": "Kültür, doğa ve şehir turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, kutulu kampanya bandı, tur görselli yorum kartları ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {

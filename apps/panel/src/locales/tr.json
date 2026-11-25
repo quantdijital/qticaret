@@ -11403,6 +11403,16 @@
           "cards": "Kartlar"
         }
       },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Ürün görseli",
+          "term": "product_image",
+          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o).",
+          "none": "Yok",
+          "thumb": "Küçük",
+          "cover": "Kapak"
+        }
+      },
       "searchBox": {
         "titleHint": "Boş bırakılırsa kutu başlıksız görünür.",
         "intro": "Giriş"

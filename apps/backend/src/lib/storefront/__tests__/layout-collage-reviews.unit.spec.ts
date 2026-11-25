@@ -11,7 +11,7 @@ import {
   PHOTO_COLLAGE_SETTINGS,
   photoCollage,
 } from "../sections/photo-collage"
-import { reviews } from "../sections/reviews"
+import { REVIEWS_PRODUCT_IMAGES, reviews } from "../sections/reviews"
 import { storedSection } from "../sections/stored"
 
 // The contract's own files (`@qticaret/types`), through jest: the package is ESM for tsc here
@@ -153,6 +153,21 @@ describe("the reviews' variants (adr/0077 §10)", () => {
     expect(issues({ home: [quotes({ scroller: {} })] })).not.toEqual([])
   })
 
+  it("takes the carousel's product picture as the contract lists it, absent until written", () => {
+    const plain = layoutDocument.parse({ home: [quotes({ variant: "carousel" })] })
+    expect(plain.home[0]).not.toHaveProperty("product_image")
+    const cover = layoutDocument.parse({
+      home: [quotes({ variant: "carousel", product_image: "cover" })],
+    })
+    expect(cover.home[0]).toMatchObject({ product_image: "cover" })
+    expect(issues({ home: [quotes({ variant: "carousel", product_image: "poster" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    // The grid holds none
+    expect(issues({ home: [quotes({ product_image: "thumb" })] })).not.toEqual([])
+    expect(REVIEWS_PRODUCT_IMAGES).toEqual(contract("section-reviews")["REVIEWS_PRODUCT_IMAGES"])
+  })
+
   it("reads a variant off the list as the grid, keeping only the grid's fields", () => {
     expect(storedSection(quotes({ variant: "wall", limit: 4, scroller: {} }))).toEqual(
       quotes({ variant: "grid", limit: 4 })
@@ -182,6 +197,13 @@ describe("the collage and the reviews on the storefront", () => {
       context()
     )
     expect(carousel).toMatchObject({ variant: "carousel", scroller: { desktop: "three" } })
+    expect(carousel).not.toHaveProperty("product_image")
+
+    const covered = await hydrateSection(
+      reviews.parse(quotes({ variant: "carousel", product_image: "cover" })),
+      context()
+    )
+    expect(covered).toMatchObject({ variant: "carousel", product_image: "cover" })
   })
 
   it("prints the photographs with their own words, captions filled, links placed", async () => {

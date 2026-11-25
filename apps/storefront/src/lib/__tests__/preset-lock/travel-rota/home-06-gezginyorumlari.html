@@ -60,7 +60,7 @@
           <ul id="«id»" class="gf-scroller-track" data-drag="">
             <li>
               <article
-                class="flex h-full flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
+                class="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-5 lg:p-6"
               >
                 <span
                   class="inline-flex items-center gap-0.5"
@@ -108,31 +108,67 @@
                     “Keskin geldi, kutusu özenliydi. Sapı elde iyi duruyor.”
                   </p>
                 </blockquote>
-                <footer class="flex flex-col gap-1 pt-2 text-sm">
-                  <span class="flex items-center gap-1.5 font-semibold text-text">
-                    Ayşe K.
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="2"
-                      class="lucide lucide-badge-check lucide-verified size-4 text-ok"
-                      role="img"
-                      aria-label="Doğrulanmış alışveriş"
-                    />
+                <footer class="flex flex-col gap-3 pt-2 text-sm">
+                  <span class="flex items-center gap-2.5 font-semibold text-text">
+                    <span
+                      aria-hidden="true"
+                      class="grid size-9 shrink-0 place-items-center rounded-full bg-paper-3 text-sm font-bold text-text-2"
+                    >
+                      A
+                    </span>
+                    <span class="flex min-w-0 flex-col">
+                      <span class="flex items-center gap-1.5">
+                        Ayşe K.
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="2"
+                          class="lucide lucide-badge-check lucide-verified size-4 shrink-0 text-ok"
+                          role="img"
+                          aria-label="Doğrulanmış alışveriş"
+                        />
+                      </span>
+                      <span class="text-xs font-normal text-text-2">
+                        10 Ekim 2026
+                      </span>
+                    </span>
                   </span>
                   <a
                     href="/urun/karacelik-alageyik-sam-celigi-av-bicagi"
-                    class="gf-link line-clamp-2 self-start text-text-2"
+                    class="group flex items-center gap-3 border-t border-rule pt-3 text-text-2 no-underline hover:text-text"
                     aria-label="Değerlendirilen ürün: Alageyik Şam Çeliği Av Bıçağı"
                   >
-                    Alageyik Şam Çeliği Av Bıçağı
+                    <span
+                      class="relative block size-12 shrink-0 overflow-hidden rounded-media bg-media"
+                    >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                          sizes="48px"
+                        />
+                        <img
+                          src="https://cdn.example.com/p/01.webp"
+                          alt="Alageyik Şam Çeliği Av Bıçağı"
+                          width="1200"
+                          height="1200"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-(--dur-long) motion-safe:group-hover:scale-[1.03]"
+                        />
+                      </picture>
+                    </span>
+                    <span class="line-clamp-2 font-semibold">
+                      Alageyik Şam Çeliği Av Bıçağı
+                    </span>
                   </a>
                 </footer>
               </article>
             </li>
             <li>
               <article
-                class="flex h-full flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
+                class="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-5 lg:p-6"
               >
                 <span
                   class="inline-flex items-center gap-0.5"
@@ -180,31 +216,67 @@
                     “Keskin geldi, kutusu özenliydi. Sapı elde iyi duruyor.”
                   </p>
                 </blockquote>
-                <footer class="flex flex-col gap-1 pt-2 text-sm">
-                  <span class="flex items-center gap-1.5 font-semibold text-text">
-                    Mehmet T.
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="2"
-                      class="lucide lucide-badge-check lucide-verified size-4 text-ok"
-                      role="img"
-                      aria-label="Doğrulanmış alışveriş"
-                    />
+                <footer class="flex flex-col gap-3 pt-2 text-sm">
+                  <span class="flex items-center gap-2.5 font-semibold text-text">
+                    <span
+                      aria-hidden="true"
+                      class="grid size-9 shrink-0 place-items-center rounded-full bg-paper-3 text-sm font-bold text-text-2"
+                    >
+                      M
+                    </span>
+                    <span class="flex min-w-0 flex-col">
+                      <span class="flex items-center gap-1.5">
+                        Mehmet T.
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="2"
+                          class="lucide lucide-badge-check lucide-verified size-4 shrink-0 text-ok"
+                          role="img"
+                          aria-label="Doğrulanmış alışveriş"
+                        />
+                      </span>
+                      <span class="text-xs font-normal text-text-2">
+                        11 Ekim 2026
+                      </span>
+                    </span>
                   </span>
                   <a
                     href="/urun/yaman-n690-katlanir-caki"
-                    class="gf-link line-clamp-2 self-start text-text-2"
+                    class="group flex items-center gap-3 border-t border-rule pt-3 text-text-2 no-underline hover:text-text"
                     aria-label="Değerlendirilen ürün: N690 Katlanır Çakı"
                   >
-                    N690 Katlanır Çakı
+                    <span
+                      class="relative block size-12 shrink-0 overflow-hidden rounded-media bg-media"
+                    >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
+                          sizes="48px"
+                        />
+                        <img
+                          src="https://cdn.example.com/p/02.webp"
+                          alt="N690 Katlanır Çakı"
+                          width="1200"
+                          height="1200"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-(--dur-long) motion-safe:group-hover:scale-[1.03]"
+                        />
+                      </picture>
+                    </span>
+                    <span class="line-clamp-2 font-semibold">
+                      N690 Katlanır Çakı
+                    </span>
                   </a>
                 </footer>
               </article>
             </li>
             <li>
               <article
-                class="flex h-full flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
+                class="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-5 lg:p-6"
               >
                 <span
                   class="inline-flex items-center gap-0.5"
@@ -252,31 +324,67 @@
                     “Keskin geldi, kutusu özenliydi. Sapı elde iyi duruyor.”
                   </p>
                 </blockquote>
-                <footer class="flex flex-col gap-1 pt-2 text-sm">
-                  <span class="flex items-center gap-1.5 font-semibold text-text">
-                    Zeynep A.
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="2"
-                      class="lucide lucide-badge-check lucide-verified size-4 text-ok"
-                      role="img"
-                      aria-label="Doğrulanmış alışveriş"
-                    />
+                <footer class="flex flex-col gap-3 pt-2 text-sm">
+                  <span class="flex items-center gap-2.5 font-semibold text-text">
+                    <span
+                      aria-hidden="true"
+                      class="grid size-9 shrink-0 place-items-center rounded-full bg-paper-3 text-sm font-bold text-text-2"
+                    >
+                      Z
+                    </span>
+                    <span class="flex min-w-0 flex-col">
+                      <span class="flex items-center gap-1.5">
+                        Zeynep A.
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="2"
+                          class="lucide lucide-badge-check lucide-verified size-4 shrink-0 text-ok"
+                          role="img"
+                          aria-label="Doğrulanmış alışveriş"
+                        />
+                      </span>
+                      <span class="text-xs font-normal text-text-2">
+                        12 Ekim 2026
+                      </span>
+                    </span>
                   </span>
                   <a
                     href="/urun/demirhan-sef-bicagi-20"
-                    class="gf-link line-clamp-2 self-start text-text-2"
+                    class="group flex items-center gap-3 border-t border-rule pt-3 text-text-2 no-underline hover:text-text"
                     aria-label="Değerlendirilen ürün: Şef Bıçağı 20 cm"
                   >
-                    Şef Bıçağı 20 cm
+                    <span
+                      class="relative block size-12 shrink-0 overflow-hidden rounded-media bg-media"
+                    >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet="https://cdn.example.com/p/03-400.webp 400w, https://cdn.example.com/p/03-800.webp 800w"
+                          sizes="48px"
+                        />
+                        <img
+                          src="https://cdn.example.com/p/03.webp"
+                          alt="Şef Bıçağı 20 cm"
+                          width="1200"
+                          height="1200"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-(--dur-long) motion-safe:group-hover:scale-[1.03]"
+                        />
+                      </picture>
+                    </span>
+                    <span class="line-clamp-2 font-semibold">
+                      Şef Bıçağı 20 cm
+                    </span>
                   </a>
                 </footer>
               </article>
             </li>
             <li>
               <article
-                class="flex h-full flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
+                class="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-5 lg:p-6"
               >
                 <span
                   class="inline-flex items-center gap-0.5"
@@ -324,31 +432,67 @@
                     “Keskin geldi, kutusu özenliydi. Sapı elde iyi duruyor.”
                   </p>
                 </blockquote>
-                <footer class="flex flex-col gap-1 pt-2 text-sm">
-                  <span class="flex items-center gap-1.5 font-semibold text-text">
-                    Can Ö.
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="2"
-                      class="lucide lucide-badge-check lucide-verified size-4 text-ok"
-                      role="img"
-                      aria-label="Doğrulanmış alışveriş"
-                    />
+                <footer class="flex flex-col gap-3 pt-2 text-sm">
+                  <span class="flex items-center gap-2.5 font-semibold text-text">
+                    <span
+                      aria-hidden="true"
+                      class="grid size-9 shrink-0 place-items-center rounded-full bg-paper-3 text-sm font-bold text-text-2"
+                    >
+                      C
+                    </span>
+                    <span class="flex min-w-0 flex-col">
+                      <span class="flex items-center gap-1.5">
+                        Can Ö.
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="2"
+                          class="lucide lucide-badge-check lucide-verified size-4 shrink-0 text-ok"
+                          role="img"
+                          aria-label="Doğrulanmış alışveriş"
+                        />
+                      </span>
+                      <span class="text-xs font-normal text-text-2">
+                        13 Ekim 2026
+                      </span>
+                    </span>
                   </span>
                   <a
                     href="/urun/karacelik-kamp-baltasi"
-                    class="gf-link line-clamp-2 self-start text-text-2"
+                    class="group flex items-center gap-3 border-t border-rule pt-3 text-text-2 no-underline hover:text-text"
                     aria-label="Değerlendirilen ürün: Kamp Baltası"
                   >
-                    Kamp Baltası
+                    <span
+                      class="relative block size-12 shrink-0 overflow-hidden rounded-media bg-media"
+                    >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet="https://cdn.example.com/p/04-400.webp 400w, https://cdn.example.com/p/04-800.webp 800w"
+                          sizes="48px"
+                        />
+                        <img
+                          src="https://cdn.example.com/p/04.webp"
+                          alt="Kamp Baltası"
+                          width="1200"
+                          height="1200"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-(--dur-long) motion-safe:group-hover:scale-[1.03]"
+                        />
+                      </picture>
+                    </span>
+                    <span class="line-clamp-2 font-semibold">
+                      Kamp Baltası
+                    </span>
                   </a>
                 </footer>
               </article>
             </li>
             <li>
               <article
-                class="flex h-full flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
+                class="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-5 lg:p-6"
               >
                 <span
                   class="inline-flex items-center gap-0.5"
@@ -396,24 +540,60 @@
                     “Keskin geldi, kutusu özenliydi. Sapı elde iyi duruyor.”
                   </p>
                 </blockquote>
-                <footer class="flex flex-col gap-1 pt-2 text-sm">
-                  <span class="flex items-center gap-1.5 font-semibold text-text">
-                    Elif S.
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="2"
-                      class="lucide lucide-badge-check lucide-verified size-4 text-ok"
-                      role="img"
-                      aria-label="Doğrulanmış alışveriş"
-                    />
+                <footer class="flex flex-col gap-3 pt-2 text-sm">
+                  <span class="flex items-center gap-2.5 font-semibold text-text">
+                    <span
+                      aria-hidden="true"
+                      class="grid size-9 shrink-0 place-items-center rounded-full bg-paper-3 text-sm font-bold text-text-2"
+                    >
+                      E
+                    </span>
+                    <span class="flex min-w-0 flex-col">
+                      <span class="flex items-center gap-1.5">
+                        Elif S.
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="2"
+                          class="lucide lucide-badge-check lucide-verified size-4 shrink-0 text-ok"
+                          role="img"
+                          aria-label="Doğrulanmış alışveriş"
+                        />
+                      </span>
+                      <span class="text-xs font-normal text-text-2">
+                        14 Ekim 2026
+                      </span>
+                    </span>
                   </span>
                   <a
                     href="/urun/yaman-elmax-caki"
-                    class="gf-link line-clamp-2 self-start text-text-2"
+                    class="group flex items-center gap-3 border-t border-rule pt-3 text-text-2 no-underline hover:text-text"
                     aria-label="Değerlendirilen ürün: Elmax Gravürlü Çakı"
                   >
-                    Elmax Gravürlü Çakı
+                    <span
+                      class="relative block size-12 shrink-0 overflow-hidden rounded-media bg-media"
+                    >
+                      <picture>
+                        <source
+                          type="image/webp"
+                          srcSet="https://cdn.example.com/p/05-400.webp 400w, https://cdn.example.com/p/05-800.webp 800w"
+                          sizes="48px"
+                        />
+                        <img
+                          src="https://cdn.example.com/p/05.webp"
+                          alt="Elmax Gravürlü Çakı"
+                          width="1200"
+                          height="1200"
+                          loading="lazy"
+                          fetchPriority="auto"
+                          decoding="async"
+                          class="absolute inset-0 h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-(--dur-long) motion-safe:group-hover:scale-[1.03]"
+                        />
+                      </picture>
+                    </span>
+                    <span class="line-clamp-2 font-semibold">
+                      Elmax Gravürlü Çakı
+                    </span>
                   </a>
                 </footer>
               </article>

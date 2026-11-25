@@ -1,6 +1,7 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
   PHOTO_COLLAGE_SETTINGS,
+  REVIEWS_PRODUCT_IMAGES,
   RICH_TEXT_IMAGE_SIDES,
   STATS_SETTINGS,
   STEPS_SETTINGS,
@@ -69,6 +70,7 @@ export type ContentField =
   | "collage_layout"
   | "collage_phone"
   | "collage_card"
+  | "reviews_product_image"
   | "departures_layout"
   | "action"
   | "search_position"
@@ -235,7 +237,22 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "reviews":
       return [
         limit(section),
-        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
+        ...(section.variant === "carousel"
+          ? [
+              // The product's picture on each card (adr/0077 §10 Ek), open in "Diziliş"
+              {
+                ...entry(
+                  section,
+                  "reviews_product_image",
+                  `${E}.reviewsCard.productImage.label`,
+                  REVIEWS_PRODUCT_IMAGES.map((step) => `${E}.reviewsCard.productImage.${step}`),
+                  "layout"
+                ),
+                term: `${E}.reviewsCard.productImage.term`,
+              },
+              ...scrollerFields(section.id, section.scroller),
+            ]
+          : []),
       ]
     case "photo_collage":
       return collageFields(section)

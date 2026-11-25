@@ -275,6 +275,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
             limit: section.limit,
             variant: section.variant,
             scroller: section.scroller,
+            // The product's picture on each card, only once written (adr/0077 §10 Ek)
+            ...(section.product_image ? { product_image: section.product_image } : {}),
           }
         : { id, type, title: section.title, limit: section.limit }
     case "google_rating":

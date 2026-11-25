@@ -11403,6 +11403,16 @@
           "cards": "Cards"
         }
       },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Product picture",
+          "term": "product_image",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one).",
+          "none": "None",
+          "thumb": "Small",
+          "cover": "Cover"
+        }
+      },
       "searchBox": {
         "titleHint": "Left empty, the box shows without a title.",
         "intro": "Intro"

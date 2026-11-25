@@ -3,6 +3,7 @@ import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } fr
 import { deviceOf } from "@qticaret/types/section-device"
 import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
+import { reviewsProductImageOf } from "@qticaret/types/section-reviews"
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
 import { trustCardSettingsOf } from "@qticaret/types/section-trust"
 import { variantOf } from "@qticaret/types/section-variants"
@@ -23,13 +24,8 @@ import { newsletterLookOf } from "./newsletter"
 import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postsView } from "./posts-section"
-import {
-  brandLinks,
-  categoryLinks,
-  customerPhotoViews,
-  type ProductContext,
-  reviewViews,
-} from "./section-data"
+import { brandLinks, categoryLinks, customerPhotoViews, type ProductContext } from "./section-data"
+import { reviewViews } from "./review-cards"
 import { programView } from "./program"
 import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
@@ -130,8 +126,11 @@ async function sectionView(
     case "featured_product":
       return featuredView(section, t)
     case "reviews": {
+      const carousel = variantOf("reviews", section.variant) === "carousel"
+      // The product's picture on each card (adr/0077 §10 Ek): a carousel's, once asked for
+      const productImage = carousel ? reviewsProductImageOf(section.product_image) : "none"
       const [reviews, photos, rating] = await Promise.all([
-        reviewViews(section.limit, t),
+        reviewViews(section.limit, t, productImage !== "none"),
         customerPhotoViews(t),
         reviewSummary(),
       ])
@@ -148,9 +147,10 @@ async function sectionView(
             // The shop's average, count and spread (adr/0046 Ek 2026-11-05)
             ...(summary ? { summary } : {}),
             // One card each in a sliding row (adr/0077 §10); a grid as before variants
-            ...(variantOf("reviews", section.variant) === "carousel"
+            ...(carousel
               ? { variant: "carousel" as const, scroller: scrollerSettingsOf(section.scroller) }
               : {}),
+            ...(productImage !== "none" ? { product_image: productImage } : {}),
           }
         : null
     }

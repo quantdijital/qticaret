@@ -172,7 +172,7 @@
         {
           "value": "Seçkin",
           "label": "Özenle seçilmiş rotalar",
-          "text": "Her rotayı önce kendimiz yürürüz.",
+          "text": "Her rotayı önce kendimiz geziyoruz.",
           "icon": "compass"
         },
         {
@@ -184,7 +184,7 @@
         {
           "value": "Kolay",
           "label": "Dert yok",
-          "text": "Yol, yatak ve sofra bizden.",
+          "text": "Ulaşım, otel ve rehber bizden.",
           "icon": "leaf"
         },
         {
@@ -232,8 +232,8 @@
             "alt": "Sisli yamaçlar arasında Ayder yaylasının ahşap evleri"
           },
           "mobile_image": null,
-          "heading": "Yaylalarda bir hafta",
-          "text": "Kaçkarların eteğinde yürüyüş, yayla evlerinde konaklama. Yaz kalkışları açıldı.",
+          "heading": "Yaz kalkışları açıldı",
+          "text": "İstanbul'dan Kapadokya'ya, Ege koylarından Karadeniz yaylalarına: rehberli turlarda yerinizi şimdiden ayırın.",
           "link": {
             "$href": "/magaza",
             "label": "Kalkışları gör"
@@ -242,8 +242,8 @@
           "tone": "light"
         }
       ],
-      "width": "full",
-      "height": "high",
+      "width": "boxed",
+      "height": "low",
       "text_position": "middle_left",
       "overlay": "light",
       "button_style": "solid"
@@ -255,7 +255,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Yürüyenler anlatıyor",
+      "title": "Misafir yorumları",
       "limit": 6,
       "scroller": {
         "desktop": "three",
@@ -268,7 +268,8 @@
         "speed": "medium",
         "loop": "off",
         "drag": "on"
-      }
+      },
+      "product_image": "cover"
     },
     {
       "id": "patikayazilari",
@@ -316,7 +317,7 @@
                   "device": "all",
                   "type": "brand",
                   "logo": true,
-                  "about": "Rehberli yürüyüş ve doğa turları. Günlük mesafe, zorluk ve konaklama her turun sayfasında yazılı.",
+                  "about": "Kültür, doğa ve şehir turları: İstanbul'dan Kapadokya'ya, Ege'den Karadeniz'e. Program, konaklama ve dahil olanlar her turun sayfasında yazılı.",
                   "social": true,
                   "address": false
                 }
@@ -377,7 +378,7 @@
       "variant": "strip",
       "title": "Yol notları e-postanızda",
       "text": null,
-      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
+      "description": "Yeni rotalar, açılan kalkışlar ve yoldan notlar.",
       "joined": true
     }
   ],
@@ -398,7 +399,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "timeline",
-      "title": "Yürüyüş programı"
+      "title": "Tur programı"
     },
     {
       "id": "patikabenzer",

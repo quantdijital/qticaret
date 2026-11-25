@@ -177,6 +177,29 @@ describe("the reviews' carousel (adr/0077 §10)", () => {
       "scroll",
     ])
   })
+
+  it("offers the cards' product picture in Diziliş, none by default, dropped back on the grid", async () => {
+    const user = userEvent.setup()
+    const carousel = { ...grid(), variant: "carousel", scroller: SCROLLER_DEFAULTS } as const
+    const changes = renderPanel(carousel)
+    expect(contentFields(carousel).map((each) => [each.key, each.group])).toContainEqual([
+      "reviews_product_image",
+      "layout",
+    ])
+
+    await openGroup(user, "Diziliş")
+    const picture = field(REVIEWS, "reviews_product_image")
+    expect(picture.getByRole("radio", { name: "Yok" })).toHaveAttribute("data-state", "on")
+    await user.click(picture.getByRole("radio", { name: "Kapak" }))
+    expect(changes.at(-1)).toMatchObject({ variant: "carousel", product_image: "cover" })
+
+    await openTab(user, "style")
+    const variant = document.getElementById(FIELD_IDS.variant(REVIEWS))
+    if (!variant) throw new Error("no variant field")
+    await user.click(within(variant).getByRole("radio", { name: "Izgara" }))
+    expect(changes.at(-1)).toMatchObject({ variant: "grid" })
+    expect(changes.at(-1)).not.toHaveProperty("product_image")
+  })
 })
 
 describe("the collage's settings search and preview marks", () => {
