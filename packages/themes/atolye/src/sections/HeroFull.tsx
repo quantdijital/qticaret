@@ -190,11 +190,7 @@ export function HeroFull({
                   {...fieldMark(on, "title_accent")}
                   className={cn(
                     "block",
-                    inked
-                      ? "text-signal"
-                      : stacked
-                        ? "text-(--highlight)"
-                        : "text-signal-on-stage"
+                    inked ? "text-signal" : stacked ? "text-(--highlight)" : "text-signal-on-stage"
                   )}
                 >
                   {settings.accent_mark === "swash" ? (
