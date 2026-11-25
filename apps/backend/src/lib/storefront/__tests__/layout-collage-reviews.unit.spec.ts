@@ -56,6 +56,7 @@ describe("the photo collage (adr/0077 §10)", () => {
       items: [1, 2, 3].map((n) => ({ ...photo(n), caption: null, link: null })),
       layout: "asymmetric",
       phone: "scroll",
+      card: "over",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "photo_collage", layout: "asymmetric" })
   })
@@ -101,6 +102,27 @@ describe("the photo collage (adr/0077 §10)", () => {
     ) as BodySection
     expect(imagesOf(section)).toEqual([1, 2, 3].map((n) => `${URL}-${String(n)}.jpg`))
     expect(linksOf(section)).toEqual([shop])
+    const all = { kind: "system", target: "shop", label: "Tüm rotalar" } as const
+    const listed = photoCollage.parse(collage({ more: all })) as BodySection
+    expect(linksOf(listed)).toEqual([all])
+  })
+
+  it("keeps the white card, its small lines, the line over the heading and the list's link", () => {
+    const all = { kind: "system", target: "shop", label: "Tüm rotalar" }
+    const section = photoCollage.parse(
+      collage({
+        card: "below",
+        eyebrow: "Popüler rotalar",
+        more: all,
+        items: [photo(1, { subtitle: "Dağ • Macera" }), photo(2), photo(3)],
+      })
+    )
+    expect(section).toMatchObject({ card: "below", eyebrow: "Popüler rotalar", more: all })
+    expect(section.items[0]).toMatchObject({ subtitle: "Dağ • Macera" })
+    expect(section.items[1]).not.toHaveProperty("subtitle")
+    expect(photoCollage.parse(collage())).not.toHaveProperty("eyebrow")
+    expect(photoCollage.safeParse(collage({ card: "flat" })).success).toBe(false)
+    expect(photoCollage.safeParse(collage({ eyebrow: "x".repeat(61) })).success).toBe(false)
   })
 
   it("mirrors the contract's lists: a step goes there first", () => {

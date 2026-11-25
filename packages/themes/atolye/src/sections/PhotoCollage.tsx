@@ -2,6 +2,8 @@ import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { PhotoCollageItemView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { Eyebrow } from "../parts/Eyebrow"
+import { CollageCard, MoreLink } from "./collage-card"
 import { type Of, headingId } from "./plan"
 
 type Collage = Of<"photo_collage">
@@ -110,25 +112,39 @@ export function PhotoCollage({ section, first = false }: { section: Collage; fir
   const scroll = section.phone === "scroll"
   const mosaic = section.layout === "asymmetric"
   const phoneSizes = PHONE_SIZES[section.phone]
+  const carded = section.card === "below"
+  const mark = (at: number, part: string) => fieldMark(section.editor, fieldKey("items", at, part))
+  const head = (section.title ?? section.intro ?? section.eyebrow) && (
+    <div className="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center">
+      {section.eyebrow && (
+        <Eyebrow text={section.eyebrow} mark={fieldMark(section.editor, "eyebrow")} />
+      )}
+      {section.title && (
+        <h2 id={id} {...fieldMark(section.editor, "title")}>
+          {section.title}
+        </h2>
+      )}
+      {section.intro && (
+        <p className="text-text-2" {...fieldMark(section.editor, "intro")}>
+          {section.intro}
+        </p>
+      )}
+    </div>
+  )
   return (
     <section
       {...(section.title ? { "aria-labelledby": id } : { "aria-label": section.label })}
       className="gf-section"
     >
       <Container className="flex flex-col gap-(--head-gap)">
-        {(section.title ?? section.intro) && (
-          <div className="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center">
-            {section.title && (
-              <h2 id={id} {...fieldMark(section.editor, "title")}>
-                {section.title}
-              </h2>
-            )}
-            {section.intro && (
-              <p className="text-text-2" {...fieldMark(section.editor, "intro")}>
-                {section.intro}
-              </p>
-            )}
+        {section.more ? (
+          // The whole list's link on the heading's line, at its end (as `SectionHead`'s)
+          <div className="flex items-end justify-between gap-4">
+            {head}
+            <MoreLink more={section.more} mark={fieldMark(section.editor, "more")} />
           </div>
+        ) : (
+          head
         )}
         <ul
           role="list"
@@ -145,20 +161,41 @@ export function PhotoCollage({ section, first = false }: { section: Collage; fir
           {section.items.map((item, at) => (
             <li
               key={`${String(at)}-${item.image.src}`}
-              className={cn(
-                scroll
-                  ? "aspect-[4/5] w-[78%] shrink-0 sm:w-[44%]"
-                  : cn("aspect-[4/3]", at === 0 && "sm:col-span-2"),
-                mosaic ? "lg:aspect-auto lg:w-auto" : "lg:col-span-1 lg:aspect-[4/3] lg:w-auto",
-                mosaic && MOSAIC[count]?.[at]
-              )}
+              className={
+                carded
+                  ? // The card holds its own photograph's shape: no ratio on the cell
+                    cn(
+                      scroll ? "w-[78%] shrink-0 sm:w-[44%]" : at === 0 && "sm:col-span-2",
+                      "lg:col-span-1 lg:w-auto",
+                      mosaic && MOSAIC[count]?.[at]
+                    )
+                  : cn(
+                      scroll
+                        ? "aspect-[4/5] w-[78%] shrink-0 sm:w-[44%]"
+                        : cn("aspect-[4/3]", at === 0 && "sm:col-span-2"),
+                      mosaic
+                        ? "lg:aspect-auto lg:w-auto"
+                        : "lg:col-span-1 lg:aspect-[4/3] lg:w-auto",
+                      mosaic && MOSAIC[count]?.[at]
+                    )
+              }
             >
-              <Photo
-                item={item}
-                sizes={`${wideSize(section, at)}, ${at === 0 && !scroll ? "92vw" : phoneSizes}`}
-                priority={first && at === 0}
-                caption={fieldMark(section.editor, fieldKey("items", at, "caption"))}
-              />
+              {carded ? (
+                <CollageCard
+                  item={item}
+                  sizes={`${wideSize(section, at)}, ${at === 0 && !scroll ? "92vw" : phoneSizes}`}
+                  priority={first && at === 0}
+                  mosaic={mosaic}
+                  marks={{ caption: mark(at, "caption"), subtitle: mark(at, "subtitle") }}
+                />
+              ) : (
+                <Photo
+                  item={item}
+                  sizes={`${wideSize(section, at)}, ${at === 0 && !scroll ? "92vw" : phoneSizes}`}
+                  priority={first && at === 0}
+                  caption={mark(at, "caption")}
+                />
+              )}
             </li>
           ))}
         </ul>

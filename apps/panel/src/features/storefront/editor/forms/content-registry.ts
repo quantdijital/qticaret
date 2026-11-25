@@ -66,6 +66,7 @@ export type ContentField =
   | "icons_phone"
   | "collage_layout"
   | "collage_phone"
+  | "collage_card"
   | "departures_layout"
   | "action"
   | "search_position"
@@ -165,6 +166,7 @@ function pointsFields(section: AnySection): RegistryField[] {
 export const COLLAGE_FIELDS = [
   ["layout", "collage_layout"],
   ["phone", "collage_phone"],
+  ["card", "collage_card"],
 ] as const satisfies readonly (readonly [keyof typeof PHOTO_COLLAGE_SETTINGS, ContentField])[]
 
 /** The photo collage's layout from 1024 px and on a phone (adr/0077 §10). */

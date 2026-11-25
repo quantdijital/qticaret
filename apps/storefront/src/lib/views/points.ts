@@ -74,6 +74,7 @@ export function collageView(
   section: StorePhotoCollageSection,
   t: Translate
 ): PhotoCollageSectionView | null {
+  const more = layoutLink(section.more ?? null, t)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -85,8 +86,11 @@ export function collageView(
           image: layoutImage(item.image, item.caption ?? ""),
           caption: item.caption,
           href: layoutLink(item.link, t)?.path ?? null,
+          ...(item.subtitle ? { subtitle: item.subtitle } : {}),
         })),
         ...photoCollageSettingsOf(section),
+        ...(section.eyebrow ? { eyebrow: section.eyebrow } : {}),
+        ...(more ? { more } : {}),
       }
     : null
 }

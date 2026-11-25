@@ -11630,6 +11630,19 @@
           "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
+        },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Popüler rotalar). Boşsa çizilmez.",
+        "more": "Tümünü gör bağlantısı",
+        "moreHint": "Başlığın sağında oklu bağlantı (ör. Tüm rotalar). Boşsa çizilmez.",
+        "subtitle": "{{number}}. fotoğrafın alt yazısı",
+        "subtitleHint": "Kartta adın altında küçük tek satır (ör. Dağ • Macera).",
+        "card": {
+          "label": "Kart görünümü",
+          "term": "card",
+          "hint": "Fotoğrafın üstünde ad etiketi ya da altında ad, alt yazı ve ok düğmesi olan beyaz kart.",
+          "over": "Fotoğraf üstünde etiket",
+          "below": "Beyaz kart"
         }
       },
       "program": {

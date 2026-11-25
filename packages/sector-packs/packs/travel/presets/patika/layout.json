@@ -83,8 +83,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Popüler rotalar",
-      "intro": "En çok seçilen beş bölge. Her birinde farklı süre ve zorlukta turlar var.",
+      "title": "İlham veren rotalar",
+      "intro": null,
+      "eyebrow": "Popüler rotalar",
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm rotalar"
+      },
       "items": [
         {
           "image": {
@@ -92,6 +97,7 @@
             "alt": "Gün batımında Kapadokya'nın peri bacaları ve vadileri"
           },
           "caption": "Kapadokya",
+          "subtitle": "Vadiler • Balon",
           "link": {
             "$href": "/magaza"
           }
@@ -102,6 +108,7 @@
             "alt": "Yukarıdan bakışla Ölüdeniz lagünü ve kumsal"
           },
           "caption": "Ege ve Akdeniz",
+          "subtitle": "Koylar • Deniz",
           "link": {
             "$href": "/magaza"
           }
@@ -112,6 +119,7 @@
             "alt": "Ormanlı yamaçlar arasında Uzungöl ve kıyısındaki köy"
           },
           "caption": "Karadeniz",
+          "subtitle": "Yaylalar • Doğa",
           "link": {
             "$href": "/magaza"
           }
@@ -122,6 +130,7 @@
             "alt": "Pamukkale'nin beyaz traverten havuzları"
           },
           "caption": "Pamukkale",
+          "subtitle": "Travertenler • Tarih",
           "link": {
             "$href": "/magaza"
           }
@@ -132,13 +141,15 @@
             "alt": "Ovanın ardında karlı Ağrı Dağı"
           },
           "caption": "Doğu Anadolu",
+          "subtitle": "Dağlar • Macera",
           "link": {
             "$href": "/magaza"
           }
         }
       ],
       "layout": "even",
-      "phone": "scroll"
+      "phone": "scroll",
+      "card": "below"
     },
     {
       "id": "nedenpatika",

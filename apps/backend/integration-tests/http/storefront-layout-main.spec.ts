@@ -134,6 +134,7 @@ medusaIntegrationTestRunner({
           hover_pause: "on",
           align: "auto",
           size: "medium",
+          tone: "graphite",
         },
         {
           id: "mainheader",

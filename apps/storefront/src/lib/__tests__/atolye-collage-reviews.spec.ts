@@ -125,6 +125,33 @@ describe("the photo collage in Atölye", () => {
     expect(html).toContain("Her bıçak elde biter.")
     expect(html).toMatch(/<figcaption[^>]*>Tezgâh<\/figcaption>/)
     expect(count(html, "<a href=")).toBeGreaterThan(0)
+    // The plate as before: no white card, no line over the heading
+    expect(html).not.toContain("shadow-float")
+    expect(html).not.toContain("tracking-[0.18em]")
+  })
+
+  it("draws the white card with its small line and arrow, the eyebrow and the list's link", () => {
+    const shop = { label: null, kind: "system" as const, target: "shop" as const, path: null }
+    const html = draw({
+      title: "İlham veren rotalar",
+      card: "below",
+      layout: "even",
+      eyebrow: "Popüler rotalar",
+      more: { ...shop, label: "Tüm rotalar" },
+      items: [
+        { image: image(1), caption: "Kapadokya", subtitle: "Vadiler • Balon", link: shop },
+        { image: image(2), caption: "Karadeniz", link: null },
+        { image: image(3), caption: null, link: null },
+      ],
+    })
+    expect(html).toMatch(/<p[^>]*uppercase[^>]*>Popüler rotalar<\/p><h2[^>]*>İlham veren rotalar/)
+    expect(html).toMatch(/<a href="[^"]+" class="gf-link[^"]*">Tüm rotalar<svg/)
+    expect(count(html, "shadow-float")).toBe(3)
+    expect(html).toContain("Vadiler • Balon</span>")
+    expect(html).not.toContain("<figcaption")
+    // The linked card alone shows the arrow
+    expect(count(html, "rounded-full border border-rule")).toBe(1)
+    expect(html).not.toContain("aspect-[4/5]")
   })
 })
 

@@ -52,6 +52,8 @@ export interface PhotoCollageItem {
   /** May hold the shop's details (`{mağaza_adı}`). */
   caption: string | null
   link: LayoutLink | null
+  /** The white card's small line under the name (`card: below`); absent or null: none. */
+  subtitle?: string | null
 }
 
 /** Three to seven photographs under an optional heading and intro (adr/0077 §10). */
@@ -60,4 +62,8 @@ export type PhotoCollageSection = BodySectionBase & {
   title: string | null
   intro: string | null
   items: PhotoCollageItem[]
+  /** A small upper-case line over the heading; absent or null: none. */
+  eyebrow?: string | null
+  /** The whole list's link beside the heading; absent or null: none. */
+  more?: LayoutLink | null
 } & PhotoCollageSettings

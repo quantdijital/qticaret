@@ -11630,6 +11630,19 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty, none is drawn.",
+        "more": "See all link",
+        "moreHint": "A link with an arrow beside the heading (e.g. All routes). Empty, none is drawn.",
+        "subtitle": "Photo {{number}} small line",
+        "subtitleHint": "A small single line under the name on the card (e.g. Mountain • Adventure).",
+        "card": {
+          "label": "Card look",
+          "term": "card",
+          "hint": "A name plate on the photo, or a white card with the name, a small line and an arrow under it.",
+          "over": "Plate on the photo",
+          "below": "White card"
         }
       },
       "program": {
