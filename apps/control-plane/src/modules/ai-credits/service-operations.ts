@@ -8,8 +8,7 @@ import { AI_OPERATION_TTL_SECONDS, AI_TASK_CREDITS, aiCallCap } from "@qticaret/
 import type { AiCreditCapability, AiCreditTask } from "@qticaret/types/control-plane"
 import { istanbulDay } from "../../lib/billing/days"
 import { istanbulMonth, splitCharge } from "../../lib/ai-credits/period"
-import { AI_DAILY_CAP_DEFAULT } from "../../lib/ai-credits/settings"
-import { STALE, addEntries, isStale, rowsOf } from "./sql"
+import { STALE, addEntries, isStale, platformValues, rowsOf } from "./sql"
 import type { Executor, Stale, WalletClock } from "./sql"
 import { AiCreditGrants } from "./service-grants"
 
@@ -153,7 +152,7 @@ export class AiCreditOperations extends AiCreditGrants {
         credits,
         day,
         credits,
-        AI_DAILY_CAP_DEFAULT,
+        (await platformValues(manager)).dailyCap,
       ]
     )
     if (!charged) {

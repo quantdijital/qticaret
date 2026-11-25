@@ -1,5 +1,6 @@
 import { MedusaError, generateEntityId } from "@medusajs/framework/utils"
 import type { AiCreditBucket, AiCreditEntryKind } from "./models/entry"
+import { AI_DAILY_CAP_DEFAULT, AI_PURCHASED_LIFETIME_MONTHS } from "../../lib/ai-credits/settings"
 
 /** The transaction's connection as the module's raw statements use it. */
 export interface Executor {
@@ -44,6 +45,30 @@ export interface EntryRow {
   note?: string | null
   actor: string
   at: Date
+}
+
+/** The platform's values a wallet's change reads (adr/0085 K6, K7). */
+export interface PlatformValues {
+  dailyCap: number
+  lifetimeMonths: number
+}
+
+/**
+ * The day's cap and the bought credits' life as the owner set them, read
+ * on the change's own connection (so inside its transaction); the
+ * defaults while none were saved.
+ */
+export async function platformValues(manager: Executor): Promise<PlatformValues> {
+  const [row] = await rowsOf<{ daily_cap: number; purchased_lifetime_months: number }>(
+    manager,
+    `SELECT daily_cap, purchased_lifetime_months FROM ai_credit_setting
+      WHERE key = 'platform' AND deleted_at IS NULL`,
+    []
+  )
+  return {
+    dailyCap: row?.daily_cap ?? AI_DAILY_CAP_DEFAULT,
+    lifetimeMonths: row?.purchased_lifetime_months ?? AI_PURCHASED_LIFETIME_MONTHS,
+  }
 }
 
 /** A whole number of credits within a Postgres integer; anything else is a programming error. */

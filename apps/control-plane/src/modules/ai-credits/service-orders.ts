@@ -30,7 +30,7 @@ export interface AiCreditOrderRow {
   decided_at: Date | null
 }
 
-const ORDER_COLUMNS = `id, tenant_id, pack_id, pack_name, credits, amount, currency, status, method,
+export const ORDER_COLUMNS = `id, tenant_id, pack_id, pack_name, credits, amount, currency, status, method,
   reference, requested_by, decided_by, requested_at, decided_at`
 
 export interface OrderPayment {

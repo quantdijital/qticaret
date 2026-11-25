@@ -1,6 +1,7 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
 import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
 import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
+import { AI_ROUTE_MIDDLEWARES } from "./http/ai-routes"
 import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
 import { csrfProtection } from "./http/csrf"
@@ -98,5 +99,6 @@ export default defineMiddlewares({
     ...TENANT_ROUTE_MIDDLEWARES,
     ...VAULT_ROUTE_MIDDLEWARES,
     ...FLEET_ROUTE_MIDDLEWARES,
+    ...AI_ROUTE_MIDDLEWARES,
   ],
 })
