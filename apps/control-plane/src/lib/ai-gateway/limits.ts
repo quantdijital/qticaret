@@ -133,6 +133,14 @@ export const AI_GATEWAY_MAX_IN_FLIGHT_PER_SHOP = 4
 export const AI_GATEWAY_MAX_IN_FLIGHT = 32
 
 /**
+ * Bodies read at once, before any signature is checked (second security
+ * review of P3b, N2; body-reads.ts): whoever sends them, at most 16 calls'
+ * bytes (up to 6 MB each, ~96 MB) are held in this process while they
+ * arrive. One more is answered 503 `unavailable` and its body never kept.
+ */
+export const AI_GATEWAY_MAX_BODY_READS = 16
+
+/**
  * How long a call's body may take to arrive (O2): past it the request is
  * answered 408 and its connection closed, before the signature is checked.
  */
