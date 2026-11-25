@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useRef, useState } from "react"
 import { AI_KEY } from "@/features/ai/api/ai"
+import { AI_CREDITS_KEY } from "@/features/ai/api/credits"
 import {
   acceptSuggestion,
   dismissSuggestion,
@@ -26,7 +27,13 @@ export interface AiAsk {
 }
 
 // The services the backend no longer offers for the task: the picker and the hint read them again (§12)
-const STALE_SERVICES = new Set(["ai.no_service", "ai.service_unavailable"])
+const STALE_SERVICES = new Set([
+  "ai.no_service",
+  "ai.service_unavailable",
+  "ai.platform_unavailable",
+])
+// The platform's wallet moved (adr/0085): the credits card reads it again
+const CREDIT_STATES = new Set(["ai.credits_exhausted", "ai.credits_daily_cap"])
 
 const asFailure = (error: unknown): Partial<AiFailure> =>
   typeof error === "object" && error !== null ? error : {}
@@ -69,6 +76,8 @@ export function useAiSuggestion(task: string, entity: AiEntity) {
         }
         if (typeof failure.code === "string" && STALE_SERVICES.has(failure.code)) {
           void queryClient.invalidateQueries({ queryKey: AI_KEY })
+        } else if (typeof failure.code === "string" && CREDIT_STATES.has(failure.code)) {
+          void queryClient.invalidateQueries({ queryKey: AI_CREDITS_KEY })
         }
         setState({ status: "error", failure: error, service, alternatives })
       }

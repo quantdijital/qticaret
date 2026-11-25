@@ -53,6 +53,9 @@ export type AiCreditsWallet = Extract<AiCreditsAnswer, { available: true }>
 
 export const AI_CREDITS_KEY = [...AI_KEY, "credits"] as const
 
+/** The platform's credits as a service (`GET /admin/ai/services`); "Platform kredisi". */
+export const PLATFORM_SERVICE = "platform"
+
 /** Who reads the wallet (`GET /admin/ai/credits`: owner, admin); others never ask. */
 export const mayReadCredits = (role: string | null | undefined): boolean =>
   role === "owner" || role === "admin"
