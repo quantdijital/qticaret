@@ -25,13 +25,26 @@ const MAX_HEADER_BYTES = 1024
 const DISPOSITION =
   /^content-disposition:[ \t]*form-data;[ \t]*name="([^"\r\n]{1,64})"(?:;[ \t]*filename="([^"\r\n]{0,200})")?[ \t]*$/i
 const TYPE = /^content-type:[ \t]*[a-z0-9!#$&^_.+-]+\/[a-z0-9!#$&^_.+-]+[ \t]*$/i
-const BOUNDARY = /;\s*boundary=(?:"([^"]{1,70})"|([^\s;"]{1,70}))/i
+/**
+ * The form's type (second security review of P3b, N3): exactly
+ * `multipart/form-data` and one parameter, its `boundary` (RFC 2046: 1–70
+ * characters), as a token or a quoted string; a second `boundary`, one
+ * inside another parameter's quotes or any other parameter is refused, so
+ * the gateway and the provider cannot read the form apart.
+ */
+const FORM_TYPE =
+  /^multipart\/form-data[ \t]*;[ \t]*boundary=(?:"([0-9a-z'()+_,\-./:=? ]{0,69}[0-9a-z'()+_,\-./:=?])"|([0-9a-z'+_\-.]{1,70}))[ \t]*$/i
+const TOKEN = /^[0-9a-z'+_\-.]+$/i
 
-/** The form's boundary as its type names it, or null. */
+/** The form's boundary as its type names it, or null for a type not exactly a form's. */
 export const boundaryOf = (contentType: string): string | null => {
-  const match = BOUNDARY.exec(contentType)
+  const match = FORM_TYPE.exec(contentType)
   return match ? (match[1] ?? match[2] ?? null) : null
 }
+
+/** The type the provider is sent: the form's, written by the gateway with the boundary read. */
+export const formTypeOf = (boundary: string): string =>
+  `multipart/form-data; boundary=${TOKEN.test(boundary) ? boundary : `"${boundary}"`}`
 
 interface Part {
   name: string

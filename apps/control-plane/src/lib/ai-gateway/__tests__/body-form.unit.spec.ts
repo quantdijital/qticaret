@@ -112,4 +112,45 @@ describe("a Photoroom form's parts (P3b review D1)", () => {
     const long = multipartBody({ "background.prompt": "x".repeat(40 * 1024) }, file("imageFile"))
     expect(send(long, "image_scene")).toMatchObject({ ok: false, code: "body_too_large" })
   })
+
+  // Second review N3: one boundary, no other parameter; the type sent is the gateway's
+  it("reads one boundary alone and writes the type the provider is sent", () => {
+    const form = multipartBody({ format: "png" }, file("image_file"))
+    const boundary = form.contentType.split("boundary=")[1] ?? ""
+    expect(send(form, "image_background")).toMatchObject({
+      ok: true,
+      contentType: `multipart/form-data; boundary=${boundary}`,
+    })
+    // Spelled otherwise, or quoted: the same form, its type written back plain
+    for (const type of [
+      `Multipart/Form-Data;BOUNDARY=${boundary}`,
+      `multipart/form-data; boundary="${boundary}"`,
+    ]) {
+      const result = send({ body: form.body, contentType: type }, "image_background")
+      expect(result).toMatchObject({
+        ok: true,
+        contentType: `multipart/form-data; boundary=${boundary}`,
+      })
+      expect(result.ok && result.body.equals(form.body)).toBe(true)
+    }
+    const refused = { ok: false, code: "body_refused", reason: "type_not_form" }
+    for (const type of [
+      `multipart/form-data; boundary=${boundary}; boundary=other`,
+      `multipart/form-data; boundary=other; boundary=${boundary}`,
+      `multipart/form-data; x="; boundary=${boundary}"; boundary=other`,
+      `multipart/form-data; x="; boundary=${boundary}"`,
+      `multipart/form-data; boundary=${boundary}; charset=utf-8`,
+      `multipart/form-data; charset=utf-8; boundary=${boundary}`,
+      `multipart/form-data; boundary=${boundary}"`,
+      `multipart/form-data; boundary="${boundary}`,
+      `multipart/form-data; boundary=`,
+      `multipart/form-data; boundary=${"b".repeat(71)}`,
+      `multipart/mixed; boundary=${boundary}`,
+    ]) {
+      expect([type, send({ body: form.body, contentType: type }, "image_background")]).toEqual([
+        type,
+        refused,
+      ])
+    }
+  })
 })

@@ -177,4 +177,43 @@ describe("the shop's bodies through the gateway's allow-list (P3b review C1)", (
       })
     }
   })
+
+  // Review N1: every type the shop's `imageInputOf` sends passes, in both protocols
+  it.each(["image/jpeg", "image/png", "image/webp"])(
+    "a %s picture as the shop sends it",
+    async (type) => {
+      const image = { mimeType: type, bytes: Buffer.from([0xff, 0xd8, 0x00, 0x52, 0x49]) }
+      const gemini = serviceOf("gemini")
+      const edits = await captured(
+        async (options) => {
+          const target = gemini.capabilities["image_edit"] as { backgrounds: readonly string[] }
+          await geminiImageEdit(options).edit({ image, background: target.backgrounds[0] })
+        },
+        gemini,
+        gemini.capabilities["image_edit"]
+      )
+      const deepseek = serviceOf("deepseek")
+      const vision = await captured(
+        (options) =>
+          openAiCompatibleText(options).complete({
+            system: "s",
+            data: "{}",
+            maxTokens: 200,
+            images: [image],
+          }),
+        deepseek,
+        deepseek.capabilities["vision"]
+      )
+      expect(edits.length * vision.length).toBeGreaterThan(0)
+      for (const body of edits) {
+        const sent = JSON.parse(body) as { contents: unknown }
+        expect(rebuilt(body, "gemini", "image_background", "image_edit")).toMatchObject({
+          contents: sent.contents,
+        })
+      }
+      for (const body of vision) {
+        expect(rebuilt(body, "deepseek", "image_alt_text", "vision")).toEqual(JSON.parse(body))
+      }
+    }
+  )
 })

@@ -1,5 +1,5 @@
 import { AI_TASK_LIMITS, maxImagesOf } from "./limits"
-import { BodyRefused, isRecord } from "./body-shared"
+import { BodyRefused, checkInlineImage, isRecord } from "./body-shared"
 import type { BodyInput, RebuiltBody } from "./body-shared"
 
 /**
@@ -31,7 +31,13 @@ const text = (value: unknown, reason: string): string => {
   return value
 }
 
-/** A part: text, or a picture inline as a `data:` URL (never an address a provider fetches). */
+// `data:<type>;base64,<bytes>`: the type checked against limits.ts's list, the bytes as base64
+const DATA_URL = /^data:([a-z0-9.+-]{1,64}\/[a-z0-9.+-]{1,64});base64,/
+
+/**
+ * A part: text, or a picture inline as a `data:` URL of a picture's type
+ * in base64 (security review N1); never an address a provider fetches.
+ */
 function partOf(part: unknown, pictures: Pictures): Record<string, unknown> {
   if (!isRecord(part)) {
     throw new BodyRefused("part_refused")
@@ -47,6 +53,11 @@ function partOf(part: unknown, pictures: Pictures): Record<string, unknown> {
   if (typeof url !== "string" || !url.startsWith("data:")) {
     throw new BodyRefused("image_not_inline")
   }
+  const inline = DATA_URL.exec(url)
+  if (inline === null) {
+    throw new BodyRefused("image_type_refused")
+  }
+  checkInlineImage(inline[1] ?? "", url.slice(inline[0].length))
   pictures.count += 1
   pictures.bytes += url.length
   return { type: "image_url", image_url: { url } }
@@ -148,7 +159,6 @@ export function chatBody(body: Record<string, unknown>, input: BodyInput): Rebui
   }
   const pictures: Pictures = { count: 0, bytes: 0 }
   const rebuilt: Record<string, unknown> = {
-    ...target.fixedBody,
     model: target.model,
     messages: messages.map((message) => messageOf(message, tools, pictures)),
     stream: false,
@@ -180,5 +190,10 @@ export function chatBody(body: Record<string, unknown>, input: BodyInput): Rebui
       rebuilt["tool_choice"] = choice
     }
   }
-  return { body: rebuilt, images: pictures.count, imageBytes: pictures.bytes }
+  // The target's fixed fields last: no field the shop sent is written over them
+  return {
+    body: { ...rebuilt, ...target.fixedBody },
+    images: pictures.count,
+    imageBytes: pictures.bytes,
+  }
 }
