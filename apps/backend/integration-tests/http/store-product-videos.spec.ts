@@ -1,7 +1,6 @@
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { PlanLimits } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import { STORE_VIDEO_LEAVES } from "../../src/api/http/media-routes"
 import { PRODUCT_VIDEOS } from "../../src/modules/platform-settings/features"
 import { createAdminUser } from "../helpers/admin"
@@ -95,7 +94,7 @@ medusaIntegrationTestRunner({
           "/hooks/control-plane/plan",
           signed(
             doc(nextSerial(), {
-              limits: Object.fromEntries(LIMIT_KEYS.map((key) => [key, null])) as PlanLimits,
+              limits: { ...NO_LIMITS },
               platform_flags: { [PRODUCT_VIDEOS]: on },
             })
           )

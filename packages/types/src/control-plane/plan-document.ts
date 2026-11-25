@@ -1,12 +1,14 @@
 import { z } from "zod"
 import {
   BILLING_PERIODS,
+  COUNTED_LIMIT_KEYS,
   FEATURE_FLAG_KEY,
-  LIMIT_KEYS,
+  GRANT_LIMIT_KEYS,
+  GRANT_LIMIT_MAX,
   SUBSCRIPTION_STATUSES,
   TENANT_STATUSES,
 } from "./registry"
-import type { LimitKey } from "./registry"
+import type { CountedLimitKey, GrantLimitKey } from "./registry"
 import { ed25519SignatureSchema, keyIdSchema, tenantIdSchema } from "./signature"
 
 /**
@@ -26,12 +28,28 @@ export const PLAN_DOCUMENT_VERSION = 1
 /** `null` is unlimited. */
 const limitValue = z.int().min(0).nullable()
 
-const limitsSchema = z.strictObject(
-  Object.fromEntries(LIMIT_KEYS.map((key) => [key, limitValue])) as Record<
-    LimitKey,
+/**
+ * A grant (`GRANT_LIMIT_KEYS`, adr/0085 K5): a whole number, never
+ * unlimited. Optional: absent is 0, so a shop takes documents with and
+ * without it while the fleet is updated (docs/08), and the control plane
+ * leaves a 0 out.
+ */
+const grantValue = z.int().min(0).max(GRANT_LIMIT_MAX).optional()
+
+const limitsSchema = z.strictObject({
+  ...(Object.fromEntries(COUNTED_LIMIT_KEYS.map((key) => [key, limitValue])) as Record<
+    CountedLimitKey,
     typeof limitValue
-  >
-)
+  >),
+  ...(Object.fromEntries(GRANT_LIMIT_KEYS.map((key) => [key, grantValue])) as Record<
+    GrantLimitKey,
+    typeof grantValue
+  >),
+})
+
+/** A grant as a document gives it: absent is 0. */
+export const grantOf = (limits: Pick<PlanLimits, GrantLimitKey>, key: GrantLimitKey): number =>
+  limits[key] ?? 0
 
 /** A package's name as the shop shows it (Ek C16): a line of plain text. */
 export const PACKAGE_NAME_MAX = 100

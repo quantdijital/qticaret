@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import type { LimitKey } from "@qticaret/types/control-plane"
+import type { CountedLimitKey } from "@qticaret/types/control-plane"
 import {
   countOrdersThisMonth,
   countProducts,
@@ -18,7 +18,8 @@ type Resolver = Pick<MedusaContainer, "resolve">
  * report's own counters (C13), so the panel, the checks and the control
  * plane read the same numbers. One exception: a team seat is a member or
  * an invitation still open, so invitations cannot run past the limit
- * before anyone accepts.
+ * before anyone accepts. A grant (the AI free credits, adr/0085 K5) is no
+ * use of the shop's: it is never counted here.
  */
 
 /** Open invitations: not expired (Medusa deletes one as it is accepted, workflows/staff/invites.ts). */
@@ -36,7 +37,11 @@ export interface Usage {
 }
 
 /** One limit's use, counted now; null where the shop keeps no count (custom domains, F16.7). */
-export async function countUsage(container: Resolver, key: LimitKey, now: Date): Promise<Usage> {
+export async function countUsage(
+  container: Resolver,
+  key: CountedLimitKey,
+  now: Date
+): Promise<Usage> {
   switch (key) {
     case "products":
       return { used: await countProducts(container) }
@@ -61,7 +66,7 @@ export async function countUsage(container: Resolver, key: LimitKey, now: Date):
 /** How long a read for the panel may be reused (the checks always count afresh). */
 export const USAGE_CACHE_MS = 10_000
 
-const cache = new Map<LimitKey, { at: number; usage: Usage }>()
+const cache = new Map<CountedLimitKey, { at: number; usage: Usage }>()
 // Forgotten per spec file of a bundled test run
 registerProcessCache(() => {
   cache.clear()
@@ -72,7 +77,11 @@ registerProcessCache(() => {
  * process (cheap counts, short cache, adr/0061 §5.3). The shop's own
  * guarded writes forget the entry (`forgetUsage`), so its screen sees them.
  */
-export async function cachedUsage(container: Resolver, key: LimitKey, now: Date): Promise<Usage> {
+export async function cachedUsage(
+  container: Resolver,
+  key: CountedLimitKey,
+  now: Date
+): Promise<Usage> {
   const kept = cache.get(key)
   if (kept && now.getTime() - kept.at >= 0 && now.getTime() - kept.at < USAGE_CACHE_MS) {
     return kept.usage
@@ -83,7 +92,7 @@ export async function cachedUsage(container: Resolver, key: LimitKey, now: Date)
 }
 
 /** Drops a kept count after a write that changes it. */
-export function forgetUsage(key?: LimitKey): void {
+export function forgetUsage(key?: CountedLimitKey): void {
   if (key === undefined) {
     cache.clear()
   } else {

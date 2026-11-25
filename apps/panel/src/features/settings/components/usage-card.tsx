@@ -27,6 +27,8 @@ const ICONS: Record<LimitKey, LucideIcon> = {
   storage_mb: HardDrive,
   llm_credits_per_month: Sparkles,
   custom_domains: Globe,
+  // Never a tile (`shownLimits` leaves grants out); listed as the record needs every key
+  ai_free_credits_per_month: Sparkles,
 }
 
 const TONES: Record<UseTone, StatusTone> = {

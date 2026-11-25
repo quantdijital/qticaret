@@ -777,6 +777,11 @@
             "summary": "AI services are connected with the shop's own key.",
             "description": "AI services are connected with the key of the shop's own account; the service bills the shop directly. Connections are under Settings > AI."
           },
+          "platform_credits": {
+            "label": "Platform credits",
+            "summary": "AI tasks run on the platform's credits; the shop needs no service key of its own.",
+            "description": "AI tasks run on the platform's credits; the shop needs no service key of its own. Your package may give free credits each month; more can be topped up."
+          },
           "storefront_search": {
             "label": "Search in your own words",
             "summary": "Shoppers can search the storefront in their own words.",
@@ -12716,7 +12721,8 @@
       "staff": "Team",
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content drafts",
-      "custom_domains": "Custom domains"
+      "custom_domains": "Custom domains",
+      "ai_free_credits_per_month": "Free AI credits"
     },
     "notice": {
       "products": {
@@ -12813,7 +12819,9 @@
       "notIncluded": "not included",
       "feature": {
         "productVideos": "Product videos",
-        "aiOwnKeys": "Your own AI key"
+        "aiOwnKeys": "Your own AI key",
+        "platformCredits": "Platform credits",
+        "platformCreditsMonthly": "Platform credits: {{value}} free a month"
       },
       "groups": {
         "totals": "Shop totals",

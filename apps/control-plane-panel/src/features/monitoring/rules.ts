@@ -1,5 +1,5 @@
-import { LIMIT_REGISTRY, LIMIT_WARNING_RATIO } from "@qticaret/types/control-plane"
-import type { LimitKey } from "@qticaret/types/control-plane"
+import { LIMIT_REGISTRY, LIMIT_WARNING_RATIO, isGrantLimit } from "@qticaret/types/control-plane"
+import type { CountedLimitKey, LimitKey } from "@qticaret/types/control-plane"
 import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { EffectiveLimit } from "@/features/tenants/api"
 import type { HealthState, TargetHealth, UsageCounts } from "./api"
@@ -22,8 +22,12 @@ export interface UseRow {
   tone: UseTone
 }
 
-/** Each limit's own count in the report; custom domains are the shop's record's. */
-const COUNT_OF: Record<LimitKey, keyof UsageCounts | null> = {
+/**
+ * Each limit's own count in the report; custom domains are the shop's
+ * record's. A grant (AI free credits, adr/0085 K5) is no use to count: the
+ * card leaves it out.
+ */
+const COUNT_OF: Record<CountedLimitKey, keyof UsageCounts | null> = {
   products: "products",
   orders_per_month: "orders_this_month",
   staff: "staff",
@@ -49,14 +53,17 @@ export function usageRows(
   counts: UsageCounts | null,
   customDomains: number
 ): UseRow[] {
-  return limits.map(({ key, value }) => {
+  return limits.flatMap(({ key, value }): UseRow[] => {
+    if (isGrantLimit(key)) {
+      return []
+    }
     const field = COUNT_OF[key]
     const used = field ? (counts ? counts[field] : null) : customDomains
     if (used === null) {
-      return { key, used: null, limit: value, ratio: null, tone: "ok" }
+      return [{ key, used: null, limit: value, ratio: null, tone: "ok" }]
     }
     const ratio = value === null ? null : value === 0 ? 1 : Math.min(used / value, 1)
-    return { key, used, limit: value, ratio, tone: toneOf(key, used, value) }
+    return [{ key, used, limit: value, ratio, tone: toneOf(key, used, value) }]
   })
 }
 

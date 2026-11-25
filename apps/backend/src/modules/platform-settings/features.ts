@@ -82,6 +82,9 @@ export const PRODUCT_VIDEOS = "catalog.product_videos"
 /** AI with the shop's own service key, "bring your own key" (adr/0071 §6). */
 export const AI_OWN_KEYS = "ai.own_keys"
 
+/** AI paid with the platform's credits through the control plane's gateway (adr/0085). */
+export const AI_PLATFORM_CREDITS = "ai.platform_credits"
+
 /**
  * AI on what customers wrote: a product's reviews summed up, a reply to a
  * review and an answer to a question drafted (adr/0071 §6, §10; Aşama 9).
@@ -236,6 +239,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "platform",
     labelKey: "qticaret.features.ai_own_keys.label",
     descriptionKey: "qticaret.features.ai_own_keys.description",
+  },
+  // adr/0085: a package's feature, off by default; no key of the shop's needed
+  [AI_PLATFORM_CREDITS]: {
+    default: false,
+    owner: "platform",
+    labelKey: "qticaret.features.ai_platform_credits.label",
+    descriptionKey: "qticaret.features.ai_platform_credits.description",
   },
   // adr/0071 §6, §10: customers' words go to the service, so the shop turns it on itself;
   // off, the review and question tasks are refused and their buttons are not drawn

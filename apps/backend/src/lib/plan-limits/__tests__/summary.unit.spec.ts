@@ -1,3 +1,4 @@
+import { LIMIT_KEYS, PLATFORM_FLAGS, isGrantLimit } from "@qticaret/types/control-plane"
 import { RESTRICTED_UNTRUSTED } from "../../../modules/control-plane/trusted-state"
 import { DEFAULT_PLAN_STATE, NO_LIMITS } from "../../../modules/control-plane/types"
 import { readPlanSummary } from "../summary"
@@ -76,7 +77,36 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
         used: null,
         max: null,
       },
+      // A document without the grant gives none (adr/0085 K5)
+      {
+        key: "ai_free_credits_per_month",
+        kind: "grant",
+        unit: "count",
+        monthly: true,
+        used: null,
+        max: 0,
+      },
     ])
+  })
+
+  it("shows the monthly AI credit grant as the document gives it, counting nothing", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<{ limits: object }> }
+    ).planState()
+    state.limits = { ...state.limits, ai_free_credits_per_month: 300 }
+
+    const summary = await readPlanSummary(container)
+
+    expect(summary.limits.find((limit) => limit.key === "ai_free_credits_per_month")).toEqual({
+      key: "ai_free_credits_per_month",
+      kind: "grant",
+      unit: "count",
+      monthly: true,
+      used: null,
+      max: 300,
+    })
   })
 
   it("lifts the package's name and the payment instruction out of the signed billing (Ek C16)", async () => {
@@ -160,6 +190,8 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
     expect(summary.features).toEqual([
       { key: "catalog.product_videos", enabled: false },
       { key: "ai.own_keys", enabled: true },
+      // adr/0085: off by default
+      { key: "ai.platform_credits", enabled: false },
     ])
   })
 
@@ -191,7 +223,12 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
 
   it("gives every feature its default without a control plane", async () => {
     const summary = await readPlanSummary(shop(false).container)
-    expect(summary.features.every((feature) => feature.enabled)).toBe(true)
+    expect(summary.features).toEqual(
+      PLATFORM_FLAGS.filter((flag) => flag.testOnly !== true).map((flag) => ({
+        key: flag.key,
+        enabled: flag.default,
+      }))
+    )
     expect(summary.features.map((feature) => feature.key)).not.toContain("test.platform_sample")
   })
 
@@ -200,7 +237,10 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
     expect(summary.managed).toBe(false)
     expect(summary.billing).toBeNull()
     expect(summary).toMatchObject({ package_name: null, payment_instruction: null })
-    expect(summary.limits.every((limit) => limit.max === null)).toBe(true)
+    // No limit, and no grant: free credits come only from a package
+    expect(summary.limits.map((limit) => limit.max)).toEqual(
+      LIMIT_KEYS.map((key) => (isGrantLimit(key) ? 0 : null))
+    )
   })
 
   it("keeps a count for a few seconds, then counts again", async () => {

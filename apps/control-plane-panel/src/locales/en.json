@@ -548,11 +548,13 @@
       "staff": "Staff",
       "storage_mb": "Storage",
       "llm_credits_per_month": "Content credits a month",
-      "custom_domains": "Custom domains"
+      "custom_domains": "Custom domains",
+      "ai_free_credits_per_month": "Free AI credits a month"
     },
     "unlimited": "Unlimited",
     "megabytes": "{{value}} MB",
-    "warnOnly": "Never blocked; a warning when passed."
+    "warnOnly": "Never blocked; a warning when passed.",
+    "grantHint": "Renewed each month, never carried over; 0: none."
   },
   "notes": {
     "title": "Notes",
@@ -743,6 +745,7 @@
       "invite_member": "This address already has an account.",
       "invite_pending": "This address has an open invitation; withdraw it first.",
       "last_owner": "The last active owner cannot lose the role or access. Make another member an owner first.",
+      "limit_grant_unlimited": "Free credits cannot be unlimited; enter a number from 0 to 100,000 (0: none).",
       "member_unknown": "The member was not found.",
       "mfa_already_enabled": "Two-step verification is already on.",
       "mfa_code_invalid": "The code is wrong; enter the app's current code.",
@@ -956,6 +959,7 @@
     "names": {
       "catalog_product_videos": "Product videos",
       "ai_own_keys": "AI with own service key (BYOK)",
+      "ai_platform_credits": "AI with platform credits",
       "test_platform_sample": "Sample platform feature"
     }
   },

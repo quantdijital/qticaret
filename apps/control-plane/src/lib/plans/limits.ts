@@ -1,8 +1,11 @@
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { LIMIT_KEYS, isGrantLimit } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
 
-/** A limit's value: a count or megabytes, null for no limit. */
+/** A limit's value: a count or megabytes, null for no limit (a grant is never null). */
 export type LimitValue = number | null
+
+/** What a key is without a value: no limit, but a grant (adr/0085 K5) gives nothing. */
+export const limitDefault = (key: LimitKey): LimitValue => (isGrantLimit(key) ? 0 : null)
 
 export type LimitValues = Record<LimitKey, LimitValue>
 
@@ -22,9 +25,11 @@ export interface EffectiveLimit {
   value: LimitValue
 }
 
-/** Every registry key with the value given, null (no limit) for the ones not given. */
+/** Every registry key with the value given, its default (`limitDefault`) for the ones not given. */
 export function fullLimits(given: Partial<Record<string, LimitValue>>): LimitValues {
-  return Object.fromEntries(LIMIT_KEYS.map((key) => [key, given[key] ?? null])) as LimitValues
+  return Object.fromEntries(
+    LIMIT_KEYS.map((key) => [key, given[key] ?? limitDefault(key)])
+  ) as LimitValues
 }
 
 export const overrideHolds = (override: OverrideLike, now: Date): boolean =>
@@ -33,7 +38,7 @@ export const overrideHolds = (override: OverrideLike, now: Date): boolean =>
 /**
  * What a shop may use, key by key (adr/0061 §2): its exception while it
  * holds, else its package's value. A shop without a package has no limit
- * (the shop's unmanaged mode, §3.3, says the same).
+ * (the shop's unmanaged mode, §3.3, says the same) and no grant.
  */
 export function effectiveLimits(
   packageLimits: LimitValues | null,
@@ -47,7 +52,7 @@ export function effectiveLimits(
       key,
       package: fromPackage,
       override: own ? own.value : undefined,
-      value: own ? own.value : (fromPackage ?? null),
+      value: own ? own.value : (fromPackage ?? limitDefault(key)),
     }
   })
 }

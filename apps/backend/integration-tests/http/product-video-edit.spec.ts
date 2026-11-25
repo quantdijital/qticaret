@@ -1,8 +1,7 @@
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { PlanLimits } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import { MAX_ATTEMPTS } from "../../src/lib/media/video/limits"
 import { PROCESSING_FAILED, afterFailure } from "../../src/lib/media/video/transcode-errors"
 import { MEDIA_MODULE } from "../../src/modules/media"
@@ -162,7 +161,7 @@ medusaIntegrationTestRunner({
             "/hooks/control-plane/plan",
             signed(
               doc(nextSerial(), {
-                limits: Object.fromEntries(LIMIT_KEYS.map((key) => [key, null])) as PlanLimits,
+                limits: { ...NO_LIMITS },
                 platform_flags: { [PRODUCT_VIDEOS]: on },
               })
             )

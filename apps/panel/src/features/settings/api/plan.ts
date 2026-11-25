@@ -3,8 +3,11 @@ import type { LimitKey } from "@qticaret/types/control-plane"
 import { useCan } from "@/features/auth/api/staff"
 import { sdk } from "@/lib/sdk"
 
-/** How a limit applies (adr/0061 §5.3): refuses past it, only warns, or not yet. */
-export type LimitKind = "block" | "warn" | "later"
+/**
+ * How a limit applies (adr/0061 §5.3): refuses past it, only warns, or not
+ * yet; `grant` is what the package gives a month (AI free credits, adr/0085).
+ */
+export type LimitKind = "block" | "warn" | "later" | "grant"
 
 export interface LimitStanding {
   key: LimitKey

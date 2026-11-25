@@ -1,8 +1,7 @@
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import sharp from "sharp"
-import { LIMIT_KEYS } from "@qticaret/types/control-plane"
-import type { PlanLimits } from "@qticaret/types/control-plane"
+import { NO_LIMITS } from "../../src/modules/control-plane/types"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
 import { PRODUCT_VIDEOS } from "../../src/modules/platform-settings/features"
@@ -215,7 +214,7 @@ medusaIntegrationTestRunner({
             "/hooks/control-plane/plan",
             signed(
               doc(nextSerial(), {
-                limits: Object.fromEntries(LIMIT_KEYS.map((key) => [key, null])) as PlanLimits,
+                limits: { ...NO_LIMITS },
                 platform_flags: { [PRODUCT_VIDEOS]: on },
               })
             )

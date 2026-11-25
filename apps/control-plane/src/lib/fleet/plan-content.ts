@@ -2,17 +2,19 @@ import { createHash } from "node:crypto"
 import { canonicalJsonDeep } from "@qticaret/server-kit"
 import {
   PLAN_DOCUMENT_VERSION,
+  isGrantLimit,
   planDocumentSchema,
   platformFlags,
 } from "@qticaret/types/control-plane"
 import type {
+  LimitKey,
   PlanBillingSummary,
   PlanDocument,
   PlanLimits,
   TenantStatus,
 } from "@qticaret/types/control-plane"
 import { effectiveLimits } from "../plans/limits"
-import type { LimitValues, OverrideLike } from "../plans/limits"
+import type { LimitValue, LimitValues, OverrideLike } from "../plans/limits"
 
 /**
  * A shop's plan document before its serial and time (adr/0061 §3.2, Ek
@@ -98,11 +100,15 @@ export interface PlanContentInput {
 
 /** The document's content for a shop on a package: its status, limits, flags and billing. */
 export function planContent(input: PlanContentInput): PlanContent {
+  // A grant of 0 is left out (absent is 0, adr/0085 K5): a shop's document
+  // does not change, nor does a shop not yet knowing the key refuse it
   const limits = Object.fromEntries(
-    effectiveLimits(input.packageLimits, input.limitOverrides, input.now).map((each) => [
-      each.key,
-      each.value,
-    ])
+    effectiveLimits(input.packageLimits, input.limitOverrides, input.now).flatMap(
+      (each): [LimitKey, LimitValue][] =>
+        isGrantLimit(each.key) && (each.value === null || each.value <= 0)
+          ? []
+          : [[each.key, each.value]]
+    )
   ) as PlanLimits
   const flags = effectiveFlags(input.packageFeatures, input.flagOverrides, input.now, input.nodeEnv)
   return {

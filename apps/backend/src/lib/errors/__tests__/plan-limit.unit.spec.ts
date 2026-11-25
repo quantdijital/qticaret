@@ -43,6 +43,14 @@ describe("PlanLimitError (adr/0061 Ek C14)", () => {
     // A made-up limit or a count that is not one is not this error
     for (const fake of [
       { qtErrorKind: "plan_limit", safeMessage: "plan.limit_reached", limit: "x", used: 1, max: 1 },
+      // A grant (adr/0085 K5) is never a refusal's limit
+      {
+        qtErrorKind: "plan_limit",
+        safeMessage: "plan.limit_reached",
+        limit: "ai_free_credits_per_month",
+        used: 1,
+        max: 1,
+      },
       {
         qtErrorKind: "plan_limit",
         safeMessage: "plan.limit_reached",

@@ -1,5 +1,5 @@
 import { LIMIT_WARNING_RATIO } from "@qticaret/types/control-plane"
-import type { BillingSummary, LimitStanding } from "@/features/settings/api/plan"
+import type { BillingSummary, LimitStanding, PlanSummary } from "@/features/settings/api/plan"
 
 /**
  * How a limit's use reads (adr/0061 §5.3, Ek C14), as the control plane's
@@ -56,9 +56,28 @@ export const packageName = (code: string): string => {
   return words.charAt(0).toLocaleUpperCase("tr-TR") + words.slice(1)
 }
 
-/** The rows Settings > Abonelik lists: every limit but the ones not applied yet. */
+/**
+ * The rows Settings > Abonelik lists: every limit but the ones not applied
+ * yet and the grants, which are no use to measure (the package's facts name them).
+ */
 export const shownLimits = (limits: readonly LimitStanding[]): LimitStanding[] =>
-  limits.filter((limit) => limit.kind !== "later")
+  limits.filter((limit) => limit.kind !== "later" && limit.kind !== "grant")
+
+/**
+ * The platform's AI credits as the package card names them (adr/0085): only
+ * while the package turns them on, with the month's free credits (0: none
+ * given); null otherwise, so nothing of them shows.
+ */
+export function platformCredits(plan: Pick<PlanSummary, "features" | "limits">): number | null {
+  const on = (plan.features ?? []).some(
+    (feature) => feature.key === "ai.platform_credits" && feature.enabled
+  )
+  if (!on) {
+    return null
+  }
+  const grant = plan.limits.find((limit) => limit.key === "ai_free_credits_per_month")
+  return grant?.max ?? 0
+}
 
 /** How many days before its due day an unpaid charge shows the payment strip (adr/0061 §7). */
 export const DUE_SOON_DAYS = 3

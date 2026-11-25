@@ -17,7 +17,7 @@ import type { StepProps } from "../field"
  * Step 3, the package (required: the setup refuses a shop without one,
  * Ek C10, since its plan document names it). Each package on sale as a
  * card of one height: its price and period, its trial and grace days and
- * its six limits.
+ * its limits.
  */
 export function PackageStep({ draft, change, problems }: StepProps) {
   const { t } = useTranslation()

@@ -90,6 +90,8 @@ medusaIntegrationTestRunner({
       expect(summary.features).toEqual([
         { key: "catalog.product_videos", enabled: true },
         { key: "ai.own_keys", enabled: true },
+        // adr/0085: off by default
+        { key: "ai.platform_credits", enabled: false },
       ])
     })
 

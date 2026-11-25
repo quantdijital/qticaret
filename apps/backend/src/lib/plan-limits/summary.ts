@@ -4,6 +4,8 @@ import {
   LIMIT_REGISTRY,
   LIMIT_WARNING_RATIO,
   PLATFORM_FLAGS,
+  grantOf,
+  isGrantLimit,
 } from "@qticaret/types/control-plane"
 import type {
   LimitEnforcement,
@@ -18,13 +20,16 @@ import { cachedUsage } from "./usage"
 
 export interface LimitStanding {
   key: LimitKey
-  /** `block` refuses the write past it, `warn` never does (orders), `later` is not applied yet. */
+  /**
+   * `block` refuses the write past it, `warn` never does (orders), `later` is
+   * not applied yet; `grant` is what the package gives a month (AI free credits).
+   */
   kind: LimitEnforcement
   unit: "count" | "mb"
   monthly: boolean
-  /** What the shop uses now; null where it keeps no count (custom domains, F16.7). */
+  /** What the shop uses now; null where it keeps no count (custom domains, F16.7; a grant). */
   used: number | null
-  /** What the package allows; null for no limit. */
+  /** What the package allows; null for no limit. A grant: its amount, 0 for none. */
   max: number | null
   /** Team seats: the open invitations counted in `used`. */
   pending?: number
@@ -106,6 +111,17 @@ export async function readPlanSummary(
   const limits = await Promise.all(
     LIMIT_KEYS.map(async (key): Promise<LimitStanding> => {
       const { enforcement, unit, monthly } = LIMIT_REGISTRY[key]
+      if (isGrantLimit(key)) {
+        // What the package gives a month (adr/0085 K5): nothing counted here, the wallet spends it
+        return {
+          key,
+          kind: enforcement,
+          unit,
+          monthly,
+          used: null,
+          max: state.managed ? grantOf(state.limits, key) : 0,
+        }
+      }
       const usage = await cachedUsage(container, key, now)
       return {
         key,

@@ -777,6 +777,11 @@
             "summary": "Yapay zekâ servislerine mağazanın kendi anahtarıyla bağlanılır.",
             "description": "Yapay zekâ servislerine mağazanın kendi hesabının anahtarıyla bağlanılır; kullanım ücretini servis doğrudan mağazaya yansıtır. Bağlantılar Ayarlar > Yapay zekâ'da."
           },
+          "platform_credits": {
+            "label": "Platform kredisi",
+            "summary": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez.",
+            "description": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez. Paketiniz her ay ücretsiz kredi verebilir; ek kredi yüklenebilir."
+          },
           "storefront_search": {
             "label": "Kendi cümlesiyle arama",
             "summary": "Müşteri vitrinde aradığını kendi cümlesiyle yazabilir.",
@@ -12716,7 +12721,8 @@
       "staff": "Ekip",
       "storage_mb": "Depolama",
       "llm_credits_per_month": "İçerik taslakları",
-      "custom_domains": "Özel alan adları"
+      "custom_domains": "Özel alan adları",
+      "ai_free_credits_per_month": "Ücretsiz yapay zekâ kredisi"
     },
     "notice": {
       "products": {
@@ -12813,7 +12819,9 @@
       "notIncluded": "dahil değil",
       "feature": {
         "productVideos": "Ürün videoları",
-        "aiOwnKeys": "Kendi yapay zekâ anahtarınız"
+        "aiOwnKeys": "Kendi yapay zekâ anahtarınız",
+        "platformCredits": "Platform kredisi",
+        "platformCreditsMonthly": "Platform kredisi: ayda {{value}} ücretsiz"
       },
       "groups": {
         "totals": "Mağaza geneli",

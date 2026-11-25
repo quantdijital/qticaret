@@ -1,5 +1,11 @@
 import { z } from "@medusajs/framework/zod"
-import { LIMIT_KEYS, TENANT_STATUSES, isPlatformFlag } from "@qticaret/types/control-plane"
+import {
+  GRANT_LIMIT_MAX,
+  LIMIT_KEYS,
+  TENANT_STATUSES,
+  isGrantLimit,
+  isPlatformFlag,
+} from "@qticaret/types/control-plane"
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { COMPANY_KINDS, CONTACT_ROLES, NOTE_MAX } from "../../../../lib/tenants/kinds"
 import { normalizePhone } from "../../../../lib/tenants/phone"
@@ -180,6 +186,14 @@ const expiresAt = z.iso
 export const PostOverride = z
   .object({ key: z.enum(LIMIT_KEYS), value: limitValue, reason, expires_at: expiresAt })
   .strict()
+  // A grant (adr/0085 K5) is a whole number up to its most: free credits are never unlimited
+  .refine(
+    (value) => !isGrantLimit(value.key) || (value.value !== null && value.value <= GRANT_LIMIT_MAX),
+    {
+      path: ["value"],
+      message: "cp.limit_grant_unlimited",
+    }
+  )
 export type PostOverrideType = z.infer<typeof PostOverride>
 
 /** A key of the shared platform flag list (Ek C9); any other is refused. */
