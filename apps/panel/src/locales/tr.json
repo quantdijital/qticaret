@@ -5688,8 +5688,7 @@
       "open_order": "Siparişi aç"
     },
     "history": {
-      "title": "Müşteri geçmişi",
-      "allOrders": "Tüm siparişleri"
+      "title": "Müşteri geçmişi"
     },
     "origin": {
       "title": "Sipariş kaynağı",

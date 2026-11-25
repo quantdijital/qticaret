@@ -5688,8 +5688,7 @@
       "open_order": "Open order"
     },
     "history": {
-      "title": "Customer history",
-      "allOrders": "All their orders"
+      "title": "Customer history"
     },
     "origin": {
       "title": "Order source",

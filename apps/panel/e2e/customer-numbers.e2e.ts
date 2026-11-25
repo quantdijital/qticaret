@@ -62,7 +62,9 @@ test("shows the customer's history beside an order", async ({ page, guard }) => 
   })
   await expect(card.getByTestId("customer-figures")).toBeVisible()
   await expect(card.getByText("Ortalama sepet")).toBeVisible()
-  await expect(card.getByRole("link", { name: "Tüm siparişleri" })).toHaveAttribute(
+  // The customer's other orders are linked once, from the customer card above
+  await expect(card.getByRole("link")).toHaveCount(0)
+  await expect(page.getByRole("link", { name: "Bu müşterinin diğer siparişleri" })).toHaveAttribute(
     "href",
     /\/orders\?customer=cus_/
   )
