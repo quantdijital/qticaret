@@ -23,6 +23,7 @@ import type {
   Translate,
   TrustBadgeView,
 } from "@qticaret/ui"
+import type { FooterLogos } from "./footer-logo"
 import { imageView } from "./image"
 import { menuLink, menuLinks } from "./menus"
 
@@ -44,7 +45,8 @@ export interface FooterRowsParts {
   menus: readonly StoreMenu[]
   contact: ContactView
   social: readonly SocialLinkView[]
-  logo: ImageView | null
+  /** The shop's logo for each ground a row may stand on. */
+  logos: FooterLogos
   name: string
   /** The shop's registered title, for the newsletter's consent sentence. */
   title: string
@@ -97,7 +99,11 @@ type RawRow = Partial<
 >
 
 /** A block's own fields filled in; null when the shop has nothing for it. */
-function bodyOf(block: StoreFooterBlock, parts: FooterRowsParts): Body | null {
+function bodyOf(
+  block: StoreFooterBlock,
+  parts: FooterRowsParts,
+  logo: ImageView | null
+): Body | null {
   const title = words((block as { title?: unknown }).title)
   switch (block.type) {
     case "text": {
@@ -119,7 +125,7 @@ function bodyOf(block: StoreFooterBlock, parts: FooterRowsParts): Body | null {
     case "brand":
       return {
         type: "brand",
-        logo: on(block.logo, true) ? parts.logo : null,
+        logo: on(block.logo, true) ? logo : null,
         name: parts.name,
         about: words(block.about)?.slice(0, FOOTER_ROWS_LIMITS.about) ?? null,
         social: on(block.social, false) ? [...parts.social] : [],
@@ -190,7 +196,11 @@ function bodyOf(block: StoreFooterBlock, parts: FooterRowsParts): Body | null {
   }
 }
 
-function blockOf(raw: unknown, parts: FooterRowsParts): FooterBlockView | null {
+function blockOf(
+  raw: unknown,
+  parts: FooterRowsParts,
+  logo: ImageView | null
+): FooterBlockView | null {
   if (typeof raw !== "object" || raw === null) {
     return null
   }
@@ -198,7 +208,7 @@ function blockOf(raw: unknown, parts: FooterRowsParts): FooterBlockView | null {
   if (typeof block.id !== "string" || !Number.isInteger(block.at)) {
     return null
   }
-  const body = bodyOf(block, parts)
+  const body = bodyOf(block, parts, logo)
   return body
     ? {
         id: block.id,
@@ -209,8 +219,20 @@ function blockOf(raw: unknown, parts: FooterRowsParts): FooterBlockView | null {
     : null
 }
 
-/** The rows as the theme draws them; none printed (a backend before them): none. */
-export function footerRowsOf(rows: unknown, parts: FooterRowsParts): FooterRowView[] {
+/** The logo for a row's ground: the stage's dark one, the main colour's as it reads, else light. */
+const rowLogo = (logos: FooterLogos, ground: string, dark: boolean): ImageView | null =>
+  ground === "stage" || (ground === "inherit" && dark)
+    ? logos.dark
+    : ground === "primary"
+      ? logos.primary
+      : logos.light
+
+/**
+ * The rows as the theme draws them; none printed (a backend before them):
+ * none. `dark`: the footer stands on the stage, so a row on its ground
+ * (`inherit`) is dark too and its brand block takes the dark-ground logo.
+ */
+export function footerRowsOf(rows: unknown, parts: FooterRowsParts, dark = false): FooterRowView[] {
   if (!Array.isArray(rows)) {
     return []
   }
@@ -220,6 +242,8 @@ export function footerRowsOf(rows: unknown, parts: FooterRowsParts): FooterRowVi
     }
     const row = raw as RawRow
     const layout = pick(FOOTER_ROW_LAYOUTS, row.layout, FOOTER_ROW_DEFAULTS.layout)
+    const ground = pick(FOOTER_ROW_SETTINGS.ground, row.ground, FOOTER_ROW_DEFAULTS.ground)
+    const logo = rowLogo(parts.logos, ground, dark)
     const saved = Array.isArray(row.columns) ? (row.columns as unknown[]) : []
     const columns = Array.from({ length: footerRowColumns(layout) }, (_, index) => {
       const column = saved[index] as { blocks?: unknown } | undefined
@@ -227,14 +251,14 @@ export function footerRowsOf(rows: unknown, parts: FooterRowsParts): FooterRowVi
       return {
         blocks: blocks
           .slice(0, FOOTER_ROWS_LIMITS.perColumn)
-          .flatMap((block: unknown) => blockOf(block, parts) ?? []),
+          .flatMap((block: unknown) => blockOf(block, parts, logo) ?? []),
       }
     })
     return [
       {
         id: typeof row.id === "string" ? row.id : `row${String(rows.indexOf(raw))}`,
         layout,
-        ground: pick(FOOTER_ROW_SETTINGS.ground, row.ground, FOOTER_ROW_DEFAULTS.ground),
+        ground,
         space: pick(FOOTER_ROW_SETTINGS.space, row.space, FOOTER_ROW_DEFAULTS.space),
         align: pick(FOOTER_ROW_SETTINGS.align, row.align, FOOTER_ROW_DEFAULTS.align),
         phoneColumns: pick(

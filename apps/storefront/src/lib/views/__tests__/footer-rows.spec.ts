@@ -40,7 +40,7 @@ const PARTS: FooterRowsParts = {
     mapHref: null,
   },
   social: [{ label: "Instagram", href: "https://www.instagram.com/ornek", network: "instagram" }],
-  logo: null,
+  logos: { light: null, dark: null, primary: null },
   name: "Örnek Atölye",
   title: "Örnek Atölye Ltd. Şti.",
   trustBadges: [

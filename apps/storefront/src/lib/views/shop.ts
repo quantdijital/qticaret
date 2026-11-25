@@ -35,7 +35,7 @@ import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
-import { footerLogoOf } from "./footer-logo"
+import { footerLogosOf } from "./footer-logo"
 import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
@@ -187,7 +187,7 @@ export async function shopView(): Promise<ShopView> {
       tree: () => withPicturesOf(navigation(categories, paths, pictures), menu),
     }),
     // The free rows footer's blocks take the details read here (adr/0070: no request of their own)
-    footerBar: footerBarOf(layout.main, t, footerLogoOf(site.shop), {
+    footerBar: footerBarOf(layout.main, t, footerLogosOf(site.shop, theme.colors.primary), {
       menus,
       contact,
       social,
