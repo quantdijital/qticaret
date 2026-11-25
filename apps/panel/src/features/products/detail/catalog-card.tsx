@@ -4,8 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
-import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
+import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { findingsNote } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
@@ -23,6 +22,7 @@ import type { CatalogShown, CatalogValues } from "./catalog-fields"
 import { PRODUCT_SECTIONS } from "./sections"
 import { SideCard } from "./side-card"
 import type { SideRow } from "./side-card"
+import { SideForm } from "./side-form"
 
 const catalogValuesOf = (catalog: ProductCatalog): CatalogValues => ({
   condition: catalog.condition,
@@ -54,7 +54,7 @@ function bookingModeOf(
 
 const refused = (failure: unknown) => (failure as { status?: unknown } | null)?.status === 400
 
-function CatalogDialog({
+function CatalogForm({
   productId,
   catalog,
   shown,
@@ -117,43 +117,36 @@ function CatalogDialog({
   })
 
   return (
-    <FormDialog
-      open
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      title={t("products.catalog.card")}
-      description={t("products.catalog.hint")}
+    <SideForm
+      label={t("products.catalog.card")}
+      hint={t("products.catalog.hint")}
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}
+      onCancel={onClose}
     >
-      <DialogBody>
-        <CatalogFields
-          form={form}
-          catalog={catalog}
-          shown={shown}
-          giftFailure={giftFailure}
-          onGiftChange={() => {
-            setGiftFailure(null)
+      <CatalogFields
+        form={form}
+        catalog={catalog}
+        shown={shown}
+        giftFailure={giftFailure}
+        onGiftChange={() => {
+          setGiftFailure(null)
+        }}
+      />
+      {confirming ? (
+        <BookingOffConfirm
+          productId={productId}
+          onCancel={() => {
+            setConfirming(null)
+          }}
+          onConfirm={() => {
+            send(confirming)
+            setConfirming(null)
           }}
         />
-        {confirming ? (
-          <BookingOffConfirm
-            productId={productId}
-            onCancel={() => {
-              setConfirming(null)
-            }}
-            onConfirm={() => {
-              send(confirming)
-              setConfirming(null)
-            }}
-          />
-        ) : null}
-      </DialogBody>
-    </FormDialog>
+      ) : null}
+    </SideForm>
   )
 }
 
@@ -202,7 +195,7 @@ function catalogRows(t: TFunction, catalog: ProductCatalog, shown: CatalogShown)
  * (F3.1), whether the product is sold to adults only and is outside the
  * right of withdrawal (F13.4, F13.6), and whether it sells gift cards
  * (adr/0025 Ek 2026-11-03): a line each in the product page's narrow
- * column, "Düzenle" opens them in a dialog.
+ * column; "Düzenle" turns the card into their form.
  */
 export function CatalogCard({
   productId,
@@ -214,7 +207,10 @@ export function CatalogCard({
 }) {
   const { t } = useTranslation()
   const catalog = useQuery(productCatalogQuery(productId))
-  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
+  useRevealTarget(PRODUCT_SECTIONS.catalog, () => {
+    setEditing(true)
+  })
   const flags = {
     kinds: useFeature("catalog.non_physical"),
     restricted: useFeature("catalog.restricted"),
@@ -239,20 +235,19 @@ export function CatalogCard({
       title={t("products.catalog.card")}
       rows={catalogRows(t, catalog.data, shown)}
       findings={findings && findingsNote(t, findings)}
+      editing={editing}
       onEdit={() => {
-        setOpen(true)
+        setEditing(true)
       }}
     >
-      {open ? (
-        <CatalogDialog
-          productId={productId}
-          catalog={catalog.data}
-          shown={shown}
-          onClose={() => {
-            setOpen(false)
-          }}
-        />
-      ) : null}
+      <CatalogForm
+        productId={productId}
+        catalog={catalog.data}
+        shown={shown}
+        onClose={() => {
+          setEditing(false)
+        }}
+      />
     </SideCard>
   )
 }

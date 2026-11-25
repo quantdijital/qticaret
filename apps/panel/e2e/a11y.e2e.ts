@@ -106,7 +106,7 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   } else {
     await expect(page.locator("#product-variant-codes")).toBeVisible()
   }
-  // The media dialog the gallery's drop zone opens, and a narrow column card's dialog. The
+  // The media dialog the gallery's drop zone opens, and a narrow column card's form. The
   // zone and the dialog say "Görsel ya da video ekle" while the product takes a video (adr/0069)
   await page
     .getByRole("button", { name: /^Görsel( ya da video)? ekle: / })
@@ -116,8 +116,9 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
   await page.keyboard.press("Escape")
+  // A narrow column card, edited in place (2026-11-25)
   await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
-  await expect(page.getByRole("dialog", { name: "Katalog bilgileri" })).toBeVisible()
+  await expect(page.getByRole("form", { name: "Katalog bilgileri" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
 })
 

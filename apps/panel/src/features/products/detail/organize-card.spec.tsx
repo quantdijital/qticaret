@@ -93,7 +93,7 @@ describe("OrganizeCard's collection", () => {
     renderCard()
 
     await userEvent.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     expect(within(dialog).getByTestId("detail-collection-value")).toHaveTextContent("Yaz Seçkisi")
     await userEvent.click(within(dialog).getByRole("button", { name: "pick detail-collection" }))
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
@@ -105,7 +105,7 @@ describe("OrganizeCard's collection", () => {
     })
   })
 
-  it("offers no collection, on its line or in the dialog, while the shop has collections off", async () => {
+  it("offers no collection, on its line or in the form, while the shop has collections off", async () => {
     fetchMock.mockImplementation((url: string) =>
       Promise.resolve(
         url === "/admin/features"
@@ -126,7 +126,7 @@ describe("OrganizeCard's collection", () => {
     })
     expect(screen.queryByText("Koleksiyon")).toBeNull()
     await userEvent.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     expect(within(dialog).queryByTestId("detail-collection-value")).toBeNull()
     expect(within(dialog).getByTestId("detail-brand-value")).toBeInTheDocument()
   })
@@ -135,7 +135,7 @@ describe("OrganizeCard's collection", () => {
     renderCard()
 
     await userEvent.click(screen.getByRole("button", { name: /düzenle/i }))
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("form")
     await userEvent.click(within(dialog).getByRole("button", { name: "clear detail-collection" }))
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 

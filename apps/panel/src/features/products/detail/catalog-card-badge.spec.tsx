@@ -62,7 +62,7 @@ function renderCard() {
 
 async function openDialog() {
   await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+  return screen.getByRole("form", { name: "Katalog bilgileri" })
 }
 
 describe("CatalogCard: the product's own badge", () => {
