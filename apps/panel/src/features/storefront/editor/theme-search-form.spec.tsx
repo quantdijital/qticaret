@@ -121,6 +121,14 @@ describe("the theme panel's search box group", () => {
     expect(onChange).toHaveBeenLastCalledWith(withForm({ date_words: true }))
   })
 
+  it("offers the boxed fields off, as drawn before, and saves them on", () => {
+    const onChange = draw(THEME)
+    const boxed = screen.getByLabelText("Kutulu alanlar")
+    expect(boxed).not.toBeChecked()
+    fireEvent.click(boxed)
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ boxed_fields: true }))
+  })
+
   it("hides the categories' look while the categories are off", () => {
     const onChange = draw(withForm({ show_category: false }))
     expect(screen.queryByText("Kategoriler nasıl görünsün")).toBeNull()

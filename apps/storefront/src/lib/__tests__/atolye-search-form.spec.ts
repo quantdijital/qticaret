@@ -13,6 +13,7 @@ import type { SearchFormSettings } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { EMPTY_VALUES, searchFormView } from "@/lib/views/search-form"
 import type { SearchFormSource } from "@/lib/views/search-form"
+import { atolyeCss } from "@/test/atolye-css"
 import { renderPage } from "@/test/theme-render"
 
 /**
@@ -111,6 +112,15 @@ describe("Atölye's search box", () => {
     const plain = home([box(form({ attribute_key: null, show_dates: false, show_people: false }))])
     expect(names(plain)).toEqual(["q", "kategori"])
     expect(plain).toContain('type="search"')
+  })
+
+  it("boxes each field apart only when the shop turns boxed fields on", () => {
+    expect(home([box(form())])).not.toContain("data-fields")
+    expect(form().boxed).toBeUndefined()
+    const html = home([box(form({ boxed_fields: true }))])
+    expect(html).toContain('data-fields="boxed"')
+    expect(names(html)).toEqual(names(home([box(form())])))
+    expect(atolyeCss("styles.css")).toContain('@import "./search-boxed.css";')
   })
 
   it("offers the categories as tabs over the bar: a radio group, the empty choice first", () => {

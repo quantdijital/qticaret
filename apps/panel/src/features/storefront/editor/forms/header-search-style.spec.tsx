@@ -129,3 +129,24 @@ describe("the header search's look", () => {
     }
   })
 })
+
+describe("the one-row header's tools", () => {
+  it("offers round (today's) and plain on the one-row header only, and saves plain", async () => {
+    const user = userEvent.setup()
+    const inline = switchVariant(centered, "inline") as HeaderBarSection
+    const changes = renderBar(inline)
+    await openGroup(user, /Menü/)
+    const steps = document.getElementById("mainheader-tools-style")
+    expect(steps).not.toBeNull()
+    expect(
+      within(steps as HTMLElement).getByRole("radio", { name: "Yuvarlak çerçeveli" })
+    ).toBeChecked()
+    await user.click(screen.getByRole("radio", { name: "Sade, düğmeli" }))
+    expect(changes.at(-1)).toMatchObject({ variant: "inline", tools_style: "plain" })
+  })
+
+  it("is not offered on the other headers", () => {
+    renderBar(centered)
+    expect(document.getElementById("mainheader-tools-style")).toBeNull()
+  })
+})

@@ -11,6 +11,7 @@ describe("search form settings", () => {
       show_people: true,
       flexible_month: true,
       date_words: false,
+      boxed_fields: false,
       category_style: "select",
       placeholder: null,
     })
@@ -38,6 +39,7 @@ describe("search form settings", () => {
         show_people: false,
         flexible_month: false,
         date_words: true,
+        boxed_fields: true,
         category_style: "tabs",
         placeholder: "  Nereye gitmek istersiniz?  ",
       })
@@ -48,6 +50,7 @@ describe("search form settings", () => {
       show_people: false,
       flexible_month: false,
       date_words: true,
+      boxed_fields: true,
       category_style: "tabs",
       placeholder: "Nereye gitmek istersiniz?",
     })

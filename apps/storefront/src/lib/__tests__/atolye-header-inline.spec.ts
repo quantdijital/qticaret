@@ -68,6 +68,29 @@ describe("the one-row header", () => {
     expect(before).toHaveLength(0)
   })
 
+  it("draws plain tools and the action pill only when the shop chose them", () => {
+    const round = page({
+      headerBar: { ...bar, highlight: { label: "Tur planla", path: "/iletisim" } },
+    })
+    expect(round.querySelector("[data-tools]")).toBeNull()
+    expect(round.body.innerHTML).not.toContain("Tur planla")
+
+    const plain = page({
+      headerBar: {
+        ...bar,
+        toolsStyle: "plain",
+        highlight: { label: "Tur planla", path: "/iletisim" },
+      },
+    })
+    const header = plain.querySelector('[data-gf-head][data-variant="inline"]')
+    expect(header?.getAttribute("data-tools")).toBe("plain")
+    expect(header?.querySelector('a[href="/hesap"]')?.className).toContain("gf-icon-btn")
+    const pill = header?.querySelector('a.gf-btn[href="/iletisim"]')
+    expect(pill?.textContent).toContain("Tur planla")
+    // Favourites leave the desktop row; the phone row still has them
+    expect(header?.querySelector('a[href="/hesap/favoriler"]')?.className).toContain("lg:hidden")
+  })
+
   it("leaves the other headers' markup as it was", () => {
     const standard = renderFrame(
       atolyeTheme,
