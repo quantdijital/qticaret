@@ -33,6 +33,7 @@ import {
 import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
 import { wholesaleCheckoutBlocked } from "@/lib/views/cart-wholesale"
 import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
+import { shippedPromises } from "@/lib/views/product-shipping"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { cartBooking } from "@/lib/booking/store"
 import { hasBookingLines, holdViewOf, withBookingRead } from "@/lib/views/booking"
@@ -175,7 +176,8 @@ export default async function CartPage({
           locked,
           shipping: extras.shipping ?? null,
           offers: extras.offers ?? [],
-          trust: shared.trust_badges,
+          // Nothing to ship: no delivery promise either, as on the product page
+          trust: shippedPromises(ships, shared.trust_badges),
           // A payment link's cart takes nothing more (adr/0051)
           upsell: locked ? null : (extras.upsell ?? null),
         }}
