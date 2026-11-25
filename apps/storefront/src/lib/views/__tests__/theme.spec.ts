@@ -85,6 +85,8 @@ describe("themeSettings", () => {
       media_ground: "page",
       density: "compact",
       motion: "lively",
+      page_width: "narrow",
+      accent_ink: "light",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -149,6 +151,9 @@ describe("themeSettings", () => {
       density: "airy",
       // adr/0067 Ek 2026-11-18: today's motion
       motion: "calm",
+      // adr/0067 Ek 2026-11-25: the page width and the accent words as before
+      page_width: "standard",
+      accent_ink: "auto",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -374,6 +379,8 @@ describe("themeView", () => {
         media_ground: "well",
         density: "airy",
         motion: "calm",
+        page_width: "standard",
+        accent_ink: "auto",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")

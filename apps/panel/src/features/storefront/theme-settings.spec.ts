@@ -63,6 +63,8 @@ const SAVED: ThemeSettings = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -84,6 +86,8 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       media_ground: "well",
       density: "airy",
       motion: "calm",
+      page_width: "standard",
+      accent_ink: "auto",
     })
   })
 })
@@ -140,6 +144,8 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       media_ground: "well",
       density: "airy",
       motion: "calm",
+      page_width: "standard",
+      accent_ink: "auto",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })

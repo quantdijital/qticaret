@@ -68,6 +68,18 @@ describe("the one-row header", () => {
     expect(before).toHaveLength(0)
   })
 
+  it("draws the tools as round icons only when the shop hides their words, names kept", () => {
+    const words = page().querySelector('[data-gf-head][data-variant="inline"]')
+    expect(words?.hasAttribute("data-tools")).toBe(false)
+
+    const icons = page({ headerBar: { ...bar, toolLabels: "hide" } }).querySelector(
+      '[data-gf-head][data-variant="inline"]'
+    )
+    expect(icons?.getAttribute("data-tools")).toBe("icons")
+    const cart = icons?.querySelector('a[href="/sepet"]')
+    expect(cart?.getAttribute("aria-label")).toBeTruthy()
+  })
+
   it("leaves the other headers' markup as it was", () => {
     const standard = renderFrame(
       atolyeTheme,

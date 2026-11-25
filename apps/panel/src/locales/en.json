@@ -9804,6 +9804,24 @@
               "lively": "Lively"
             },
             "hint": "Calm is the theme's own short transitions. Lively zooms a product card's photo slightly and lifts the card while pointed at, eases sections and products in as the page scrolls, fades images in as they load and presses buttons down a little. A visitor who asks for less motion sees none of it."
+          },
+          "page_width": {
+            "label": "Page width",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standard",
+              "narrow": "Narrow"
+            },
+            "hint": "The column the content sits in. Standard is 1440 px, Narrow 1344 px: a tighter, easier column for a showcase."
+          },
+          "accent_ink": {
+            "label": "Words on the accent",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Automatic",
+              "light": "Always white"
+            },
+            "hint": "Automatic sets the words on the accent colour (a button, a pill) white or dark, whichever reads better. Always white keeps bold white words on a bright accent such as orange: the colour should give at least 3:1 against white."
           }
         },
         "card": "Product card",
@@ -10493,6 +10511,13 @@
           "all": "Everywhere",
           "submenus": "In submenus",
           "off": "None"
+        },
+        "tool_labels": {
+          "label": "Icon words",
+          "term": "tool labels",
+          "show": "With words",
+          "hide": "Icons only",
+          "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
         },
         "search_style": {
           "label": "Search look",

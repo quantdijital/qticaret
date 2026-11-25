@@ -19,6 +19,10 @@
 .gf-head[data-variant="inline"] .gf-tool.gf-icon-btn:hover::after {
   content: none;
 }
+/* Icons only (`tool_labels: hide`): the cart's word goes, its name stays the link's label */
+.gf-head[data-variant="inline"][data-tools="icons"] .gf-tool > span[aria-hidden="true"] {
+  display: none;
+}
 
 .gf-head[data-variant="inline"] .gf-menu-item[aria-current="page"] {
   position: relative;

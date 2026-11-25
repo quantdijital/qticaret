@@ -56,6 +56,7 @@ export function HeaderInline({
       {...sectionMark(shop.headerBar?.id)}
       className={cn("z-(--z-sticky-nav) bg-paper", sticky ? "gf-head sticky top-0" : "relative")}
       data-variant="inline"
+      data-tools={shop.headerBar?.toolLabels === "hide" ? "icons" : undefined}
     >
       <Container
         data-gf-head-row=""

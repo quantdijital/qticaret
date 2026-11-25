@@ -1,8 +1,8 @@
 {
   "settings_version": 2,
   "theme": "atolye",
-  "colors": { "primary": "#264f33", "accent": "#b44f14", "background": "warm" },
-  "typography": { "heading": "manrope", "body": "manrope" },
+  "colors": { "primary": "#264f33", "accent": "#e9730c", "background": "warm" },
+  "typography": { "heading": "plus-jakarta", "body": "plus-jakarta" },
   "radius": "round",
   "product_card": {
     "ratio": "3:4",
@@ -36,5 +36,7 @@
   "shadow": "float",
   "media_ground": "well",
   "density": "airy",
-  "motion": "lively"
+  "motion": "lively",
+  "page_width": "narrow",
+  "accent_ink": "light"
 }

@@ -9,7 +9,8 @@
       "variant": "inline",
       "sticky": true,
       "menu_images": "off",
-      "search_style": "icon"
+      "search_style": "icon",
+      "tool_labels": "hide"
     }
   ],
   "home": [

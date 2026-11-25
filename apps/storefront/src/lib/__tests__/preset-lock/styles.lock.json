@@ -62,12 +62,16 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "976ed4baf85ee4a6c5c619f7d35d368577a17d70627139ce39fd411be085c2f5",
+      "sha256": "f73c2302b6711db914f689a1be2fb2fafc876c0030e125897cc3fae1b12c5195",
       "file": "header-inline.css"
     },
     {
-      "sha256": "e0f9d76556b0be75e6fa1af2d2fd21c4d1394030edd05866d6b3eb94da8c14e6",
+      "sha256": "3c7419a14554d5dbd06e60609a59f5e59937786d52d613b8634ae6025bed8bab",
       "file": "hero-full.css"
+    },
+    {
+      "sha256": "64528ad209dbb9f42bfea320dccf69e385044060045d6a7bb254a5162402e123",
+      "file": "kit-steps.css"
     },
     {
       "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
@@ -150,7 +154,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "f8250ee02336f712bc2d287dd832009c2d7e036e5286b7c8a3f8a89c881d305d",
+      "sha256": "8abdd0a9fdbec8002650c0f386dd9f638d7ec00c4ac86e8d87e30c6843322f38",
       "file": "styles.css"
     },
     {

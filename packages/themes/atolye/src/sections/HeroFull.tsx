@@ -230,7 +230,7 @@ export function HeroFull({
             <HeroTrust
               badges={trust}
               label={t("footer.trust")}
-              className={blend && !(search && overlap) ? "mx-auto lg:w-[76%]" : undefined}
+              className={blend && !(search && overlap) ? "mx-auto lg:w-[82%]" : undefined}
               roomy={blend}
             />
           )}

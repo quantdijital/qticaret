@@ -1,4 +1,9 @@
-import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES, MARQUEE_SETTINGS } from "@qticaret/types"
+import {
+  HEADER_MENU_IMAGES,
+  HEADER_SEARCH_STYLES,
+  HEADER_TOOL_LABELS,
+  MARQUEE_SETTINGS,
+} from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type {
   AnySection,
@@ -121,6 +126,7 @@ export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, F
 export const HEADER_GROUPS = {
   search_style: "search",
   menu_images: "menu",
+  tool_labels: "icons",
   sticky: "look",
 } as const satisfies Readonly<Record<string, FieldGroupName>>
 
@@ -212,6 +218,7 @@ export const FIELD_IDS = {
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
+  toolLabels: (sectionId: string) => `${sectionId}-tool-labels`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,
@@ -318,6 +325,17 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         term: `${HEADER}.${key}.term`,
         options: steps.map((step: string) => `${HEADER}.${key}.${step}`),
         target,
+      })
+    }
+    // The one-row header's tools: with words or as round icons only
+    if (section.variant === "inline") {
+      fields.push({
+        key: "tool_labels",
+        group: HEADER_GROUPS.tool_labels,
+        label: `${HEADER}.tool_labels.label`,
+        term: `${HEADER}.tool_labels.term`,
+        options: HEADER_TOOL_LABELS.map((step) => `${HEADER}.tool_labels.${step}`),
+        target: FIELD_IDS.toolLabels(id),
       })
     }
     if (section.variant === "catalog") {

@@ -22,4 +22,7 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   density: true,
   // S7, adr/0067 Ek 2026-11-18: hover, scroll reveal and press motion (`data-motion`)
   motion: true,
+  // S8, S9 adr/0067 Ek 2026-11-25: the content column (`data-page-width`), the accent's words (`data-accent-ink`)
+  page_width: true,
+  accent_ink: true,
 }

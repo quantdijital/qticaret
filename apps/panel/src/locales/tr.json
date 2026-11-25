@@ -9804,6 +9804,24 @@
               "lively": "Canlı"
             },
             "hint": "Sakin, temanın kendi kısa geçişleridir. Canlı'da ürün kartının fotoğrafı üzerine gelince hafifçe büyür ve kart yükselir, bölümler ve ürünler sayfa kaydıkça yumuşakça belirir, görseller yüklenince süzülerek gelir, düğmeler basılınca hafifçe çöker. Hareketi azaltmayı seçmiş ziyaretçide hiçbiri oynamaz."
+          },
+          "page_width": {
+            "label": "Sayfa genişliği",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standart",
+              "narrow": "Dar"
+            },
+            "hint": "İçeriğin sığdığı sütun. Standart 1440 px, Dar 1344 px: vitrin rahat okunan, daha toplu bir sütunda durur."
+          },
+          "accent_ink": {
+            "label": "Vurgu üstündeki yazı",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Otomatik",
+              "light": "Hep beyaz"
+            },
+            "hint": "Otomatik'te vurgu renginin üstündeki yazı (düğme, etiket) hangisi daha iyi okunuyorsa beyaz ya da koyudur. Hep beyaz, parlak bir turuncu gibi açık vurgularda beyaz kalın yazı ister: renk beyazla en az 3:1 vermeli."
           }
         },
         "card": "Ürün kartı",
@@ -10493,6 +10511,13 @@
           "all": "Her yerde",
           "submenus": "Alt menülerde",
           "off": "Yok"
+        },
+        "tool_labels": {
+          "label": "Simge yazıları",
+          "term": "tool labels",
+          "show": "Yazılı",
+          "hide": "Yalnız simge",
+          "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
         },
         "search_style": {
           "label": "Arama görünümü",

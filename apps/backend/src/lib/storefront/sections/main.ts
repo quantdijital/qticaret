@@ -67,6 +67,15 @@ export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
 type SearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
 
 /**
+ * The one-row header's tools with words or as round icons: mirrors
+ * `@qticaret/types`' `HEADER_TOOL_LABELS` (a unit test keeps them equal);
+ * `show`, as drawn before it, is the default.
+ */
+export const HEADER_TOOL_LABELS = ["show", "hide"] as const
+
+type ToolLabels = (typeof HEADER_TOOL_LABELS)[number]
+
+/**
  * The catalog header's layout choices (adr/0049 Ek 2026-11-15): mirror
  * `@qticaret/types`' `HEADER_TOOLS_PLACES`, `HEADER_TOP_LINKS_PLACES` and
  * `HEADER_SEARCH_WIDTHS` (a unit test keeps them equal); each list's first
@@ -80,6 +89,7 @@ export const HEADER_SEARCH_WIDTHS = ["wide", "narrow"] as const
 const HEADER_STEPS: Readonly<Record<string, readonly unknown[]>> = {
   menu_images: HEADER_MENU_IMAGES,
   search_style: HEADER_SEARCH_STYLES,
+  tool_labels: HEADER_TOOL_LABELS,
   tools_place: HEADER_TOOLS_PLACES,
   top_links: HEADER_TOP_LINKS_PLACES,
   search_width: HEADER_SEARCH_WIDTHS,
@@ -136,6 +146,17 @@ const headerCommon = {
       MAIN_ERROR
     )
     .default("field"),
+  /**
+   * The one-row header's tools: `show` (the cart's word beside its icon, as
+   * before it: the default) or `hide` (round icons only). Read by `inline`;
+   * kept on the others for a switch back.
+   */
+  tool_labels: z
+    .custom<ToolLabels>(
+      (value) => (HEADER_TOOL_LABELS as readonly unknown[]).includes(value),
+      MAIN_ERROR
+    )
+    .default("show"),
   /**
    * The header's action button, whatever the variant: its words and where
    * it goes (the catalog header's highlighted link, now every header's). None:

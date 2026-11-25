@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES } from "@qticaret/types"
+import { HEADER_MENU_IMAGES, HEADER_SEARCH_STYLES, HEADER_TOOL_LABELS } from "@qticaret/types"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { PANEL_GROUPS } from "../panel-groups"
@@ -70,6 +70,23 @@ export function HeaderGroups({
       }}
     />
   )
+  // The one-row header's tools: with words or as round icons only
+  const toolLabels =
+    section.variant === "inline" ? (
+      <StepChoice
+        id={FIELD_IDS.toolLabels(section.id)}
+        label={t(`${H}.tool_labels.label`)}
+        term={t(`${H}.tool_labels.term`)}
+        hint={t(`${H}.tool_labels.hint`)}
+        steps={HEADER_TOOL_LABELS}
+        value={section.tool_labels ?? "show"}
+        fallback="show"
+        nameOf={(step) => t(`${H}.tool_labels.${step}`)}
+        onChange={(step) => {
+          onChange({ ...section, tool_labels: step })
+        }}
+      />
+    ) : null
   // The other variants' action button (the catalog header's highlighted link, its own field there)
   const actionId = FIELD_IDS.header(section.id, "highlight_link")
   const action =
@@ -137,6 +154,7 @@ export function HeaderGroups({
             </>
           )
         : null}
+      {toolLabels ? group("icons", toolLabels) : null}
       {group(
         "look",
         <SwitchRow

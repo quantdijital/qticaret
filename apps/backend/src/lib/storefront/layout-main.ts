@@ -45,6 +45,7 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   sticky: theme.sticky,
   menu_images: "submenus",
   search_style: "field",
+  tool_labels: "show",
 })
 
 const FOOTER_BAR: FooterBar = {
@@ -134,6 +135,7 @@ export function mainSectionsOf<L>(
       sticky: header.sticky,
       menu_images: header.menu_images,
       search_style: header.search_style,
+      tool_labels: header.tool_labels,
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
       // The other variants' action button (the catalog prints it in its own): only once set
       ...(header.variant !== "catalog" && header.highlight_link
