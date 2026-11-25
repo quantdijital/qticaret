@@ -46,6 +46,7 @@ import { CUSTOMER_ROUTES } from "./http/customer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { WHOLESALE_ROUTES } from "./http/wholesale-routes"
 import { WHOLESALE_STORE_ROUTES } from "./http/wholesale-store-routes"
+import { VARIANT_SALE_ROUTES } from "./http/variant-sale-guard"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { POPUP_ROUTES } from "./http/popup-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
@@ -372,6 +373,8 @@ export default defineMiddlewares({
     ...WHOLESALE_ROUTES,
     // ADR-0068 §7: the signed-in wholesaler's own prices
     ...WHOLESALE_STORE_ROUTES,
+    // adr/0086: the variants' own sale lists stay off the price lists screen and its writes
+    ...VARIANT_SALE_ROUTES,
     // adr/0050: bulk e-mail and SMS, behind their flag
     ...CAMPAIGN_ROUTES,
     // adr/0080: storefront pop-ups, behind their flag
