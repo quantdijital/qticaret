@@ -36,6 +36,7 @@ import { summaryOf, withBookingSummary } from "./checkout-summary"
 import { cartBooking } from "@/lib/booking/store"
 import { asksTravelers } from "@/lib/booking/travelers"
 import type { StoreCartTravelers } from "@/lib/booking/travelers"
+import { orderNoteOf } from "@/lib/checkout/order-note"
 import { hasBookingLines } from "./booking"
 import { displayPhone } from "./frame"
 import { travelersView } from "./travelers"
@@ -269,6 +270,7 @@ export async function checkoutView(
       : null,
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
+    orderNote: orderNoteOf(cart.metadata),
     summary: withBookingSummary(
       summaryOf(cart, t, paths, pictures, wholesale.active && wholesale.vatExclusive),
       cart.items,

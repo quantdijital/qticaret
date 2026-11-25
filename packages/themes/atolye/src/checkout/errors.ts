@@ -43,6 +43,7 @@ export const CHECKOUT_ERRORS = [
   "checkout.provider_down",
   "checkout.cod_unavailable",
   "checkout.failed",
+  "checkout.order_note_too_long",
   "messaging.email_domain_refuses",
   "legal.version_changed",
   "legal.consent_missing",

@@ -3,6 +3,7 @@ import { lineAddonsOf } from "../catalog/addons"
 import { fromMedusaAmount, toMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
 import { giftRecipientOf } from "../promotions/gift-sale"
+import { orderNoteOf } from "./customer-note"
 import { lineMetadataOf } from "./line-metadata"
 import type { LineMetadataRow } from "./line-metadata"
 import { paymentMethodOf } from "./payment-method"
@@ -160,6 +161,8 @@ export function packingOrderOf(order: PackingOrderRow, extras: PackingExtras) {
     tracking_number: extras.tracking_number,
     items: present(order.items).map((item) => itemOf(item, extras.prices)),
     notes: extras.notes,
+    // The shopper's own words at checkout (Batch 8 / O1), printed for whoever packs
+    customer_note: orderNoteOf(order.metadata),
     totals: extras.prices
       ? {
           items: amount(order.original_item_total),

@@ -24,6 +24,8 @@ test("a guest orders by bank transfer", async ({ page }) => {
   })
 
   await page.locator('input[value="pp_bank-transfer_bank-transfer"]').check()
+  // The optional note for the shop rides with the order (Batch 8 / O1)
+  await page.getByLabel("Sipariş notu (isteğe bağlı)").fill("Zili çalmayın, kapıya bırakın.")
   const accept = page.locator('input[name="accept"]')
   if (await accept.count()) {
     await accept.check()

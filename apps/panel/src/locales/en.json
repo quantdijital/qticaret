@@ -5230,6 +5230,9 @@
       "notDelivered_one": "{{count}} order could not be marked: {{reason}}",
       "notDelivered_other": "{{count}} orders could not be marked: {{reason}}"
     },
+    "customerNote": {
+      "title": "Customer's note"
+    },
     "notes": {
       "title": "Internal notes",
       "text": "Only the team sees them; never shown to the customer.",
@@ -5574,6 +5577,7 @@
       "shipping": "Shipping",
       "total": "Total",
       "notes": "Team notes",
+      "customerNote": "Customer's note",
       "perOrder": "Orders and add-ons",
       "ordersCount_one": "{{count}} order",
       "ordersCount_other": "{{count}} orders",

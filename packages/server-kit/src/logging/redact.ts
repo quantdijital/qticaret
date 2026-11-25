@@ -60,6 +60,8 @@ const PERSONAL_PARTS = [
   "legalname",
   "contactname",
   "birthdate",
+  // The shopper's free text at checkout (`qt_order_note`, `order_note`)
+  "ordernote",
 ]
 const PERSONAL_EXCEPTIONS = new Set(["emailverified"])
 const REFERENCE = /ids?$/

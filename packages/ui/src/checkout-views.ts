@@ -163,6 +163,11 @@ export interface CheckoutPageView {
   ageLimit: number | null
   /** The text version of the marketing consent offered with the order. */
   marketingVersion: string
+  /**
+   * The shopper's note for the shop kept on the cart (Batch 8 / O1), to fill
+   * the field again; the payment form sends it back as `order_note`.
+   */
+  orderNote?: string | null
   summary: CheckoutSummaryView
   /**
    * The coupon codes on the cart, each removable beside the summary; null
