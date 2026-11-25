@@ -9,6 +9,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { MEASURES, measureText } from "./measures"
+import { SalePriceField } from "./sale-price-field"
 import type { MeasureName } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
 import { storedGtinNote } from "./variant-codes"
@@ -27,12 +28,23 @@ function useError(form: Form) {
   }
 }
 
-/** The selling price, the unit cost, and (several variants) the price for all of them. */
+/** A saved variant whose sale price (adr/0086) shows under its price. */
+export interface SaleTarget {
+  productId: string
+  variantId: string
+}
+
+/**
+ * The selling price, the unit cost, the sale price of a saved variant
+ * (`saleTarget`; it saves on its own) and (several variants) the price
+ * for all of them.
+ */
 export function PriceFields({
   form,
   idPrefix,
   sale,
   others,
+  saleTarget = null,
 }: {
   form: Form
   idPrefix: string
@@ -40,6 +52,8 @@ export function PriceFields({
   sale: { price: number; struck: number } | null
   /** How many other variants the price may go to; none for a product of one. */
   others: number
+  /** A saved variant: its "İndirimli fiyat" under the price; none on a new product. */
+  saleTarget?: SaleTarget | null
 }) {
   const { t } = useTranslation()
   const error = useError(form)
@@ -78,6 +92,14 @@ export function PriceFields({
           />
         </Field>
       </div>
+      {saleTarget ? (
+        <SalePriceField
+          key={saleTarget.variantId}
+          productId={saleTarget.productId}
+          variantId={saleTarget.variantId}
+          idPrefix={idPrefix}
+        />
+      ) : null}
       {sale ? (
         <p className="text-xs text-muted-foreground">
           {t("products.priceHistory.struckDetail", {

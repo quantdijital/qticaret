@@ -4205,6 +4205,43 @@
       "table": "Prices from {{from}} to today",
       "unchanged": "The price has not changed in the last 90 days."
     },
+    "sale": {
+      "label": "Sale price",
+      "hint": "Leave empty for no sale. The storefront strikes through the lowest price of the 10 days before the sale.",
+      "percent": "{{percent}}% off",
+      "schedule": "Schedule",
+      "unschedule": "Remove schedule",
+      "starts": "Starts",
+      "ends": "Ends",
+      "running": "The sale is on.",
+      "runsUntil": "The sale runs until {{date}}.",
+      "startsOn": "The sale starts on {{date}}.",
+      "remove": "Remove sale",
+      "apply": "Save sale",
+      "cancel": "Cancel",
+      "saved": "Sale price saved.",
+      "errors": {
+        "amount": "Enter a valid price.",
+        "noRegular": "Save the selling price first.",
+        "notBelow": "The sale price must be below the selling price.",
+        "datesOrder": "The end cannot be before the start.",
+        "ended": "The end date has passed; choose a later one."
+      },
+      "bulk": {
+        "action": "Sale price",
+        "title": "Sale price",
+        "description_one": "{{count}} selected variant",
+        "description_other": "{{count}} selected variants",
+        "mode": "Kind of sale",
+        "percent": "Percent off",
+        "price": "Set a price",
+        "percentLabel": "Discount",
+        "apply_one": "Apply to {{count}} variant",
+        "apply_other": "Apply to {{count}} variants",
+        "done_one": "{{count}} variant's sale updated.",
+        "done_other": "{{count}} variants' sales updated."
+      }
+    },
     "interest": {
       "title": "Customer interest",
       "wishlist": "Saved by",
