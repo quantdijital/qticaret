@@ -1,15 +1,12 @@
 import { z } from "@medusajs/framework/zod"
 import { PAYMENT_INSTRUCTION_MAX, PAYMENT_METHODS } from "@qticaret/types/control-plane"
 import { isDay } from "../../../../lib/billing/days"
+import { CLEAN, CLEAN_TEXT } from "../../../../lib/clean-text"
 
 /**
  * What the billing routes take (Ek C16), strictly. Amounts are kuruş as
  * whole numbers; days are Istanbul calendar days (`YYYY-MM-DD`).
  */
-
-// Control and invisible format characters never make text; a reason keeps its line breaks
-const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
-const CLEAN_TEXT = /^(?:[^\p{Cc}\p{Cf}\u2028\u2029]|\n)*$/u
 
 const day = z.string().refine(isDay, "cp.day_invalid")
 

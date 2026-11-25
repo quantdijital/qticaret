@@ -1,4 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { AI_CREDITS_MODULE } from "../modules/ai-credits"
+import type AiCreditsModuleService from "../modules/ai-credits/service"
 import { BILLING_MODULE } from "../modules/billing"
 import type BillingModuleService from "../modules/billing/service"
 import { FLEET_MODULE } from "../modules/fleet"
@@ -28,3 +30,6 @@ export const provisioningIn = (container: Container) =>
 
 export const billingIn = (container: Container) =>
   container.resolve<BillingModuleService>(BILLING_MODULE)
+
+export const aiCreditsIn = (container: Container) =>
+  container.resolve<AiCreditsModuleService>(AI_CREDITS_MODULE)
