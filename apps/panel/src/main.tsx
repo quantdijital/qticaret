@@ -11,6 +11,7 @@ import { createRoot } from "react-dom/client"
 import { CURRENT_USER_KEY } from "./features/auth/api/me"
 import { refreshStandingAfter } from "./features/auth/api/staff"
 import type { CurrentUser } from "./features/auth/api/me"
+import { stringifySearch } from "./lib/search-params"
 import { routeTree } from "./routeTree.gen"
 
 // Before the first paint: the remembered colours, or the defaults
@@ -35,6 +36,8 @@ const router = createRouter({
   context: { queryClient },
   defaultPreload: "intent",
   scrollRestoration: true,
+  // A filter's several choices read `?payment=paid,refunded` in the address
+  stringifySearch,
 })
 
 declare module "@tanstack/react-router" {

@@ -1,8 +1,36 @@
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useRef, useState } from "react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { FormDialog } from "./form-dialog"
+
+describe("FormDialog inside another form", () => {
+  it("sends only itself, never the form around its opener", async () => {
+    const user = userEvent.setup()
+    const outer = vi.fn((event: { preventDefault: () => void }) => {
+      event.preventDefault()
+    })
+    const inner = vi.fn()
+    render(
+      <form onSubmit={outer}>
+        <FormDialog
+          open
+          onOpenChange={() => undefined}
+          title="Kredi yükle"
+          dirty
+          saving={false}
+          onSubmit={inner}
+          submitLabel="Talep gönder"
+        >
+          <input aria-label="Paket" />
+        </FormDialog>
+      </form>
+    )
+    await user.click(await screen.findByRole("button", { name: "Talep gönder" }))
+    expect(inner).toHaveBeenCalledTimes(1)
+    expect(outer).not.toHaveBeenCalled()
+  })
+})
 
 /**
  * A row that opens its dialog from the parent's state, no Radix trigger
