@@ -16,6 +16,7 @@ import {
   checkSchema,
   dailyCapAnswerSchema,
   orderAnswerSchema,
+  paidAnswerSchema,
   providerAnswerSchema,
   settingsSchema,
 } from "@/features/ai-credits/api/schemas"
@@ -81,7 +82,7 @@ export const useMarkPaid = (order: AiOrder) =>
     (input: { method: PaymentMethod; reference: string }) =>
       withStepUp((headers) =>
         read(
-          orderAnswerSchema,
+          paidAnswerSchema,
           orderPath(order, "paid"),
           post({ method: input.method, reference: input.reference.trim() || null }, headers)
         )

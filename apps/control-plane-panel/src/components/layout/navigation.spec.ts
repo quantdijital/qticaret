@@ -17,7 +17,7 @@ describe("the control plane's menu", () => {
   })
 
   it("opens the shops, packages, payments and releases to every role", () => {
-    for (const role of ["owner", "operator", "finance", "readonly"] as const) {
+    for (const role of ["operator", "finance", "readonly"] as const) {
       const platform = navFor(role).find((group) => group.key === "platform")
       expect(platform?.items.map((item) => [item.key, item.to])).toEqual([
         ["shops", "/tenants"],
@@ -26,6 +26,24 @@ describe("the control plane's menu", () => {
         ["releases", "/releases"],
       ])
     }
+  })
+
+  it("adds the AI credit requests and the AI settings for an owner only (adr/0085 §5)", () => {
+    const platform = navFor("owner").find((group) => group.key === "platform")
+    expect(platform?.items.map((item) => [item.key, item.to])).toEqual([
+      ["shops", "/tenants"],
+      ["packages", "/packages"],
+      ["payments", "/payments"],
+      ["aiOrders", "/ai-orders"],
+      ["releases", "/releases"],
+    ])
+    expect(keys("owner")).toContain("aiSettings")
+    for (const role of ["operator", "finance", "readonly", null] as const) {
+      expect(keys(role)).not.toContain("aiOrders")
+      expect(keys(role)).not.toContain("aiSettings")
+    }
+    expect(activeKey("/ai-orders")).toBe("aiOrders")
+    expect(activeKey("/ai-settings")).toBe("aiSettings")
   })
 
   it("lights one item for a page", () => {

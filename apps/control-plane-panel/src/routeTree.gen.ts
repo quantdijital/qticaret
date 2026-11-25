@@ -8,222 +8,234 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as AppRouteImport } from './routes/_app'
-import { Route as EnrolRouteImport } from './routes/enrol'
-import { Route as InviteRouteImport } from './routes/invite'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as NoAccessRouteImport } from './routes/no-access'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppAccountRouteImport } from './routes/_app/account'
-import { Route as AppAuditLogRouteImport } from './routes/_app/audit-log'
-import { Route as AppKeysRouteImport } from './routes/_app/keys'
-import { Route as AppPackagesRouteImport } from './routes/_app/packages'
-import { Route as AppPaymentsRouteImport } from './routes/_app/payments'
-import { Route as AppReleasesRouteImport } from './routes/_app/releases'
-import { Route as AppStaffRouteImport } from './routes/_app/staff'
-import { Route as SecuritySetupRouteImport } from './routes/security/setup'
-import { Route as AppTenantsIndexRouteImport } from './routes/_app/tenants/index'
-import { Route as AppTenantsIdRouteImport } from './routes/_app/tenants/$id'
-import { Route as AppTenantsNewRouteImport } from './routes/_app/tenants/new'
+import { Route as rootRouteImport } from "./routes/__root"
+import { Route as AppRouteImport } from "./routes/_app"
+import { Route as EnrolRouteImport } from "./routes/enrol"
+import { Route as InviteRouteImport } from "./routes/invite"
+import { Route as LoginRouteImport } from "./routes/login"
+import { Route as NoAccessRouteImport } from "./routes/no-access"
+import { Route as AppIndexRouteImport } from "./routes/_app/index"
+import { Route as AppAccountRouteImport } from "./routes/_app/account"
+import { Route as AppAiOrdersRouteImport } from "./routes/_app/ai-orders"
+import { Route as AppAuditLogRouteImport } from "./routes/_app/audit-log"
+import { Route as AppKeysRouteImport } from "./routes/_app/keys"
+import { Route as AppPackagesRouteImport } from "./routes/_app/packages"
+import { Route as AppPaymentsRouteImport } from "./routes/_app/payments"
+import { Route as AppReleasesRouteImport } from "./routes/_app/releases"
+import { Route as AppStaffRouteImport } from "./routes/_app/staff"
+import { Route as SecuritySetupRouteImport } from "./routes/security/setup"
+import { Route as AppTenantsIndexRouteImport } from "./routes/_app/tenants/index"
+import { Route as AppTenantsIdRouteImport } from "./routes/_app/tenants/$id"
+import { Route as AppTenantsNewRouteImport } from "./routes/_app/tenants/new"
 
 const AppRoute = AppRouteImport.update({
-  id: '/_app',
+  id: "/_app",
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnrolRoute = EnrolRouteImport.update({
-  id: '/enrol',
-  path: '/enrol',
+  id: "/enrol",
+  path: "/enrol",
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteRoute = InviteRouteImport.update({
-  id: '/invite',
-  path: '/invite',
+  id: "/invite",
+  path: "/invite",
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoAccessRoute = NoAccessRouteImport.update({
-  id: '/no-access',
-  path: '/no-access',
+  id: "/no-access",
+  path: "/no-access",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => AppRoute,
 } as any)
 const AppAccountRoute = AppAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+  id: "/account",
+  path: "/account",
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiOrdersRoute = AppAiOrdersRouteImport.update({
+  id: "/ai-orders",
+  path: "/ai-orders",
   getParentRoute: () => AppRoute,
 } as any)
 const AppAuditLogRoute = AppAuditLogRouteImport.update({
-  id: '/audit-log',
-  path: '/audit-log',
+  id: "/audit-log",
+  path: "/audit-log",
   getParentRoute: () => AppRoute,
 } as any)
 const AppKeysRoute = AppKeysRouteImport.update({
-  id: '/keys',
-  path: '/keys',
+  id: "/keys",
+  path: "/keys",
   getParentRoute: () => AppRoute,
 } as any)
 const AppPackagesRoute = AppPackagesRouteImport.update({
-  id: '/packages',
-  path: '/packages',
+  id: "/packages",
+  path: "/packages",
   getParentRoute: () => AppRoute,
 } as any)
 const AppPaymentsRoute = AppPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
+  id: "/payments",
+  path: "/payments",
   getParentRoute: () => AppRoute,
 } as any)
 const AppReleasesRoute = AppReleasesRouteImport.update({
-  id: '/releases',
-  path: '/releases',
+  id: "/releases",
+  path: "/releases",
   getParentRoute: () => AppRoute,
 } as any)
 const AppStaffRoute = AppStaffRouteImport.update({
-  id: '/staff',
-  path: '/staff',
+  id: "/staff",
+  path: "/staff",
   getParentRoute: () => AppRoute,
 } as any)
 const SecuritySetupRoute = SecuritySetupRouteImport.update({
-  id: '/security/setup',
-  path: '/security/setup',
+  id: "/security/setup",
+  path: "/security/setup",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppTenantsIndexRoute = AppTenantsIndexRouteImport.update({
-  id: '/tenants/',
-  path: '/tenants/',
+  id: "/tenants/",
+  path: "/tenants/",
   getParentRoute: () => AppRoute,
 } as any)
 const AppTenantsIdRoute = AppTenantsIdRouteImport.update({
-  id: '/tenants/$id',
-  path: '/tenants/$id',
+  id: "/tenants/$id",
+  path: "/tenants/$id",
   getParentRoute: () => AppRoute,
 } as any)
 const AppTenantsNewRoute = AppTenantsNewRouteImport.update({
-  id: '/tenants/new',
-  path: '/tenants/new',
+  id: "/tenants/new",
+  path: "/tenants/new",
   getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
-  '/enrol': typeof EnrolRoute
-  '/invite': typeof InviteRoute
-  '/login': typeof LoginRoute
-  '/no-access': typeof NoAccessRoute
-  '/account': typeof AppAccountRoute
-  '/audit-log': typeof AppAuditLogRoute
-  '/keys': typeof AppKeysRoute
-  '/packages': typeof AppPackagesRoute
-  '/payments': typeof AppPaymentsRoute
-  '/releases': typeof AppReleasesRoute
-  '/staff': typeof AppStaffRoute
-  '/security/setup': typeof SecuritySetupRoute
-  '/tenants/$id': typeof AppTenantsIdRoute
-  '/tenants/new': typeof AppTenantsNewRoute
-  '/tenants/': typeof AppTenantsIndexRoute
+  "/": typeof AppIndexRoute
+  "/enrol": typeof EnrolRoute
+  "/invite": typeof InviteRoute
+  "/login": typeof LoginRoute
+  "/no-access": typeof NoAccessRoute
+  "/account": typeof AppAccountRoute
+  "/ai-orders": typeof AppAiOrdersRoute
+  "/audit-log": typeof AppAuditLogRoute
+  "/keys": typeof AppKeysRoute
+  "/packages": typeof AppPackagesRoute
+  "/payments": typeof AppPaymentsRoute
+  "/releases": typeof AppReleasesRoute
+  "/staff": typeof AppStaffRoute
+  "/security/setup": typeof SecuritySetupRoute
+  "/tenants/$id": typeof AppTenantsIdRoute
+  "/tenants/new": typeof AppTenantsNewRoute
+  "/tenants/": typeof AppTenantsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/enrol': typeof EnrolRoute
-  '/invite': typeof InviteRoute
-  '/login': typeof LoginRoute
-  '/no-access': typeof NoAccessRoute
-  '/account': typeof AppAccountRoute
-  '/audit-log': typeof AppAuditLogRoute
-  '/keys': typeof AppKeysRoute
-  '/packages': typeof AppPackagesRoute
-  '/payments': typeof AppPaymentsRoute
-  '/releases': typeof AppReleasesRoute
-  '/staff': typeof AppStaffRoute
-  '/security/setup': typeof SecuritySetupRoute
-  '/': typeof AppIndexRoute
-  '/tenants/$id': typeof AppTenantsIdRoute
-  '/tenants/new': typeof AppTenantsNewRoute
-  '/tenants': typeof AppTenantsIndexRoute
+  "/enrol": typeof EnrolRoute
+  "/invite": typeof InviteRoute
+  "/login": typeof LoginRoute
+  "/no-access": typeof NoAccessRoute
+  "/account": typeof AppAccountRoute
+  "/ai-orders": typeof AppAiOrdersRoute
+  "/audit-log": typeof AppAuditLogRoute
+  "/keys": typeof AppKeysRoute
+  "/packages": typeof AppPackagesRoute
+  "/payments": typeof AppPaymentsRoute
+  "/releases": typeof AppReleasesRoute
+  "/staff": typeof AppStaffRoute
+  "/security/setup": typeof SecuritySetupRoute
+  "/": typeof AppIndexRoute
+  "/tenants/$id": typeof AppTenantsIdRoute
+  "/tenants/new": typeof AppTenantsNewRoute
+  "/tenants": typeof AppTenantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_app': typeof AppRouteWithChildren
-  '/enrol': typeof EnrolRoute
-  '/invite': typeof InviteRoute
-  '/login': typeof LoginRoute
-  '/no-access': typeof NoAccessRoute
-  '/_app/account': typeof AppAccountRoute
-  '/_app/audit-log': typeof AppAuditLogRoute
-  '/_app/keys': typeof AppKeysRoute
-  '/_app/packages': typeof AppPackagesRoute
-  '/_app/payments': typeof AppPaymentsRoute
-  '/_app/releases': typeof AppReleasesRoute
-  '/_app/staff': typeof AppStaffRoute
-  '/security/setup': typeof SecuritySetupRoute
-  '/_app/': typeof AppIndexRoute
-  '/_app/tenants/$id': typeof AppTenantsIdRoute
-  '/_app/tenants/new': typeof AppTenantsNewRoute
-  '/_app/tenants/': typeof AppTenantsIndexRoute
+  "/_app": typeof AppRouteWithChildren
+  "/enrol": typeof EnrolRoute
+  "/invite": typeof InviteRoute
+  "/login": typeof LoginRoute
+  "/no-access": typeof NoAccessRoute
+  "/_app/account": typeof AppAccountRoute
+  "/_app/ai-orders": typeof AppAiOrdersRoute
+  "/_app/audit-log": typeof AppAuditLogRoute
+  "/_app/keys": typeof AppKeysRoute
+  "/_app/packages": typeof AppPackagesRoute
+  "/_app/payments": typeof AppPaymentsRoute
+  "/_app/releases": typeof AppReleasesRoute
+  "/_app/staff": typeof AppStaffRoute
+  "/security/setup": typeof SecuritySetupRoute
+  "/_app/": typeof AppIndexRoute
+  "/_app/tenants/$id": typeof AppTenantsIdRoute
+  "/_app/tenants/new": typeof AppTenantsNewRoute
+  "/_app/tenants/": typeof AppTenantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/enrol'
-    | '/invite'
-    | '/login'
-    | '/no-access'
-    | '/account'
-    | '/audit-log'
-    | '/keys'
-    | '/packages'
-    | '/payments'
-    | '/releases'
-    | '/staff'
-    | '/security/setup'
-    | '/tenants/$id'
-    | '/tenants/new'
-    | '/tenants/'
+    | "/"
+    | "/enrol"
+    | "/invite"
+    | "/login"
+    | "/no-access"
+    | "/account"
+    | "/ai-orders"
+    | "/audit-log"
+    | "/keys"
+    | "/packages"
+    | "/payments"
+    | "/releases"
+    | "/staff"
+    | "/security/setup"
+    | "/tenants/$id"
+    | "/tenants/new"
+    | "/tenants/"
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/enrol'
-    | '/invite'
-    | '/login'
-    | '/no-access'
-    | '/account'
-    | '/audit-log'
-    | '/keys'
-    | '/packages'
-    | '/payments'
-    | '/releases'
-    | '/staff'
-    | '/security/setup'
-    | '/'
-    | '/tenants/$id'
-    | '/tenants/new'
-    | '/tenants'
+    | "/enrol"
+    | "/invite"
+    | "/login"
+    | "/no-access"
+    | "/account"
+    | "/ai-orders"
+    | "/audit-log"
+    | "/keys"
+    | "/packages"
+    | "/payments"
+    | "/releases"
+    | "/staff"
+    | "/security/setup"
+    | "/"
+    | "/tenants/$id"
+    | "/tenants/new"
+    | "/tenants"
   id:
-    | '__root__'
-    | '/_app'
-    | '/enrol'
-    | '/invite'
-    | '/login'
-    | '/no-access'
-    | '/_app/account'
-    | '/_app/audit-log'
-    | '/_app/keys'
-    | '/_app/packages'
-    | '/_app/payments'
-    | '/_app/releases'
-    | '/_app/staff'
-    | '/security/setup'
-    | '/_app/'
-    | '/_app/tenants/$id'
-    | '/_app/tenants/new'
-    | '/_app/tenants/'
+    | "__root__"
+    | "/_app"
+    | "/enrol"
+    | "/invite"
+    | "/login"
+    | "/no-access"
+    | "/_app/account"
+    | "/_app/ai-orders"
+    | "/_app/audit-log"
+    | "/_app/keys"
+    | "/_app/packages"
+    | "/_app/payments"
+    | "/_app/releases"
+    | "/_app/staff"
+    | "/security/setup"
+    | "/_app/"
+    | "/_app/tenants/$id"
+    | "/_app/tenants/new"
+    | "/_app/tenants/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,124 +247,131 @@ export interface RootRouteChildren {
   SecuritySetupRoute: typeof SecuritySetupRoute
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/_app': {
-      id: '/_app'
-      path: ''
-      fullPath: '/'
+    "/_app": {
+      id: "/_app"
+      path: ""
+      fullPath: "/"
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/enrol': {
-      id: '/enrol'
-      path: '/enrol'
-      fullPath: '/enrol'
+    "/enrol": {
+      id: "/enrol"
+      path: "/enrol"
+      fullPath: "/enrol"
       preLoaderRoute: typeof EnrolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/invite': {
-      id: '/invite'
-      path: '/invite'
-      fullPath: '/invite'
+    "/invite": {
+      id: "/invite"
+      path: "/invite"
+      fullPath: "/invite"
       preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
+    "/login": {
+      id: "/login"
+      path: "/login"
+      fullPath: "/login"
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/no-access': {
-      id: '/no-access'
-      path: '/no-access'
-      fullPath: '/no-access'
+    "/no-access": {
+      id: "/no-access"
+      path: "/no-access"
+      fullPath: "/no-access"
       preLoaderRoute: typeof NoAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
+    "/_app/": {
+      id: "/_app/"
+      path: "/"
+      fullPath: "/"
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/account': {
-      id: '/_app/account'
-      path: '/account'
-      fullPath: '/account'
+    "/_app/account": {
+      id: "/_app/account"
+      path: "/account"
+      fullPath: "/account"
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/audit-log': {
-      id: '/_app/audit-log'
-      path: '/audit-log'
-      fullPath: '/audit-log'
+    "/_app/ai-orders": {
+      id: "/_app/ai-orders"
+      path: "/ai-orders"
+      fullPath: "/ai-orders"
+      preLoaderRoute: typeof AppAiOrdersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    "/_app/audit-log": {
+      id: "/_app/audit-log"
+      path: "/audit-log"
+      fullPath: "/audit-log"
       preLoaderRoute: typeof AppAuditLogRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/keys': {
-      id: '/_app/keys'
-      path: '/keys'
-      fullPath: '/keys'
+    "/_app/keys": {
+      id: "/_app/keys"
+      path: "/keys"
+      fullPath: "/keys"
       preLoaderRoute: typeof AppKeysRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/packages': {
-      id: '/_app/packages'
-      path: '/packages'
-      fullPath: '/packages'
+    "/_app/packages": {
+      id: "/_app/packages"
+      path: "/packages"
+      fullPath: "/packages"
       preLoaderRoute: typeof AppPackagesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/payments': {
-      id: '/_app/payments'
-      path: '/payments'
-      fullPath: '/payments'
+    "/_app/payments": {
+      id: "/_app/payments"
+      path: "/payments"
+      fullPath: "/payments"
       preLoaderRoute: typeof AppPaymentsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/releases': {
-      id: '/_app/releases'
-      path: '/releases'
-      fullPath: '/releases'
+    "/_app/releases": {
+      id: "/_app/releases"
+      path: "/releases"
+      fullPath: "/releases"
       preLoaderRoute: typeof AppReleasesRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/staff': {
-      id: '/_app/staff'
-      path: '/staff'
-      fullPath: '/staff'
+    "/_app/staff": {
+      id: "/_app/staff"
+      path: "/staff"
+      fullPath: "/staff"
       preLoaderRoute: typeof AppStaffRouteImport
       parentRoute: typeof AppRoute
     }
-    '/security/setup': {
-      id: '/security/setup'
-      path: '/security/setup'
-      fullPath: '/security/setup'
+    "/security/setup": {
+      id: "/security/setup"
+      path: "/security/setup"
+      fullPath: "/security/setup"
       preLoaderRoute: typeof SecuritySetupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/tenants/': {
-      id: '/_app/tenants/'
-      path: '/tenants'
-      fullPath: '/tenants/'
+    "/_app/tenants/": {
+      id: "/_app/tenants/"
+      path: "/tenants"
+      fullPath: "/tenants/"
       preLoaderRoute: typeof AppTenantsIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tenants/$id': {
-      id: '/_app/tenants/$id'
-      path: '/tenants/$id'
-      fullPath: '/tenants/$id'
+    "/_app/tenants/$id": {
+      id: "/_app/tenants/$id"
+      path: "/tenants/$id"
+      fullPath: "/tenants/$id"
       preLoaderRoute: typeof AppTenantsIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/tenants/new': {
-      id: '/_app/tenants/new'
-      path: '/tenants/new'
-      fullPath: '/tenants/new'
+    "/_app/tenants/new": {
+      id: "/_app/tenants/new"
+      path: "/tenants/new"
+      fullPath: "/tenants/new"
       preLoaderRoute: typeof AppTenantsNewRouteImport
       parentRoute: typeof AppRoute
     }
@@ -361,6 +380,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
+  AppAiOrdersRoute: typeof AppAiOrdersRoute
   AppAuditLogRoute: typeof AppAuditLogRoute
   AppKeysRoute: typeof AppKeysRoute
   AppPackagesRoute: typeof AppPackagesRoute
@@ -375,6 +395,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
+  AppAiOrdersRoute: AppAiOrdersRoute,
   AppAuditLogRoute: AppAuditLogRoute,
   AppKeysRoute: AppKeysRoute,
   AppPackagesRoute: AppPackagesRoute,

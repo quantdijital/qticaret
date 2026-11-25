@@ -123,3 +123,5 @@ export const providerAnswerSchema = z.object({
 export const adjustAnswerSchema = z.object({ applied: z.boolean() })
 export const dailyCapAnswerSchema = z.object({ own_daily_cap: count.nullable() })
 export const orderAnswerSchema = z.object({ order: orderSchema })
+/** "Ödendi": `applied: false` when it had been marked paid already (nothing added twice). */
+export const paidAnswerSchema = z.object({ applied: z.boolean(), order: orderSchema })
