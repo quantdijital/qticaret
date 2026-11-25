@@ -9791,14 +9791,17 @@
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
         },
         "accentFont": "Vurgu yazı tipi",
-        "accentFontTerm": "el yazısı · font-family",
-        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle, el yazısı gibi görünür. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız not olan sayfada yüklenir.",
+        "accentFontTerm": "el yazısı · tırnaklı · font-family",
+        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle görünür; açılışta başlık karışımı seçiliyse başlığın vurgulu kısmı da bu yazı tipiyle eğik çizilir. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız kullanıldığı sayfada yüklenir.",
         "handwriting": "el yazısı",
         "accentFonts": {
           "none": "Yok",
           "caveat": "Caveat",
           "dancing-script": "Dancing Script",
-          "kalam": "Kalam"
+          "kalam": "Kalam",
+          "dm-serif": "DM Serif Display",
+          "fraunces": "Fraunces",
+          "playfair": "Playfair Display"
         },
         "shapes": "Şekiller",
         "radius": "Köşeler",
@@ -11563,6 +11566,13 @@
           "hint": "Yazının yanında, ana renginizin açık tonunda küçük bir yaprak dalı (1024 px ve üstü).",
           "none": "Yok",
           "leaves": "Yaprak dalı"
+        },
+        "title_mix": {
+          "label": "Başlıkta yazı karışımı",
+          "term": "font mix",
+          "hint": "Başlığın ikinci kısmı aynı satırda, eğik bir tırnaklı yazı tipiyle yazılır; geri kalanı ince çizilir. Yazı tipini Tema ayarları › Yazı tipleri › Vurgu yazı tipi'nden seçersiniz.",
+          "none": "Tek yazı tipi",
+          "serif_accent": "Vurgu eğik tırnaklı"
         }
       },
       "trustCard": {

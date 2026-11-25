@@ -27,9 +27,10 @@ export const FONT_FILES: Readonly<Record<ThemeFont, readonly [string, string]>> 
 
 /**
  * The accent faces' files (`ACCENT_FONTS`, `@qticaret/types/hand-note`),
- * the same way. Never preloaded: only a section's hand note is drawn in
- * one, so a browser fetches a file only when a page shows a note while
- * the shop has chosen that face (`--font-accent`, `lib/views/theme.ts`).
+ * the same way. Never preloaded: only a section's hand note or an
+ * opening's mixed heading is drawn in one, so a browser fetches a file only
+ * when a page shows one while the shop has chosen that face
+ * (`--font-accent`, `lib/views/theme.ts`).
  */
 export const ACCENT_FONT_FILES: Readonly<
   Record<Exclude<AccentFont, "none">, readonly [string, string]>
@@ -40,6 +41,10 @@ export const ACCENT_FONT_FILES: Readonly<
     "/fonts/dancing-script-tr.4374430929.woff2",
   ],
   kalam: ["/fonts/kalam-latin.954410601a.woff2", "/fonts/kalam-tr.b90a584f5b.woff2"],
+  // The serif accents are heading faces too: the same files
+  "dm-serif": FONT_FILES["dm-serif"],
+  fraunces: FONT_FILES.fraunces,
+  playfair: FONT_FILES.playfair,
 }
 
 /**

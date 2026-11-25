@@ -16,11 +16,20 @@
  */
 
 /**
- * The accent faces a shop may choose, `none` first: handwriting faces that
- * carry every Turkish letter, OFL 1.1, served from the storefront's own
+ * The accent faces a shop may choose, `none` first: handwriting faces, then
+ * serif display faces (drawn italic in a mixed heading, `title_mix`), each
+ * carrying every Turkish letter, OFL 1.1, served from the storefront's own
  * origin (`app/fonts.css`), never a font host.
  */
-export const ACCENT_FONTS = ["none", "caveat", "dancing-script", "kalam"] as const
+export const ACCENT_FONTS = [
+  "none",
+  "caveat",
+  "dancing-script",
+  "kalam",
+  "dm-serif",
+  "fraunces",
+  "playfair",
+] as const
 export type AccentFont = (typeof ACCENT_FONTS)[number]
 
 /** A note's most characters: a few words, never a paragraph. */

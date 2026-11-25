@@ -79,6 +79,7 @@ export type ContentField =
   | "button_icon"
   | "accent_mark"
   | "ornament"
+  | "title_mix"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {

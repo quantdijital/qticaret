@@ -215,6 +215,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["edge", "layout"],
       ["accent_mark", "layout"],
       ["ornament", "layout"],
+      ["title_mix", "layout"],
     ])
     // Only a search: no button to colour or arrow
     expect(keys(full({ action: "search", image_side: "end" }))).toEqual([
@@ -228,6 +229,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["edge", "layout"],
       ["accent_mark", "layout"],
       ["ornament", "layout"],
+      ["title_mix", "layout"],
     ])
     // Both: the search box's place and the button's colour and arrow
     expect(keys(full({ action: "both" })).map(([key]) => key)).toEqual(

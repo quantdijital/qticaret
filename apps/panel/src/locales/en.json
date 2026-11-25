@@ -9791,14 +9791,17 @@
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
         },
         "accentFont": "Accent font",
-        "accentFontTerm": "handwriting · font-family",
-        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font, like handwriting. With None the note is drawn in the body font, italic. The font loads only on a page with a note.",
+        "accentFontTerm": "handwriting · serif · font-family",
+        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font; with the opening's heading font mix, the heading's accent part is drawn in it, italic. With None the note is drawn in the body font, italic. The font loads only on a page that uses it.",
         "handwriting": "handwriting",
         "accentFonts": {
           "none": "None",
           "caveat": "Caveat",
           "dancing-script": "Dancing Script",
-          "kalam": "Kalam"
+          "kalam": "Kalam",
+          "dm-serif": "DM Serif Display",
+          "fraunces": "Fraunces",
+          "playfair": "Playfair Display"
         },
         "shapes": "Shapes",
         "radius": "Corners",
@@ -11563,6 +11566,13 @@
           "hint": "A small sprig of leaves beside the words, in a light tint of your main colour (1024 px and up).",
           "none": "None",
           "leaves": "Sprig of leaves"
+        },
+        "title_mix": {
+          "label": "Heading font mix",
+          "term": "font mix",
+          "hint": "The heading's second part follows on the same line in an italic serif; the rest is drawn light. Choose the font in Theme settings › Fonts › Accent font.",
+          "none": "One font",
+          "serif_accent": "Accent in italic serif"
         }
       },
       "trustCard": {

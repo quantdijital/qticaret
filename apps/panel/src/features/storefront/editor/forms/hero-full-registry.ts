@@ -29,6 +29,7 @@ export const HERO_FULL_LAYOUT = [
   ["edge", "edge"],
   ["accent_mark", "accent_mark"],
   ["ornament", "ornament"],
+  ["title_mix", "title_mix"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
 
 type FullSection = Extract<AnySection, { type: "hero"; variant: "full_image" }>

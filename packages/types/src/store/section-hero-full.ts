@@ -37,6 +37,8 @@ export const HERO_FULL_SETTINGS = {
   accent_mark: ["none", "swash"],
   /** A drawn sprig of leaves by the words, for the eye only. */
   ornament: ["none", "leaves"],
+  /** The heading in one face, or set light with its second part inline in an italic serif (the accent face). */
+  title_mix: ["none", "serif_accent"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -55,6 +57,7 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   button_icon: "none",
   accent_mark: "none",
   ornament: "none",
+  title_mix: "none",
 }
 
 export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
@@ -90,6 +93,7 @@ export function heroFullSettingsOf(
     button_icon: heroFullStepOf("button_icon", section.button_icon),
     accent_mark: heroFullStepOf("accent_mark", section.accent_mark),
     ornament: heroFullStepOf("ornament", section.ornament),
+    title_mix: heroFullStepOf("title_mix", section.title_mix),
   }
 }
 

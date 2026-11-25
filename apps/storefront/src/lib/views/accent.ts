@@ -15,7 +15,13 @@ export const ACCENT_FONT_VARIABLES: Readonly<Record<Exclude<AccentFont, "none">,
   caveat: "--font-caveat",
   "dancing-script": "--font-dancing-script",
   kalam: "--font-kalam",
+  "dm-serif": "--font-dm-serif",
+  fraunces: "--font-fraunces",
+  playfair: "--font-playfair",
 }
+
+/** The serif faces among them: their fallback is a serif, not a handwriting kind. */
+const SERIF_ACCENTS: ReadonlySet<AccentFont> = new Set(["dm-serif", "fraunces", "playfair"])
 
 /**
  * The accent face as the settings hold it: a face on the list, or nothing
@@ -47,5 +53,9 @@ export const handFace = (settings: StoreThemeSettings): boolean =>
  */
 export function accentDeclarations(settings: StoreThemeSettings): string[] {
   const accent = settings.typography.accent ?? "none"
-  return accent === "none" ? [] : [`--font-accent:var(${ACCENT_FONT_VARIABLES[accent]}), cursive`]
+  if (accent === "none") {
+    return []
+  }
+  const kind = SERIF_ACCENTS.has(accent) ? "serif" : "cursive"
+  return [`--font-accent:var(${ACCENT_FONT_VARIABLES[accent]}), ${kind}`]
 }

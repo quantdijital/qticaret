@@ -51,7 +51,9 @@ const SIZES = {
  * box under them. The buttons take the shop's accent colour
  * (`button_tone`), the first an arrow after its words (`button_icon`); the
  * second line of the heading a drawn curl (`accent_mark`); a sprig of
- * leaves may stand by the words (`ornament`). Each off: drawn as before.
+ * leaves may stand by the words (`ornament`). Mixed (`title_mix`), the
+ * heading is set light and its second part follows on the same line in
+ * the accent face's italic, in the heading's ink. Each off: drawn as before.
  * The shop's trust badges, when shown, are a box over the bottom edge too,
  * under the search card, which then takes the same width (one edge for
  * both). Beside the words the photograph ends where that foot begins, so
@@ -84,6 +86,8 @@ export function HeroFull({
   const accentTone = settings.button_tone === "accent"
   const leaves = settings.ornament === "leaves"
   const centred = settings.align === "center"
+  // The heading set light, its second part inline in the accent face's italic (`hero-full-mix.css`)
+  const mixed = settings.title_mix === "serif_accent"
   const sizes = SIZES[side]
   const Heading = first ? "h1" : "h2"
   const overlap = search !== null && settings.search_position === "overlap"
@@ -102,6 +106,7 @@ export function HeroFull({
       data-scrim={settings.scrim}
       data-edge={settings.edge}
       data-foot={foot ? "" : undefined}
+      data-title-mix={mixed ? "serif_accent" : undefined}
     >
       {first && image && <Preload image={image} sizes={sizes} />}
       <div className="gf-cover-stage relative isolate flex flex-col justify-center">
@@ -167,7 +172,22 @@ export function HeroFull({
               )}
             >
               <span {...fieldMark(on, "heading")}>{hero.heading}</span>
-              {accent && (
+              {accent && mixed && (
+                <>
+                  {" "}
+                  <span {...fieldMark(on, "title_accent")} className="gf-cover-accent">
+                    {settings.accent_mark === "swash" ? (
+                      <span className="relative inline-block">
+                        {accent}
+                        <HeroSwash />
+                      </span>
+                    ) : (
+                      accent
+                    )}
+                  </span>
+                </>
+              )}
+              {accent && !mixed && (
                 <span
                   {...fieldMark(on, "title_accent")}
                   className={cn("block", inked ? "text-signal" : "text-signal-on-stage")}
