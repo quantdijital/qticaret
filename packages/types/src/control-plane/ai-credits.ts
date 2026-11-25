@@ -180,8 +180,19 @@ export const aiCreditsStatusSchema = z.discriminatedUnion("available", [
   z.strictObject({
     available: z.literal(true),
     balance: z.strictObject({
-      /** This month's grant left (K5) and the Istanbul day it renews. */
-      plan: z.strictObject({ remaining: credits, renews_on: z.iso.date() }),
+      /**
+       * This month's grant left (K5) and the Istanbul day it renews;
+       * `granted`: the month's whole grant (P5b), at least `remaining`, 0
+       * for a shop whose package gives none. Optional both ways: a control
+       * plane before P5b leaves it out and a shop reads `remaining` alone.
+       * A shop before P5b refuses it (the object is closed): shops update
+       * first.
+       */
+      plan: z.strictObject({
+        remaining: credits,
+        renews_on: z.iso.date(),
+        granted: credits.optional(),
+      }),
       /** Bought credits left (K6) and their last day; null while none were bought. */
       purchased: z.strictObject({ remaining: credits, expires_on: z.iso.date().nullable() }),
     }),

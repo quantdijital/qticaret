@@ -102,6 +102,24 @@ describe("the gateway's shapes", () => {
     expect(aiCreditsStatusSchema.safeParse(status).success).toBe(false)
   })
 
+  it("reads the month's whole grant when it comes and goes on without it (P5b)", () => {
+    const granted = {
+      ...STATUS,
+      balance: { ...STATUS.balance, plan: { ...STATUS.balance.plan, granted: 200 } },
+    }
+    expect(aiCreditsStatusSchema.parse(granted)).toEqual(granted)
+    const none = {
+      ...STATUS,
+      balance: { ...STATUS.balance, plan: { remaining: 0, renews_on: "2026-12-01", granted: 0 } },
+    }
+    expect(aiCreditsStatusSchema.safeParse(none).success).toBe(true)
+    for (const bad of [-1, 1.5, "200", null]) {
+      const plan = { ...STATUS.balance.plan, granted: bad }
+      const status = { ...STATUS, balance: { ...STATUS.balance, plan } }
+      expect(aiCreditsStatusSchema.safeParse(status).success).toBe(false)
+    }
+  })
+
   it("takes a task the shop does not know yet in the gateway's table", () => {
     const newer = { ...STATUS, table: { ...STATUS.table, video_clip: 80 } }
     expect(aiCreditsStatusSchema.safeParse(newer).success).toBe(true)
