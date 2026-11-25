@@ -7,6 +7,9 @@
 //
 //   ci-unit-groups.mjs --all          every group (dev, main, a full run)
 //   git diff --name-only ... | ci-unit-groups.mjs   the groups those files reach
+//   git diff --name-only ... | ci-unit-groups.mjs --reaches <package>
+//                                     true if those files reach that package
+//                                     (it or a workspace it depends on changed)
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { pathToFileURL } from "node:url"
@@ -53,8 +56,8 @@ export function readWorkspaces(root) {
   return workspaces
 }
 
-/** The groups `files` reach through `workspaces`, in job order. */
-export function unitGroups(workspaces, files) {
+/** The workspaces `files` change, and every workspace depending on those. */
+export function reachedWorkspaces(workspaces, files) {
   // A file belongs to the workspace with the longest folder holding it
   const owner = (file) =>
     workspaces
@@ -76,6 +79,12 @@ export function unitGroups(workspaces, files) {
       }
     }
   }
+  return reached
+}
+
+/** The groups `files` reach through `workspaces`, in job order. */
+export function unitGroups(workspaces, files) {
+  const reached = reachedWorkspaces(workspaces, files)
   const groups = new Set(
     workspaces
       .filter((workspace) => workspace.tested && reached.has(workspace.name))
@@ -87,6 +96,10 @@ export function unitGroups(workspaces, files) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (process.argv[2] === "--all") {
     process.stdout.write(`${JSON.stringify(GROUPS)}\n`)
+  } else if (process.argv[2] === "--reaches") {
+    const files = readFileSync(0, "utf8").split("\n").filter(Boolean)
+    const reached = reachedWorkspaces(readWorkspaces(process.cwd()), files)
+    process.stdout.write(`${String(reached.has(process.argv[3]))}\n`)
   } else {
     const files = readFileSync(0, "utf8").split("\n").filter(Boolean)
     const groups = unitGroups(readWorkspaces(process.cwd()), files)

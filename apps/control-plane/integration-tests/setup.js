@@ -22,4 +22,17 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   // no test makes a database or starts a shop
   process.env.CP_PROVISIONER = "fake"
   process.env.CP_LOCAL_PG_ADMIN_URL = ""
+  // No scheduled job runs while a file's tests do (src/jobs): on the clock
+  // they would bill, push plan documents to and probe the test's own shops
+  // between its steps (billing at :07, pushes every minute), a race the test
+  // did not ask for. A test wanting a job's work calls its function. Medusa's
+  // own switch (defineFileConfig's isDisabled), keyed by the path its job
+  // loader reads each file from
+  const { defineFileConfig } = require("@medusajs/framework/utils")
+  const { readdirSync } = require("node:fs")
+  const { join } = require("node:path")
+  const jobs = join(__dirname, "..", "src", "jobs")
+  for (const file of readdirSync(jobs)) {
+    defineFileConfig({ path: join(jobs, file), isDisabled: () => true })
+  }
 }
