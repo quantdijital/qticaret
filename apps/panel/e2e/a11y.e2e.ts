@@ -92,17 +92,20 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
-  // A variant's dialog, each of its tabs; a product of one variant has the fields in its card
+  // A variant's row open in place (the owner, 2026-11-25), its options' editor and the bulk
+  // bar; a product of one variant has the fields in its card
   const rows = page.locator("[data-variant-row]")
   if ((await rows.count()) > 0) {
     await rows.first().click()
-    const dialog = page.getByRole("dialog", { name: "Varyantı düzenle" })
-    for (const tab of ["Fiyat ve stok", "Kodlar ve ölçüler", "Görseller"]) {
-      await dialog.getByRole("tab", { name: tab }).click()
-      expect(await seriousIssues(page)).toEqual([])
-    }
-    await page.keyboard.press("Escape")
-    await expect(dialog).toBeHidden()
+    const form = page.getByRole("form", { name: "Varyantı düzenle" })
+    await expect(form).toBeVisible()
+    expect(await seriousIssues(page)).toEqual([])
+    await rows.first().click()
+    await expect(form).toBeHidden()
+    await page.getByRole("button", { name: "Seçenekleri düzenle" }).click()
+    await expect(page.locator("[data-variant-options]")).toBeVisible()
+    expect(await seriousIssues(page)).toEqual([])
+    await page.locator("[data-variant-options]").getByRole("button", { name: "Vazgeç" }).click()
   } else {
     await expect(page.locator("#product-variant-codes")).toBeVisible()
   }

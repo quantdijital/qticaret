@@ -3487,12 +3487,7 @@
         "valuesPlaceholder": "Değer yazıp Enter'a basın: S, M, L",
         "removeValue": "{{value}} değerini kaldır",
         "remove": "Seçeneği kaldır",
-        "suggestions": [
-          "Beden",
-          "Renk",
-          "Boyut",
-          "Malzeme"
-        ]
+        "suggestions": ["Beden", "Renk", "Boyut", "Malzeme"]
       },
       "pricingCard": "Fiyat ve stok",
       "pricingHint": "Fiyatlar KDV dahil girilir.",

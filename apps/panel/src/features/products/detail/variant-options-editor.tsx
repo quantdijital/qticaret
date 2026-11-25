@@ -260,7 +260,7 @@ export function VariantOptionsEditor({
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="cancel"
             size="sm"
             disabled={apply.isPending}
             onClick={() => {
