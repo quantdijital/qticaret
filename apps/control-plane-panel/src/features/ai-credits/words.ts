@@ -46,3 +46,13 @@ export function actorText(t: TFunction, actor: string, me: Me | undefined): stri
   }
   return actor
 }
+
+const SERVICES = ["deepseek", "minimax", "gemini", "photoroom", "fake"] as const
+
+/** A service by its name ("Google Gemini"); one this panel does not know yet by its id. */
+export const serviceName = (t: TFunction, service: string) =>
+  (SERVICES as readonly string[]).includes(service) ? t(`aiCredits.services.${service}`) : service
+
+/** A capability in words ("Metin yazma"). */
+export const capabilityName = (t: TFunction, capability: string) =>
+  t(`aiCredits.capabilities.${capability}`, { defaultValue: capability })

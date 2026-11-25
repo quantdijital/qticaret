@@ -1,4 +1,5 @@
 import {
+  Bot,
   Coins,
   CreditCard,
   GitBranch,
@@ -24,6 +25,7 @@ export interface NavItem {
     | "/packages"
     | "/payments"
     | "/ai-orders"
+    | "/ai-settings"
     | "/releases"
     | "/staff"
     | "/audit-log"
@@ -67,6 +69,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { key: "staff", icon: Users, to: "/staff", roles: OWNER },
       { key: "audit", icon: ScrollText, to: "/audit-log", roles: OWNER },
       { key: "keys", icon: KeyRound, to: "/keys", roles: OWNER },
+      { key: "aiSettings", icon: Bot, to: "/ai-settings", roles: OWNER },
     ],
   },
 ]

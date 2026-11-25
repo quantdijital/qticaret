@@ -17,6 +17,7 @@ import { Route as NoAccessRouteImport } from "./routes/no-access"
 import { Route as AppIndexRouteImport } from "./routes/_app/index"
 import { Route as AppAccountRouteImport } from "./routes/_app/account"
 import { Route as AppAiOrdersRouteImport } from "./routes/_app/ai-orders"
+import { Route as AppAiSettingsRouteImport } from "./routes/_app/ai-settings"
 import { Route as AppAuditLogRouteImport } from "./routes/_app/audit-log"
 import { Route as AppKeysRouteImport } from "./routes/_app/keys"
 import { Route as AppPackagesRouteImport } from "./routes/_app/packages"
@@ -65,6 +66,11 @@ const AppAccountRoute = AppAccountRouteImport.update({
 const AppAiOrdersRoute = AppAiOrdersRouteImport.update({
   id: "/ai-orders",
   path: "/ai-orders",
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiSettingsRoute = AppAiSettingsRouteImport.update({
+  id: "/ai-settings",
+  path: "/ai-settings",
   getParentRoute: () => AppRoute,
 } as any)
 const AppAuditLogRoute = AppAuditLogRouteImport.update({
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   "/no-access": typeof NoAccessRoute
   "/account": typeof AppAccountRoute
   "/ai-orders": typeof AppAiOrdersRoute
+  "/ai-settings": typeof AppAiSettingsRoute
   "/audit-log": typeof AppAuditLogRoute
   "/keys": typeof AppKeysRoute
   "/packages": typeof AppPackagesRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   "/no-access": typeof NoAccessRoute
   "/account": typeof AppAccountRoute
   "/ai-orders": typeof AppAiOrdersRoute
+  "/ai-settings": typeof AppAiSettingsRoute
   "/audit-log": typeof AppAuditLogRoute
   "/keys": typeof AppKeysRoute
   "/packages": typeof AppPackagesRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   "/no-access": typeof NoAccessRoute
   "/_app/account": typeof AppAccountRoute
   "/_app/ai-orders": typeof AppAiOrdersRoute
+  "/_app/ai-settings": typeof AppAiSettingsRoute
   "/_app/audit-log": typeof AppAuditLogRoute
   "/_app/keys": typeof AppKeysRoute
   "/_app/packages": typeof AppPackagesRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | "/no-access"
     | "/account"
     | "/ai-orders"
+    | "/ai-settings"
     | "/audit-log"
     | "/keys"
     | "/packages"
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | "/no-access"
     | "/account"
     | "/ai-orders"
+    | "/ai-settings"
     | "/audit-log"
     | "/keys"
     | "/packages"
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | "/no-access"
     | "/_app/account"
     | "/_app/ai-orders"
+    | "/_app/ai-settings"
     | "/_app/audit-log"
     | "/_app/keys"
     | "/_app/packages"
@@ -305,6 +317,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AppAiOrdersRouteImport
       parentRoute: typeof AppRoute
     }
+    "/_app/ai-settings": {
+      id: "/_app/ai-settings"
+      path: "/ai-settings"
+      fullPath: "/ai-settings"
+      preLoaderRoute: typeof AppAiSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     "/_app/audit-log": {
       id: "/_app/audit-log"
       path: "/audit-log"
@@ -381,6 +400,7 @@ declare module "@tanstack/react-router" {
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppAiOrdersRoute: typeof AppAiOrdersRoute
+  AppAiSettingsRoute: typeof AppAiSettingsRoute
   AppAuditLogRoute: typeof AppAuditLogRoute
   AppKeysRoute: typeof AppKeysRoute
   AppPackagesRoute: typeof AppPackagesRoute
@@ -396,6 +416,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppAiOrdersRoute: AppAiOrdersRoute,
+  AppAiSettingsRoute: AppAiSettingsRoute,
   AppAuditLogRoute: AppAuditLogRoute,
   AppKeysRoute: AppKeysRoute,
   AppPackagesRoute: AppPackagesRoute,
