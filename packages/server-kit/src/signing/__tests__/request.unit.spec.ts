@@ -1,6 +1,11 @@
 import { generateKeyPairSync } from "node:crypto"
 import { MemoryNonceStore } from "../nonce-store"
-import { SIGNED_REQUEST_HEADERS, signRequest, verifySignedRequest } from "../request"
+import {
+  SIGNED_REQUEST_HEADERS,
+  precheckSignedRequest,
+  signRequest,
+  verifySignedRequest,
+} from "../request"
 import type { IncomingSignedRequest, VerifyRequestOptions } from "../request"
 import { signerFromPrivateKey } from "../ed25519"
 
@@ -197,5 +202,20 @@ describe("signed requests", () => {
   it("refuses to sign a malformed path or tenant id", () => {
     expect(() => signed({ path: "/a b" })).toThrow(TypeError)
     expect(() => signed({ tenantId: "ten a" })).toThrow(TypeError)
+  })
+
+  it("prechecks the headers and the time before the body, as verifying does", async () => {
+    const { headers } = signed()
+    const now = () => NOW
+    expect(precheckSignedRequest(headers, { now })).toBeNull()
+    const missing = { ...headers, [SIGNED_REQUEST_HEADERS.nonce]: undefined }
+    expect(precheckSignedRequest(missing, { now })).toBe("signature.missing_header")
+    const broken = { ...headers, [SIGNED_REQUEST_HEADERS.signature]: "x" }
+    expect(precheckSignedRequest(broken, { now })).toBe("signature.malformed")
+    expect(precheckSignedRequest(headers, { now: () => NOW + 301_000 })).toBe("signature.stale")
+    // The same codes the full check gives the same requests
+    const options = setup(NOW + 301_000)
+    const late = await verifySignedRequest(signed(), options)
+    expect(late).toEqual({ ok: false, code: "signature.stale" })
   })
 })

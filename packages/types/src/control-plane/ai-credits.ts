@@ -274,7 +274,9 @@ export type AiCallResponseHeaders = z.infer<typeof aiCallResponseHeadersSchema>
  * service does not take, more than the task's input), a body over 6 MB;
  * and, once charged, a provider that did not answer (no connection, a
  * reset or too large answer: 502) or not in time (504): no provider status
- * to pass on, the credit headers say what was kept.
+ * to pass on, the credit headers say what was kept. `busy`: the shop has
+ * as many calls in flight as it may (or the gateway as it may in all), no
+ * credit taken; tried again once one ends.
  */
 export const AI_GATEWAY_REFUSALS = Object.freeze({
   credits_exhausted: 402,
@@ -287,6 +289,7 @@ export const AI_GATEWAY_REFUSALS = Object.freeze({
   body_too_large: 413,
   provider_unreachable: 502,
   provider_timeout: 504,
+  busy: 429,
 } as const)
 export type AiGatewayRefusalCode = keyof typeof AI_GATEWAY_REFUSALS
 export const AI_GATEWAY_REFUSAL_CODES = Object.keys(AI_GATEWAY_REFUSALS) as [

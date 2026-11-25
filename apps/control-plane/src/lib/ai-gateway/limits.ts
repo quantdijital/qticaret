@@ -112,6 +112,19 @@ export const maxImagesOf = (task: AiCreditTask, capability: AiCreditCapability):
   capability === "text" ? 0 : AI_TASK_LIMITS[task].maxImages
 
 /**
+ * Calls in flight at once (security review of P3b O2, in-flight.ts): four
+ * a shop (its own bulk work runs a few at a time), 32 in this process.
+ */
+export const AI_GATEWAY_MAX_IN_FLIGHT_PER_SHOP = 4
+export const AI_GATEWAY_MAX_IN_FLIGHT = 32
+
+/**
+ * How long a call's body may take to arrive (O2): past it the request is
+ * answered 408 and its connection closed, before the signature is checked.
+ */
+export const AI_GATEWAY_BODY_TIMEOUT_MS = 30_000
+
+/**
  * How long the provider has (adr/0085 §2): text and pictures read 60 s,
  * a picture edited 120 s (the shop's own timeouts). Past it the call is
  * abandoned and its credits stay taken: the provider may have done (and

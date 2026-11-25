@@ -163,6 +163,7 @@ describe("the gateway's shapes", () => {
     expect([...AI_GATEWAY_REFUSAL_CODES].sort()).toEqual([
       "body_refused",
       "body_too_large",
+      "busy",
       "call_cap",
       "credits_exhausted",
       "daily_cap",

@@ -150,6 +150,35 @@ function readHeaders(
 }
 
 /**
+ * What can be refused of a signed request before its body is read: the
+ * headers' presence and shape and the time, the same checks (and codes)
+ * `verifySignedRequest` starts with; null when they pass. No key is looked
+ * up, so an unknown key still answers only after the body, as a wrong
+ * signature does. For a route that reads a large body (the AI gateway's).
+ */
+export function precheckSignedRequest(
+  headers: IncomingSignedRequest["headers"],
+  options: Pick<VerifyRequestOptions, "now" | "maxSkewSeconds"> = {}
+): SignedRequestErrorCode | null {
+  const values = readHeaders(headers)
+  if (typeof values === "string") {
+    return values
+  }
+  if (
+    !ID.test(values.tenant) ||
+    !ID.test(values.keyId) ||
+    !TIMESTAMP.test(values.timestamp) ||
+    !NONCE.test(values.nonce) ||
+    !SIGNATURE.test(values.signature)
+  ) {
+    return "signature.malformed"
+  }
+  const now = Math.floor((options.now ?? Date.now)() / 1000)
+  const skew = options.maxSkewSeconds ?? DEFAULT_MAX_SKEW_SECONDS
+  return Math.abs(now - Number(values.timestamp)) > skew ? "signature.stale" : null
+}
+
+/**
  * Checks shape, time, key and signature, and only then claims the nonce, so
  * an unsigned request cannot use up someone's nonces. Never throws on input.
  */
