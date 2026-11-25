@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { POPUP_LAYOUTS, POPUP_LIMITS } from "@/features/popups/api/types"
 import type { PopupLayout } from "@/features/popups/api/types"
 import type { PopupValues } from "@/features/popups/form"
+import { DesignPicker } from "./design-picker"
 import { NumberInput } from "./number-input"
 
 const F = "popups.form"
@@ -30,9 +31,10 @@ function LayoutShape({ layout }: { layout: PopupLayout }) {
 }
 
 /**
- * Görünüm (adr/0080 §6): a centred window or a corner card on a wide
- * screen (a phone draws both as a bottom sheet); under "Gelişmiş", which
- * one wins when two could show on the same page.
+ * Görünüm (adr/0080 §6): the design inside (§6a), then a centred window
+ * or a corner card on a wide screen (a phone draws both as a bottom
+ * sheet); under "Gelişmiş", which one wins when two could show on the
+ * same page.
  */
 export function LookCard() {
   const { t } = useTranslation()
@@ -43,29 +45,36 @@ export function LookCard() {
   return (
     <SectionCard title={t(`${F}.look`)}>
       <div className="flex flex-col gap-4">
-        <Controller
-          control={control}
-          name="layout"
-          render={({ field }) => (
-            <RadioGroup
-              value={field.value}
-              aria-label={t(`${F}.layout`)}
-              onValueChange={field.onChange}
-              className="grid gap-2 sm:grid-cols-2"
-            >
-              {POPUP_LAYOUTS.map((layout) => (
-                <label
-                  key={layout}
-                  className="flex cursor-pointer items-center gap-3 rounded-md border p-3 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
-                >
-                  <RadioGroupItem value={layout} />
-                  <LayoutShape layout={layout} />
-                  <span className="font-medium">{t(`popups.choices.layout.${layout}`)}</span>
-                </label>
-              ))}
-            </RadioGroup>
-          )}
-        />
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">{t(`${F}.design`)}</span>
+          <DesignPicker />
+        </div>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">{t(`${F}.layout`)}</span>
+          <Controller
+            control={control}
+            name="layout"
+            render={({ field }) => (
+              <RadioGroup
+                value={field.value}
+                aria-label={t(`${F}.layout`)}
+                onValueChange={field.onChange}
+                className="grid gap-2 sm:grid-cols-2"
+              >
+                {POPUP_LAYOUTS.map((layout) => (
+                  <label
+                    key={layout}
+                    className="flex cursor-pointer items-center gap-3 rounded-md border p-3 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
+                  >
+                    <RadioGroupItem value={layout} />
+                    <LayoutShape layout={layout} />
+                    <span className="font-medium">{t(`popups.choices.layout.${layout}`)}</span>
+                  </label>
+                ))}
+              </RadioGroup>
+            )}
+          />
+        </div>
         <div className="flex flex-col gap-3">
           <button
             type="button"

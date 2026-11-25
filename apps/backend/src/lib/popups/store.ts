@@ -1,6 +1,7 @@
 import type { PopupPromotion, PopupRecord } from "./eligibility"
 import { earlierEnd } from "./eligibility"
 import type {
+  PopupDesign,
   PopupDevice,
   PopupFrequency,
   PopupLayout,
@@ -48,6 +49,8 @@ export interface StorePopup {
   trigger: { kind: PopupTrigger; value: number }
   frequency: { kind: PopupFrequency; days: number | null }
   layout: PopupLayout
+  /** How it looks inside; a theme that lacks one draws `classic`. */
+  design: PopupDesign
   priority: number
   /** When it stops showing (its own end or its campaign's, the earlier); null: open. */
   ends_at: string | null
@@ -91,6 +94,7 @@ export function storePopupOf(popup: PopupRecord, parts: StorePopupParts): StoreP
       days: popup.frequency === "days" ? popup.frequency_days : null,
     },
     layout: popup.layout,
+    design: popup.design,
     priority: popup.priority,
     ends_at: earlierEnd(
       popup.ends_at,

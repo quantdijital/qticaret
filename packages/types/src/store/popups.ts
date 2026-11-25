@@ -8,6 +8,9 @@ import type { MediaDerivatives } from "./catalog.js"
 
 export type StorePopupType = "info" | "campaign" | "newsletter"
 
+/** How a pop-up looks inside; `classic` is the first design, every older pop-up's. */
+export type StorePopupDesign = "classic" | "split" | "hero" | "minimal" | "coupon"
+
 /** The pages a pop-up may target; `all` adds every other page but the blocked ones. */
 export type StorePopupPage = "home" | "category" | "product" | "content"
 
@@ -43,6 +46,8 @@ export interface StorePopup {
   frequency: { kind: "session" | "days" | "until_closed"; days: number | null }
   /** A wide screen's dialog or corner card; a phone draws either as a bottom sheet. */
   layout: "modal" | "corner"
+  /** How it looks inside (adr/0080 §6a), whatever its type and place. */
+  design: StorePopupDesign
   priority: number
   /** ISO time it stops showing; null: open. */
   ends_at: string | null

@@ -1,4 +1,10 @@
-import type { PopupEventType, PopupPageKind, PopupSetup, PopupView } from "@qticaret/ui"
+import type {
+  PopupDesign,
+  PopupEventType,
+  PopupPageKind,
+  PopupSetup,
+  PopupView,
+} from "@qticaret/ui"
 import type { StorePopup } from "@qticaret/types/popups"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { imageView } from "./image"
@@ -50,6 +56,12 @@ export function popupPageOfEntity(entityType: string): PopupPageKind {
   }
 }
 
+const DESIGNS: readonly string[] = ["classic", "split", "hero", "minimal", "coupon"]
+
+/** The pop-up's design; one this storefront does not know (a newer backend's) is drawn `classic`. */
+const designOf = (design: unknown): PopupDesign =>
+  typeof design === "string" && DESIGNS.includes(design) ? (design as PopupDesign) : "classic"
+
 /**
  * One pop-up as the theme draws it: the backend's answer with its picture
  * as the theme's image (its versions, its size for the dialog's place).
@@ -69,6 +81,7 @@ export function popupView(popup: StorePopup): PopupView {
     trigger: popup.trigger,
     frequency: popup.frequency,
     layout: popup.layout,
+    design: designOf(popup.design),
     priority: popup.priority,
     endsAt: popup.ends_at,
   }

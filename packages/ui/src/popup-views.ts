@@ -10,6 +10,14 @@ import type { ImageView } from "./views"
 
 export type PopupType = "info" | "campaign" | "newsletter"
 
+/**
+ * How a pop-up looks inside (adr/0080 §6a), whatever its type and place:
+ * `classic` the picture above the words; `split` the picture beside them
+ * on a wide screen; `hero` a tall picture, the words centred under it;
+ * `minimal` the words alone, centred; `coupon` a ticket with the code large.
+ */
+export type PopupDesign = "classic" | "split" | "hero" | "minimal" | "coupon"
+
 /** A page a pop-up may name; `all` takes every other page too but the blocked ones. */
 export type PopupTargetPage = "home" | "category" | "product" | "content"
 
@@ -50,6 +58,8 @@ export interface PopupView {
   frequency: { kind: "session" | "days" | "until_closed"; days: number | null }
   /** A wide screen's dialog in the middle or a card in the corner; a phone always a bottom sheet. */
   layout: "modal" | "corner"
+  /** How it looks inside; a theme without one draws `classic`. */
+  design: PopupDesign
   priority: number
   /** ISO time it stops showing; null: open. */
   endsAt: string | null

@@ -21,8 +21,11 @@ import { useFieldError } from "./use-field-error"
 
 const F = "popups.form"
 
-/** The pop-up's type, its words, picture and button (adr/0080 §2). */
-export function ContentCard() {
+/**
+ * The pop-up's type, its words, picture and button (adr/0080 §2). On a new
+ * one whose design is untouched, the design follows the type's suggestion.
+ */
+export function ContentCard({ isNew = false }: { isNew?: boolean }) {
   const { t } = useTranslation()
   const form = useFormContext<PopupValues>()
   const { register, control } = form
@@ -45,7 +48,11 @@ export function ContentCard() {
             <Select
               value={type}
               onValueChange={(next) => {
-                const values = switchType(form.getValues(), next as PopupType)
+                const values = switchType(form.getValues(), next as PopupType, {
+                  suggest: isNew && !form.getFieldState("design").isDirty,
+                })
+                // A suggestion, not a choice: the design stays free to follow the next type
+                form.setValue("design", values.design)
                 form.setValue("type", values.type, { shouldDirty: true })
                 form.setValue("promotion_id", values.promotion_id, { shouldDirty: true })
                 form.setValue("button_href", values.button_href, { shouldDirty: true })
