@@ -1,4 +1,5 @@
 import { answerContentType, providerHeaders } from "./headers"
+import { platformFault, readableAnswerType } from "./provider-errors"
 import type { GatewayTarget } from "./target"
 
 /**
@@ -95,12 +96,13 @@ export async function forwardCall(input: ForwardInput): Promise<ForwardOutcome> 
     if (body === null) {
       return { kind: "failed", code: "answer_too_large" }
     }
-    return {
-      kind: "answered",
-      status: response.status,
-      contentType: answerContentType(response.headers.get("content-type")),
-      body,
+    const contentType = answerContentType(response.headers.get("content-type"))
+    const ok = response.status >= 200 && response.status < 300
+    // A success the shop cannot read (D2): no answer, the work maybe done
+    if (ok && !readableAnswerType(contentType)) {
+      return { kind: "failed", code: "answer_type" }
     }
+    return { kind: "answered", status: response.status, contentType, body }
   } catch {
     return deadline.aborted
       ? { kind: "timeout", code: "timeout" }
@@ -133,7 +135,8 @@ const NOT_TAKEN_STATUSES: ReadonlySet<number> = new Set([401, 402, 403, 429])
  * Whether the provider never took the call (adr/0085 §1, the shop's
  * `notTakenByService`): never connected; a refused key (401, 403), no
  * balance (402), busy or out of quota (429), down (5xx); a 200 whose body
- * code says one of these. A timeout, a cut answer, a 408 or any other
+ * code says one of these; the platform's own failure (a 404, its key refused
+ * in a 400: provider-errors.ts). A timeout, a cut answer, a 408 or any other
  * 4xx may have been charged: the credits stay.
  */
 export function notTaken(outcome: ForwardOutcome, target: GatewayTarget): boolean {
@@ -144,7 +147,8 @@ export function notTaken(outcome: ForwardOutcome, target: GatewayTarget): boolea
     return false
   }
   const { status } = outcome
-  if (NOT_TAKEN_STATUSES.has(status) || status >= 500) {
+  // The platform's own failure (a model gone, its key refused in a 400): not the shop's to pay
+  if (NOT_TAKEN_STATUSES.has(status) || status >= 500 || platformFault(status, outcome.body)) {
     return true
   }
   if (status >= 200 && status < 300 && target.notTakenBodyCodes.length > 0) {

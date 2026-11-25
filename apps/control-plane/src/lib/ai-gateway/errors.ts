@@ -1,9 +1,12 @@
 import { AI_CALL_RESPONSE_HEADERS, AI_GATEWAY_REFUSALS } from "@qticaret/types/control-plane"
 import type { AiGatewayRefusalCode } from "@qticaret/types/control-plane"
+import type { ForwardOutcome } from "./forward"
+import { normalizedErrorBody, platformFault } from "./provider-errors"
 
 /**
- * What the gateway answers a call (adr/0085 §2). A provider's answer
- * passes with its status, its type and its bytes, plus the credits this
+ * What the gateway answers a call (adr/0085 §2). A provider's 2xx answer
+ * passes with its status, its type and its bytes (a failure's body only as
+ * `answerOf` writes it), plus the credits this
  * call charged and the wallet left. The gateway's own refusal is told
  * apart by `x-qt-ai-refusal` and its envelope `{ qt_ai_gateway: { code } }`,
  * with the code's own status, so a shop never takes it for a provider's
@@ -60,6 +63,39 @@ export function passedOn(
     },
     body: answer.body,
   }
+}
+
+/**
+ * What the shop gets for a provider's outcome: a 2xx as it came; a
+ * non-2xx with its status and only the codes the shop maps
+ * (provider-errors.ts, D2); `unavailable` for an answer that may quote
+ * the key or a failure that is the platform's own (D3); no answer at
+ * all (no connection, a reset, a cut, an unreadable 2xx) 502, a timeout
+ * 504.
+ */
+export function answerOf(
+  outcome: ForwardOutcome,
+  context: { echoes: boolean; service: string },
+  note: CreditNote
+): GatewayAnswer {
+  if (outcome.kind !== "answered") {
+    return refusal(outcome.kind === "timeout" ? "provider_timeout" : "provider_unreachable", note)
+  }
+  const { status, body } = outcome
+  if (context.echoes || platformFault(status, body)) {
+    return refusal("unavailable", note)
+  }
+  if (status >= 200 && status < 300) {
+    return passedOn(outcome, note)
+  }
+  return passedOn(
+    {
+      status,
+      contentType: "application/json",
+      body: normalizedErrorBody(context.service, status, body),
+    },
+    note
+  )
 }
 
 /** Whether an answer may hold the key's words: a refused key's, or one that has it in full. */
