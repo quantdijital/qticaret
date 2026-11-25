@@ -9,6 +9,7 @@ import { ATOLYE_COLORS } from "@/theme/atolye"
 import { useProblemText } from "./forms/problem-text"
 import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
+import { ListingPageGroup } from "./theme-listing-page-fields"
 import { KitChoice } from "./theme-style-kit-fields"
 import { ListingTextGroup } from "./theme-listing-text-fields"
 import { SearchFormGroup } from "./theme-search-form-fields"
@@ -64,7 +65,12 @@ export function ThemeForm({
   const { colors } = theme
   const toGrafit = () => {
     // The search box's fields are not the look (adr/0077 §1): the shop's stay
-    onChange({ ...theme, ...GRAFIT_THEME, search_form: theme.search_form })
+    onChange({
+      ...theme,
+      ...GRAFIT_THEME,
+      search_form: theme.search_form,
+      listing_page: theme.listing_page,
+    })
     toast.success(t(`${C}.grafit.done`), {
       action: { label: t("storefront.editor.undo"), onClick: onUndo },
     })
@@ -120,6 +126,13 @@ export function ThemeForm({
       <ListingTextGroup
         theme={theme}
         reveal={reveal("listingText")}
+        onChange={(next) => {
+          onChange(next)
+        }}
+      />
+      <ListingPageGroup
+        theme={theme}
+        reveal={reveal("listingPage")}
         onChange={(next) => {
           onChange(next)
         }}

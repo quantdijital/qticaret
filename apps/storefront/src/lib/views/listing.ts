@@ -1,3 +1,5 @@
+import { LISTING_VIEWS, LISTING_VIEW_PARAM, LISTING_VIEW_WORDS } from "@qticaret/types/listing-page"
+import type { ListingViewMode } from "@qticaret/types/listing-page"
 import type { ListingSort, ListingView } from "@qticaret/types"
 import { DATED_NAMES, appendDated, datedFromSearch, isDated } from "./dated-search"
 import type { DatedState } from "./dated-search"
@@ -19,6 +21,18 @@ export interface ListingState {
   q?: string | null
   /** A search's category, dates and party (adr/0077 §2), written after the filters. */
   dated?: DatedState
+  /**
+   * The grid or list the shopper chose (`gorunum`), written last; none:
+   * the shop's own. Never the backend's: it is not in the listing's query.
+   */
+  view?: ListingViewMode | null
+}
+
+/** `gorunum`'s value as the shopper's choice; anything else is none. */
+export function viewAsked(search: URLSearchParams): ListingViewMode | null {
+  const value = search.getAll(LISTING_VIEW_PARAM).at(-1)?.trim()
+  const found = LISTING_VIEWS.find((mode) => LISTING_VIEW_WORDS[mode] === value)
+  return found ?? null
 }
 
 const BRAND = "marka"
@@ -77,11 +91,18 @@ export function searchOf(state: ListingState): string {
   if (state.page > 1) {
     params.append("sayfa", String(state.page))
   }
+  if (state.view) {
+    params.append(LISTING_VIEW_PARAM, LISTING_VIEW_WORDS[state.view])
+  }
   return params.toString().replace(/%2C/g, ",")
 }
 
-/** The listing's own query as the listing route reads it (`query=`): the search's words aside. */
-export const listingQueryOf = (state: ListingState): string => searchOf({ ...state, q: null })
+/**
+ * The listing's own query as the listing route reads it (`query=`): the
+ * search's words and the shopper's grid or list aside.
+ */
+export const listingQueryOf = (state: ListingState): string =>
+  searchOf({ ...state, q: null, view: null })
 
 export const hrefOf = (pathname: string, state: ListingState): string => {
   const search = searchOf(state)
@@ -146,7 +167,16 @@ export function priceAsked(search: URLSearchParams): ListingState["price"] | und
 const SORTS = new Set(["yeni", "fiyat-artan", "fiyat-azalan", "kalkis"])
 const VALUE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/
 const KEY = /^[a-z][a-z0-9_]{0,63}$/
-const OWN = new Set(["fiyat", "sirala", "sayfa", "fiyat_en_az", "fiyat_en_cok", "q", "variant"])
+const OWN = new Set([
+  "fiyat",
+  "sirala",
+  "sayfa",
+  "fiyat_en_az",
+  "fiyat_en_cok",
+  "q",
+  "variant",
+  LISTING_VIEW_PARAM,
+])
 
 /**
  * A listing's state read from its own address, for a page resolve does
@@ -172,8 +202,10 @@ export function stateFromSearch(search: URLSearchParams): ListingState {
   const sort = search.get("sirala")
   const page = Number(search.get("sayfa") ?? "1")
   const dated = datedFromSearch(search)
+  const view = viewAsked(search)
   return normalized({
     ...(isDated(dated) || dated.pax > 1 ? { dated } : {}),
+    ...(view ? { view } : {}),
     filters,
     price:
       price && (price[1] !== undefined || price[2] !== undefined)

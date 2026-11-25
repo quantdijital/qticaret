@@ -14,6 +14,12 @@ import {
   withListingTextDefaults,
 } from "./theme-listing-text"
 import type { ListingTextSettings } from "./theme-listing-text"
+import {
+  LISTING_PAGE_DEFAULTS,
+  listingPageSchema,
+  withListingPageDefaults,
+} from "./theme-listing-page"
+import type { ListingPageSettings } from "./theme-listing-page"
 import { SEARCH_FORM_DEFAULTS, searchFormSchema, withSearchFormDefaults } from "./theme-search-form"
 import type { SearchFormSettings } from "./theme-search-form"
 import { STYLE_KIT_DEFAULTS, styleKitSchema, withStyleKitDefaults } from "./theme-style-kit"
@@ -32,6 +38,8 @@ export {
 export type { ProductCardSettings } from "./theme-card"
 export { LISTING_TEXT, LISTING_TEXT_DEFAULTS, withListingTextDefaults } from "./theme-listing-text"
 export type { ListingTextSettings } from "./theme-listing-text"
+export { LISTING_PAGE, LISTING_PAGE_DEFAULTS, withListingPageDefaults } from "./theme-listing-page"
+export type { ListingPageSettings } from "./theme-listing-page"
 export { SEARCH_FORM_DEFAULTS } from "./theme-search-form"
 export type { SearchFormSettings } from "./theme-search-form"
 export { STYLE_KIT, STYLE_KIT_DEFAULTS, withStyleKitDefaults } from "./theme-style-kit"
@@ -140,6 +148,8 @@ export interface ThemeSettings extends StyleKitSettings {
   surface_style: (typeof SURFACE_STYLES)[number]
   /** A category, brand or collection page's own text at its foot (adr/0075). */
   listing_text: ListingTextSettings
+  /** A listing page's products as a grid or a list, its switch and its trail. */
+  listing_page: ListingPageSettings
   /** The search box's fields (adr/0077 §1). */
   search_form: SearchFormSettings
 }
@@ -201,6 +211,7 @@ const GRAFIT: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: LISTING_TEXT_DEFAULTS,
+  listing_page: LISTING_PAGE_DEFAULTS,
   search_form: SEARCH_FORM_DEFAULTS,
   ...STYLE_KIT_DEFAULTS,
 }
@@ -226,7 +237,9 @@ export function withCardDefaults(value: unknown): unknown {
     value = { ...value, surface_style: GRAFIT.surface_style }
   }
   // And the style kit (adr/0067): without a field, today's drawing; the listing text's too (adr/0075)
-  value = withSearchFormDefaults(withListingTextDefaults(withStyleKitDefaults(value)))
+  value = withSearchFormDefaults(
+    withListingPageDefaults(withListingTextDefaults(withStyleKitDefaults(value)))
+  )
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
   }
@@ -306,6 +319,7 @@ export const themeSection = defineSection<ThemeSettings>(
     section_spacing: z.enum(SECTION_SPACINGS),
     surface_style: z.enum(SURFACE_STYLES),
     listing_text: listingTextSchema,
+    listing_page: listingPageSchema,
     search_form: searchFormSchema,
     ...styleKitSchema,
   },
