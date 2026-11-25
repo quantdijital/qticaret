@@ -16,15 +16,14 @@ import { errorText } from "@/lib/errors"
  * Ayarlar › Yapay zekâ sağlayıcıları (adr/0085 §5; the owner's alone):
  * the provider keys, the routing, the platform's limits and the top-up
  * packs. Each card saves its own part; a settings card reads the settings
- * again just before it saves (the last write wins on the server).
+ * again just before it saves (the last write wins on the server) and
+ * stops if its own part changed under its draft (`useSettingsDraft`).
  */
 export function AiSettingsPage() {
   const { t } = useTranslation()
   const settings = useQuery(settingsQuery())
   const providers = useQuery(providersQuery())
   const answer = settings.data
-  // A card's draft starts again when the settings change underneath it (a key deleted unroutes)
-  const version = answer?.settings.updated_at ?? "none"
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -38,20 +37,21 @@ export function AiSettingsPage() {
         }
       />
       <ProvidersCard />
-      {settings.isError ? (
-        <ErrorState text={errorText(t, settings.error)} onRetry={() => void settings.refetch()} />
-      ) : answer && providers.data ? (
+      {/* Once read, the cards stay (a failed read again keeps them and their drafts) */}
+      {answer && providers.data ? (
         <>
-          <RoutingCard key={version} answer={answer} providers={providers.data.providers} />
+          <RoutingCard answer={answer} providers={providers.data.providers} />
           <PageGrid>
             <PageColumn span={5}>
-              <GeneralCard key={version} settings={answer.settings} />
+              <GeneralCard settings={answer.settings} />
             </PageColumn>
             <PageColumn span={7}>
               <PacksCard settings={answer.settings} />
             </PageColumn>
           </PageGrid>
         </>
+      ) : settings.isError ? (
+        <ErrorState text={errorText(t, settings.error)} onRetry={() => void settings.refetch()} />
       ) : (
         <Skeleton className="h-64 rounded-lg" />
       )}

@@ -3,59 +3,16 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { Toaster } from "@qticaret/admin-ui/patterns/toaster"
 import "@/lib/i18n"
-import type { AiCheckReason, AiSettingsAnswer } from "@/features/ai-credits/api/schemas"
+import type { AiCheckReason } from "@/features/ai-credits/api/schemas"
 import { AiSettingsPage } from "@/features/ai-credits/pages/ai-settings-page"
 import { forgetStepUp } from "@/lib/step-up"
 import { stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
+import { PROVIDERS, SETTINGS } from "@/test/ai-settings"
 import { renderAs } from "@/test/member"
 
 // Plainly fake, short: never a real key's shape
 const FAKE_KEY = "fake-key-123"
-
-const SETTINGS: AiSettingsAnswer = {
-  settings: {
-    daily_cap: 300,
-    purchased_lifetime_months: 12,
-    packs: [
-      {
-        id: "pack_00000000000000aa",
-        name: "Küçük",
-        credits: 1000,
-        amount: 19_900,
-        currency: "TRY",
-        active: true,
-      },
-    ],
-    routing: { text: { service: "deepseek", model: "deepseek-chat" } },
-    updated_at: "2026-11-24T09:00:00.000Z",
-    updated_by: "user_me",
-  },
-  targets: [
-    { service: "deepseek", capabilities: { text: ["deepseek-chat"], vision: ["deepseek-chat"] } },
-    {
-      service: "gemini",
-      capabilities: {
-        text: ["gemini-flash"],
-        vision: ["gemini-flash"],
-        image_edit: ["gemini-image"],
-      },
-    },
-  ],
-}
-
-const PROVIDERS = {
-  providers: [
-    {
-      service: "deepseek",
-      has_key: true,
-      version: 3,
-      written_at: "2026-11-20T09:00:00.000Z",
-      routed: ["text"],
-    },
-    { service: "gemini", has_key: true, version: 1, written_at: null, routed: [] },
-  ],
-}
 
 function controlPlane(verdict: () => unknown) {
   return (call: Sent): Answer => {

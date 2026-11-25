@@ -1671,7 +1671,8 @@
     "settings": {
       "title": "AI providers",
       "text": "Provider keys, routing, packs and platform limits for work on platform credits.",
-      "updated": "Last changed: {{day}}"
+      "updated": "Last changed: {{day}}",
+      "moved": "The settings changed in the meantime. Reload the page and try again."
     },
     "providers": {
       "title": "Provider keys",

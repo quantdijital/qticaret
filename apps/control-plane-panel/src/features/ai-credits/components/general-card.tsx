@@ -8,9 +8,19 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { useSaveSettings } from "@/features/ai-credits/api/mutations"
 import type { AiSettings } from "@/features/ai-credits/api/schemas"
-import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 import { DAILY_CAP_MAX } from "./daily-cap-dialog"
+import { settingsErrorText, useSettingsDraft } from "./settings-draft"
+
+const partOf = (settings: AiSettings) => ({
+  daily_cap: settings.daily_cap,
+  purchased_lifetime_months: settings.purchased_lifetime_months,
+})
+
+const toDraft = (part: ReturnType<typeof partOf>) => ({
+  cap: String(part.daily_cap),
+  months: String(part.purchased_lifetime_months),
+})
 
 // The control plane's bounds on the bought credits' life (months)
 const LIFETIME_MIN = 1
@@ -23,34 +33,38 @@ const LIFETIME_MAX = 120
 export function GeneralCard({ settings }: { settings: AiSettings }) {
   const { t } = useTranslation()
   const save = useSaveSettings()
-  const [cap, setCap] = useState(String(settings.daily_cap))
-  const [months, setMonths] = useState(String(settings.purchased_lifetime_months))
+  const { draft, setDraft, base, guard } = useSettingsDraft(settings, partOf, toDraft)
   const [failure, setFailure] = useState<string | null>(null)
-  const capValue = parseCountInput(cap)
-  const monthsValue = parseCountInput(months)
+  const capValue = parseCountInput(draft.cap)
+  const monthsValue = parseCountInput(draft.months)
   const valid =
     capValue !== null &&
     capValue <= DAILY_CAP_MAX &&
     monthsValue !== null &&
     monthsValue >= LIFETIME_MIN &&
     monthsValue <= LIFETIME_MAX
-  const dirty =
-    capValue !== settings.daily_cap || monthsValue !== settings.purchased_lifetime_months
+  const dirty = capValue !== base.daily_cap || monthsValue !== base.purchased_lifetime_months
   const submit = () => {
     if (!valid) {
       return
     }
     setFailure(null)
-    save.mutate(() => ({ daily_cap: capValue, purchased_lifetime_months: monthsValue }), {
-      onSuccess: () => {
-        toast.success(t("aiCredits.general.done"))
+    save.mutate(
+      (current) => {
+        guard(current)
+        return { daily_cap: capValue, purchased_lifetime_months: monthsValue }
       },
-      onError: (error) => {
-        if (!isStepUpCancelled(error)) {
-          setFailure(errorText(t, error))
-        }
-      },
-    })
+      {
+        onSuccess: () => {
+          toast.success(t("aiCredits.general.done"))
+        },
+        onError: (error) => {
+          if (!isStepUpCancelled(error)) {
+            setFailure(settingsErrorText(t, error))
+          }
+        },
+      }
+    )
   }
   return (
     <SectionCard
@@ -70,9 +84,9 @@ export function GeneralCard({ settings }: { settings: AiSettings }) {
             min={0}
             max={DAILY_CAP_MAX}
             suffix={t("aiCredits.unit")}
-            value={cap}
+            value={draft.cap}
             onChange={(event) => {
-              setCap(event.target.value)
+              setDraft((prev) => ({ ...prev, cap: event.target.value }))
             }}
           />
           <p className="text-[13px] text-muted-foreground">{t("aiCredits.general.dailyCapHelp")}</p>
@@ -84,9 +98,9 @@ export function GeneralCard({ settings }: { settings: AiSettings }) {
             min={LIFETIME_MIN}
             max={LIFETIME_MAX}
             suffix={t("aiCredits.general.months")}
-            value={months}
+            value={draft.months}
             onChange={(event) => {
-              setMonths(event.target.value)
+              setDraft((prev) => ({ ...prev, months: event.target.value }))
             }}
           />
           <p className="text-[13px] text-muted-foreground">{t("aiCredits.general.lifetimeHelp")}</p>

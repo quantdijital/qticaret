@@ -10,8 +10,8 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { useSaveSettings } from "@/features/ai-credits/api/mutations"
 import type { AiProvider, AiSettingsAnswer } from "@/features/ai-credits/api/schemas"
 import { capabilityName, serviceName } from "@/features/ai-credits/words"
-import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
+import { settingsErrorText, useSettingsDraft } from "./settings-draft"
 
 const OFF = "off"
 const choiceOf = (service: string, model: string) => `${service}|${model}`
@@ -61,6 +61,8 @@ const draftOf = (routing: AiSettingsAnswer["settings"]["routing"]): Draft =>
     })
   ) as Draft
 
+const keep = (draft: Draft) => draft
+
 /** Yönlendirme (adr/0085 §2): each capability's service and model, saved whole. */
 export function RoutingCard({
   answer,
@@ -71,8 +73,12 @@ export function RoutingCard({
 }) {
   const { t } = useTranslation()
   const save = useSaveSettings()
-  const saved = draftOf(answer.settings.routing)
-  const [draft, setDraft] = useState<Draft>(saved)
+  const {
+    draft,
+    setDraft,
+    base: saved,
+    guard,
+  } = useSettingsDraft(answer.settings, (settings) => draftOf(settings.routing), keep)
   const [failure, setFailure] = useState<string | null>(null)
   const keyed = new Set(providers.filter((each) => each.has_key).map((each) => each.service))
   const dirty = AI_TARGET_CAPABILITIES.some((capability) => draft[capability] !== saved[capability])
@@ -87,16 +93,22 @@ export function RoutingCard({
         ]
       })
     )
-    save.mutate(() => ({ routing }), {
-      onSuccess: () => {
-        toast.success(t("aiCredits.routing.done"))
+    save.mutate(
+      (current) => {
+        guard(current)
+        return { routing }
       },
-      onError: (error) => {
-        if (!isStepUpCancelled(error)) {
-          setFailure(errorText(t, error))
-        }
-      },
-    })
+      {
+        onSuccess: () => {
+          toast.success(t("aiCredits.routing.done"))
+        },
+        onError: (error) => {
+          if (!isStepUpCancelled(error)) {
+            setFailure(settingsErrorText(t, error))
+          }
+        },
+      }
+    )
   }
   return (
     <SectionCard

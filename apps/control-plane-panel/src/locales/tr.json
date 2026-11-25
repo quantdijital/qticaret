@@ -1671,7 +1671,8 @@
     "settings": {
       "title": "Yapay zekâ sağlayıcıları",
       "text": "Platform kredisiyle çalışan işlerin sağlayıcı anahtarları, yönlendirmesi, paketleri ve genel sınırları.",
-      "updated": "Son değişiklik: {{day}}"
+      "updated": "Son değişiklik: {{day}}",
+      "moved": "Ayarlar bu arada değişti. Sayfayı yenileyip yeniden deneyin."
     },
     "providers": {
       "title": "Sağlayıcı anahtarları",
