@@ -1,20 +1,22 @@
-import type { TenantDetail } from "@/features/tenants/api"
-
-/** The platform flag that turns the credits on for a shop (adr/0085, P1). */
-export const AI_CREDITS_FLAG = "ai.platform_credits"
-
-/** The package's monthly grant (adr/0085 K5), a limit key. */
-export const AI_GRANT_LIMIT = "ai_free_credits_per_month"
+import type { AiWallet } from "@/features/ai-credits/api/schemas"
 
 /**
- * Whether the shop may spend platform credits at all: its flag on and the
- * shop `active` (a restricted, suspended or closing shop is answered
- * `available: false` by the gateway, P3a).
+ * Whether the wallet's answer says the shop may not spend platform
+ * credits (P3d): its plan's `ai.platform_credits` off, or the shop not
+ * `active` (a restricted, suspended or closing shop is answered
+ * `available: false` by the gateway, P3a). A control plane before P3d
+ * says neither, and then nothing is claimed.
  */
-export const creditsOn = (shop: TenantDetail) =>
-  shop.tenant.status === "active" &&
-  shop.features.some((flag) => flag.key === AI_CREDITS_FLAG && flag.value)
+export const creditsOff = (wallet: AiWallet) =>
+  wallet.flag_on === false ||
+  (wallet.tenant_status !== undefined && wallet.tenant_status !== "active")
 
-/** The shop's monthly grant as its package and exceptions set it; 0 when none. */
-export const monthlyGrantOf = (shop: TenantDetail) =>
-  shop.limits.find((limit) => limit.key === AI_GRANT_LIMIT)?.value ?? 0
+/** The share of the month's grant still left, 0–100; null when there is no grant to show it against. */
+export function grantLeftPercent(wallet: AiWallet): number | null {
+  const total = wallet.monthly_grant
+  if (total === undefined || total <= 0) {
+    return null
+  }
+  const left = Math.min(Math.max(wallet.balance.plan.balance, 0), total)
+  return Math.round((left / total) * 100)
+}

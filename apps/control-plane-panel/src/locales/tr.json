@@ -1567,6 +1567,7 @@
       "plan": "Aylık hak (kalan / toplam)",
       "planValue": "{{left}} / {{total}}",
       "planHint": "{{month}} dönemi · {{day}} yenilenir",
+      "planBar": "Aylık haktan kalan: %{{value}}",
       "purchased": "Satın alınan",
       "expires": "Son kullanma: {{day}}",
       "noneBought": "Satın alınmış kredi yok",

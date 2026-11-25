@@ -1567,6 +1567,7 @@
       "plan": "Monthly grant (left / total)",
       "planValue": "{{left}} / {{total}}",
       "planHint": "{{month}} · renews {{day}}",
+      "planBar": "Monthly grant left: {{value}}%",
       "purchased": "Purchased",
       "expires": "Expires: {{day}}",
       "noneBought": "No purchased credits",

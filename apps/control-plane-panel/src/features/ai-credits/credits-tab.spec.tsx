@@ -62,13 +62,6 @@ describe("a shop's AI credits tab (adr/0085 §5)", () => {
     expect(screen.queryByText(/platform kredisi kapalı/)).toBeNull()
   })
 
-  it("says the credits are off for a shop whose flag is off", async () => {
-    stubApi(controlPlane(() => ({ status: 200, body: { applied: true } })))
-    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
-
-    expect(await screen.findByText(/Bu mağazada platform kredisi kapalı/)).toBeInTheDocument()
-  })
-
   it("does not send a correction without a note", async () => {
     const sent = stubApi(controlPlane(() => ({ status: 200, body: { applied: true } })))
     renderAs(<AiCreditsTab shop={ON} />, "owner")

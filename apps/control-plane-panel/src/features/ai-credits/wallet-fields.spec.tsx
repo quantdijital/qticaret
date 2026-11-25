@@ -66,4 +66,56 @@ describe("the AI credits tab reads the wallet's own fields (P3d)", () => {
     expect(await screen.findAllByText("Silinmiş personel")).toHaveLength(2)
     expect(screen.getByText("user_other")).toBeInTheDocument()
   })
+
+  it("shows the month's grant left of its whole with a bar, and no off note", async () => {
+    const sent = stubApi(answering(WALLET))
+    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
+
+    expect(await screen.findByText("120 / 300")).toBeInTheDocument()
+    const bar = screen.getByRole("progressbar", { name: "Aylık haktan kalan: %40" })
+    expect(bar).toHaveAttribute("aria-valuenow", "40")
+    expect(bar).toHaveAttribute("aria-valuemin", "0")
+    expect(bar).toHaveAttribute("aria-valuemax", "100")
+    // SHOP's own flag is off and it is provisioning: the wallet's answer decides
+    expect(screen.queryByText(/platform kredisi kapalı/)).toBeNull()
+    // The tab reads the wallet alone, not the shop's detail or list
+    expect(sent.filter((call) => call.path.startsWith("/admin/cp/tenants?"))).toEqual([])
+  })
+
+  it("draws no bar for a month without a grant", async () => {
+    stubApi(answering({ ...WALLET, monthly_grant: 0 }))
+    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
+
+    expect(await screen.findByText("120 / 0")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).toBeNull()
+  })
+
+  it("shows the remainder alone, no bar and no off note, from a control plane before P3d", async () => {
+    // Sent as JSON: the undefined fields are left out of the answer
+    stubApi(
+      answering({
+        ...WALLET,
+        flag_on: undefined,
+        tenant_status: undefined,
+        monthly_grant: undefined,
+      })
+    )
+    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
+
+    expect(await screen.findByText("120 kredi")).toBeInTheDocument()
+    expect(screen.queryByRole("progressbar")).toBeNull()
+    expect(screen.queryByText(/platform kredisi kapalı/)).toBeNull()
+  })
+
+  it.each([
+    ["its flag is off", { flag_on: false }],
+    ["the shop is suspended", { tenant_status: "suspended" }],
+  ])("says the credits are off when %s", async (_case, change) => {
+    stubApi(answering({ ...WALLET, ...change }))
+    renderAs(<AiCreditsTab shop={SHOP} />, "owner")
+
+    expect(await screen.findByText(/Bu mağazada platform kredisi kapalı/)).toBeInTheDocument()
+    // The wallet is still shown
+    expect(screen.getByText("120 / 300")).toBeInTheDocument()
+  })
 })

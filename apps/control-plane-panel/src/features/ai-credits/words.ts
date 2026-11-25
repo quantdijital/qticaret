@@ -52,7 +52,7 @@ export function monthText(period: string): string {
  */
 export function actorOf(
   t: TFunction,
-  row: { actor: string; actor_name?: string | null },
+  row: { actor: string; actor_name?: string | null | undefined },
   me: Me | undefined
 ): { text: string; id?: string } {
   if (row.actor === "system") {
