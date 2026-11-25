@@ -2,6 +2,7 @@ import { ArrowRight, Play } from "lucide-react"
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { HandNoteView, HeroFullView, TrustBadgeView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { HandNote } from "../parts/HandNote"
 import { TrustIcon } from "../parts/TrustIcon"
 import { HeroVideo } from "./HeroVideo"
 import { heroVideoWords } from "./hero-video-words"
@@ -127,19 +128,15 @@ export function HeroCornerNote({
 }) {
   return (
     <div className="gf-cover-note absolute top-(--cover-room) right-(--gutter) hidden w-56 lg:block xl:w-64">
-      <p
-        {...mark}
-        data-hand={note.hand ? "" : undefined}
+      <HandNote
+        note={note}
+        {...(mark ? { mark } : {})}
         className={cn(
-          "-rotate-6 text-center leading-[1.05] text-balance",
-          note.hand
-            ? "font-(family-name:--font-accent) text-3xl font-normal xl:text-4xl"
-            : "text-xl font-medium italic",
+          "mx-auto -rotate-6 text-center leading-[1.05]",
+          note.hand ? "text-3xl lg:text-3xl xl:text-4xl" : "text-xl lg:text-xl",
           inked ? "text-text" : "text-stage-text"
         )}
-      >
-        {note.text}
-      </p>
+      />
       <svg
         aria-hidden="true"
         viewBox="0 0 120 14"
