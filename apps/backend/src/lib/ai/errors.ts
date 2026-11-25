@@ -28,6 +28,8 @@ export const AI_ERROR_KEYS = [
   // adr/0085: the platform's credits; the day's cap reached, the gateway unusable now
   "ai.credits_daily_cap",
   "ai.platform_unavailable",
+  // adr/0085 Ek (P3b) (d) `busy`: too many calls in flight, no credit taken; again shortly
+  "ai.platform_busy",
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",

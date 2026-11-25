@@ -1,5 +1,6 @@
 import { model } from "@medusajs/framework/utils"
 import {
+  POPUP_DESIGNS,
   POPUP_DEVICES,
   POPUP_FREQUENCIES,
   POPUP_LAYOUTS,
@@ -48,5 +49,7 @@ export const Popup = model
     frequency: model.enum([...POPUP_FREQUENCIES]).default("days"),
     frequency_days: model.number().nullable(),
     layout: model.enum([...POPUP_LAYOUTS]).default("modal"),
+    /** How it looks inside (adr/0080 §6a); `classic` for every pop-up made before. */
+    design: model.enum([...POPUP_DESIGNS]).default("classic"),
   })
   .indexes([{ on: ["is_active"], where: "deleted_at IS NULL" }])

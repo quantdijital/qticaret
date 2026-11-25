@@ -4,7 +4,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { withAiBreaker } from "../../../lib/ai/breaker"
 import { isPlanLimitError } from "../../../lib/errors"
 import { aiProviderError } from "../../../lib/ai/errors"
-import { imageConnectorFor, imageTargetOf } from "../../../lib/ai/image-connector-of"
+import { imageConnectorWith, imageTargetOf } from "../../../lib/ai/image-connector-of"
 import { readVisionSource } from "../../../lib/ai/image-input"
 import { failureOf } from "../../../lib/ai/outcome"
 import type { ImageEditConnector } from "../../../lib/ai/connectors/image-types"
@@ -22,7 +22,9 @@ import { assertStorageFits } from "../../../lib/plan-limits"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import { removeFiles, storePublicFile } from "../../media/files"
-import { apiKeyOf, retryAfterOf } from "./call-service"
+import { PLATFORM_SERVICE_ID } from "../../../lib/ai/registry/platform-service"
+import { transportFor } from "../transport-for"
+import { retryAfterOf } from "./call-service"
 import type { CallOutcome } from "./call-service"
 
 /** The code of an edit refused by the package's storage limit. */
@@ -38,6 +40,8 @@ export interface EditImageInput {
   /** `image_scene`: a scene typed once (client words, cleaned again here before the call). */
   custom?: string | null | undefined
   media_id: string
+  /** The run's operation (select-service); needed on the platform's credits. */
+  operation?: string | null | undefined
 }
 
 /** How the edit ended, and the stored result file when there is one. */
@@ -78,7 +82,9 @@ async function runFor(
     }
     const background = input.background
     return {
-      done: await withAiBreaker(input.service, () => runImageEdit({ ...run, background })),
+      done: await withAiBreaker({ service: input.service, capability: "image_edit" }, () =>
+        runImageEdit({ ...run, background })
+      ),
       source: "edited",
     }
   }
@@ -99,7 +105,7 @@ async function runFor(
   if (!scene) {
     throw aiProviderError({ service: input.service, key: "ai.unknown_task", code: "scene_unknown" })
   }
-  const done = await withAiBreaker(input.service, () =>
+  const done = await withAiBreaker({ service: input.service, capability: "image_edit" }, () =>
     runImageScene({ ...run, setting: settingOf(scene), source: target.source })
   )
   return { done, source: target.source }
@@ -148,13 +154,15 @@ export async function editImage(
 ): Promise<EditImageOutcome> {
   const started = Date.now()
   const task = findAiTask(input.task)
-  const resolved = imageTargetOf(input.service)
+  // The model recorded is the own service's; on credits none: the routed service never shows
+  const own = imageTargetOf(input.service)
+  const modelOf = (resolved: Resolved | null): string =>
+    (task?.optionSource === "scenes" ? sceneOf(resolved)?.model : undefined) ??
+    resolved?.target.model ??
+    ""
   const base: EditImageOutcome = {
     status: "failed",
-    model:
-      (task?.optionSource === "scenes" ? sceneOf(resolved)?.model : undefined) ??
-      resolved?.target.model ??
-      "",
+    model: modelOf(own),
     text: null,
     candidates: [],
     correction: null,
@@ -171,25 +179,29 @@ export async function editImage(
   // Set once the service gave a result back: the call is paid for from here on
   let returned: EditImageOutcome | null = null
   try {
-    if (task?.capability !== "image_edit" || !resolved) {
-      throw aiProviderError({
+    const notRegistered = () =>
+      aiProviderError({
         service: input.service,
         key: "ai.service_unavailable",
         code: "not_registered",
       })
+    if (task?.capability !== "image_edit" || (!own && input.service !== PLATFORM_SERVICE_ID)) {
+      throw notRegistered()
     }
     const original = await originalOf(container, input.service, input.media_id)
     // Full already: not worth a call the shop pays for
     await assertStorageFits(container, original.bytes.length)
-    const apiKey = await apiKeyOf(container, resolved.service.credentialProvider)
-    if (apiKey === null) {
-      throw aiProviderError({
-        service: input.service,
-        key: "ai.service_unavailable",
-        code: "no_credentials",
-      })
+    const route = await transportFor(container, {
+      service: input.service,
+      capability: "image_edit",
+      task: task.id,
+      operation: input.operation,
+    })
+    const resolved = imageTargetOf(route.service.id)
+    if (!resolved) {
+      throw notRegistered()
     }
-    const connector = imageConnectorFor(input.service, apiKey)
+    const connector = imageConnectorWith(route.service.id, route.transport)
     const { done, source } = await runFor(container, input, task, resolved, connector, original)
     returned = {
       ...base,

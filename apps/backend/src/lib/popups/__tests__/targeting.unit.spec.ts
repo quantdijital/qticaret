@@ -18,6 +18,7 @@ const popup = (id: string, values: Partial<StorePopup> = {}): StorePopup => ({
   trigger: { kind: "delay", value: 5 },
   frequency: { kind: "session", days: null },
   layout: "modal",
+  design: "classic",
   priority: 0,
   ends_at: null,
   ...values,

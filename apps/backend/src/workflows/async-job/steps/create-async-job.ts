@@ -15,7 +15,8 @@ export interface EnqueueAsyncJobInput {
 
 /**
  * Checks a job request against its type (input schema, feature flag, one at
- * a time, with its group's kinds too) and opens its `queued` record. The
+ * a time, with its group's kinds too), lets the type set what the server
+ * adds to the input (`prepare`) and opens its `queued` record. The
  * workflow holds a lock per type, or per group, around this step, so two
  * requests cannot both pass the one-at-a-time check.
  */
@@ -53,9 +54,12 @@ export const createAsyncJobStep = createStep(
         throw new ConflictError("async_job.already_running")
       }
     }
+    const input = type.prepare
+      ? await type.prepare(container, parsed.data, request.requested_by)
+      : parsed.data
     const job = await service.createAsyncJobs({
       type: request.type,
-      input: parsed.data as Record<string, unknown>,
+      input: input as Record<string, unknown>,
       requested_by: request.requested_by,
     })
     return new StepResponse({ id: job.id }, job.id)

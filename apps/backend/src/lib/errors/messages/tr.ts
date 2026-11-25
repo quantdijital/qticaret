@@ -838,6 +838,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "ai.credits_exhausted": "Yapay zekâ krediniz bitti. Devam etmek için kredi yükleyin.",
   "ai.credits_daily_cap": "Bugünkü kredi sınırına ulaşıldı. Yarın yeniden deneyin.",
   "ai.platform_unavailable": "Platform kredisi şu an kullanılamıyor. Biraz sonra yeniden deneyin.",
+  "ai.platform_busy": "Şu anda çok fazla yapay zekâ işi sürüyor. Biraz sonra yeniden deneyin.",
   "ai.unknown_entity": "Öneri istenen kayıt bulunamadı.",
   "ai.unknown_task": "Böyle bir yapay zekâ işi yok.",
   "ai.suggestion_not_open": "Bu öneri artık karar beklemiyor.",

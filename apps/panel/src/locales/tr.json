@@ -12163,6 +12163,20 @@
       "layout": {
         "modal": "Ortada pencere",
         "corner": "Köşede kart"
+      },
+      "design": {
+        "classic": "Klasik",
+        "split": "Yan yana",
+        "hero": "Büyük görsel",
+        "minimal": "Sade",
+        "coupon": "Kupon"
+      },
+      "designHint": {
+        "classic": "Görsel üstte, metin altında; ilk tasarım.",
+        "split": "Geniş ekranda görsel solda, metin sağda; görsel yoksa klasik gibi görünür.",
+        "hero": "Uzun görsel üstte, başlık büyük ve ortada.",
+        "minimal": "Görselsiz; büyük başlık ve kısa metin ortada.",
+        "coupon": "İndirim kodu bilet gibi büyük gösterilir; kod yoksa başlık biletin içinde yer alır."
       }
     },
     "form": {
@@ -12202,7 +12216,8 @@
       "frequencyDays": "Kaç günde bir",
       "daysUnit": "gün",
       "look": "Görünüm",
-      "layout": "Biçim",
+      "design": "Tasarım",
+      "layout": "Yerleşim",
       "advanced": "Gelişmiş",
       "priority": "Öncelik",
       "priorityHint": "Aynı sayfada birden çok pop-up uyarsa büyük sayı önce gösterilir.",
@@ -12240,13 +12255,19 @@
       "codePlaceholder": "KOD",
       "device": "Önizleme cihazı",
       "desktop": "Masaüstü",
-      "mobile": "Mobil"
+      "mobile": "Mobil",
+      "copy": "Kopyala"
     },
     "stats": {
       "title": "Sonuçlar",
       "clickRate": "Tıklama oranı {{rate}}",
       "last30": "Son 30 gün gösterim",
       "daily": "Son 30 gün, günlük gösterim"
+    },
+    "facts": {
+      "title": "Özet",
+      "created": "Oluşturuldu",
+      "updated": "Son değişiklik"
     }
   },
   "paymentLinks": {

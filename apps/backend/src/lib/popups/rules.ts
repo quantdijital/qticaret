@@ -50,6 +50,18 @@ export type PopupFrequency = (typeof POPUP_FREQUENCIES)[number]
 export const POPUP_LAYOUTS = ["modal", "corner"] as const
 export type PopupLayout = (typeof POPUP_LAYOUTS)[number]
 
+/**
+ * How it looks inside, whatever its type and place (adr/0080 §6a):
+ * `classic` the picture above the words (the first design, every older
+ * pop-up's); `split` the picture beside them on a wide screen; `hero` a
+ * tall picture with the words centred under it; `minimal` the words alone,
+ * centred, a large title; `coupon` a ticket with the campaign's code large
+ * (the title in its place when there is no code). Separate from `layout`,
+ * which says where it stands.
+ */
+export const POPUP_DESIGNS = ["classic", "split", "hero", "minimal", "coupon"] as const
+export type PopupDesign = (typeof POPUP_DESIGNS)[number]
+
 /** What the storefront counts (adr/0080 §7). */
 export const POPUP_EVENTS = ["impression", "click", "close", "signup"] as const
 export type PopupEvent = (typeof POPUP_EVENTS)[number]
@@ -90,6 +102,7 @@ export const POPUP_DEFAULTS = {
   frequency: "days",
   frequency_days: 7,
   layout: "modal",
+  design: "classic",
   priority: 0,
   is_active: false,
 } as const satisfies Record<string, unknown>

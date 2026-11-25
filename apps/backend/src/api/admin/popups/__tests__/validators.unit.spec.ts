@@ -69,6 +69,17 @@ describe("AdminPostPopup", () => {
     expect(AdminPostPopup.safeParse({ ...base, pages: ["home", "product"] }).success).toBe(true)
   })
 
+  it("takes one of the designs and nothing else; left out, none is set", () => {
+    for (const design of ["classic", "split", "hero", "minimal", "coupon"]) {
+      expect(AdminPostPopup.parse({ ...base, design }).design).toBe(design)
+    }
+    expect(AdminPostPopup.parse(base)).not.toHaveProperty("design")
+    expect(AdminPostPopup.safeParse({ ...base, design: "fullscreen" }).success).toBe(false)
+    expect(AdminPostPopup.safeParse({ ...base, design: "<style>" }).success).toBe(false)
+    expect(AdminPostPopup.safeParse({ ...base, design: null }).success).toBe(false)
+    expect(AdminUpdatePopup.parse({ design: "coupon" })).toEqual({ design: "coupon" })
+  })
+
   it("reads dates with their offset", () => {
     const parsed = AdminPostPopup.parse({ ...base, starts_at: "2026-12-01T00:00:00+03:00" })
     expect(parsed.starts_at).toEqual(new Date("2026-11-30T21:00:00.000Z"))

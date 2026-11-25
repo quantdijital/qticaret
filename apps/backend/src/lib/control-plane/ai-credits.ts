@@ -17,20 +17,35 @@ import type { Fetch } from "./pull"
  * `GET /tenant-api/v1/ai/credits`, signed, held to the contract, kept 60
  * seconds in this process. Closed by default: unmanaged, unconfigured,
  * unreachable, refused or of another shape, the credits are not
- * available (an unmanaged shop asks nobody). A failure is not kept: the
- * next ask asks again. After each call on credits the wallet left, from
- * the gateway's headers, updates what is kept (`noteAiCharge`).
+ * available (an unmanaged shop asks nobody). A failure is kept too, as
+ * "not available", for a shorter while (`AI_CREDITS_FAILURE_CACHE_MS`):
+ * while the control plane cannot be reached no AI request waits for it
+ * again, and one warning is logged a window. One ask is in flight at a
+ * time; those meanwhile wait for its answer. After each call on credits
+ * the wallet left, from the gateway's headers, updates what is kept
+ * (`noteAiCharge`).
  */
 
 export const AI_CREDITS_CACHE_MS = 60_000
+/** How long a failed ask counts as "not available" before the next one asks again. */
+export const AI_CREDITS_FAILURE_CACHE_MS = 20_000
 const STATUS_TIMEOUT_MS = 5_000
 
 const UNAVAILABLE: AiCreditsStatus = Object.freeze({ available: false })
 
 let kept: { at: number; status: AiCreditsStatus } | null = null
+// When the last ask failed: "not available" until the window ends
+let failedAt: number | null = null
+// The ask in flight: those asking meanwhile wait for the same answer
+let asking: Promise<AiCreditsStatus> | null = null
 registerProcessCache(() => {
   kept = null
+  failedAt = null
+  asking = null
 })
+
+const within = (at: number, since: number, ms: number): boolean =>
+  at - since >= 0 && at - since < ms
 
 export interface AiCreditsStatusOptions {
   /** Tests only: where and how to sign; the shop's configuration otherwise. */
@@ -93,16 +108,34 @@ export async function aiCreditsStatus(
     return UNAVAILABLE
   }
   const at = (options.now ?? Date.now)()
-  if (kept !== null && at - kept.at >= 0 && at - kept.at < AI_CREDITS_CACHE_MS) {
+  if (kept !== null && within(at, kept.at, AI_CREDITS_CACHE_MS)) {
     return kept.status
   }
-  const status = await askControlPlane(endpoint, options, at)
-  if (status === null) {
-    kept = null
+  if (failedAt !== null && within(at, failedAt, AI_CREDITS_FAILURE_CACHE_MS)) {
     return UNAVAILABLE
   }
-  kept = { at, status }
-  return status
+  if (asking !== null) {
+    return asking
+  }
+  const ask = askControlPlane(endpoint, options, at).then((status) => {
+    if (status === null) {
+      kept = null
+      failedAt = at
+      return UNAVAILABLE
+    }
+    kept = { at, status }
+    failedAt = null
+    return status
+  })
+  asking = ask
+  try {
+    return await ask
+  } finally {
+    // A forgetting meanwhile (tests) may have dropped it, or a later ask taken its place
+    if (asking === ask) {
+      asking = null
+    }
+  }
 }
 
 /**

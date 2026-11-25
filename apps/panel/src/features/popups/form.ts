@@ -4,6 +4,7 @@ import { isCleanText } from "@/features/settings/storefront"
 import { toOffsetIso } from "@/features/storefront/maintenance"
 import { toLocalInput } from "@/features/storefront/layout/schedule"
 import {
+  POPUP_DESIGNS,
   POPUP_DEVICES,
   POPUP_FREQUENCIES,
   POPUP_LAYOUTS,
@@ -15,7 +16,7 @@ import {
   POPUP_TYPES,
   POPUP_VISITORS,
 } from "./api/types"
-import type { Popup, PopupInput, PopupType } from "./api/types"
+import type { Popup, PopupDesign, PopupInput, PopupType } from "./api/types"
 
 /**
  * The pop-up form (adr/0080 §1): the backend's limits and what its fields
@@ -72,6 +73,7 @@ export const popupSchema = z
     frequency: z.enum(POPUP_FREQUENCIES),
     frequency_days: z.number({ message: `${E}.number` }).int({ message: `${E}.number` }),
     layout: z.enum(POPUP_LAYOUTS),
+    design: z.enum(POPUP_DESIGNS),
     priority: z
       .number({ message: `${E}.number` })
       .int({ message: `${E}.number` })
@@ -148,10 +150,19 @@ export function emptyValues(type: PopupType): PopupValues {
     frequency: "days",
     frequency_days: 7,
     layout: "modal",
+    design: suggestedDesign(type),
     priority: 0,
     starts_at: "",
     ends_at: "",
   }
+}
+
+/**
+ * The design a new pop-up of a type starts with: a campaign's code on a
+ * ticket, the classic look otherwise. Any design suits any type.
+ */
+export function suggestedDesign(type: PopupType): PopupDesign {
+  return type === "campaign" ? "coupon" : "classic"
 }
 
 /** A saved pop-up as the form shows it. */
@@ -177,6 +188,7 @@ export function valuesOf(popup: Popup): PopupValues {
     frequency: popup.frequency,
     frequency_days: popup.frequency_days ?? 7,
     layout: popup.layout,
+    design: popup.design,
     priority: popup.priority,
     starts_at: toLocalInput(popup.starts_at),
     ends_at: toLocalInput(popup.ends_at),
@@ -185,13 +197,22 @@ export function valuesOf(popup: Popup): PopupValues {
 
 /**
  * The fields a type leaves behind when the form moves to another: the
- * campaign's promotion, the link of a button that sends a form. The save
+ * campaign's promotion, the link of a button that sends a form. With
+ * `suggest` (a new pop-up whose design the owner has not touched), the
+ * design follows the type's suggestion. The save
  * sends them empty too (`requestOf`); cleared here, the form shows it.
  */
-export function switchType(values: PopupValues, type: PopupType): PopupValues {
+export function switchType(
+  values: PopupValues,
+  type: PopupType,
+  { suggest = false }: { suggest?: boolean } = {}
+): PopupValues {
+  // Only a design the owner has not chosen follows the type: the one the last type suggested
+  const followDesign = suggest && values.design === suggestedDesign(values.type)
   return {
     ...values,
     type,
+    design: followDesign ? suggestedDesign(type) : values.design,
     promotion_id: type === "campaign" ? values.promotion_id : "",
     button_href: type === "newsletter" ? "" : values.button_href,
   }
@@ -227,6 +248,7 @@ export function requestOf(values: PopupValues, { create }: { create: boolean }):
     frequency: values.frequency,
     frequency_days: values.frequency === "days" ? values.frequency_days : null,
     layout: values.layout,
+    design: values.design,
     priority: values.priority,
     starts_at: toOffsetIso(values.starts_at),
     ends_at: toOffsetIso(values.ends_at),

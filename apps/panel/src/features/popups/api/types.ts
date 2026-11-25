@@ -34,6 +34,13 @@ export type PopupFrequency = (typeof POPUP_FREQUENCIES)[number]
 export const POPUP_LAYOUTS = ["modal", "corner"] as const
 export type PopupLayout = (typeof POPUP_LAYOUTS)[number]
 
+/**
+ * How it looks inside, whatever its type (adr/0080 §6a); `layout` says
+ * where it stands. `classic` is every older pop-up's.
+ */
+export const POPUP_DESIGNS = ["classic", "split", "hero", "minimal", "coupon"] as const
+export type PopupDesign = (typeof POPUP_DESIGNS)[number]
+
 export const POPUP_STATES = ["off", "scheduled", "live", "ended", "campaign_inactive"] as const
 export type PopupState = (typeof POPUP_STATES)[number]
 
@@ -92,6 +99,7 @@ export interface Popup {
   frequency: PopupFrequency
   frequency_days: number | null
   layout: PopupLayout
+  design: PopupDesign
   created_at: string
   updated_at: string
   state: PopupState
@@ -136,4 +144,5 @@ export interface PopupInput {
   frequency: PopupFrequency
   frequency_days: number | null
   layout: PopupLayout
+  design: PopupDesign
 }

@@ -130,6 +130,20 @@ Vitrine **gitmeyenler:** `name`, `is_active`, `starts_at`, `promotion_id`, zaman
 - Erişilebilirlik: `role="dialog"`, `aria-modal` (pencerede), odak tuzağı ve Esc ile kapanma, kapatma düğmesi her zaman görünür.
 - Tema sözleşmesi `packages/ui`'ya pop-up bileşeni olarak girer; hazır görünümler ve görünüm kilidi testi bu biçimleri kapsar (adr/0066). Yeni görünüş farkı ayar ya da yeni biçim olarak gelir.
 
+### 6a. Tasarım (ek, 2026-11-25)
+
+`layout` pop-up'ın **nerede** durduğunu söyler (pencere / köşe / telefonda çekmece); yeni `design` alanı **içinin nasıl dizildiğini**. İkisi bağımsızdır ve her tasarım her türle (bilgi, kampanya, bülten) seçilebilir. Alan `popup.design` (enum, boş olamaz, varsayılan `classic`; migration `Migration20261125140000` eski kayıtları `classic` yapar), admin doğrulayıcısı listede olmayanı reddeder, `GET /store/popups` yanıtında `design` olarak gider. Vitrin tanımadığı bir değeri (daha yeni backend) `classic` çizer.
+
+| Tasarım | Çizim | Görsel yoksa |
+|---|---|---|
+| `classic` | Görsel üstte, metin solda (ilk tasarım; çizimi değişmez, adr/0066) | Yalnız metin |
+| `split` | Geniş ekran penceresinde görsel solda, metin sağda (pencere 720 px); köşe kartında görsel üstte | `classic` gibi |
+| `hero` | Uzun görsel (4:3) üstte, büyük başlık ve metin ortada | Ortada büyük başlık |
+| `minimal` | Görsel hiç yok; büyük başlık, metin ortada, geniş iç boşluk | — |
+| `coupon` | Ortada; kampanya kodu kesikli kenarlı bilet içinde büyük, kopyala düğmesi biletin içinde | Kod yoksa (bilgi/bülten) başlık biletin içine girer; otomatik indirimde "sepette uygulanır" bilette |
+
+Telefonun alt çekmecesi her tasarımda görselsizdir (§6). Erişilebilirlik (diyalog rolü, başlık/açıklama bağı, kapatma düğmesi, odak) bütün tasarımlarda aynıdır. Panelde yeni pop-up türüne göre öneri tasarımla başlar (kampanya → `coupon`, diğerleri → `classic`); sahibin seçtiği tasarım tür değişince değiştirilmez. Yeni bir tasarım yeni enum değeri olarak gelir; var olanların çizimi yerinde değiştirilmez.
+
 ### 7. Ölçüm
 
 - Sunucu sayaçları (§5) yalnız sayıdır; kimlik, IP, e-posta yazılmaz. Günlük satır, tek SQL deyimiyle artırılır (`INSERT … ON CONFLICT DO UPDATE`), eşzamanlı sayımlar kaybolmaz.

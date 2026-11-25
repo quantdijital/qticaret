@@ -61,7 +61,10 @@ function previewCall(
     }))
   ).config({ name: `ai-preview-input-${name}` })
   const claimed = claimQuotaStep(
-    transform({ authorized }, ({ authorized }) => ({ capability: authorized.capability }))
+    transform({ authorized, chosen }, ({ authorized, chosen }) => ({
+      capability: authorized.capability,
+      funding: chosen.funding,
+    }))
   ).config({ name: `ai-preview-claim-${name}` })
   const outcome = callServiceStep(
     transform({ authorized, chosen, prompt }, ({ authorized, chosen, prompt }) => ({
@@ -70,6 +73,8 @@ function previewCall(
       service: chosen.service,
       system: prompt.system,
       data: prompt.data,
+      // Each side is its own operation (two answers shown): the step makes one for it
+      operation: null,
     }))
   ).config({ name: `ai-preview-call-${name}` })
   releaseUntakenStep(
