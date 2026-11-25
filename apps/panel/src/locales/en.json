@@ -13321,7 +13321,9 @@
       },
       "ofLimit": "{{used}} / {{max}}",
       "unlimited": "{{used}} · no limit",
-      "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight."
+      "ceilingNote": "At the limit no new suggestion can be asked for; the daily limit resets at midnight.",
+      "platformCredits_one": "{{amount}} credit from the platform's credits was spent this month.",
+      "platformCredits_other": "{{amount}} credits from the platform's credits were spent this month."
     },
     "suggest": {
       "button": "Suggest with AI",
