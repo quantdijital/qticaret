@@ -20,6 +20,8 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigate,
 }))
 
+const accountName = "Kaya Bıçak Ltd"
+
 const row: BoardOrder = {
   id: "order_9",
   display_id: 1050,
@@ -79,20 +81,61 @@ describe("WholesaleOrdersPage (Ek 2026-11-15 (2))", () => {
     })
   })
 
-  it("narrows to one wholesaler from the picker, kept in the address", async () => {
-    search.current = { wholesaler: "wsa_1", stage: "to_ship" }
+  it("narrows to one wholesaler from the filter menu, kept in the address", async () => {
+    search.current = { stage: "to_ship", page: 2 }
+    serve()
+    renderWith(clientWith(), <WholesaleOrdersPage />)
+    await screen.findByText("#1050")
+    // No picker beside the filters any more: the wholesaler is one of them
+    expect(screen.queryByRole("combobox", { name: "Toptancı" })).toBeNull()
+    await userEvent.click(screen.getByRole("button", { name: "Filtrele" }))
+    await userEvent.click(await screen.findByRole("button", { name: /^Toptancı/ }))
+    await userEvent.click(await screen.findByRole("button", { name: accountName }))
+    expect(navigate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        to: "/wholesale/orders",
+        search: expect.objectContaining({
+          wholesaler: account().id,
+          stage: "to_ship",
+          page: undefined,
+        }) as unknown,
+      })
+    )
+  })
+
+  it("shows the wholesaler as a chip, cleared with its × or with every filter", async () => {
+    search.current = { wholesaler: account().id, stage: "to_ship", carrier: ["aras"] }
     serve()
     renderWith(clientWith(), <WholesaleOrdersPage />)
     await screen.findByText("#1050")
     expect(fetchMock).toHaveBeenCalledWith("/admin/order-board", {
-      query: { stage: "to_ship", segment: "wholesale", wholesaler: "wsa_1", offset: 0 },
+      query: {
+        stage: "to_ship",
+        carrier: "aras",
+        segment: "wholesale",
+        wholesaler: account().id,
+        offset: 0,
+      },
     })
-    await userEvent.click(screen.getByRole("combobox", { name: "Toptancı" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Tüm toptancılar" }))
+    expect(
+      await screen.findByRole("button", { name: `Toptancı: ${accountName}` })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Filtrele · 2" })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole("button", { name: "Toptancı filtresini kaldır" }))
     expect(navigate).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        to: "/wholesale/orders",
-        search: expect.objectContaining({ wholesaler: undefined, stage: "to_ship" }) as unknown,
+        search: expect.objectContaining({ wholesaler: undefined, carrier: ["aras"] }) as unknown,
+      })
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Tümünü temizle" }))
+    expect(navigate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: expect.objectContaining({
+          wholesaler: undefined,
+          carrier: undefined,
+          stage: "to_ship",
+        }) as unknown,
       })
     )
   })
