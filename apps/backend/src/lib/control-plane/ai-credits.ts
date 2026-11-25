@@ -138,6 +138,11 @@ export async function aiCreditsStatus(
   }
 }
 
+/** Forgets the kept status (a top-up request just opened): the next ask asks again. */
+export function forgetAiCreditsStatus(): void {
+  kept = null
+}
+
 /**
  * A call's charge and the wallet left after it (the gateway's headers):
  * the kept status follows without asking. The month's grant is spent

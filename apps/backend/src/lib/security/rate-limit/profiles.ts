@@ -129,6 +129,11 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: MINUTE },
     perIdentityAnyIp: { max: 10, windowMs: MINUTE },
   },
+  // adr/0085 K11: a request to buy AI credits, read by the platform's staff: a few an hour
+  ai_credit_order: {
+    name: "ai_credit_order",
+    perIdentityAnyIp: { max: 5, windowMs: HOUR },
+  },
   // adr/0071 §8: image and video work, dearer and slower than text: narrower
   ai_media: {
     name: "ai_media",

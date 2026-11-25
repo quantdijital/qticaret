@@ -5,6 +5,7 @@ import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminGetAiSuggestions,
   AdminGetAiUsage,
+  AdminPostAiCreditOrder,
   AdminPostAiAccept,
   AdminPostAiFaq,
   AdminPostAiGuidancePreview,
@@ -12,7 +13,7 @@ import {
 } from "../admin/ai/validators"
 import { AdminPostSeoFill } from "../admin/ai/seo-fill/validators"
 import { AdminPostAssistantTurn } from "../admin/ai/assistant/validators"
-import { AI_ASSISTANT } from "../../modules/platform-settings/features"
+import { AI_ASSISTANT, AI_PLATFORM_CREDITS } from "../../modules/platform-settings/features"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
@@ -45,6 +46,25 @@ export const AI_ROUTES = [
     matcher: "/admin/ai/services",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
+  },
+  // The platform's credits (adr/0085 §3): the card's wallet, and a top-up request asked
+  // within a narrow budget, its body the pack's id alone; no such route while the flag is off
+  {
+    matcher: "/admin/ai/credits",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/ai/credits/orders",
+    methods: ["POST" as const],
+    middlewares: [
+      requireFeature(AI_PLATFORM_CREDITS),
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.ai_credit_order, {
+        identity: (req) => (req as AuthenticatedMedusaRequest).auth_context.actor_id,
+      }),
+      validateAndTransformBody(AdminPostAiCreditOrder),
+    ],
   },
   {
     matcher: "/admin/ai/usage",

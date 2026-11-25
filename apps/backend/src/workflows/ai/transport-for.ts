@@ -6,7 +6,7 @@ import { findAiService } from "../../lib/ai/registry/services"
 import type { AiService } from "../../lib/ai/registry/services"
 import { ownKeyTransport } from "../../lib/ai/transport/own-key"
 import { platformTransport } from "../../lib/ai/transport/platform"
-import type { AiTransport } from "../../lib/ai/transport/types"
+import type { AiCharge, AiTransport } from "../../lib/ai/transport/types"
 import { aiCreditsStatus, noteAiCharge } from "../../lib/control-plane/ai-credits"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import { isCredentialProvider } from "../../modules/integration-credentials/providers"
@@ -57,6 +57,8 @@ export interface TransportRequest {
    * on credits only.
    */
   operation?: string | null | undefined
+  /** On credits: told each answer's charge too (the run's usage rows, `charge-tally.ts`). */
+  onCharge?: ((charge: AiCharge) => void) | undefined
 }
 
 export interface AiRoute {
@@ -95,7 +97,10 @@ async function platformRoute(request: TransportRequest, container: Resolver): Pr
       service: service.id,
       operation: request.operation,
       // Each answer's wallet left updates the kept status; nothing is kept on the transport
-      onCharge: noteAiCharge,
+      onCharge: (charge) => {
+        noteAiCharge(charge)
+        request.onCharge?.(charge)
+      },
     }),
   }
 }

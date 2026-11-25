@@ -211,3 +211,13 @@ export const AdminGetAiUsage = z.object({
   month: z.string().regex(MONTH_PATTERN).optional(),
 })
 export type AdminGetAiUsageType = z.infer<typeof AdminGetAiUsage>
+
+/**
+ * A top-up request (adr/0085 K11): the pack's id and nothing else. Credits, an
+ * amount or a currency sent are refused: the platform's pack says them.
+ * Held to the control plane's pack id (`aiCreditPackSchema`; a test keeps the two equal).
+ */
+export const AdminPostAiCreditOrder = z
+  .object({ pack_id: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,39}$/) })
+  .strict()
+export type AdminPostAiCreditOrderType = z.infer<typeof AdminPostAiCreditOrder>

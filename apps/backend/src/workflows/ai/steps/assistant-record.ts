@@ -6,6 +6,7 @@ import { logger } from "../../../lib/logging"
 import { AI_MODULE } from "../../../modules/ai"
 import type AiModuleService from "../../../modules/ai/service"
 import type { CallRecord } from "./assistant-turn"
+import { usageCredits } from "./record-usage"
 
 /** What the usage row names a turn's tools as: `entity_type`, holding no record. */
 export const ASSISTANT_TOOLS_ENTITY = "assistant_tools"
@@ -65,6 +66,7 @@ export const assistantRecordStep = createStep(
           output_tokens: call.output_tokens,
           estimated_cost_micros: cost?.micros ?? null,
           currency: cost?.currency ?? null,
+          credits: usageCredits(input.funding, call.credits),
           entity_type: last && tools !== null ? ASSISTANT_TOOLS_ENTITY : null,
           entity_id: last ? tools : null,
           suggestion_id: null,

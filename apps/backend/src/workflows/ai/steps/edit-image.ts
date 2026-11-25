@@ -23,6 +23,7 @@ import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import { removeFiles, storePublicFile } from "../../media/files"
 import { PLATFORM_SERVICE_ID } from "../../../lib/ai/registry/platform-service"
+import { chargeTally } from "../charge-tally"
 import { transportFor } from "../transport-for"
 import { retryAfterOf } from "./call-service"
 import type { CallOutcome } from "./call-service"
@@ -178,6 +179,8 @@ export async function editImage(
   }
   // Set once the service gave a result back: the call is paid for from here on
   let returned: EditImageOutcome | null = null
+  // On credits: what the gateway charged the edit, its row's `credits`
+  const tally = chargeTally()
   try {
     const notRegistered = () =>
       aiProviderError({
@@ -196,6 +199,7 @@ export async function editImage(
       capability: "image_edit",
       task: task.id,
       operation: input.operation,
+      onCharge: tally.onCharge,
     })
     const resolved = imageTargetOf(route.service.id)
     if (!resolved) {
@@ -222,6 +226,7 @@ export async function editImage(
       status: "succeeded",
       duration_ms: Date.now() - started,
       file_id: file.id,
+      credits: tally.total(),
     }
     return outcome
   } catch (error) {
@@ -244,6 +249,7 @@ export async function editImage(
         ...answered,
         duration_ms: Date.now() - started,
         error_code: STORAGE_FULL,
+        credits: tally.total(),
       }
       return full
     }
@@ -255,6 +261,7 @@ export async function editImage(
       error_key: failure.key,
       error_code: failure.code,
       retry_after_ms: retryAfterOf(error),
+      credits: tally.total(),
     }
     return outcome
   }
