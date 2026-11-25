@@ -1,3 +1,4 @@
+import { aiTargetUnverified } from "@qticaret/types/control-plane"
 import { platformServiceOf } from "../registry/platform-service"
 import { aiServices } from "../registry/services"
 import { IMAGE_SCENE_TASK } from "../registry/tasks"
@@ -24,7 +25,10 @@ describe("the platform's scene", () => {
   })
 
   it("is the same whichever image service runs behind the platform", () => {
-    for (const service of imageServices) {
+    // Bria runs behind it once a real call proves its result's host (ai-targets.ts `unverified`)
+    const behind = imageServices.filter((service) => !aiTargetUnverified(service.id, "image_edit"))
+    expect(behind.length).toBeGreaterThan(1)
+    for (const service of behind) {
       const platform = platformServiceOf({ text: "deepseek", image_edit: service.id }, "production")
       expect(platform).not.toBeNull()
       expect([service.id, platform && canRunTask(platform, IMAGE_SCENE_TASK)]).toEqual([

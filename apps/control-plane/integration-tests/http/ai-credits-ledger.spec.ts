@@ -122,14 +122,14 @@ medusaIntegrationTestRunner({
       await spend(c(), { tenantId, operationId: opId(), task: "image_background", now: second })
       await buy(tenantId, 50, second)
       const after = await balanceOf(c(), tenantId, istanbul("2027-01-20"))
-      expect(after.purchased).toEqual({ balance: 140, expiresAt: istanbul("2027-07-15") })
+      expect(after.purchased).toEqual({ balance: 145, expiresAt: istanbul("2027-07-15") })
 
       const past = await balanceOf(c(), tenantId, istanbul("2027-07-15", "12:00"))
       expect(past.purchased.balance).toBe(0)
       const expiries = (await entriesOf(c(), tenantId)).filter(
         (each) => each.kind === "expire" && each.bucket === "purchased"
       )
-      expect(expiries).toEqual([expect.objectContaining({ amount: -140 })])
+      expect(expiries).toEqual([expect.objectContaining({ amount: -145 })])
       // A top-up after the day starts a new life; what expired stays expired
       await buy(tenantId, 10, istanbul("2027-08-01"))
       expect(await walletOf(c(), tenantId)).toMatchObject({ purchased_balance: 10 })

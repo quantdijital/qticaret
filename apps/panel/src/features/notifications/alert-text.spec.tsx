@@ -19,6 +19,7 @@ describe("the bell's account alert for an AI service (adr/0071 §3)", () => {
       minimax: "MiniMax",
       gemini: "Gemini",
       photoroom: "Photoroom",
+      bria: "Bria",
     }
     for (const lng of ["tr", "en"]) {
       await i18next.changeLanguage(lng)

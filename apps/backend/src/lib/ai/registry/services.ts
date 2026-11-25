@@ -2,6 +2,7 @@ import { AI_FAKE_TARGET, AI_SERVICE_TARGETS as T, endpointUrl } from "@qticaret/
 import type { AiSource } from "../../media/ai-source"
 import type { AiErrorKey } from "../errors"
 import type { AiCapability } from "./capabilities"
+import { BRIA } from "./service-bria"
 import { QWEN } from "./service-qwen"
 
 /**
@@ -95,16 +96,20 @@ export interface ImageSceneTarget {
   source: AiSource
   /** A scene's own price where it differs from the service's `image_edit` one. */
   unitPrice?: AiUnitPrice
+  /** `bria`: the fixed body fields of this endpoint (the shared table's `fixedBody`). */
+  body?: Readonly<Record<string, unknown>>
 }
 
 /** An image editing endpoint (Aşama 4): its full address, fixed here. */
 export interface ImageEditTarget {
-  connector: "photoroom" | "gemini-image"
+  connector: "photoroom" | "gemini-image" | "bria"
   model: string
   /** `https`, on one of the service's `hosts`; no query. */
   url: string
-  /** The backgrounds this endpoint is documented to make. */
+  /** The backgrounds this endpoint is documented to make (or made here from its own). */
   backgrounds: readonly ImageBackground[]
+  /** `bria`: the fixed body fields of this endpoint (the shared table's `fixedBody`). */
+  body?: Readonly<Record<string, unknown>>
   /** Left out: the service is not documented to set a product in a scene. */
   scene?: ImageSceneTarget
 }
@@ -125,6 +130,7 @@ export function sceneTargetOf(
   if (
     target?.connector === "photoroom" ||
     target?.connector === "gemini-image" ||
+    target?.connector === "bria" ||
     target?.connector === "fake-image"
   ) {
     return target.scene ?? null
@@ -153,6 +159,12 @@ export interface AiService {
    * `google.rpc.QuotaFailure` details. Left out: every 429 is a rate.
    */
   quotaErrors?: "google-rpc"
+  /**
+   * A status the service documents for a refusal of its own kind
+   * (`connectors/status-failure.ts`), over the generic meaning of the
+   * status: Bria's 422 is its moderation's, 415 a picture it does not read.
+   */
+  statusErrors?: Readonly<Record<number, AiErrorKey>>
 }
 
 /*
@@ -556,7 +568,7 @@ export const FAKE_SERVICE: AiService = {
   dataNoteKey: "ai.data_note.fake",
 }
 
-const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI, PHOTOROOM, QWEN]
+const SERVICES: readonly AiService[] = [DEEPSEEK, MINIMAX, GEMINI, PHOTOROOM, QWEN, BRIA]
 
 /** The services of this instance, in registry order (the order a choice falls back to). */
 export function aiServices(

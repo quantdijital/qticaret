@@ -1,3 +1,4 @@
+import { AI_SERVICE_CHECKS } from "@qticaret/types/control-plane"
 import { logger } from "../logging"
 import { isSafeFetchError, safeFetch } from "../security/safe-fetch"
 import type { SafeFetchResponse } from "../security/safe-fetch"
@@ -39,9 +40,9 @@ export type AiAccountCheck = "valid" | "secret_invalid" | "unreachable" | "faile
 interface CheckCall {
   url: string
   /** Where the key goes: `Authorization: Bearer`, or the service's own header. */
-  header: "bearer" | "x-api-key"
+  header: "bearer" | "x-api-key" | "api_token"
   /** What a documented answer looks like. */
-  answer: "model_list" | "photoroom_account"
+  answer: "model_list" | "photoroom_account" | "bria_status"
   /**
    * false: the check itself is not fully documented, so an answer out of the
    * documentation says nothing about the key: only 401 refuses it (a 403
@@ -75,6 +76,19 @@ const CHECKS: Readonly<Record<string, CheckCall>> = {
     url: "https://image-api.photoroom.com/v2/account",
     header: "x-api-key",
     answer: "photoroom_account",
+    documented: false,
+  },
+  // Verified 2026-11-25: Bria documents no account or key endpoint
+  // (https://docs.bria.ai/getting-started/authentication.md: 401 for a missing, invalid or
+  // revoked token). The status of a request it never had generates nothing
+  // (https://docs.bria.ai/getting-started/async-requests: GET /v2/status/{request_id};
+  // "a 404 means the request_id does not exist", or `status: UNKNOWN` "an unknown or
+  // expired request_id"): an answer of that kind says the key was taken. That a
+  // refused key gets its 401 before the lookup is not written down: not documented
+  bria: {
+    url: AI_SERVICE_CHECKS.bria.url,
+    header: "api_token",
+    answer: "bria_status",
     documented: false,
   },
 }
@@ -112,9 +126,26 @@ function isDocumentedAnswer(answer: CheckCall["answer"], body: Buffer): boolean 
     if (!isRecord(parsed)) {
       return false
     }
+    if (answer === "bria_status") {
+      return typeof parsed["status"] === "string"
+    }
     return answer === "model_list"
       ? parsed["object"] === "list" && Array.isArray(parsed["data"])
       : isRecord(parsed["images"])
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Bria's own "no such request" (a 404): a JSON object with its `status`
+ * or its error object. The control plane's check reads it the same way
+ * (`apps/control-plane/src/lib/ai-gateway/check.ts`).
+ */
+function isBriaNotFound(body: Buffer): boolean {
+  try {
+    const parsed: unknown = JSON.parse(body.toString("utf8"))
+    return isRecord(parsed) && (typeof parsed["status"] === "string" || isRecord(parsed["error"]))
   } catch {
     return false
   }
@@ -149,6 +180,11 @@ function verdictOf(service: AiService, response: SafeFetchResponse): [AiAccountC
   }
   if (status === 408 || status === 429 || status >= 500) {
     return ["unreachable", code]
+  }
+  // Bria: "no such request" is said only to a key it took (CHECKS above), and only in its
+  // own JSON; a bare, HTML or empty 404 (a proxy, a moved path) says nothing of the key
+  if (status === 404 && CHECKS[service.id]?.answer === "bria_status") {
+    return isBriaNotFound(response.body) ? ["valid", code] : ["unreachable", "not_bria_404"]
   }
   if (status >= 200 && status < 300) {
     const answer = CHECKS[service.id]?.answer ?? "model_list"
@@ -194,7 +230,11 @@ export async function checkAiAccount(
     return "failed"
   }
   const auth: Record<string, string> =
-    call.header === "bearer" ? { Authorization: `Bearer ${apiKey}` } : { "x-api-key": apiKey }
+    call.header === "bearer"
+      ? { Authorization: `Bearer ${apiKey}` }
+      : call.header === "api_token"
+        ? { api_token: apiKey }
+        : { "x-api-key": apiKey }
   let verdict: [AiAccountCheck, string]
   try {
     const response = await (options.fetch ?? safeFetch)(url, {

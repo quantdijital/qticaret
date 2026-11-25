@@ -1,4 +1,9 @@
-import { AI_FAKE_TARGET, AI_SERVICE_TARGETS, endpointUrl } from "@qticaret/types/control-plane"
+import {
+  AI_FAKE_TARGET,
+  AI_SERVICE_TARGETS,
+  aiTargetUnverified,
+  endpointUrl,
+} from "@qticaret/types/control-plane"
 import type {
   AiCapabilityTarget,
   AiCreditCapability,
@@ -30,6 +35,8 @@ export interface GatewayTarget {
   price: AiUnitPrice | null
   /** A 200 body code meaning the service did no work (MiniMax). */
   notTakenBodyCodes: readonly number[]
+  /** Statuses beyond the shared ones the service refuses before any work (Bria's 415). */
+  notTakenStatuses: readonly number[]
   /** The body fields the gateway writes over the shop's (the table's `fixedBody`). */
   fixedBody: Readonly<Record<string, unknown>>
   /** The fake service's own time, in tests only. */
@@ -75,6 +82,7 @@ function fakeTarget(capability: AiCreditCapability, task: AiCreditTask): Gateway
       ? { currency: "USD", perImage: 1_000 }
       : { currency: "USD", inputPerMillionTokens: 1_000_000, outputPerMillionTokens: 2_000_000 },
     notTakenBodyCodes: [],
+    notTakenStatuses: [],
     fixedBody: {},
     ...fakeTimeout(),
   }
@@ -92,6 +100,23 @@ function fixedUrl(service: AiServiceTarget, address: string): URL | null {
 
 /** The endpoint a task's call on a service goes to, or null: nowhere it may go. */
 export function gatewayTargetOf(
+  serviceId: string,
+  capability: AiCreditCapability,
+  task: AiCreditTask
+): GatewayTarget | null {
+  // Not one a real call has not proven yet (ai-targets.ts `unverified`: Bria's result host)
+  if (aiTargetUnverified(serviceId, capability)) {
+    return null
+  }
+  return tableTargetOf(serviceId, capability, task)
+}
+
+/**
+ * The table's endpoint for a task, held to its hosts, whether or not it is
+ * proven yet (`unverified`): how a held target's body and measures would
+ * be built, for their tests. Calls go through `gatewayTargetOf` alone.
+ */
+export function tableTargetOf(
   serviceId: string,
   capability: AiCreditCapability,
   task: AiCreditTask
@@ -127,6 +152,8 @@ export function gatewayTargetOf(
     maxTokensField: target.maxTokensField ?? null,
     price: endpoint.price ?? target.price ?? null,
     notTakenBodyCodes: service.notTakenBodyCodes ?? [],
-    fixedBody: target.fixedBody ?? {},
+    notTakenStatuses: service.notTakenStatuses ?? [],
+    // A scene endpoint's own fixed fields (Bria's mode), else its capability's
+    fixedBody: endpoint.fixedBody ?? target.fixedBody ?? {},
   }
 }

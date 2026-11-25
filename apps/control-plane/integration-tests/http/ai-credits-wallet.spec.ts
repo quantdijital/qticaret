@@ -265,31 +265,37 @@ medusaIntegrationTestRunner({
         now: NOW,
       })
       const lateEvening = istanbul("2026-11-10", "23:50")
-      // Seven scenes at 40: 280 of 300; eight at once, so the cap holds under a race too
+      // Three cut-outs at 5 first (15), then fifteen scenes at 20 at once: fourteen fit
+      // (295 of 300), so the cap holds under a race too
+      for (let cut = 0; cut < 3; cut += 1) {
+        expect(await spendAt(tenantId, "image_background", lateEvening)).toMatchObject({
+          kind: "charged",
+        })
+      }
       const results = await Promise.all(
-        Array.from({ length: 8 }, () => spendAt(tenantId, "image_scene", lateEvening))
+        Array.from({ length: 15 }, () => spendAt(tenantId, "image_scene", lateEvening))
       )
-      expect(kinds(results)).toEqual({ charged: 7, daily_cap: 1 })
-      // 20 left today: a 10-credit task still goes, a 40-credit one does not
+      expect(kinds(results)).toEqual({ charged: 14, daily_cap: 1 })
+      // 5 left today: a 5-credit task still goes, a 20-credit one does not
       expect(await spendAt(tenantId, "image_background", lateEvening)).toMatchObject({
         kind: "charged",
       })
       expect(await spendAt(tenantId, "image_scene", lateEvening)).toEqual({ kind: "daily_cap" })
       expect((await balanceOf(c(), tenantId, lateEvening)).daily).toEqual({
         cap: 300,
-        spent: 290,
-        remaining: 10,
+        spent: 300,
+        remaining: 0,
       })
       // Midnight in Istanbul is 21:00 UTC: the next day's counter starts at nothing
       const midnight = istanbul("2026-11-11", "00:00")
       expect(await spendAt(tenantId, "image_scene", midnight)).toMatchObject({ kind: "charged" })
       expect(await walletOf(c(), tenantId)).toMatchObject({
-        spent_today: 40,
+        spent_today: 20,
         spent_day: "2026-11-11",
-        purchased_balance: 1000 - 290 - 40,
+        purchased_balance: 1000 - 300 - 20,
       })
       // A shop's own cap is its wallet's
-      await pgOf(c()).raw("UPDATE ai_credit_wallet SET daily_cap = 45 WHERE tenant_id = ?", [
+      await pgOf(c()).raw("UPDATE ai_credit_wallet SET daily_cap = 22 WHERE tenant_id = ?", [
         tenantId,
       ])
       expect(await spendAt(tenantId, "image_background", midnight)).toEqual({ kind: "daily_cap" })

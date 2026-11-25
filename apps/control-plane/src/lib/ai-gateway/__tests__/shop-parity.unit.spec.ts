@@ -27,6 +27,7 @@ interface ShopService {
   capabilities: Record<string, ShopTarget>
   unitPrices: Record<string, unknown>
   bodyErrors?: Record<number, string>
+  statusErrors?: Record<number, string>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- the caller names what it loads
@@ -113,5 +114,20 @@ describe("the gateway against the shop's registry (adr/0085 K2)", () => {
         codes,
       ])
     }
+  })
+
+  it("gives credits back on the service's own statuses the shop gives its quota back on", () => {
+    for (const service of aiServices("production")) {
+      // The shared ones (401, 402, 403, 429, a 5xx) are every service's, in forward.ts
+      const statuses = Object.entries(service.statusErrors ?? {})
+        .filter(([, key]) => notTakenByService(key, null))
+        .map(([status]) => Number(status))
+        .sort((a, b) => a - b)
+      expect([service.id, [...(targets[service.id]?.notTakenStatuses ?? [])]]).toEqual([
+        service.id,
+        statuses,
+      ])
+    }
+    expect(targets["bria"]?.notTakenStatuses).toEqual([415])
   })
 })

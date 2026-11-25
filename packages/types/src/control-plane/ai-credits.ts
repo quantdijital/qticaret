@@ -39,8 +39,8 @@ export const AI_TASK_CREDITS = Object.freeze({
   // The panel assistant's turn (a loop of a few calls)
   assistant: 3,
   // Pictures edited
-  image_background: 10,
-  image_scene: 40,
+  image_background: 5,
+  image_scene: 20,
 } as const satisfies Record<string, number>)
 
 export type AiCreditTask = keyof typeof AI_TASK_CREDITS

@@ -37,6 +37,20 @@ export function callParamsOf(target: string): AiCallParams | null {
   return parsed.success ? parsed.data : null
 }
 
+/** The key in the one header its service reads (the table's `auth`). */
+export function credentialHeader(auth: AiTargetAuth, value: string): Record<string, string> {
+  switch (auth) {
+    case "bearer":
+      return { authorization: `Bearer ${value}` }
+    case "x-api-key":
+      return { "x-api-key": value }
+    case "x-goog-api-key":
+      return { "x-goog-api-key": value }
+    case "api_token":
+      return { api_token: value }
+  }
+}
+
 /**
  * The headers sent to the provider: the key opened just now (a Buffer,
  * zeroed by the caller once sent), the body's type, `accept`. Nothing else.
@@ -46,14 +60,11 @@ export function providerHeaders(
   key: Buffer,
   contentType: string
 ): Record<string, string> {
-  const value = key.toString("utf8")
-  const credential: Record<string, string> =
-    auth === "bearer"
-      ? { authorization: `Bearer ${value}` }
-      : auth === "x-api-key"
-        ? { "x-api-key": value }
-        : { "x-goog-api-key": value }
-  return { "content-type": contentType, accept: "application/json, image/*", ...credential }
+  return {
+    "content-type": contentType,
+    accept: "application/json, image/*",
+    ...credentialHeader(auth, key.toString("utf8")),
+  }
 }
 
 // A type the shop reads: one line, a token/subtype and its parameters, nothing longer

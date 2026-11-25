@@ -121,6 +121,13 @@ export const AI_INLINE_IMAGE_TYPES: ReadonlySet<string> = new Set([
   "image/webp",
 ])
 
+/**
+ * The most pixels a picture sent to an image service may have, read from
+ * its header (image-dimensions.ts): the shop's own upload limit
+ * (apps/backend lib/media/sanitize.ts `MAX_INPUT_PIXELS`), 40 MP.
+ */
+export const AI_INLINE_IMAGE_MAX_PIXELS = 40_000_000
+
 /** The pictures a call may send: none as plain text, the task's own otherwise. */
 export const maxImagesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>
   capability === "text" ? 0 : AI_TASK_LIMITS[task].maxImages

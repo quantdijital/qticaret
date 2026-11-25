@@ -1,3 +1,4 @@
+import { briaBody } from "./body-bria"
 import { chatBody } from "./body-chat"
 import { boundaryOf, formRefusal, formTypeOf } from "./body-form"
 import { geminiImageBody } from "./body-gemini"
@@ -12,7 +13,7 @@ export type { BodyInput, BodyRefusal, PreparedBody } from "./body-shared"
  * A shop's provider body made safe to send (adr/0085 K2, "Güvenlik"): the
  * shop builds the prompt, the gateway writes what costs money. A JSON body
  * is never passed on: a new one is built from the fields the gateway
- * allows (body-chat.ts, body-gemini.ts), the model, the output budget,
+ * allows (body-chat.ts, body-gemini.ts, body-bria.ts), the model, the output budget,
  * streaming and the target's fixed fields written by the gateway alone.
  * Its text (the body less its inline pictures) is held to the task's
  * size. A form body (Photoroom) is not parsed: its type (one boundary, no
@@ -67,7 +68,11 @@ export function prepareBody(input: BodyInput): PreparedBody {
   }
   try {
     const rebuilt =
-      target.protocol === "gemini-image" ? geminiImageBody(parsed, input) : chatBody(parsed, input)
+      target.protocol === "gemini-image"
+        ? geminiImageBody(parsed, input)
+        : target.protocol === "bria"
+          ? briaBody(parsed, input)
+          : chatBody(parsed, input)
     const body = Buffer.from(JSON.stringify(rebuilt.body))
     if (body.length - rebuilt.imageBytes > maxTextBytesOf(task, capability)) {
       return refuse("over_task_text", "body_too_large")

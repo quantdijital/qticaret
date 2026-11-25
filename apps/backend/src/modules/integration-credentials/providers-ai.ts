@@ -58,6 +58,14 @@ export const AI_CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
+  // Bria platform > API keys: image editing (cut-out and scene)
+  bria: {
+    settings: z.object({}).strict(),
+    secrets: ["api_key"],
+    secret: apiKey,
+    identity: [],
+    optional: [],
+  },
   // The fake AI service's account (`lib/ai` registry): development and tests only, see
   // `LOCAL_ONLY_PROVIDERS`. Its check never leaves the machine
   fake: {

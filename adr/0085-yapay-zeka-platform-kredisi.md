@@ -51,8 +51,10 @@
 | Görsel alt metni | 0,002–0,004 $ | 2 |
 | Fotoğraftan ürün kartı | 0,004–0,008 $ | 3 |
 | Panel yardımcısı turu (araç döngüsü, birkaç çağrı) | 0,003–0,01 $ | 3 |
-| Arka plan temizleme | 0,02 $ | 10 |
-| Sahne görseli | 0,04–0,10 $ | 40 |
+| Arka plan temizleme | 0,018–0,02 $ | 5 |
+| Sahne görseli | 0,03–0,10 $ | 20 |
+
+2026-11-25 sahip kararı: metinde maliyetin yaklaşık 4 katı, görselde düşük pay; görsel işlerinde 1 kredinin maliyeti 0,0025 $ ölçüsünü aşabilir.
 
 Kendi anahtarıyla yapılan işte kredi düşmez; `AiTask.credits` alanı kalkmaz ama platform yolunda okunmaz (tek kaynak yukarıdaki tablo; kayıttaki her işin tabloda satırı olduğunu ya da bilerek dışarıda bırakıldığını bir eşitlik testi denetler).
 
@@ -90,7 +92,7 @@ Kendi anahtarıyla yapılan işte kredi düşmez; `AiTask.credits` alanı kalkma
 ### 4. Mağaza paneli (sade arayüz)
 
 - Ayarlar › Yapay zekâ'da "Platform kredisi" kartı: kalan aylık hak ve yenileneceği gün, satın alınan kredi ve son kullanma günü, "Kredi yükle" (paketler, talep, bekleyen talebin durumu).
-- Seçicide "Platform kredisi" adı; hangi servisin çalıştığı söylenmez. Düğmenin yanında kredi yalnız 1'den büyükse küçük notla ("40 kredi"); bakiye bitince öneri kutusunda "Kredi yükle".
+- Seçicide "Platform kredisi" adı; hangi servisin çalıştığı söylenmez. Düğmenin yanında kredi yalnız 1'den büyükse küçük notla ("20 kredi"); bakiye bitince öneri kutusunda "Kredi yükle".
 - Bayrak kapalıyken hiçbir şey görünmez.
 
 ### 5. Üst panel arayüzü

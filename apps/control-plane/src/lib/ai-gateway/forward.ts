@@ -135,9 +135,11 @@ const NOT_TAKEN_STATUSES: ReadonlySet<number> = new Set([401, 402, 403, 429])
  * Whether the provider never took the call (adr/0085 §1, the shop's
  * `notTakenByService`): never connected; a refused key (401, 403), no
  * balance (402), busy or out of quota (429), down (5xx); a 200 whose body
- * code says one of these; the platform's own failure (a 404, its key refused
- * in a 400: provider-errors.ts). A timeout, a cut answer, a 408 or any other
- * 4xx may have been charged: the credits stay.
+ * code says one of these; a status the service's own row lists as refused
+ * before any work (`notTakenStatuses`: Bria's 415, a picture type it does
+ * not take); the platform's own failure (a 404, its key refused in a 400:
+ * provider-errors.ts). A timeout, a cut answer, a 408 or any other 4xx may
+ * have been charged: the credits stay.
  */
 export function notTaken(outcome: ForwardOutcome, target: GatewayTarget): boolean {
   if (outcome.kind === "not_connected") {
@@ -149,6 +151,9 @@ export function notTaken(outcome: ForwardOutcome, target: GatewayTarget): boolea
   const { status } = outcome
   // The platform's own failure (a model gone, its key refused in a 400): not the shop's to pay
   if (NOT_TAKEN_STATUSES.has(status) || status >= 500 || platformFault(status, outcome.body)) {
+    return true
+  }
+  if (target.notTakenStatuses.includes(status)) {
     return true
   }
   if (status >= 200 && status < 300 && target.notTakenBodyCodes.length > 0) {

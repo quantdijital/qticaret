@@ -845,6 +845,7 @@
       "ai_route_service_unknown": "Unknown service.",
       "ai_route_no_key": "This service has no key; write its key first.",
       "ai_route_uncapped": "This service documents no output limit, so it cannot run on platform credits.",
+      "ai_route_unverified": "This service is not verified yet; it cannot be routed on platform credits.",
       "ai_service_unknown": "Unknown AI service."
     },
     "ai_credits": {
@@ -1557,6 +1558,7 @@
       "qwen": "Qwen (Alibaba)",
       "gemini": "Google Gemini",
       "photoroom": "Photoroom",
+      "bria": "Bria",
       "fake": "Fake service (tests only)"
     },
     "tab": {
@@ -1731,6 +1733,7 @@
       "label": "{{capability}}: service and model",
       "noKey": "{{service}} (no key)",
       "uncapped": "{{service}}: this service documents no output limit, so it cannot run on platform credits.",
+      "unverified": "{{service}}: this service is not verified yet; it cannot be routed on platform credits.",
       "done": "Routing saved."
     },
     "general": {

@@ -28,6 +28,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   qwen: "Qwen (Alibaba)",
   gemini: "Gemini",
   photoroom: "Photoroom",
+  bria: "Bria",
   fake: "Fake AI",
 }
 

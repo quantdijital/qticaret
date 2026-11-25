@@ -47,6 +47,7 @@ export function settingsLinkOf(id: string) {
     case "qwen":
     case "gemini":
     case "photoroom":
+    case "bria":
       return linkOptions({ to: "/settings/ai" })
     default:
       return null

@@ -23,7 +23,7 @@ const reasonOf = (run: () => unknown): unknown => {
 
 // Plainly fake and fresh per run (docs/04)
 const key = () => `test-key-${fakeSecret()}`
-const AI = ["deepseek", "minimax", "gemini", "photoroom", "qwen"] as const
+const AI = ["deepseek", "minimax", "gemini", "photoroom", "qwen", "bria"] as const
 
 describe("AI service accounts (adr/0071 §3)", () => {
   it("are providers of their own, after the others and in the registry's order", () => {

@@ -1,4 +1,5 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { AI_TASK_CREDITS } from "@qticaret/types/control-plane"
 import {
   adjust,
   cancelOrder,
@@ -32,9 +33,9 @@ const PACK = {
   currency: "TRY" as const,
 }
 
-// A picture edited: 40 credits, two calls an operation (the case the review named)
+// A picture set in a scene: two calls an operation (the case the review named)
 const TASK = "image_scene"
-const COST = 40
+const COST = AI_TASK_CREDITS[TASK]
 const GRANT = 400
 const ROUNDS = 6
 

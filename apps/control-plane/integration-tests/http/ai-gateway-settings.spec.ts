@@ -122,6 +122,9 @@ medusaIntegrationTestRunner({
         }
         expect(keys(await save(gemini))).toBe("cp.ai_route_uncapped")
       }
+      // A target no real call has proven yet (Bria's result host): not on credits either
+      const bria = { routing: { image_edit: { service: "bria", model: "RMBG2" } } }
+      expect(keys(await save(bria))).toBe("cp.ai_route_unverified")
       expect((await call.get(S, owner)).data).toMatchObject({
         settings: { packs: [], routing: {} },
       })

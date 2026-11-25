@@ -1,3 +1,4 @@
+import { briaImageEdit } from "./connectors/bria"
 import { fakeImageConnector } from "./connectors/fake-image"
 import { geminiImageEdit } from "./connectors/gemini-image"
 import type { ImageEditConnector } from "./connectors/image-types"
@@ -32,6 +33,7 @@ export function imageTargetOf(
   if (
     target.connector === "photoroom" ||
     target.connector === "gemini-image" ||
+    target.connector === "bria" ||
     target.connector === "fake-image"
   ) {
     return { service, target }
@@ -65,7 +67,12 @@ export function imageConnectorWith(
   if (target.connector === "fake-image") {
     return fakeImageConnector
   }
-  return target.connector === "photoroom"
-    ? photoroomImageEdit({ service, target, transport })
-    : geminiImageEdit({ service, target, transport })
+  switch (target.connector) {
+    case "photoroom":
+      return photoroomImageEdit({ service, target, transport })
+    case "bria":
+      return briaImageEdit({ service, target, transport })
+    case "gemini-image":
+      return geminiImageEdit({ service, target, transport })
+  }
 }

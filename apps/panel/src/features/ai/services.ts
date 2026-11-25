@@ -10,6 +10,7 @@ export const AI_SERVICE_IDS = [
   "qwen",
   "gemini",
   "photoroom",
+  "bria",
   "fake",
 ] as const
 

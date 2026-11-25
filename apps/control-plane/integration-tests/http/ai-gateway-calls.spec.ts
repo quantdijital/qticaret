@@ -178,7 +178,7 @@ medusaIntegrationTestRunner({
       expect(reply.status).toBe(200)
       expect(reply.headers["content-type"]).toBe("image/png")
       expect(Buffer.from(reply.data).equals(png)).toBe(true)
-      expect(reply.headers["x-qt-ai-credits-charged"]).toBe("40")
+      expect(reply.headers["x-qt-ai-credits-charged"]).toBe("20")
       const [sent] = provider.seen
       expect(sent?.path).toBe("/scene")
       expect(sent?.body.equals(form)).toBe(true)
@@ -187,12 +187,12 @@ medusaIntegrationTestRunner({
       expect(sent?.headers.authorization).toBeUndefined()
       expect(await operationOf(operation)).toMatchObject({
         status: "charged",
-        credits: 40,
+        credits: 20,
         model: "fake-scene",
         images: 1,
         estimated_cost_micros: 1_000,
       })
-      expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 60 })
+      expect(await walletOf(getContainer(), who.id)).toMatchObject({ plan_balance: 80 })
     })
 
     it("adds an operation's later calls' measures to it, charging once (P3d, D4)", async () => {

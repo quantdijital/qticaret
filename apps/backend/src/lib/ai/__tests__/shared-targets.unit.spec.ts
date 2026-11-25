@@ -19,19 +19,25 @@ const HOSTS: Record<string, string[]> = {
   qwen: ["dashscope-intl.aliyuncs.com"],
   gemini: ["generativelanguage.googleapis.com"],
   photoroom: ["sdk.photoroom.com", "image-api.photoroom.com"],
+  bria: ["engine.prod.bria-api.com"],
 }
 
 const AUTH_OF: Record<string, AiCapabilityTarget["auth"]> = {
   "openai-compatible": "bearer",
   photoroom: "x-api-key",
   "gemini-image": "x-goog-api-key",
+  bria: "api_token",
 }
 
 function addressOf(target: AiTarget): string | null {
   if (target.connector === "openai-compatible") {
     return `${target.baseUrl}${target.path}`
   }
-  return target.connector === "photoroom" || target.connector === "gemini-image" ? target.url : null
+  return target.connector === "photoroom" ||
+    target.connector === "gemini-image" ||
+    target.connector === "bria"
+    ? target.url
+    : null
 }
 
 describe("the registry's targets come from the shared table", () => {
@@ -62,10 +68,17 @@ describe("the registry's targets come from the shared table", () => {
         expect(addressOf(target)).toBe(endpointUrl(table))
         expect(AUTH_OF[target.connector]).toBe(table.auth)
         const scene =
-          target.connector === "photoroom" || target.connector === "gemini-image"
+          target.connector === "photoroom" ||
+          target.connector === "gemini-image" ||
+          target.connector === "bria"
             ? target.scene
             : undefined
         expect(scene?.model).toBe(table.scene?.model)
+        // Bria's body fields are the table's, the gateway's own (`fixedBody`)
+        if (target.connector === "bria") {
+          expect(target.body).toEqual(table.fixedBody)
+          expect(scene?.body).toEqual(table.scene?.fixedBody)
+        }
         expect(scene?.url).toBe(table.scene ? endpointUrl(table.scene) : undefined)
       }
     }
@@ -76,7 +89,9 @@ describe("the registry's targets come from the shared table", () => {
       Object.values(service.capabilities).flatMap((target) => {
         const own = addressOf(target) ?? "-"
         const scene =
-          target.connector === "photoroom" || target.connector === "gemini-image"
+          target.connector === "photoroom" ||
+          target.connector === "gemini-image" ||
+          target.connector === "bria"
             ? [target.scene?.url ?? "-"]
             : []
         return [`${service.id} ${target.model} ${own}`, ...scene.map((url) => `scene ${url}`)]
@@ -95,6 +110,8 @@ describe("the registry's targets come from the shared table", () => {
       "scene https://image-api.photoroom.com/v2/edit",
       "qwen qwen3.8-flash https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
       "qwen qwen3.8-flash https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+      "bria RMBG2 https://engine.prod.bria-api.com/v2/image/edit/remove_background",
+      "scene https://engine.prod.bria-api.com/v2/image/edit/replace_background",
     ])
   })
 
