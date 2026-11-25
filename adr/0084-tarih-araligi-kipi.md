@@ -1,11 +1,11 @@
 # ADR-0084: Tarih aralığı kipi: konaklama ve kiralama
 
-- **Durum:** Taslak; sahibin kararı bekleniyor (2026-11-25)
+- **Durum:** Kabul (sahip, 2026-11-25: "soruları kendin cevapla, devam et"; aşağıdaki öneriler karar oldu). A1 gün tanecikli sayılı kaynak, A2 ilk dilim tarih aralığıyla talep, A3 taban fiyat ve tarihe özel fiyat, A4 ilk sürüm kuralları (en az/en çok gece, pencere, son dakika), A5 her oda tipi ayrı ürün, A6 teminat ilk sürümde bilgi satırı. Bu kipi bekleyen müşteri yok; uygulama sırası 0082 ve 0083'ten sonradır. Hukukçu ya da mali müşavir doğrulaması isteyen maddeler doğrulanana kadar yazılı varsayılanla yürür; her dilim kendi PR'ında `security-reviewer` incelemesinden geçer.
 - **Tarih:** 2026-11-25
 - **İlgili:** adr/0076 (tarihli ürün; §11 "tarih aralığı modu yazılmıyor, temel buna hazır", K4 "tutma ve rezervasyon slot listesine bağlanır"), adr/0077 (tarih araması, ay takvimi), adr/0082 (kapora ve bakiye), adr/0083 (yerleşim birimi), adr/0007 (KDV), adr/0066 (tema sözleşmesi), docs/13 (SEO)
 - **Dayanak:** sahip (2026-11-22, adr/0076 dayanağı): ileride otel, oda ve araç kiralama (tarih aralığı seçerek) da gelebilir; bugünkü temel ona uygun olsun. Bugün bu kipi bekleyen bir müşteri yok; bu ADR temeli harcamadan nasıl tamamlanacağını ve hangi sırayla yazılacağını karara bağlar.
 
-## Sahibin vereceği kararlar
+## Kararlar (sahip, 2026-11-25; "Önerim" sütunu karardır)
 
 Kısa liste; seçenekler ve gerekçe hemen altında. İkili tercihler **ayar** olarak gelir.
 

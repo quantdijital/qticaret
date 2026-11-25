@@ -87,6 +87,6 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0079 | [Panel yapay zekâ yardımcısı: doğal dille yol gösterme, okuma ve onaylı işlem](0079-panel-yapay-zeka-yardimcisi.md) | — |
 | 0080 | [Vitrin pop-up'ları: bilgi, kampanya ve bülten; hedefleme, sıklık, sayaçlar](0080-vitrin-pop-uplari.md) | — |
 | 0081 | [Hızlı CI: değişene göre koşan, önbellekli, paralel hat ve tek sonuç](0081-hizli-ci.md) | — |
-| 0082 | [Tarihli üründe kapora (ön ödeme) ve bakiye tahsilatı](0082-tarihli-urunde-kapora-ve-bakiye.md) (taslak) | — |
-| 0083 | [Tarihli üründe oda dağılımı ve tek kişi farkı](0083-oda-dagilimi-ve-tek-kisi-farki.md) (taslak) | — |
-| 0084 | [Tarih aralığı kipi: konaklama ve kiralama](0084-tarih-araligi-kipi.md) (taslak) | — |
+| 0082 | [Tarihli üründe kapora (ön ödeme) ve bakiye tahsilatı](0082-tarihli-urunde-kapora-ve-bakiye.md) | — |
+| 0083 | [Tarihli üründe oda dağılımı ve tek kişi farkı](0083-oda-dagilimi-ve-tek-kisi-farki.md) | — |
+| 0084 | [Tarih aralığı kipi: konaklama ve kiralama](0084-tarih-araligi-kipi.md) | — |

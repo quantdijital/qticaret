@@ -1,11 +1,11 @@
 # ADR-0082: Tarihli üründe kapora (ön ödeme) ve bakiye tahsilatı
 
-- **Durum:** Taslak; sahibin kararı bekleniyor (2026-11-25)
+- **Durum:** Kabul (sahip, 2026-11-25). S1 (yüzde ve kişi başı sabit tutar ikisi de, görünürde yüzde) ve S2'yi (önce basit yol, sonra ödeme bağlantısı; karttan otomatik çekim yok) sahip kendisi seçti; S3–S6 için "soruları kendin cevapla, devam et" dedi ve aşağıdaki öneriler karar oldu: S3 kalkıştan 30 gün önce, S4 hatırlat ve mağazaya bırak (kendiliğinden iptal ayarı kapalı gelir), S5 mevcut kademeler ödenenle sınırlı, S6 fatura tamamı ödenince (mali müşavir teyidiyle değişebilen ayar). Hukukçu ya da mali müşavir doğrulaması isteyen maddeler doğrulanana kadar yazılı varsayılanla yürür; her dilim kendi PR'ında `security-reviewer` incelemesinden geçer.
 - **Tarih:** 2026-11-25
 - **İlgili:** adr/0076 (tarihli ürün; K10 "ilk sürüm tam ödemedir, kapora ayrı ADR"), adr/0026 (barındırılan ödeme formu, sahipsiz ödeme), adr/0029 (havale), adr/0033 (sipariş düzenleme: fark tahsilatı), adr/0051 (ödeme bağlantısı), adr/0034 (e-fatura tetikleri), adr/0010 (kuruş ve yuvarlama), adr/0044 (dolandırıcılık koruması), adr/0083 (oda dağılımı), adr/0084 (tarih aralığı kipi)
 - **Dayanak:** adr/0076 "Sonraya" satırı ve açık sorusu (kapora ve bakiye tahsilatı; sağlayıcıların ön provizyon desteği doğrulanacak). İlk kullanım: kendi turlarını satan acenta. Tur tutarı büyüktür, aylar öncesinden satılır; müşteri tamamını o gün ödemek istemez.
 
-## Sahibin vereceği kararlar
+## Kararlar (sahip, 2026-11-25; "Önerim" sütunu karardır)
 
 Kısa liste; her birinin seçenekleri ve gerekçesi hemen altında. İkili tercihler soru değil, **ayar** olarak gelir (varsayılanı yazılı).
 

@@ -1,11 +1,11 @@
 # ADR-0083: Tarihli üründe oda dağılımı ve tek kişi farkı
 
-- **Durum:** Taslak; sahibin kararı bekleniyor (2026-11-25)
+- **Durum:** Kabul (sahip, 2026-11-25: "soruları kendin cevapla, devam et"; aşağıdaki öneriler karar oldu). T1 basit yol ve ürün ayarıyla açılan oda oda seçim, T2 tek tutar, T3 çocuk fiyatı için odada en az iki tam ücretli kişi (ayar), T4 ilk sürümde oda sınırı yok, T5 ilk sürümde oda arkadaşı yok. Hukukçu ya da mali müşavir doğrulaması isteyen maddeler doğrulanana kadar yazılı varsayılanla yürür; her dilim kendi PR'ında `security-reviewer` incelemesinden geçer.
 - **Tarih:** 2026-11-25
 - **İlgili:** adr/0076 (tarihli ürün; K3 "varyant fiyat kategorisidir", §7 katılımcı), adr/0052 (sunucu fiyatlı satır deseni), adr/0010 (kuruş), adr/0066 (tema sözleşmesi, biçim sözleşmesi), adr/0077 (kart fiyatı), adr/0082 (kapora), adr/0084 (tarih aralığı kipi), docs/kvkk-envanter.md
 - **Dayanak:** adr/0076 "Sonraya" satırı (oda dağılımı ve tek kişi farkı) ve açık sorusu (ilk müşteri acentanın gerçek ürün yapısı: oda dağılımı, çocuk yaş sınırları). Konaklamalı turun fiyatı "iki kişilik odada kişi başı" verilir; tek gelen fark öder, çocuk indirimi çoğu zaman iki yetişkinle aynı odada geçerlidir.
 
-## Sahibin vereceği kararlar
+## Kararlar (sahip, 2026-11-25; "Önerim" sütunu karardır)
 
 Kısa liste; seçenekler ve gerekçe hemen altında. İkili tercihler **ayar** olarak gelir.
 
