@@ -68,10 +68,12 @@ describe("a cart line's struck amount", () => {
     const words = cartSheetWords(t, 1).line
     const drawer = html(<CartSheetLine line={promoted} change={undefined} locked words={words} />)
     for (const drawn of [page, drawer]) {
-      expect(drawn).toContain('<span class="sr-only">Promosyon indirimi: </span>1.750,50 TL</s>')
+      expect(drawn).toContain(
+        '<span class="sr-only">Promosyon indirimi öncesi: </span>1.750,50 TL</s>'
+      )
       expect(drawn).not.toContain("Önceki fiyat")
     }
-    expect(words.before).toBe("Promosyon indirimi:")
+    expect(words.before).toBe("Promosyon indirimi öncesi:")
   })
 
   it("says nothing of a discount on a line without one", () => {

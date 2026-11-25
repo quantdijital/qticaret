@@ -19,7 +19,7 @@ export interface SheetLineWords {
   group: string
   decrease: string
   increase: string
-  /** "Promosyon indirimi:", read before the struck amount (adr/0076 Ek 2026-11-25). */
+  /** "Promosyon indirimi öncesi:", read before the struck amount (adr/0076 Ek 2026-11-25). */
   before: string
   /** A line made to the buyer's wish: no right of withdrawal. */
   nonWithdrawable: string
