@@ -45,6 +45,7 @@
     "flexible_month": false,
     "date_words": true
   },
+  "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
   "menu_style": "plain",
   "chip_style": "lined",
   "density": "balanced",
