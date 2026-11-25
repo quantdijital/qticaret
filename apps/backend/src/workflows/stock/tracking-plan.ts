@@ -194,14 +194,19 @@ export function planTracking(
       .map((row) => ({ id: row.id, manage_inventory: false })),
     tracked: true,
   }
-  const seen = new Set<string>()
+  // The count each item was given: two variants on one item must agree
+  const seen = new Map<string, number | undefined>()
   // An unlinked item goes back to one variant only
   const relinked = new Set<string>()
   const level = (itemId: string, levels: (LevelRow | null)[], quantity: number | undefined) => {
     if (seen.has(itemId)) {
+      const before = seen.get(itemId)
+      if (before !== undefined && quantity !== undefined && before !== quantity) {
+        throw new ValidationError("stock_tracking.shared_count", { field: "quantity" })
+      }
       return
     }
-    seen.add(itemId)
+    seen.set(itemId, quantity)
     const found = levels.find((each) => each?.location_id === locationId)
     const key = { inventory_item_id: itemId, location_id: locationId }
     if (!found) {

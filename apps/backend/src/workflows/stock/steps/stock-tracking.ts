@@ -64,10 +64,14 @@ async function itemsBySku(
     ),
   ])
   const linked = new Set((links as { inventory_item_id: string }[]).map((l) => l.inventory_item_id))
+  const held = new Set(
+    levels.filter((level) => count(level.reserved_quantity) > 0).map((l) => l.inventory_item_id)
+  )
   return items.map((item) => ({
     id: item.id,
     sku: item.sku ?? "",
-    linked: linked.has(item.id),
+    // One that orders hold is not taken over: its holds are some other sale's
+    linked: linked.has(item.id) || held.has(item.id),
     levels: levels
       .filter((level) => level.inventory_item_id === item.id)
       .map((level) => ({
@@ -143,9 +147,19 @@ export const linkVariantItemsStep = createStep(
       inventory_item_id: each.relink ?? madeFor.get(each.variant_id) ?? "",
       created: each.relink === null,
     }))
-    await container
-      .resolve<Link>(ContainerRegistrationKeys.LINK)
-      .create(linked.map((each) => ({ ...linkOf(each), data: { required_quantity: 1 } })))
+    try {
+      await container
+        .resolve<Link>(ContainerRegistrationKeys.LINK)
+        .create(linked.map((each) => ({ ...linkOf(each), data: { required_quantity: 1 } })))
+    } catch (error) {
+      // A step that throws gets no compensation: the items made here go with it
+      if (made.length > 0) {
+        await container
+          .resolve<IInventoryService>(Modules.INVENTORY)
+          .deleteInventoryItems(made.map((item) => item.id))
+      }
+      throw error
+    }
     return new StepResponse(linked, linked)
   },
   async (linked, { container }) => {

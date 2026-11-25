@@ -130,6 +130,34 @@ describe("planTracking", () => {
     ).toBe("stock_tracking.kit")
   })
 
+  it("refuses two different counts for one item two variants share", () => {
+    const shared = linked("iitem_1", [{ stocked: 1 }])
+    const rows = [row("v1", { inventory_items: shared }), row("v2", { inventory_items: shared })]
+    expect(
+      refusal(() =>
+        planTracking(
+          input(true, [
+            { id: "v1", quantity: 2 },
+            { id: "v2", quantity: 3 },
+          ]),
+          rows,
+          LOC,
+          []
+        )
+      )
+    ).toBe("stock_tracking.shared_count")
+    const same = planTracking(
+      input(true, [
+        { id: "v1", quantity: 2 },
+        { id: "v2", quantity: 2 },
+      ]),
+      rows,
+      LOC,
+      []
+    )
+    expect(same.update).toHaveLength(1)
+  })
+
   it("turns off by the flag alone, refused while orders hold its stock", () => {
     const tracked = row("v1", {
       manage_inventory: true,

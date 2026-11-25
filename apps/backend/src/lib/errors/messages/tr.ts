@@ -611,6 +611,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "stock_tracking.no_location":
     "Mağazanın varsayılan depo adresi yok; stok takibi için önce bir depo adresi ekleyin.",
   "stock_tracking.kit": "Set ürünün stoğu parçalarından sayılır; adedi buradan yazılamaz.",
+  "stock_tracking.shared_count": "Aynı stok kalemini paylaşan varyantlara farklı adet yazılamaz.",
   "stock_tracking.quantity_untracked": "Stok takibi kapalı varyanta adet yazılamaz.",
   "reviews.not_purchased": "Yalnızca teslim aldığınız ürünlere yorum yazabilirsiniz.",
   "reviews.photo_unknown": "Fotoğraflardan biri bulunamadı; yeniden ekleyin.",

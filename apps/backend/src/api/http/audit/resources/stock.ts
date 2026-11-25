@@ -72,17 +72,28 @@ async function watchOf(scope: Resolver, id: string): Promise<Snapshot> {
   return { threshold: (data[0] as { threshold?: number | null } | undefined)?.threshold ?? null }
 }
 
-// Each variant's stock tracking, on or off, by its id
+interface TrackingRow {
+  id: string
+  manage_inventory?: boolean | null
+  inventory_items?: ({ inventory_item_id: string } | null)[] | null
+}
+
+// Each variant's stock tracking, on or off, and the items it is linked to, by its id
 async function trackingOf(scope: Resolver, productId: string): Promise<Snapshot> {
   const { data } = await query(scope).graph({
     entity: "product_variant",
-    fields: ["id", "manage_inventory"],
+    fields: ["id", "manage_inventory", "inventory_items.inventory_item_id"],
     filters: { product_id: productId },
   })
   return Object.fromEntries(
-    (data as { id: string; manage_inventory?: boolean | null }[]).map((variant) => [
-      `manage_inventory:${variant.id}`,
-      variant.manage_inventory === true,
+    (data as TrackingRow[]).flatMap((variant): [string, boolean | string][] => [
+      [`manage_inventory:${variant.id}`, variant.manage_inventory === true],
+      [
+        `inventory_items:${variant.id}`,
+        (variant.inventory_items ?? [])
+          .flatMap((item) => (item ? [item.inventory_item_id] : []))
+          .join(","),
+      ],
     ])
   )
 }

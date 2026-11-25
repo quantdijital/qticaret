@@ -5,7 +5,7 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { emitEventStep } from "@medusajs/medusa/core-flows"
+import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import {
   linkVariantItemsStep,
   planStockTrackingStep,
@@ -59,6 +59,13 @@ function levelsOf(plan: TrackingPlan, linked: Linked, input: TrackingInput): Wri
 export const setStockTrackingWorkflow = createWorkflow(
   "stock-set-tracking",
   (input: WorkflowData<TrackingInput>) => {
+    // One change per product at a time: two "on"s at once would give a variant two items
+    const lock = transform({ input }, ({ input }) => ({
+      key: `stock-tracking:${input.product_id}`,
+      timeout: 10,
+      ttl: 60,
+    }))
+    acquireLockStep(lock)
     const plan = planStockTrackingStep(input)
     const linked = linkVariantItemsStep(transform({ plan }, ({ plan }) => plan.link))
     const levels = transform({ plan, linked, input }, ({ plan, linked, input }) =>
@@ -82,6 +89,7 @@ export const setStockTrackingWorkflow = createWorkflow(
         data: transform({ flip }, ({ flip }) => flip.ids.map((id) => ({ id }))),
       })
     })
+    releaseLockStep(transform({ lock }, ({ lock }) => ({ key: lock.key })))
     return new WorkflowResponse(flip)
   }
 )
