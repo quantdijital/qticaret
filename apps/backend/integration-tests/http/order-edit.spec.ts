@@ -261,6 +261,9 @@ medusaIntegrationTestRunner({
         post(`/admin/orders/${orderId}`, { billing_address: { address_1 } })
 
       const whilePending = await billing("Fatura Sokak No 1")
+      // BirFatura pulled it: the row still waits, the provider holds the old buyer
+      await invoices.updateInvoices({ id: invoice.id, listed_at: new Date() })
+      const whileListed = await billing("Fatura Sokak No 1b")
       await invoices.updateInvoices({ id: invoice.id, status: "issuing" })
       const whileIssuing = await billing("Fatura Sokak No 2")
       const shippingStill = await post(`/admin/orders/${orderId}`, {
@@ -275,6 +278,7 @@ medusaIntegrationTestRunner({
       })
 
       expect(whilePending.status).toBe(200)
+      expect(whileListed.data.message).toBe("orders.billing_invoiced")
       expect(whileIssuing.status).toBe(400)
       expect(whileIssuing.data.message).toBe("orders.billing_invoiced")
       expect(shippingStill.status).toBe(200)
