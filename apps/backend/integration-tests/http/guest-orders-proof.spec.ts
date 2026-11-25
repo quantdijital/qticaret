@@ -8,6 +8,7 @@ import { attachGuestOrdersWorkflow } from "../../src/workflows/orders/attach-gue
 import { confirmEmail } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { namedPort } from "../helpers/port"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -18,7 +19,7 @@ jest.setTimeout(240 * 1000)
 // The auth providers are read when the app starts, before any hook: the
 // fake Apple's address and client are set here, its server started later
 const apple = fakeAppleAccount()
-const port = 20_000 + Math.floor(Math.random() * 20_000)
+const port = namedPort()
 Object.assign(process.env, {
   APPLE_AUTH_CLIENT_ID: apple.clientId,
   APPLE_AUTH_TEAM_ID: apple.teamId,
