@@ -13,7 +13,9 @@
  */
 :root:has(#icerik .gf-cover[data-side="full"]:not(.gf-section)) .gf-head[data-over-cover] {
   margin-bottom: -3.5rem;
+  /* The fold's slide (`frame.css`) kept beside the ground's fade */
   transition:
+    transform var(--dur-short) var(--ease-out),
     background-color var(--dur-short) var(--ease-out),
     color var(--dur-short) var(--ease-out);
 }
@@ -47,6 +49,14 @@
   & .gf-tool.gf-icon-btn:hover,
   & .gf-icon-btn:hover {
     background: rgb(255 255 255 / 0.14);
+  }
+  /* The wide row's own ground (`frame.css`, for the fold) goes too */
+  & .gf-head-row {
+    background: transparent;
+  }
+  /* A logo drawn for the page's ground turns light, as the words do */
+  & [data-gf-head-row] img {
+    filter: brightness(0) invert(1);
   }
   &::after {
     content: none;
