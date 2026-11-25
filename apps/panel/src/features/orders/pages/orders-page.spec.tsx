@@ -88,8 +88,8 @@ describe("OrdersPage", () => {
   it("asks the server for the address's filters: the days, the methods, the carrier", async () => {
     search.current = {
       stage: "to_ship",
-      method: ["cod", "card"],
-      carrier: ["aras"],
+      method: "cod,card",
+      carrier: "aras",
       from: "2026-11-01",
       to: "2026-11-06",
     }
@@ -129,7 +129,7 @@ describe("OrdersPage", () => {
   })
 
   it("ticks several choices from the Filtrele menu into the address, from the first page", async () => {
-    search.current = { stage: "to_ship", payment: ["paid"], page: 3 }
+    search.current = { stage: "to_ship", payment: "paid", page: 3 }
     renderPage()
 
     await screen.findByText("#1042")
@@ -146,7 +146,7 @@ describe("OrdersPage", () => {
       to: "/orders",
       search: expect.objectContaining({
         stage: "to_ship",
-        payment: ["paid", "refunded"],
+        payment: "paid,refunded",
         page: undefined,
       }) as unknown,
       replace: true,
@@ -156,7 +156,7 @@ describe("OrdersPage", () => {
   })
 
   it("clears one filter's choices with its chip's ×", async () => {
-    search.current = { shipping: ["none", "label"] }
+    search.current = { shipping: "none,label" }
     renderPage()
 
     await screen.findByText("#1042")
@@ -203,7 +203,7 @@ describe("OrdersPage", () => {
   })
 
   it("exports the filtered list for the owner, and offers it to no one else", async () => {
-    search.current = { stage: "to_ship", method: ["card", "cod"], carrier: ["own"] }
+    search.current = { stage: "to_ship", method: "card,cod", carrier: "own" }
     const { unmount } = renderPage()
 
     await userEvent.click(await screen.findByRole("button", { name: "Dışa aktar" }))

@@ -7,6 +7,7 @@ import {
   PAYMENT_METHODS,
   SHIPPING_FILTERS,
 } from "@/features/orders/api/orders"
+import { choicesOf, choicesText } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
 
 /**
@@ -86,10 +87,7 @@ export function useOrderFilters(
       ...(extra?.filters ?? []),
     ],
     values: {
-      payment: search.payment,
-      shipping: search.shipping,
-      method: search.method,
-      carrier: search.carrier,
+      ...choicesOf(search),
       days: { from: search.from, to: search.to },
       ...extra?.values,
     },
@@ -100,8 +98,8 @@ export function useOrderFilters(
         return
       }
       if (MULTI_KEYS.includes(key)) {
-        // The bar only hands back a filter's own choices, ticked in its order
-        onChange({ [key]: value })
+        // The bar only hands back a filter's own choices, in its order; a comma text in the address
+        onChange({ [key]: choicesText(value as readonly string[] | undefined) })
         return
       }
       if (extra) {

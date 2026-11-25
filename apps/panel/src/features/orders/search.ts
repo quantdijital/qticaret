@@ -15,28 +15,37 @@ const day = z
   .optional()
   .catch(undefined)
 
+/** A filter's known choices in a comma text (`paid,refunded`), repeats and unknown ones dropped. */
+export function choicesIn<T extends string>(
+  values: readonly T[],
+  text: string | undefined
+): T[] | undefined {
+  const kept = [...new Set((text ?? "").split(","))].filter((one): one is T =>
+    values.includes(one as T)
+  )
+  return kept.length > 0 ? kept : undefined
+}
+
+/** Choices as the address holds them: a comma text, or nothing for none. */
+export const choicesText = (list: readonly string[] | undefined): string | undefined =>
+  list && list.length > 0 ? list.join(",") : undefined
+
 /**
- * One or more of a filter's choices: a list, or the single value
- * (`payment=paid`) and comma list older and hand-written links have.
- * Unknown and repeated choices are dropped; nothing left is no filter.
+ * One or more of a filter's choices as a plain comma text in the address
+ * (`payment=paid,refunded`); an older link's single value reads as it is,
+ * and a list (an address written as one) is joined. Unknown and repeated
+ * choices are dropped; nothing left is no filter.
  */
-const choices = <T extends string>(values: readonly T[]) =>
+const choices = (values: readonly string[]) =>
   z
-    .preprocess(
-      (input) => (typeof input === "string" ? input.split(",") : input),
-      z.array(z.string()).max(20)
-    )
-    .transform((list): T[] | undefined => {
-      const kept = [...new Set(list)].filter((one): one is T => values.includes(one as T))
-      return kept.length > 0 ? kept : undefined
-    })
+    .preprocess((input) => (Array.isArray(input) ? input.join(",") : input), z.string().max(200))
+    .transform((text) => choicesText(choicesIn(values, text)))
     .optional()
     .catch(undefined)
 
 /**
- * The order list's URL: `/orders?stage=to_ship&payment=["paid","refunded"]&shipping=["label"]&method=["cod"]&carrier=["aras"]&from=2026-11-01&to=2026-11-06&q=1042&page=2`
- * (1-based in the URL; `payment=paid` as older links have it still reads).
- * Every filter lives here, so a filtered list is a link.
+ * The order list's URL: `/orders?stage=to_ship&payment=paid,refunded&shipping=label&method=cod&carrier=aras&from=2026-11-01&to=2026-11-06&q=1042&page=2`
+ * (1-based in the URL). Every filter lives here, so a filtered list is a link.
  */
 export const orderListSearchSchema = z.object({
   q: z.string().max(100).optional().catch(undefined),
@@ -52,42 +61,43 @@ export const orderListSearchSchema = z.object({
 
 export type OrderListSearch = z.infer<typeof orderListSearchSchema>
 
-/** A list of choices, or nothing when it is empty. */
-const some = <T>(list: T[] | undefined): T[] | undefined =>
-  list && list.length > 0 ? list : undefined
+/** The address's choices as lists, for the filter bar and the server. */
+export const choicesOf = (search: OrderListSearch) => ({
+  payment: choicesIn(PAYMENT_FILTERS, search.payment),
+  shipping: choicesIn(SHIPPING_FILTERS, search.shipping),
+  method: choicesIn(PAYMENT_METHODS, search.method),
+  carrier: choicesIn(CARRIER_FILTERS, search.carrier),
+})
 
 /** Whether any filter beside the search and the tab is set. */
-export const isFiltered = (search: OrderListSearch): boolean =>
-  Boolean(
-    some(search.payment) ??
-    some(search.shipping) ??
-    some(search.method) ??
-    some(search.carrier) ??
-    search.from ??
-    search.to
+export const isFiltered = (search: OrderListSearch): boolean => {
+  const lists = choicesOf(search)
+  return Boolean(
+    lists.payment ?? lists.shipping ?? lists.method ?? lists.carrier ?? search.from ?? search.to
   )
+}
 
 /** The address's search without its empty parts: an "all" tab, an empty search or list, page 1. */
-export const cleanSearch = (search: OrderListSearch): OrderListSearch => ({
-  q: search.q === "" ? undefined : search.q,
-  stage: search.stage === "all" ? undefined : search.stage,
-  payment: some(search.payment),
-  shipping: some(search.shipping),
-  method: some(search.method),
-  carrier: some(search.carrier),
-  from: search.from,
-  to: search.to,
-  page: search.page && search.page > 1 ? search.page : undefined,
-})
+export const cleanSearch = (search: OrderListSearch): OrderListSearch => {
+  const lists = choicesOf(search)
+  return {
+    q: search.q === "" ? undefined : search.q,
+    stage: search.stage === "all" ? undefined : search.stage,
+    payment: choicesText(lists.payment),
+    shipping: choicesText(lists.shipping),
+    method: choicesText(lists.method),
+    carrier: choicesText(lists.carrier),
+    from: search.from,
+    to: search.to,
+    page: search.page && search.page > 1 ? search.page : undefined,
+  }
+}
 
 /** The list's filters as the address holds them. */
 export const filtersOf = (search: OrderListSearch): OrderFilters => ({
   stage: search.stage ?? "all",
   q: search.q ?? "",
-  payment: search.payment,
-  shipping: search.shipping,
-  method: search.method,
-  carrier: search.carrier,
+  ...choicesOf(search),
   from: search.from,
   to: search.to,
 })

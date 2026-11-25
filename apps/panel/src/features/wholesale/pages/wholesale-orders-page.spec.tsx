@@ -104,7 +104,7 @@ describe("WholesaleOrdersPage (Ek 2026-11-15 (2))", () => {
   })
 
   it("shows the wholesaler as a chip, cleared with its × or with every filter", async () => {
-    search.current = { wholesaler: account().id, stage: "to_ship", carrier: ["aras"] }
+    search.current = { wholesaler: account().id, stage: "to_ship", carrier: "aras" }
     serve()
     renderWith(clientWith(), <WholesaleOrdersPage />)
     await screen.findByText("#1050")
@@ -125,7 +125,7 @@ describe("WholesaleOrdersPage (Ek 2026-11-15 (2))", () => {
     await userEvent.click(screen.getByRole("button", { name: "Toptancı filtresini kaldır" }))
     expect(navigate).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        search: expect.objectContaining({ wholesaler: undefined, carrier: ["aras"] }) as unknown,
+        search: expect.objectContaining({ wholesaler: undefined, carrier: "aras" }) as unknown,
       })
     )
     await userEvent.click(screen.getByRole("button", { name: "Tümünü temizle" }))
