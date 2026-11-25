@@ -128,6 +128,10 @@ describe("the control plane's refusals in words", () => {
     expect(errorKey(new ApiError(404, "ai_credits.pack_unknown", "not_found"))).toBe(
       "errors.ai_credits.pack_unknown"
     )
+    // A routing to a service with no key (P3d)
+    expect(errorText(t, new ApiError(409, "cp.ai_route_no_key", "conflict"))).toBe(
+      "Bu servisin anahtarı yok; önce anahtarını yazın."
+    )
   })
 })
 

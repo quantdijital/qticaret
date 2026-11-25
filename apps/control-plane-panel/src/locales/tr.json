@@ -843,6 +843,7 @@
       "ai_route_capability_unsupported": "Bu servis bu iş türünü yapamıyor.",
       "ai_route_model_not_allowed": "Bu model bu iş türü için seçilemez.",
       "ai_route_service_unknown": "Bilinmeyen servis.",
+      "ai_route_no_key": "Bu servisin anahtarı yok; önce anahtarını yazın.",
       "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
       "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
     },
@@ -1669,6 +1670,8 @@
         "title": "Talep iptal edilsin mi?",
         "text": "{{shop}} mağazasının {{pack}} talebi ({{credits}}, {{amount}}) iptal edilecek. Kredi yüklenmez; mağaza yeni talep açabilir.",
         "confirm": "Talebi iptal et",
+        "note": "Not (isteğe bağlı)",
+        "noteHelp": "Neden iptal edildiğini kısaca yazabilirsiniz; yalnız işlem kayıtlarında görünür, mağaza görmez.",
         "done": "Talep iptal edildi."
       }
     },

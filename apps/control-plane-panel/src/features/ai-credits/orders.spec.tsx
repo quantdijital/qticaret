@@ -179,6 +179,41 @@ describe("the AI credit requests (adr/0085 K11)", () => {
     expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
   })
 
+  it.each([
+    ["sends the note why, trimmed", "  Müşteri vazgeçti  ", { note: "Müşteri vazgeçti" }],
+    ["sends no note when it is only spaces", "   ", {}],
+  ])("%s", async (_case, typed, body) => {
+    const sent = stubApi(controlPlane)
+    page()
+
+    await screen.findByText("Kahve Durağı")
+    await userEvent.click(screen.getByRole("button", { name: "İptal et" }))
+    const ask = await screen.findByRole("alertdialog")
+    await userEvent.type(within(ask).getByLabelText("Not (isteğe bağlı)"), typed)
+    await userEvent.click(within(ask).getByRole("button", { name: "Talebi iptal et" }))
+    await proveWithCode()
+
+    await waitFor(() => {
+      const cancel = sent.filter((call) => call.path === "/admin/cp/ai/orders/aico_1/cancel")
+      expect(cancel.at(-1)?.headers[STEP_UP_HEADER]).toBe("proof-1")
+      expect(cancel.at(-1)?.body).toEqual(body)
+    })
+  })
+
+  it("takes no more than the control plane's 500 characters of note", async () => {
+    stubApi(controlPlane)
+    page()
+
+    await screen.findByText("Kahve Durağı")
+    await userEvent.click(screen.getByRole("button", { name: "İptal et" }))
+    const ask = await screen.findByRole("alertdialog")
+    const field = within(ask).getByLabelText("Not (isteğe bağlı)")
+    expect(field).toHaveAttribute("maxlength", "500")
+    await userEvent.click(field)
+    await userEvent.paste("a".repeat(501))
+    expect((field as HTMLTextAreaElement).value).toHaveLength(500)
+  })
+
   it("says why a cancel was refused once the confirmation has closed", async () => {
     stubApi(refusingCancel(refusal(409, "cp.ai_credit_order_closed", "conflict")))
     page()

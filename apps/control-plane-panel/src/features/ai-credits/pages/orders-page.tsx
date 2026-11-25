@@ -41,17 +41,20 @@ export function OrdersPage() {
   // Owned here, not by the confirmation: its answer is said after that has closed
   const cancel = useCancelOrder()
   const [open, setOpen] = useState<Open>(null)
-  const cancelOrder = (order: AiOrder) => {
-    cancel.mutate(order, {
-      onSuccess: () => {
-        toast.success(t("aiCredits.orders.cancel.done"))
-      },
-      onError: (error) => {
-        if (!isStepUpCancelled(error)) {
-          toast.error(errorText(t, error))
-        }
-      },
-    })
+  const cancelOrder = (order: AiOrder, note: string) => {
+    cancel.mutate(
+      { order, note },
+      {
+        onSuccess: () => {
+          toast.success(t("aiCredits.orders.cancel.done"))
+        },
+        onError: (error) => {
+          if (!isStepUpCancelled(error)) {
+            toast.error(errorText(t, error))
+          }
+        },
+      }
+    )
   }
   const go = (next: Partial<{ status: AiCreditOrderStatus; page: number }>) => {
     void navigate({ search: (prev) => ({ ...prev, page: 1, ...next }) })
@@ -177,8 +180,8 @@ export function OrdersPage() {
       {open?.action === "cancel" ? (
         <CancelDialog
           order={open.order}
-          onConfirm={() => {
-            cancelOrder(open.order)
+          onConfirm={(note) => {
+            cancelOrder(open.order, note)
           }}
           onClose={close}
         />
