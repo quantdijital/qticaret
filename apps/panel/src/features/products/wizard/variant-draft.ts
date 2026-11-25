@@ -39,6 +39,7 @@ export function draftValues(values: WizardValues, index: number): DialogValues |
     price: row.price,
     stock: row.stock,
     backorder: values.allow_backorder,
+    tracked: values.manage_inventory,
     cost: row.cost,
     sku: row.sku,
     gtin: row.ean,

@@ -4340,6 +4340,10 @@
       "stockHint": "The quantity at the shop's default location.",
       "onHand": "Stock quantity",
       "untracked": "Stock not tracked: this variant is always sold.",
+      "tracking": "Track stock",
+      "trackingOn": "The count is kept; selling stops when it runs out.",
+      "trackingOffAsk": "Stop tracking stock? The variant will always be sold without a count. The saved count is kept and comes back when tracking is turned on again.",
+      "trackingOff": "Stop tracking",
       "backorderHint": "Orders are taken after it sells out too (preorder).",
       "codes": "Codes",
       "measures": "Measures",
@@ -4418,7 +4422,8 @@
         "fields": {
           "price": "Selling price",
           "cost": "Cost",
-          "stock": "Stock count"
+          "stock": "Stock count",
+          "tracking": "Stock tracking"
         },
         "applyAll_one": "Apply to {{count}} variant",
         "applyAll_other": "Apply to {{count}} variants",
@@ -4431,7 +4436,12 @@
         "nothing": "Nothing to change: the variants already have this value or their stock is not tracked.",
         "pick": "Select variant {{name}}",
         "pickAll": "Select all variants",
-        "pickGroup": "Select group {{name}}"
+        "pickGroup": "Select group {{name}}",
+        "tracking": {
+          "pick": "On or off",
+          "on": "Turn stock tracking on",
+          "off": "Turn stock tracking off"
+        }
       }
     },
     "rowActions": "Actions for {{title}}",
