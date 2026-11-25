@@ -9885,7 +9885,8 @@
           "text_positionHint": "Görsel üstünde: ürün adı ve fiyat fotoğrafın altındaki koyu geçişin üstünde durur. Yalnız standart kartta geçer.",
           "textPositions": {
             "below": "Görselin altında",
-            "over": "Görselin üstünde"
+            "over": "Görselin üstünde",
+            "over_split": "Görselin üstünde, fiyat sağda"
           },
           "rating_badge": "Puanı görselde rozet olarak göster",
           "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
@@ -11525,6 +11526,13 @@
           "hint": "Dar ekranda sığmayan kategoriler yana kayar ya da alt satıra iner.",
           "scroll": "Yana kaydır",
           "wrap": "Alt satıra geç"
+        },
+        "row_style": {
+          "label": "Dizilim",
+          "term": "row style",
+          "hint": "Alt alta, başlıklı'da ad ikonun altında ve bölüm başlığı görünür. Şerit'te kategoriler sayfa boyunca tek sırada durur, ad ikonun yanındadır; başlık yalnız ekran okuyucuya kalır.",
+          "stacked": "Alt alta, başlıklı",
+          "strip": "Şerit"
         }
       },
       "icons": {

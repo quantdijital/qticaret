@@ -9885,7 +9885,8 @@
           "text_positionHint": "Over the photo: the name and price stand on a dark fade at the photo's foot. Standard cards only.",
           "textPositions": {
             "below": "Under the photo",
-            "over": "Over the photo"
+            "over": "Over the photo",
+            "over_split": "Over the photo, price at the right"
           },
           "rating_badge": "Show the rating as a badge on the photo",
           "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
@@ -11525,6 +11526,13 @@
           "hint": "Categories that do not fit a narrow screen slide sideways or wrap onto a new row.",
           "scroll": "Slide sideways",
           "wrap": "Wrap"
+        },
+        "row_style": {
+          "label": "Arrangement",
+          "term": "row style",
+          "hint": "Stacked shows the name under the icon and the section heading. Strip sets the categories in one row across the page with the name beside the icon; the heading stays for screen readers only.",
+          "stacked": "Stacked, with heading",
+          "strip": "Strip"
         }
       },
       "icons": {
