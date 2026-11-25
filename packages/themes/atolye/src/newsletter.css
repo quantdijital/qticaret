@@ -14,6 +14,14 @@
     min-width: 0;
     align-items: stretch;
   }
+  /*
+   * A narrow box (a footer column, a 320 px phone): the field over its
+   * button, each whole, so the example address is never cut (owner
+   * 2026-11-26: "ornek@eposta.c…")
+   */
+  .gf-join-box {
+    container-type: inline-size;
+  }
   .gf-join > .gf-field {
     border-start-end-radius: 0;
     border-end-end-radius: 0;
@@ -23,6 +31,20 @@
     border-start-start-radius: 0;
     border-end-start-radius: 0;
     padding-inline: var(--space-md);
+  }
+  /* After the joined corners: a narrow box's field and button each whole */
+  @container (max-width: 20rem) {
+    .gf-join {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .gf-join > .gf-field,
+    .gf-join > .gf-btn {
+      border-radius: var(--button-radius);
+    }
+    .gf-join > .gf-field {
+      border-inline-end-width: 1px;
+    }
   }
   /* The strip's small form: a step lower */
   .gf-news-small .gf-join > .gf-field,

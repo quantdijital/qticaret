@@ -133,7 +133,7 @@ export function NewsletterBox(props: NewsletterBoxProps) {
             )}
           </div>
         </div>
-        {form("gf-news-small w-full lg:w-[24rem] lg:shrink-0")}
+        {form("gf-news-small gf-join-box w-full lg:w-[24rem] lg:shrink-0")}
       </section>
     )
   }

@@ -79,7 +79,7 @@ describe("the brand columns footer", () => {
     expect(html).toContain('<nav aria-label="Yasal metinler"')
     expect(html).toContain('href="/yasal/mesafeli-satis-sozlesmesi"')
     expect(html).toMatch(/<details class="group border-b border-rule">/)
-    // The bottom line: the year, the marks as their own files with their names, the cookie choices
+    // The bottom line: the year, the marks as their own files with their names
     expect(html).toContain(`© ${new Date().getFullYear()} Örnek Atölye Ltd. Şti.`)
     expect(html).toContain('<ul aria-label="Ödeme seçenekleri" class="gf-pay">')
     expect(html).toMatch(
@@ -87,7 +87,10 @@ describe("the brand columns footer", () => {
     )
     expect(html).toContain('alt="American Express"')
     expect(html).toMatch(/<li data-mark="bank_transfer">.*Havale \/ EFT<\/li>/)
-    expect(html).toContain('href="/cerez-tercihleri"')
+    // The cookie choices close the legal column, not beside the ways to pay (owner 2026-11-26)
+    const legal = html.slice(html.lastIndexOf('<nav aria-label="Yasal metinler"'))
+    expect(legal.slice(0, legal.indexOf("</nav>"))).toContain('href="/cerez-tercihleri"')
+    expect(html.slice(html.indexOf("gf-foot-line"))).not.toContain('href="/cerez-tercihleri"')
     expect(html).toContain("Yukarı çık")
     // No inline style (CSP)
     expect(footerOf(html)).not.toContain("style=")

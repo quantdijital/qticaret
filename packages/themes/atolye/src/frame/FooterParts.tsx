@@ -22,7 +22,7 @@ import { FooterSocial } from "./FooterSocial"
  * summary and the row of marks.
  */
 
-const LINK =
+export const LINK =
   "inline-flex min-h-11 items-center text-sm text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
 
 /**
@@ -52,7 +52,7 @@ function Reach({
         <span className="gf-reach-sign">{icon}</span>
         <span className="flex min-w-0 flex-col">
           <span className="text-xs text-text-3">{kind}</span>
-          <span className="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2">
+          <span className="font-semibold wrap-anywhere transition-colors duration-(--dur-micro) group-hover/reach:text-text-2">
             {value}
           </span>
         </span>
@@ -228,8 +228,17 @@ const OUTSIDE = /^https?:\/\//i
 export const outsideRel = (href: string): string | undefined =>
   OUTSIDE.test(href) ? "noopener noreferrer" : undefined
 
-/** A link column's list: each a 44 px row (32 px under a fine pointer from 1024 px). */
-export function LinkList({ links }: { links: readonly (LinkView & { title?: string })[] }) {
+/**
+ * A link column's list: each a 44 px row (32 px under a fine pointer from
+ * 1024 px); `last`, one more row after them (the legal column's cookie choices).
+ */
+export function LinkList({
+  links,
+  last,
+}: {
+  links: readonly (LinkView & { title?: string })[]
+  last?: ReactNode
+}) {
   return (
     <ul className="flex flex-col">
       {links.map((link) => (
@@ -239,6 +248,7 @@ export function LinkList({ links }: { links: readonly (LinkView & { title?: stri
           </a>
         </li>
       ))}
+      {last ? <li>{last}</li> : null}
     </ul>
   )
 }

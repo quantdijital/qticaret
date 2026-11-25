@@ -213,10 +213,10 @@
           "icon": "calendar"
         }
       ],
-      "dividers": "off",
+      "dividers": "on",
       "icons": "on",
-      "arrangement": "row",
-      "social": "on"
+      "arrangement": "stacked",
+      "social": "off"
     }
   ],
   "footer": [
