@@ -145,6 +145,12 @@ export interface FooterColumnsView {
   about: string | null
   ground: FooterColumnsStep<"ground">
   badgeStyle: FooterColumnsStep<"badge_style">
+  /** The newsletter box under the brand block (absent) or as the last column. */
+  newsPlace?: "column"
+  /** The brand block without the address, phone and e-mail (absent: with them). */
+  brandContact?: "hide"
+  /** The bottom line's words in the middle between two rules (absent: spread). */
+  bottomAlign?: "center"
 }
 
 export interface BackToTopView {

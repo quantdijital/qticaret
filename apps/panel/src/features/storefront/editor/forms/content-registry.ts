@@ -58,6 +58,8 @@ export type ContentField =
   | "form"
   | "imprint"
   | "dividers"
+  | "stats_arrangement"
+  | "stats_social"
   | "steps_layout"
   | "numbers"
   | "show_icons"

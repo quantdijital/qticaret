@@ -9448,6 +9448,20 @@
           "hint": "Where the picture meets the panel.",
           "straight": "Straight",
           "curved": "Curved"
+        },
+        "button_tone": {
+          "label": "Button colour",
+          "term": "button colour",
+          "hint": "The first button in the main colour or the accent colour.",
+          "primary": "Main",
+          "accent": "Accent"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small flower spray in the accent colour at the panel's lower right (wide screens).",
+          "none": "None",
+          "flower": "Flower"
         }
       },
       "products": {
@@ -10681,6 +10695,25 @@
           "card": "On cards",
           "plain": "Plain"
         },
+        "news_place": {
+          "label": "Newsletter place",
+          "term": "newsletter place",
+          "brand": "Under the brand",
+          "column": "Last column"
+        },
+        "brand_contact": {
+          "label": "Contact in the brand column",
+          "term": "brand contact",
+          "hint": "Hidden: no address, phone or e-mail in the brand column; the Contact page stays.",
+          "show": "Show",
+          "hide": "Hide"
+        },
+        "bottom_align": {
+          "label": "Bottom line",
+          "term": "bottom line",
+          "spread": "Spread",
+          "center": "Centred"
+        },
         "bottom_badges": {
           "label": "Payment logos in the bottom line",
           "term": "payment badges",
@@ -11327,6 +11360,18 @@
           "label": "Show icons",
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
+        },
+        "arrangement": {
+          "label": "Arrangement",
+          "term": "arrangement",
+          "hint": "Row: the icon at the left, the figure and its label beside it, one tight row.",
+          "stacked": "Stacked",
+          "row": "Row"
+        },
+        "social": {
+          "label": "Show social profiles",
+          "term": "social",
+          "hint": "At the row's end, \"Follow us\" and the social profiles from the store details. Only in the Row arrangement."
         }
       },
       "steps": {
@@ -11384,7 +11429,28 @@
         "intro": "Intro",
         "link": "Button",
         "linkTerm": "button",
-        "linkHint": "Left empty, the button leads to every post."
+        "linkHint": "Left empty, the button leads to every post.",
+        "panel_tone": {
+          "label": "Panel tone",
+          "term": "panel tone",
+          "hint": "The panel on the section's ground, or a light tint of your main colour over it.",
+          "ground": "Ground",
+          "tint": "Light tint"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small leaf sprig at the panel's lower right corner (wide screens).",
+          "none": "None",
+          "leaves": "Leaves"
+        },
+        "cover_ratio": {
+          "label": "Cover ratio",
+          "term": "cover ratio",
+          "hint": "The shape of the post cards' cover pictures.",
+          "standard": "16:10",
+          "wide": "Wide (2:1)"
+        }
       },
       "heroFull": {
         "accent": {

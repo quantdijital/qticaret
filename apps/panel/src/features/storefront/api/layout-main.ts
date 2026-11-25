@@ -102,6 +102,9 @@ export interface FooterColumnsFields {
   about: string | null
   ground: FooterColumnsStep<"ground">
   badge_style: FooterColumnsStep<"badge_style">
+  news_place: FooterColumnsStep<"news_place">
+  brand_contact: FooterColumnsStep<"brand_contact">
+  bottom_align: FooterColumnsStep<"bottom_align">
 }
 
 export type FooterColumnsSection = FooterBarCommon & {

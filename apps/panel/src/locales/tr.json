@@ -9448,6 +9448,20 @@
           "hint": "Görselin panele değdiği kenar.",
           "straight": "Düz",
           "curved": "Yuvarlak"
+        },
+        "button_tone": {
+          "label": "Düğme rengi",
+          "term": "button colour",
+          "hint": "İlk düğme ana renkte ya da vurgu renginde.",
+          "primary": "Ana",
+          "accent": "Vurgu"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ altında vurgu renginde küçük bir çiçek demeti (geniş ekranda).",
+          "none": "Yok",
+          "flower": "Çiçek"
         }
       },
       "products": {
@@ -10681,6 +10695,25 @@
           "card": "Kart içinde",
           "plain": "Yalın"
         },
+        "news_place": {
+          "label": "E-bülten yeri",
+          "term": "newsletter place",
+          "brand": "Marka altında",
+          "column": "Son sütun"
+        },
+        "brand_contact": {
+          "label": "Marka sütununda iletişim",
+          "term": "brand contact",
+          "hint": "Gizlerseniz adres, telefon ve e-posta marka sütununda görünmez; İletişim sayfası yerinde kalır.",
+          "show": "Göster",
+          "hide": "Gizle"
+        },
+        "bottom_align": {
+          "label": "Alt satır",
+          "term": "bottom line",
+          "spread": "Yayık",
+          "center": "Ortalı"
+        },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
           "term": "payment badges",
@@ -11327,6 +11360,18 @@
           "label": "İkon göster",
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
+        },
+        "arrangement": {
+          "label": "Dizilim",
+          "term": "arrangement",
+          "hint": "Satır: ikon solda, rakam ve etiketi yanında, tek sıkı satır.",
+          "stacked": "Alt alta",
+          "row": "Satır"
+        },
+        "social": {
+          "label": "Sosyal hesapları göster",
+          "term": "social",
+          "hint": "Satırın sonunda \"Bizi izleyin\" ve mağaza bilgilerindeki sosyal hesaplar. Yalnız Satır dizilimde görünür."
         }
       },
       "steps": {
@@ -11384,7 +11429,28 @@
         "intro": "Giriş",
         "link": "Düğme",
         "linkTerm": "button",
-        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
+        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür.",
+        "panel_tone": {
+          "label": "Panel tonu",
+          "term": "panel tone",
+          "hint": "Panel bölümün zemininde ya da üstünde ana renginizin açık bir tonuyla.",
+          "ground": "Zemin",
+          "tint": "Açık ton"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ alt köşesinde küçük bir yaprak dalı (geniş ekranda).",
+          "none": "Yok",
+          "leaves": "Yaprak"
+        },
+        "cover_ratio": {
+          "label": "Kapak oranı",
+          "term": "cover ratio",
+          "hint": "Yazı kartlarındaki kapak görselinin biçimi.",
+          "standard": "16:10",
+          "wide": "Geniş (2:1)"
+        }
       },
       "heroFull": {
         "accent": {

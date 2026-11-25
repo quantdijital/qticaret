@@ -2,6 +2,7 @@ import { POSTS_INTRO_CARDS } from "@qticaret/types/section-posts"
 import { ResponsiveImage, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { PanelLeaves } from "./band-art"
 import { type Of, headingId } from "./plan"
 
 /** The posts' variants this theme draws beside today's tiles (`drawnVariant`). */
@@ -37,9 +38,11 @@ export function GuidesPanel({
       <Container>
         <div
           data-ground={ground}
+          data-tone={section.panelTone}
           className={cn(
             "gf-ground grid items-center gap-(--gap-columns) rounded-tile p-5 sm:p-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:p-10",
-            ground === "stage" && "gf-stage"
+            ground === "stage" && "gf-stage",
+            section.ornament === "leaves" && "relative"
           )}
         >
           <div className="flex flex-col items-start gap-3">
@@ -67,7 +70,13 @@ export function GuidesPanel({
               <li key={post.path} className="min-w-0">
                 <article className="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane">
                   {post.image && (
-                    <div className="relative aspect-[16/10] bg-media-deep">
+                    <div
+                      className={
+                        section.coverRatio === "wide"
+                          ? "relative aspect-[2/1] bg-media-deep"
+                          : "relative aspect-[16/10] bg-media-deep"
+                      }
+                    >
                       <ResponsiveImage
                         image={{ ...post.image, alt: "" }}
                         sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 100vw"
@@ -98,6 +107,7 @@ export function GuidesPanel({
               </li>
             ))}
           </ul>
+          {section.ornament === "leaves" && <PanelLeaves />}
         </div>
       </Container>
     </section>
