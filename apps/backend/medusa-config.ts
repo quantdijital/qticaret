@@ -7,7 +7,7 @@ import {
 import { customerAuthProviders } from "./src/lib/auth/providers"
 import { assertCompiledPackages } from "./src/lib/control-plane/compiled-packages"
 import { assertControlPlaneConfigured } from "./src/lib/control-plane/env"
-import { isLocalEnv, parseEnv, s3Settings, sharedFileOrigins } from "./src/lib/env"
+import { backendUrl, isLocalEnv, parseEnv, s3Settings, sharedFileOrigins } from "./src/lib/env"
 import { assertTurnstileConfigured } from "./src/lib/security/turnstile/env"
 import { warnFakeProviders } from "./src/lib/fake-providers"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
@@ -352,6 +352,24 @@ module.exports = defineConfig({
             },
           },
         ]
-      : []),
+      : env.BACKEND_URL
+        ? [
+            // Local disk with the backend on another address (a second local
+            // shop on its own port): Medusa's local provider writes
+            // localhost:9000 into every file URL unless told otherwise
+            {
+              resolve: "@medusajs/medusa/file",
+              options: {
+                providers: [
+                  {
+                    resolve: "@medusajs/medusa/file-local",
+                    id: "local",
+                    options: { backend_url: `${backendUrl(env)}/static` },
+                  },
+                ],
+              },
+            },
+          ]
+        : []),
   ],
 })
