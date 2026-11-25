@@ -12,7 +12,11 @@
  * route files to each other.
  */
 
-import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
+import {
+  AI_CREDITS_PATHS,
+  AI_CREDIT_ORDER_MAX_BYTES,
+  USAGE_REPORT_MAX_BYTES,
+} from "@qticaret/types/control-plane"
 
 export interface TenantApiRule {
   method: "GET" | "POST"
@@ -29,6 +33,9 @@ export const TENANT_API_ROUTES: readonly TenantApiRule[] = [
   { method: "POST", path: "/tenant-api/v1/usage", maxBodyBytes: USAGE_REPORT_MAX_BYTES },
   // Ek C20: the shop's own payment history, bound to the request's nonce
   { method: "GET", path: "/tenant-api/v1/billing", maxBodyBytes: 0 },
+  // adr/0085 §2: the platform AI credits' status and a top-up request (their own rate profile)
+  { method: "GET", path: AI_CREDITS_PATHS.credits, maxBodyBytes: 0 },
+  { method: "POST", path: AI_CREDITS_PATHS.orders, maxBodyBytes: AI_CREDIT_ORDER_MAX_BYTES },
 ]
 
 /** The table's row for a request (HEAD as GET), or null. */

@@ -1,5 +1,10 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
-import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
+import {
+  AI_CREDITS_PATHS,
+  AI_CREDIT_ORDER_MAX_BYTES,
+  USAGE_REPORT_MAX_BYTES,
+} from "@qticaret/types/control-plane"
+import { routePath } from "./http/request"
 import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
 import { AI_ROUTE_MIDDLEWARES } from "./http/ai-routes"
 import { auditAuth, auditCpRequests } from "./http/audit"
@@ -84,9 +89,15 @@ export default defineMiddlewares({
         rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api),
         guardTenantApi,
         // C13 review M1: then per verified shop, whatever its address
-        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api_signer, {
-          identity: (req) => tenantCallerOf(req)?.tenantId,
-        }),
+        rateLimit(
+          (req) =>
+            routePath(req).startsWith("/tenant-api/v1/ai/")
+              ? CP_RATE_LIMIT_PROFILES.tenant_api_ai
+              : CP_RATE_LIMIT_PROFILES.tenant_api_signer,
+          {
+            identity: (req) => tenantCallerOf(req)?.tenantId,
+          }
+        ),
       ],
     },
     // Ek C13: the usage report's signature covers its exact bytes; held to 4 KB (413 past it)
@@ -94,6 +105,12 @@ export default defineMiddlewares({
       matcher: "/tenant-api/v1/usage",
       methods: ["POST"],
       bodyParser: { sizeLimit: USAGE_REPORT_MAX_BYTES, preserveRawBody: true },
+    },
+    // adr/0085 K11: a top-up request's signature covers its exact bytes; held to 1 KB
+    {
+      matcher: AI_CREDITS_PATHS.orders,
+      methods: ["POST"],
+      bodyParser: { sizeLimit: AI_CREDIT_ORDER_MAX_BYTES, preserveRawBody: true },
     },
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,
