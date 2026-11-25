@@ -8,8 +8,10 @@ import { DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { MEASURES, measureText } from "./measures"
+import { SalePriceField, SalePriceView } from "./sale-price-field"
 import type { MeasureName } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
+import type { SaleTarget, VariantSale } from "./use-variant-sale"
 import { storedGtinNote } from "./variant-codes"
 import type { VariantField, VariantValues } from "./variant-values"
 
@@ -29,12 +31,21 @@ function useError(form: Form) {
   }
 }
 
-/** The selling price, the unit cost, and (several variants) the price for all of them. */
+export type { SaleTarget } from "./use-variant-sale"
+
+/**
+ * The regular price, the unit cost, the sale price of a saved variant
+ * (adr/0086) and (several variants) the price for all of them. The sale
+ * price is the host's (`saleOf`, saved with its form) or its own
+ * (`saleTarget`, saved by its own button and the page's save bar).
+ */
 export function PriceFields({
   form,
   idPrefix,
   sale,
   others,
+  saleTarget = null,
+  saleOf = null,
 }: {
   form: Form
   idPrefix: string
@@ -42,6 +53,10 @@ export function PriceFields({
   sale: { price: number; struck: number } | null
   /** How many other variants the price may go to; none for a product of one. */
   others: number
+  /** A saved variant: its "İndirimli fiyat" under the price; none on a new product. */
+  saleTarget?: SaleTarget | null
+  /** A saved variant's sale price that the host saves with its own form. */
+  saleOf?: VariantSale | null
 }) {
   const { t } = useTranslation()
   const error = useError(form)
@@ -80,6 +95,15 @@ export function PriceFields({
           />
         </Field>
       </div>
+      {saleOf ? <SalePriceView sale={saleOf} idPrefix={idPrefix} own={false} /> : null}
+      {saleTarget && !saleOf ? (
+        <SalePriceField
+          key={saleTarget.variantId}
+          productId={saleTarget.productId}
+          variantId={saleTarget.variantId}
+          idPrefix={idPrefix}
+        />
+      ) : null}
       {sale ? (
         <p className="text-xs text-muted-foreground">
           {t("products.priceHistory.struckDetail", {

@@ -15,6 +15,7 @@ import { useSaveVariants } from "@/features/products/api/product-edit"
 import type { VariantEdit } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
+import { SaleBulkButton } from "./sale-bulk-dialog"
 import { BULK_FIELDS, bulkEdit, bulkValue, filtered, filterKey } from "./variant-bulk"
 import type { BulkField } from "./variant-bulk"
 import type { OptionDraft } from "./variant-options"
@@ -181,6 +182,8 @@ export function VariantBulkBar({
         {save.isPending ? <Loader2 className="animate-spin" /> : null}
         {label}
       </Button>
+      {/* adr/0086: the same variants' sale price, a price or a share off each */}
+      <SaleBulkButton productId={product.id} variantIds={targets.map((variant) => variant.id)} />
     </div>
   )
 }

@@ -161,6 +161,10 @@ export function answer(
   if (url.endsWith("/price-history")) {
     return history ?? HISTORY
   }
+  // adr/0086: no sale price on any variant
+  if (url.endsWith("/sale-prices")) {
+    return { currency_code: "try", variants: [] }
+  }
   if (url === "/admin/staff/me") {
     return { can: { catalog: true } }
   }

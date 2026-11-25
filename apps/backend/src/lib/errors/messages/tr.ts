@@ -1016,6 +1016,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "price_lists.unknown": "Fiyat listesi bulunamadı.",
   "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",
   "price_lists.rate": "Oran yüzde 0 ile 100 arasında olmalı.",
+  "variant_sale.amount": "İndirimli fiyat sıfırdan büyük olmalı.",
+  "variant_sale.amount_or_rate":
+    "İndirimli fiyat için ya tutar ya da yüzde girin, ikisini birden değil.",
+  "variant_sale.date": "İndirim tarihi okunamadı.",
+  "variant_sale.dates_order": "İndirimin bitişi başlangıcından sonra olmalı.",
+  "variant_sale.duplicate": "Aynı varyant bir istekte iki kez geçiyor.",
+  "variant_sale.ended": "İndirimin bitiş tarihi geçmiş; ileri bir tarih seçin.",
+  "variant_sale.managed": "Bu bir ürünün indirimli fiyatı; ürünün sayfasından değiştirin.",
+  "variant_sale.no_regular_price": "Bu varyantın normal fiyatı yok; önce normal fiyatı kaydedin.",
+  "variant_sale.not_below_regular": "İndirimli fiyat normal fiyattan düşük olmalı.",
+  "variant_sale.variant_unknown": "Varyant bu ürünün değil ya da artık yok.",
   "wholesale.managed":
     "Bu grup ya da fiyat listesi toptan satışa ait; toptan ekranlarından değiştirin.",
   "wholesale.tier_exists": "Bu adla bir toptan seviyesi ya da müşteri grubu zaten var.",
