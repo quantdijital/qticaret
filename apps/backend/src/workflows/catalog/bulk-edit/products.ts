@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../../lib/catalog"
+import { productSaleFacts, shopCurrency } from "../../pricing/variant-sale/read"
+import type { ProductSaleFacts } from "../../pricing/variant-sale/read"
 import { PRICE_FIELDS } from "../prices"
 import type { PriceRow } from "../prices"
 import type { BulkAction } from "./change"
@@ -21,11 +23,16 @@ export interface BulkProduct {
   variants?: BulkVariant[] | null
   images?: { id: string; url: string; rank?: number | null; variants?: { id: string }[] | null }[]
   media_assets?: ({ id: string; url: string; alt?: string | null } | null)[] | null
+  brand?: { id: string } | null
+  tags?: ({ id: string; value: string } | null)[] | null
+  /** A sale change's: each variant's regular price and its sales (adr/0086), read apart. */
+  sale?: ProductSaleFacts
 }
 
 export interface BulkVariant {
   id: string
   manage_inventory?: boolean | null
+  allow_backorder?: boolean | null
   options?: { value: string; option_id: string }[] | null
   prices?: PriceRow[] | null
   /** The unit cost in kuruş (F11.4). */
@@ -64,6 +71,10 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
     "addon_templates.id",
     "attribute_template.addon_template_ids",
   ],
+  brand: [...BASE, "brand.id"],
+  tag: [...BASE, "tags.id", "tags.value"],
+  backorder: [...BASE, "variants.id", "variants.manage_inventory", "variants.allow_backorder"],
+  sale: BASE,
   alt_text: [
     ...BASE,
     "options.id",
@@ -100,6 +111,13 @@ export async function bulkProducts(
     })
     for (const row of data as unknown as BulkProduct[]) {
       found.set(row.id, row)
+    }
+  }
+  if (action === "sale" && found.size > 0) {
+    // The sale workflow's own read, so the plan sees what the write will
+    const currency = await shopCurrency(container)
+    for (const product of found.values()) {
+      product.sale = await productSaleFacts(container, product.id, currency)
     }
   }
   return ids.flatMap((id) => {

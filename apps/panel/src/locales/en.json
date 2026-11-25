@@ -4063,8 +4063,8 @@
       "clear": "Clear selection",
       "edit": "Bulk edit",
       "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
-      "scope_one": "Applies to the {{formatted}} selected product. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
-      "scope_other": "Applies to the {{formatted}} selected products. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
+      "scope_one": "Applied to the {{formatted}} product picked. Each product is checked as its own save would be; before applying you see how many will change and which are left out.",
+      "scope_other": "Applied to the {{formatted}} products picked. Each product is checked as its own save would be; before applying you see how many will change and which are left out.",
       "apply_one": "Apply to {{formatted}} product",
       "apply_other": "Apply to {{formatted}} products",
       "working": "Updating products…",
@@ -4087,7 +4087,11 @@
         "seo_template": "Apply SEO template",
         "alt_text": "Fill missing alt texts",
         "cost": "Change cost",
-        "addon_template": "Add / remove add-on group"
+        "addon_template": "Add / remove add-on group",
+        "sale": "Sale price",
+        "brand": "Change brand",
+        "tag": "Add / remove tag",
+        "backorder": "Selling when out of stock"
       },
       "price": {
         "mode": "Price change",
@@ -4158,7 +4162,11 @@
         "category": "Choose a category.",
         "seoFields": "Choose at least one field.",
         "cost": "Enter a cost between 0 and 10,000,000 ₺.",
-        "addonTemplate": "Choose an add-on group."
+        "addonTemplate": "Choose an add-on group.",
+        "saleDates": "The end day cannot be before the start.",
+        "saleEnded": "The end day is past; pick a later day.",
+        "brand": "Pick a brand.",
+        "tag": "Type a tag of 1–100 characters."
       },
       "cost": {
         "mode": "Cost change",
@@ -4186,6 +4194,57 @@
           "remove": "The group is removed from the selected products; those from an attribute group stay."
         },
         "none": "No add-on groups yet."
+      },
+      "preview": "Preview",
+      "problems": "Products left out",
+      "willChange_one": "{{formatted}} product will change.",
+      "willChange_other": "{{formatted}} products will change.",
+      "willStay_one": "{{formatted}} product is already so; it is left as it is.",
+      "willStay_other": "{{formatted}} products are already so; they are left as they are.",
+      "willSkip_one": "{{formatted}} product will be left out:",
+      "willSkip_other": "{{formatted}} products will be left out:",
+      "sale": {
+        "mode": "Sale",
+        "modes": {
+          "percent": "Percent off",
+          "amount": "Amount off",
+          "clear": "Remove sale"
+        },
+        "percent": "Percent off (%)",
+        "amount": "Amount off (₺)",
+        "hint": "Taken off each variant's regular price; the sale price is worked out on the server.",
+        "starts": "Starts",
+        "ends": "Ends",
+        "daysHint": "Left empty, the sale starts now and runs until you remove it.",
+        "clearHint": "The picked products' variants lose their sale price and sell at the regular price."
+      },
+      "brand": {
+        "mode": "Action",
+        "modes": {
+          "set": "Set brand",
+          "clear": "Remove brand"
+        },
+        "hint": "The picked products get this brand.",
+        "clearHint": "The picked products' brand is removed."
+      },
+      "tag": {
+        "mode": "Action",
+        "modes": {
+          "add": "Add",
+          "remove": "Remove"
+        },
+        "hints": {
+          "add": "The tag is added to the products, and made if the shop has none; their other tags stay.",
+          "remove": "The tag is taken off the products; type the name of one of the shop's tags."
+        }
+      },
+      "backorder": {
+        "label": "When out of stock",
+        "options": {
+          "allow": "Keep selling",
+          "deny": "Stop selling"
+        },
+        "hint": "Only variants whose stock is tracked change; untracked ones always sell."
       }
     },
     "priceHistory": {

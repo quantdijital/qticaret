@@ -117,9 +117,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",
   "bulk_edit.price_out_of_range": "Yeni fiyat sıfırın altına iner ya da üst sınırı aşar.",
   "bulk_edit.product_missing": "Ürün bulunamadı; silinmiş olabilir.",
+  "bulk_edit.sale_out_of_range":
+    "İndirim tutarı bir varyantın normal fiyatına eşit ya da ondan büyük.",
+  "bulk_edit.sale_refused": "İndirimli fiyat bu ürüne uygulanamadı.",
   "bulk_edit.stock_negative": "Yeni stok sıfırın altına iner.",
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
+  "bulk_edit.tag_unknown": "Bu adla bir etiket yok.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
   "cart.out_of_stock":

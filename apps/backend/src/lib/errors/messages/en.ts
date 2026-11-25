@@ -112,9 +112,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.no_price": "Its variants have no TRY price; enter a price first.",
   "bulk_edit.price_out_of_range": "The new price would fall below zero or pass the limit.",
   "bulk_edit.product_missing": "Product not found; it may have been deleted.",
+  "bulk_edit.sale_out_of_range":
+    "The amount off is equal to or more than a variant's regular price.",
+  "bulk_edit.sale_refused": "The sale price could not be applied to this product.",
   "bulk_edit.stock_negative": "The new stock would fall below zero.",
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
+  "bulk_edit.tag_unknown": "There is no tag with this name.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.insufficient_stock": "There are not as many of this item in stock as you asked for.",
   "cart.out_of_stock":

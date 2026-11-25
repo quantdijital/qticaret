@@ -146,7 +146,7 @@ test("picks products and checks a bulk change without applying it", async ({ pag
   const dialog = page.getByRole("dialog", { name: "Fiyatı değiştir" })
   await dialog.getByRole("radio", { name: "Yüzde" }).check()
   await dialog.getByLabel("Oran (%)").fill("0")
-  await dialog.getByRole("button", { name: "2 ürüne uygula" }).click()
+  await dialog.getByRole("button", { name: "Önizle" }).click()
   // Named on the field; nothing is sent
   await expect(dialog.getByRole("alert")).toHaveText(
     "Sıfırdan büyük, en fazla 1000 olan bir oran girin."

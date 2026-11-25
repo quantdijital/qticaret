@@ -8,6 +8,8 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { updateProductVariantsWorkflow, updateProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { setProductAddonTemplatesWorkflow } from "../../addon-templates"
+import { setProductBrandWorkflow } from "../../brands/workflows"
+import { setVariantSalesWorkflow } from "../../pricing/variant-sale/workflow"
 import { setProductAltsWorkflow } from "../../media/workflows"
 import { upsertSeoMetaWorkflow } from "../../seo/upsert-seo-meta"
 import { writeStockLevelsWorkflow } from "../../stock/write-levels"
@@ -65,7 +67,8 @@ export interface WriteOrigin {
  * One product's change, through the workflow the panel's own save uses
  * (its hooks and checks included): Medusa's for prices and status, ours
  * for stock (ledger reason `bulk_edit`), categories, SEO, alt texts and
- * unit costs, and add-on template links (adr/0052 Ek 2026-11-23).
+ * unit costs, add-on template links (adr/0052 Ek 2026-11-23), the brand
+ * and the variants' sale prices (adr/0086).
  */
 export async function writeBulkChange(
   container: MedusaContainer,
@@ -128,6 +131,26 @@ export async function writeBulkChange(
           write.mode === "add"
             ? { product_id: productId, add: write.template_id }
             : { product_id: productId, remove: write.template_id },
+      })
+      return
+    case "brand":
+      await setProductBrandWorkflow(container).run({
+        input: { product_id: productId, brand_id: write.brand_id },
+      })
+      return
+    case "tag":
+      await updateProductsWorkflow(container).run({
+        input: { selector: { id: productId }, update: { tag_ids: write.tag_ids } },
+      })
+      return
+    case "backorder":
+      await updateProductVariantsWorkflow(container).run({
+        input: { product_variants: write.variants },
+      })
+      return
+    case "sale":
+      await setVariantSalesWorkflow(container).run({
+        input: { product_id: productId, set: write.set, clear: write.clear },
       })
       return
   }
