@@ -1621,6 +1621,8 @@
       "open": "Change daily cap",
       "title": "Change daily cap",
       "text": "The most credits the shop may spend in a day. Platform default: {{cap}} credits.",
+      "textUnknown": "The most credits the shop may spend in a day.",
+      "platform": "platform default",
       "label": "This shop's daily cap",
       "help": "Leave it empty for the platform default. 0 means the shop cannot spend credits.",
       "done": "Daily cap saved."

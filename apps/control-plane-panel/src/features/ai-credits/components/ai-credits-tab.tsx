@@ -95,7 +95,7 @@ export function AiCreditsTab({ shop }: { shop: TenantDetail }) {
         <DailyCapDialog
           tenantId={id}
           ownCap={data.own_daily_cap}
-          platformCap={settings.data?.settings.daily_cap ?? data.balance.daily.cap}
+          platformCap={settings.data?.settings.daily_cap ?? null}
           onClose={() => {
             setOpen(null)
           }}

@@ -26,7 +26,8 @@ export function DailyCapDialog({
 }: {
   tenantId: string
   ownCap: number | null
-  platformCap: number
+  /** null: the settings could not be read; never the shop's own cap in its place. */
+  platformCap: number | null
   onClose: () => void
 }) {
   const { t } = useTranslation()
@@ -45,7 +46,11 @@ export function DailyCapDialog({
         }
       }}
       title={t("aiCredits.dailyCap.title")}
-      description={t("aiCredits.dailyCap.text", { cap: formatCount(platformCap) })}
+      description={
+        platformCap === null
+          ? t("aiCredits.dailyCap.textUnknown")
+          : t("aiCredits.dailyCap.text", { cap: formatCount(platformCap) })
+      }
       dirty={value !== ownCap}
       saving={change.isPending}
       canSubmit={ready}
@@ -75,7 +80,9 @@ export function DailyCapDialog({
             min={0}
             max={DAILY_CAP_MAX}
             suffix={t("aiCredits.unit")}
-            placeholder={formatCount(platformCap)}
+            placeholder={
+              platformCap === null ? t("aiCredits.dailyCap.platform") : formatCount(platformCap)
+            }
             value={text}
             onChange={(event) => {
               setText(event.target.value)

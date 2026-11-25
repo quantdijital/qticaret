@@ -1621,6 +1621,8 @@
       "open": "Günlük tavanı değiştir",
       "title": "Günlük tavanı değiştir",
       "text": "Mağazanın bir günde harcayabileceği en çok kredi. Genel varsayılan: {{cap}} kredi.",
+      "textUnknown": "Mağazanın bir günde harcayabileceği en çok kredi.",
+      "platform": "genel varsayılan",
       "label": "Bu mağazanın günlük tavanı",
       "help": "Boş bırakırsanız genel varsayılan geçerli olur. 0 yazarsanız mağaza kredi harcayamaz.",
       "done": "Günlük tavan kaydedildi."

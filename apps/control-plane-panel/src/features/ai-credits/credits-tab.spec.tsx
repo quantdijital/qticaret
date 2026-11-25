@@ -188,4 +188,24 @@ describe("a shop's AI credits tab (adr/0085 §5)", () => {
       expect(tries.map((call) => (call.body as { amount: number }).amount)).toEqual([40, 30])
     })
   })
+
+  it("never names the shop's own cap as the platform default when the settings are unread", async () => {
+    const own: AiWallet = {
+      ...WALLET,
+      own_daily_cap: 150,
+      balance: { ...WALLET.balance, daily: { cap: 150, spent: 0, remaining: 150 } },
+    }
+    const base = controlPlane(() => ({ status: 200, body: { applied: true } }))
+    stubApi((call) => (call.path.startsWith(`${BASE}?`) ? { status: 200, body: own } : base(call)))
+    renderAs(<AiCreditsTab shop={ON} />, "owner")
+
+    await userEvent.click(await screen.findByRole("button", { name: "Günlük tavanı değiştir" }))
+    const form = await screen.findByRole("dialog", { name: "Günlük tavanı değiştir" })
+    expect(form).toHaveTextContent("Mağazanın bir günde harcayabileceği en çok kredi.")
+    expect(form).not.toHaveTextContent("Genel varsayılan: 150")
+    expect(within(form).getByLabelText("Bu mağazanın günlük tavanı")).toHaveAttribute(
+      "placeholder",
+      "genel varsayılan"
+    )
+  })
 })
