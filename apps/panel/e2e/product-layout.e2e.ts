@@ -100,7 +100,13 @@ test.describe("product page layout", () => {
     // Still reached: "Göster" brings it back for this visit
     await page.getByRole("button", { name: "Göster", exact: true }).click()
     await expect(page.locator('main [data-part="advanced"]')).toBeAttached()
-    await expect(page.getByText("Gizlenen bölüm: bu ziyaret için gösteriliyor.")).toBeVisible()
+    // A tab of the data card: back in its tab list, its line said in its panel once opened
+    await page.locator("#product-data").getByRole("tab", { name: "Gelişmiş" }).click()
+    await expect(
+      page
+        .locator('main [data-part="advanced"]')
+        .getByText("Gizlenen bölüm: bu ziyaret için gösteriliyor.")
+    ).toBeVisible()
     await guard.assertHealthy()
   })
 
