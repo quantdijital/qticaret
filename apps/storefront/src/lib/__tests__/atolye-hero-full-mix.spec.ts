@@ -78,3 +78,46 @@ describe("the opening's mixed heading", () => {
     expect(accentDeclarations(theme("none"))).toEqual([])
   })
 })
+
+describe("the opening's split words and faint veil", () => {
+  it("marks the split words only over the photograph, and the faint veil by its step", () => {
+    const pictured = (settings: Partial<HeroFullSettings>) =>
+      renderPage(atolyeTheme, "HomePage", {
+        view: {
+          sections: [
+            {
+              ...cover(full(settings)),
+              image: {
+                src: "/media/dag.jpg",
+                alt: "Dağ",
+                width: 1600,
+                height: 900,
+                sources: { avif: null, webp: null },
+              },
+            } as HomeSectionView,
+          ],
+        },
+      })
+    const split = sectionTag(pictured({ words_place: "split", scrim: "faint" }))
+    expect(split).toContain('data-words="split"')
+    expect(split).toContain('data-scrim="faint"')
+    // Beside the words there is no photograph behind them to split around
+    expect(sectionTag(pictured({ words_place: "split", image_side: "end" }))).not.toContain(
+      "data-words"
+    )
+    expect(sectionTag(pictured({}))).not.toContain("data-words")
+  })
+
+  it("keeps every rule under its setting's mark", () => {
+    const css = atolyeCss("hero-full-split.css").replace(/\/\*[\s\S]*?\*\//g, "")
+    const selectors = css
+      .split("{")
+      .slice(0, -1)
+      .map((part) => part.split("}").at(-1)?.trim() ?? "")
+      .filter((selector) => selector !== "" && !selector.startsWith("@media"))
+    expect(selectors.length).toBeGreaterThan(0)
+    for (const selector of selectors) {
+      expect(selector).toMatch(/data-words="split"|data-scrim="faint"/)
+    }
+  })
+})

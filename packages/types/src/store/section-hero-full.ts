@@ -18,8 +18,8 @@ export const HERO_FULL_SETTINGS = {
   search_position: ["inside", "overlap"],
   /** `screen`: about the screen's height; `tall`: about two thirds of it. */
   height: ["screen", "tall"],
-  /** The veil over the photograph, under the words. */
-  scrim: ["light", "strong"],
+  /** The veil over the photograph, under the words; `faint` barely there, a shade only at the top and foot. */
+  scrim: ["light", "strong", "faint"],
   align: ["center", "start"],
   /**
    * `full`: the photograph behind the words; `end`: beside them, the words on
@@ -39,6 +39,8 @@ export const HERO_FULL_SETTINGS = {
   ornament: ["none", "leaves"],
   /** The heading in one face, or set light with its second part inline in an italic serif (the accent face). */
   title_mix: ["none", "serif_accent"],
+  /** The words together, or the heading at the top and the text and buttons at the foot, the picture between. */
+  words_place: ["together", "split"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -58,6 +60,7 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   accent_mark: "none",
   ornament: "none",
   title_mix: "none",
+  words_place: "together",
 }
 
 export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
@@ -94,6 +97,7 @@ export function heroFullSettingsOf(
     accent_mark: heroFullStepOf("accent_mark", section.accent_mark),
     ornament: heroFullStepOf("ornament", section.ornament),
     title_mix: heroFullStepOf("title_mix", section.title_mix),
+    words_place: heroFullStepOf("words_place", section.words_place),
   }
 }
 

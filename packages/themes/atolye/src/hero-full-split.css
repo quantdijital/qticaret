@@ -1,0 +1,64 @@
+/*
+ * The full image opening's split words and faint veil (sections/HeroFull.tsx):
+ *
+ * - Split (`words_place: split`, `data-words`, the photograph behind the
+ *   words): the heading near the opening's top, the text and buttons at its
+ *   foot, the photograph's subject showing between; the text in the stage's
+ *   full ink a size up, the first button wide and tall.
+ * - Faint (`scrim: faint`): almost no veil, a shade only at the top (for the
+ *   header and the heading) and at the foot (for the text), so a bright
+ *   photograph keeps its colour and the words still read.
+ *
+ * Every rule sits under its setting's own mark: no other opening changes.
+ * Unlayered: the words' widths and sizes are utilities on them.
+ */
+.gf-cover[data-side="full"][data-scrim="faint"] .gf-cover-media::after {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-stage) 34%, transparent),
+    color-mix(in oklab, var(--color-stage) 6%, transparent) 32%,
+    color-mix(in oklab, var(--color-stage) 6%, transparent) 52%,
+    color-mix(in oklab, var(--color-stage) 48%, transparent)
+  );
+}
+
+.gf-cover[data-words="split"] .gf-cover-stage {
+  justify-content: flex-start;
+}
+.gf-cover[data-words="split"] .gf-cover-body {
+  flex: 1 1 auto;
+  padding-block: 2.5rem 3rem;
+}
+.gf-cover[data-words="split"] .gf-cover-body > :first-child {
+  flex: 1 1 auto;
+}
+.gf-cover[data-words="split"] .gf-cover-title + * {
+  margin-top: auto;
+}
+.gf-cover[data-words="split"] .gf-cover-title + p {
+  max-width: 40rem;
+  color: var(--color-stage-text);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+}
+.gf-cover[data-words="split"] .gf-cover-title + p + div {
+  padding-top: 1.25rem;
+}
+.gf-cover[data-words="split"] .gf-btn:first-child {
+  min-width: 15rem;
+  min-height: 3.5rem;
+  font-weight: 500;
+}
+
+@media (width >= 64rem) {
+  .gf-cover[data-words="split"] .gf-cover-body {
+    padding-block: 3.75rem 5rem;
+  }
+  .gf-cover[data-words="split"] .gf-cover-title + p {
+    font-size: 1.125rem;
+  }
+  .gf-cover[data-words="split"] .gf-btn:first-child {
+    min-width: 20rem;
+    min-height: 4rem;
+  }
+}

@@ -216,6 +216,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["accent_mark", "layout"],
       ["ornament", "layout"],
       ["title_mix", "layout"],
+      ["words_place", "layout"],
     ])
     // Only a search: no button to colour or arrow
     expect(keys(full({ action: "search", image_side: "end" }))).toEqual([

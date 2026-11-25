@@ -167,6 +167,7 @@ const fullImage = z
     accent_mark: fullStep("accent_mark"),
     ornament: fullStep("ornament"),
     title_mix: fullStep("title_mix"),
+    words_place: fullStep("words_place"),
     show_trust: z.boolean().default(false),
     video_url: optional(videoUrl),
     video_label: optional(text(HERO_VIDEO_LIMITS.label)),

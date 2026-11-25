@@ -2,9 +2,18 @@ import { describe, expect, it } from "vitest"
 import { ACCENT_FONTS, HAND_NOTE_MAX, accentFontOf, handNoteOf } from "./hand-note.js"
 
 describe("the hand note's contract", () => {
-  it("offers no face first, then a few handwriting faces", () => {
+  it("offers no face first, then a few handwriting faces, then the serif display faces", () => {
     expect(ACCENT_FONTS[0]).toBe("none")
-    expect(ACCENT_FONTS).toEqual(["none", "caveat", "dancing-script", "kalam"])
+    expect(ACCENT_FONTS).toEqual([
+      "none",
+      "caveat",
+      "dancing-script",
+      "kalam",
+      "dm-serif",
+      "fraunces",
+      "playfair",
+    ])
+    expect(accentFontOf("playfair")).toBe("playfair")
     expect(HAND_NOTE_MAX).toBe(60)
   })
 

@@ -11530,7 +11530,8 @@
           "term": "overlay",
           "hint": "The dark veil over the image, so the text reads on any picture.",
           "light": "Light",
-          "strong": "Strong"
+          "strong": "Strong",
+          "faint": "Faint"
         },
         "edge": {
           "label": "Image edge",
@@ -11573,6 +11574,13 @@
           "hint": "The heading's second part follows on the same line in an italic serif; the rest is drawn light. Choose the font in Theme settings › Fonts › Accent font.",
           "none": "One font",
           "serif_accent": "Accent in italic serif"
+        },
+        "words_place": {
+          "label": "Words layout",
+          "term": "layout",
+          "hint": "The words stand together, or the heading at the cover's top and the text and button at its foot, the picture showing between.",
+          "together": "Together",
+          "split": "Heading top, button bottom"
         }
       },
       "trustCard": {

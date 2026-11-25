@@ -53,7 +53,10 @@ const SIZES = {
  * second line of the heading a drawn curl (`accent_mark`); a sprig of
  * leaves may stand by the words (`ornament`). Mixed (`title_mix`), the
  * heading is set light and its second part follows on the same line in
- * the accent face's italic, in the heading's ink. Each off: drawn as before.
+ * the accent face's italic, in the heading's ink. Split (`words_place`,
+ * behind the words only), the heading stands at the opening's top and the
+ * text and buttons at its foot, the photograph between; the veil may be
+ * faint (`scrim`). Each off: drawn as before.
  * The shop's trust badges, when shown, are a box over the bottom edge too,
  * under the search card, which then takes the same width (one edge for
  * both). Beside the words the photograph ends where that foot begins, so
@@ -88,6 +91,8 @@ export function HeroFull({
   const centred = settings.align === "center"
   // The heading set light, its second part inline in the accent face's italic (`hero-full-mix.css`)
   const mixed = settings.title_mix === "serif_accent"
+  // The heading at the top, the text and buttons at the foot: over the photograph only (`hero-full-split.css`)
+  const split = settings.words_place === "split" && side === "full"
   const sizes = SIZES[side]
   const Heading = first ? "h1" : "h2"
   const overlap = search !== null && settings.search_position === "overlap"
@@ -107,6 +112,7 @@ export function HeroFull({
       data-edge={settings.edge}
       data-foot={foot ? "" : undefined}
       data-title-mix={mixed ? "serif_accent" : undefined}
+      data-words={split ? "split" : undefined}
     >
       {first && image && <Preload image={image} sizes={sizes} />}
       <div className="gf-cover-stage relative isolate flex flex-col justify-center">

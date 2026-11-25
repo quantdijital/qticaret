@@ -11,7 +11,7 @@ export const HERO_FULL_SETTINGS = {
   action: ["button", "search", "both"],
   search_position: ["inside", "overlap"],
   height: ["screen", "tall"],
-  scrim: ["light", "strong"],
+  scrim: ["light", "strong", "faint"],
   align: ["center", "start"],
   image_side: ["full", "end", "blend"],
   edge: ["straight", "wave"],
@@ -25,6 +25,8 @@ export const HERO_FULL_SETTINGS = {
   ornament: ["none", "leaves"],
   /** The heading in one face, or set light with its second part inline in an italic serif (the accent face). */
   title_mix: ["none", "serif_accent"],
+  /** The words together, or the heading at the top and the text and buttons at the foot, the picture between. */
+  words_place: ["together", "split"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -43,6 +45,7 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   accent_mark: "none",
   ornament: "none",
   title_mix: "none",
+  words_place: "together",
 }
 
 /** The heading's accent line at its longest, and the trust badges the opening shows at most. */

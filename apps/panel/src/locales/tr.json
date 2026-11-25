@@ -11530,7 +11530,8 @@
           "term": "overlay",
           "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
           "light": "Hafif",
-          "strong": "Güçlü"
+          "strong": "Güçlü",
+          "faint": "Çok hafif"
         },
         "edge": {
           "label": "Görselin kenarı",
@@ -11573,6 +11574,13 @@
           "hint": "Başlığın ikinci kısmı aynı satırda, eğik bir tırnaklı yazı tipiyle yazılır; geri kalanı ince çizilir. Yazı tipini Tema ayarları › Yazı tipleri › Vurgu yazı tipi'nden seçersiniz.",
           "none": "Tek yazı tipi",
           "serif_accent": "Vurgu eğik tırnaklı"
+        },
+        "words_place": {
+          "label": "Yazı yerleşimi",
+          "term": "layout",
+          "hint": "Yazılar bir arada durur ya da başlık kapağın üstünde, metin ve düğme altında durur; görsel aradan görünür.",
+          "together": "Bir arada",
+          "split": "Başlık üstte, düğme altta"
         }
       },
       "trustCard": {
