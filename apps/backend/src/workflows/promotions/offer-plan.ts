@@ -46,6 +46,8 @@ export interface UpdateOfferInput {
     | undefined
   /** The rules that replace its basket minimum. */
   minimum?: OfferRule[] | undefined
+  /** The rules that replace who may use it: customer groups, first order only (K1/K2). */
+  audience?: OfferRule[] | undefined
   per_customer?: { limit: number | null } | undefined
   dates?: { starts_at: string | null; ends_at: string | null } | undefined
   /** A campaign of its own, made when it needs one and has none. */
@@ -70,6 +72,7 @@ export interface OfferState {
   target_rule_ids: string[]
   buy_rule_ids: string[]
   minimum_rule_ids: string[]
+  audience_rule_ids: string[]
   campaign_id: string | null
   /** No other promotion shares its campaign: its days and budget are this form's. */
   owns_campaign: boolean
@@ -168,6 +171,9 @@ export function planOffer(input: UpdateOfferInput, state: OfferState) {
       ? batch(RuleType.BUY_RULES, scope.buy_rules, state.buy_rule_ids)
       : null,
     minimum: input.minimum ? batch(RuleType.RULES, input.minimum, state.minimum_rule_ids) : null,
+    audience: input.audience
+      ? batch(RuleType.RULES, input.audience, state.audience_rule_ids)
+      : null,
     campaign: campaignChanges(input, state),
     newCampaign:
       !state.campaign_id && wantsCampaign && input.campaign ? newCampaignOf(input.campaign) : null,

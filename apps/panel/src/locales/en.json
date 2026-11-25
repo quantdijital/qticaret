@@ -6374,7 +6374,20 @@
       "buyCount": "Units taken",
       "payCount": "Units paid",
       "buyWord": "buy",
-      "payWord": "pay"
+      "payWord": "pay",
+      "audience": "Who can use it",
+      "audienceHint": "Customers in the chosen groups can use it once they log in to their account.",
+      "audiences": {
+        "everyone": "Everyone",
+        "groups": "Customer groups"
+      },
+      "audienceGroups": "Customer groups",
+      "noGroups": "No customer groups yet; create one under Customers › Groups.",
+      "firstOrder": "First order only",
+      "firstOrderHint": "Customers who ordered before cannot use it; their e-mail address is checked too.",
+      "previewGroups_one": "For {{count}} chosen customer group",
+      "previewGroups_other": "For {{count}} chosen customer groups",
+      "previewFirstOrder": "On a first order only"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
@@ -6386,7 +6399,8 @@
       "minimum": "Enter an amount above zero, or leave it empty.",
       "perCustomer": "Uses per customer must be a whole number.",
       "buyget": "Units paid must be fewer than units taken, both whole numbers from 1 to 99 (for example buy 3, pay 2).",
-      "buygetScope": "For buy X, pay Y choose products, categories or collections."
+      "buygetScope": "For buy X, pay Y choose products, categories or collections.",
+      "groups": "Choose at least one customer group, or everyone."
     },
     "created": "Promotion created.",
     "saved": "Promotion saved.",

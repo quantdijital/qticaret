@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 import {
+  audienceOf,
+  audienceRulesFor,
+  isAudienceRule,
   isPerCustomerBudget,
+  sameAudience,
   minimumOf,
   minimumRuleIds,
   minimumRulesFor,
@@ -54,5 +58,29 @@ describe("promotion scope and conditions (ADR-0024)", () => {
     expect(perCustomerOf({ type: "usage", limit: 100 })).toBe("")
     expect(isPerCustomerBudget({ type: "spend", limit: 1000 })).toBe(false)
     expect(perCustomerOf(null)).toBe("")
+  })
+
+  it("reads and writes who may use it (K1/K2)", () => {
+    const rules = [
+      rule("r1", "item_total", ["150"]),
+      rule("r2", "customer.groups.id", ["g1", "g2"]),
+      rule("r3", "first_order", ["true"]),
+    ]
+    const read = audienceOf(rules)
+    expect(read).toEqual({ audience: "groups", groups: ["g1", "g2"], firstOrder: true })
+    expect(audienceRulesFor(read)).toEqual([
+      { attribute: "customer.groups.id", operator: "in", values: ["g1", "g2"] },
+      { attribute: "first_order", operator: "in", values: ["true"] },
+    ])
+    expect(audienceOf([])).toEqual({ audience: "everyone", groups: [], firstOrder: false })
+    // Groups picked, then everyone chosen: no group rule
+    expect(audienceRulesFor({ audience: "everyone", groups: ["g1"], firstOrder: false })).toEqual(
+      []
+    )
+    expect(isAudienceRule({ attribute: "item_total" })).toBe(false)
+    expect(sameAudience(read, { audience: "groups", groups: ["g2", "g1"], firstOrder: true })).toBe(
+      true
+    )
+    expect(sameAudience(read, { ...read, firstOrder: false })).toBe(false)
   })
 })

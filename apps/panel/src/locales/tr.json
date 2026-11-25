@@ -6374,7 +6374,20 @@
       "buyCount": "Alınan adet",
       "payCount": "Ödenen adet",
       "buyWord": "al",
-      "payWord": "öde"
+      "payWord": "öde",
+      "audience": "Kimler kullanabilir",
+      "audienceHint": "Seçili gruplardaki müşteriler hesaplarına giriş yaptığında kullanabilir.",
+      "audiences": {
+        "everyone": "Herkes",
+        "groups": "Müşteri grupları"
+      },
+      "audienceGroups": "Müşteri grupları",
+      "noGroups": "Henüz müşteri grubu yok; Müşteriler › Gruplar'dan oluşturabilirsiniz.",
+      "firstOrder": "İlk siparişe özel",
+      "firstOrderHint": "Daha önce sipariş vermiş müşteriler kullanamaz; e-posta adresiyle de kontrol edilir.",
+      "previewGroups_one": "Seçili {{count}} müşteri grubuna özel",
+      "previewGroups_other": "Seçili {{count}} müşteri grubuna özel",
+      "previewFirstOrder": "Yalnızca ilk siparişte"
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
@@ -6386,7 +6399,8 @@
       "minimum": "Sıfırdan büyük bir tutar girin ya da boş bırakın.",
       "perCustomer": "Müşteri başına kullanım bir tam sayı olmalı.",
       "buyget": "Ödenen adet alınandan az olmalı; ikisi de 1 ile 99 arasında tam sayı (ör. 3 al 2 öde).",
-      "buygetScope": "X al Y öde için ürün, kategori ya da koleksiyon seçin."
+      "buygetScope": "X al Y öde için ürün, kategori ya da koleksiyon seçin.",
+      "groups": "En az bir müşteri grubu seçin ya da herkesi seçin."
     },
     "created": "Kampanya oluşturuldu.",
     "saved": "Kampanya kaydedildi.",

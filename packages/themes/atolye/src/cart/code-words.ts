@@ -7,6 +7,10 @@ const PROMOTION_ERRORS = [
   "errors.too_many_requests",
   // A wholesaler's cart takes no code (ADR-0068 §6)
   "promotions.wholesale_no_code",
+  // A code for some customers or a first order only (K1/K2)
+  "promotions.customer_group_login",
+  "promotions.customer_group_only",
+  "promotions.first_order_only",
 ]
 
 /** The coupon field's words, the cart page's and the checkout summary's alike. */

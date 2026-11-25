@@ -24,6 +24,7 @@ import {
   releaseLinkClaim,
 } from "../payment-links/cart-guard"
 import type { LinkClaim } from "../payment-links/cart-guard"
+import { assertRestrictedCodesHold } from "../promotions/restricted-codes"
 import { assertWholesaleCartCompletes } from "../wholesale/checkout"
 import { overlapsPlacement } from "./completion-overlap"
 import type { HookCart } from "./completion-overlap"
@@ -120,6 +121,8 @@ completeCartWorkflow.hooks.validate(
         throw new ValidationError("promotions.one_code", { field: "promo_codes" })
       }
     }
+    // A code for some customer groups or a first order only is still the buyer's (K1/K2)
+    await assertRestrictedCodesHold(container, cart.id)
     // Of two carts of one link completing at once one holds it, the other is refused here:
     // before its order and its payment's authorization. Nothing throws after this
     const claim = linkId ? await claimLinkForCart(container, linkId, cart.id) : null
