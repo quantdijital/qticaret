@@ -92,21 +92,19 @@ describe("CategoriesPage", () => {
     update.mockReset().mockResolvedValue({})
     search.value = {}
     list.mockReset().mockResolvedValue({ product_categories: TREE })
-    fetchMock
-      .mockReset()
-      .mockImplementation((path: string) =>
-        Promise.resolve(
-          path === "/admin/category-counts"
-            ? { counts: { mutfak: 12, sef: 7, santoku: 3, ekmek: 5, kamp: 0 } }
-            : path === "/admin/category-images"
-              ? {
-                  images: [{ category_id: "mutfak", url: "https://cdn.example/m.webp", alt: null }],
-                }
-              : path === "/admin/platform-settings/seo"
-                ? { values: { url_style: { category: "prefixed" } } }
-                : {}
-        )
+    fetchMock.mockReset().mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/category-counts"
+          ? { counts: { mutfak: 12, sef: 7, santoku: 3, ekmek: 5, kamp: 0 } }
+          : path === "/admin/category-images"
+            ? {
+                images: [{ category_id: "mutfak", url: "https://cdn.example/m.webp", alt: null }],
+              }
+            : path === "/admin/platform-settings/seo"
+              ? { values: { url_style: { category: "prefixed" } } }
+              : {}
       )
+    )
   })
 
   it("lists parents first with their children under them, each with its address and visibility", async () => {
