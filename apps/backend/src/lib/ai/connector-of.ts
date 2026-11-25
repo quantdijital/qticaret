@@ -7,6 +7,8 @@ import { aiProviderError } from "./errors"
 import type { AiCapability } from "./registry/capabilities"
 import { findAiService, verifiedToolCalls } from "./registry/services"
 import type { AiService, AiTarget } from "./registry/services"
+import { ownKeyTransport } from "./transport/own-key"
+import type { AiTransport } from "./transport/types"
 
 /**
  * The one way to a connector (adr/0071 §2, §9): by a service's id,
@@ -14,7 +16,7 @@ import type { AiService, AiTarget } from "./registry/services"
  * fake service runs only where the registry lists it (tests and
  * development; never staging or production) and no address but the
  * registry's is called. The key is handed to the connector here and kept
- * in its closure only.
+ * in its closure only; or a transport is (adr/0085 §3: the platform's).
  */
 
 export interface ResolvedTarget {
@@ -40,6 +42,16 @@ export function textConnectorFor(
   apiKey: string,
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): TextConnector {
+  return textConnectorWith(serviceId, capability, ownKeyTransport(apiKey), nodeEnv)
+}
+
+/** The text connector of a registered service, sending through a transport. */
+export function textConnectorWith(
+  serviceId: string,
+  capability: Extract<AiCapability, "text" | "vision">,
+  transport: AiTransport,
+  nodeEnv: string | undefined = process.env["NODE_ENV"]
+): TextConnector {
   const resolved = textTargetOf(serviceId, capability, nodeEnv)
   if (resolved === null) {
     throw aiProviderError({
@@ -55,7 +67,7 @@ export function textConnectorFor(
   if (target.connector !== "openai-compatible") {
     throw aiProviderError({ service: serviceId, key: "ai.service_unavailable", code: "not_text" })
   }
-  return openAiCompatibleText({ service, target, apiKey })
+  return openAiCompatibleText({ service, target, transport })
 }
 
 /**
@@ -66,6 +78,15 @@ export function textConnectorFor(
 export function toolConnectorFor(
   serviceId: string,
   apiKey: string,
+  nodeEnv: string | undefined = process.env["NODE_ENV"]
+): ToolConnector {
+  return toolConnectorWith(serviceId, ownKeyTransport(apiKey), nodeEnv)
+}
+
+/** The tool calling connector of a registered service, sending through a transport. */
+export function toolConnectorWith(
+  serviceId: string,
+  transport: AiTransport,
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): ToolConnector {
   const resolved = textTargetOf(serviceId, "text", nodeEnv)
@@ -84,5 +105,5 @@ export function toolConnectorFor(
   if (target.connector !== "openai-compatible") {
     throw refuse("not_text")
   }
-  return openAiCompatibleTools({ service, target, apiKey })
+  return openAiCompatibleTools({ service, target, transport })
 }
