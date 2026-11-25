@@ -253,6 +253,26 @@
       "legalIdentity": {
         "label": "Mağaza künyesi eksik",
         "hint": "Yasanın istediği eksik alanlar"
+      },
+      "openReturns": {
+        "label": "Karar bekleyen iadeler",
+        "hint": "Onaylanacak ya da reddedilecek talepler"
+      },
+      "unreadContact": {
+        "label": "Yanıtlanmayan mesajlar",
+        "hint": "İletişim formundan gelen yeni mesajlar"
+      },
+      "pendingReviews": {
+        "label": "Onay bekleyen yorumlar",
+        "hint": "Vitrinde görünmeden önce bakılacak"
+      },
+      "pendingQuestions": {
+        "label": "Onay bekleyen sorular",
+        "hint": "Sorular ve gelen yanıtlar"
+      },
+      "outOfStock": {
+        "label": "Tükenen ürünler",
+        "hint": "Satılabilir stoku kalmayan varyantlar"
       }
     },
     "recent": {
