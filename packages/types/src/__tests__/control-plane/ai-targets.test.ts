@@ -9,6 +9,7 @@ import {
   aiServiceIdSchema,
   aiTargetModels,
   aiTargetServiceIds,
+  aiTargetUncapped,
   endpointUrl,
 } from "../../control-plane/index.js"
 import type {
@@ -58,6 +59,20 @@ describe("AI service targets (adr/0085 §2)", () => {
     }
   )
 
+  it("calls Qwen on Singapore's shared domain alone, thinking off, the output capped", () => {
+    // The "International" scope: no mainland node; neither a workspace domain nor "Global"
+    expect(AI_SERVICE_TARGETS.qwen.hosts).toEqual(["dashscope-intl.aliyuncs.com"])
+    for (const target of Object.values<AiCapabilityTarget>(AI_SERVICE_TARGETS.qwen.capabilities)) {
+      expect(endpointUrl(target)).toBe(
+        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+      )
+      expect(target.fixedBody).toEqual({ enable_thinking: false })
+      expect(target.maxTokensField).toBe("max_completion_tokens")
+    }
+    expect(aiTargetUncapped("qwen", "text")).toBe(false)
+    expect(aiTargetUncapped("qwen", "vision")).toBe(false)
+  })
+
   it("is frozen", () => {
     expect(Object.isFrozen(AI_SERVICE_TARGETS)).toBe(true)
     expect(Object.isFrozen(AI_FAKE_TARGET)).toBe(true)
@@ -98,6 +113,8 @@ describe("AI service targets (adr/0085 §2)", () => {
   it("answers the models a capability may be routed to, null where it has none", () => {
     expect(aiTargetModels("deepseek", "text", "production")).toEqual(["deepseek-flash"])
     expect(aiTargetModels("photoroom", "image_edit", "production")).toEqual(["segment-v1"])
+    expect(aiTargetModels("qwen", "vision", "production")).toEqual(["qwen3.8-flash"])
+    expect(aiTargetModels("qwen", "image_edit", "production")).toBeNull()
     expect(aiTargetModels("photoroom", "text", "production")).toBeNull()
     expect(aiTargetModels("bria", "image_edit", "production")).toEqual(["RMBG2"])
     expect(aiTargetModels("deepseek", "video", "production")).toBeNull()

@@ -147,7 +147,11 @@ describe("Bria's connector with a shop's own key", () => {
       retries: false,
       send: (request) => {
         seen.push(request)
-        return Promise.resolve({ status: done.status, headers: done.headers, body: done.body })
+        return Promise.resolve({
+          status: done.status,
+          headers: { "content-type": "application/json" },
+          body: done.body,
+        })
       },
     }
     await imageConnectorWith("bria", transport, "production").edit({

@@ -25,6 +25,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   smtp: "SMTP",
   deepseek: "DeepSeek",
   minimax: "MiniMax",
+  qwen: "Qwen (Alibaba)",
   gemini: "Gemini",
   photoroom: "Photoroom",
   bria: "Bria",

@@ -44,6 +44,7 @@ export function settingsLinkOf(id: string) {
     // adr/0071 §13: the AI services are set up on their own page
     case "deepseek":
     case "minimax":
+    case "qwen":
     case "gemini":
     case "photoroom":
     case "bria":

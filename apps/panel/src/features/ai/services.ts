@@ -7,6 +7,7 @@
 export const AI_SERVICE_IDS = [
   "deepseek",
   "minimax",
+  "qwen",
   "gemini",
   "photoroom",
   "bria",

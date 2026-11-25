@@ -31,6 +31,7 @@ describe("AI registries (adr/0071 §2)", () => {
         "minimax",
         "gemini",
         "photoroom",
+        "qwen",
         "bria",
       ])
       expect(findAiService("fake", env)).toBeNull()
@@ -143,6 +144,7 @@ describe("AI registries (adr/0071 §2)", () => {
       minimax: ["text", "vision"],
       gemini: ["text", "vision", "image_edit"],
       photoroom: ["image_edit"],
+      qwen: ["text", "vision"],
       bria: ["image_edit"],
     })
     // A result is fetched by its address from Bria alone, from its documented host only;

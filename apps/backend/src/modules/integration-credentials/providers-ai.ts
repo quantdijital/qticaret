@@ -50,6 +50,14 @@ export const AI_CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
+  // Alibaba Model Studio, Singapore region > API keys (a key works only in its own region)
+  qwen: {
+    settings: z.object({}).strict(),
+    secrets: ["api_key"],
+    secret: apiKey,
+    identity: [],
+    optional: [],
+  },
   // Bria platform > API keys: image editing (cut-out and scene)
   bria: {
     settings: z.object({}).strict(),

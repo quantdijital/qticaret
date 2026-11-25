@@ -116,7 +116,21 @@ export function readableAnswerType(contentType: string): boolean {
  * message is never searched: a provider may echo the shop's input in it.
  */
 const KEY_REFUSED_REASONS: ReadonlySet<string> = new Set(["API_KEY_INVALID", "API_KEY_EXPIRED"])
-const KEY_REFUSED_CODES: ReadonlySet<string> = new Set(["invalid_api_key"])
+/**
+ * ... and the platform's own account said to be unpaid, unbought or out of
+ * budget (Model Studio's codes; its page gives no status for `Arrearage`):
+ * the shop's work was not done and the fault is ours, whatever the status.
+ */
+const KEY_REFUSED_CODES: ReadonlySet<string> = new Set([
+  "invalid_api_key",
+  "Arrearage",
+  "PrepaidBillOverdue",
+  "PostpaidBillOverdue",
+  "CommodityNotPurchased",
+  "BudgetLimitExceeded",
+  "AccessDenied.Unpurchased",
+  "AllocationQuota.FreeTierOnly",
+])
 
 function keyRefused(body: Buffer): boolean {
   const value = parsed(body)
@@ -136,7 +150,7 @@ function keyRefused(body: Buffer): boolean {
   })
 }
 
-/** The platform's own failure: the model or endpoint gone, or its key refused in a 400. */
+/** The platform's own failure: the model or endpoint gone, or its key or account refused in a 400. */
 export function platformFault(status: number, body: Buffer): boolean {
   if (status === 404) {
     return true

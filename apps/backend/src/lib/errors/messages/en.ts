@@ -888,6 +888,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "DeepSeek did not accept this API key. Copy it again from the API keys page of the DeepSeek platform.",
   "minimax.secret_invalid":
     "MiniMax did not accept this API key. Copy it again from the API keys page of the MiniMax platform.",
+  "qwen.secret_invalid":
+    "Qwen did not accept this API key. Copy it again from the API keys page of Alibaba Model Studio (Singapore region).",
   "gemini.secret_invalid":
     "Gemini did not accept this API key. Copy it again from the API keys page of Google AI Studio.",
   "meta.pixel_id_invalid": "The pixel id is digits only.",

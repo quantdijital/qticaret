@@ -13191,6 +13191,14 @@
           "secret_invalid": "MiniMax did not accept the key. Copy it again and enter it."
         }
       },
+      "qwen": {
+        "name": "Qwen (Alibaba)",
+        "description": "Low-cost text and image reading service (Alibaba Cloud, Singapore).",
+        "rejected": "Qwen refused the stored key. Change the key or check the balance and payment status of your Alibaba Cloud account.",
+        "checks": {
+          "secret_invalid": "Qwen did not accept the key. Copy it again from the Singapore region and enter it."
+        }
+      },
       "gemini": {
         "name": "Gemini",
         "description": "Google's text service.",
@@ -13231,6 +13239,7 @@
     "data_note": {
       "deepseek": "Data is processed and stored in China. DeepSeek's privacy policy lists training its models as a use of the data.",
       "minimax": "Where data is processed and whether it trains models is not stated.",
+      "qwen": "Data is stored in Singapore and processed on nodes outside the Chinese mainland. Alibaba does not train models on the content without separate consent.",
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
       "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
       "bria": "Where data is processed and whether it trains models is not stated; Bria says it does not keep the input and holds the result at a temporary address for 3 days.",
@@ -13240,6 +13249,7 @@
     "data_detail": {
       "deepseek": "DeepSeek processes and stores the text sent on servers in the People's Republic of China. Its privacy policy lists improving (training) its models among the uses of the data. Only content published on your storefront, such as products, categories and pages, is sent.",
       "minimax": "MiniMax's international platform is used. Where data is processed and whether it trains models could not be verified from the service's documentation; we suggest reading MiniMax's own terms before connecting. Only content published on your storefront is sent.",
+      "qwen": "Alibaba Cloud Model Studio's Singapore region (the \"International\" scope) is used: requests are stored in Singapore and processed on nodes outside the Chinese mainland. Under Alibaba's retention policy prompts and answers are kept for at most 30 days and are not used to train models without separate consent. A key works only in the region it was made in: take it from the Singapore region. Only content published on your storefront is sent.",
       "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
       "photoroom": "Photoroom processes the image on its servers in the USA and deletes it after answering. Photoroom's pages differ on whether images are used to train models; we suggest reading its own terms before connecting. Only the image to edit leaves your shop.",
       "bria": "Bria says it does not keep the image sent and holds the result at a temporary address for 3 days. Its documents do not state the country where data is processed or whether it trains models; written confirmation is awaited. We suggest reading Bria's own terms before connecting. Only the image to edit leaves your shop.",

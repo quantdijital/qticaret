@@ -126,6 +126,26 @@ const MINIMAX_CHAT = {
 } as const
 
 /*
+ * Alibaba Model Studio, Singapore region ("International" scope: global
+ * nodes excluding the Chinese mainland). The shared DashScope domain of
+ * that region only: a workspace domain would put an id of the account in
+ * the host, and the "Global" scope may run a call on mainland nodes, so
+ * neither is used (adr/0071 §9).
+ */
+const QWEN_CHAT = {
+  protocol: "openai-chat",
+  auth: "bearer",
+  model: "qwen3.8-flash",
+  baseUrl: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+  path: "/chat/completions",
+  // Documented as the output's whole length, thinking included (`max_tokens` is going away)
+  maxTokensField: "max_completion_tokens",
+  // Thinking is on unless turned off
+  fixedBody: { enable_thinking: false },
+  price: tokens(150_000, 470_000),
+} as const
+
+/*
  * Not on the platform's credits (adr/0085, security review of P3b): the
  * OpenAI-compatible endpoint documents no field that caps the output
  * (aistudio.google.com/docs/openai, read 2026-11-25) and Gemini 4's
@@ -189,6 +209,10 @@ export const AI_SERVICE_TARGETS = deepFrozen({
     capabilities: { text: MINIMAX_CHAT, vision: MINIMAX_CHAT },
     // The shop's `bodyErrors` whose key is not taken: busy, key, balance, quota
     notTakenBodyCodes: [1002, 1004, 1008, 1039, 2049, 2053, 2056, 2061, 2067, 2068],
+  },
+  qwen: {
+    hosts: ["dashscope-intl.aliyuncs.com"],
+    capabilities: { text: QWEN_CHAT, vision: QWEN_CHAT },
   },
   gemini: {
     hosts: ["generativelanguage.googleapis.com"],
@@ -260,6 +284,13 @@ export const BRIA_CHECK_REQUEST_ID = "qticaret-key-check"
 export const AI_SERVICE_CHECKS = deepFrozen({
   deepseek: { url: "https://api.deepseek.com/models", auth: "bearer", answer: "model_list" },
   minimax: { url: "https://api.minimax.io/v1/models", auth: "bearer", answer: "model_list" },
+  // The OpenAI-compatible model list is not on Model Studio's pages: only a 401 refuses
+  qwen: {
+    url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models",
+    auth: "bearer",
+    answer: "model_list",
+    documented: false,
+  },
   gemini: {
     url: "https://generativelanguage.googleapis.com/v1beta/openai/models",
     auth: "bearer",
