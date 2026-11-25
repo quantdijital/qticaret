@@ -25,6 +25,9 @@ export const AI_ERROR_KEYS = [
   "ai.input_unsupported",
   "ai.daily_limit_reached",
   "ai.credits_exhausted",
+  // adr/0085: the platform's credits; the day's cap reached, the gateway unusable now
+  "ai.credits_daily_cap",
+  "ai.platform_unavailable",
   "ai.unknown_entity",
   "ai.unknown_task",
   "ai.suggestion_not_open",
