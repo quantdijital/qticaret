@@ -48,7 +48,11 @@ export const MEDIA_ROUTES = [
   {
     matcher: "/admin/media/delete",
     methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminDeleteMediaBatch)],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.media_cleanup),
+      validateAndTransformBody(AdminDeleteMediaBatch),
+    ],
   },
   {
     matcher: MEDIA_ENTRY,

@@ -13060,7 +13060,8 @@
         "collection": "Collection picture",
         "popup": "Pop-up",
         "storefront_design": "Saved look",
-        "favicon": "Site icon"
+        "favicon": "Site icon",
+        "booking": "Tour programme"
       },
       "seoTypes": {
         "product": "product page",

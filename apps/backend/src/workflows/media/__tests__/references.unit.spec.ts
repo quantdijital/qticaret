@@ -60,6 +60,18 @@ describe("media references (M1)", () => {
     expect(isReferenced(asset, references)).toBe(false)
   })
 
+  it("reads an address written percent-encoded", () => {
+    const encoded = `/_next/image?url=${encodeURIComponent(asset.url)}&w=640`
+    expect(isReferenced(asset, referencesFrom([encoded]))).toBe(true)
+  })
+
+  it("counts a picture it cannot find by its pieces as used", () => {
+    const short = { ...asset, url: "https://cdn.example.com/a.jpg", file_id: "a.jpg" }
+    expect(isReferenced(short, referencesFrom([]))).toBe(true)
+    const odd = { ...asset, file_id: "kupa mavi (1).jpg" }
+    expect(isReferenced(odd, referencesFrom([]))).toBe(true)
+  })
+
   it("reads every place the detail's uses name, and more", () => {
     const tables = new Set(MEDIA_REFERENCE_SOURCES.map((source) => source.table))
     for (const table of [
@@ -78,6 +90,8 @@ describe("media references (M1)", () => {
       "storefront_layout",
       "storefront_design",
       "product_extension",
+      "bookable",
+      "async_job",
     ]) {
       expect(tables.has(table)).toBe(true)
     }

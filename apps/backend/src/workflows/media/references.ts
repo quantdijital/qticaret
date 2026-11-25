@@ -19,6 +19,8 @@ type Container = Pick<MedusaContainer, "resolve">
 interface Source {
   table: string
   columns: readonly string[]
+  /** Only rows whose column holds one of these values (a job still to run). */
+  only?: { column: string; values: readonly string[] }
 }
 
 /** Tables and columns that hold a picture's address, key or id, or a document that may. */
@@ -29,6 +31,11 @@ export const MEDIA_REFERENCE_SOURCES: readonly Source[] = [
   { table: "product_variant", columns: ["thumbnail"] },
   { table: "order_line_item", columns: ["thumbnail"] },
   { table: "cart_line_item", columns: ["thumbnail"] },
+  // Texts and metadata Medusa keeps, a staff member's picture
+  { table: "product", columns: ["description", "metadata"] },
+  { table: "product_variant", columns: ["metadata"] },
+  { table: "product_category", columns: ["description", "metadata"] },
+  { table: "user", columns: ["avatar_url"] },
   // The catalog's own pictures and texts
   { table: "product_extension", columns: ["description_doc", "summary_doc", "addons"] },
   { table: "brand", columns: ["logo_url", "logo_file_id", "description_doc"] },
@@ -46,6 +53,9 @@ export const MEDIA_REFERENCE_SOURCES: readonly Source[] = [
   { table: "bulk_message", columns: ["body"] },
   { table: "legal_document", columns: ["body"] },
   { table: "popup", columns: ["image_url", "body"] },
+  // adr/0076: a dated product's programme steps
+  { table: "bookable", columns: ["program"] },
+  { table: "storefront_menu_item", columns: ["url"] },
   { table: "payment_link", columns: ["lines"] },
   // A page's share image (its storage key), every setting, the storefront's design
   { table: "seo_meta", columns: ["og_image_override"] },
@@ -58,6 +68,12 @@ export const MEDIA_REFERENCE_SOURCES: readonly Source[] = [
   { table: "media_video", columns: ["poster"] },
   { table: "migration_file", columns: ["media_id"] },
   { table: "sector_pack_item", columns: ["record_id"] },
+  // A job still to run on pictures (an AI edit names them in its input)
+  {
+    table: "async_job",
+    columns: ["input"],
+    only: { column: "status", values: ["queued", "running"] },
+  },
 ]
 
 // What a name, key or id is made of; anything else separates them (/, ", spaces, commas)
@@ -65,11 +81,26 @@ const SEPARATOR = /[^A-Za-z0-9._-]+/
 // Shorter pieces ("1x", "webp", "https") are never a picture's name, key or id
 const MIN_TOKEN = 6
 
-/** Every piece of text in a value that could be a picture's name, key or id. */
+function decoded(text: string): string | null {
+  try {
+    const plain = decodeURIComponent(text)
+    return plain === text ? null : plain
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Every piece of text in a value that could be a picture's name, key or
+ * id; an address written percent-encoded (`/_next/image?url=…`) is read
+ * decoded as well.
+ */
 export function tokensOf(text: string, into: Set<string>): void {
-  for (const token of text.split(SEPARATOR)) {
-    if (token.length >= MIN_TOKEN) {
-      into.add(token)
+  for (const each of [text, decoded(text)]) {
+    for (const token of each?.split(SEPARATOR) ?? []) {
+      if (token.length >= MIN_TOKEN) {
+        into.add(token)
+      }
     }
   }
 }
@@ -82,10 +113,13 @@ export interface MediaReferences {
 }
 
 async function columnTokens(knex: Knex, source: Source, column: string, into: Set<string>) {
-  const rows = (await knex(source.table)
+  const read = knex(source.table)
     .distinct(knex.raw("??::text as value", [column]))
     .whereNull("deleted_at")
-    .whereNotNull(column)) as { value: string | null }[]
+    .whereNotNull(column)
+  const rows = (await (source.only
+    ? read.whereIn(source.only.column, [...source.only.values])
+    : read)) as { value: string | null }[]
   for (const row of rows) {
     if (row.value) {
       tokensOf(row.value, into)
@@ -161,6 +195,19 @@ export function keysOf(asset: ReferencedAsset): string[] {
   return [...keys]
 }
 
-/** Whether anything may show the picture: unknown counts as used. */
-export const isReferenced = (asset: ReferencedAsset, references: MediaReferences): boolean =>
-  references.linked.has(asset.id) || keysOf(asset).some((key) => references.tokens.has(key))
+// A name the token check cannot find for sure: too short, or with characters it splits on
+const KEY_SHAPE = /^[A-Za-z0-9._-]+$/
+const unsure = (name: string) => name.length < MIN_TOKEN || !KEY_SHAPE.test(name)
+
+/**
+ * Whether anything may show the picture: unknown counts as used, so a
+ * picture whose address or key the check could not find by its pieces
+ * is used too.
+ */
+export function isReferenced(asset: ReferencedAsset, references: MediaReferences): boolean {
+  const fileName = asset.url.split("?")[0]?.split("/").pop() ?? ""
+  if (unsure(fileName) || (asset.file_id !== null && unsure(asset.file_id))) {
+    return true
+  }
+  return references.linked.has(asset.id) || keysOf(asset).some((key) => references.tokens.has(key))
+}

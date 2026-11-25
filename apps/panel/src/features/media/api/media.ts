@@ -62,6 +62,8 @@ export type MediaUseKind =
   | "collection"
   /** A storefront pop-up's picture (adr/0080): `id` the pop-up, `label` its name. */
   | "popup"
+  /** A dated product's programme (adr/0076): `id` the product, `label` its title. */
+  | "booking"
 
 export interface MediaUse {
   kind: MediaUseKind
