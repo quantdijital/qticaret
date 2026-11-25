@@ -20,6 +20,7 @@ import { readRawBody } from "./http/raw-body"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
 import { guardTenantApi, tenantCallerOf } from "./http/tenant-api"
+import { tenantApiAddressLimit } from "./http/tenant-api-address"
 import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
 import { VAULT_ROUTE_MIDDLEWARES } from "./http/vault-routes"
 
@@ -87,7 +88,8 @@ export default defineMiddlewares({
     {
       matcher: "/tenant-api/*",
       middlewares: [
-        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api),
+        // PR #371 D4: per address only what no signature vouched for
+        tenantApiAddressLimit(),
         // adr/0085 §2: a provider body read as its bytes (JSON or a form), before the signature
         readRawBody,
         guardTenantApi,

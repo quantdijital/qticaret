@@ -43,6 +43,7 @@ export const CP_RATE_LIMIT_PROFILES = {
   },
   // An invitation's page and its acceptance, before any account: the link is the credential
   invite_public: { name: "cp_invite_public", perIp: { max: 20, windowMs: HOUR } },
+  // Per address, before the signature: only what no signature vouched for (D4, tenant-api-address.ts)
   tenant_api: { name: "cp_tenant_api", perIp: { max: 300, windowMs: MINUTE } },
   // Ek C13 review M1: per shop as its signature proves it, every tenant API
   // route together (shops behind one address do not share a bucket)
