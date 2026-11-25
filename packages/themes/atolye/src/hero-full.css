@@ -18,6 +18,13 @@
  * - Foot (`data-foot`): the search card and the trust box rise over the
  *   opening's bottom edge by `--cover-lift`; the words keep that much more
  *   room under them.
+ * - Blend (`data-side="blend"`): from 1024 px the photograph fills the
+ *   opening at its height, the drawn wash (`HeroWash`) over it and no mask
+ *   (the wash draws the edges); below it, as beside the words.
+ * - The accent button (`button_tone: accent`, `.gf-btn--accent`): the shop's
+ *   accent colour and its measured ink, a step darker on hover (the
+ *   button's own hover rule, given the accent's deep step).
+ * - The leaves (`ornament: leaves`): a light tint of the shop's colour.
  */
 @layer components {
   .gf-cover {
@@ -60,6 +67,20 @@
     content: "";
   }
 
+  .gf-cover .gf-btn--accent {
+    /* The button's own hover (`ui.css`) reads its deep step: here the accent's */
+    --color-signal-deep: color-mix(in oklab, var(--highlight) 86%, black);
+    background: var(--highlight);
+    color: var(--highlight-foreground);
+  }
+  /* The wash's hazes are the page's ground, as its shapes (`fill-paper`) */
+  .gf-cover-wash .gf-wash-haze stop {
+    stop-color: var(--color-paper);
+  }
+  .gf-cover-leaves {
+    color: color-mix(in oklab, var(--color-signal) 42%, var(--color-paper));
+  }
+
   .gf-cover[data-edge="wave"] .gf-cover-media {
     mask-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath d='M0 0h1200v30C1000 70 800-10 600 30S200-10 0 30z'/%3E%3C/svg%3E"),
@@ -76,8 +97,18 @@
       --cover-wave: 2.75rem;
       --cover-lift: 3.5rem;
     }
-    .gf-cover[data-side="end"] .gf-cover-stage {
+    .gf-cover:is([data-side="end"], [data-side="blend"]) .gf-cover-stage {
       min-height: var(--cover-min);
+    }
+    /* Blended, the trust box sits deeper in the picture's foot, the screen's opening a step taller */
+    .gf-cover[data-side="blend"] {
+      --cover-lift: 5rem;
+    }
+    .gf-cover[data-side="blend"][data-height="screen"] {
+      --cover-min: clamp(30rem, 96svh, 60rem);
+    }
+    .gf-cover[data-side="blend"] .gf-cover-media {
+      mask-image: none;
     }
     .gf-cover[data-side="end"][data-edge="wave"] .gf-cover-media {
       mask-image:

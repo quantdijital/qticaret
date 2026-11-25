@@ -50,6 +50,8 @@ const SEARCH_FORM = {
   show_category: true,
   show_dates: true,
   show_people: true,
+  flexible_month: true,
+  date_words: false,
   category_style: "select",
   placeholder: null,
 }

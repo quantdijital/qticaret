@@ -17,7 +17,8 @@ const ITEMS: readonly { item: BottomNavItem; root: string }[] = [
 
 const under = (path: string, root: string) => path === root || path.startsWith(`${root}/`)
 
-const pathOf = (url: string) => url.split(/[?#]/, 1)[0] ?? ""
+/** An address's path, without its query or fragment. */
+export const pathOf = (url: string) => url.split(/[?#]/, 1)[0] ?? ""
 
 /** The bar for the page at `url` (path and query, as the proxy set it); null where it stays away. */
 export function bottomNavOf(url: string): BottomNavView | null {

@@ -204,6 +204,8 @@ describe("the full image opening in the settings search and the preview", () => 
 
     expect(keys(full())).toEqual([
       ["action", "content"],
+      ["button_tone", "content"],
+      ["button_icon", "content"],
       ["show_trust", "content"],
       ["video_url", "video"],
       ["height", "layout"],
@@ -211,7 +213,10 @@ describe("the full image opening in the settings search and the preview", () => 
       ["image_side", "layout"],
       ["scrim", "layout"],
       ["edge", "layout"],
+      ["accent_mark", "layout"],
+      ["ornament", "layout"],
     ])
+    // Only a search: no button to colour or arrow
     expect(keys(full({ action: "search", image_side: "end" }))).toEqual([
       ["action", "content"],
       ["search_position", "content"],
@@ -221,7 +226,13 @@ describe("the full image opening in the settings search and the preview", () => 
       ["align", "layout"],
       ["image_side", "layout"],
       ["edge", "layout"],
+      ["accent_mark", "layout"],
+      ["ornament", "layout"],
     ])
+    // Both: the search box's place and the button's colour and arrow
+    expect(keys(full({ action: "both" })).map(([key]) => key)).toEqual(
+      expect.arrayContaining(["search_position", "button_tone", "button_icon"])
+    )
     expect(keys(hero())).toEqual([])
   })
 

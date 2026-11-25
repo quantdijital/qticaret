@@ -1,0 +1,42 @@
+/*
+ * The one-row header (`header_bar` `inline`, frame/HeaderInline.tsx): its
+ * tools are round, each in a hairline ring on the field colour, its icons
+ * a step smaller from 1024 px; hovered, the page's well instead of the
+ * menus' line (`menu.css`). The page's own link in the menu takes the
+ * shop's accent colour (`--highlight`) and a short line under its words;
+ * with the underline menus a hovered link's line is as short. Every rule sits under the variant's
+ * own `[data-variant="inline"]`: no other header changes. Unlayered, as
+ * the menus' tool rules they answer.
+ */
+.gf-head[data-variant="inline"] .gf-tool.gf-icon-btn {
+  border: 1px solid var(--color-rule);
+  border-radius: 9999px;
+  background: var(--color-field);
+}
+.gf-head[data-variant="inline"] .gf-tool.gf-icon-btn:hover {
+  background: var(--color-paper-2);
+}
+.gf-head[data-variant="inline"] .gf-tool.gf-icon-btn:hover::after {
+  content: none;
+}
+
+.gf-head[data-variant="inline"] .gf-menu-item[aria-current="page"] {
+  position: relative;
+  color: var(--highlight);
+}
+.gf-head[data-variant="inline"] .gf-menu-item[aria-current="page"]::after,
+[data-menu-style="underline"] .gf-head[data-variant="inline"] .gf-menu-item:hover::after {
+  position: absolute;
+  inset: auto 0.75rem 0.375rem;
+  height: 2px;
+  background: currentColor;
+  content: "";
+  pointer-events: none;
+}
+
+@media (width >= 64rem) {
+  .gf-head[data-variant="inline"] .gf-tool svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}

@@ -36,6 +36,14 @@ export interface SearchFormSettings {
   show_dates: boolean
   /** Dated products only: places the party takes (`kisi`). */
   show_people: boolean
+  /** The dates' "Esnek ay" field beside the two days (today's, on); off: the two days only. */
+  flexible_month: boolean
+  /**
+   * An empty day written as words ("Tarih ekle") and a chosen one as
+   * `GG.AA.YYYY`, instead of the browser's own date field (off, today's).
+   * Only with JavaScript: without it the plain date fields stay.
+   */
+  date_words: boolean
   category_style: SearchFormCategoryStyle
   /**
    * The words field's hint before a search ("Nereye gitmek istersiniz?");
@@ -50,6 +58,8 @@ export const SEARCH_FORM_DEFAULTS: Readonly<SearchFormSettings> = {
   show_category: true,
   show_dates: true,
   show_people: true,
+  flexible_month: true,
+  date_words: false,
   category_style: "select",
   placeholder: null,
 }
@@ -74,6 +84,8 @@ export function searchFormOf(
     show_category: flag(value?.show_category, SEARCH_FORM_DEFAULTS.show_category),
     show_dates: flag(value?.show_dates, SEARCH_FORM_DEFAULTS.show_dates),
     show_people: flag(value?.show_people, SEARCH_FORM_DEFAULTS.show_people),
+    flexible_month: flag(value?.flexible_month, SEARCH_FORM_DEFAULTS.flexible_month),
+    date_words: flag(value?.date_words, SEARCH_FORM_DEFAULTS.date_words),
     category_style: (SEARCH_FORM_CATEGORY_STYLES as readonly unknown[]).includes(style)
       ? (style as SearchFormCategoryStyle)
       : SEARCH_FORM_DEFAULTS.category_style,

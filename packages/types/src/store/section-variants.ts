@@ -77,8 +77,10 @@ export const SECTION_VARIANTS = {
    * centred header (`header.layout`), read into the bar by name; its
    * `catalog` (N14) a utility strip, a wide search with the shop's phone and
    * a filled menu bar with a "Kategoriler" button.
+   * `inline` ("Tek satır"): one row, the wordmark at the start, the main
+   * menu in the middle with the page's own link marked, round tools at the end.
    */
-  header_bar: ["standard", "centered", "catalog"],
+  header_bar: ["standard", "centered", "catalog", "inline"],
   /**
    * `ledger`: today's steel-well ledger; `brand_columns` (adr/0049 Ek
    * 2026-11-17): a brand block beside the link columns, an optional strip

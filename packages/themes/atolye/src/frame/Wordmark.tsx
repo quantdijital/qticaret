@@ -11,10 +11,13 @@ export function Wordmark({
   name,
   logo,
   className,
+  large = false,
 }: {
   name: string
   logo: ImageView | null
   className?: string
+  /** A logo file a step taller from 1024 px (the one-row header's taller row). */
+  large?: boolean
 }) {
   return (
     <a
@@ -23,7 +26,12 @@ export function Wordmark({
       className={cn("flex min-h-11 min-w-0 items-center rounded-inner", className)}
     >
       {logo ? (
-        <ResponsiveImage image={logo} sizes="180px" priority className="h-9 w-auto lg:h-10" />
+        <ResponsiveImage
+          image={logo}
+          sizes={large ? "300px" : "180px"}
+          priority
+          className={cn("h-9 w-auto", large ? "lg:h-14" : "lg:h-10")}
+        />
       ) : (
         <span className="truncate font-display text-wordmark leading-none font-extrabold tracking-(--tracking-display)">
           {name}

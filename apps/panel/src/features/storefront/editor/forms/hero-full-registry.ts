@@ -17,6 +17,8 @@ const H = "storefront.editor.heroFull"
 export const HERO_FULL_CONTENT = [
   ["action", "action"],
   ["search_position", "search_position"],
+  ["button_tone", "button_tone"],
+  ["button_icon", "button_icon"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
 
 export const HERO_FULL_LAYOUT = [
@@ -25,6 +27,8 @@ export const HERO_FULL_LAYOUT = [
   ["image_side", "image_side"],
   ["scrim", "scrim"],
   ["edge", "edge"],
+  ["accent_mark", "accent_mark"],
+  ["ornament", "ornament"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
 
 type FullSection = Extract<AnySection, { type: "hero"; variant: "full_image" }>
@@ -32,12 +36,16 @@ type FullSection = Extract<AnySection, { type: "hero"; variant: "full_image" }>
 /**
  * Whether a step's field is shown as the opening stands: the search box's
  * place only while the opening asks for a search, the veil only while the
- * photograph is behind the words.
+ * photograph is behind the words, the button's colour and arrow only while
+ * the opening has its buttons.
  */
 export function heroFullShows(section: FullSection, name: HeroFullSetting): boolean {
   const settings = heroFullSettingsOf(section)
   if (name === "search_position") {
-    return settings.action === "search"
+    return settings.action !== "button"
+  }
+  if (name === "button_tone" || name === "button_icon") {
+    return settings.action !== "search"
   }
   return name !== "scrim" || settings.image_side === "full"
 }

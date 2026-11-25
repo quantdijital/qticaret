@@ -12,19 +12,31 @@
  * `@qticaret/types/section-hero-full` subpath).
  */
 export const HERO_FULL_SETTINGS = {
-  /** What the opening asks for: its buttons, or the shop's one search box (adr/0077 §1). */
-  action: ["button", "search"],
-  /** The search box inside the opening, or as a card over its bottom edge; read only with `action: search`. */
+  /** What the opening asks for: its buttons, the shop's one search box (adr/0077 §1), or `both` (the buttons, then the box). */
+  action: ["button", "search", "both"],
+  /** The search box inside the opening, or as a card over its bottom edge; read only while the opening has the box. */
   search_position: ["inside", "overlap"],
   /** `screen`: about the screen's height; `tall`: about two thirds of it. */
   height: ["screen", "tall"],
   /** The veil over the photograph, under the words. */
   scrim: ["light", "strong"],
   align: ["center", "start"],
-  /** `full`: the photograph behind the words; `end`: beside them, the words on the page's ground. */
-  image_side: ["full", "end"],
+  /**
+   * `full`: the photograph behind the words; `end`: beside them, the words on
+   * the page's ground; `blend`: the photograph across the opening, the page's
+   * ground washing over it in soft drawn shapes from the words' side.
+   */
+  image_side: ["full", "end", "blend"],
   /** The photograph's edge: its own rectangle, or a soft wave. */
   edge: ["straight", "wave"],
+  /** The buttons' colour: the shop's main colour, or its accent (`colors.accent`). */
+  button_tone: ["primary", "accent"],
+  /** An arrow after the first button's words, for the eye only. */
+  button_icon: ["none", "arrow"],
+  /** A hand-drawn curl under the heading's second line, in the accent colour. */
+  accent_mark: ["none", "swash"],
+  /** A drawn sprig of leaves by the words, for the eye only. */
+  ornament: ["none", "leaves"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -39,6 +51,10 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   align: "center",
   image_side: "full",
   edge: "straight",
+  button_tone: "primary",
+  button_icon: "none",
+  accent_mark: "none",
+  ornament: "none",
 }
 
 export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
@@ -70,6 +86,10 @@ export function heroFullSettingsOf(
     align: heroFullStepOf("align", section.align),
     image_side: heroFullStepOf("image_side", section.image_side),
     edge: heroFullStepOf("edge", section.edge),
+    button_tone: heroFullStepOf("button_tone", section.button_tone),
+    button_icon: heroFullStepOf("button_icon", section.button_icon),
+    accent_mark: heroFullStepOf("accent_mark", section.accent_mark),
+    ornament: heroFullStepOf("ornament", section.ornament),
   }
 }
 

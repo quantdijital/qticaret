@@ -110,6 +110,17 @@ describe("the theme panel's search box group", () => {
     expect(onChange).toHaveBeenLastCalledWith(withForm({ show_people: false }))
   })
 
+  it("offers the flexible month and the date words with the dates, and saves them", () => {
+    const onChange = draw(THEME, ["catalog.booking"])
+    expect(screen.getByLabelText("Esnek ay alanı")).toBeChecked()
+    fireEvent.click(screen.getByLabelText("Esnek ay alanı"))
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ flexible_month: false }))
+    const words = screen.getByLabelText('Boş tarihte "Tarih ekle" yazsın')
+    expect(words).not.toBeChecked()
+    fireEvent.click(words)
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ date_words: true }))
+  })
+
   it("hides the categories' look while the categories are off", () => {
     const onChange = draw(withForm({ show_category: false }))
     expect(screen.queryByText("Kategoriler nasıl görünsün")).toBeNull()

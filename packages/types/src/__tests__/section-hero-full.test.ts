@@ -32,4 +32,27 @@ describe("the full image opening's settings", () => {
       heroFullSettingsOf({ action: "search", search_position: "overlap", height: 3, scrim: "max" })
     ).toEqual({ ...HERO_FULL_DEFAULTS, action: "search", search_position: "overlap" })
   })
+
+  it("keeps the blended photograph, both actions and the drawn marks", () => {
+    expect(
+      heroFullSettingsOf({
+        action: "both",
+        image_side: "blend",
+        button_tone: "accent",
+        button_icon: "arrow",
+        accent_mark: "swash",
+        ornament: "leaves",
+      })
+    ).toEqual({
+      ...HERO_FULL_DEFAULTS,
+      action: "both",
+      image_side: "blend",
+      button_tone: "accent",
+      button_icon: "arrow",
+      accent_mark: "swash",
+      ornament: "leaves",
+    })
+    expect(heroFullStepOf("button_tone", "orange")).toBe("primary")
+    expect(heroFullStepOf("ornament", undefined)).toBe("none")
+  })
 })

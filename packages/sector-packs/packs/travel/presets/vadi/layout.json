@@ -6,7 +6,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "standard",
+      "variant": "inline",
       "sticky": true,
       "menu_images": "off",
       "search_style": "icon"
@@ -21,22 +21,26 @@
       "ends_at": null,
       "variant": "full_image",
       "eyebrow": "Doğaya açılan rotalar",
-      "heading": "Yeni yerler keşfedin,",
-      "title_accent": "anılarınızı biriktirin",
-      "text": "Koylar, yaylalar ve vadiler arasında küçük gruplarla turlar. Gidilecek yeri, tarihi ve kişi sayısını seçin, uygun kalkışları görün.",
-      "links": [{ "$href": "/magaza", "label": "Turları incele" }],
+      "heading": "Doğayı keşfet.",
+      "title_accent": "Kendi rotanı bul.",
+      "text": "Nefes kesen yerler, unutulmaz deneyimler; hepsi küçük gruplar için özenle hazırlandı.",
+      "links": [{ "$href": "/magaza", "label": "Turları keşfet" }],
       "image": {
-        "$image": "images/kapak-oludeniz.webp",
-        "alt": "Yukarıdan bakışla Ölüdeniz lagünü, kumsal ve çevreleyen yeşil tepeler"
+        "$image": "images/kapak-braies.webp",
+        "alt": "Çam ormanlarıyla çevrili turkuaz bir dağ gölü ve arkasında yükselen kayalık zirveler"
       },
-      "action": "search",
-      "search_position": "overlap",
-      "height": "tall",
+      "action": "both",
+      "search_position": "inside",
+      "height": "screen",
       "scrim": "light",
       "align": "start",
-      "image_side": "end",
+      "image_side": "blend",
       "edge": "wave",
-      "show_trust": true
+      "show_trust": true,
+      "button_tone": "accent",
+      "button_icon": "arrow",
+      "accent_mark": "swash",
+      "ornament": "leaves"
     },
     {
       "id": "populerrotalar",

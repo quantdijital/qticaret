@@ -15,6 +15,11 @@ import { CONTROL, Cell, DAY, DayCell, SelectCell } from "./search-form-cells"
 // over the people field beside it
 const GROUP =
   "flex min-w-0 max-lg:contents lg:flex-[3] lg:flex-row lg:border-l lg:border-rule lg:min-w-fit"
+// Without the flexible month, two fields' share of the bar
+const PAIR = "lg:flex-[2]"
+
+/** A chosen day as the shop's readers write it, `GG.AA.YYYY`. */
+const written = (day: string) => day.split("-").reverse().join(".")
 
 // False on the server and while hydrating, true after: the page as sent is the plain form's
 const never = () => () => undefined
@@ -32,6 +37,12 @@ const OPENING = new Set(["Enter", " ", "ArrowDown"])
  * (the calendar writes them), the month a button with the chosen months
  * (up to three) in a hidden field of the same name. Closed, the calendar
  * draws nothing; its days are asked for only once it opens.
+ *
+ * The shop may leave the month out (`dates.flexible`): the two days
+ * only, both ways. With `dates.hint`, a running page writes an empty
+ * day as those words and a chosen one `GG.AA.YYYY` on a button, its
+ * value in a hidden field of the day's name, instead of the browser's
+ * date field (which wrote `mm/dd/yyyy` in an English browser).
  */
 export function SearchDates({
   dates,
@@ -51,13 +62,15 @@ export function SearchDates({
   const group = useRef<HTMLDivElement>(null)
   const opener = useRef<HTMLElement | null>(null)
   const calendar = dates.calendar
+  const month = dates.flexible !== false
+  const groupClass = cn(GROUP, !month && PAIR)
 
   if (!running || !calendar) {
     return (
-      <div role="group" aria-label={dates.label} className={GROUP}>
+      <div role="group" aria-label={dates.label} className={groupClass}>
         <DayCell field={dates.from} className={wide} from="lg" />
         <DayCell field={dates.to} from="lg" />
-        <SelectCell icon={CalendarRange} field={dates.month} className={DAY} from="lg" />
+        {month && <SelectCell icon={CalendarRange} field={dates.month} className={DAY} from="lg" />}
       </div>
     )
   }
@@ -72,48 +85,70 @@ export function SearchDates({
       show("exact", event.currentTarget)
     }
   }
-  const day = (field: SearchFormDayView, value: string, className?: string | false) => (
-    <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)} from="lg">
-      <input
-        key="calendar"
-        type="date"
-        name={field.name}
-        value={value}
-        min={field.min}
-        max={field.max}
-        readOnly
-        aria-haspopup="dialog"
-        onClick={(event) => {
-          show("exact", event.currentTarget)
-        }}
-        onKeyDown={onDayKey}
-        className={cn(CONTROL, "cursor-pointer")}
-      />
-    </Cell>
-  )
+  const hint = dates.hint
+  const day = (field: SearchFormDayView, value: string, className?: string | false) =>
+    hint ? (
+      <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)} from="lg">
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          onClick={(event) => {
+            show("exact", event.currentTarget)
+          }}
+          className={cn(CONTROL, "cursor-pointer text-left")}
+        >
+          {value ? written(value) : hint}
+        </button>
+        {value && <input type="hidden" name={field.name} value={value} />}
+      </Cell>
+    ) : (
+      <Cell icon={CalendarDays} label={field.label} className={cn(DAY, className)} from="lg">
+        <input
+          key="calendar"
+          type="date"
+          name={field.name}
+          value={value}
+          min={field.min}
+          max={field.max}
+          readOnly
+          aria-haspopup="dialog"
+          onClick={(event) => {
+            show("exact", event.currentTarget)
+          }}
+          onKeyDown={onDayKey}
+          className={cn(CONTROL, "cursor-pointer")}
+        />
+      </Cell>
+    )
   const monthWords = choice.months
     .map((month) => dates.month.options.find((option) => option.value === month)?.label ?? month)
     .join(", ")
 
   return (
-    <div ref={group} role="group" aria-label={dates.label} className={GROUP}>
+    <div ref={group} role="group" aria-label={dates.label} className={groupClass}>
       {day(dates.from, choice.from, wide)}
       {day(dates.to, choice.to)}
-      <Cell icon={CalendarRange} label={dates.month.label} className={DAY} from="lg">
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          onClick={(event) => {
-            show("flexible", event.currentTarget)
-          }}
-          className={cn(CONTROL, "cursor-pointer text-left")}
-        >
-          {monthWords || dates.month.anyLabel}
-        </button>
-        {choice.months.length > 0 && (
-          <input type="hidden" name={dates.month.name} value={choice.months.join(",")} />
-        )}
-      </Cell>
+      {month && (
+        <Cell icon={CalendarRange} label={dates.month.label} className={DAY} from="lg">
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            onClick={(event) => {
+              show("flexible", event.currentTarget)
+            }}
+            className={cn(CONTROL, "cursor-pointer text-left")}
+          >
+            {monthWords || dates.month.anyLabel}
+          </button>
+          {choice.months.length > 0 && (
+            <input type="hidden" name={dates.month.name} value={choice.months.join(",")} />
+          )}
+        </Cell>
+      )}
+      {/* No month field: a month chosen in the calendar's own tab still goes with the form */}
+      {!month && choice.months.length > 0 && (
+        <input type="hidden" name={dates.month.name} value={choice.months.join(",")} />
+      )}
       {mode && (
         <DatePicker
           mode={mode}

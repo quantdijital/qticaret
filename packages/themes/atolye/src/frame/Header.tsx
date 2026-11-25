@@ -14,6 +14,7 @@ import { SearchDropOpener } from "./SearchDropOpener"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
 import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
+import { HeaderInline } from "./HeaderInline"
 import { LABELLED, accountOf, searchOf } from "./header-words"
 
 /** The catalog header's strip and phone when the shop's bar is drawn as it (else null). */
@@ -25,7 +26,7 @@ export function catalogOf(shop: ShopView) {
 }
 
 /** The header bar's variants this theme draws (`drawnVariant`). */
-export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
+export const HEADER_VARIANTS = ["standard", "centered", "catalog", "inline"] as const
 
 /**
  * The header, sticky unless the shop says not, in the design's variant
@@ -49,7 +50,7 @@ export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
  * search stays; the top row, the whole header, on a phone. The shop may
  * ask for its search as an icon (`searchStyle: icon`, adr/0049 Ek
  * 2026-11-15): from 1024 px a magnifier in the box's place opens it
- * (`SearchToggle`).
+ * (`SearchToggle`). `inline` is `HeaderInline`'s own drawing (one row).
  */
 export function Header({
   shop,
@@ -76,6 +77,17 @@ export function Header({
         catalog={shop.headerBar.catalog}
         sticky={sticky}
         t={t}
+        searchSuggest={searchSuggest}
+        changeCartLine={changeCartLine}
+      />
+    )
+  }
+  if (variant === "inline") {
+    return (
+      <HeaderInline
+        shop={shop}
+        t={t}
+        sticky={sticky}
         searchSuggest={searchSuggest}
         changeCartLine={changeCartLine}
       />

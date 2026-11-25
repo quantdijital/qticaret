@@ -56,6 +56,8 @@ export function Aisle({
   pictures = true,
   links = [],
   linksLabel = "",
+  inRow = false,
+  current = null,
 }: {
   categories: readonly NavCategoryView[]
   label: string
@@ -74,6 +76,10 @@ export function Aisle({
   links?: readonly LinkView[]
   /** The links' group's name for a screen reader. */
   linksLabel?: string
+  /** In the one-row header's own row (`inline`): no room kept under the line. */
+  inRow?: boolean
+  /** The page's own path: its plain link is marked `aria-current="page"`; null: none. */
+  current?: string | null
 }) {
   const [open, setOpen] = useState("")
   const root = useRef<HTMLElement>(null)
@@ -106,7 +112,9 @@ export function Aisle({
       onValueChange={setOpen}
       delayDuration={150}
       aria-label={label}
-      className={inBar ? "gf-menubar-aisle static min-w-0 flex-1" : "relative pb-2"}
+      className={
+        inBar ? "gf-menubar-aisle static min-w-0 flex-1" : inRow ? "relative" : "relative pb-2"
+      }
     >
       <NavigationMenu.List
         ref={list}
@@ -129,7 +137,11 @@ export function Aisle({
               className={away ? "hidden" : undefined}
             >
               <NavigationMenu.Link asChild>
-                <a href={category.path} className={cn(ITEM, inBar && BAR_ITEM)}>
+                <a
+                  href={category.path}
+                  aria-current={current !== null && category.path === current ? "page" : undefined}
+                  className={cn(ITEM, inBar && BAR_ITEM)}
+                >
                   <Word text={category.label} />
                 </a>
               </NavigationMenu.Link>

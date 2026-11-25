@@ -125,6 +125,27 @@ describe("searchFormView", () => {
     expect(months.category?.value).toBe("")
   })
 
+  it("leaves out the flexible month and writes an empty day in words only when the shop asks", () => {
+    const plain = searchFormView(source(), EMPTY_VALUES, t).dates
+    expect(plain).not.toHaveProperty("flexible")
+    expect(plain).not.toHaveProperty("hint")
+
+    const asked = searchFormView(
+      source({
+        settings: {
+          ...SEARCH_FORM_DEFAULTS,
+          attribute_key: "gidilecek_yer",
+          flexible_month: false,
+          date_words: true,
+        },
+      }),
+      EMPTY_VALUES,
+      t
+    ).dates
+    expect(asked?.flexible).toBe(false)
+    expect(asked?.hint).toBe("Tarih ekle")
+  })
+
   it("offers this month and the next eleven", () => {
     expect(monthsFrom("2026-11-23")).toEqual([
       "2026-11",

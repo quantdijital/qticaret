@@ -53,7 +53,7 @@ export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): H
   return {
     settings,
     accent: accent === "" ? null : accent,
-    search: settings.action === "search" ? source.search : null,
+    search: settings.action === "button" ? null : source.search,
     trust: section.show_trust === true ? source.badges.slice(0, HERO_FULL_LIMITS.trust) : [],
     video: heroVideo(section),
     // The hand note only when there is one: an opening without it is the view it was
@@ -69,7 +69,7 @@ export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): H
 export async function heroFullView(section: StoreHeroFull, t: Translate): Promise<HeroFullView> {
   const { action } = heroFullSettingsOf(section)
   const [search, badges, hand] = await Promise.all([
-    action === "search" ? currentSearchForm(EMPTY_VALUES, t) : Promise.resolve(null),
+    action === "button" ? Promise.resolve(null) : currentSearchForm(EMPTY_VALUES, t),
     section.show_trust === true
       ? currentShared().then((shared) => shared.trust_badges)
       : Promise.resolve([]),

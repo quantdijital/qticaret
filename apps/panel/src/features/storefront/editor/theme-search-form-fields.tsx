@@ -55,7 +55,9 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
     ...attributes.keys(),
     ...(form.attribute_key && !attributes.has(form.attribute_key) ? [form.attribute_key] : []),
   ]
-  const toggle = (name: "show_category" | "show_dates" | "show_people") => {
+  const toggle = (
+    name: "show_category" | "show_dates" | "show_people" | "flexible_month" | "date_words"
+  ) => {
     const field = THEME_FIELD[`search_form.${name}`]
     return shown(field) ? (
       <SwitchRow
@@ -124,6 +126,8 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
         />
       )}
       {toggle("show_dates")}
+      {toggle("flexible_month")}
+      {toggle("date_words")}
       {toggle("show_people")}
     </PanelGroup>
   )

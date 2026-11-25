@@ -42,7 +42,7 @@ const BARE = [
   "product/Installments.tsx",
   "product/Write.tsx",
   // adr/0077 §9: the full image opening's trust box, no border of its own
-  "sections/HeroFull.tsx",
+  "sections/HeroTrust.tsx",
   // adr/0077 §10 Ek: the trust badges' floating card, no border of its own
   "sections/PromiseCard.tsx",
 ]

@@ -1,7 +1,7 @@
 {
   "settings_version": 2,
   "theme": "atolye",
-  "colors": { "primary": "#2f6b3f", "accent": "#d2601a", "background": "neutral" },
+  "colors": { "primary": "#264f33", "accent": "#b44f14", "background": "warm" },
   "typography": { "heading": "manrope", "body": "manrope" },
   "radius": "round",
   "product_card": {
@@ -24,9 +24,11 @@
   "surface_style": "filled",
   "search_form": {
     "attribute_key": "gidilecek_yer",
-    "show_category": true,
+    "show_category": false,
     "show_dates": true,
     "show_people": true,
+    "flexible_month": false,
+    "date_words": true,
     "category_style": "select",
     "placeholder": "Nereye gitmek istersiniz?"
   },
