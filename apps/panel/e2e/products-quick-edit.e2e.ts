@@ -15,11 +15,11 @@ test("edits a price in the list, saves it from the header and puts it back", asy
   await expect(page.getByRole("table").getByRole("link").first()).toBeVisible()
   await page.getByRole("button", { name: "Hızlı düzenle" }).click()
 
-  // The first product of one variant: its price is a field
-  const price = page.getByRole("textbox", { name: / fiyatı$/ }).first()
+  // The first product of one variant: its price is a number field (role spinbutton)
+  const price = page.getByRole("spinbutton", { name: / fiyatı$/ }).first()
   await expect(price).toBeVisible()
   const label = (await price.getAttribute("aria-label")) ?? ""
-  const field = page.getByRole("textbox", { name: label, exact: true })
+  const field = page.getByRole("spinbutton", { name: label, exact: true })
   const original = await field.inputValue()
   const save = page.getByRole("button", { name: "1 değişikliği kaydet" })
 
