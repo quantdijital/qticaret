@@ -5142,12 +5142,35 @@
     },
     "address": {
       "edit": "Edit",
-      "title": "Delivery address of #{{number}}",
-      "description": "The delivery address can change until the order is packed.",
+      "title": {
+        "shipping": "Delivery address",
+        "billing": "Billing address"
+      },
+      "hint": {
+        "shipping": "The delivery address can change until the order is packed.",
+        "billing": "The billing address can change until the invoice is issued."
+      },
+      "saved": {
+        "shipping": "Delivery address updated.",
+        "billing": "Billing address updated."
+      },
+      "editOf": {
+        "shipping": "Edit the delivery address",
+        "billing": "Edit the billing address"
+      },
       "firstName": "First name",
       "lastName": "Last name",
       "nameRequired": "First and last name are required.",
-      "saved": "Delivery address updated."
+      "company": "Company name",
+      "sameAsDelivery": "Same as the delivery address.",
+      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "email": "E-mail",
+      "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
+      "emailRequired": "E-mail is required.",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailSaved": "E-mail updated.",
+      "editEmail": "Edit the e-mail",
+      "noEmail": "No e-mail."
     },
     "filters": {
       "payment": "Payment",
@@ -5181,7 +5204,12 @@
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
-      "days": "Order date"
+      "days": "Order date",
+      "customer": "Customer",
+      "customerOrders": "This customer's other orders",
+      "anyCustomer": "Search by name or e-mail",
+      "noCustomer": "No customer found.",
+      "customerUnknown": "Customer not found"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",
@@ -5644,7 +5672,8 @@
       "tabs": {
         "label": "Customer records",
         "orders": "Orders"
-      }
+      },
+      "allOrders": "All their orders"
     },
     "consents": {
       "title": "Message consent",
