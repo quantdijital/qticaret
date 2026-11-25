@@ -55,4 +55,31 @@ describe("the full image opening's settings", () => {
     expect(heroFullStepOf("button_tone", "orange")).toBe("primary")
     expect(heroFullStepOf("ornament", undefined)).toBe("none")
   })
+
+  it("keeps the play button, stacked title, inside trust row, corner note and side scrim", () => {
+    expect(HERO_FULL_DEFAULTS).toMatchObject({
+      second_button: "quiet",
+      title_style: "standard",
+      trust_place: "foot",
+      note_place: "heading",
+    })
+    expect(
+      heroFullSettingsOf({
+        second_button: "play",
+        title_style: "stacked",
+        trust_place: "inside",
+        note_place: "corner",
+        scrim: "side",
+      })
+    ).toEqual({
+      ...HERO_FULL_DEFAULTS,
+      second_button: "play",
+      title_style: "stacked",
+      trust_place: "inside",
+      note_place: "corner",
+      scrim: "side",
+    })
+    expect(heroFullStepOf("second_button", "video")).toBe("quiet")
+    expect(heroFullStepOf("note_place", 3)).toBe("heading")
+  })
 })

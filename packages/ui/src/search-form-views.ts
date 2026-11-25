@@ -141,6 +141,8 @@ export interface SearchFormView {
   label: string
   /** The button's words ("Ara"). */
   submit: string
+  /** Each field's label over its own light box (`search_form.boxed_fields`); absent: the hairline bar. */
+  boxed?: true
   /** Values carried as they are (a search's words when no words field is drawn). */
   hidden: { name: string; value: string }[]
   /** A words field (`q`): drawn when the shop names no "where" attribute; null: none. */

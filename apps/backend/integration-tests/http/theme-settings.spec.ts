@@ -52,6 +52,7 @@ const SEARCH_FORM = {
   show_people: true,
   flexible_month: true,
   date_words: false,
+  boxed_fields: false,
   category_style: "select",
   placeholder: null,
 }

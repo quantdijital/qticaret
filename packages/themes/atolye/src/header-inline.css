@@ -40,3 +40,11 @@
     height: 1.25rem;
   }
 }
+
+/* Plain tools (`tools_style: plain`): icons only, the page's own link in the ink with its line */
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-icon-btn > span[aria-hidden="true"] {
+  display: none;
+}
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-menu-item[aria-current="page"] {
+  color: var(--color-text);
+}

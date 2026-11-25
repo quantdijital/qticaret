@@ -77,6 +77,7 @@ export function SearchForm({ form, className }: { form: SearchFormView; classNam
       method="get"
       role="search"
       aria-label={form.label}
+      data-fields={form.boxed ? "boxed" : undefined}
       className={cn(
         "rounded-tile border border-rule bg-field text-left text-text shadow-float-edged",
         className
