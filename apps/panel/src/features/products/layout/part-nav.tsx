@@ -124,8 +124,7 @@ export function PartNav({
                   "aria-[current=location]:border-transparent aria-[current=location]:bg-accent aria-[current=location]:font-medium aria-[current=location]:text-accent-foreground"
                 )}
               >
-                {name(key)}{" "}
-                <Mark mark={marks(key)} />
+                {name(key)} <Mark mark={marks(key)} />
               </button>
             </li>
           ))}
@@ -147,8 +146,7 @@ export function PartNav({
             {present.map((key) => (
               <SelectItem key={key} value={key}>
                 <span className="flex items-center gap-2">
-                  {name(key)}{" "}
-                  <Mark mark={marks(key)} />
+                  {name(key)} <Mark mark={marks(key)} />
                 </span>
               </SelectItem>
             ))}
