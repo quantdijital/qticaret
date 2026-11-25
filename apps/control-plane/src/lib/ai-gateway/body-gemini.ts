@@ -6,12 +6,20 @@ import type { BodyInput, RebuiltBody } from "./body-shared"
  * A Gemini picture body (`generateContent`) rebuilt from an allow-list
  * (security review of P3b C1): only `contents`, each turn's parts only a
  * text or an inline picture (`inline_data` / `inlineData`: a PNG, JPEG or
- * WebP as base64, limits.ts `AI_INLINE_IMAGE_TYPES`), and the target's fixed `generationConfig` written over
- * whatever the shop sent (an image asked for alone, one candidate). A part
+ * WebP as base64, limits.ts `AI_INLINE_IMAGE_TYPES`), and the target's
+ * fixed `generationConfig` (an image asked for alone) with the gateway's
+ * one candidate written last, over whatever the shop sent (third review
+ * D1: no table row writes over `contents` or `candidateCount`). A part
  * naming a file or a function is refused; `generation_config`,
  * `systemInstruction`, `tools`, `cachedContent`, `safetySettings`, `model`
  * and any other field are dropped. The model is the address's.
  */
+
+/** The paths a Gemini picture body's gateway writes itself, last (D1). */
+export const GEMINI_GATEWAY_FIELDS: readonly string[] = [
+  "contents",
+  "generationConfig.candidateCount",
+]
 
 interface Pictures {
   count: number
@@ -80,10 +88,13 @@ export function geminiImageBody(body: Record<string, unknown>, input: BodyInput)
     throw new BodyRefused("contents_refused")
   }
   const pictures: Pictures = { count: 0, bytes: 0 }
-  // The target's fixed fields last: no field the shop sent is written over them
+  // The target's fixed fields over every field the shop sent; the gateway's own last (D1)
+  const fixed = input.target.fixedBody
+  const fixedConfig = isRecord(fixed["generationConfig"]) ? fixed["generationConfig"] : {}
   const rebuilt = {
+    ...fixed,
     contents: contents.map((turn) => turnOf(turn, pictures)),
-    ...input.target.fixedBody,
+    generationConfig: { ...fixedConfig, candidateCount: 1 },
   }
   if (pictures.count > maxImagesOf(input.task, input.capability)) {
     throw new BodyRefused("too_many_images")
