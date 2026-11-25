@@ -3,13 +3,13 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { AI_TASK_CREDITS, aiCreditsStatusSchema } from "@qticaret/types/control-plane"
 import type { AiCreditOrder, AiCreditsStatus, TenantStatus } from "@qticaret/types/control-plane"
 import type { AiCreditOrderRow } from "../../modules/ai-credits/service"
-import { plansIn, tenantsIn } from "../../workflows/modules"
+import { tenantsIn } from "../../workflows/modules"
 import { balanceReadOf } from "../ai-credits/balance"
 import { requestOrder } from "../ai-credits/grant"
 import { activePacks, aiCreditSettingsOf } from "../ai-credits/platform-settings"
 import { pendingOrderOf } from "../ai-credits/staff"
 import { istanbulDay } from "../billing/days"
-import { effectiveFlags } from "../fleet/plan-content"
+import { platformCreditsFlagOf } from "../ai-credits/flag"
 import { providerKeysHeld } from "./keys"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -22,7 +22,7 @@ type Container = Pick<MedusaContainer, "resolve">
  * signature names; nothing here reads a shop's id from anywhere else.
  */
 
-export const PLATFORM_CREDITS_FLAG = "ai.platform_credits"
+export { PLATFORM_CREDITS_FLAG } from "../ai-credits/flag"
 
 /**
  * Only an `active` shop may use or buy credits. A `restricted` one (an
@@ -43,30 +43,20 @@ async function shopServed(container: Container, tenantId: string): Promise<boole
 }
 
 /**
- * The shop's `ai.platform_credits` as its plan document says it: its own
- * exception while it holds, else its package's, else the list's default
- * (off). A shop on no package has no document: off. A shop that is not
- * `active` has it off whatever its document says.
+ * The shop's `ai.platform_credits` as its plan document says it
+ * (`platformCreditsFlagOf`: its own exception, else its package's, else
+ * off). A shop that is not `active` has it off whatever its document says.
  */
 export async function platformCreditsOn(
   container: Container,
   tenantId: string,
   now: Date
 ): Promise<boolean> {
-  const plans = plansIn(container)
-  const [served, plan, overrides] = await Promise.all([
+  const [served, flag] = await Promise.all([
     shopServed(container, tenantId),
-    plans.planOf(tenantId),
-    plans.featureOverridesOf(tenantId),
+    platformCreditsFlagOf(container, tenantId, now),
   ])
-  if (!served || !plan) {
-    return false
-  }
-  return (
-    effectiveFlags(plan.features, overrides, now, process.env["NODE_ENV"]).find(
-      (flag) => flag.key === PLATFORM_CREDITS_FLAG
-    )?.value === true
-  )
+  return served && flag
 }
 
 /** Capability → service, for each routed capability whose service's key the vault holds. */

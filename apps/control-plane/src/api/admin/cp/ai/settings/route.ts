@@ -1,8 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import {
-  aiCreditSettingsOf,
-  saveAiCreditSettings,
-} from "../../../../../lib/ai-credits/platform-settings"
+import { aiCreditSettingsOf } from "../../../../../lib/ai-credits/platform-settings"
+import { saveAiSettingsWithKeys } from "../../../../../lib/ai-gateway/routing-keys"
+import { answeringAiConflicts } from "../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../http/audit"
 import { actorOf } from "../../tenants/params"
 import type { PostAiSettingsType } from "../validators"
@@ -21,13 +20,19 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
 /**
  * POST /admin/cp/ai/settings (owner, step-up): any of the four changed;
  * packs get their ids here, routing is checked against the shared target
- * table. The audit row keeps what moved (no key is ever among them).
+ * table and only to a service whose key is held (`cp.ai_route_no_key`,
+ * 409). The audit row keeps what moved (no key is ever among them).
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostAiSettingsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { before, after } = await saveAiCreditSettings(req.scope, req.validatedBody, actorOf(req))
-  noteAuditChanges(req, settingsChanges(before, after))
-  res.json({ settings: settingsView(after), targets: targetsView() })
+  const saved = await answeringAiConflicts(res, () =>
+    saveAiSettingsWithKeys(req.scope, req.validatedBody, actorOf(req))
+  )
+  if (saved === undefined) {
+    return
+  }
+  noteAuditChanges(req, settingsChanges(saved.before, saved.after))
+  res.json({ settings: settingsView(saved.after), targets: targetsView() })
 }

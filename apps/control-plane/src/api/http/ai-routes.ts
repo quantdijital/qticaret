@@ -9,6 +9,7 @@ import {
   GetAiWallet,
   PostAiAdjust,
   PostAiDailyCap,
+  PostAiOrderCancel,
   PostAiOrderPaid,
   PostAiSettings,
   PostProviderKey,
@@ -64,5 +65,5 @@ export const AI_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(`${W}/daily-cap`, PostAiDailyCap),
   query(`${A}/orders`, GetAiOrders),
   body(`${A}/orders/:id/paid`, PostAiOrderPaid),
-  body(`${A}/orders/:id/cancel`, NoBody),
+  body(`${A}/orders/:id/cancel`, PostAiOrderCancel),
 ]

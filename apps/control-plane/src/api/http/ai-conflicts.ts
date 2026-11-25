@@ -11,6 +11,8 @@ const AI_CONFLICT_KEYS: ReadonlySet<string> = new Set([
   "cp.ai_credit_order_pending",
   "cp.ai_credit_order_closed",
   "cp.ai_credit_grant_ref_conflict",
+  // P3d: a capability routed to a service whose key the platform does not hold
+  "cp.ai_route_no_key",
 ])
 
 /**
