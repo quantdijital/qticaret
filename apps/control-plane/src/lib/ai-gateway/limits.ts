@@ -69,9 +69,43 @@ export function maxBodyBytesOf(task: AiCreditTask, capability: AiCreditCapabilit
   return task === "assistant" ? AI_ASSISTANT_MAX_BODY_BYTES : AI_TEXT_MAX_BODY_BYTES
 }
 
+/**
+ * The text one call may send (security review of P3b O1): the body as
+ * rebuilt, less its inline pictures' base64, so a credit's price holds
+ * whatever a picture call carries beside its picture. Measured against the
+ * shop's own bodies: every text task's data block is at most
+ * `MAX_DATA_CHARS` (30,000 UTF-16 units, apps/backend lib/ai/prompt.ts),
+ * written once more as a JSON string in the body (its quotes escaped,
+ * Turkish letters two bytes) beside the system message (the task's
+ * instructions and the owner's own): about 40 KB at the data block's
+ * limit. So a short task and a picture read take 64 KB, not the 32 KB the
+ * review proposed (32 KB would refuse a full data block the shop sends);
+ * the long writing tasks 128 KB; an edited picture's text is the shop's
+ * fixed instruction alone (32 KB); the assistant keeps its 512 KB (its
+ * tools and the turn's history).
+ */
+export const AI_SHORT_TEXT_MAX_BYTES = 64 * 1024
+export const AI_LONG_TEXT_MAX_BYTES = 128 * 1024
+export const AI_IMAGE_EDIT_TEXT_MAX_BYTES = 32 * 1024
+
+const LONG_TEXT_TASKS: ReadonlySet<AiCreditTask> = new Set<AiCreditTask>([
+  "product_description",
+  "product_faq",
+  "review_summary",
+  "campaign_email",
+  "post_draft",
+])
+
 /** The text a call may send: its body less the inline pictures' base64. */
-export const maxTextBytesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>
-  maxBodyBytesOf(task, capability)
+export function maxTextBytesOf(task: AiCreditTask, capability: AiCreditCapability): number {
+  if (task === "assistant") {
+    return AI_ASSISTANT_MAX_BODY_BYTES
+  }
+  if (capability === "image_edit") {
+    return AI_IMAGE_EDIT_TEXT_MAX_BYTES
+  }
+  return LONG_TEXT_TASKS.has(task) ? AI_LONG_TEXT_MAX_BYTES : AI_SHORT_TEXT_MAX_BYTES
+}
 
 /** The pictures a call may send: none as plain text, the task's own otherwise. */
 export const maxImagesOf = (task: AiCreditTask, capability: AiCreditCapability): number =>

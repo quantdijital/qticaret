@@ -126,7 +126,7 @@ medusaIntegrationTestRunner({
     it("refuses more than a text task's input and more than 6 MB, free", async () => {
       const who = await shop()
       const long = chatBody({
-        messages: [{ role: "user", content: "a".repeat(256 * 1024 + 1) }],
+        messages: [{ role: "user", content: "a".repeat(64 * 1024 + 1) }],
       })
       expect(refusalOf(await callAs(http, who, long))).toEqual(refused(413, "body_too_large"))
       // Past the gateway's 6 MB the bytes are not even read to the signature
