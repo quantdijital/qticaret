@@ -160,6 +160,9 @@ medusaIntegrationTestRunner({
 
       expect(unlimited.status).toBe(400)
       expect(JSON.stringify(unlimited.data)).toContain("cp.limit_grant_unlimited")
+      const tooMany = await call.post(path, { limits: { [key]: 100_001 } }, finance)
+      expect(tooMany.status).toBe(400)
+      expect(JSON.stringify(tooMany.data)).toContain("cp.limit_grant_unlimited")
       expect(planOf(granted).limits[key]).toBe(300)
       expect(await plans.listPackageLimits({ package_id: made.id, key })).toHaveLength(1)
     })

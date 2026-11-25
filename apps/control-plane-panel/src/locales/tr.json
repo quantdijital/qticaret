@@ -745,7 +745,7 @@
       "invite_member": "Bu adresin zaten bir hesabı var.",
       "invite_pending": "Bu adrese gönderilmiş açık bir davet var; önce onu geri çekin.",
       "last_owner": "Son etkin sahip rolünü ya da erişimini kaybedemez. Önce başka bir üyeye sahip rolü verin.",
-      "limit_grant_unlimited": "Ücretsiz kredi sınırsız olamaz; bir sayı girin (0: hak yok).",
+      "limit_grant_unlimited": "Ücretsiz kredi sınırsız olamaz; 0 ile 100.000 arasında bir sayı girin (0: hak yok).",
       "member_unknown": "Üye bulunamadı.",
       "mfa_already_enabled": "İki adımlı doğrulama zaten açık.",
       "mfa_code_invalid": "Kod doğru değil; uygulamadaki güncel kodu girin.",

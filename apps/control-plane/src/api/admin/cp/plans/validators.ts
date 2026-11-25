@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import {
   BILLING_PERIODS,
   GRANT_LIMIT_KEYS,
+  GRANT_LIMIT_MAX,
   LIMIT_KEYS,
   isPlatformFlag,
 } from "@qticaret/types/control-plane"
@@ -15,10 +16,11 @@ const name = z.string().trim().min(1, "cp.name_required").max(100).regex(CLEAN, 
 const price = z.number().int().min(0).max(100_000_000)
 const days = (max: number) => z.number().int().min(0).max(max)
 
-/** Any of the registry's limits; a key not in it is refused, and a grant is never unlimited. */
+/** Any of the registry's limits; a key not in it is refused, and a grant is never unlimited nor past its most. */
 const limits = z.partialRecord(z.enum(LIMIT_KEYS), limitValue).superRefine((value, ctx) => {
   for (const key of GRANT_LIMIT_KEYS) {
-    if (value[key] === null) {
+    const grant = value[key]
+    if (grant === null || (grant !== undefined && grant > GRANT_LIMIT_MAX)) {
       ctx.addIssue({ code: "custom", path: [key], message: "cp.limit_grant_unlimited" })
     }
   }

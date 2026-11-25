@@ -78,6 +78,12 @@ export type LimitKey = (typeof LIMIT_KEYS)[number]
 export const GRANT_LIMIT_KEYS = ["ai_free_credits_per_month"] as const satisfies readonly LimitKey[]
 export type GrantLimitKey = (typeof GRANT_LIMIT_KEYS)[number]
 
+/**
+ * The most a grant may be: "never unlimited" means little while a billion
+ * passes, and a wallet is filled with this number every month (adr/0085).
+ */
+export const GRANT_LIMIT_MAX = 100_000
+
 /** The keys that cap something the shop counts: every one but the grants. */
 export type CountedLimitKey = Exclude<LimitKey, GrantLimitKey>
 

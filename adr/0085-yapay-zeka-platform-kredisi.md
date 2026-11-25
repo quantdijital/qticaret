@@ -106,6 +106,7 @@ Kendi anahtarıyla yapılan işte kredi düşmez; `AiTask.credits` alanı kalkma
 - Ağ geçidi adres, model ve çıktı tavanını istekten almaz; iş adının yeteneği ile istenen yetenek uyuşmazsa reddeder (ucuz işin adıyla pahalı çağrı yapılamaz).
 - Mağaza yalnız kendi cüzdanını görür ve harcar: kiracı kimliği imzadan çözülür, gövdeden okunmaz.
 - Kredi ekleme ve düşme yalnız üst panel sahibi rolünde, notlu ve denetim kayıtlı; `grant_ref` benzersiz.
+- Aylık hak (`ai_free_credits_per_month`) bilerek ayrı tutulur: bir paket limitidir ve bugünkü limit düzeniyle yazılır (paket: sahip ve finans; mağazaya özel üzerine yazma: sahip ve operatör, gerekçeli ve denetim kayıtlı), tavanı 100.000, "sınırsız" olamaz. Tek seferlik kredi ekleme, düşme ve talep onayı yalnız sahip rolündedir.
 - Eşzamanlı iki harcama tek krediyi iki kez harcayamaz (tek deyim; yarış testi).
 - KVKK: ağ geçidi içerik saklamaz; platform kredisi yolunda sözleşmenin tarafı platformdur (docs/12), sağlayıcılar alt işleyen olarak mağaza sözleşmesinde anılır; `docs/kvkk-envanter.md` satırı ilgili PR'da.
 - Her dilimde `security-reviewer` (para, migration, kimlik bilgisi, dış çağrı).

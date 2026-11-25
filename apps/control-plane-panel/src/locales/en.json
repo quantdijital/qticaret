@@ -745,7 +745,7 @@
       "invite_member": "This address already has an account.",
       "invite_pending": "This address has an open invitation; withdraw it first.",
       "last_owner": "The last active owner cannot lose the role or access. Make another member an owner first.",
-      "limit_grant_unlimited": "Free credits cannot be unlimited; enter a number (0: none).",
+      "limit_grant_unlimited": "Free credits cannot be unlimited; enter a number from 0 to 100,000 (0: none).",
       "member_unknown": "The member was not found.",
       "mfa_already_enabled": "Two-step verification is already on.",
       "mfa_code_invalid": "The code is wrong; enter the app's current code.",
