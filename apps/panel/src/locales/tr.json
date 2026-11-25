@@ -777,6 +777,11 @@
             "summary": "Yapay zekâ servislerine mağazanın kendi anahtarıyla bağlanılır.",
             "description": "Yapay zekâ servislerine mağazanın kendi hesabının anahtarıyla bağlanılır; kullanım ücretini servis doğrudan mağazaya yansıtır. Bağlantılar Ayarlar > Yapay zekâ'da."
           },
+          "platform_credits": {
+            "label": "Platform kredisi",
+            "summary": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez.",
+            "description": "Yapay zekâ işlemleri platformun kredisiyle çalışır; mağazanın kendi servis anahtarı gerekmez. Paketiniz her ay ücretsiz kredi verebilir; ek kredi yüklenebilir."
+          },
           "storefront_search": {
             "label": "Kendi cümlesiyle arama",
             "summary": "Müşteri vitrinde aradığını kendi cümlesiyle yazabilir.",

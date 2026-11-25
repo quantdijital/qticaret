@@ -956,6 +956,7 @@
     "names": {
       "catalog_product_videos": "Ürün videoları",
       "ai_own_keys": "Yapay zekâ: kendi anahtarıyla (BYOK)",
+      "ai_platform_credits": "Yapay zekâ: platform kredisi",
       "test_platform_sample": "Örnek platform özelliği"
     }
   },
