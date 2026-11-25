@@ -130,14 +130,36 @@ describe("Atölye's blended full image opening", () => {
     expect(plain).not.toContain("gf-cover-leaves")
   })
 
-  it("centres the trust box under a blended opening's search inside it", () => {
+  it("centres the trust box under a blended opening's search inside it, roomy", () => {
     const html = home(
       full({ action: "search", image_side: "blend" }, { search: FORM, trust: BADGES })
     )
     const box = /<ul aria-label="[^"]+" class="([^"]*)"/.exec(html)?.[1] ?? ""
 
     expect(box).toContain("mx-auto")
-    expect(box).toContain("lg:w-[84%]")
+    expect(box).toContain("lg:w-[76%]")
+    expect(box).toContain("lg:py-7")
+  })
+
+  it("keeps the trust box of an opening not blended as it was", () => {
+    const html = home(full({ action: "search" }, { search: FORM, trust: BADGES }))
+    const box = /<ul aria-label="[^"]+" class="([^"]*)"/.exec(html)?.[1] ?? ""
+
+    expect(box).not.toContain("lg:py-7")
+    expect(html).not.toContain("lg:size-10")
+  })
+
+  it("names the wash's hazes after the opening and sets the leaves by the words", () => {
+    const html = home(
+      full({ image_side: "blend", ornament: "leaves" }, { search: FORM, trust: BADGES })
+    )
+
+    expect(html).toContain('id="bolum-kapak-wash-x"')
+    expect(html).toContain('mask="url(#bolum-kapak-wash-m)"')
+    // The words' column holds the sprig, so it never lands on them
+    expect(html).toMatch(
+      /<div class="flex flex-col gap-4 lg:gap-5 relative[^"]*"><svg[^>]*gf-cover-leaves/
+    )
   })
 })
 

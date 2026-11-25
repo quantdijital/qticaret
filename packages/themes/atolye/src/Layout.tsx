@@ -91,7 +91,8 @@ export function Layout({
   // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
   // its search: not twice
   const catalog = catalogOf(shop)
-  // The one-row header keeps no top strip of links: they are in its menu sheet
+  // The one-row header keeps no top strip of links or phone: they are in its menu sheet; the
+  // strip stays for the shop's announcements
   const inline = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS) === "inline"
   const whatsapp =
     shop.contact.whatsappHref !== null &&
@@ -110,7 +111,9 @@ export function Layout({
           mark={shop.announcementMark}
           links={catalog?.links || inline ? [] : shop.topLinks}
           contact={
-            catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
+            catalog?.phone || inline
+              ? { ...shop.contact, phone: null, phoneHref: null }
+              : shop.contact
           }
           words={{
             announcements: t("nav.announcements"),

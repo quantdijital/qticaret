@@ -10,22 +10,27 @@ const COLUMNS = ["lg:grid-cols-1", "lg:grid-cols-2", "lg:grid-cols-3", "lg:grid-
  * colour with the theme's float shadow (a hairline in its place when the
  * shop turns shadows off), each badge its icon in the shop's colour beside
  * its title and line; two by two on a phone, all in a row from 1024 px.
+ * Roomy (a blended opening's): from 1024 px a taller box, larger icons and
+ * words.
  */
 export function HeroTrust({
   badges,
   label,
   className,
+  roomy = false,
 }: {
   badges: readonly TrustBadgeView[]
   label: string
   /** The box's width and place in its opening (a blended one centres it). */
   className?: string | undefined
+  roomy?: boolean
 }) {
   return (
     <ul
       aria-label={label}
       className={cn(
         "grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2",
+        roomy && "lg:py-7",
         COLUMNS[Math.min(badges.length, COLUMNS.length) - 1],
         className
       )}
@@ -35,12 +40,24 @@ export function HeroTrust({
           key={badge.title}
           className="flex items-start gap-3 last:odd:col-span-2 lg:border-l lg:border-rule lg:px-6 lg:first:border-l-0 lg:last:odd:col-span-1"
         >
-          <TrustIcon icon={badge.icon} className="size-7 shrink-0 text-signal" />
+          <TrustIcon
+            icon={badge.icon}
+            className={cn("size-7 shrink-0 text-signal", roomy && "lg:size-10")}
+          />
           <span className="flex min-w-0 flex-col gap-0.5 leading-snug">
-            <span className="text-sm font-extrabold tracking-[-0.01em] text-balance">
+            <span
+              className={cn(
+                "text-sm font-extrabold tracking-[-0.01em] text-balance",
+                roomy && "lg:text-base"
+              )}
+            >
               {badge.title}
             </span>
-            {badge.text && <span className="text-xs text-balance text-text-2">{badge.text}</span>}
+            {badge.text && (
+              <span className={cn("text-xs text-balance text-text-2", roomy && "lg:text-sm")}>
+                {badge.text}
+              </span>
+            )}
           </span>
         </li>
       ))}

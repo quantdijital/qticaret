@@ -8,12 +8,17 @@
 
 /**
  * The page's ground over the photograph from the words' side, from 1024 px:
- * a soft see-through edge, the solid ground the words stand on, a rise at
- * the far corner and a low wave along the foot into the page. Stretched to
- * the opening (`preserveAspectRatio="none"`), so the shapes keep their
- * place on any width.
+ * a haze that holds the words (nearly the ground under them, the picture
+ * coming through past them), a lighter haze under the header, a soft
+ * swirl rising from the start corner, a rise at the far edge and a low
+ * wave along the foot into the page. Stretched to the opening
+ * (`preserveAspectRatio="none"`), so the shapes keep their place on any
+ * width; the gradients' colour is the ground's (`hero-full.css`), `id`
+ * keeps their names the opening's own.
  */
-export function HeroWash() {
+export function HeroWash({ id }: { id: string }) {
+  const across = `${id}-wash-x`
+  const down = `${id}-wash-y`
   return (
     <svg
       aria-hidden="true"
@@ -22,20 +27,38 @@ export function HeroWash() {
       preserveAspectRatio="none"
       className="gf-cover-wash pointer-events-none absolute inset-0 hidden h-full w-full lg:block"
     >
+      <defs>
+        <linearGradient id={across} className="gf-wash-haze" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopOpacity="0.95" />
+          <stop offset="0.38" stopOpacity="0.92" />
+          <stop offset="0.46" stopOpacity="0.8" />
+          <stop offset="0.54" stopOpacity="0.4" />
+          <stop offset="0.64" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id={down} className="gf-wash-haze" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopOpacity="0.6" />
+          <stop offset="1" stopOpacity="0" />
+        </linearGradient>
+        {/* The haze thins under the search box: the picture's foot comes through */}
+        <linearGradient id={`${id}-wash-fade`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0.56" stopColor="#fff" />
+          <stop offset="0.82" stopColor="#fff" stopOpacity="0.3" />
+        </linearGradient>
+        <mask id={`${id}-wash-m`}>
+          <rect width="1440" height="800" fill={`url(#${id}-wash-fade)`} />
+        </mask>
+      </defs>
+      <rect width="1440" height="800" fill={`url(#${across})`} mask={`url(#${id}-wash-m)`} />
+      <rect width="1440" height="170" fill={`url(#${down})`} />
       <path
         className="fill-paper"
-        opacity="0.55"
-        d="M0 0h760c40 70 30 150-10 220-38 68-22 140 16 205 40 70 18 150-60 205-80 58-200 80-310 120C290 790 140 800 0 800Z"
+        opacity="0.7"
+        d="M0 430c70-20 150 6 196 70 44 62 40 140 96 200 34 36 80 66 130 100H0Z"
       />
       <path
         className="fill-paper"
-        opacity="0.96"
-        d="M0 0h680c34 60 26 130-8 192-34 62-24 128 8 188 34 64 14 136-56 182-74 50-190 66-292 100C230 690 110 720 0 760Z"
-      />
-      <path
-        className="fill-paper"
-        opacity="0.9"
-        d="M1440 430c-60 34-96 110-70 186 18 54-20 118-96 184h166Z"
+        opacity="0.75"
+        d="M1440 400c-64 30-104 104-80 180 20 60-14 130-92 220h172Z"
       />
       <path
         className="fill-paper"
@@ -68,8 +91,10 @@ export function HeroSwash() {
 }
 
 /**
- * A sprig of leaves at the opening's start edge, from 1024 px: a curved
- * stem and five leaves in a light tint of the shop's colour.
+ * A sprig of leaves by the words' top corner, from 1280 px (where the
+ * page's side margin holds it): a curved stem in the margin and five
+ * leaves rising above the first line, none over the words, in a light
+ * tint of the shop's colour.
  */
 export function HeroLeaves() {
   return (
@@ -77,7 +102,7 @@ export function HeroLeaves() {
       aria-hidden="true"
       focusable="false"
       viewBox="0 0 80 120"
-      className="gf-cover-leaves pointer-events-none absolute top-[14%] left-3 hidden h-28 w-20 lg:block xl:left-6"
+      className="gf-cover-leaves pointer-events-none absolute -top-20 -left-9 hidden h-24 w-16 xl:block"
     >
       <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
         <path d="M14 116C24 90 30 62 52 8" />

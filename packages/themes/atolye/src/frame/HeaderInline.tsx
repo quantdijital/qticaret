@@ -23,7 +23,8 @@ const TOOL = "gf-icon-btn gf-tool"
  * aisle, each category with children opening its dropdown, the page's own
  * link marked in the accent colour) and round tools at the end: the
  * search as a magnifier (`SearchToggle`), favourites, the cart and the
- * account. No second row and no top strip: the shop's top links are in
+ * account, in a 96 px row with a logo a step taller. No second row and no
+ * top strip of links or phone: the shop's top links and phone are in
  * the menu sheet. A phone, as every header: its 56 px row (the menu, the
  * wordmark, favourites, the cart), the search dropping from the bottom
  * bar's "Ara" (`SearchDrop`). Sticky unless the shop says not; it folds
@@ -58,7 +59,7 @@ export function HeaderInline({
     >
       <Container
         data-gf-head-row=""
-        className="gf-head-row flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-lg)"
+        className="gf-head-row flex h-14 items-center gap-1 lg:h-24 lg:gap-(--space-lg)"
       >
         <MenuSheet
           categories={shop.categories}
@@ -74,7 +75,7 @@ export function HeaderInline({
             ...menu,
           }}
         />
-        <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
+        <Wordmark name={shop.name} logo={shop.logo} large className="mr-auto lg:mr-0" />
         <div className="hidden min-w-0 flex-1 justify-center lg:flex">
           {shop.categories.length > 0 && (
             <Aisle

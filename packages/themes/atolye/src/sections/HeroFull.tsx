@@ -82,6 +82,7 @@ export function HeroFull({
   // The words on the page's ground, in its inks: beside the photograph or on its wash
   const inked = beside || blend
   const accentTone = settings.button_tone === "accent"
+  const leaves = settings.ornament === "leaves"
   const centred = settings.align === "center"
   const sizes = SIZES[side]
   const Heading = first ? "h1" : "h2"
@@ -104,7 +105,6 @@ export function HeroFull({
     >
       {first && image && <Preload image={image} sizes={sizes} />}
       <div className="gf-cover-stage relative isolate flex flex-col justify-center">
-        {settings.ornament === "leaves" && <HeroLeaves />}
         <div
           {...fieldMark(on, "image")}
           className={cn(
@@ -128,17 +128,19 @@ export function HeroFull({
               className="absolute inset-0 h-full w-full object-cover"
             />
           )}
-          {blend && <HeroWash />}
+          {blend && <HeroWash id={id} />}
         </div>
-        <Container className="gf-cover-body flex flex-col gap-8">
+        <Container className={cn("gf-cover-body flex flex-col gap-8", blend && "lg:gap-12")}>
           <div
             className={cn(
               "flex flex-col gap-4 lg:gap-5",
+              leaves && "relative",
               inked ? "lg:max-w-[42%]" : "gf-stage max-w-3xl bg-transparent",
               centred && "items-center text-center",
               centred && !beside && "mx-auto"
             )}
           >
+            {leaves && <HeroLeaves />}
             {hero.eyebrow && (
               <p
                 {...fieldMark(on, "eyebrow")}
@@ -228,7 +230,8 @@ export function HeroFull({
             <HeroTrust
               badges={trust}
               label={t("footer.trust")}
-              className={blend && !(search && overlap) ? "mx-auto lg:w-[84%]" : undefined}
+              className={blend && !(search && overlap) ? "mx-auto lg:w-[76%]" : undefined}
+              roomy={blend}
             />
           )}
         </Container>
