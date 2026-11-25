@@ -2,28 +2,41 @@
 <div data-qs="rotakartlari">
   <section aria-labelledby="bolum-rotakartlari" class="gf-section">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
-      <div
-        class="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
-      >
-        <h2 id="bolum-rotakartlari">
-          Popüler rotalar
-        </h2>
-        <p class="text-text-2">
-          En çok seçilen beş bölge. Her birinde farklı süre ve zorlukta turlar var.
-        </p>
+      <div class="flex items-end justify-between gap-4">
+        <div
+          class="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
+        >
+          <p class="text-xs font-semibold tracking-[0.18em] text-text-2 uppercase">
+            Popüler rotalar
+          </p>
+          <h2 id="bolum-rotakartlari">
+            İlham veren rotalar
+          </h2>
+        </div>
+        <a
+          href="/magaza"
+          class="gf-link inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold"
+        >
+          Tüm rotalar
+          <svg
+            width="24"
+            height="24"
+            stroke-width="2"
+            class="lucide lucide-arrow-right size-4 shrink-0"
+            aria-hidden="true"
+          />
+        </a>
       </div>
       <ul
         role="list"
         class="gap-(--gap-columns) gf-rail -mx-(--gutter) flex scroll-px-(--gutter) overflow-x-auto px-(--gutter) lg:mx-0 lg:overflow-visible lg:px-0 lg:grid lg:grid-cols-5"
       >
-        <li
-          class="aspect-[4/5] w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:aspect-[4/3] lg:w-auto"
-        >
-          <figure class="relative h-full overflow-hidden rounded-media bg-media">
-            <a
-              href="/magaza"
-              class="absolute inset-0 block rounded-media focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
-            >
+        <li class="w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:w-auto">
+          <a
+            href="/magaza"
+            class="flex h-full flex-col rounded-media bg-paper p-2 shadow-float text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            <span class="relative block overflow-hidden rounded-inner bg-media aspect-[4/3]">
               <picture>
                 <img
                   src="https://cdn.example.com/preset/travel/patika/images/rota-kapadokya.webp"
@@ -34,22 +47,37 @@
                   class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
-            </a>
-            <figcaption
-              class="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-inner bg-paper px-2.5 py-1 text-sm font-semibold text-text"
-            >
-              Kapadokya
-            </figcaption>
-          </figure>
+            </span>
+            <span class="flex items-center justify-between gap-3 px-1.5 pt-3 pb-1">
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="truncate font-semibold text-text">
+                  Kapadokya
+                </span>
+                <span class="truncate text-xs text-text-2">
+                  Vadiler • Balon
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-arrow-right size-4"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
+          </a>
         </li>
-        <li
-          class="aspect-[4/5] w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:aspect-[4/3] lg:w-auto"
-        >
-          <figure class="relative h-full overflow-hidden rounded-media bg-media">
-            <a
-              href="/magaza"
-              class="absolute inset-0 block rounded-media focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
-            >
+        <li class="w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:w-auto">
+          <a
+            href="/magaza"
+            class="flex h-full flex-col rounded-media bg-paper p-2 shadow-float text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            <span class="relative block overflow-hidden rounded-inner bg-media aspect-[4/3]">
               <picture>
                 <img
                   src="https://cdn.example.com/preset/travel/patika/images/rota-oludeniz.webp"
@@ -60,22 +88,37 @@
                   class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
-            </a>
-            <figcaption
-              class="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-inner bg-paper px-2.5 py-1 text-sm font-semibold text-text"
-            >
-              Ege ve Akdeniz
-            </figcaption>
-          </figure>
+            </span>
+            <span class="flex items-center justify-between gap-3 px-1.5 pt-3 pb-1">
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="truncate font-semibold text-text">
+                  Ege ve Akdeniz
+                </span>
+                <span class="truncate text-xs text-text-2">
+                  Koylar • Deniz
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-arrow-right size-4"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
+          </a>
         </li>
-        <li
-          class="aspect-[4/5] w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:aspect-[4/3] lg:w-auto"
-        >
-          <figure class="relative h-full overflow-hidden rounded-media bg-media">
-            <a
-              href="/magaza"
-              class="absolute inset-0 block rounded-media focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
-            >
+        <li class="w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:w-auto">
+          <a
+            href="/magaza"
+            class="flex h-full flex-col rounded-media bg-paper p-2 shadow-float text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            <span class="relative block overflow-hidden rounded-inner bg-media aspect-[4/3]">
               <picture>
                 <img
                   src="https://cdn.example.com/preset/travel/patika/images/rota-karadeniz.webp"
@@ -86,22 +129,37 @@
                   class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
-            </a>
-            <figcaption
-              class="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-inner bg-paper px-2.5 py-1 text-sm font-semibold text-text"
-            >
-              Karadeniz
-            </figcaption>
-          </figure>
+            </span>
+            <span class="flex items-center justify-between gap-3 px-1.5 pt-3 pb-1">
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="truncate font-semibold text-text">
+                  Karadeniz
+                </span>
+                <span class="truncate text-xs text-text-2">
+                  Yaylalar • Doğa
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-arrow-right size-4"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
+          </a>
         </li>
-        <li
-          class="aspect-[4/5] w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:aspect-[4/3] lg:w-auto"
-        >
-          <figure class="relative h-full overflow-hidden rounded-media bg-media">
-            <a
-              href="/magaza"
-              class="absolute inset-0 block rounded-media focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
-            >
+        <li class="w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:w-auto">
+          <a
+            href="/magaza"
+            class="flex h-full flex-col rounded-media bg-paper p-2 shadow-float text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            <span class="relative block overflow-hidden rounded-inner bg-media aspect-[4/3]">
               <picture>
                 <img
                   src="https://cdn.example.com/preset/travel/patika/images/rota-pamukkale.webp"
@@ -112,22 +170,37 @@
                   class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
-            </a>
-            <figcaption
-              class="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-inner bg-paper px-2.5 py-1 text-sm font-semibold text-text"
-            >
-              Pamukkale
-            </figcaption>
-          </figure>
+            </span>
+            <span class="flex items-center justify-between gap-3 px-1.5 pt-3 pb-1">
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="truncate font-semibold text-text">
+                  Pamukkale
+                </span>
+                <span class="truncate text-xs text-text-2">
+                  Travertenler • Tarih
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-arrow-right size-4"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
+          </a>
         </li>
-        <li
-          class="aspect-[4/5] w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:aspect-[4/3] lg:w-auto"
-        >
-          <figure class="relative h-full overflow-hidden rounded-media bg-media">
-            <a
-              href="/magaza"
-              class="absolute inset-0 block rounded-media focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
-            >
+        <li class="w-[78%] shrink-0 sm:w-[44%] lg:col-span-1 lg:w-auto">
+          <a
+            href="/magaza"
+            class="flex h-full flex-col rounded-media bg-paper p-2 shadow-float text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text"
+          >
+            <span class="relative block overflow-hidden rounded-inner bg-media aspect-[4/3]">
               <picture>
                 <img
                   src="https://cdn.example.com/preset/travel/patika/images/rota-agri.webp"
@@ -138,13 +211,30 @@
                   class="absolute inset-0 h-full w-full object-cover"
                 />
               </picture>
-            </a>
-            <figcaption
-              class="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] rounded-inner bg-paper px-2.5 py-1 text-sm font-semibold text-text"
-            >
-              Doğu Anadolu
-            </figcaption>
-          </figure>
+            </span>
+            <span class="flex items-center justify-between gap-3 px-1.5 pt-3 pb-1">
+              <span class="flex min-w-0 flex-col gap-0.5">
+                <span class="truncate font-semibold text-text">
+                  Doğu Anadolu
+                </span>
+                <span class="truncate text-xs text-text-2">
+                  Dağlar • Macera
+                </span>
+              </span>
+              <span
+                aria-hidden="true"
+                class="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-arrow-right size-4"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
+          </a>
         </li>
       </ul>
     </div>
