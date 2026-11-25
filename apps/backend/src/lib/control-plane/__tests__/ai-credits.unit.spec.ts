@@ -89,12 +89,26 @@ describe("the platform's credits status", () => {
     expect(received).toHaveLength(0)
   })
 
+  it("drops a field a newer control plane adds and reads the rest (P5b)", async () => {
+    const newer = {
+      ...AVAILABLE,
+      model: "deepseek-flash",
+      balance: {
+        ...AVAILABLE.balance,
+        plan: { ...AVAILABLE.balance.plan, carried_over: 12 },
+      },
+      daily: { ...AVAILABLE.daily, resets_at: "2026-11-26T00:00:00Z" },
+    }
+    const { fetch } = controlPlane(() => json(newer))
+    await expect(aiCreditsStatus({ endpoint: ENDPOINT, fetch, now })).resolves.toEqual(AVAILABLE)
+  })
+
   it.each([
     ["unreachable", () => Promise.reject(new TypeError("fetch failed"))],
     ["refused", () => json({ error: "signature.invalid" }, 401)],
     ["failing", () => json({}, 500)],
     ["not JSON", () => new Response("<html>")],
-    ["of another shape", () => json({ ...AVAILABLE, model: "deepseek-flash" })],
+    ["of another shape", () => json({ ...AVAILABLE, daily: "none" })],
     ["a balance below zero", () => json({ ...AVAILABLE, daily: { cap: 300, remaining: -1 } })],
     ["too large", () => new Response(" ".repeat(17 * 1024) + JSON.stringify(AVAILABLE))],
   ])("%s: not available, kept a shorter while", async (_case, answer) => {

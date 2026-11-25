@@ -15,7 +15,9 @@ import {
   aiCallPath,
   aiCallResponseHeadersSchema,
   aiCreditOrderRequestSchema,
+  aiCreditOrderResponseReadSchema,
   aiCreditOrderResponseSchema,
+  aiCreditsStatusReadSchema,
   aiCreditsStatusSchema,
   aiGatewayRefusalSchema,
   isAiCreditTask,
@@ -100,6 +102,28 @@ describe("the gateway's shapes", () => {
     ["a service id that is not one", { ...STATUS, services: { text: "https://x" } }],
   ])("refuses a status with %s", (_case, status) => {
     expect(aiCreditsStatusSchema.safeParse(status).success).toBe(false)
+  })
+
+  it("is read open by a shop: an unknown field is dropped, a wrong one still refused (P5b)", () => {
+    const newer = {
+      ...STATUS,
+      wallet_id: "x",
+      balance: { ...STATUS.balance, plan: { ...STATUS.balance.plan, carried_over: 12 } },
+      packs: [{ ...PACK, badge: "popular" }],
+    }
+    expect(aiCreditsStatusSchema.safeParse(newer).success).toBe(false)
+    expect(aiCreditsStatusReadSchema.parse(newer)).toEqual({ ...STATUS, packs: [PACK] })
+    expect(aiCreditsStatusReadSchema.parse({ available: false, why: "flag" })).toEqual({
+      available: false,
+    })
+    for (const wrong of [
+      { ...STATUS, daily: { cap: 300, remaining: -1 } },
+      { ...STATUS, packs: [{ ...PACK, currency: "USD" }] },
+      { ...STATUS, services: { text: "https://x" } },
+      { ...STATUS, balance: undefined },
+    ]) {
+      expect(aiCreditsStatusReadSchema.safeParse(wrong).success).toBe(false)
+    }
   })
 
   it("reads the month's whole grant when it comes and goes on without it (P5b)", () => {
@@ -219,6 +243,10 @@ describe("the gateway's shapes", () => {
       expect(aiCreditOrderRequestSchema.safeParse(body).success).toBe(false)
     }
     expect(aiCreditOrderResponseSchema.parse({ order: ORDER })).toEqual({ order: ORDER })
+    // A shop reads it open: what it does not know is dropped (P5b)
+    const newer = { order: { ...ORDER, paid_by: "x" }, receipt: "y" }
+    expect(aiCreditOrderResponseSchema.safeParse(newer).success).toBe(false)
+    expect(aiCreditOrderResponseReadSchema.parse(newer)).toEqual({ order: ORDER })
     expect(
       aiCreditOrderResponseSchema.safeParse({ order: { ...ORDER, status: "refunded" } }).success
     ).toBe(false)
