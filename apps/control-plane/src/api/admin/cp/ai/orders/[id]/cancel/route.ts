@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { cancelOrderAsStaff } from "../../../../../../../lib/ai-credits/grant"
+import { answeringAiConflicts } from "../../../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../../../http/audit"
 import { actorOf, paramOf } from "../../../../tenants/params"
 import { orderView } from "../../../views"
@@ -10,11 +11,16 @@ import { orderView } from "../../../views"
  * `cp.ai_credit_order_closed`. The audit row names the shop.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const order = await cancelOrderAsStaff(req.scope, {
-    orderId: paramOf(req, "id"),
-    actor: actorOf(req),
-    now: new Date(),
-  })
+  const order = await answeringAiConflicts(res, () =>
+    cancelOrderAsStaff(req.scope, {
+      orderId: paramOf(req, "id"),
+      actor: actorOf(req),
+      now: new Date(),
+    })
+  )
+  if (order === undefined) {
+    return
+  }
   noteAuditChanges(req, {
     order: { tenant_id: order.tenant_id, to: "cancelled", credits: order.credits },
   })

@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { markOrderPaid } from "../../../../../../../lib/ai-credits/grant"
+import { answeringAiConflicts } from "../../../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../../../http/audit"
 import { actorOf, paramOf } from "../../../../tenants/params"
 import type { PostAiOrderPaidType } from "../../../validators"
@@ -15,13 +16,18 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostAiOrderPaidType>,
   res: MedusaResponse
 ): Promise<void> {
-  const done = await markOrderPaid(req.scope, {
-    orderId: paramOf(req, "id"),
-    actor: actorOf(req),
-    method: req.validatedBody.method,
-    reference: req.validatedBody.reference ?? null,
-    now: new Date(),
-  })
+  const done = await answeringAiConflicts(res, () =>
+    markOrderPaid(req.scope, {
+      orderId: paramOf(req, "id"),
+      actor: actorOf(req),
+      method: req.validatedBody.method,
+      reference: req.validatedBody.reference ?? null,
+      now: new Date(),
+    })
+  )
+  if (done === undefined) {
+    return
+  }
   noteAuditChanges(req, {
     order: {
       tenant_id: done.order.tenant_id,

@@ -8,6 +8,8 @@ import { auditRows, client, makeTenant, proved } from "../helpers/tenants"
 
 jest.setTimeout(240 * 1000)
 
+const CLOSED = { status: 409, data: { message: "cp.ai_credit_order_closed" } }
+
 const PACK = {
   id: "pack_test",
   name: "Başlangıç",
@@ -168,7 +170,7 @@ medusaIntegrationTestRunner({
         (await entriesOf(getContainer(), shop.id)).filter((each) => each.kind === "grant_purchase")
       ).toEqual([expect.objectContaining({ amount: 500, grant_ref: `order:${order.id}` })])
       expect((await walletOf(getContainer(), shop.id))?.purchased_balance).toBe(500)
-      expect((await post(`${O}/cancel`, {})).status).toBe(409)
+      expect(await post(`${O}/cancel`, {})).toMatchObject(CLOSED)
 
       const next = await requestOrder(getContainer(), {
         tenantId: shop.id,
@@ -178,8 +180,8 @@ medusaIntegrationTestRunner({
       })
       const N = `/admin/cp/ai/orders/${next.id}`
       expect((await post(`${N}/cancel`, {})).data).toMatchObject({ order: { status: "cancelled" } })
-      expect((await post(`${N}/cancel`, {})).status).toBe(409)
-      expect((await post(`${N}/paid`, { method: "bank_transfer" })).status).toBe(409)
+      expect(await post(`${N}/cancel`, {})).toMatchObject(CLOSED)
+      expect(await post(`${N}/paid`, { method: "bank_transfer" })).toMatchObject(CLOSED)
       expect(
         (
           await post(`/admin/cp/ai/orders/aiord_${randomUUID().slice(0, 8)}/paid`, {

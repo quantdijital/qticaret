@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { adjust } from "../../../../../../../lib/ai-credits/grant"
+import { answeringAiConflicts } from "../../../../../../http/ai-conflicts"
 import { noteAuditChanges } from "../../../../../../http/audit"
 import { actorOf, tenantParam } from "../../../../tenants/params"
 import type { PostAiAdjustType } from "../../../../ai/validators"
@@ -18,15 +19,20 @@ export async function POST(
 ): Promise<void> {
   const tenant = await tenantParam(req)
   const { amount, bucket, note, key } = req.validatedBody
-  const done = await adjust(req.scope, {
-    tenantId: tenant.id,
-    key,
-    amount,
-    bucket,
-    note,
-    actor: actorOf(req),
-    now: new Date(),
-  })
+  const done = await answeringAiConflicts(res, () =>
+    adjust(req.scope, {
+      tenantId: tenant.id,
+      key,
+      amount,
+      bucket,
+      note,
+      actor: actorOf(req),
+      now: new Date(),
+    })
+  )
+  if (done === undefined) {
+    return
+  }
   noteAuditChanges(req, { adjust: { bucket, amount, applied: done.applied } })
   res.json({ applied: done.applied, entry_id: done.entryId, balance: done.balance })
 }

@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { aiCreditOrderRequestSchema } from "@qticaret/types/control-plane"
 import { requestTopUp } from "../../../../../lib/ai-gateway/tenant"
+import { answeringAiConflicts } from "../../../../http/ai-conflicts"
 import { tenantCallerOf } from "../../../../http/tenant-api"
 
 /**
@@ -22,11 +23,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     res.status(400).json({ type: "invalid_data", message: "errors.invalid_request" })
     return
   }
-  const order = await requestTopUp(req.scope, {
-    tenantId: caller.tenantId,
-    packId: body.data.pack_id,
-    requestedBy: body.data.requested_by,
-    now: new Date(),
-  })
+  const order = await answeringAiConflicts(res, () =>
+    requestTopUp(req.scope, {
+      tenantId: caller.tenantId,
+      packId: body.data.pack_id,
+      requestedBy: body.data.requested_by,
+      now: new Date(),
+    })
+  )
+  if (order === undefined) {
+    return
+  }
   res.status(201).json({ order })
 }
