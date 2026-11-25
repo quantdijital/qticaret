@@ -99,9 +99,21 @@ export function useRequestCreditTopUp() {
   })
 }
 
-/** Money in minor units as the shop's locale writes it (`25000`, TRY → "₺250,00"); no sum. */
-export function formatMinorMoney(amount: number, currency: string): string {
-  const format = new Intl.NumberFormat("tr-TR", {
+/** The panel's language as a number format's locale: English as `en-US`, anything else Turkish. */
+const moneyLocale = (language: string | undefined): string =>
+  language?.startsWith("en") ? "en-US" : "tr-TR"
+
+/**
+ * Money in minor units as the panel's language writes it (`25000`, TRY →
+ * "₺250,00" in Turkish, "TRY 250.00" in English); the currency is the
+ * server's. No sum.
+ */
+export function formatMinorMoney(
+  amount: number,
+  currency: string,
+  language: string | undefined = i18next.language
+): string {
+  const format = new Intl.NumberFormat(moneyLocale(language), {
     style: "currency",
     currency: currency.toUpperCase(),
   })
