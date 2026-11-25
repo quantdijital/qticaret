@@ -113,6 +113,8 @@ export interface CallOptions {
   extra?: Record<string, string>
   /** Signed as this shop's id but with `shop`'s key (a forgery). */
   tenantId?: string
+  /** The shop hangs up after this long. */
+  timeoutMs?: number
 }
 
 export interface CallReply {
@@ -138,6 +140,7 @@ export function callAs(
   })
   return http.post(CALLS, bytes, {
     ...anyStatus,
+    ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
     responseType: "arraybuffer",
     // The bytes as they are: axios must not turn them into anything else
     transformRequest: [(data: unknown) => data],

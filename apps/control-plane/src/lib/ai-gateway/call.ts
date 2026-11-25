@@ -103,7 +103,7 @@ async function askProvider(
       key,
       body: prepared.body,
       contentType: prepared.contentType,
-      timeoutMs: AI_PROVIDER_TIMEOUT_MS[capability],
+      timeoutMs: target.timeoutMs ?? AI_PROVIDER_TIMEOUT_MS[capability],
       maxAnswerBytes: AI_PROVIDER_MAX_ANSWER_BYTES[capability],
       ...(fetch === undefined ? {} : { fetch }),
     })

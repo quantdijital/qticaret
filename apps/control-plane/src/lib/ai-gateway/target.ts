@@ -30,9 +30,18 @@ export interface GatewayTarget {
   price: AiUnitPrice | null
   /** A 200 body code meaning the service did no work (MiniMax). */
   notTakenBodyCodes: readonly number[]
+  /** The fake service's own time, in tests only. */
+  timeoutMs?: number
 }
 
 export const FAKE_URL_ENV = "AI_GATEWAY_FAKE_URL"
+/** The fake call's time in milliseconds (tests of a timeout); the capability's otherwise. */
+export const FAKE_TIMEOUT_ENV = "AI_GATEWAY_FAKE_TIMEOUT_MS"
+
+const fakeTimeout = (): { timeoutMs?: number } => {
+  const value = Number(process.env[FAKE_TIMEOUT_ENV] ?? "")
+  return Number.isSafeInteger(value) && value > 0 ? { timeoutMs: value } : {}
+}
 
 /** The fake service's endpoints, as Photoroom's for a picture (a form) and OpenAI's for text. */
 function fakeTarget(capability: AiCreditCapability, task: AiCreditTask): GatewayTarget | null {
@@ -64,6 +73,7 @@ function fakeTarget(capability: AiCreditCapability, task: AiCreditTask): Gateway
       ? { currency: "USD", perImage: 1_000 }
       : { currency: "USD", inputPerMillionTokens: 1_000_000, outputPerMillionTokens: 2_000_000 },
     notTakenBodyCodes: [],
+    ...fakeTimeout(),
   }
 }
 
