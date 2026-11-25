@@ -30,18 +30,40 @@ export async function tablesHolding(
   return hits
 }
 
-/** What the process writes to stdout and stderr while `run` runs (the logs). */
+const LOGGER_METHODS = ["info", "warn", "error", "debug", "log"] as const
+
+/**
+ * What the process writes to stdout and stderr while `run` runs, and,
+ * given the container, every line its logger is handed: where the logger
+ * writes (a console jest silences in CI, a stream) does not decide whether
+ * a test sees the line, so "logged" and "not logged" are both checked.
+ */
 export async function captureOutput<T>(
-  run: () => Promise<T>
+  run: () => Promise<T>,
+  container?: MedusaContainer
 ): Promise<{ result: T; output: string }> {
   const chunks: string[] = []
-  const spies = [process.stdout, process.stderr].map((stream) => {
+  const spies: { mockRestore: () => void }[] = [process.stdout, process.stderr].map((stream) => {
     const write = stream.write.bind(stream)
     return jest.spyOn(stream, "write").mockImplementation((chunk: unknown, ...rest: unknown[]) => {
       chunks.push(String(chunk))
       return (write as (...args: unknown[]) => boolean)(chunk, ...rest)
     })
   })
+  const logger = container?.resolve<Record<string, unknown>>(ContainerRegistrationKeys.LOGGER)
+  for (const method of LOGGER_METHODS) {
+    const original = logger?.[method]
+    if (logger && typeof original === "function") {
+      spies.push(
+        jest.spyOn(logger, method as never).mockImplementation(((...args: unknown[]) => {
+          chunks.push(
+            `${args.map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg))).join(" ")}\n`
+          )
+          return (original as (...args: unknown[]) => unknown).apply(logger, args)
+        }) as never)
+      )
+    }
+  }
   try {
     const result = await run()
     return { result, output: chunks.join("") }

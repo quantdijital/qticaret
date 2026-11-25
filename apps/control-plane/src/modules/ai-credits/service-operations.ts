@@ -38,6 +38,7 @@ export type SpendOutcome =
 
 interface OperationRow {
   task: string
+  capability: string
   status: "open" | "charged" | "released"
   calls: number
   created_at: Date
@@ -80,9 +81,10 @@ export class AiCreditOperations extends AiCreditGrants {
       manager,
       `UPDATE ai_credit_operation SET calls = calls + 1, updated_at = now()
         WHERE tenant_id = ? AND operation_id = ? AND deleted_at IS NULL
-          AND task = ? AND status IN ('open', 'charged') AND calls < ? AND created_at > ?
+          AND task = ? AND capability = ? AND status IN ('open', 'charged') AND calls < ?
+          AND created_at > ?
         RETURNING calls`,
-      [tenantId, operationId, task, aiCallCap(task), youngerThan]
+      [tenantId, operationId, task, capability, aiCallCap(task), youngerThan]
     )
     if (again) {
       return {
@@ -93,12 +95,13 @@ export class AiCreditOperations extends AiCreditGrants {
     }
     const [known] = await rowsOf<OperationRow>(
       manager,
-      `SELECT task, status, calls, created_at FROM ai_credit_operation
+      `SELECT task, capability, status, calls, created_at FROM ai_credit_operation
         WHERE tenant_id = ? AND operation_id = ? AND deleted_at IS NULL`,
       [tenantId, operationId]
     )
     if (known) {
-      if (known.task !== task) {
+      // The task and the capability are bound on the first call (P3b): a later one keeps both
+      if (known.task !== task || known.capability !== capability) {
         return { kind: "task_mismatch" }
       }
       // A released operation gave its credits back: a later call is a new operation

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   AI_CALLS_PER_OPERATION,
-  AI_CALL_HEADERS,
+  AI_CALL_PARAMS,
   AI_CALL_RESPONSE_HEADERS,
   AI_CREDIT_TASKS,
   AI_GATEWAY_REFUSALS,
@@ -11,7 +11,8 @@ import {
   AI_TASK_CAPABILITIES,
   AI_TASK_CREDITS,
   aiCallCap,
-  aiCallHeadersSchema,
+  aiCallParamsSchema,
+  aiCallPath,
   aiCallResponseHeadersSchema,
   aiCreditOrderRequestSchema,
   aiCreditOrderResponseSchema,
@@ -106,23 +107,36 @@ describe("the gateway's shapes", () => {
     expect(aiCreditsStatusSchema.safeParse(newer).success).toBe(true)
   })
 
-  it("holds a call's headers to their rules", () => {
-    const headers = {
-      [AI_CALL_HEADERS.task]: "product_description",
-      [AI_CALL_HEADERS.capability]: "text",
-      [AI_CALL_HEADERS.service]: "deepseek",
-      [AI_CALL_HEADERS.operation]: "3f0e8a52-6b1d-4c7e-9a43-2d5b8f1c0e97",
+  it("holds a call's query to its rules", () => {
+    const params = {
+      [AI_CALL_PARAMS.task]: "product_description",
+      [AI_CALL_PARAMS.capability]: "text",
+      [AI_CALL_PARAMS.service]: "deepseek",
+      [AI_CALL_PARAMS.operation]: "3f0e8a52-6b1d-4c7e-9a43-2d5b8f1c0e97",
     }
-    expect(aiCallHeadersSchema.parse(headers)).toEqual(headers)
+    expect(aiCallParamsSchema.parse(params)).toEqual(params)
     for (const [name, value] of [
-      [AI_CALL_HEADERS.operation, "op-1"],
-      [AI_CALL_HEADERS.task, "Product Description"],
-      [AI_CALL_HEADERS.service, "../deepseek"],
+      [AI_CALL_PARAMS.operation, "op-1"],
+      [AI_CALL_PARAMS.task, "Product Description"],
+      [AI_CALL_PARAMS.service, "../deepseek"],
+      // A repeated parameter, read as a list
+      [AI_CALL_PARAMS.task, ["seo_title", "post_draft"]],
     ] as const) {
-      expect(aiCallHeadersSchema.safeParse({ ...headers, [name]: value }).success).toBe(false)
+      expect(aiCallParamsSchema.safeParse({ ...params, [name]: value }).success).toBe(false)
     }
-    expect(aiCallHeadersSchema.safeParse({ ...headers, "x-qt-ai-model": "big" }).success).toBe(
-      false
+    expect(aiCallParamsSchema.safeParse({ ...params, model: "big" }).success).toBe(false)
+    expect(aiCallParamsSchema.safeParse({ ...params, service: undefined }).success).toBe(false)
+  })
+
+  it("writes a call's target with its four values in a fixed order", () => {
+    const path = aiCallPath({
+      task: "seo_title",
+      capability: "text",
+      service: "deepseek",
+      operation: "3f0e8a52-6b1d-4c7e-9a43-2d5b8f1c0e97",
+    })
+    expect(path).toBe(
+      "/tenant-api/v1/ai/calls?task=seo_title&capability=text&service=deepseek&operation=3f0e8a52-6b1d-4c7e-9a43-2d5b8f1c0e97"
     )
   })
 
@@ -147,13 +161,21 @@ describe("the gateway's shapes", () => {
 
   it("gives each refusal its own envelope and an error status", () => {
     expect([...AI_GATEWAY_REFUSAL_CODES].sort()).toEqual([
+      "body_refused",
+      "body_too_large",
+      "busy",
       "call_cap",
       "credits_exhausted",
       "daily_cap",
       "not_offered",
+      "provider_timeout",
+      "provider_unreachable",
       "task_mismatch",
       "unavailable",
     ])
+    // A provider's 4xx and the gateway's own are told apart by the header, not the status
+    expect(AI_GATEWAY_REFUSALS.body_too_large).toBe(413)
+    expect(AI_GATEWAY_REFUSALS.credits_exhausted).toBe(402)
     for (const code of AI_GATEWAY_REFUSAL_CODES) {
       expect(AI_GATEWAY_REFUSALS[code]).toBeGreaterThanOrEqual(400)
       expect(aiGatewayRefusalSchema.parse({ qt_ai_gateway: { code } })).toEqual({

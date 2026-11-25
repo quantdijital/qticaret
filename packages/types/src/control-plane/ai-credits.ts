@@ -203,21 +203,42 @@ export type AiCreditsStatus = z.infer<typeof aiCreditsStatusSchema>
 /** The status answer is held to this before it is parsed. */
 export const AI_CREDITS_STATUS_MAX_BYTES = 16 * 1024
 
-/** `POST …/ai/calls`' own headers, lowercase as Node holds them; the body is the provider's. */
-export const AI_CALL_HEADERS = {
-  task: "x-qt-ai-task",
-  capability: "x-qt-ai-capability",
-  service: "x-qt-ai-service",
-  operation: "x-qt-ai-operation",
+/**
+ * `POST …/ai/calls`' own values, in its query: the task, the capability,
+ * the service and the operation decide what is charged, so they ride in
+ * the request target the signature covers (never in a header it does
+ * not). The body is the provider's.
+ */
+export const AI_CALL_PARAMS = {
+  task: "task",
+  capability: "capability",
+  service: "service",
+  operation: "operation",
 } as const
 
-export const aiCallHeadersSchema = z.strictObject({
-  [AI_CALL_HEADERS.task]: aiTaskNameSchema,
-  [AI_CALL_HEADERS.capability]: aiCapabilityNameSchema,
-  [AI_CALL_HEADERS.service]: aiServiceIdSchema,
-  [AI_CALL_HEADERS.operation]: aiOperationIdSchema,
+/**
+ * A call's query, each name once: a parameter the contract does not name
+ * is refused, and so is a repeated one (read as a list, it fails the
+ * string's rule).
+ */
+export const aiCallParamsSchema = z.strictObject({
+  [AI_CALL_PARAMS.task]: aiTaskNameSchema,
+  [AI_CALL_PARAMS.capability]: aiCapabilityNameSchema,
+  [AI_CALL_PARAMS.service]: aiServiceIdSchema,
+  [AI_CALL_PARAMS.operation]: aiOperationIdSchema,
 })
-export type AiCallHeaders = z.infer<typeof aiCallHeadersSchema>
+export type AiCallParams = z.infer<typeof aiCallParamsSchema>
+
+/** The call's target as the shop signs and sends it: the path, then the four values in this order. */
+export function aiCallPath(params: AiCallParams): string {
+  const query = new URLSearchParams([
+    [AI_CALL_PARAMS.task, params.task],
+    [AI_CALL_PARAMS.capability, params.capability],
+    [AI_CALL_PARAMS.service, params.service],
+    [AI_CALL_PARAMS.operation, params.operation],
+  ])
+  return `${AI_CREDITS_PATHS.calls}?${query.toString()}`
+}
 
 /**
  * The gateway's headers on a call's answer: the credits this call charged
@@ -246,8 +267,16 @@ export type AiCallResponseHeaders = z.infer<typeof aiCallResponseHeadersSchema>
 /**
  * Why the gateway refused before any provider was asked, and its status:
  * no credits left, the day's cap reached, credits not available (flag,
- * key or routing), a capability the task may not call as, the
- * operation's calls used up, a task not sold on credits.
+ * key or routing; the service named is not the one routed), a capability
+ * the task may not call as, the operation's calls used up (or the
+ * operation closed), a task not sold on credits, a body the task may not
+ * send (a tool outside the assistant, too many pictures, a type the
+ * service does not take, more than the task's input), a body over 6 MB;
+ * and, once charged, a provider that did not answer (no connection, a
+ * reset or too large answer: 502) or not in time (504): no provider status
+ * to pass on, the credit headers say what was kept. `busy`: the shop has
+ * as many calls in flight as it may (or the gateway as it may in all), no
+ * credit taken; tried again once one ends.
  */
 export const AI_GATEWAY_REFUSALS = Object.freeze({
   credits_exhausted: 402,
@@ -256,6 +285,11 @@ export const AI_GATEWAY_REFUSALS = Object.freeze({
   task_mismatch: 422,
   call_cap: 409,
   not_offered: 404,
+  body_refused: 400,
+  body_too_large: 413,
+  provider_unreachable: 502,
+  provider_timeout: 504,
+  busy: 429,
 } as const)
 export type AiGatewayRefusalCode = keyof typeof AI_GATEWAY_REFUSALS
 export const AI_GATEWAY_REFUSAL_CODES = Object.keys(AI_GATEWAY_REFUSALS) as [

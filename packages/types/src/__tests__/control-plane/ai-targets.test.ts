@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   AI_CREDIT_CAPABILITIES,
   AI_FAKE_TARGET,
+  AI_SERVICE_CHECKS,
   AI_SERVICE_TARGETS,
   AI_TARGET_AUTH_HEADERS,
   AI_TARGET_CAPABILITIES,
@@ -60,6 +61,28 @@ describe("AI service targets (adr/0085 §2)", () => {
   it("is frozen", () => {
     expect(Object.isFrozen(AI_SERVICE_TARGETS)).toBe(true)
     expect(Object.isFrozen(AI_FAKE_TARGET)).toBe(true)
+    expect(Object.isFrozen(AI_SERVICE_CHECKS)).toBe(true)
+  })
+
+  it.each(services)("%s: an output budget field on a chat target, a price", (_, service) => {
+    for (const target of Object.values<AiCapabilityTarget>(service.capabilities)) {
+      expect(target.maxTokensField !== undefined).toBe(target.protocol === "openai-chat")
+      for (const endpoint of endpointsOf(target)) {
+        const price = endpoint.price ?? target.price
+        expect(price?.currency).toBe("USD")
+        for (const value of Object.values(price ?? {})) {
+          expect(typeof value === "string" || (Number.isSafeInteger(value) && value > 0)).toBe(true)
+        }
+      }
+    }
+  })
+
+  it.each(services)("%s: a connection check on its own hosts, https, no query", (id, service) => {
+    const check = (AI_SERVICE_CHECKS as Record<string, { url: string }>)[id]
+    const url = new URL(check?.url ?? "http://missing")
+    expect(url.protocol).toBe("https:")
+    expect(url.search + url.hash + url.username + url.port).toBe("")
+    expect(service.hosts).toContain(url.hostname)
   })
 
   it("lists the fake service in test and development only", () => {
