@@ -140,6 +140,9 @@ export const callQuery = (options: CallOptions = {}): string =>
     ["operation", options.operation ?? randomUUID()],
   ]).toString()
 
+// No query, no `?`: the client would drop a lone one from what it sends
+const targetOf = (query: string): string => (query === "" ? CALLS : `${CALLS}?${query}`)
+
 /** What `callAs` sends: the target, the bytes and the headers, signed by `shop`. */
 export function signedCall(
   shop: AiShop,
@@ -152,14 +155,14 @@ export function signedCall(
     ? {}
     : signRequest({
         method: "POST",
-        path: `${CALLS}?${query}`,
+        path: targetOf(query),
         tenantId: options.tenantId ?? shop.id,
         body: bytes,
         signer: shop.signer,
       })
   const sent = options.sentBody
   return {
-    path: `${CALLS}?${options.sentQuery ?? query}`,
+    path: targetOf(options.sentQuery ?? query),
     bytes: sent === undefined ? bytes : Buffer.isBuffer(sent) ? sent : Buffer.from(sent),
     headers: {
       ...signed,
