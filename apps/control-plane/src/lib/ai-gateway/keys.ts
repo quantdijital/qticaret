@@ -112,18 +112,21 @@ export async function deleteProviderKey(
     deleted: false,
     unrouted: await unrouteService(container, id, actor),
   }
+  // The step under way, named in the audit row when it fails (no key held retires nothing)
+  let step: "retire" | "unroute_again" = "retire"
   try {
     done = {
       ...done,
       deleted: await vaultIn(container).retireSecret(PLATFORM_OWNER, aiProviderKeyName(id)),
     }
+    step = "unroute_again"
     const late = await unrouteService(container, id, actor)
     return { ...done, unrouted: [...new Set([...done.unrouted, ...late])] }
   } catch (error) {
     if (!done.deleted && done.unrouted.length === 0) {
       throw error
     }
-    throw new PartlyDoneError(done, done.deleted ? "unroute_again" : "retire", error)
+    throw new PartlyDoneError(done, step, error)
   }
 }
 
