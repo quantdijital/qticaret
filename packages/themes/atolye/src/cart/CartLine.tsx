@@ -118,7 +118,7 @@ export function CartLine({
     <LinePrice
       total={line.total}
       original={line.original}
-      before={t("price.before")}
+      before={t("cart.line_before_promotion")}
       note={line.taxNote}
       large
       className="ml-auto"

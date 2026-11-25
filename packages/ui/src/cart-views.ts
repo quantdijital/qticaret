@@ -15,7 +15,12 @@ export interface CartLineView {
   quantity: number
   /** The line's total, KDV included; without it when `taxNote` says so. */
   total: string
-  /** The line before its discount, only when one applies. */
+  /**
+   * The line before its promotions' discounts, only when one applies
+   * (Medusa's `original_total`; a price list's sale is the line's own
+   * price, never struck here): read as "Promosyon indirimi", never as a
+   * price before (adr/0076 Ek 2026-11-25).
+   */
   original: string | null
   /** A wholesaler's line (ADR-0068 §5): "KDV hariç" under a total without KDV; absent otherwise. */
   taxNote?: string | null

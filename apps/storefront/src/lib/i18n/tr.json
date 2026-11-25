@@ -31,6 +31,7 @@
   "cart.items_net": "Ürünler (KDV hariç)",
   "cart.vat": "KDV",
   "cart.line_vat_excluded": "KDV hariç",
+  "cart.line_before_promotion": "Promosyon indirimi:",
   "cart.wholesale_note": "Toptan fiyatlar KDV hariç gösterilir; KDV ayrı satırda eklenir.",
   "cart.drawer_wholesale_note": "Tutarlar KDV hariçtir; KDV ve kargo ödeme adımında eklenir.",
   "cart.wholesale_minimum": "Toptan siparişte en az {min} adet gerekir; sepetinizde {units} adet var.",

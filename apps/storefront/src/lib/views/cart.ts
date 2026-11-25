@@ -69,6 +69,8 @@ export function cartLinesOf(
       detail: line.variant_title ?? line.subtitle,
       quantity: line.quantity,
       total: formatLira(taxNote ? lineNetOf(line) : line.total),
+      // Before the promotions' adjustments only: a price list's sale is already the unit price,
+      // so the theme reads it as "Promosyon indirimi", never as a price before (adr/0076 Ek 2026-11-25)
       original:
         !taxNote && differs(line.original_total, line.total)
           ? formatLira(line.original_total)
