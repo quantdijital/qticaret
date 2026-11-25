@@ -13637,6 +13637,7 @@
       "topUp": "Kredi yükle",
       "tellOwner": "Mağaza sahibine haber verin.",
       "cost": "{{credits}} kredi",
+      "costEach": "Öğe başına {{credits}} kredi; en çok {{total}} kredi.",
       "costs": "Bir işlem kaç kredi?",
       "costsTask": "İş",
       "costsCredits": "Kredi",

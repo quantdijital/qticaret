@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
+import { AiCreditCost } from "@/features/ai/components/ai-credit-cost"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { aiFailureText } from "@/features/ai/failure-text"
+import { ALT_BULK_MAX, ALT_TEXT_TASK } from "@/features/media/api/alt-review"
 import type { AltJobSummary } from "@/features/media/api/alt-review"
 import type { SheetJob } from "@/features/products/api/sheets"
 
@@ -86,6 +88,7 @@ export function AltReviewStart({
   return (
     <div className="flex flex-col gap-3 rounded-md border bg-muted/40 p-3">
       <p className="text-xs text-muted-foreground">{t("ai.suggest.imageNote")}</p>
+      <AiCreditCost tasks={[ALT_TEXT_TASK]} service={service} items={ALT_BULK_MAX} />
       <AiServicePicker
         services={usable}
         value={service}

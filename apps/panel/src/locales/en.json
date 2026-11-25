@@ -13637,6 +13637,7 @@
       "topUp": "Top up credits",
       "tellOwner": "Let the shop owner know.",
       "cost": "{{credits}} credits",
+      "costEach": "{{credits}} credits per item; {{total}} at most.",
       "costs": "How many credits does a task take?",
       "costsTask": "Task",
       "costsCredits": "Credits",

@@ -4,10 +4,16 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
 import { AiConnectHint } from "@/features/ai/components/ai-connect-hint"
+import { AiCreditCost } from "@/features/ai/components/ai-credit-cost"
 import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { aiFailureText } from "@/features/ai/failure-text"
 import { SEO_FILL_SCOPES, scopeTotal } from "@/features/seo/api/seo-fill"
-import type { SeoFillCount, SeoFillScope, SeoFillSummary } from "@/features/seo/api/seo-fill"
+import type {
+  SeoFillCount,
+  SeoFillScope,
+  SeoFillSummary,
+  SeoFillTask,
+} from "@/features/seo/api/seo-fill"
 import type { SheetJob } from "@/features/products/api/sheets"
 
 export interface SeoFillStartProps {
@@ -23,6 +29,13 @@ export interface SeoFillStartProps {
 }
 
 const R = "seo.aiFill"
+
+/** The texts one page may be asked for, by what is filled (a page asks only for those it lacks). */
+const SCOPE_TASKS: Readonly<Record<SeoFillScope, readonly SeoFillTask[]>> = {
+  both: ["seo_title", "seo_description"],
+  title: ["seo_title"],
+  description: ["seo_description"],
+}
 
 const isRunning = (job: SheetJob | undefined) =>
   job?.status === "queued" || job?.status === "running"
@@ -109,6 +122,7 @@ export function SeoFillStart({
             })
           : t(`${R}.cost`, { count: pages })}
       </p>
+      <AiCreditCost tasks={SCOPE_TASKS[scope]} service={service} items={pages} />
       <details className="text-sm">
         <summary className="cursor-pointer text-xs text-muted-foreground">
           {t(`${R}.options`)}
