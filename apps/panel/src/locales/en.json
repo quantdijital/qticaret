@@ -9692,7 +9692,9 @@
           "dm-serif": "DM Serif Display",
           "manrope": "Manrope",
           "source-sans": "Source Sans 3",
-          "nunito": "Nunito"
+          "nunito": "Nunito",
+          "plus-jakarta": "Plus Jakarta Sans",
+          "montserrat": "Montserrat"
         },
         "fontNotes": {
           "noLira": "This font has no ₺ sign. Prices are drawn in the body font; a ₺ you type into a heading shows in a fallback font.",

@@ -52,8 +52,23 @@ const REMOVED_THEMES: Readonly<Record<string, (typeof INSTALLED_THEMES)[number]>
  * Self-hosted faces the storefront has a loader for: a name from this list,
  * never an address (no third-party font host sees the shop's visitors).
  */
-export const HEADING_FONTS = ["fraunces", "inter", "playfair", "dm-serif", "manrope"] as const
-export const BODY_FONTS = ["inter", "manrope", "source-sans", "nunito"] as const
+export const HEADING_FONTS = [
+  "fraunces",
+  "inter",
+  "playfair",
+  "dm-serif",
+  "manrope",
+  "plus-jakarta",
+  "montserrat",
+] as const
+export const BODY_FONTS = [
+  "inter",
+  "manrope",
+  "source-sans",
+  "nunito",
+  "plus-jakarta",
+  "montserrat",
+] as const
 
 /**
  * The page colours a theme offers, as the storefront paints them: the

@@ -87,10 +87,12 @@ export interface StoreMenu {
 }
 
 /** The heading faces a shop may choose (adr/0053 §B): names, each self-hosted by the storefront. */
-export type ThemeHeadingFont = "fraunces" | "inter" | "playfair" | "dm-serif" | "manrope"
+export type ThemeHeadingFont =
+  "fraunces" | "inter" | "playfair" | "dm-serif" | "manrope" | "plus-jakarta" | "montserrat"
 
 /** The body faces a shop may choose. */
-export type ThemeBodyFont = "inter" | "manrope" | "source-sans" | "nunito"
+export type ThemeBodyFont =
+  "inter" | "manrope" | "source-sans" | "nunito" | "plus-jakarta" | "montserrat"
 
 /**
  * The page colour's name; the storefront paints each with the backend's

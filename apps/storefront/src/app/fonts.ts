@@ -18,6 +18,11 @@ export const FONT_FILES: Readonly<Record<ThemeFont, readonly [string, string]>> 
     "/fonts/source-sans-tr.2739d40613.woff2",
   ],
   nunito: ["/fonts/nunito-latin.20fc9b6fc6.woff2", "/fonts/nunito-tr.e5385d46f7.woff2"],
+  "plus-jakarta": [
+    "/fonts/plus-jakarta-latin.153fc85b70.woff2",
+    "/fonts/plus-jakarta-tr.37427dca1e.woff2",
+  ],
+  montserrat: ["/fonts/montserrat-latin.06b16db7a9.woff2", "/fonts/montserrat-tr.324b17bf3a.woff2"],
 }
 
 /**
