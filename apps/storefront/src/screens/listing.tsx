@@ -24,6 +24,7 @@ import {
   listProducts,
   pathsOf,
   priceDisplays,
+  storefrontSettings,
 } from "@/lib/store-api/requests"
 import { cardFacts, categoryDescription, collectionDetails } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
@@ -36,9 +37,11 @@ import { collectionsOn } from "@/lib/views/collections-on"
 import { filterViews, stockForCards } from "@/lib/views/facets"
 import { currentLayout, currentShared } from "@/lib/views/layout"
 import {
+  cleared,
   hrefOf,
   listingQueryOf,
   priceAsked,
+  stateFromSearch,
   stateOf,
   withPage,
   withPrice,
@@ -47,7 +50,17 @@ import {
 import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
 import { categoryMainOf } from "@/lib/views/main-sections"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
+import {
+  dateFilterView,
+  datedChip,
+  layoutOf,
+  trailOf,
+  viewSwitchView,
+} from "@/lib/views/listing-layout"
 import { listingTextView } from "@/lib/views/listing-text"
+import { cardDatesOf } from "@/lib/views/dated-search"
+import { listingPageOf } from "@qticaret/types/listing-page"
+import { shopToday } from "@/lib/views/search-form-data"
 import type { ListingTextSource } from "@/lib/views/listing-text"
 import { cardOptions, currentTheme } from "@/lib/views/theme-settings"
 import { paragraphsOf } from "@/lib/views/text"
@@ -154,7 +167,14 @@ async function headingOf(page: Entity, first: boolean): Promise<Heading> {
  */
 export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
   const type = page.entity_type as ListingType
-  const state = stateOf(page.listing)
+  // The backend read the dates (a dated shop's, checked) and left the grid or list as they came
+  const asked = stateFromSearch(url.searchParams)
+  const dated = asked.dated ? { ...asked.dated, category: null } : null
+  const state = {
+    ...stateOf(page.listing),
+    ...(dated ? { dated } : {}),
+    ...(asked.view ? { view: asked.view } : {}),
+  }
   return (
     <ListingContent
       type={type}
@@ -219,6 +239,8 @@ export async function ListingContent({
     redirect(hrefOf(url.pathname, withPrice(state, asked)))
   }
   const isSearch = type === "search"
+  // A listing's dates ask its dated cards for them as a search's do (adr/0077 §4)
+  const dates = cardDates ?? (isSearch ? null : cardDatesOf(state.dated))
   const [heading, answer, sections] = await Promise.all([
     loadHeading(),
     load(listingQueryOf(state)),
@@ -239,7 +261,7 @@ export async function ListingContent({
     priceDisplays(variantIdsOf(products)),
     cardFacts(
       products.map((product) => product.id),
-      cardDates
+      dates
     ),
     currentWholesale(),
   ])
@@ -270,7 +292,7 @@ export async function ListingContent({
       current: state.sort === "fiyat-azalan",
     },
     // A date search's own order: the nearest departure first (adr/0077 §2)
-    ...(cardDates
+    ...(dates
       ? [
           {
             label: t("search.sort_departure"),
@@ -281,13 +303,14 @@ export async function ListingContent({
       : []),
   ]
   // The colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
-  const [shared, options, amounts, settings] = await Promise.all([
+  const [shared, options, amounts, settings, storefront] = await Promise.all([
     currentShared(),
     cardOptions(),
     visitorAmounts(),
     currentTheme(),
+    isSearch ? null : storefrontSettings().catch(() => null),
   ])
-  const facets = filterViews(
+  const filtered = filterViews(
     url.pathname,
     state,
     answer.facets,
@@ -296,6 +319,17 @@ export async function ListingContent({
     swatchLookup(shared.color_swatches),
     !retailOnly
   )
+  // A dated shop's listing: its departure months beside the filters, the dates asked as a chip
+  const booking = storefront?.features?.booking === true
+  const chip = booking ? datedChip(url.pathname, state) : null
+  const facets = chip
+    ? {
+        ...filtered,
+        active: [...filtered.active, chip],
+        clearPath: datedChip(url.pathname, cleared(state))?.path ?? chip.path,
+      }
+    : filtered
+  const shape = listingPageOf(settings.listing_page)
   const first = current === 1 && facets.active.length === 0
   const cards = withCardFacts(productCards(products, paths, displays, options), facts, options, t)
   // A search is one when asked, not again for each page or filter (as the backend counts it).
@@ -340,7 +374,7 @@ export async function ListingContent({
           sectionsTop: sections.top,
           sectionsBottom: sections.bottom,
           ...(sections.main ? { main: sections.main } : {}),
-          breadcrumbs: breadcrumbs(heading.title),
+          breadcrumbs: trailOf(breadcrumbs(heading.title), shape),
           subcategories: heading.subcategories,
           products: cards,
           total: answer.count,
@@ -349,6 +383,12 @@ export async function ListingContent({
           // Dated products only: no "in stock" toggle; a search counts results, not products
           stock: stockForCards(facets.stock, cards),
           ...(isSearch ? { countLabel: t("search.count", { count: answer.count }) } : {}),
+          // The grid or list (`listing_page`): absent while the shop draws today's page
+          ...(shape.default_view === "list" || shape.view_switch === "show"
+            ? { layout: layoutOf(shape, state) }
+            : {}),
+          viewSwitch: viewSwitchView(url.pathname, state, shape, t),
+          dates: booking && !isSearch ? dateFilterView(url.pathname, state, shopToday(), t) : null,
           ...extra,
           pagination: {
             page: current,
