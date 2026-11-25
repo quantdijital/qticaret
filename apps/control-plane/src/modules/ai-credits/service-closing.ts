@@ -15,6 +15,20 @@ export interface OperationMeasures {
   estimatedCostMicros?: number | null
 }
 
+/** An open operation past its time, as the reconcile job reads it. */
+export interface StaleOperation {
+  id: string
+  tenant_id: string
+  operation_id: string
+  created_at: Date
+}
+
+export interface ReleaseResult {
+  released: boolean
+  plan: number
+  purchased: number
+}
+
 const measure = (value: number | null | undefined): number | null =>
   value === undefined || value === null || !Number.isSafeInteger(value) || value < 0
     ? null
@@ -28,12 +42,17 @@ const measure = (value: number | null | undefined): number | null =>
  */
 export class AiCreditClosing extends AiCreditOperations {
   /**
-   * An open operation's credits given back (the provider did not take the
-   * work, or it stayed open too long): the operation is `released` once,
-   * so a second release changes nothing. Each bucket gets back what it
-   * gave, and the day's counter what it counted that day. The grant's part
-   * comes back only within the month it was taken from: the grant does not
-   * carry over (K5).
+   * An open operation's credits given back when the provider did not take
+   * its one call: the operation is `released` once, so a second release
+   * changes nothing. Only an operation with one call so far: once a second
+   * call was counted (`repeat`, possibly running at this moment), a failed
+   * first call gives nothing back (the operation's charge holds for the
+   * call that went on), and a call after the release finds the operation
+   * closed (`expired_operation`). Both take the wallet's lock first, so one
+   * of the two always sees the other. Each bucket gets back what it gave,
+   * and the day's counter what it counted that day. The grant's part comes
+   * back only within the month it was taken from: the grant does not carry
+   * over (K5).
    */
   @InjectTransactionManager()
   async release(
@@ -41,8 +60,49 @@ export class AiCreditClosing extends AiCreditOperations {
     operationId: string,
     clock: WalletClock,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ released: boolean; plan: number; purchased: number } | Stale> {
-    const manager = sharedContext.transactionManager as Executor
+  ): Promise<ReleaseResult | Stale> {
+    return await this.giveBack(
+      sharedContext.transactionManager as Executor,
+      tenantId,
+      operationId,
+      clock,
+      "AND calls = 1",
+      []
+    )
+  }
+
+  /**
+   * An operation still open that began before `startedBefore` (the
+   * reconcile job's: past its life no call may join it, and an operation
+   * never settled is closed in the shop's favour, whatever its calls).
+   */
+  @InjectTransactionManager()
+  async releaseStale(
+    tenantId: string,
+    operationId: string,
+    startedBefore: Date,
+    clock: WalletClock,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ReleaseResult | Stale> {
+    return await this.giveBack(
+      sharedContext.transactionManager as Executor,
+      tenantId,
+      operationId,
+      clock,
+      "AND created_at < ?",
+      [startedBefore]
+    )
+  }
+
+  private async giveBack(
+    manager: Executor,
+    tenantId: string,
+    operationId: string,
+    clock: WalletClock,
+    // One of the two fixed conditions above, never the caller's text
+    condition: "AND calls = 1" | "AND created_at < ?",
+    conditionParams: unknown[]
+  ): Promise<ReleaseResult | Stale> {
     const { now } = clock
     if ((await this.touch(manager, tenantId, clock)) === STALE) {
       return STALE
@@ -56,8 +116,9 @@ export class AiCreditClosing extends AiCreditOperations {
       manager,
       `UPDATE ai_credit_operation SET status = 'released', closed_at = ?, updated_at = now()
         WHERE tenant_id = ? AND operation_id = ? AND deleted_at IS NULL AND status = 'open'
+          ${condition}
         RETURNING credits, plan_credits, purchased_credits, created_at`,
-      [now, tenantId, operationId]
+      [now, tenantId, operationId, ...conditionParams]
     )
     if (!closed) {
       return { released: false, plan: 0, purchased: 0 }
@@ -136,19 +197,25 @@ export class AiCreditClosing extends AiCreditOperations {
     return { settled: rows.length > 0 }
   }
 
-  /** Operations still open that began before `before`, oldest first. */
+  /**
+   * Operations still open that began before `before`, oldest first, `limit`
+   * at a time: the next page starts after `after` (the last one read), so
+   * one that cannot be released does not hold back the ones behind it.
+   */
   @InjectManager()
   async staleOperations(
     before: Date,
     limit: number,
+    after: StaleOperation | null = null,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ tenant_id: string; operation_id: string }[]> {
+  ): Promise<StaleOperation[]> {
+    const page = after === null ? "" : "AND (created_at, id) > (?, ?)"
     return await rowsOf(
       sharedContext.manager as Executor,
-      `SELECT tenant_id, operation_id FROM ai_credit_operation
-        WHERE status = 'open' AND created_at < ? AND deleted_at IS NULL
-        ORDER BY created_at ASC LIMIT ?`,
-      [before, limit]
+      `SELECT id, tenant_id, operation_id, created_at FROM ai_credit_operation
+        WHERE status = 'open' AND created_at < ? AND deleted_at IS NULL ${page}
+        ORDER BY created_at ASC, id ASC LIMIT ?`,
+      after === null ? [before, limit] : [before, after.created_at, after.id, limit]
     )
   }
 }

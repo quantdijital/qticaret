@@ -1,4 +1,11 @@
-import { addMonths, istanbulMonth, nextMonthStart, splitCharge, spentOn } from "../period"
+import {
+  addMonths,
+  comparesAt,
+  istanbulMonth,
+  nextMonthStart,
+  splitCharge,
+  spentOn,
+} from "../period"
 
 describe("AI credits' calendar (adr/0085 K5, K6, K7)", () => {
   it("reads the month in Istanbul: 21:00 UTC on the last day is already the next month", () => {
@@ -34,9 +41,17 @@ describe("AI credits' calendar (adr/0085 K5, K6, K7)", () => {
     expect(splitCharge(-1, 2)).toEqual({ plan: 0, purchased: 2 })
   })
 
-  it("counts the day's spend only on its own day", () => {
+  it("counts the day's spend on its own day and keeps a later day's (a clock behind never resets it)", () => {
     expect(spentOn(12, "2026-11-25", "2026-11-25")).toBe(12)
     expect(spentOn(12, "2026-11-24", "2026-11-25")).toBe(0)
+    expect(spentOn(12, "2026-11-26", "2026-11-25")).toBe(12)
     expect(spentOn(0, null, "2026-11-25")).toBe(0)
+  })
+
+  it("compares ledger and wallet on the first run of each hour only", () => {
+    expect(comparesAt(new Date("2026-11-25T10:00:03.000Z"))).toBe(true)
+    expect(comparesAt(new Date("2026-11-25T10:09:59.999Z"))).toBe(true)
+    expect(comparesAt(new Date("2026-11-25T10:10:00.000Z"))).toBe(false)
+    expect(comparesAt(new Date("2026-11-25T10:50:00.000Z"))).toBe(false)
   })
 })

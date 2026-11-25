@@ -1,11 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   AI_TASK_CAPABILITIES,
   aiOperationIdSchema,
   isAiCreditTask,
 } from "@qticaret/types/control-plane"
 import type { AiCreditCapability } from "@qticaret/types/control-plane"
-import type { OperationMeasures } from "../../modules/ai-credits/service-closing"
+import type { OperationMeasures, ReleaseResult } from "../../modules/ai-credits/service-closing"
 import type { SpendOutcome } from "../../modules/ai-credits/service-operations"
 import { aiCreditsIn } from "../../workflows/modules"
 import { withCurrentMonth } from "./rollover"
@@ -46,23 +47,45 @@ export async function spend(container: Container, input: SpendInput): Promise<Sp
     return { kind: "task_mismatch" }
   }
   const credits = aiCreditsIn(container)
-  return await withCurrentMonth(container, tenantId, now, (clock) =>
+  const result = await withCurrentMonth(container, tenantId, now, (clock) =>
     credits.spend({ tenantId, operationId, task, capability }, clock)
   )
+  if (result.kind === "clock_behind") {
+    // Another server rolled the wallet into a later month: this clock is behind
+    container
+      .resolve(ContainerRegistrationKeys.LOGGER)
+      .warn(`cp.ai_credit_clock_behind ${JSON.stringify({ tenant_id: tenantId, now })}`)
+  }
+  return result
 }
 
 /**
  * An open operation's credits given back, to the buckets they came from
- * (the provider did not take the work). Idempotent: an operation released
- * or settled already changes nothing (`released: false`).
+ * (the provider did not take its one call). Idempotent: an operation
+ * released or settled already changes nothing (`released: false`); so
+ * does one that a second call has joined (its charge holds for that call).
  */
 export async function release(
   container: Container,
   input: { tenantId: string; operationId: string; now: Date }
-): Promise<{ released: boolean; plan: number; purchased: number }> {
+): Promise<ReleaseResult> {
   const credits = aiCreditsIn(container)
   return await withCurrentMonth(container, input.tenantId, input.now, (clock) =>
     credits.release(input.tenantId, input.operationId, clock)
+  )
+}
+
+/**
+ * An operation left open past `startedBefore` given back in the shop's
+ * favour, whatever its calls (the reconcile job's; no call joins it then).
+ */
+export async function releaseStale(
+  container: Container,
+  input: { tenantId: string; operationId: string; startedBefore: Date; now: Date }
+): Promise<ReleaseResult> {
+  const credits = aiCreditsIn(container)
+  return await withCurrentMonth(container, input.tenantId, input.now, (clock) =>
+    credits.releaseStale(input.tenantId, input.operationId, input.startedBefore, clock)
   )
 }
 

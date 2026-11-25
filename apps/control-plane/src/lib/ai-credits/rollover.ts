@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { GRANT_LIMIT_MAX } from "@qticaret/types/control-plane"
 import { STALE, isStale } from "../../modules/ai-credits/sql"
 import type { Stale, WalletClock } from "../../modules/ai-credits/sql"
 import { StaleWallet } from "../../modules/ai-credits/service"
@@ -15,7 +16,9 @@ const STALE_MESSAGE = new StaleWallet().message
  * The credits a shop's month gives (adr/0085 K5): its own exception to
  * `ai_free_credits_per_month` while it holds, else its package's; a shop
  * without a package gets none. The same reckoning as the shop's limits
- * screen and its plan document (`effectiveLimits`).
+ * screen and its plan document (`effectiveLimits`), held to
+ * `GRANT_LIMIT_MAX` whatever a stored value says (one written before the
+ * ceiling, or past it by hand).
  */
 export async function monthlyGrantOf(
   container: Container,
@@ -27,7 +30,9 @@ export async function monthlyGrantOf(
   const grant = effectiveLimits(plan?.limits ?? null, overrides, now).find(
     (each) => each.key === "ai_free_credits_per_month"
   )?.value
-  return typeof grant === "number" && Number.isSafeInteger(grant) && grant > 0 ? grant : 0
+  return typeof grant === "number" && Number.isSafeInteger(grant) && grant > 0
+    ? Math.min(grant, GRANT_LIMIT_MAX)
+    : 0
 }
 
 /**

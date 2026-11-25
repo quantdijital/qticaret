@@ -26,6 +26,14 @@ export type Stale = typeof STALE
 
 export const isStale = (value: unknown): value is Stale => value === STALE
 
+/** Thrown inside a transaction whose wallet's month is behind, to roll it back; the caller retries. */
+export class StaleWallet extends Error {
+  constructor() {
+    super("cp.ai_credit_wallet_stale")
+    this.name = "StaleWallet"
+  }
+}
+
 export interface EntryRow {
   tenantId: string
   kind: AiCreditEntryKind
@@ -44,6 +52,75 @@ export function wholeCredits(value: number, min = 0): number {
     throw new MedusaError(MedusaError.Types.INVALID_DATA, "cp.ai_credit_amount_invalid")
   }
   return value
+}
+
+export interface GrantEntryRow {
+  tenantId: string
+  kind: "grant_purchase" | "adjust"
+  amount: number
+  bucket: AiCreditBucket
+  /** Names the move once (unique among the ledger's rows). */
+  grantRef: string
+  note: string | null
+  actor: string
+  at: Date
+}
+
+/**
+ * A ledger row named by its `grant_ref`, written once in the caller's
+ * transaction (the unique index decides, also for two at once): its id
+ * and `applied: true`, or the row already written and `applied: false`.
+ * A row already there for another shop, kind, bucket or amount is not
+ * this move: `cp.ai_credit_grant_ref_conflict`, and nothing is written.
+ */
+export async function addGrantEntry(
+  manager: Executor,
+  row: GrantEntryRow
+): Promise<{ id: string; applied: boolean }> {
+  const [written] = await rowsOf<{ id: string }>(
+    manager,
+    `INSERT INTO ai_credit_entry
+       (id, tenant_id, kind, amount, bucket, grant_ref, note, actor, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT (grant_ref) WHERE grant_ref IS NOT NULL AND deleted_at IS NULL DO NOTHING
+     RETURNING id`,
+    [
+      generateEntityId(undefined, "aient"),
+      row.tenantId,
+      row.kind,
+      row.amount,
+      row.bucket,
+      row.grantRef,
+      row.note,
+      row.actor,
+      row.at,
+      row.at,
+    ]
+  )
+  if (written) {
+    return { id: written.id, applied: true }
+  }
+  const [existing] = await rowsOf<{
+    id: string
+    tenant_id: string
+    kind: string
+    amount: number
+    bucket: string
+  }>(
+    manager,
+    `SELECT id, tenant_id, kind, amount, bucket FROM ai_credit_entry
+      WHERE grant_ref = ? AND deleted_at IS NULL`,
+    [row.grantRef]
+  )
+  if (
+    existing?.tenant_id !== row.tenantId ||
+    existing.kind !== row.kind ||
+    existing.amount !== row.amount ||
+    existing.bucket !== row.bucket
+  ) {
+    throw new MedusaError(MedusaError.Types.CONFLICT, "cp.ai_credit_grant_ref_conflict")
+  }
+  return { id: existing.id, applied: false }
 }
 
 /** Ledger rows written in the caller's transaction; a row of 0 credits is not written. */

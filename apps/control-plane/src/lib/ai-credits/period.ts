@@ -49,6 +49,17 @@ export function splitCharge(planBalance: number, credits: number): BucketSplit {
   return { plan, purchased: credits - plan }
 }
 
-/** The day's spend as it counts on `day`: the counter of another day counts nothing. */
+/**
+ * The day's spend as it counts on `day`: an earlier day's counter counts
+ * nothing; a later day's (another server's clock a little ahead) still
+ * counts, as the spend's statement counts it.
+ */
 export const spentOn = (spentToday: number, spentDay: string | null, day: string): number =>
-  spentDay === day ? spentToday : 0
+  spentDay !== null && spentDay >= day ? spentToday : 0
+
+/**
+ * Whether the reconcile run at `now` compares ledger and wallet: the first
+ * run of each hour (the comparison reads the whole ledger; the releases run
+ * every ten minutes).
+ */
+export const comparesAt = (now: Date): boolean => now.getUTCMinutes() < 10

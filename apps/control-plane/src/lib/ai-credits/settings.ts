@@ -13,5 +13,15 @@ export const AI_PURCHASED_LIFETIME_MONTHS = 12
 /** §1: an operation still `open` this long after it began is released, in the shop's favour. */
 export const AI_STALE_OPERATION_MINUTES = 15
 
-/** At most this many stale operations are released in one reconcile run. */
+/** Stale operations are read this many at a time in one reconcile run. */
 export const AI_STALE_RELEASE_BATCH = 500
+
+/** At most this many batches in one run: a run ends, the next one goes on. */
+export const AI_STALE_RELEASE_PAGES = 10
+
+/**
+ * The most credits one top-up or one staff correction moves: a typo of a
+ * few zeros is refused, not booked (a real need larger than this is two
+ * moves, each in the ledger).
+ */
+export const AI_CREDIT_MOVE_MAX = 1_000_000
