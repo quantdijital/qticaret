@@ -1,5 +1,6 @@
 import type { AiCreditCapability, AiCreditTask } from "@qticaret/types/control-plane"
 import { prepareBody } from "../body"
+import { checkInlineImage, isBase64 } from "../body-shared"
 import { AI_INLINE_IMAGE_TYPES } from "../limits"
 import { gatewayTargetOf } from "../target"
 import type { GatewayTarget } from "../target"
@@ -121,5 +122,34 @@ describe("an inline picture's type and bytes (P3b second review N1)", () => {
       ok: false,
       reason: "image_not_inline",
     })
+  })
+
+  // A picture near 6 MB: once its check overflowed the regexp's stack now and then (`unreadable`)
+  it("reads base64 as the anchored pattern did, a picture near 6 MB included", () => {
+    const pattern = /^[A-Za-z0-9+/]+={0,2}$/
+    const cases = [
+      "QUFB",
+      "QUE=",
+      "QQ==",
+      "Q",
+      "",
+      "=",
+      "==",
+      "QQ===",
+      "Q=Q=",
+      "QQ= ",
+      "Q Q",
+      "Q\n",
+      "-_",
+    ]
+    for (const value of cases) {
+      expect([value, isBase64(value)]).toEqual([value, pattern.test(value)])
+    }
+    const near6Mb = Buffer.alloc(4_400_000, 0x89).toString("base64")
+    expect(isBase64(near6Mb)).toBe(true)
+    expect(isBase64(`${near6Mb.slice(0, -1)}!`)).toBe(false)
+    expect(() => {
+      checkInlineImage("image/png", near6Mb)
+    }).not.toThrow()
   })
 })

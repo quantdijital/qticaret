@@ -36,8 +36,28 @@ export class BodyRefused extends Error {
   }
 }
 
-// Standard base64 (what the shop's `Buffer#toString("base64")` writes): no spaces, padding last
-const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/
+// A character standard base64 never holds: searched, never backtracked over
+const NOT_BASE64 = /[^A-Za-z0-9+/=]/
+
+/**
+ * Standard base64 (what the shop's `Buffer#toString("base64")` writes): no
+ * spaces, at least one character, at most two `=` and those last. Checked
+ * without an anchored `^[…]+={0,2}$`: over a picture of several MB, its
+ * backtracking overflowed the regexp's stack now and then (a RangeError,
+ * the call refused `unreadable`).
+ */
+export function isBase64(data: string): boolean {
+  if (data === "" || NOT_BASE64.test(data)) {
+    return false
+  }
+  const padding = data.indexOf("=")
+  if (padding === -1) {
+    return true
+  }
+  return (
+    padding > 0 && padding >= data.length - 2 && data.endsWith("=".repeat(data.length - padding))
+  )
+}
 
 /**
  * An inline picture's type and bytes checked (security review N1): a type
@@ -47,7 +67,7 @@ export function checkInlineImage(mimeType: string, data: string): void {
   if (!AI_INLINE_IMAGE_TYPES.has(mimeType)) {
     throw new BodyRefused("image_type_refused")
   }
-  if (!BASE64.test(data)) {
+  if (!isBase64(data)) {
     throw new BodyRefused("image_data_refused")
   }
 }
