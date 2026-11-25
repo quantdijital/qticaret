@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { AI_CREDIT_ORDER_STATUSES } from "@qticaret/types/control-plane"
 import type { AiCreditOrderStatus } from "@qticaret/types/control-plane"
 import { formatCount, formatDate } from "@qticaret/admin-ui/lib/format"
@@ -14,10 +15,12 @@ import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { money } from "@/features/billing/words"
+import { useCancelOrder } from "@/features/ai-credits/api/mutations"
 import { ORDERS_PAGE_SIZE, ordersQuery, shopNamesQuery } from "@/features/ai-credits/api/queries"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
 import { CancelDialog, PaidDialog } from "@/features/ai-credits/components/order-dialogs"
 import { errorText } from "@/lib/errors"
+import { isStepUpCancelled } from "@/lib/step-up"
 
 const route = getRouteApi("/_app/ai-orders")
 
@@ -35,7 +38,21 @@ export function OrdersPage() {
   const navigate = useNavigate({ from: "/ai-orders" })
   const list = useQuery(ordersQuery(status, page - 1))
   const names = useQuery(shopNamesQuery())
+  // Owned here, not by the confirmation: its answer is said after that has closed
+  const cancel = useCancelOrder()
   const [open, setOpen] = useState<Open>(null)
+  const cancelOrder = (order: AiOrder) => {
+    cancel.mutate(order, {
+      onSuccess: () => {
+        toast.success(t("aiCredits.orders.cancel.done"))
+      },
+      onError: (error) => {
+        if (!isStepUpCancelled(error)) {
+          toast.error(errorText(t, error))
+        }
+      },
+    })
+  }
   const go = (next: Partial<{ status: AiCreditOrderStatus; page: number }>) => {
     void navigate({ search: (prev) => ({ ...prev, page: 1, ...next }) })
   }
@@ -102,6 +119,7 @@ export function OrdersPage() {
                   size="sm"
                   variant="outline"
                   className="text-destructive"
+                  disabled={cancel.isPending}
                   onClick={() => {
                     setOpen({ order: row, action: "cancel" })
                   }}
@@ -157,7 +175,14 @@ export function OrdersPage() {
         <PaidDialog order={open.order} shop={shopOf(open.order)} onClose={close} />
       ) : null}
       {open?.action === "cancel" ? (
-        <CancelDialog order={open.order} shop={shopOf(open.order)} onClose={close} />
+        <CancelDialog
+          order={open.order}
+          shop={shopOf(open.order)}
+          onConfirm={() => {
+            cancelOrder(open.order)
+          }}
+          onClose={close}
+        />
       ) : null}
     </div>
   )

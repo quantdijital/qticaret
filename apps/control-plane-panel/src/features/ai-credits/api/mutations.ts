@@ -90,14 +90,18 @@ export const useMarkPaid = (order: AiOrder) =>
     () => [ORDERS_KEY, walletKey(order.tenant_id)]
   )
 
-/** "İptal et": the server takes no note (its body is empty). */
-export const useCancelOrder = (order: AiOrder) =>
+/**
+ * "İptal et": the server takes no note (its body is empty). The request
+ * comes with each call, so the page that stays on screen owns the
+ * mutation and its answer is said after the confirmation has closed.
+ */
+export const useCancelOrder = () =>
   useChange(
-    () =>
+    (order: AiOrder) =>
       withStepUp((headers) =>
         read(orderAnswerSchema, orderPath(order, "cancel"), post({}, headers))
       ),
-    () => [ORDERS_KEY, walletKey(order.tenant_id)]
+    (order) => [ORDERS_KEY, walletKey(order.tenant_id)]
   )
 
 const providerPath = (service: string, rest = "") =>
@@ -113,10 +117,10 @@ export const useWriteKey = (service: string) =>
     () => [PROVIDERS_KEY, SETTINGS_KEY]
   )
 
-/** The key gone (every version), its routings first. */
-export const useDeleteKey = (service: string) =>
+/** The key gone (every version), its routings first; the service comes with each call. */
+export const useDeleteKey = () =>
   useChange(
-    () =>
+    (service: string) =>
       withStepUp((headers) =>
         read(providerAnswerSchema, providerPath(service), { method: "DELETE", headers })
       ),

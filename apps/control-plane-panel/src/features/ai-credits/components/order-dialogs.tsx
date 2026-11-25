@@ -10,7 +10,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { money } from "@/features/billing/words"
-import { useCancelOrder, useMarkPaid } from "@/features/ai-credits/api/mutations"
+import { useMarkPaid } from "@/features/ai-credits/api/mutations"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
 import { credits } from "@/features/ai-credits/words"
 import { errorText } from "@/lib/errors"
@@ -134,19 +134,21 @@ export function PaidDialog({
 
 /**
  * "İptal et": asked first, naming the shop, the pack, its credits and
- * amount. The server takes no note for it. Behind a step-up.
+ * amount. Only the question: the page that stays on screen sends it
+ * (behind a step-up) and says the answer, so closing this loses nothing.
  */
 export function CancelDialog({
   order,
   shop,
+  onConfirm,
   onClose,
 }: {
   order: AiOrder
   shop: string
+  onConfirm: () => void
   onClose: () => void
 }) {
   const { t } = useTranslation()
-  const cancel = useCancelOrder(order)
   return (
     <ConfirmDialog
       open
@@ -159,18 +161,7 @@ export function CancelDialog({
       description={t("aiCredits.orders.cancel.text", factsOf(t, order, shop))}
       confirmLabel={t("aiCredits.orders.cancel.confirm")}
       destructive
-      onConfirm={() => {
-        cancel.mutate(undefined, {
-          onSuccess: () => {
-            toast.success(t("aiCredits.orders.cancel.done"))
-          },
-          onError: (error) => {
-            if (!isStepUpCancelled(error)) {
-              toast.error(errorText(t, error))
-            }
-          },
-        })
-      }}
+      onConfirm={onConfirm}
     />
   )
 }

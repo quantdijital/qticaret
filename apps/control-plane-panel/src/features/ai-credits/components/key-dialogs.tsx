@@ -6,7 +6,7 @@ import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
-import { useDeleteKey, useWriteKey } from "@/features/ai-credits/api/mutations"
+import { useWriteKey } from "@/features/ai-credits/api/mutations"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
@@ -90,18 +90,21 @@ export function KeyDialog({
   )
 }
 
-/** "Anahtarı sil": asked first; the routings to the service go with it. Behind a step-up. */
+/**
+ * "Anahtarı sil": asked first; the routings to the service go with it.
+ * Only the question: the card that stays on screen sends it (behind a
+ * step-up) and says the answer, so closing this loses nothing.
+ */
 export function DeleteKeyDialog({
-  service,
   name,
+  onConfirm,
   onClose,
 }: {
-  service: string
   name: string
+  onConfirm: () => void
   onClose: () => void
 }) {
   const { t } = useTranslation()
-  const remove = useDeleteKey(service)
   return (
     <ConfirmDialog
       open
@@ -114,18 +117,7 @@ export function DeleteKeyDialog({
       description={t("aiCredits.providers.deleteDialog.text")}
       confirmLabel={t("aiCredits.providers.deleteDialog.confirm")}
       destructive
-      onConfirm={() => {
-        remove.mutate(undefined, {
-          onSuccess: () => {
-            toast.success(t("aiCredits.providers.deleteDialog.done"))
-          },
-          onError: (error) => {
-            if (!isStepUpCancelled(error)) {
-              toast.error(errorText(t, error))
-            }
-          },
-        })
-      }}
+      onConfirm={onConfirm}
     />
   )
 }

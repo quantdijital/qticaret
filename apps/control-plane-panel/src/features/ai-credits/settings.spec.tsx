@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { Toaster } from "@qticaret/admin-ui/patterns/toaster"
 import "@/lib/i18n"
 import type { AiCheckReason, AiSettingsAnswer } from "@/features/ai-credits/api/schemas"
 import { AiSettingsPage } from "@/features/ai-credits/pages/ai-settings-page"
@@ -114,6 +115,40 @@ describe("the AI providers page (adr/0085 §2, §5)", () => {
     // Never read back: no answer carried it, and the field held it only until sent
     expect(document.body.innerHTML).not.toContain(FAKE_KEY)
   })
+
+  it.each<[string, Answer, string]>([
+    [
+      "a server error",
+      { status: 500, body: {} },
+      "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
+    ],
+    ["success", { status: 200, body: { provider: PROVIDERS.providers[0] } }, "Anahtar silindi."],
+  ])(
+    "says a key deletion's answer (%s) once the confirmation has closed",
+    async (_case, answer, words) => {
+      const base = controlPlane(() => ({ ok: true }))
+      const sent = stubApi((call) =>
+        call.method === "DELETE" && call.path === "/admin/cp/ai/providers/deepseek"
+          ? answer
+          : base(call)
+      )
+      renderAs(
+        <>
+          <AiSettingsPage />
+          <Toaster />
+        </>,
+        "owner"
+      )
+
+      await userEvent.click(await firstButton("Anahtarı sil"))
+      const ask = await screen.findByRole("alertdialog", { name: "DeepSeek anahtarı silinsin mi?" })
+      await userEvent.click(within(ask).getByRole("button", { name: "Anahtarı sil" }))
+
+      expect(await screen.findByText(words)).toBeInTheDocument()
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
+      expect(sent.filter((call) => call.method === "DELETE")).toHaveLength(1)
+    }
+  )
 
   it.each<[{ ok: true } | { ok: false; reason: AiCheckReason }, string]>([
     [{ ok: true }, "DeepSeek: bağlandı."],

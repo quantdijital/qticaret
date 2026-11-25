@@ -2,17 +2,19 @@ import { useQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { useCheckKey } from "@/features/ai-credits/api/mutations"
+import { useCheckKey, useDeleteKey } from "@/features/ai-credits/api/mutations"
 import { providersQuery } from "@/features/ai-credits/api/queries"
 import type { AiProvider } from "@/features/ai-credits/api/schemas"
 import { capabilityName, serviceName } from "@/features/ai-credits/words"
 import { errorText } from "@/lib/errors"
+import { isStepUpCancelled } from "@/lib/step-up"
 import { DeleteKeyDialog, KeyDialog } from "./key-dialogs"
 
 /** "Bağlantıyı dene" and its verdict, said where a screen reader hears it. */
@@ -65,7 +67,21 @@ type Open = { provider: AiProvider; action: "write" | "delete" } | null
 export function ProvidersCard() {
   const { t } = useTranslation()
   const providers = useQuery(providersQuery())
+  // Owned here, not by the confirmation: its answer is said after that has closed
+  const remove = useDeleteKey()
   const [open, setOpen] = useState<Open>(null)
+  const removeKey = (service: string) => {
+    remove.mutate(service, {
+      onSuccess: () => {
+        toast.success(t("aiCredits.providers.deleteDialog.done"))
+      },
+      onError: (error) => {
+        if (!isStepUpCancelled(error)) {
+          toast.error(errorText(t, error))
+        }
+      },
+    })
+  }
   const columns: Column<AiProvider>[] = [
     {
       key: "service",
@@ -114,6 +130,7 @@ export function ProvidersCard() {
                   size="sm"
                   variant="outline"
                   className="text-destructive"
+                  disabled={remove.isPending}
                   onClick={() => {
                     setOpen({ provider: row, action: "delete" })
                   }}
@@ -162,8 +179,10 @@ export function ProvidersCard() {
       ) : null}
       {open?.action === "delete" ? (
         <DeleteKeyDialog
-          service={open.provider.service}
           name={serviceName(t, open.provider.service)}
+          onConfirm={() => {
+            removeKey(open.provider.service)
+          }}
           onClose={close}
         />
       ) : null}

@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { Toaster } from "@qticaret/admin-ui/patterns/toaster"
 import "@/lib/i18n"
 import { StepUpHost } from "@/components/layout/step-up-host"
 import type { AiOrder } from "@/features/ai-credits/api/schemas"
@@ -34,6 +35,14 @@ const ORDER: AiOrder = {
   decided_at: null,
 }
 
+/** The control plane, its cancel answering `closed` once the owner is proven. */
+const refusingCancel =
+  (closed: Answer) =>
+  (call: Sent): Answer =>
+    call.path === "/admin/cp/ai/orders/aico_1/cancel" && call.headers[STEP_UP_HEADER]
+      ? closed
+      : controlPlane(call)
+
 function controlPlane(call: Sent): Answer {
   if (call.path.startsWith("/admin/cp/ai/orders?")) {
     return { status: 200, body: { orders: [ORDER], count: 1, limit: 50, offset: 0 } }
@@ -59,6 +68,7 @@ const page = () =>
     <>
       <OrdersPage />
       <StepUpHost />
+      <Toaster />
     </>,
     "owner"
   )
@@ -126,5 +136,23 @@ describe("the AI credit requests (adr/0085 K11)", () => {
       expect(cancel.at(-1)?.headers[STEP_UP_HEADER]).toBe("proof-1")
       expect(cancel.at(-1)?.body).toEqual({})
     })
+    // Said after the confirmation has closed
+    expect(await screen.findByText("Talep iptal edildi.")).toBeInTheDocument()
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument()
+  })
+
+  it("says why a cancel was refused once the confirmation has closed", async () => {
+    stubApi(refusingCancel(refusal(409, "cp.ai_credit_order_closed", "conflict")))
+    page()
+
+    await screen.findByText("Kahve Durağı")
+    await userEvent.click(screen.getByRole("button", { name: "İptal et" }))
+    const ask = await screen.findByRole("alertdialog")
+    await userEvent.click(within(ask).getByRole("button", { name: "Talebi iptal et" }))
+    await proveWithCode()
+
+    expect(
+      await screen.findByText("Bu talep artık beklemiyor: ödenmiş ya da iptal edilmiş.")
+    ).toBeInTheDocument()
   })
 })
