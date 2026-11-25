@@ -116,6 +116,25 @@ describe("the figures strip's panel", () => {
     await user.click(dividers)
     expect(changes.at(-1)).toMatchObject({ dividers: "off" })
   })
+
+  it("offers the item look in Diziliş, the large figure by default", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(newHomeSection("stats", STATS))
+    await openGroup(user, "Diziliş")
+
+    expect(screen.getByRole("radio", { name: /Büyük rakam/ })).toBeChecked()
+    await user.click(screen.getByRole("radio", { name: /İkonlu madde/ }))
+    expect(changes.at(-1)).toMatchObject({ item_style: "feature" })
+  })
+
+  it("writes the line over the heading and the hand note", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(newHomeSection("stats", STATS))
+
+    await user.type(screen.getByLabelText(/^Üst satır/), "Neden biz")
+    await user.type(screen.getByLabelText(/^El yazısı not/), "Yol")
+    expect(changes.at(-1)).toMatchObject({ eyebrow: "Neden biz", note: "Yol" })
+  })
 })
 
 describe("the steps' panel", () => {
@@ -164,6 +183,7 @@ describe("the settings search and the preview's marks", () => {
     const steps = newHomeSection("steps", STEPS)
 
     expect(contentFields(strip).map((each) => [each.key, each.group])).toEqual([
+      ["stats_style", "layout"],
       ["dividers", "layout"],
       ["show_icons", "layout"],
     ])
