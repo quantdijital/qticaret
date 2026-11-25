@@ -48,6 +48,7 @@ export {
   SIGNED_REQUEST_SCHEME,
   bodyDigest,
   canonicalRequest,
+  precheckSignedRequest,
   signRequest,
   verifySignedRequest,
 } from "./signing/request"

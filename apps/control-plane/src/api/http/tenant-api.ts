@@ -5,6 +5,7 @@ import type { SignedRequestErrorCode } from "@qticaret/server-kit"
 import { tenantApiNonces } from "../../lib/fleet/nonces"
 import { matchTenantApi } from "../../lib/fleet/tenant-api-routes"
 import { fleetIn } from "../../workflows/modules"
+import { rawBodyKept } from "./raw-body"
 import { rejectRequest, requestTarget, routePath } from "./request"
 
 /** Who signed a tenant API request, once the guard has checked it. */
@@ -86,8 +87,14 @@ export async function guardTenantApi(
     return
   }
   // A POST's signature covers the exact bytes sent (Ek C13): JSON only, as
-  // the body parser kept them (`preserveRawBody`, held to the route's size)
-  const body = rule.maxBodyBytes === 0 ? Buffer.alloc(0) : rawBodyOf(req)
+  // the body parser kept them (`preserveRawBody`, held to the route's size);
+  // a raw body route's bytes as `readRawBody` kept them, whatever their type
+  const body =
+    rule.maxBodyBytes === 0
+      ? Buffer.alloc(0)
+      : rule.rawBody === true
+        ? (rawBodyKept(req) ?? null)
+        : rawBodyOf(req)
   if (body === null || body.length > rule.maxBodyBytes) {
     rejectRequest(
       req,
