@@ -1,9 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { AI_TASK_CREDITS, aiCreditsStatusSchema } from "@qticaret/types/control-plane"
-import type { AiCreditOrder, AiCreditsStatus } from "@qticaret/types/control-plane"
+import type { AiCreditOrder, AiCreditsStatus, TenantStatus } from "@qticaret/types/control-plane"
 import type { AiCreditOrderRow } from "../../modules/ai-credits/service"
-import { plansIn } from "../../workflows/modules"
+import { plansIn, tenantsIn } from "../../workflows/modules"
 import { balanceOf } from "../ai-credits/balance"
 import { requestOrder } from "../ai-credits/grant"
 import { activePacks, aiCreditSettingsOf } from "../ai-credits/platform-settings"
@@ -25,9 +25,28 @@ type Container = Pick<MedusaContainer, "resolve">
 export const PLATFORM_CREDITS_FLAG = "ai.platform_credits"
 
 /**
+ * Only an `active` shop may use or buy credits. A `restricted` one (an
+ * overdue payment, adr/0061 §6: its panel only reads) creates nothing new
+ * and is not asked for more money while it owes; a `suspended`, closing
+ * or closed one is served nothing. The status answer has no room for a
+ * balance without the credits (its unavailable shape is `available`
+ * alone), so each of these hears just "not available".
+ */
+const CREDITS_SERVE: readonly TenantStatus[] = ["active"]
+
+async function shopServed(container: Container, tenantId: string): Promise<boolean> {
+  const [tenant] = await tenantsIn(container).listTenants(
+    { id: tenantId },
+    { select: ["id", "status"], take: 1 }
+  )
+  return tenant !== undefined && CREDITS_SERVE.includes(tenant.status)
+}
+
+/**
  * The shop's `ai.platform_credits` as its plan document says it: its own
  * exception while it holds, else its package's, else the list's default
- * (off). A shop on no package has no document: off.
+ * (off). A shop on no package has no document: off. A shop that is not
+ * `active` has it off whatever its document says.
  */
 export async function platformCreditsOn(
   container: Container,
@@ -35,11 +54,12 @@ export async function platformCreditsOn(
   now: Date
 ): Promise<boolean> {
   const plans = plansIn(container)
-  const [plan, overrides] = await Promise.all([
+  const [served, plan, overrides] = await Promise.all([
+    shopServed(container, tenantId),
     plans.planOf(tenantId),
     plans.featureOverridesOf(tenantId),
   ])
-  if (!plan) {
+  if (!served || !plan) {
     return false
   }
   return (
