@@ -15,6 +15,7 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
       "hover_pause",
       "align",
       "size",
+      "tone",
     ])
     expect(ANNOUNCEMENT_SETTINGS.mode).toEqual(["first", "rotate", "inline"])
     expect(ANNOUNCEMENT_SETTINGS.interval).toEqual(["slow", "medium", "fast"])

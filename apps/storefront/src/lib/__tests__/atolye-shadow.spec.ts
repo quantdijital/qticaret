@@ -45,6 +45,8 @@ const BARE = [
   "sections/HeroTrust.tsx",
   // adr/0077 §10 Ek: the trust badges' floating card, no border of its own
   "sections/PromiseCard.tsx",
+  // adr/0077 §10: the photo collage's white route card (`card: below`), no border of its own
+  "sections/collage-card.tsx",
 ]
 
 const source = (file: string) => readFileSync(`${ATOLYE_SOURCE}${file}`, "utf8")

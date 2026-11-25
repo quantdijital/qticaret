@@ -46,10 +46,18 @@ describe("the new variants and settings keep today's drawing by default", () => 
   })
 
   it("draws the figures without icons unless the shop turns them on", () => {
-    expect(STATS_DEFAULTS).toEqual({ dividers: "on", icons: "off" })
-    expect(statsSettingsOf({ dividers: "off" })).toEqual({ dividers: "off", icons: "off" })
-    expect(statsSettingsOf({ icons: "on" })).toEqual({ dividers: "on", icons: "on" })
+    const figure = { item_style: "figure" }
+    expect(STATS_DEFAULTS).toEqual({ dividers: "on", icons: "off", ...figure })
+    expect(statsSettingsOf({ dividers: "off" })).toEqual({
+      dividers: "off",
+      icons: "off",
+      ...figure,
+    })
+    expect(statsSettingsOf({ icons: "on" })).toEqual({ dividers: "on", icons: "on", ...figure })
     expect(statsSettingsOf({ icons: "big" })).toEqual(STATS_DEFAULTS)
+    // The feature look is chosen, an unknown one reads as the figure
+    expect(statsSettingsOf({ item_style: "feature" }).item_style).toBe("feature")
+    expect(statsSettingsOf({ item_style: "card" }).item_style).toBe("figure")
   })
 
   it("reads the icon row's settings forgivingly", () => {

@@ -92,7 +92,10 @@ describe("the theme editor's settings search", () => {
 
   it("searches only the page being edited, and gives the header and footer no look", () => {
     expect(keys(search("yardim"))).toEqual([])
-    expect(search("zemin").map((hit) => hit.group)).toEqual(["home", "home", "home"])
+    // The header's one "zemin" is the announcement bar's own colour, not a look
+    const grounds = search("zemin")
+    expect(grounds.map((hit) => hit.group)).toEqual(["header", "home", "home", "home"])
+    expect(keys(grounds)[0]).toBe("duyuru0001:announcement.tone")
     expect(keys(search("başlangıç"))).toContain("duyuru0001:starts_at")
     expect(keys(search("başlangıç"))).toContain("bulten0001:starts_at")
   })

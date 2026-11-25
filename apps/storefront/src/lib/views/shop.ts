@@ -143,8 +143,7 @@ export async function shopView(): Promise<ShopView> {
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
   // The bar's small button (its link's own words); none: not drawn
-  const announcementLink =
-    bar?.type === "announcement_bar" ? layoutLink(bar.link ?? null, t) : null
+  const announcementLink = bar?.type === "announcement_bar" ? layoutLink(bar.link ?? null, t) : null
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
