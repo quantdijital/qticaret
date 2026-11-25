@@ -71,7 +71,7 @@ function identityKey(identity: string): string {
 }
 
 /** The client's address as limits count it (IPv6 by its /64), behind the trusted proxy. */
-const clientBucket = (req: MedusaRequest): string =>
+export const clientBucket = (req: MedusaRequest): string =>
   ipBucket(req.ip ?? req.socket.remoteAddress) ?? "unknown"
 
 export interface RateLimitOptions {

@@ -1,10 +1,12 @@
 import { request } from "node:http"
-import type { ClientRequest, IncomingHttpHeaders } from "node:http"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { aiGatewayRefusalSchema } from "@qticaret/types/control-plane"
 import { BODY_TIMEOUT_ENV } from "../../src/api/http/raw-body"
-import { bodyReadsNow } from "../../src/lib/ai-gateway/body-reads"
-import { AI_GATEWAY_MAX_BODY_READS } from "../../src/lib/ai-gateway/limits"
+import { bodyReadsNow, tuneBodyReads } from "../../src/lib/ai-gateway/body-reads"
+import {
+  AI_GATEWAY_MAX_BODY_READS,
+  AI_GATEWAY_MAX_BODY_READS_PER_ADDRESS,
+} from "../../src/lib/ai-gateway/limits"
 import { ensureSigningKey } from "../helpers/fleet"
 import { walletOf } from "../helpers/ai-credits"
 import {
@@ -17,24 +19,11 @@ import {
 } from "../helpers/ai-provider"
 import type { CallReply, FakeProvider } from "../helpers/ai-provider"
 import { aiShop, routeAll } from "../helpers/ai-shops"
+import { openCall, until } from "../helpers/open-call"
 import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
 
 jest.setTimeout(240 * 1000)
-
-interface Answer {
-  status: number
-  headers: IncomingHttpHeaders
-  body: string
-}
-
-/** Waits for `done` (the server's own count), at most 10 s. */
-async function until(done: () => boolean): Promise<void> {
-  for (let tries = 0; tries < 200 && !done(); tries += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 50))
-  }
-  expect(done()).toBe(true)
-}
 
 /**
  * Security review of P3b, O2: what the gateway refuses before it holds a
@@ -71,43 +60,6 @@ medusaIntegrationTestRunner({
     const shop = () => aiShop(http, getContainer(), owner, { monthly: 100 })
     const base = () => new URL(String((api as { defaults: { baseURL?: string } }).defaults.baseURL))
 
-    /** A call sent on its own connection, its body's first `bytes` only: the rest never comes. */
-    const openCall = (call: ReturnType<typeof signedCall>, bytes: number) => {
-      let finished = false
-      let client: ClientRequest | undefined
-      const answered = new Promise<Answer>((resolve) => {
-        client = request(
-          {
-            host: base().hostname,
-            port: base().port,
-            path: call.path,
-            method: "POST",
-            agent: false,
-            headers: { ...call.headers, "content-length": String(call.bytes.length) },
-          },
-          (res) => {
-            const chunks: Buffer[] = []
-            res.on("data", (chunk: Buffer) => chunks.push(chunk))
-            res.on("end", () => {
-              finished = true
-              const body = Buffer.concat(chunks).toString("utf8")
-              resolve({ status: res.statusCode ?? 0, headers: res.headers, body })
-            })
-          }
-        )
-        // Destroyed by the test: its error is the point
-        client.on("error", () => undefined)
-        if (bytes > 0) {
-          client.write(call.bytes.subarray(0, bytes))
-        } else {
-          client.flushHeaders()
-        }
-      })
-      if (client === undefined) {
-        throw new Error("no request")
-      }
-      return { client, answered, done: () => finished }
-    }
     const messageOf = (reply: CallReply) => [reply.status, jsonOf(reply)["message"]]
     const strict = (reply: CallReply) => aiGatewayRefusalSchema.safeParse(jsonOf(reply)).success
 
@@ -187,25 +139,62 @@ medusaIntegrationTestRunner({
       expect((await callAs(http, who, chatBody())).status).toBe(200)
     })
 
+    /** Bodies of `count` calls left half sent, `bytes` each, from `host` (default the API's). */
+    const slowCalls = (who: Awaited<ReturnType<typeof shop>>, count: number, host?: string) =>
+      Array.from({ length: count }, () =>
+        openCall(base(), signedCall(who, chatBody()), 10, host === undefined ? {} : { host })
+      )
+
     it("reads 16 bodies at once, whoever sends them; the 17th is 503 before its body", async () => {
       const who = await shop()
-      // Well-formed headers, a body that never ends: the signature is never checked
-      const slow = Array.from({ length: AI_GATEWAY_MAX_BODY_READS }, () =>
-        openCall(signedCall(who, chatBody()), 10)
-      )
-      await until(() => bodyReadsNow() === AI_GATEWAY_MAX_BODY_READS)
-      const busy = openCall(signedCall(who, chatBody()), 0)
-      const answer = await busy.answered
-      expect([answer.status, answer.headers["x-qt-ai-refusal"]]).toEqual([503, "unavailable"])
-      expect(aiGatewayRefusalSchema.safeParse(JSON.parse(answer.body)).success).toBe(true)
-      expect(slow.some((call) => call.done())).toBe(false)
-      busy.client.destroy()
-      // The senders gone: every slot back, the next call read and sent
-      for (const call of slow) {
-        call.client.destroy()
+      // Every test call comes from one address: its own limit lifted, the pace never checked
+      tuneBodyReads({ perAddress: AI_GATEWAY_MAX_BODY_READS, graceMs: 60_000 })
+      try {
+        // Well-formed headers, a body that never ends: the signature is never checked
+        const slow = slowCalls(who, AI_GATEWAY_MAX_BODY_READS)
+        await until(() => bodyReadsNow() === AI_GATEWAY_MAX_BODY_READS)
+        const busy = openCall(base(), signedCall(who, chatBody()), 0)
+        const answer = await busy.answered
+        expect([answer.status, answer.headers["x-qt-ai-refusal"]]).toEqual([503, "unavailable"])
+        expect(aiGatewayRefusalSchema.safeParse(JSON.parse(answer.body)).success).toBe(true)
+        expect(slow.some((call) => call.done())).toBe(false)
+        busy.client.destroy()
+        // The senders gone: every slot back, the next call read and sent
+        for (const call of slow) {
+          call.client.destroy()
+        }
+        await until(() => bodyReadsNow() === 0)
+      } finally {
+        tuneBodyReads(null)
       }
-      await until(() => bodyReadsNow() === 0)
       expect((await callAs(http, who, chatBody())).status).toBe(200)
+      expect(provider.seen).toHaveLength(1)
+    })
+
+    it("reads four bodies at once from one address; the fifth is 503, another address read", async () => {
+      const who = await shop()
+      tuneBodyReads({ graceMs: 60_000 })
+      try {
+        // 127.0.0.1 and ::1 are two client addresses to the gateway
+        const slow = slowCalls(who, AI_GATEWAY_MAX_BODY_READS_PER_ADDRESS, "127.0.0.1")
+        await until(() => bodyReadsNow() === AI_GATEWAY_MAX_BODY_READS_PER_ADDRESS)
+        const busy = openCall(base(), signedCall(who, chatBody()), 0, { host: "127.0.0.1" })
+        const answer = await busy.answered
+        expect([answer.status, answer.headers["x-qt-ai-refusal"]]).toEqual([503, "unavailable"])
+        // The process was far from its 16: the address's own limit refused it
+        expect(bodyReadsNow()).toBe(AI_GATEWAY_MAX_BODY_READS_PER_ADDRESS)
+        busy.client.destroy()
+        const call = signedCall(who, chatBody())
+        const other = openCall(base(), call, call.bytes.length, { host: "::1" })
+        other.client.end()
+        expect((await other.answered).status).toBe(200)
+        for (const sent of slow) {
+          sent.client.destroy()
+        }
+        await until(() => bodyReadsNow() === 0)
+      } finally {
+        tuneBodyReads(null)
+      }
       expect(provider.seen).toHaveLength(1)
     })
   },
