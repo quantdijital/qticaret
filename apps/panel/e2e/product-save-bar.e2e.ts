@@ -57,14 +57,22 @@ test.describe("product page save bar", () => {
     const address = await handle.inputValue()
     // A second card: the search appearance, opened from its folded line (the
     // section bar above carries a link-button of the same name). An urgent
-    // advisor finding opens it by itself: a click then would fold it again.
+    // advisor finding opens it by itself when the advisor answers, which may
+    // land between a look and a click: the click then folds it again. So the
+    // advisor's score is awaited first, and the card is opened until it
+    // stays open (a look-then-click that raced is simply done once more).
+    await expect(page.getByRole("img", { name: /^SEO puanı \d+\/100$/ }).first()).toBeVisible()
     const fold = page
       .locator("#product-seo")
       .getByRole("button", { name: "Arama motoru görünümü", exact: true })
-    if ((await fold.getAttribute("aria-expanded")) === "false") {
-      await fold.click()
-    }
+    await expect(async () => {
+      if ((await fold.getAttribute("aria-expanded")) === "false") {
+        await fold.click()
+      }
+      await expect(fold).toHaveAttribute("aria-expanded", "true", { timeout: 1_000 })
+    }).toPass()
     const seoTitle = page.locator("#product-seo input").first()
+    await expect(seoTitle).toBeVisible()
     const seoBefore = await seoTitle.inputValue()
     await seoTitle.fill(`${title} – özel`)
 
