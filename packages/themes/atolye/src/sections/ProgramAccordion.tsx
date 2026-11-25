@@ -31,7 +31,8 @@ export function ProgramAccordion({ section }: { section: ProgramSectionView }) {
         const panel = `program-${section.id}-${String(index)}`
         return (
           <li key={panel} className="rounded-media gf-pane">
-            <h3>
+            {/* The base h3's 40ch measure would end the row's button (and its sign) mid-row */}
+            <h3 className="max-w-none">
               <button
                 type="button"
                 aria-expanded={shown}

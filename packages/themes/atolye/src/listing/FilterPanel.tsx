@@ -145,7 +145,11 @@ function StockSwitch({ stock, hash }: { stock: StockFilterView; hash: string }) 
   )
 }
 
-/** The price range: a plain GET form; the listing's other choices ride along hidden. */
+/**
+ * The price range: a plain GET form; the listing's other choices ride along hidden.
+ * Each field hints its end of the range by the amount alone, its word in its
+ * label: "En çok 15.800 TL" ran past a side panel's field and was cut.
+ */
 function PriceRange({
   price,
   id,
@@ -187,7 +191,7 @@ function PriceRange({
             name="fiyat_en_az"
             rule={{ ...rule, start: price.min }}
             words={words}
-            placeholder={`${t("listing.price_min")} ${formatWholeLira(price.min)}`}
+            placeholder={formatWholeLira(price.min)}
             defaultValue={price.currentMin ?? undefined}
             className="px-4 text-md lg:text-sm"
           />
@@ -199,7 +203,7 @@ function PriceRange({
             name="fiyat_en_cok"
             rule={{ ...rule, start: price.max }}
             words={words}
-            placeholder={`${t("listing.price_max")} ${formatWholeLira(price.max)}`}
+            placeholder={formatWholeLira(price.max)}
             defaultValue={price.currentMax ?? undefined}
             className="px-4 text-md lg:text-sm"
           />
