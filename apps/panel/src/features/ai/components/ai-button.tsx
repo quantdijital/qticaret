@@ -20,6 +20,11 @@ export interface AiButtonProps {
   entity: AiEntity
   /** Gets the accepted text for the form; the form saves it, or not, as its own change. */
   onUse: (text: string) => void
+  /**
+   * With several candidates, "Hepsini ekle" hands every one over (a list
+   * field: focus keywords); left out: one is picked and used.
+   */
+  onUseAll?: ((texts: string[]) => void) | undefined
   /** The ready options to offer, a subset of the task's; left out: the task's own. */
   options?: readonly string[]
   /** The button's size: `icon` stands level with a 36px field beside it (docs/18 §2). */
@@ -45,6 +50,7 @@ export function AiButton({
   task,
   entity,
   onUse,
+  onUseAll,
   options,
   size = "icon-sm",
   label,
@@ -137,6 +143,15 @@ export function AiButton({
     }
   }
 
+  // Every candidate taken: the first is recorded as the pick, all go to the list
+  const takeAll = async (take: (texts: string[]) => void) => {
+    const candidates =
+      suggestion.state.status === "suggestion" ? suggestion.state.suggestion.candidates : []
+    await suggestion.accept(candidates[0])
+    setOpen(false)
+    take(candidates)
+  }
+
   const tryWith = (id: string) => {
     if (usable.includes(id)) {
       setPicked(id)
@@ -175,6 +190,7 @@ export function AiButton({
               ask({ option: next })
             }}
             onUse={(candidate) => void use(candidate)}
+            onUseAll={onUseAll && (() => void takeAll(onUseAll))}
             onRetry={() => {
               ask({ option })
             }}

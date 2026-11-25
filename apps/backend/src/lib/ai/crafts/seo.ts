@@ -24,7 +24,7 @@ const SEO_WRITER =
 
 // Which fields of the data block carry what, told once for the SEO tasks
 const SEO_FIELDS =
-  'Verideki "focus_keyword" sayfanın odak anahtar kelimesidir; "current_seo_title" ve "current_seo_description" sayfanın bugünkü arama sonucu metinleridir; kategori, koleksiyon ve marka sayfasında "products" içindeki ürünlerden örnek adlar, "brands" en sık markalar, "categories" (marka sayfasında) en sık kategoriler, "product_count" ürün sayısıdır; içerik sayfasında ve blog yazısında "summary" yazının özeti, "body" metninin başıdır.'
+  'Verideki "focus_keyword" sayfanın odak anahtar kelimesidir (virgülle ayrılmış birkaç ifade varsa ilki ana kelimedir, diğerleri ikincil); "current_seo_title" ve "current_seo_description" sayfanın bugünkü arama sonucu metinleridir; kategori, koleksiyon ve marka sayfasında "products" içindeki ürünlerden örnek adlar, "brands" en sık markalar, "categories" (marka sayfasında) en sık kategoriler, "product_count" ürün sayısıdır; içerik sayfasında ve blog yazısında "summary" yazının özeti, "body" metninin başıdır.'
 
 const SEARCH_INTENT =
   "Okur: arama kutusuna ürün türünü ya da ihtiyacını yazmış, sonuç listesini birkaç saniyede tarayan bir alışverişçi. Ürün sayfasında niyet çoğunlukla satın almaktır; kategori, koleksiyon ve marka sayfasında seçenekleri görmek ve karşılaştırmaktır; içerik sayfasında ve blog yazısında bilgi almaktır."

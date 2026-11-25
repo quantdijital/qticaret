@@ -116,7 +116,8 @@ export function topicOf(topic: PostTopic): TopicStems {
       weights.set(stem, Math.max(weights.get(stem) ?? 0, TOPIC_WEIGHTS[part]))
     }
   }
-  const phrase = stemListOf(topic.focusKeyword ?? "")
+  // The primary keyword is the phrase; a list keeps it first ("primary, other, …")
+  const phrase = stemListOf((topic.focusKeyword ?? "").split(",")[0] ?? "")
   return { weights, phrase: phrase.length >= 2 ? phrase.join(" ") : null }
 }
 

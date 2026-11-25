@@ -6533,7 +6533,8 @@
         "titleAuto": "Başlık (otomatik) {{length}}/{{limit}}",
         "description": "Açıklama {{length}}/{{limit}}",
         "descriptionAuto": "Açıklama (otomatik) {{length}}/{{limit}}",
-        "noDescription": "Açıklama yok"
+        "noDescription": "Açıklama yok",
+        "keywords": "Odak: {{keywords}}"
       },
       "noDescription": "Açıklama yok; arama motoru sayfadan bir parça seçer.",
       "seoTitle": "SEO başlığı",
@@ -6541,7 +6542,7 @@
       "seoDescription": "Meta açıklama",
       "seoDescriptionHint": "Arama sonucundaki kısa açıklama; yaklaşık 155 karakter görünür.",
       "focusKeyword": "Odak anahtar kelime",
-      "focusKeywordHint": "Yalnızca panelde ve önerilerde kullanılır; mağazada görünmez.",
+      "focusKeywordHint": "Yalnızca panelde ve önerilerde kullanılır; mağazada görünmez. Enter ya da virgülle ekleyin; ilki ana kelimedir (başlıkta geçmeli), diğerleri ikincildir.",
       "robots": "Arama motoru dizini",
       "robotsDefault": "Sayfanın durumuna göre (önerilen)",
       "robotsOptions": {
@@ -6556,7 +6557,15 @@
       "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür.",
       "aiTitle": "Başlık için yapay zekâ ile öner",
       "aiDescription": "Açıklama için yapay zekâ ile öner",
-      "aiKeyword": "Odak anahtar kelime için yapay zekâ ile öner"
+      "aiKeyword": "Odak anahtar kelime için yapay zekâ ile öner",
+      "keywords": {
+        "placeholder": "Yazın, Enter ile ekleyin",
+        "primary": "Ana",
+        "makePrimary": "“{{keyword}}” ana kelime olsun",
+        "remove": "“{{keyword}}” kelimesini kaldır",
+        "limit": "En çok {{max}} odak kelime eklenir; fazlası alınmadı.",
+        "length": "Bir kelime en çok {{length}} karakter olur; uzun kısım kesildi."
+      }
     },
     "redirectsCard": {
       "title": "Yönlendirmeler ve 404",
@@ -6921,8 +6930,8 @@
         },
         "KW-01": {
           "title": "Odak kelime \"{{keyword}}\" şurada yok: {{missing}}.",
-          "why": "Seçtiğiniz kelime başlıkta, açıklamada ve metnin başında geçtiğinde sayfa o aramayla daha iyi eşleşir.",
-          "how": "Kelimeyi doğal bir cümleyle eksik yerlere ekleyin."
+          "why": "Ana kelime başlıkta, odak kelimelerinizden biri açıklamada ve metnin başında geçtiğinde sayfa o aramalarla daha iyi eşleşir.",
+          "how": "Ana kelimeyi başlığa, odak kelimelerinizden birini açıklamaya ve metnin başına doğal bir cümleyle ekleyin."
         },
         "ROBOTS-01": {
           "title": "Sayfa arama motorlarına kapalı (noindex).",
@@ -13401,7 +13410,8 @@
       "refused": "Uygun bir öneri çıkmadı. Yeniden deneyebilirsiniz.",
       "note": "Kullan yalnız alanı doldurur; kaydetmek size kalır.",
       "choices": "Öneriler",
-      "mainChoice": "ana öneri"
+      "mainChoice": "ana öneri",
+      "useAll": "Hepsini ekle"
     },
     "hint": {
       "text": "Yapay zekâ bağlarsanız bu alanı tek tıkla doldurabilirsiniz.",

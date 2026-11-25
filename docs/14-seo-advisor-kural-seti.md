@@ -57,7 +57,7 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | P-META-03 | Açıklamada fayda + fiyat/kargo ipucu + çağrı (bilgi) | B | Öneri |
 | P-SLUG-01 | Slug ≤ 80 karakter, yalnız `[a-z0-9-]`, sayı-only değil | Y | Addan üret |
 | P-SLUG-02 | Slug ürün adının anlamlı kelimelerini içeriyor | O | Addan üret |
-| P-KW-01 | Odak anahtar kelime (girildiyse) başlık, meta ve ilk 100 kelimede | O | Öneri |
+| P-KW-01 | Odak anahtar kelimeler (girildiyse, en çok 5; ilki ana kelime): **ana kelime** başlıkta; açıklamada ve ilk 100 kelimede **herhangi biri** | O | Öneri |
 | P-KW-02 | Odak kelime adayları: ad + attribute + arama terimleri raporu (F11) | B | Öneri |
 
 ### 3.2 Ürün — içerik

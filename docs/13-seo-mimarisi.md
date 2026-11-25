@@ -73,7 +73,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 | Kısıtlı kategori (F13.4) | Tenant ayarına göre indexlenir veya `noindex` |
 
 ## 3. Meta bilgileri ve şablonlar
-- Her varlıkta: `seo_title`, `seo_description`, `canonical_override`, `robots_override`, `og_image_override`, `focus_keyword` (opsiyonel).
+- Her varlıkta: `seo_title`, `seo_description`, `canonical_override`, `robots_override`, `og_image_override`, `focus_keyword` (opsiyonel). `focus_keyword` en çok 5 anahtar kelimelik bir listedir (her biri ≤ 60 karakter), sütunda `"ana, ikincil, …"` biçiminde virgül + boşlukla saklanır; ilki ana kelimedir (başlık, H1, slug ona göre değerlendirilir). Tek kelimelik eski değerler bir elemanlı liste sayılır; Rank Math'in virgüllü listesi aynı biçimde içe gelir (`lib/seo/focus-keywords.ts`, panelde `features/seo/focus-keywords.ts`).
 - Boş bırakılanlar **şablondan** üretilir; şablonlar tenant ayarıdır ve varlık türüne göre tokenlar alır:
   - Ürün: `{ürün_adı} | {marka} | {mağaza}` → `{ürün_adı} - {öne_çıkan_attribute} | {marka}` (skill önerisi: `[Ürün] - [Özellik] | [Marka]`)
   - Kategori: `{kategori} Modelleri ve Fiyatları | {mağaza}`

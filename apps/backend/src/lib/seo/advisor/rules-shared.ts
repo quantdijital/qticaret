@@ -1,4 +1,5 @@
 import { SERP_TEXT_LENGTH, fitsSerp } from "../pixel-width"
+import { parseFocusKeywords } from "../focus-keywords"
 import { isValidSlug, toSlug } from "../slug"
 import { hasSymbolRun, includesFolded, isShouting, repeatedWord, words } from "./text"
 import type { AdvisorFacts, IssueFix, PageKind, Rule } from "./types"
@@ -128,24 +129,30 @@ const slugMeaning: Rule = (facts) => {
       }
 }
 
-/** P-KW-01: a focus keyword the shop chose belongs in the title, the description and the start of the text. */
+/**
+ * P-KW-01: the focus keywords the shop chose (docs/14 §3.1). The primary
+ * belongs in the title; the description and the start of the text are
+ * served by any of them, so a secondary keyword there counts.
+ */
 const keywordPlaced: Rule = (facts) => {
-  const keyword = facts.focusKeyword?.trim()
-  if (!keyword) {
+  const keywords = parseFocusKeywords(facts.focusKeyword)
+  const [primary] = keywords
+  if (primary === undefined) {
     return null
   }
   const opening = words(facts.body).slice(0, 100).join(" ")
+  const anyIn = (text: string) => keywords.some((keyword) => includesFolded(text, keyword))
   const missing = [
-    includesFolded(facts.title, keyword) ? null : "title",
-    includesFolded(facts.description, keyword) ? null : "description",
-    includesFolded(opening, keyword) ? null : "body",
+    includesFolded(facts.title, primary) ? null : "title",
+    anyIn(facts.description) ? null : "description",
+    anyIn(opening) ? null : "body",
   ].filter((place): place is string => place !== null)
   return missing.length > 0
     ? {
         ruleId: id(facts, "KW-01"),
         severity: "medium",
         category: "meta",
-        params: { keyword, missing: missing.join(",") },
+        params: { keyword: primary, missing: missing.join(",") },
       }
     : null
 }

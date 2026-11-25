@@ -6533,7 +6533,8 @@
         "titleAuto": "Title (automatic) {{length}}/{{limit}}",
         "description": "Description {{length}}/{{limit}}",
         "descriptionAuto": "Description (automatic) {{length}}/{{limit}}",
-        "noDescription": "No description"
+        "noDescription": "No description",
+        "keywords": "Focus: {{keywords}}"
       },
       "noDescription": "No description; the search engine picks a snippet from the page.",
       "seoTitle": "SEO title",
@@ -6541,7 +6542,7 @@
       "seoDescription": "Meta description",
       "seoDescriptionHint": "The short text under the result; about 155 characters show.",
       "focusKeyword": "Focus keyword",
-      "focusKeywordHint": "Used in the panel and its suggestions only; never shown in the shop.",
+      "focusKeywordHint": "Used only in the panel and in suggestions; not shown in the shop. Add with Enter or a comma; the first is the main keyword (it belongs in the title), the others are secondary.",
       "robots": "Search engine indexing",
       "robotsDefault": "Follow the page's state (recommended)",
       "robotsOptions": {
@@ -6556,7 +6557,15 @@
       "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results.",
       "aiTitle": "Suggest a title with AI",
       "aiDescription": "Suggest a description with AI",
-      "aiKeyword": "Suggest a focus keyword with AI"
+      "aiKeyword": "Suggest a focus keyword with AI",
+      "keywords": {
+        "placeholder": "Type, press Enter to add",
+        "primary": "Main",
+        "makePrimary": "Make “{{keyword}}” the main keyword",
+        "remove": "Remove “{{keyword}}”",
+        "limit": "At most {{max}} focus keywords; the rest were not added.",
+        "length": "A keyword is at most {{length}} characters; the rest was cut."
+      }
     },
     "redirectsCard": {
       "title": "Redirects and 404s",
@@ -6921,8 +6930,8 @@
         },
         "KW-01": {
           "title": "The focus keyword \"{{keyword}}\" is missing from: {{missing}}.",
-          "why": "When the chosen word is in the title, the description and the start of the text, the page matches that search better.",
-          "how": "Add the word where it is missing, in a natural sentence."
+          "why": "When the main keyword is in the title and one of your focus keywords is in the description and the start of the text, the page matches those searches better.",
+          "how": "Add the main keyword to the title, and one of your focus keywords to the description and the start of the text, in a natural sentence."
         },
         "ROBOTS-01": {
           "title": "The page is closed to search engines (noindex).",
@@ -13401,7 +13410,8 @@
       "refused": "No suitable suggestion came out. You can try again.",
       "note": "Use only fills the field; saving is up to you.",
       "choices": "Suggestions",
-      "mainChoice": "main suggestion"
+      "mainChoice": "main suggestion",
+      "useAll": "Add all"
     },
     "hint": {
       "text": "Connect an AI service to fill this field in one click.",
