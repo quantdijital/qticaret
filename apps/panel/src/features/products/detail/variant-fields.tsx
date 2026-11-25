@@ -9,9 +9,10 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { MEASURES, measureText } from "./measures"
-import { SalePriceField } from "./sale-price-field"
+import { SalePriceField, SalePriceView } from "./sale-price-field"
 import type { MeasureName } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
+import type { SaleTarget, VariantSale } from "./use-variant-sale"
 import { storedGtinNote } from "./variant-codes"
 import type { StockFacts, VariantField, VariantValues } from "./variant-values"
 
@@ -28,16 +29,13 @@ function useError(form: Form) {
   }
 }
 
-/** A saved variant whose sale price (adr/0086) shows under its price. */
-export interface SaleTarget {
-  productId: string
-  variantId: string
-}
+export type { SaleTarget } from "./use-variant-sale"
 
 /**
- * The selling price, the unit cost, the sale price of a saved variant
- * (`saleTarget`; it saves on its own) and (several variants) the price
- * for all of them.
+ * The regular price, the unit cost, the sale price of a saved variant
+ * (adr/0086) and (several variants) the price for all of them. The sale
+ * price is the host's (`saleOf`, saved with its form) or its own
+ * (`saleTarget`, saved by its own button and the page's save bar).
  */
 export function PriceFields({
   form,
@@ -45,6 +43,7 @@ export function PriceFields({
   sale,
   others,
   saleTarget = null,
+  saleOf = null,
 }: {
   form: Form
   idPrefix: string
@@ -54,6 +53,8 @@ export function PriceFields({
   others: number
   /** A saved variant: its "İndirimli fiyat" under the price; none on a new product. */
   saleTarget?: SaleTarget | null
+  /** A saved variant's sale price that the host saves with its own form. */
+  saleOf?: VariantSale | null
 }) {
   const { t } = useTranslation()
   const error = useError(form)
@@ -92,7 +93,8 @@ export function PriceFields({
           />
         </Field>
       </div>
-      {saleTarget ? (
+      {saleOf ? <SalePriceView sale={saleOf} idPrefix={idPrefix} own={false} /> : null}
+      {saleTarget && !saleOf ? (
         <SalePriceField
           key={saleTarget.variantId}
           productId={saleTarget.productId}

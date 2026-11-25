@@ -150,6 +150,7 @@ export function SaleBulkButton({
         type="button"
         variant="outline"
         size="sm"
+        className="h-9 w-full sm:w-auto"
         disabled={variantIds.length === 0}
         onClick={() => {
           setOpen(true)

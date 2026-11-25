@@ -4222,8 +4222,8 @@
       "saved": "Sale price saved.",
       "errors": {
         "amount": "Enter a valid price.",
-        "noRegular": "Save the selling price first.",
-        "notBelow": "The sale price must be below the selling price.",
+        "noRegular": "Save the regular price first.",
+        "notBelow": "The sale price must be below the regular price.",
         "datesOrder": "The end cannot be before the start.",
         "ended": "The end date has passed; choose a later one."
       },
@@ -4369,7 +4369,7 @@
       "listHint": "Type the options and create the variants; click a variant's row to edit its price, stock, codes and pictures in place.",
       "singleTitle": "Price, stock and codes",
       "price": "Price",
-      "sellingPrice": "Selling price",
+      "sellingPrice": "Regular price",
       "priceHint": "VAT included; the storefront shows this price.",
       "applyAll_one": "Apply this price to the other {{count}} variant too",
       "applyAll_other": "Apply this price to the other {{count}} variants too",
@@ -4453,7 +4453,7 @@
         "filter": "Which variants",
         "every": "All variants",
         "fields": {
-          "price": "Selling price",
+          "price": "Regular price",
           "cost": "Cost",
           "stock": "Stock count"
         },

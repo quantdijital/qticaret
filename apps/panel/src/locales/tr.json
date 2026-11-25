@@ -4222,8 +4222,8 @@
       "saved": "İndirimli fiyat kaydedildi.",
       "errors": {
         "amount": "Geçerli bir fiyat girin.",
-        "noRegular": "Önce satış fiyatını kaydedin.",
-        "notBelow": "İndirimli fiyat satış fiyatından düşük olmalı.",
+        "noRegular": "Önce normal fiyatı kaydedin.",
+        "notBelow": "İndirimli fiyat normal fiyattan düşük olmalı.",
         "datesOrder": "Bitiş, başlangıçtan önce olamaz.",
         "ended": "Bitiş tarihi geçmiş; ileri bir tarih seçin."
       },
@@ -4369,8 +4369,8 @@
       "listHint": "Seçenekleri yazıp varyantları oluşturun; bir varyantın fiyatını, stoğunu, kodlarını ve görsellerini satırına tıklayarak yerinde düzenleyin.",
       "singleTitle": "Fiyat, stok ve kodlar",
       "price": "Fiyat",
-      "sellingPrice": "Satış fiyatı",
-      "priceHint": "KDV dahil; vitrinde bu fiyat görünür.",
+      "sellingPrice": "Normal fiyat",
+      "priceHint": "KDV dahil. İndirimli fiyat yoksa vitrinde bu fiyat görünür.",
       "applyAll_one": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "applyAll_other": "Bu fiyatı diğer {{count}} varyanta da uygula",
       "stock": "Stok",
@@ -4453,7 +4453,7 @@
         "filter": "Hangi varyantlar",
         "every": "Tüm varyantlar",
         "fields": {
-          "price": "Satış fiyatı",
+          "price": "Normal fiyat",
           "cost": "Maliyet",
           "stock": "Stok adedi"
         },

@@ -1,83 +1,37 @@
-import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
-import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
-import { salePricesQuery, useSetSalePrices } from "@/features/products/api/sale-prices"
-import { errorText } from "@/lib/errors"
-import { checkSale, EMPTY_SALE, saleChangeOf, saleDraftOf, sameDraft } from "./sale-price-values"
-import type { SaleDraft } from "./sale-price-values"
+import { EMPTY_SALE } from "./sale-price-values"
+import { useVariantSale } from "./use-variant-sale"
+import type { SaleTarget, VariantSale } from "./use-variant-sale"
 
 const S = "products.sale"
 
 /**
  * A variant's sale price beside its regular one (adr/0086), as WooCommerce
  * has it: "İndirimli fiyat", and "Zamanla" for its first and last day.
- * Saved on its own (the server checks it against the stored regular
- * price) and through the page's one save bar; the discount's share is
- * shown, and the storefront strikes through the price-before rule's
- * price, not necessarily the regular one.
+ * The discount's share is shown; the storefront strikes through the
+ * price-before rule's price, not necessarily the regular one. `own`: its
+ * own "İndirimi kaydet" (a host that saves it with its form has none).
  */
-export function SalePriceField({
-  productId,
-  variantId,
+export function SalePriceView({
+  sale,
   idPrefix,
+  own,
 }: {
-  productId: string
-  variantId: string
+  sale: VariantSale
   idPrefix: string
+  own: boolean
 }) {
   const { t } = useTranslation()
-  const read = useQuery(salePricesQuery(productId))
-  const row = read.data?.variants.find((each) => each.id === variantId)
-  const stored = saleDraftOf(row?.sale)
-  const [draft, setDraft] = useState<SaleDraft>(stored)
-  const save = useSetSalePrices(productId)
-  const dirty = !sameDraft(draft, stored)
-  const regular = row?.regular === null || row?.regular === undefined ? null : Number(row.regular)
-  const check = checkSale(draft, regular)
-  const storedKey = JSON.stringify(stored)
-  // The stored sale the draft was last in step with: a newer one (the first read, the
-  // server's answer, another tab's save) replaces the field unless it was edited since
-  // (adjusted while drawing, as React has a prop change followed)
-  const [base, setBase] = useState(storedKey)
-  if (storedKey !== base) {
-    setBase(storedKey)
-    if (sameDraft(draft, JSON.parse(base) as SaleDraft)) {
-      setDraft(stored)
-    }
-  }
-  const submit = () => {
-    if (check.error) {
-      toast.error(t(`${S}.errors.${check.error}`))
-      return
-    }
-    save.mutate(saleChangeOf(variantId, draft), {
-      onSuccess: (answer) => {
-        const next = answer.variants.find((each) => each.id === variantId)
-        setDraft(saleDraftOf(next?.sale))
-        toast.success(t(`${S}.saved`))
-      },
-      onError: (failure) => toast.error(errorText(t, failure)),
-    })
-  }
-  const reset = () => {
-    setDraft(stored)
-  }
-  useDirtyEntry({ dirty, saving: save.isPending, submit, reset })
-  if (!read.data) {
+  if (!sale.ready) {
     return null
   }
-  const update = (change: Partial<SaleDraft>) => {
-    setDraft((current) => ({ ...current, ...change }))
-  }
+  const { draft, update, check, stored, dirty } = sale
   const id = `${idPrefix}-sale`
-  const sale = row?.sale
   return (
     <div className="flex flex-col gap-3" data-testid="sale-price-field">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -131,13 +85,13 @@ export function SalePriceField({
             {t(`${S}.percent`, { percent: check.percent })}
           </span>
         ) : null}
-        {sale && !dirty ? (
+        {stored && !dirty ? (
           <span>
-            {sale.running
-              ? sale.ends_at
-                ? t(`${S}.runsUntil`, { date: formatDate(sale.ends_at) })
+            {stored.running
+              ? stored.ends_at
+                ? t(`${S}.runsUntil`, { date: formatDate(stored.ends_at) })
                 : t(`${S}.running`)
-              : t(`${S}.startsOn`, { date: formatDate(sale.starts_at ?? "") })}
+              : t(`${S}.startsOn`, { date: formatDate(stored.starts_at ?? "") })}
           </span>
         ) : null}
         <Button
@@ -147,12 +101,12 @@ export function SalePriceField({
           className="h-auto p-0 text-xs"
           aria-expanded={draft.scheduled}
           onClick={() => {
-            update(draft.scheduled ? { scheduled: false } : { scheduled: true })
+            update({ scheduled: !draft.scheduled })
           }}
         >
           {draft.scheduled ? t(`${S}.unschedule`) : t(`${S}.schedule`)}
         </Button>
-        {sale ? (
+        {stored ? (
           <Button
             type="button"
             variant="link"
@@ -166,16 +120,29 @@ export function SalePriceField({
           </Button>
         ) : null}
       </div>
-      {dirty ? (
+      {own && dirty ? (
         <div className="flex gap-2">
-          <Button type="button" size="sm" disabled={save.isPending} onClick={submit}>
+          <Button type="button" size="sm" disabled={sale.saving} onClick={sale.submit}>
             {t(`${S}.apply`)}
           </Button>
-          <Button type="button" size="sm" variant="cancel" onClick={reset}>
+          <Button type="button" size="sm" variant="cancel" onClick={sale.reset}>
             {t(`${S}.cancel`)}
           </Button>
         </div>
       ) : null}
     </div>
   )
+}
+
+/**
+ * The field on its own: saved by its "İndirimi kaydet" and through the
+ * page's one save bar (the variant's dialog, the one-variant card).
+ */
+export function SalePriceField({
+  productId,
+  variantId,
+  idPrefix,
+}: SaleTarget & { idPrefix: string }) {
+  const sale = useVariantSale({ productId, variantId }, true)
+  return <SalePriceView sale={sale} idPrefix={idPrefix} own />
 }

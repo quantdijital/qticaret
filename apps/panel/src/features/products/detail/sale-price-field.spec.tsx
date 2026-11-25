@@ -47,7 +47,7 @@ describe("SalePriceField", () => {
     const field = await screen.findByLabelText("İndirimli fiyat")
 
     await userEvent.type(field, "100")
-    expect(screen.getByText("İndirimli fiyat satış fiyatından düşük olmalı.")).toBeInTheDocument()
+    expect(screen.getByText("İndirimli fiyat normal fiyattan düşük olmalı.")).toBeInTheDocument()
 
     await userEvent.clear(field)
     await userEvent.type(field, "80")
