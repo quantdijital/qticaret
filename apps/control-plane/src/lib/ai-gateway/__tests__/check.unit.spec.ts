@@ -15,6 +15,15 @@ describe("checkTargetOf", () => {
       answer: "photoroom_account",
       documented: false,
     })
+    // Singapore's shared domain only; its model list is not documented: only a 401 refuses
+    expect(checkTargetOf("qwen")).toMatchObject({
+      auth: "bearer",
+      answer: "model_list",
+      documented: false,
+    })
+    expect(checkTargetOf("qwen")?.url.href).toBe(
+      "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/models"
+    )
     for (const service of ["nobody", "toString", "__proto__", "FAKE"]) {
       expect(checkTargetOf(service)).toBeNull()
     }
@@ -48,6 +57,7 @@ describe("checkProviderKey", () => {
       Promise.resolve([
         { name: "ai.deepseek.api_key", version: 1, created_at: new Date() },
         { name: "ai.photoroom.api_key", version: 1, created_at: new Date() },
+        { name: "ai.qwen.api_key", version: 1, created_at: new Date() },
       ])
     ),
     openSecret: jest.fn(() => {
@@ -83,6 +93,11 @@ describe("checkProviderKey", () => {
       // Photoroom's check is not documented: only a 401 refuses its key
       ["photoroom", answering(403, "no"), { ok: false, reason: "unexpected" }],
       ["photoroom", answering(200, '{"images":{}}'), { ok: true }],
+      // Qwen's model list is not on Model Studio's pages; a 403 there may be an overdue account
+      ["qwen", answering(200, models), { ok: true }],
+      ["qwen", answering(401, "invalid_api_key"), { ok: false, reason: "rejected" }],
+      ["qwen", answering(403, "Arrearage"), { ok: false, reason: "unexpected" }],
+      ["qwen", answering(404, ""), { ok: false, reason: "unexpected" }],
       ["deepseek", answering(429, ""), { ok: false, reason: "unreachable" }],
       ["deepseek", answering(502, ""), { ok: false, reason: "unreachable" }],
       ["deepseek", answering(200, "not json"), { ok: false, reason: "unexpected" }],

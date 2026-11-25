@@ -134,7 +134,7 @@ medusaIntegrationTestRunner({
           secrets: { client_secret: false },
         }),
         // adr/0071 §3: the AI services, a key each; the fake one under NODE_ENV=test only
-        ...["deepseek", "minimax", "gemini", "photoroom", "fake"].map(
+        ...["deepseek", "minimax", "gemini", "photoroom", "qwen", "fake"].map(
           (provider) =>
             expect.objectContaining({
               provider,

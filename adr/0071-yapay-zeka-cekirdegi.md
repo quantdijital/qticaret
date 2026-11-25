@@ -67,6 +67,7 @@ Yerleşim:
 | MiniMax | `text`, `image_generate`, `video` | OpenAI uyumlu metin ucu ve bölgesel taban adresleri (uluslararası ve Çin ayrı); görsel üretim ve fotoğraftan video uçları, uzak iş sorgulama biçimi; görsel okuma ve görsel düzenleme olup olmadığı; sonuç dosyalarının indirildiği alan adları |
 | Gemini | `text`, `vision`, `image_edit`, `image_generate`, `video` | OpenAI uyumluluk ucunun kapsamı (metin ve görsel girdi); görsel düzenleme ve üretimin yalnız kendi API'siyle mi sunulduğu; video üretiminin aynı anahtarla ve hangi ücret katmanında açık olduğu; anahtarın başlıkla gönderilmesi; ücretsiz katmanda verinin eğitimde kullanımı; üretilen görseldeki filigran |
 | Photoroom | `image_edit` | arka plan temizleme ve düzenleme uçları, alan adları, başlık adı; deneme (sandbox) kipi; beyaz zemin ve sahne parametreleri; çıktı boyut sınırları |
+| Qwen (Alibaba Model Studio, Singapur; 2026-11-25'te eklendi) | `text`, `vision` | Doğrulandı 2026-11-25: yalnız Singapur bölgesinin ortak alan adı (`dashscope-intl.aliyuncs.com`, "International" kapsamı, Çin anakarası düğümleri yok; "Global" kapsamı ve hesap kimlikli çalışma alanı adresi kullanılmaz); `qwen3.8-flash`; düşünme kipi varsayılan açık, `enable_thinking: false`; çıktı tavanı `max_completion_tokens`; yalnız `json_object`; araç çağırmada `tool_choice: "required"` yok. Kayıt: `lib/ai/registry/service-qwen.ts` |
 
 ### 3. Servis bağlantısı: `integration-credentials`, yeni tablo yok
 

@@ -78,7 +78,7 @@ const png = (width: number, height: number, alpha = false) =>
     .toBuffer()
 
 describe("image reading through the OpenAI compatible connector", () => {
-  it.each(["deepseek", "minimax", "gemini"])(
+  it.each(["deepseek", "minimax", "gemini", "qwen"])(
     "sends %s the data block and the image as a base64 data URL, the key in the header only",
     async (id) => {
       const { connector, calls, target } = visionConnector(id)

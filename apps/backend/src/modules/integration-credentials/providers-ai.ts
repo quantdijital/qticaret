@@ -34,14 +34,6 @@ export const AI_CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
-  // Alibaba Model Studio, Singapore region > API keys (a key works only in its own region)
-  qwen: {
-    settings: z.object({}).strict(),
-    secrets: ["api_key"],
-    secret: apiKey,
-    identity: [],
-    optional: [],
-  },
   // Google AI Studio > API keys
   gemini: {
     settings: z.object({}).strict(),
@@ -52,6 +44,14 @@ export const AI_CREDENTIAL_PROVIDERS = {
   },
   // Image editing (Aşama 4); a sandbox key (`sandbox_…`) is a key like any other
   photoroom: {
+    settings: z.object({}).strict(),
+    secrets: ["api_key"],
+    secret: apiKey,
+    identity: [],
+    optional: [],
+  },
+  // Alibaba Model Studio, Singapore region > API keys (a key works only in its own region)
+  qwen: {
     settings: z.object({}).strict(),
     secrets: ["api_key"],
     secret: apiKey,
