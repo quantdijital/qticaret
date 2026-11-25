@@ -42,7 +42,10 @@ export function StorefrontButton({ product }: { product: ProductDetail }) {
   return (
     <Button variant="outline" disabled={link.isPending} onClick={open}>
       {live ? <ExternalLink /> : <Eye />}
-      {t(live ? "products.detail.viewOnStore" : "products.detail.preview")}
+      {/* On a phone the icon only: the header's row keeps room for the save */}
+      <span className="max-sm:sr-only">
+        {t(live ? "products.detail.viewOnStore" : "products.detail.preview")}
+      </span>
     </Button>
   )
 }

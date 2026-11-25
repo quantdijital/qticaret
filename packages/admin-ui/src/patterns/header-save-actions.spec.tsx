@@ -4,7 +4,7 @@ import { useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 import { CardForm } from "./card-form"
 import { DirtyRegistryProvider, createDirtyRegistry } from "./dirty-registry"
-import { SaveBar } from "./save-bar"
+import { HeaderSaveActions } from "./header-save-actions"
 
 vi.mock("@tanstack/react-router", () => ({
   useBlocker: () => ({ status: "idle" }),
@@ -43,40 +43,42 @@ function Card({ name, onSave }: { name: string; onSave: (value: string) => void 
 function Page({ first = vi.fn(), second = vi.fn() }) {
   return (
     <DirtyRegistryProvider>
+      <HeaderSaveActions />
       <Card name="Genel" onSave={first} />
       <Card name="SEO" onSave={second} />
-      <SaveBar />
     </DirtyRegistryProvider>
   )
 }
 
-const bar = () => screen.queryByRole("region", { name: "Kaydedilmemiş değişiklikler" })
+const group = () => screen.getByRole("group", { name: "Sayfanın kaydı" })
+const headerButton = (name: string) => within(group()).getByRole("button", { name })
 
-describe("the page's one save bar (docs/06 'Ürün sayfası')", () => {
-  it("shows while a card holds changes and saves every changed card through its own save", async () => {
+describe("the page's one save in its header (docs/06 'Ürün sayfası')", () => {
+  it("rests as a disabled 'Kaydedildi' until a card holds changes, then saves each through its own save", async () => {
     const first = vi.fn()
     const second = vi.fn()
     render(<Page first={first} second={second} />)
-    expect(bar()).toBeNull()
+    expect(headerButton("Kaydedildi")).toBeDisabled()
+    expect(within(group()).queryByRole("button", { name: "Vazgeç" })).toBeNull()
 
     await userEvent.type(screen.getByRole("textbox", { name: "Genel" }), "Kupa")
     await userEvent.type(screen.getByRole("textbox", { name: "SEO" }), "Kupa al")
-    expect(bar()).toHaveTextContent("Kaydedilmemiş değişiklikler (2 bölümde)")
+    expect(group()).toHaveTextContent("2 bölümde değişiklik")
 
-    const region = screen.getByRole("region", { name: "Kaydedilmemiş değişiklikler" })
-    await userEvent.click(within(region).getByRole("button", { name: "Kaydet" }))
+    await userEvent.click(headerButton("Kaydet"))
     expect(first).toHaveBeenCalledWith("Kupa")
     expect(second).toHaveBeenCalledWith("Kupa al")
-    expect(bar()).toBeNull()
+    expect(headerButton("Kaydedildi")).toBeDisabled()
+    expect(group()).not.toHaveTextContent("bölümde")
   })
 
   it("lets every change go after asking", async () => {
     render(<Page />)
     await userEvent.type(screen.getByRole("textbox", { name: "Genel" }), "Kupa")
-    await userEvent.click(screen.getByRole("button", { name: "Vazgeç" }))
+    await userEvent.click(headerButton("Vazgeç"))
     await userEvent.click(screen.getByRole("button", { name: "Değişiklikleri at" }))
     expect(screen.getByRole("textbox", { name: "Genel" })).toHaveValue("")
-    expect(bar()).toBeNull()
+    expect(headerButton("Kaydedildi")).toBeDisabled()
   })
 
   it("saves on Ctrl+S and keeps the browser's own save away, but not inside a dialog", async () => {
@@ -99,8 +101,8 @@ describe("the page's one save bar (docs/06 'Ürün sayfası')", () => {
   })
 
   it("draws nothing outside a page that has one", () => {
-    render(<SaveBar />)
-    expect(bar()).toBeNull()
+    render(<HeaderSaveActions />)
+    expect(screen.queryByRole("group", { name: "Sayfanın kaydı" })).toBeNull()
   })
 })
 

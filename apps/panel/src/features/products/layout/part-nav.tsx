@@ -39,7 +39,10 @@ export function Mark({ mark }: { mark: PartMark }) {
   )
 }
 
-/** The bar's own height, kept as the page's scroll padding: a part gone to lands under it. */
+/**
+ * The bar's own height and the held page header's over it, kept as the
+ * page's scroll padding: a part gone to lands under both.
+ */
 function useBarRoom() {
   const bar = useRef<HTMLElement>(null)
   const [top, setTop] = useState(0)
@@ -50,12 +53,17 @@ function useBarRoom() {
     }
     const root = document.documentElement
     const measure = () => {
-      root.style.scrollPaddingTop = `${String(el.offsetHeight)}px`
+      root.style.scrollPaddingTop = `calc(var(--page-header-height, 0px) + ${String(el.offsetHeight)}px)`
       setTop((parseFloat(getComputedStyle(el).top) || 0) + el.offsetHeight)
     }
     measure()
     const watcher = new ResizeObserver(measure)
     watcher.observe(el)
+    // The header over it grows or shrinks (a line of changes): the bar moves with it
+    const header = document.querySelector("[data-page-header-sticky]")
+    if (header) {
+      watcher.observe(header)
+    }
     return () => {
       watcher.disconnect()
       root.style.scrollPaddingTop = ""
@@ -66,8 +74,8 @@ function useBarRoom() {
 
 /**
  * The product page's sections in their order (docs/06 "Ürün sayfası"),
- * held under the top bar: a click goes to one (a folded one opens), the
- * one being read is marked, and each says whether something in it is
+ * held under the top bar and the page's header: a click goes to one (a
+ * folded one opens), the one being read is marked, and each says whether something in it is
  * missing (the advisor's findings, an empty required attribute). Side by
  * side the bar heads the main column and names its parts as chips that
  * wrap; narrower it heads the page and is one picker, so it never scrolls
@@ -107,7 +115,7 @@ export function PartNav({
       ref={bar}
       aria-label={t(`${L}.label`)}
       data-part-nav=""
-      className="sticky top-[var(--layout-topbar-height)] z-10 -my-2 bg-background py-2"
+      className="sticky top-[calc(var(--layout-topbar-height)+var(--page-header-height,0px))] z-10 -my-2 bg-background py-2"
     >
       {wide ? (
         <ul className="flex flex-wrap gap-1.5">

@@ -3,9 +3,9 @@ import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
 import { DirtyRegistryProvider } from "@qticaret/admin-ui/patterns/dirty-registry"
+import { HeaderSaveActions } from "@qticaret/admin-ui/patterns/header-save-actions"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
-import { SaveBar } from "@qticaret/admin-ui/patterns/save-bar"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
@@ -51,7 +51,8 @@ function DetailSkeleton() {
  * attributes, variants, catalog, add-ons and price history), its search
  * appearance folded to a line; beside them, a narrow column following the
  * scroll with its facts, the SEO advisor and its categories, edited in
- * place. Every form saves on its own and on the one save bar. The
+ * place. Every form saves on its own and with the page's one "Kaydet" in
+ * the header, held under the top bar as the section bar under it. The
  * shop lays the page out for its team ("Sayfayı düzenle"): each column's
  * order and the parts it hides.
  */
@@ -127,9 +128,11 @@ function ProductPage({
             title={product.title}
             badge={<ProductStatusBadge status={product.status} />}
             back={back}
+            sticky
             action={
               <ProductActions
                 product={product}
+                save={<HeaderSaveActions />}
                 onCustomize={
                   canArrange
                     ? () => {
@@ -171,7 +174,6 @@ function ProductPage({
             })}
           />
           <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
-          <SaveBar />
         </div>
       </SectionDefaults>
     </DirtyRegistryProvider>

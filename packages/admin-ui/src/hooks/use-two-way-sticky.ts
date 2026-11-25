@@ -43,6 +43,7 @@ export function useTwoWaySticky(
       return
     }
     const wide = window.matchMedia(SIDE_BY_SIDE)
+    const header = document.querySelector<HTMLElement>("[data-page-header-sticky]")
     let shift = 0
     const set = (name: string, px: number) => {
       box.style.setProperty(name, `${px}px`)
@@ -62,9 +63,11 @@ export function useTwoWaySticky(
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
       const height = column.offsetHeight
       const view = window.innerHeight
+      // Under a page header held at the top too (`PageHeader sticky`)
+      const above = top * rem + (header?.offsetHeight ?? 0)
       set("--sticky-height", height)
-      set("--sticky-top", Math.min(top * rem, view - height - gap * rem))
-      set("--sticky-bottom", view - top * rem - height)
+      set("--sticky-top", Math.min(above, view - height - gap * rem))
+      set("--sticky-bottom", view - above - height)
       settle()
     }
     const turn = () => {
@@ -76,6 +79,9 @@ export function useTwoWaySticky(
     const observer = new ResizeObserver(measure)
     observer.observe(column)
     observer.observe(box)
+    if (header) {
+      observer.observe(header)
+    }
     window.addEventListener("resize", measure)
     window.addEventListener("scroll", settle, { passive: true })
     wide.addEventListener("change", turn)
