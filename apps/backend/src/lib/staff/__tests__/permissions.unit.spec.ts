@@ -384,6 +384,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: true,
       orderExport: true,
+      customerExport: true,
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
@@ -413,6 +414,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: false,
       orderExport: false,
+      customerExport: false,
       looks: false,
       wholesale: true,
     })
@@ -445,6 +447,7 @@ describe("staff roles", () => {
       legalTexts: false,
       vatRates: false,
       orderExport: false,
+      customerExport: false,
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
@@ -622,6 +625,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/search/synonyms/:id": false,
   "POST /admin/search/synonyms": false,
   "POST /admin/catalog/imports": false,
+  // F3.10: a bulk change's preview, the catalog roles' as the job is
+  "POST /admin/catalog/bulk-edit/preview": false,
   "POST /admin/migrations": false,
   "POST /admin/migrations/shopify": false,
   "POST /admin/migrations/feed": false,
@@ -738,6 +743,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/media/:id": false,
   "DELETE /admin/media/:id": false,
   "POST /admin/media/import": false,
+  // M1: unused pictures deleted at once, as one is
+  "POST /admin/media/delete": false,
   "POST /admin/media": false,
   "POST /admin/messaging/sender-domain/check": false,
   "POST /admin/messaging/sender-domain": false,
@@ -753,6 +760,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/order-board/deliver": true,
   // The order list as a file, every customer's details in it: the owner's alone
   "POST /admin/order-board/export": false,
+  "POST /admin/customer-export": false,
   "POST /admin/orders/:id/return-requests": true,
   "POST /admin/orders/:id/notes": true,
   "DELETE /admin/orders/:id/notes/:note_id": true,
@@ -791,6 +799,13 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // which stays the catalog roles' as a content draft's does
   "POST /admin/products/:id/duplicate": false,
   "POST /admin/products/:id/preview": false,
+  // Whether a variant can sell out is the catalog's; the count on the shelf stays open
+  "POST /admin/products/:id/stock-tracking": false,
+  // S2: when a product goes live is the catalog's, as publishing it is
+  "POST /admin/products/:id/publish-schedule": false,
+  "DELETE /admin/products/:id/publish-schedule": false,
+  // adr/0086: a sale price is a price, like a price list's
+  "POST /admin/products/:id/sale-prices": false,
   // adr/0069: a product's videos are written by those who write its images
   "POST /admin/products/:id/videos": false,
   "DELETE /admin/products/:id/videos/:video_id": false,

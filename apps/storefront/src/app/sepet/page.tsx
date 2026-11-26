@@ -23,16 +23,18 @@ import { LINK_CART_LOCKED } from "@/lib/cart/payment-link"
 import { cartExtras } from "@/lib/views/cart-extras"
 import { currentShared } from "@/lib/views/layout"
 import {
+  allShipFree,
   cartLinesOf,
   differs,
   freeShippingOf,
   lockedNoteOf,
   withAddonForms,
   withGiftLines,
+  withShippingNotes,
 } from "@/lib/views/cart"
 import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
 import { wholesaleCheckoutBlocked } from "@/lib/views/cart-wholesale"
-import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
+import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { shippedPromises } from "@/lib/views/product-shipping"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { cartBooking } from "@/lib/booking/store"
@@ -57,6 +59,8 @@ const CART_ERRORS = new Set([
   "messaging.email_domain_refuses",
   // A line's add-on picks or its quantity, refused (adr/0052)
   ...ADDON_ERROR_KEYS,
+  // S5: more of a product than one order may hold
+  "cart.max_quantity",
   // A payment link's cart: its lines and code are fixed (adr/0051)
   LINK_CART_LOCKED,
 ])
@@ -91,22 +95,25 @@ export default async function CartPage({
           : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons, extras, paths, pictures, amounts, booking] = await Promise.all([
-    shopperGiftLines(cart?.id),
-    // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
-    locked
-      ? new Map<string, StoreProductAddon[]>()
-      : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
-    // Shipping before an address, the shop's cart offers, products to add (adr/0046 Ek 2026-11-05)
-    cartExtras(cart, t),
-    // Each line's product page (a payment link's too); gone or hidden products read as text
-    productPathsOf(cart?.items ?? []),
-    // Each line's picture in its small versions (the same answer as the paths)
-    linePicturesOf(cart?.items ?? []),
-    visitorAmounts(),
-    // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
-    cart && hasBookingLines(cart.items) ? cartBooking(cart.id) : Promise.resolve(null),
-  ])
+  const [gifts, addons, extras, paths, pictures, amounts, booking, freeProducts] =
+    await Promise.all([
+      shopperGiftLines(cart?.id),
+      // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
+      locked
+        ? new Map<string, StoreProductAddon[]>()
+        : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
+      // Shipping before an address, the shop's cart offers, products to add (adr/0046 Ek 2026-11-05)
+      cartExtras(cart, t),
+      // Each line's product page (a payment link's too); gone or hidden products read as text
+      productPathsOf(cart?.items ?? []),
+      // Each line's picture in its small versions (the same answer as the paths)
+      linePicturesOf(cart?.items ?? []),
+      visitorAmounts(),
+      // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
+      cart && hasBookingLines(cart.items) ? cartBooking(cart.id) : Promise.resolve(null),
+      // adr/0087 §3: the lines of free-shipping products (the same answer as the paths)
+      freeShippingProductsOf(cart?.items ?? []),
+    ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
   const built = withGiftLines(
@@ -118,7 +125,12 @@ export default async function CartPage({
     ),
     gifts
   )
-  const lines = withBookingRead(built, cart?.items ?? [], booking)
+  const lines = withShippingNotes(
+    withBookingRead(built, cart?.items ?? [], booking),
+    cart,
+    freeProducts,
+    t
+  )
   const hold = holdViewOf(cart?.items ?? [], booking)
   // A dated line whose places are no longer held stops the payment until it is picked again
   const bookingBlocked = lines.some((line) => line.booking?.expired)
@@ -164,7 +176,12 @@ export default async function CartPage({
           credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
           // Nothing to ship (adr/0076 §6): no free shipping meter, no shipping row
           freeShipping: ships
-            ? freeShippingOf(subtotal, settings.free_shipping_threshold, t)
+            ? freeShippingOf(
+                subtotal,
+                settings.free_shipping_threshold,
+                t,
+                allShipFree(cart?.items ?? [], freeProducts)
+              )
             : null,
           ...(ships ? {} : { ships: false }),
           error: refused,

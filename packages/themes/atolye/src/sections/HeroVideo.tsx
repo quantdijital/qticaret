@@ -19,7 +19,16 @@ import type { HeroVideoWords } from "./hero-video-words"
  * privacy-enhanced player, Vimeo's without tracking). A video the player
  * cannot take draws no button.
  */
-export function HeroVideo({ video, words }: { video: HeroVideoView; words: HeroVideoWords }) {
+export function HeroVideo({
+  video,
+  words,
+  ringed = false,
+}: {
+  video: HeroVideoView
+  words: HeroVideoWords
+  /** Clear, the play mark in a ring before the words (`second_button: play`); else the quiet button. */
+  ringed?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const src = heroVideoPlayerSrc(video)
   if (src === null) {
@@ -28,8 +37,16 @@ export function HeroVideo({ video, words }: { video: HeroVideoView; words: HeroV
   const name = words[video.host]
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="gf-btn gf-btn--quiet">
-        <Play className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
+      <Dialog.Trigger
+        className={ringed ? "gf-btn gf-btn--quiet gf-btn--play" : "gf-btn gf-btn--quiet"}
+      >
+        {ringed ? (
+          <span aria-hidden="true" className="gf-play-ring">
+            <Play className="size-4 fill-current" strokeWidth={2} />
+          </span>
+        ) : (
+          <Play className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
+        )}
         <span>{video.label ?? words.play}</span>
       </Dialog.Trigger>
       <LayerPortal>

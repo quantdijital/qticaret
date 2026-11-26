@@ -194,6 +194,12 @@
   margin-top: 14px;
 }
 
+/* The shopper's note keeps its own line breaks */
+.print-pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .print-totals {
   margin-left: auto;
   width: 50%;

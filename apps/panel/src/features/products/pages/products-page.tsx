@@ -12,7 +12,11 @@ import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { BulkAction } from "@/features/products/api/bulk"
-import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
+import { productCountsQuery, productsQuery } from "@/features/products/api/products"
+import { ListOptions } from "@/features/products/components/list-options"
+import { useListPrefs } from "@/features/products/list-prefs"
+import { QuickSave, QuickToggle } from "@/features/products/quick-edit/quick-save"
+import { useQuickEdit } from "@/features/products/quick-edit/use-quick-edit"
 import type { ProductFilters } from "@/features/products/api/products"
 import { PLAN_STRIP_ID } from "@/components/layout/plan-status-banner"
 import { usePlanRestricted } from "@/features/auth/api/staff"
@@ -54,7 +58,9 @@ export function ProductsPage() {
     sort: search.sort,
   }
   const filters: ProductFilters = { q, status, ...values }
-  const list = useQuery(productsQuery({ ...filters, page }))
+  // "Görünüm": products per page and the columns shown, kept per person
+  const [prefs, setPrefs] = useListPrefs()
+  const list = useQuery(productsQuery({ ...filters, page, pageSize: prefs.pageSize }))
   const counts = useQuery(productCountsQuery())
   const scores = useQuery(
     productScoresQuery((list.data?.products ?? []).map((product) => product.id))
@@ -62,12 +68,17 @@ export function ProductsPage() {
   const duplicate = useDuplicateAndOpen()
   const productsFull = isFull(useLimitStanding("products"))
   const restricted = usePlanRestricted()
+  // "Hızlı düzenle": price, stock and status typed in the list, saved from the header
+  const quick = useQuickEdit()
   const columns = useProductColumns(
     new Map((scores.data ?? []).map((score) => [score.entity_id, score])),
     (product) => {
       duplicate.run(product.id)
-    }
+    },
+    prefs.hidden,
+    quick
   )
+  const quickDirty = quick.count > 0 || quick.saving
   // A search or a filter that can leave products out: the empty list says "no match"
   const filtered =
     q !== "" ||
@@ -109,37 +120,42 @@ export function ProductsPage() {
         title={t("nav.products")}
         description={t("products.description")}
         action={
-          <div className="flex flex-wrap items-center gap-2">
-            <SheetExportMenu />
-            <Button
-              variant="outline"
-              onClick={() => {
-                setImporting(true)
-              }}
-            >
-              <Upload />
-              {t("products.sheets.import")}
-            </Button>
-            {productsFull || restricted ? (
-              // At the package's limit the notice below says why (adr/0061 Ek C14); while the
-              // shop is restricted or suspended, the strip above every page (Ek C15)
+          // While quick edits wait, the header holds their save alone (as the product page's)
+          quickDirty ? (
+            <QuickSave edit={quick} />
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <SheetExportMenu />
               <Button
-                disabled
-                title={t(restricted ? "plan.strip.closed" : "plan.createBlocked")}
-                aria-describedby={restricted ? PLAN_STRIP_ID : LIMIT_NOTICE}
+                variant="outline"
+                onClick={() => {
+                  setImporting(true)
+                }}
               >
-                <Plus />
-                {t("products.add")}
+                <Upload />
+                {t("products.sheets.import")}
               </Button>
-            ) : (
-              <Button asChild>
-                <Link to="/products/new">
+              {productsFull || restricted ? (
+                // At the package's limit the notice below says why (adr/0061 Ek C14); while the
+                // shop is restricted or suspended, the strip above every page (Ek C15)
+                <Button
+                  disabled
+                  title={t(restricted ? "plan.strip.closed" : "plan.createBlocked")}
+                  aria-describedby={restricted ? PLAN_STRIP_ID : LIMIT_NOTICE}
+                >
                   <Plus />
                   {t("products.add")}
-                </Link>
-              </Button>
-            )}
-          </div>
+                </Button>
+              ) : (
+                <Button asChild>
+                  <Link to="/products/new">
+                    <Plus />
+                    {t("products.add")}
+                  </Link>
+                </Button>
+              )}
+            </div>
+          )
         }
       />
       <LimitNotice limit="products" id={LIMIT_NOTICE} />
@@ -194,12 +210,25 @@ export function ProductsPage() {
             />
           }
           actions={
-            <ProductSort
-              value={values.sort}
-              onChange={(sort) => {
-                setSearch({ sort, page: 1 })
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <ProductSort
+                value={values.sort}
+                onChange={(sort) => {
+                  setSearch({ sort, page: 1 })
+                }}
+              />
+              <QuickToggle edit={quick} />
+              <ListOptions
+                value={prefs}
+                onChange={(next) => {
+                  // Another page size starts from the first page
+                  if (next.pageSize !== prefs.pageSize) {
+                    setSearch({ page: 1 })
+                  }
+                  setPrefs(next)
+                }}
+              />
+            </div>
           }
           note={
             list.data?.limited ? (
@@ -259,7 +288,7 @@ export function ProductsPage() {
             {list.data && list.data.count > 0 ? (
               <Pagination
                 page={page}
-                pageSize={PAGE_SIZE}
+                pageSize={prefs.pageSize}
                 count={list.data.count}
                 onPageChange={(next) => {
                   setSearch({ page: next + 1 })

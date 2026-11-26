@@ -181,6 +181,7 @@ export function ProductPage({
                   whatsapp={
                     view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
                   }
+                  maxQuantity={view.maxQuantity ?? null}
                   words={buyWords(t, percents)}
                 />
               )}

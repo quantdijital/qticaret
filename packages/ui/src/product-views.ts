@@ -31,6 +31,8 @@ export interface ProductCardView {
   title: string
   path: string
   brand: string | null
+  /** The product's subtitle, on a split card only (`look.split`); none elsewhere. */
+  subtitle?: string | null
   image: ImageView | null
   /**
    * The product's second photo, on every variant while the shop has
@@ -96,6 +98,11 @@ export interface CardBadgeView {
 export interface CardLookView {
   /** The name, a line and the price over a dark fade at the photo's foot, the price at the right. */
   over: boolean
+  /**
+   * Over the photo, the name and its subtitle at the left and a short price in
+   * the accent colour at the right, no rows (`text_position: over_split`). Absent: false.
+   */
+  split?: boolean
   /** The stars' average as a pill on the photo ("★ 4,8") instead of the stars' row. */
   ratingBadge: boolean
   /** A round arrow at the card's foot, for the eye only: the card keeps its one link. */
@@ -267,6 +274,13 @@ export interface ProductPageView {
    * Null or left out: no such mark.
    */
   withdrawalNote?: string | null
+  /**
+   * The most of the product one order may hold (S5), its variants
+   * together: the count beside "add to cart" stops there and says so.
+   * The backend refuses more whatever the page sends. Left out or null:
+   * no limit.
+   */
+  maxQuantity?: number | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
   /** The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7); absent: today's. */

@@ -1,4 +1,4 @@
-import type { ListingTextSettings } from "@qticaret/types"
+import type { ListingTextSettings, ListingViewMode } from "@qticaret/types"
 import type { SearchFormView } from "./search-form-views"
 import type { CategoryCardView } from "./card-views"
 import type { HomeSectionView } from "./content-views"
@@ -51,6 +51,28 @@ export interface StockFilterView {
   count: number
   selected: boolean
   path: string
+}
+
+/**
+ * The grid/list switch: a plain GET form to the listing (`gorunum=…`),
+ * its other parameters carried along, so it works before the script and
+ * the address can be shared. Its two buttons say which is on (`aria-pressed`).
+ */
+export interface ListingViewSwitchView {
+  /** "Görünüm": the group's name for a screen reader. */
+  label: string
+  action: string
+  /** The query's parameter (`gorunum`). */
+  name: string
+  options: { mode: ListingViewMode; value: string; label: string; current: boolean }[]
+  /** The listing's other parameters, as hidden fields. */
+  keep: { name: string; value: string }[]
+}
+
+/** The departure month filter: each month a link that chooses it or lets it go (nofollow). */
+export interface DateFilterView {
+  label: string
+  options: { label: string; path: string; selected: boolean }[]
 }
 
 /** The price range form: a plain GET form to the listing, its current filters carried along. */
@@ -128,6 +150,19 @@ export interface ListingPageView {
    * Ek 2026-11-14 §7); absent on other lists and from an older backend: today's.
    */
   main?: CategoryMainView
+  /**
+   * The products as a grid of cards (`grid`) or one to a row (`list`): the
+   * shopper's choice, else the shop's (`StoreThemeSettings.listing_page`).
+   * Absent: today's grid.
+   */
+  layout?: ListingViewMode
+  /** The shopper's grid/list switch beside the sort; none: no switch (today's page). */
+  viewSwitch?: ListingViewSwitchView | null
+  /**
+   * The departure month filter of a shop selling dated products (`ay`,
+   * the search box's own parameter, adr/0077 §2); none: not offered.
+   */
+  dates?: DateFilterView | null
   /** A site search's help (`/arama`); none on other lists. */
   search?: SearchHelpView | null
   /** The empty list's words, when the page has its own (a search, the sale page). */

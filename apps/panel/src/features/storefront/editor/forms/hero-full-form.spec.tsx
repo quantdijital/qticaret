@@ -206,6 +206,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["action", "content"],
       ["button_tone", "content"],
       ["button_icon", "content"],
+      ["second_button", "content"],
       ["show_trust", "content"],
       ["video_url", "video"],
       ["height", "layout"],
@@ -215,6 +216,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["edge", "layout"],
       ["accent_mark", "layout"],
       ["ornament", "layout"],
+      ["title_style", "layout"],
       ["title_mix", "layout"],
       ["words_place", "layout"],
     ])
@@ -230,6 +232,7 @@ describe("the full image opening in the settings search and the preview", () => 
       ["edge", "layout"],
       ["accent_mark", "layout"],
       ["ornament", "layout"],
+      ["title_style", "layout"],
       ["title_mix", "layout"],
     ])
     // Both: the search box's place and the button's colour and arrow
@@ -237,6 +240,16 @@ describe("the full image opening in the settings search and the preview", () => 
       expect.arrayContaining(["search_position", "button_tone", "button_icon"])
     )
     expect(keys(hero())).toEqual([])
+  })
+
+  it("asks for the trust row's place only with the badges on, the note's only with a note", () => {
+    const names = (section: AnySection) => contentFields(section).map((each) => each.key)
+
+    expect(names(full())).not.toContain("trust_place")
+    expect(names(full())).not.toContain("note_place")
+    expect(names(full({ show_trust: true }))).toContain("trust_place")
+    expect(names(full({ note: "Anı biriktir" }))).toContain("note_place")
+    expect(names(full({ action: "search" }))).not.toContain("second_button")
   })
 
   it("lands a click on the preview's accent line on its field", () => {

@@ -28,7 +28,10 @@ import { STAFF_ACCOUNT_ROUTES } from "./http/staff-account-routes"
 import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
+import { AdminPostBulkEditPreview } from "./admin/catalog/bulk-edit/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
+import { AdminPostProductStockTracking } from "./admin/products/[id]/stock-tracking/validators"
+import { AdminPostProductPublishSchedule } from "./admin/products/[id]/publish-schedule/validators"
 import { VariantImagesInput } from "../lib/catalog/variant-images"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
@@ -46,6 +49,7 @@ import { CUSTOMER_ROUTES } from "./http/customer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { WHOLESALE_ROUTES } from "./http/wholesale-routes"
 import { WHOLESALE_STORE_ROUTES } from "./http/wholesale-store-routes"
+import { VARIANT_SALE_ROUTES } from "./http/variant-sale-guard"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { POPUP_ROUTES } from "./http/popup-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
@@ -71,6 +75,7 @@ import { INVOICE_ROUTES } from "./http/invoice-routes"
 import { MIGRATION_ROUTES } from "./http/migration-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
+import { ORDER_NOTE_ROUTES } from "./http/order-note-routes"
 import { PAYMENT_LINK_ROUTES } from "./http/payment-link-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
@@ -314,6 +319,12 @@ export default defineMiddlewares({
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostDescriptionFactsPreview)],
     },
+    // F3.10: what a bulk change would do, before the job applies it
+    {
+      matcher: "/admin/catalog/bulk-edit/preview",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostBulkEditPreview)],
+    },
     // A new product's variant pictures, picked before it existed: tied within the create's workflow
     {
       matcher: "/admin/products",
@@ -326,6 +337,18 @@ export default defineMiddlewares({
       methods: ["POST"],
       bodyParser: { sizeLimit: "1mb" },
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
+    },
+    // A variant's stock tracking turned on (with its count) or off after it was made
+    {
+      matcher: "/admin/products/:id/stock-tracking",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductStockTracking)],
+    },
+    // S2: a draft's planned publish set (POST) or cancelled (DELETE)
+    {
+      matcher: "/admin/products/:id/publish-schedule",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductPublishSchedule)],
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
     ...SEO_ROUTES,
@@ -372,6 +395,8 @@ export default defineMiddlewares({
     ...WHOLESALE_ROUTES,
     // ADR-0068 §7: the signed-in wholesaler's own prices
     ...WHOLESALE_STORE_ROUTES,
+    // adr/0086: the variants' own sale lists stay off the price lists screen and its writes
+    ...VARIANT_SALE_ROUTES,
     // adr/0050: bulk e-mail and SMS, behind their flag
     ...CAMPAIGN_ROUTES,
     // adr/0080: storefront pop-ups, behind their flag
@@ -390,6 +415,7 @@ export default defineMiddlewares({
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,
+    ...ORDER_NOTE_ROUTES,
     // adr/0051: payment links behind their flag; a link's cart locked; Medusa's draft orders closed
     ...PAYMENT_LINK_ROUTES,
     // F3.11: brands

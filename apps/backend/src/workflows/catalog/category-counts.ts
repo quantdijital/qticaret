@@ -3,6 +3,7 @@ import { createTtlCache } from "../../lib/cache/ttl-cache"
 import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
 import type SearchIndexModuleService from "../../modules/search-index/service"
 import { categoryRows, subtreeIn } from "../content/landing-facet"
+import { hidesOutOfStock } from "../seo/listing-stock"
 
 type Channels = readonly string[] | null
 
@@ -17,13 +18,15 @@ type Channels = readonly string[] | null
  */
 export async function countCategories(
   container: MedusaContainer,
-  channels: Channels
+  channels: Channels,
+  inStockOnly = false
 ): Promise<Record<string, number>> {
   const rows = await categoryRows(container)
   const shown = rows.filter((row) => row.is_active === true && row.is_internal !== true)
   return container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE).categoryCounts(
     shown.map((row) => ({ id: row.id, ids: subtreeIn(rows, row.id, true) })),
-    channels && [...channels]
+    channels && [...channels],
+    inStockOnly
   )
 }
 
@@ -32,10 +35,12 @@ export async function countCategories(
 const counted = createTtlCache<Record<string, number>>({ ttlMs: 60_000, maxEntries: 8 })
 
 /** `countCategories`, kept a minute per set of channels. */
-export function storeCategoryCounts(
+export async function storeCategoryCounts(
   container: MedusaContainer,
   channels: Channels
 ): Promise<Record<string, number>> {
-  const key = channels ? [...new Set(channels)].sort().join(",") : "*"
-  return counted(key, () => countCategories(container, channels))
+  // T1: hiding sold-out products, the tiles count what the listings show
+  const hide = await hidesOutOfStock(container)
+  const key = `${channels ? [...new Set(channels)].sort().join(",") : "*"}${hide ? ":in-stock" : ""}`
+  return counted(key, () => countCategories(container, channels, hide))
 }

@@ -21,10 +21,20 @@ import {
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { WHOLESALE_NO_CODE } from "@/lib/views/cart-wholesale"
 
+/** The backend's refusals of a code not for this buyer (K1/K2), passed on as their keys. */
+const RESTRICTED_CODE_REFUSALS: ReadonlySet<string> = new Set([
+  "promotions.customer_group_login",
+  "promotions.customer_group_only",
+  "promotions.first_order_only",
+])
+
 const AddToCart = z.object({
   variant_id: z.string().regex(/^variant_[0-9A-Za-z]{10,64}$/),
   quantity: z.coerce.number().int().min(1).max(99),
 })
+
+/** The backend's refusal of more of a product than one order may hold (S5). */
+const MAX_QUANTITY = "cart.max_quantity"
 
 /** The messages a theme can show for a failed add; anything else is `cart.add_failed`. */
 function messageFor(error: unknown): string {
@@ -42,6 +52,10 @@ function messageFor(error: unknown): string {
   // More units than are for sale: said so, not "not for sale"
   if (isInsufficientStock(error)) {
     return INSUFFICIENT_STOCK
+  }
+  // More of the product than one order may hold (S5)
+  if (error.messageKey === MAX_QUANTITY) {
+    return MAX_QUANTITY
   }
   return error.status === 400 || error.status === 404
     ? "cart.variant_unavailable"
@@ -105,7 +119,7 @@ export async function changeCartLine(form: FormData): Promise<void> {
     // payment link's cart keeps its lines as they are (adr/0051)
     const key = isStoreApiError(error) ? error.messageKey : null
     const shown =
-      key === "addons.max_quantity"
+      key === "addons.max_quantity" || key === MAX_QUANTITY
         ? key
         : (linkCartRefusal(error) ??
           (messageFor(error) === "errors.too_many_requests"
@@ -148,9 +162,12 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
         // A wholesaler's cart takes no code (ADR-0068 §6): told as such
         (error.messageKey === WHOLESALE_NO_CODE
           ? WHOLESALE_NO_CODE
-          : error.status === 429
-            ? "errors.too_many_requests"
-            : "cart.promotion_invalid"),
+          : // A code for some customers or a first order only (K1/K2): told why
+            error.messageKey && RESTRICTED_CODE_REFUSALS.has(error.messageKey)
+            ? error.messageKey
+            : error.status === 429
+              ? "errors.too_many_requests"
+              : "cart.promotion_invalid"),
     }
   }
   revalidatePath("/", "layout")

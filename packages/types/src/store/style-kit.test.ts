@@ -17,6 +17,8 @@ describe("the style kit", () => {
       media_ground: ["well", "page"],
       density: ["airy", "balanced", "compact"],
       motion: ["calm", "lively"],
+      page_width: ["standard", "narrow"],
+      accent_ink: ["auto", "light"],
     })
     expect(STYLE_KIT_FIELDS).toEqual([
       "menu_style",
@@ -25,6 +27,8 @@ describe("the style kit", () => {
       "media_ground",
       "density",
       "motion",
+      "page_width",
+      "accent_ink",
     ])
   })
 
@@ -44,6 +48,8 @@ describe("the style kit", () => {
       "data-media-ground",
       "data-density",
       "data-motion",
+      "data-page-width",
+      "data-accent-ink",
     ])
   })
 

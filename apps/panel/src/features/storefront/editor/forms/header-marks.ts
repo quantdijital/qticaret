@@ -8,6 +8,7 @@ import { headerCatalogOffers } from "./header-catalog-steps"
 const HEADER_DEFAULTS = {
   search_style: "field",
   menu_images: "submenus",
+  tool_labels: "show",
   sticky: true,
   over_cover: false,
 } as const

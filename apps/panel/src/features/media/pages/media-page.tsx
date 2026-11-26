@@ -4,6 +4,7 @@ import { Sparkles, Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
@@ -22,6 +23,8 @@ import { aiServicesQuery } from "@/features/ai/api/ai"
 import { useCan } from "@/features/auth/api/staff"
 import { ALT_TEXT_TASK } from "@/features/media/api/alt-review"
 import { MEDIA_PAGE_SIZE, mediaListQuery } from "@/features/media/api/media"
+import type { MediaView } from "@/features/media/api/media"
+import { MediaCleanupBar } from "@/features/media/components/media-cleanup-bar"
 import { AltReviewDialog } from "@/features/media/components/alt-review-dialog"
 import { MediaDetailDialog } from "@/features/media/components/media-detail-dialog"
 import { MediaGrid } from "@/features/media/components/media-grid"
@@ -68,6 +71,8 @@ function UploadDialog({
  * The media library (docs/06 Ortam kütüphanesi): every picture the shop
  * uploaded or brought in from an address, newest first, searchable; one
  * opens in a dialog with its words, its address and where it is used.
+ * Views (M1): all, those nothing shows (picked and deleted at once), those
+ * without an alt text.
  */
 export function MediaPage() {
   const { t } = useTranslation()
@@ -75,20 +80,28 @@ export function MediaPage() {
   const navigate = useNavigate()
   const canUpload = useCan("catalog")
   const q = search.q ?? ""
+  const view = search.view ?? "all"
   const page = (search.page ?? 1) - 1
-  const list = useQuery(mediaListQuery({ q, page }))
+  const list = useQuery(mediaListQuery({ q, page, view }))
+  // The "Kullanılmayan" view's picks; another view or page lets them go
+  const [picked, setPicked] = useState<Set<string>>(() => new Set())
+  const picking = view === "unused" && canUpload
   const [uploading, setUploading] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   // Only for a role the alt text task allows (owner, admin); a quiet button beside upload
   const altTask = useQuery(aiServicesQuery()).data?.tasks.find((each) => each.id === ALT_TEXT_TASK)
   const walk = useRecordWalk(list.data?.media, (asset) => asset.id)
-  const setSearch = (next: { q?: string; page?: number }) => {
+  const setSearch = (next: { q?: string; page?: number; view?: MediaView }) => {
+    setPicked(new Set())
     void navigate({
       to: "/media",
       search: (previous: { q?: string | undefined; page?: number | undefined }) => {
         const merged = { ...previous, ...next }
+        // The view as this page reads it: other routes name `view` with their own values
+        const nextView = next.view ?? view
         return {
           q: merged.q === "" ? undefined : merged.q,
+          view: nextView === "all" ? undefined : nextView,
           page: merged.page && merged.page > 1 ? merged.page : undefined,
         }
       },
@@ -134,6 +147,18 @@ export function MediaPage() {
       {/* adr/0061 Ek C14: near or at the package's storage limit */}
       <LimitNotice limit="storage_mb" />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
+        <FilterTabs
+          label={t("media.views.label")}
+          value={view}
+          onChange={(next) => {
+            setSearch({ view: next, page: 1 })
+          }}
+          tabs={[
+            { key: "all", label: t("media.views.all") },
+            { key: "unused", label: t("media.views.unused") },
+            { key: "missing_alt", label: t("media.views.missing_alt") },
+          ]}
+        />
         <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3">
           <SearchInput
             value={q}
@@ -143,6 +168,14 @@ export function MediaPage() {
             }}
           />
         </div>
+        {view === "unused" && list.data ? (
+          <MediaCleanupBar
+            items={list.data.media}
+            selected={picked}
+            onSelect={setPicked}
+            canDelete={canUpload}
+          />
+        ) : null}
         <div className="p-5">
           {list.isError ? (
             <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />
@@ -151,13 +184,32 @@ export function MediaPage() {
               items={list.data?.media}
               loading={list.isPending}
               stale={list.isPlaceholderData}
-              onItemClick={walk.show}
+              {...(picking ? { selected: picked } : {})}
+              onItemClick={(asset) => {
+                if (!picking) {
+                  walk.show(asset)
+                  return
+                }
+                setPicked((current) => {
+                  const next = new Set(current)
+                  if (!next.delete(asset.id)) {
+                    next.add(asset.id)
+                  }
+                  return next
+                })
+              }}
               empty={
                 <div className="flex flex-col items-center gap-3 text-center">
                   <p className="max-w-sm text-sm text-muted-foreground">
-                    {t(q ? "media.noMatch" : "media.empty")}
+                    {t(
+                      q
+                        ? "media.noMatch"
+                        : view === "all"
+                          ? "media.empty"
+                          : `media.views.empty.${view}`
+                    )}
                   </p>
-                  {q ? null : upload}
+                  {q || view !== "all" ? null : upload}
                 </div>
               }
             />

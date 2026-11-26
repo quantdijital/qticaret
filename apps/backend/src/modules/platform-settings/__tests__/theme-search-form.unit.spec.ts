@@ -28,6 +28,7 @@ describe("theme section: the search form", () => {
       show_people: true,
       flexible_month: true,
       date_words: false,
+      boxed_fields: false,
       category_style: "select",
       placeholder: null,
     })
@@ -42,6 +43,7 @@ describe("theme section: the search form", () => {
         show_people: false,
         flexible_month: false,
         date_words: true,
+        boxed_fields: true,
         category_style,
         placeholder: "Nereye gitmek istersiniz?",
       }
@@ -69,6 +71,7 @@ describe("theme section: the search form", () => {
     expect(off({ attribute_key: "marka" })).toBe(false)
     expect(off({ show_dates: "yes" })).toBe(false)
     expect(off({ date_words: "yes" })).toBe(false)
+    expect(off({ boxed_fields: "yes" })).toBe(false)
     expect(off({ show_words: true })).toBe(false)
   })
 

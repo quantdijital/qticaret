@@ -150,6 +150,11 @@ const TR: Readonly<Record<string, string>> = {
   "order_invoiced.intro":
     "#{{number}} numaralı siparişinizin {{document}} faturası {{invoice}} numarasıyla kesildi. Faturanızı sipariş sayfanızdan indirebilirsiniz.",
   "order_invoiced.button": "Faturayı görüntüle",
+  "order_note.subject": "Siparişinizle ilgili bir not (#{{number}})",
+  "order_note.preheader": "{{shop}} siparişiniz hakkında size yazdı.",
+  "order_note.heading": "Merhaba {{name}}, siparişiniz hakkında bir notumuz var",
+  "order_note.intro": "#{{number}} numaralı siparişinizle ilgili {{shop}} ekibinin notu:",
+  "order_note.button": "Siparişimi görüntüle",
   "order_link.subject": "Siparişinizin bağlantısı (#{{number}})",
   "order_link.preheader": "{{shop}} siparişinizi görüntüleyin.",
   "order_link.heading": "Merhaba {{name}}, siparişiniz burada",

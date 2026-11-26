@@ -29,6 +29,18 @@ function groupFiles(group: string | undefined): { testMatch: RegExp; testIgnore?
 }
 
 /**
+ * Files that change what every product page draws, the shop's product page
+ * layout (it hides parts): run alone, after the others, never beside a test
+ * of the product page. Beside one, a part hidden in between left that page
+ * once its finding was fixed (product-header-save's SEO card, 2026-11-25).
+ */
+const SHOP_WIDE = /product-layout\.e2e\.ts$/
+const group = process.env["E2E_GROUP"]
+const files = groupFiles(group)
+// Group "1" names its files; the shop-wide ones are in "2" (and in a run of every file)
+const shopWide = group !== "1"
+
+/**
  * The panel's e2e smoke tests (docs/07, docs/06): a temporary admin signs
  * in, the main screens open without errors, a few read-only flows work,
  * and axe finds no serious accessibility issue. They run against the
@@ -63,10 +75,21 @@ export default defineConfig({
     { name: "teardown", testMatch: /auth\.teardown\.ts/ },
     {
       name: "chromium",
-      ...groupFiles(process.env["E2E_GROUP"]),
+      testMatch: files.testMatch,
+      testIgnore: files.testIgnore ? [files.testIgnore, SHOP_WIDE] : SHOP_WIDE,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: SESSION_FILE },
     },
+    ...(shopWide
+      ? [
+          {
+            name: "shop-wide",
+            testMatch: SHOP_WIDE,
+            dependencies: ["setup", "chromium"],
+            use: { ...devices["Desktop Chrome"], storageState: SESSION_FILE },
+          },
+        ]
+      : []),
   ],
   webServer: {
     command: "pnpm dev",

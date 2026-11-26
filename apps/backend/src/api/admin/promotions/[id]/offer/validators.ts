@@ -1,5 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 import { CODE_PATTERN, normalizeCode } from "../../../../../lib/promotions"
+import {
+  AUDIENCE_ATTRIBUTES,
+  FIRST_ORDER_ATTRIBUTE,
+  FIRST_ORDER_VALUE,
+} from "../../../../../lib/promotions/restrictions"
 
 const Rule = z
   .object({
@@ -45,6 +50,20 @@ export const AdminPostPromotionOffer = z
       .strict()
       .optional(),
     minimum: z.array(Rule).max(5).optional(),
+    // Who may use it (K1/K2): only those rules, so no other rule is replaced through here
+    audience: z
+      .array(
+        Rule.refine(
+          (rule) =>
+            rule.operator === "in" &&
+            AUDIENCE_ATTRIBUTES.includes(rule.attribute) &&
+            (rule.attribute !== FIRST_ORDER_ATTRIBUTE ||
+              (rule.values.length === 1 && rule.values[0] === FIRST_ORDER_VALUE)),
+          { message: "promotions.audience_invalid" }
+        )
+      )
+      .max(2)
+      .optional(),
     per_customer: z.object({ limit: z.number().int().positive().nullable() }).strict().optional(),
     dates: z.object({ starts_at: Day, ends_at: Day }).strict().optional(),
     campaign: z

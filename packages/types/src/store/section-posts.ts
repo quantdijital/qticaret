@@ -18,6 +18,31 @@ export const POSTS_INTRO_LIMITS = { eyebrow: 40, intro: 200 } as const
 export const POSTS_INTRO_CARDS = 3
 
 /**
+ * The intro panel's look (each list's first: the panel as it was): its
+ * ground as the section's (`ground`) or a light tint of the shop's main
+ * colour over it (`tint`, "Panel tonu"); a leaf sprig at its lower right
+ * (`leaves`, "Süs"); the cards' covers 16:10 (`standard`) or wider, 2:1
+ * (`wide`, "Kapak oranı").
+ */
+export const POSTS_PANEL_SETTINGS = {
+  panel_tone: ["ground", "tint"],
+  ornament: ["none", "leaves"],
+  cover_ratio: ["standard", "wide"],
+} as const satisfies Record<string, readonly [string, ...string[]]>
+
+export type PostsPanelSetting = keyof typeof POSTS_PANEL_SETTINGS
+export type PostsPanelStep<S extends PostsPanelSetting> = (typeof POSTS_PANEL_SETTINGS)[S][number]
+
+/** A setting as a reader takes it: absent or off the list, the first. */
+export const postsPanelStepOf = <S extends PostsPanelSetting>(
+  setting: S,
+  value: unknown
+): PostsPanelStep<S> => {
+  const steps: readonly unknown[] = POSTS_PANEL_SETTINGS[setting]
+  return (steps.includes(value) ? value : POSTS_PANEL_SETTINGS[setting][0]) as PostsPanelStep<S>
+}
+
+/**
  * The posts as the store API prints them: today's title and count, then
  * the variant's own only off the default, so a `grid` prints as it did
  * before variants. The storefront reads a variant it does not know as
@@ -36,4 +61,8 @@ export interface StorePostsSection {
   intro?: string | null
   /** `intro_panel`: the button; null or absent (or broken): the storefront's "every post". */
   link?: StoreLayoutLink | null
+  /** `intro_panel`: printed only off the default; absent: `ground`, `none`, `standard`. */
+  panel_tone?: PostsPanelStep<"panel_tone">
+  ornament?: PostsPanelStep<"ornament">
+  cover_ratio?: PostsPanelStep<"cover_ratio">
 }

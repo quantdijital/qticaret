@@ -5,6 +5,7 @@ import { FilterPanel, hasFilters } from "./listing/FilterPanel"
 import { FilterSheet } from "./listing/FilterSheet"
 import { ListingText } from "./listing/ListingText"
 import { Pager, hasPages } from "./listing/Pager"
+import { ProductRows } from "./listing/ProductRows"
 import { Empty, SearchHelp } from "./listing/SearchHelp"
 import { Toolbar } from "./listing/Toolbar"
 import { Understood } from "./listing/Understood"
@@ -112,17 +113,23 @@ export function ListingPage({
             >
               {panel && (
                 <aside aria-labelledby="filtre-baslik" className="max-lg:hidden">
-                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2">
-                    <h2 id="filtre-baslik" className="text-title">
+                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2">
+                    <h2 id="filtre-baslik" className="flex min-h-11 items-center text-title">
                       {t("listing.filters")}
                     </h2>
                     <FilterPanel view={view} t={t} id="filtre-yan" />
                   </div>
                 </aside>
               )}
-              <div className="flex min-w-0 flex-col gap-6 lg:gap-8">
+              <div className="flex min-w-0 flex-col gap-6">
                 <Toolbar view={view} t={t} sheet={panel ? SHEET : null} results={RESULTS} />
-                {found ? (
+                {found && view.layout === "list" ? (
+                  <ProductRows
+                    products={view.products}
+                    t={t}
+                    eager={view.pagination.page === 1 && !banner ? 2 : 0}
+                  />
+                ) : found ? (
                   <ProductGrid
                     products={view.products}
                     t={t}
@@ -135,7 +142,7 @@ export function ListingPage({
                   <Empty view={view} t={t} />
                 )}
                 {hasPages(view.pagination) && (
-                  <div className="pt-4">
+                  <div className="pt-4 lg:pt-6">
                     <Pager pagination={view.pagination} t={t} />
                   </div>
                 )}

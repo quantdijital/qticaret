@@ -12,8 +12,11 @@ import { parcelLinesOf } from "./geliver/mappers"
 import type { OrderItemRow } from "./geliver/mappers"
 import { defaultParcelOf, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
+import { kurus, toMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
+import { quoteContextOf, shippingQuote } from "./quote"
+import type { QuoteLine } from "./quote"
 
 /**
  * What a carrier provider reads of the shop at the time of the call, from
@@ -78,6 +81,64 @@ export async function tablePriceOf(desi: number): Promise<Kurus> {
     throw new ValidationError("shipping.no_rate")
   }
   return price
+}
+
+/** A quote in kuruş as Medusa takes a calculated price: lira, KDV in. */
+export const calculatedPriceOf = (amount: Kurus) => ({
+  calculated_amount: Number(toMedusaAmount(amount)),
+  is_calculated_price_tax_inclusive: true,
+})
+
+/** A cart line as the quote and the parcel read it. */
+export type CartLine = OrderItemRow & QuoteLine
+
+/** A provider context's lines, the missing ones left out. */
+export const cartLinesOf = (context: { items?: readonly (CartLine | null)[] | null }): CartLine[] =>
+  (context.items ?? []).filter((item): item is CartLine => item !== null)
+
+/**
+ * A cart's price by the shop's desi table (adr/0035), through the one
+ * shipping quote (adr/0087 §2): the paid lines' parcel, free past the
+ * basket threshold or with every product free, plus a class surcharge.
+ */
+export async function tableQuoteOf(context: { items?: readonly (CartLine | null)[] | null }) {
+  const amount = await shippingQuote({
+    lines: cartLinesOf(context),
+    context: quoteContextOf(context),
+    basis: "parcel",
+    price: async (lines) => tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi),
+  })
+  return calculatedPriceOf(amount)
+}
+
+/**
+ * A flat-priced option's amount (adr/0087 §2): kept in its `data.amount`,
+ * kuruş, KDV in, written by our workflows only. Anything else is refused:
+ * an option without a price is never free by mistake.
+ */
+export function flatAmountOf(optionData: Record<string, unknown> | null | undefined): Kurus {
+  const amount = optionData?.["amount"]
+  if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount < 0) {
+    throw new ValidationError("shipping.option_invalid")
+  }
+  return kurus(amount)
+}
+
+/** A flat-priced option for a cart: its amount, through the one quote (free past the threshold). */
+export async function flatQuoteOf(
+  optionData: Record<string, unknown>,
+  context: { items?: readonly (CartLine | null)[] | null }
+) {
+  const amount = flatAmountOf(optionData)
+  return calculatedPriceOf(
+    await shippingQuote({
+      lines: cartLinesOf(context),
+      context: quoteContextOf(context),
+      // Per order: a mixed basket pays it in full (adr/0087, the owner's answer 2)
+      basis: "order",
+      price: () => amount,
+    })
+  )
 }
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"

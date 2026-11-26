@@ -64,7 +64,8 @@ export function LineExtras({
  * One order's packing slip (an irsaliye-like paper for the box): who it
  * goes to, how it was paid and goes, each line with its SKU, variant,
  * quantity and add-on texts; prices only when the shop prints them; the
- * team's notes only when asked for this print (they are never the shopper's).
+ * team's notes only when asked for this print (they are never the shopper's);
+ * the shopper's own note at checkout always.
  */
 export function PackingSlip({
   order,
@@ -177,6 +178,12 @@ export function PackingSlip({
             <span>{t(`${P}.total`)}</span>
             <span>{money(order.totals.total)}</span>
           </div>
+        </div>
+      ) : null}
+      {order.customer_note ? (
+        <div className="print-section">
+          <h2>{t(`${P}.customerNote`)}</h2>
+          <p className="print-pre">{order.customer_note}</p>
         </div>
       ) : null}
       {notes && order.notes.length > 0 ? (

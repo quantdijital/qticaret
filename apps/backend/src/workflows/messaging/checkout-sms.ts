@@ -1,3 +1,4 @@
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
@@ -26,8 +27,17 @@ const holdCheckoutSmsStep = createStep(
   }
 )
 
-/** A checkout from a flooding address: its order's "order received" text is held. */
+/**
+ * A checkout from a flooding address: its order's "order received" text is
+ * held. Under the cart's own lock, so another writer of its metadata (the
+ * order note) never drops the mark.
+ */
 export const holdCheckoutSmsWorkflow = createWorkflow(
   "messaging-hold-checkout-sms",
-  (input: { cart_id: string }) => new WorkflowResponse(holdCheckoutSmsStep(input))
+  (input: { cart_id: string }) => {
+    acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
+    const held = holdCheckoutSmsStep(input)
+    releaseLockStep({ key: input.cart_id })
+    return new WorkflowResponse(held)
+  }
 )

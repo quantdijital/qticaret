@@ -21,6 +21,8 @@ export const PlaceOrder = z.object({
     .string()
     .regex(/^[\w.-]{1,40}$/)
     .optional(),
+  // The shopper's note for the shop (Batch 8 / O1): the backend cleans it and holds it to 500
+  order_note: z.string().max(2000).optional(),
   challenge: z
     .string()
     .regex(/^[\w.-]{1,300}$/)
@@ -75,6 +77,21 @@ export async function acceptTerms(cartId: string, input: PlaceOrderInput): Promi
   return null
 }
 
+/**
+ * The shopper's order note on the cart before the payment starts, so a card
+ * paid on the provider's page brings it to the order too. A theme that draws
+ * no note field sends none, and the cart's stays as it is; an empty one
+ * takes it off.
+ */
+export async function saveOrderNote(cartId: string, input: PlaceOrderInput): Promise<void> {
+  if (input.order_note === undefined) {
+    return
+  }
+  await storePost(`/store/carts/${encodeURIComponent(cartId)}/order-note`, {
+    note: input.order_note,
+  })
+}
+
 /** The backend's refusals a shopper can act on, by key; anything else is the step's own message. */
 const KNOWN = new Set([
   "messaging.email_domain_refuses",
@@ -92,7 +109,12 @@ const KNOWN = new Set([
   "cart.email_required",
   "payments.cart_changed",
   "promotions.one_code",
+  // A code no longer this buyer's at the checkout (K1/K2): the code comes off in the cart
+  "promotions.first_order_only",
+  "promotions.customer_group_only",
+  "promotions.customer_group_login",
   "errors.too_many_requests",
+  "checkout.order_note_too_long",
   // A gift card line not ready to pay (adr/0025 Ek 2026-11-03)
   "gift_card.recipient_required",
   "gift_card.sale_disabled",
@@ -102,6 +124,8 @@ const KNOWN = new Set([
   "addons.required",
   "addons.max_quantity",
   "catalog.addons_disabled",
+  // S5: more of a product than one order may hold, fixed in the cart
+  "cart.max_quantity",
   "cart.prices_changed",
   // A payment link's cart (adr/0051): the link closed, a newer cart, lines or prices moved;
   // its code on another cart; cash on delivery

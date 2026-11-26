@@ -20,6 +20,7 @@ import {
   checkoutError,
   PlaceOrder,
   pricesChanged,
+  saveOrderNote,
   shortOfMinimum,
 } from "@/lib/checkout/place-order"
 import {
@@ -133,6 +134,7 @@ export async function placeOrder(
     if (!offered.includes(input.provider_id)) {
       return { ok: false, error: "checkout.payment_required", challenge: NO_CHALLENGE }
     }
+    await saveOrderNote(cart.id, input)
     const refused = await acceptTerms(cart.id, input)
     if (refused) {
       return { ok: false, error: refused, challenge: NO_CHALLENGE }

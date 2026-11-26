@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   createCartWorkflow,
   createShippingOptionsWorkflow,
-  listShippingOptionsForCartWorkflow,
+  listShippingOptionsForCartWithPricingWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
@@ -15,6 +15,7 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import { completeWithSystemPayment } from "../helpers/checkout"
+import { convertFlatShippingOptionsWorkflow } from "../../src/workflows/shipping/flat-to-calculated"
 
 jest.setTimeout(240 * 1000)
 
@@ -24,10 +25,6 @@ interface ModelRow {
   shipping_profile_id: string
   provider_id: string
   type: { label: string; description: string; code: string }
-}
-
-interface OptionRow {
-  prices: { amount: unknown; price_rules?: { attribute: string }[] }[]
 }
 
 /** F4.5 (ADR-0024, KK): free shipping from a basket total, after discounts, KDV in. */
@@ -83,7 +80,7 @@ medusaIntegrationTestRunner({
           ...(codes ? { promo_codes: codes } : {}),
         },
       })
-      const { result } = await listShippingOptionsForCartWorkflow(getContainer()).run({
+      const { result } = await listShippingOptionsForCartWithPricingWorkflow(getContainer()).run({
         input: { cart_id: cart.id },
       })
       const option = (result as { id: string; amount?: number }[]).find(
@@ -180,93 +177,100 @@ medusaIntegrationTestRunner({
       expect((await chooseShipping()).data.cart.shipping_total).toBeGreaterThan(0)
     })
 
-    it("takes free shipping away with the threshold, and gives it to a new option", async () => {
+    it("takes free shipping away with the threshold", async () => {
       await threshold(200)
+      expect(await shipping(3)).toBe(0)
       await threshold(null)
       expect(await shipping(3)).toBeGreaterThan(0)
-
-      await threshold(200)
-      const { data } = await getContainer()
-        .resolve(ContainerRegistrationKeys.QUERY)
-        .graph({
-          entity: "shipping_option",
-          fields: [
-            "id",
-            "service_zone_id",
-            "shipping_profile_id",
-            "provider_id",
-            "type.label",
-            "type.description",
-            "type.code",
-          ],
-          filters: { id: shop.shippingOptionId },
-        })
-      const model = data[0] as unknown as ModelRow
-      const { result } = await createShippingOptionsWorkflow(getContainer()).run({
-        input: [
-          {
-            name: "Hızlı Kargo",
-            service_zone_id: model.service_zone_id,
-            shipping_profile_id: model.shipping_profile_id,
-            provider_id: model.provider_id,
-            price_type: "flat",
-            type: model.type,
-            prices: [{ currency_code: "try", amount: 150 }],
-            rules: [],
-          },
-        ],
-      })
-      const created = result[0]?.id ?? ""
-      // The subscriber adds the free price after the event
-      let prices: OptionRow["prices"] = []
-      for (let attempt = 0; attempt < 50 && prices.length < 2; attempt++) {
-        const read = await getContainer()
-          .resolve(ContainerRegistrationKeys.QUERY)
-          .graph({
-            entity: "shipping_option",
-            fields: ["prices.amount", "prices.price_rules.attribute"],
-            filters: { id: created },
-          })
-        prices = (read.data[0] as unknown as OptionRow | undefined)?.prices ?? []
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-      expect(prices.map((price) => Number(price.amount)).sort((a, b) => a - b)).toEqual([0, 150])
     })
-    it("makes a region-priced option free too (Medusa Admin prices options per region)", async () => {
+
+    // adr/0087 §7: a flat-rate option made the old way (Medusa Admin, a region's price)
+    async function legacyFlatOption(name: string, prices: object[]): Promise<string> {
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({
           entity: "shipping_option",
-          fields: [
-            "id",
-            "service_zone_id",
-            "shipping_profile_id",
-            "provider_id",
-            "type.label",
-            "type.description",
-            "type.code",
-          ],
+          fields: ["service_zone_id", "shipping_profile_id", "type.label", "type.description"],
           filters: { id: shop.shippingOptionId },
         })
       const model = data[0] as unknown as ModelRow
       const { result } = await createShippingOptionsWorkflow(getContainer()).run({
         input: [
           {
-            name: "Bölge Kargo",
+            name,
             service_zone_id: model.service_zone_id,
             shipping_profile_id: model.shipping_profile_id,
-            provider_id: model.provider_id,
+            provider_id: "manual_manual",
             price_type: "flat",
-            type: model.type,
-            prices: [{ region_id: shop.regionId, amount: 120 }],
-            rules: [],
+            type: { label: name, description: name, code: "manual" },
+            prices,
+            rules: [
+              { attribute: "enabled_in_store", operator: "eq", value: "true" },
+              { attribute: "is_return", operator: "eq", value: "false" },
+            ],
           },
-        ],
+        ] as never,
       })
-      const created = result[0]?.id ?? ""
+      return result[0]?.id ?? ""
+    }
+
+    it("moves flat-rate options to our pricing once, the threshold then holding for them", async () => {
+      const plain = await legacyFlatOption("Hızlı Kargo", [{ currency_code: "try", amount: 150 }])
+      const region = await legacyFlatOption("Bölge Kargo", [
+        { region_id: shop.regionId, amount: 120 },
+      ])
+
+      const first = await convertFlatShippingOptionsWorkflow(getContainer()).run()
+      const again = await convertFlatShippingOptionsWorkflow(getContainer()).run()
+      expect(first.result).toBe(2)
+      expect(again.result).toBe(0)
+
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "shipping_option",
+          fields: ["id", "price_type", "provider_id", "data", "prices.amount"],
+          filters: { id: [plain, region] },
+        })
+      const rows = data as unknown as {
+        id: string
+        price_type: string
+        provider_id: string
+        data: Record<string, unknown>
+        prices?: unknown[]
+      }[]
+      expect(rows.find((row) => row.id === plain)).toMatchObject({
+        price_type: "calculated",
+        provider_id: "shop_shop",
+        data: { id: "shop-flat", amount: 15_000 },
+      })
+      expect(rows.find((row) => row.id === region)?.data).toEqual({
+        id: "shop-flat",
+        amount: 12_000,
+      })
+
       expect((await threshold(250)).status).toBe(200)
-      expect(await shipping(2, undefined, created)).toBe(120)
-      expect(await shipping(3, undefined, created)).toBe(0)
+      expect(await shipping(2, undefined, region)).toBe(120)
+      expect(await shipping(3, undefined, region)).toBe(0)
+      expect(await shipping(3, undefined, plain)).toBe(0)
+    })
+
+    it("keeps a new flat-rate option from the panel on our pricing, and its new amount", async () => {
+      const created = await settle(
+        http.post<{ id: string }>(
+          "/admin/shipping-setup/options",
+          { name: "Kendi Kargom", carrier: "manual", pricing: { type: "flat", amount: 75.5 } },
+          { headers: admin.headers }
+        )
+      )
+      const id = created.data.id
+      expect(await shipping(1, undefined, id)).toBe(75.5)
+      await settle(
+        http.post(`/admin/shipping-setup/options/${id}`, { amount: 80 }, { headers: admin.headers })
+      )
+      expect(await shipping(1, undefined, id)).toBe(80)
+      await threshold(100)
+      expect(await shipping(1, undefined, id)).toBe(0)
     })
   },
 })

@@ -88,6 +88,7 @@ export const SETTINGS = [
   "/orders/invoices",
   "/settings/integrations",
   "/settings/appearance",
+  "/settings/shipping?part=options",
   "/settings/shipping?part=locations",
   // SEO's one home (the owner, 2026-11-23): the overview, the advisor, the audit, redirects,
   // site search's synonym groups (adr/0056) and the settings

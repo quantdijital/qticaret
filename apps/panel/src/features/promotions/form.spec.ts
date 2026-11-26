@@ -140,4 +140,18 @@ describe("promotion form", () => {
     })
     expect(buyGetCounts({ buyCount: "3", payCount: "2" })).toEqual({ buy: 3, pay: 2 })
   })
+
+  it("writes who may use it beside the basket minimum (K1/K2)", () => {
+    const values = { ...base, audience: "groups" as const, groups: [], firstOrder: true }
+    const result = promotionSchema.safeParse(values)
+    expect(result.success ? [] : result.error.issues.map((issue) => issue.message)).toEqual([
+      "promotions.errors.groups",
+    ])
+    const body = createBody({ ...values, groups: ["cusgroup_1"], minimum: "150" }, "try")
+    expect(body.rules).toEqual([
+      { attribute: "item_total", operator: "gte", values: ["150"] },
+      { attribute: "customer.groups.id", operator: "in", values: ["cusgroup_1"] },
+      { attribute: "first_order", operator: "in", values: ["true"] },
+    ])
+  })
 })

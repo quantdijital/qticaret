@@ -6,9 +6,12 @@ import { isGiftCardProduct } from "@/features/products/api/products"
 import type { ProductListItem } from "@/features/products/api/products"
 import { ProductRowMenu } from "@/features/products/components/product-row-menu"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
+import { publishScheduleOf } from "@/features/products/publish-schedule"
 import { ProductThumb } from "@/features/products/components/product-thumb"
-import { availableStock, priceRange } from "@/features/products/product-math"
+import { availableStock, listSku, priceRange } from "@/features/products/product-math"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
+import { QuickPrice, QuickStatusCell, QuickStock } from "@/features/products/quick-edit/quick-cells"
+import type { QuickEdit } from "@/features/products/quick-edit/use-quick-edit"
 import type { StoredAssessment } from "@/features/seo/api/advisor"
 import { GRADE_TEXT } from "@/features/seo/advisor/grades"
 import { formatCount, formatMoney, formatRelative } from "@qticaret/admin-ui/lib/format"
@@ -19,47 +22,68 @@ const CURRENCY = "try"
 const LOW_STOCK = 5
 
 /**
- * The product list's columns: picture and name, status, stock, variants,
- * category, SEO, price, and the row's ⋯ menu (copying it).
+ * The product list's columns: picture and name (the stock code under it),
+ * status, stock, variants, category, SEO, price, and the row's ⋯ menu.
  */
 export function useProductColumns(
   scores: ReadonlyMap<string, StoredAssessment>,
-  onDuplicate: (product: ProductListItem) => void
+  onDuplicate: (product: ProductListItem) => void,
+  /** The columns the person turned off in "Görünüm" (`list-prefs.ts`). */
+  hidden: readonly string[] = [],
+  /** "Hızlı düzenle": while on, price, stock and status are fields (`quick-edit/`). */
+  quick?: QuickEdit
 ): Column<ProductListItem>[] {
   const { t } = useTranslation()
   const prefix = useProductPathPrefix()
-  return [
+  const columns: Column<ProductListItem>[] = [
     {
       key: "product",
       header: t("products.columns.product"),
-      cell: (product) => (
-        <div className="flex min-w-0 items-center gap-3">
-          <ProductThumb src={product.thumbnail} />
-          <div className="flex min-w-0 flex-col">
-            <Link
-              to="/products/$id"
-              params={{ id: product.id }}
-              className="truncate font-medium hover:underline"
-              onClick={(event) => {
-                event.stopPropagation()
-              }}
-            >
-              {product.title}
-            </Link>
-            <span className="truncate text-xs text-muted-foreground">
-              {prefix}
-              {product.handle}
-            </span>
+      // A long name is cut short (whole on hover) instead of pushing the other columns off the card
+      fill: true,
+      className: "min-w-40",
+      cell: (product) => {
+        const sku = listSku(product.variants)
+        return (
+          <div className="flex min-w-0 items-center gap-3">
+            <ProductThumb src={product.thumbnail} />
+            <div className="flex min-w-0 flex-col">
+              <Link
+                to="/products/$id"
+                params={{ id: product.id }}
+                title={product.title}
+                className="truncate font-medium hover:underline"
+                onClick={(event) => {
+                  event.stopPropagation()
+                }}
+              >
+                {product.title}
+              </Link>
+              <span className="truncate text-xs text-muted-foreground">
+                {sku ? (
+                  <span className="text-foreground/80" title={t("products.columns.sku")}>
+                    {sku.sku}
+                    {sku.more > 0 ? ` +${String(sku.more)}` : ""}
+                    {" · "}
+                  </span>
+                ) : null}
+                {prefix}
+                {product.handle}
+              </span>
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: "status",
       header: t("products.columns.status"),
       cell: (product) => (
         <div className="flex flex-wrap items-center gap-1.5">
-          <ProductStatusBadge status={product.status} />
+          <ProductStatusBadge
+            status={product.status}
+            publishAt={publishScheduleOf(product).publish_at}
+          />
           {isGiftCardProduct(product) ? (
             <Badge variant="outline" className="h-6 font-normal">
               {t("products.giftCardBadge")}
@@ -161,4 +185,26 @@ export function useProductColumns(
       cell: (product) => <ProductRowMenu product={product} onDuplicate={onDuplicate} />,
     },
   ]
+  const shown = columns.filter((column) => !hidden.includes(column.key))
+  return quick?.on ? withQuickEdit(shown, quick) : shown
+}
+
+// The quick edit's fields in the price, stock and status cells; what they show otherwise falls back
+const QUICK_CELLS = { price: QuickPrice, stock: QuickStock, status: QuickStatusCell } as const
+
+function withQuickEdit(
+  columns: Column<ProductListItem>[],
+  edit: QuickEdit
+): Column<ProductListItem>[] {
+  return columns.map((column) => {
+    const Cell = QUICK_CELLS[column.key as keyof typeof QUICK_CELLS] as
+      (typeof QUICK_CELLS)[keyof typeof QUICK_CELLS] | undefined
+    if (!Cell) {
+      return column
+    }
+    return {
+      ...column,
+      cell: (product) => <Cell product={product} edit={edit} fallback={column.cell(product)} />,
+    }
+  })
 }

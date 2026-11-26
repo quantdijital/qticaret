@@ -18,15 +18,23 @@ const LIST_FIELDS = [
   "title",
   "handle",
   "status",
+  // A draft's planned publish (S2): the list's "Planlı" badge
+  "metadata",
   "thumbnail",
   "updated_at",
   "categories.id",
   "categories.name",
   "variants.id",
+  "variants.sku",
   "variants.manage_inventory",
+  "variants.prices.id",
   "variants.prices.amount",
   "variants.prices.currency_code",
   "variants.inventory_items.inventory.location_levels.available_quantity",
+  // The quick edit's shelf at the shop's location (quick-edit/quick-drafts.ts)
+  "variants.inventory_items.inventory_item_id",
+  "variants.inventory_items.inventory.location_levels.location_id",
+  "variants.inventory_items.inventory.location_levels.stocked_quantity",
   // A gift card product's badge (adr/0025 Ek 2026-11-03): the catalog extension's mark
   "product_extension.is_gift_card",
 ].join(",")
@@ -45,6 +53,8 @@ export interface ProductFilters {
 
 export interface ProductListParams extends ProductFilters {
   page: number
+  /** Products a page shows (the list's screen options); PAGE_SIZE when absent. */
+  pageSize?: number | undefined
 }
 
 // The list's orders as the server names them
@@ -89,11 +99,11 @@ export const productBoard = (filters: ProductFilters, offset: number, limit: num
   })
 
 /** A page: the board's ids, then those products with what a row shows, in the board's order. */
-export const productsQuery = ({ page, ...filters }: ProductListParams) =>
+export const productsQuery = ({ page, pageSize = PAGE_SIZE, ...filters }: ProductListParams) =>
   queryOptions({
-    queryKey: ["products", "list", { ...filters, page }],
+    queryKey: ["products", "list", { ...filters, page, pageSize }],
     queryFn: async () => {
-      const board = await productBoard(filters, page * PAGE_SIZE, PAGE_SIZE)
+      const board = await productBoard(filters, page * pageSize, pageSize)
       if (board.ids.length === 0) {
         return { products: [], count: board.count, limited: board.limited }
       }
@@ -148,6 +158,8 @@ const DETAIL_FIELDS = [
   "subtitle",
   "handle",
   "status",
+  // A draft's planned publish (S2)
+  "metadata",
   "description",
   "thumbnail",
   "weight",

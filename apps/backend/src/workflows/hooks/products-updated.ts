@@ -3,6 +3,7 @@ import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { alignBookingProducts, restoreBookingVariants } from "../catalog/align-booking"
 import { alignProductProfiles, restoreProductProfiles } from "../catalog/align-shipping"
 import { claimProductPaths, unclaimPaths } from "../catalog/entity-paths"
+import { clearPublishedSchedules, restoreSchedules } from "../catalog/publish-schedule-clear"
 import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-levels"
 
 // Medusa takes one handler per hook: every rule for changed products joins
@@ -20,9 +21,12 @@ updateProductsWorkflow.hooks.productsUpdated(
     // backorder levels so none gets a stock level for selling past stock
     const booking = await alignBookingProducts(container, ids)
     const levels = await addBackorderLevels(container, { product_ids: ids })
-    return new StepResponse(undefined, { claims, profiles, booking, levels })
+    // S2: a product now live drops a planned publish left on it
+    const schedules = await clearPublishedSchedules(container, ids)
+    return new StepResponse(undefined, { claims, profiles, booking, levels, schedules })
   },
   async (undo, { container }) => {
+    await restoreSchedules(container, undo?.schedules ?? [])
     await removeBackorderLevels(container, undo?.levels ?? [])
     await restoreBookingVariants(container, undo?.booking ?? [])
     await restoreProductProfiles(container, undo?.profiles ?? [])

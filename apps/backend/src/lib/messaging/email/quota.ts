@@ -30,6 +30,9 @@ export const OPEN_TEMPLATES: readonly string[] = [
   "stock.alert_confirm",
   "cart.reminder",
   "consent.confirm",
+  // Staff's own words to a customer (Batch 9 / O3): within the share too, so notes never
+  // use up the day the order confirmations and parcels need (security review)
+  "order.note",
 ]
 
 const DAY = 24 * 60 * 60 * 1000

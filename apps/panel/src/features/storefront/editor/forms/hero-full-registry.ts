@@ -19,6 +19,8 @@ export const HERO_FULL_CONTENT = [
   ["search_position", "search_position"],
   ["button_tone", "button_tone"],
   ["button_icon", "button_icon"],
+  ["second_button", "second_button"],
+  ["trust_place", "trust_place"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
 
 export const HERO_FULL_LAYOUT = [
@@ -29,6 +31,8 @@ export const HERO_FULL_LAYOUT = [
   ["edge", "edge"],
   ["accent_mark", "accent_mark"],
   ["ornament", "ornament"],
+  ["title_style", "title_style"],
+  ["note_place", "note_place"],
   ["title_mix", "title_mix"],
   ["words_place", "words_place"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
@@ -46,8 +50,14 @@ export function heroFullShows(section: FullSection, name: HeroFullSetting): bool
   if (name === "search_position") {
     return settings.action !== "button"
   }
-  if (name === "button_tone" || name === "button_icon") {
+  if (name === "button_tone" || name === "button_icon" || name === "second_button") {
     return settings.action !== "search"
+  }
+  if (name === "trust_place") {
+    return section.show_trust === true
+  }
+  if (name === "note_place") {
+    return typeof section.note === "string" && section.note.trim() !== ""
   }
   // The veil and the split words only while the photograph is behind the words
   return (name !== "scrim" && name !== "words_place") || settings.image_side === "full"

@@ -60,7 +60,9 @@ describe("price comparison feeds and shipping (F10.8)", () => {
   it("charges the desi table's rate, else the flat rate, free from the shop's basket total", () => {
     const cheap = itemOf({ price: 249.9 })
 
-    expect(shippingCost(itemOf({ shippingRate: 120 }), SHOP)).toBe(120)
+    expect(shippingCost(itemOf({ price: 249.9, shippingRate: 120 }), SHOP)).toBe(120)
+    // adr/0087 §5: the desi table is free from the basket total too
+    expect(shippingCost(itemOf({ shippingRate: 120 }), SHOP)).toBe(0)
     expect(shippingCost(cheap, SHOP)).toBe(89.9)
     expect(shippingCost(itemOf(), SHOP)).toBe(0)
     expect(shippingCost(cheap, { ...SHOP, flatShipping: null })).toBeNull()

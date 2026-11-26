@@ -3,10 +3,12 @@ import { productAttributesQuery } from "@/features/attributes/api"
 import { isEmpty } from "@/features/attributes/empty"
 import { useSectionFindings } from "@/features/content/section-findings"
 import type { ProductDetail } from "@/features/products/api/products"
-import { MAIN_PARTS, SIDE_PARTS } from "@/features/products/layout/parts"
+import { targetsOf } from "@/features/products/layout/parts"
 import type { PartKey } from "@/features/products/layout/parts"
 import { assessmentQuery } from "@/features/seo/api/advisor"
 import { PRODUCT_TARGETS } from "./sections"
+import { usePlaceholderOption } from "./placeholder-option"
+import { isSimpleProduct } from "./simple-plan"
 
 /** The advisor's findings for one part of the product's page, by its element id. */
 export function useProductFindings(product: ProductDetail) {
@@ -27,6 +29,7 @@ export type PartMark = "complete" | "missing" | "urgent" | null
  * empty required attribute. Before the advisor answers, nothing is known.
  */
 function usePartState(product: ProductDetail) {
+  const simple = isSimpleProduct(product, usePlaceholderOption())
   const findings = useProductFindings(product)
   const known = useQuery(assessmentQuery("product", product.id, product.updated_at)).isSuccess
   const attributes = useQuery(productAttributesQuery(product.id)).data
@@ -37,7 +40,7 @@ function usePartState(product: ProductDetail) {
       isEmpty(attributes?.values[definition.key])
   )
   return (key: PartKey) => {
-    const targets = [...MAIN_PARTS, ...SIDE_PARTS].find((each) => each.key === key)?.targets ?? []
+    const targets = targetsOf(key, simple)
     const found = targets.map((target) => findings(target))
     const empty = key === "attributes" && requiredEmpty
     return {

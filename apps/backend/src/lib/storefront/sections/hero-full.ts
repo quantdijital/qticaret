@@ -11,7 +11,7 @@ export const HERO_FULL_SETTINGS = {
   action: ["button", "search", "both"],
   search_position: ["inside", "overlap"],
   height: ["screen", "tall"],
-  scrim: ["light", "strong", "faint"],
+  scrim: ["light", "strong", "side", "faint"],
   align: ["center", "start"],
   image_side: ["full", "end", "blend"],
   edge: ["straight", "wave"],
@@ -23,6 +23,14 @@ export const HERO_FULL_SETTINGS = {
   accent_mark: ["none", "swash"],
   /** A drawn sprig of leaves by the words, for the eye only. */
   ornament: ["none", "leaves"],
+  /** The second button (and the video's): quiet, or clear with a ringed play mark before its words. */
+  second_button: ["quiet", "play"],
+  /** The heading as written, or larger in a narrow column: a word or two to a line. */
+  title_style: ["standard", "stacked"],
+  /** The trust badges as a box over the bottom edge, or a row of icons under the buttons. */
+  trust_place: ["foot", "inside"],
+  /** The hand note over the heading, or in the opening's top corner with a brush stroke under it. */
+  note_place: ["heading", "corner"],
   /** The heading in one face, or set light with its second part inline in an italic serif (the accent face). */
   title_mix: ["none", "serif_accent"],
   /** The words together, or the heading at the top and the text and buttons at the foot, the picture between. */
@@ -44,6 +52,10 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   button_icon: "none",
   accent_mark: "none",
   ornament: "none",
+  second_button: "quiet",
+  title_style: "standard",
+  trust_place: "foot",
+  note_place: "heading",
   title_mix: "none",
   words_place: "together",
 }

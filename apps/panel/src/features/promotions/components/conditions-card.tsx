@@ -10,6 +10,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { CategoryTree } from "@/features/products/components/category-tree"
+import { AudienceFields } from "@/features/promotions/components/audience-fields"
 import {
   collectionsQuery,
   productNamesQuery,
@@ -109,7 +110,7 @@ function ProductList({ value, onChange }: { value: string[]; onChange: (ids: str
 /**
  * Where the promotion applies and when (F4.4, ADR-0024): the whole basket
  * or some categories, collections or products; the least the basket must
- * hold; how often one customer may use it.
+ * hold; how often one customer may use it; who may use it (K1/K2).
  */
 export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boolean }) {
   const { t } = useTranslation()
@@ -209,6 +210,7 @@ export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boole
             />
           </Field>
         </div>
+        <AudienceFields />
       </div>
     </SectionCard>
   )

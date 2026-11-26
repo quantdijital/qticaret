@@ -116,6 +116,33 @@ describe("the figures strip's panel", () => {
     await user.click(dividers)
     expect(changes.at(-1)).toMatchObject({ dividers: "off" })
   })
+
+  it("offers the row in Diziliş, stacked by default, and the profiles' switch only on the row", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(newHomeSection("stats", STATS))
+    await openGroup(user, "Diziliş")
+
+    expect(
+      field(STATS, "stats_arrangement").getByRole("radio", { name: "Alt alta" })
+    ).toHaveAttribute("data-state", "on")
+    expect(screen.queryByRole("switch", { name: /Sosyal hesapları göster/ })).toBeNull()
+    await user.click(field(STATS, "stats_arrangement").getByRole("radio", { name: "Satır" }))
+    expect(changes.at(-1)).toMatchObject({ arrangement: "row" })
+  })
+
+  it("turns the profiles on for a strip set in a row", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel({
+      ...newHomeSection("stats", STATS),
+      arrangement: "row",
+    } as AnySection)
+    await openGroup(user, "Diziliş")
+
+    const social = screen.getByRole("switch", { name: /Sosyal hesapları göster/ })
+    expect(social).not.toBeChecked()
+    await user.click(social)
+    expect(changes.at(-1)).toMatchObject({ arrangement: "row", social: "on" })
+  })
 })
 
 describe("the steps' panel", () => {

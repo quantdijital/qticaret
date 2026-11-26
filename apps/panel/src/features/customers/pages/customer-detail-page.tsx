@@ -9,6 +9,7 @@ import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { customerQuery } from "@/features/customers/api/customers"
 import type { CustomerDetail } from "@/features/customers/api/customers"
@@ -24,6 +25,7 @@ import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { ConsentCard } from "@/features/customers/components/consent-card"
 import { CustomerGroupsCard } from "@/features/customers/components/customer-groups-card"
 import { CustomerInfoCard } from "@/features/customers/components/customer-info-card"
+import { CustomerStatsCard } from "@/features/customers/components/customer-stats-card"
 import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
 import { PrivacyRequestsCard } from "@/features/customers/components/privacy-requests-card"
 
@@ -41,7 +43,18 @@ function OrdersCard({ customerId }: { customerId: string }) {
     return <EmptyRow text={t("customers.detail.noOrders")} />
   }
   return (
-    <SectionCard title={t("customers.detail.orders")} flush>
+    <SectionCard
+      title={t("customers.detail.orders")}
+      flush
+      action={
+        // Every one of them, in the order list filtered to this customer
+        <Button asChild variant="outline" size="sm">
+          <Link to="/orders" search={{ customer: customerId }}>
+            {t("customers.detail.allOrders")}
+          </Link>
+        </Button>
+      }
+    >
       <AsyncBody query={query} skeleton={<Skeleton className="mx-5 mb-5 h-40" />}>
         {(data) => (
           <ul className="flex flex-col">
@@ -120,7 +133,7 @@ function CustomerTabs({ customer }: { customer: CustomerDetail }) {
 
 /**
  * One customer (docs/06 "Detay sayfası düzeni"): how to reach and bill
- * them in one card at the top, then their orders, what they were sent,
+ * them in one card at the top, their numbers under it, then their orders, what they were sent,
  * their message permissions, groups, KVKK requests and store credit, one
  * tab each.
  */
@@ -165,6 +178,7 @@ export function CustomerDetailPage() {
         back={back}
       />
       <CustomerInfoCard customer={customer} />
+      <CustomerStatsCard customerId={customer.id} />
       <CustomerTabs customer={customer} />
     </div>
   )

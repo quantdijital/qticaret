@@ -28,6 +28,7 @@ import type { CardVariant, StyleKitField } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections } from "@/features/storefront/layout/sections"
 import { STYLE_KIT_READY } from "./style-kit-ready"
+import { LISTING_PAGE_META } from "./theme-registry-listing-page"
 import { SEARCH_FORM_META } from "./theme-registry-search"
 import { TOUR_CARD_META } from "./theme-registry-tour"
 
@@ -52,6 +53,7 @@ export type ThemeGroupName =
   | "card"
   | "framed"
   | "listingText"
+  | "listingPage"
   | "searchForm"
 
 /** Each group's title (i18n key), as the panel and a hit's second line show it. */
@@ -64,6 +66,7 @@ export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
   card: `${C}.card`,
   framed: `${C}.framed`,
   listingText: `${C}.listingTextTitle`,
+  listingPage: `${C}.listingPageTitle`,
   searchForm: `${C}.searchFormTitle`,
 }
 
@@ -215,6 +218,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   media_ground: kitField("media_ground", "surfaces"),
   menu_style: kitField("menu_style", "surfaces"),
   motion: kitField("motion", "surfaces"),
+  page_width: { ...kitField("page_width", "spacing"), keywords: `${C}.spacingWords` },
+  accent_ink: kitField("accent_ink", "colors"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,
@@ -283,6 +288,8 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   "listing_text.align": listingText("align", LISTING_TEXT_ALIGNS),
   "listing_text.width": listingText("width", LISTING_TEXT_WIDTHS),
   "listing_text.collapse": listingText("collapse"),
+  // A listing page's grid or list, its switch and its trail
+  ...LISTING_PAGE_META,
   // The search box's fields (adr/0077 §1)
   ...SEARCH_FORM_META,
   "header.layout": null,

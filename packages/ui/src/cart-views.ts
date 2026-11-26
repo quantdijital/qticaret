@@ -35,6 +35,8 @@ export interface CartLineView {
   gift?: GiftLineView | null
   /** The line's add-on picks (adr/0052), one under another; none on a plain line. */
   addons: LineAddonView[]
+  /** A free-shipping product's line in a mixed cart (adr/0087 §3): "Ücretsiz kargo"; absent otherwise. */
+  shippingNote?: string | null
   /** A pick made to the buyer's wish puts the line outside the right of withdrawal. */
   nonWithdrawable: boolean
   /** The most units the line may hold with its picks; null or absent: the cart's own limit. */

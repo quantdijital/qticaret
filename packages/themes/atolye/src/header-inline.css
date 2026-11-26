@@ -19,6 +19,13 @@
 .gf-head[data-variant="inline"] .gf-tool.gf-icon-btn:hover::after {
   content: none;
 }
+/*
+ * Icons only (`tool_labels: hide`, `data-tool-words`): the cart's word goes,
+ * its name stays the link's label; the plain tools have no word to hide
+ */
+.gf-head[data-variant="inline"][data-tool-words="hidden"] .gf-tool > span[aria-hidden="true"] {
+  display: none;
+}
 
 .gf-head[data-variant="inline"] .gf-menu-item[aria-current="page"] {
   position: relative;
@@ -39,4 +46,12 @@
     width: 1.25rem;
     height: 1.25rem;
   }
+}
+
+/* Plain tools (`tools_style: plain`): icons only, the page's own link in the ink with its line */
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-icon-btn > span[aria-hidden="true"] {
+  display: none;
+}
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-menu-item[aria-current="page"] {
+  color: var(--color-text);
 }

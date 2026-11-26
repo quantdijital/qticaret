@@ -71,6 +71,12 @@ export const SHIPPING_ROUTES = [
     methods: ["DELETE" as const],
     middlewares: [requireUserActor],
   },
+  // adr/0087 §4: products per shipping class, staff only
+  {
+    matcher: "/admin/shipping-setup/classes",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
   {
     matcher: "/hooks/geliver",
     methods: ["POST" as const],

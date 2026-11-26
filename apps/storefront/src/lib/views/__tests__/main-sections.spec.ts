@@ -29,6 +29,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       sticky: false,
       menuImages: "submenus",
       searchStyle: "field",
+      toolLabels: "show",
     })
   })
 
@@ -58,6 +59,15 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     expect(headerBarOf(stray, theme).searchStyle).toBe("field")
   })
 
+  it("names the one-row header's plain tools only once chosen", () => {
+    const theme = { header: { layout: "centered", sticky: true } } as const
+    const plain = { ...MAIN, header_bar: { ...MAIN.header_bar, tools_style: "plain" as const } }
+    expect(headerBarOf(plain, theme).toolsStyle).toBe("plain")
+    const round = { ...MAIN, header_bar: { ...MAIN.header_bar, tools_style: "round" as const } }
+    expect(headerBarOf(round, theme)).not.toHaveProperty("toolsStyle")
+    expect(headerBarOf(MAIN, theme)).not.toHaveProperty("toolsStyle")
+  })
+
   it("reads the theme's header from a backend before the main sections", () => {
     expect(headerBarOf(undefined, { header: { layout: "centered", sticky: false } })).toEqual({
       id: "mainheader",
@@ -65,6 +75,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       sticky: false,
       menuImages: "submenus",
       searchStyle: "field",
+      toolLabels: "show",
     })
     expect(headerBarOf(undefined, { header: { layout: "left", sticky: true } })).toMatchObject({
       variant: "standard",

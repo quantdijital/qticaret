@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -49,7 +50,14 @@ const ratesOf = (saved: ShippingSettings): RateValues => ({
 })
 
 /** The shop's own price by desi, for options priced by the table (F7.8). */
-export function RatesCard({ saved }: { saved: ShippingSettings }) {
+export function RatesCard({
+  saved,
+  collapse,
+}: {
+  saved: ShippingSettings
+  /** Folded under the page's "Gelişmiş" to a one-line summary. */
+  collapse?: CollapseOptions | undefined
+}) {
   const { t } = useTranslation()
   const save = useSaveSection<ShippingSettings>("shipping")
   const values = ratesOf(saved)
@@ -82,6 +90,7 @@ export function RatesCard({ saved }: { saved: ShippingSettings }) {
   return (
     <CardForm
       title={t(`${S}.ratesTitle`)}
+      collapse={collapse}
       description={t(`${S}.ratesDescription`)}
       dirty={form.formState.isDirty}
       saving={save.isPending}

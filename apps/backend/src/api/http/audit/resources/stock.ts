@@ -72,6 +72,32 @@ async function watchOf(scope: Resolver, id: string): Promise<Snapshot> {
   return { threshold: (data[0] as { threshold?: number | null } | undefined)?.threshold ?? null }
 }
 
+interface TrackingRow {
+  id: string
+  manage_inventory?: boolean | null
+  inventory_items?: ({ inventory_item_id: string } | null)[] | null
+}
+
+// Each variant's stock tracking, on or off, and the items it is linked to, by its id
+async function trackingOf(scope: Resolver, productId: string): Promise<Snapshot> {
+  const { data } = await query(scope).graph({
+    entity: "product_variant",
+    fields: ["id", "manage_inventory", "inventory_items.inventory_item_id"],
+    filters: { product_id: productId },
+  })
+  return Object.fromEntries(
+    (data as TrackingRow[]).flatMap((variant): [string, boolean | string][] => [
+      [`manage_inventory:${variant.id}`, variant.manage_inventory === true],
+      [
+        `inventory_items:${variant.id}`,
+        (variant.inventory_items ?? [])
+          .flatMap((item) => (item ? [item.inventory_item_id] : []))
+          .join(","),
+      ],
+    ])
+  )
+}
+
 const SENSITIVE = ["phone"] as const
 
 const byId = (method: "POST" | "DELETE", path: string): AuditedResource => ({
@@ -105,6 +131,15 @@ export const STOCK_RESOURCES: readonly AuditedResource[] = [
     resourceType: "inventory_item",
     resourceId: (params) => params["id"] ?? null,
     snapshot: ({ scope, params }) => watchOf(scope, params["id"] ?? ""),
+  },
+  // A variant's stock counted or not decides whether it can sell out
+  {
+    method: "POST",
+    route: "POST /admin/products/:id/stock-tracking",
+    pattern: new RegExp(`^/admin/products/(?<id>${ID})/stock-tracking$`, "i"),
+    resourceType: "product_stock_tracking",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: ({ scope, params }) => trackingOf(scope, params["id"] ?? ""),
   },
   ...[`/admin/warehouses/(?<id>${ID})/default`, `/admin/stores/(?<id>${ID})`].map(
     (path): AuditedResource => ({

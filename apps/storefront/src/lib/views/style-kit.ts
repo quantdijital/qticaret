@@ -26,4 +26,6 @@ export const styleKitView = (settings: StyleKit): StyleKit => ({
   media_ground: settings.media_ground,
   density: settings.density,
   motion: settings.motion,
+  page_width: settings.page_width,
+  accent_ink: settings.accent_ink,
 })

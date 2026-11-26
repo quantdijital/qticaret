@@ -42,11 +42,16 @@ medusaIntegrationTestRunner({
 
       expect(list.status).toBe(200)
       // adr/0068 Ek 2026-11-15 (2): staff open wholesalers with a password, no mail goes
-      // adr/0076 Ek D7b: four booking messages
-      expect(list.data.templates).toHaveLength(39)
+      // adr/0076 Ek D7b: four booking messages; Batch 9 / O3: a note sent to the customer
+      expect(list.data.templates).toHaveLength(40)
       const names = list.data.templates.map((template) => template.name)
       expect(names).not.toContain("account.wholesale_invite")
       expect(names).not.toContain("account.wholesale_enabled")
+      expect(list.data.templates).toContainEqual({
+        name: "order.note",
+        kind: "transactional",
+        channels: ["email"],
+      })
       // Units refused at receipt, a sealed good opened (adr/0032 Ek 2026-11-03)
       expect(list.data.templates).toContainEqual({
         name: "return.refused",

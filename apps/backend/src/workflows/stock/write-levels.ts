@@ -32,14 +32,14 @@ export interface WriteStockLevelsInput {
   update: LevelQuantity[]
   /** Moved under the item's lock, as Medusa's own adjustments are: a sale in between stays. */
   adjust?: LevelAdjustment[]
-  reason: "import" | "bulk_edit"
+  reason: "import" | "bulk_edit" | "manual"
   /** The job that wrote them. */
   reference: string | null
   actor_id: string | null
 }
 
 /**
- * Stock quantities our own writers set (an import, bulk edit), through
+ * Stock quantities our own writers set (an import, bulk edit, tracking turned on), through
  * Medusa's level workflows, then the stock ledger's row with the writer's
  * reason and actor (adr/0020), and the low-stock check. Recorded before the
  * levels' events go out, so the ledger's subscriber finds nothing left to

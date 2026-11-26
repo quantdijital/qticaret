@@ -1,4 +1,6 @@
 import type { BulkAction, BulkChange } from "@/features/products/api/bulk"
+import { dayEnd, dayOf, dayStart } from "@qticaret/admin-ui/lib/days"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import {
   parseCountInput,
   parseDecimalInput,
@@ -25,6 +27,16 @@ export interface BulkForm {
   seoDescription: boolean
   addonTemplateMode: "add" | "remove"
   addonTemplateId: string
+  /** adr/0086: a share or an amount off each variant's regular price, or the sales cleared. */
+  saleMode: "percent" | "amount" | "clear"
+  /** The sale's first and last day ("2026-12-01"), Turkey's days; empty: open on that side. */
+  saleStarts: string
+  saleEnds: string
+  brandMode: "set" | "clear"
+  brand: PickerOption | null
+  tagMode: "add" | "remove"
+  tag: string
+  backorder: "allow" | "deny"
 }
 
 export const EMPTY_BULK_FORM: BulkForm = {
@@ -40,6 +52,14 @@ export const EMPTY_BULK_FORM: BulkForm = {
   seoDescription: false,
   addonTemplateMode: "add",
   addonTemplateId: "",
+  saleMode: "percent",
+  saleStarts: "",
+  saleEnds: "",
+  brandMode: "set",
+  brand: null,
+  tagMode: "add",
+  tag: "",
+  backorder: "allow",
 }
 
 const MAX_AMOUNT = 1_000_000_000
@@ -47,6 +67,7 @@ const MAX_COST = 10_000_000
 const MAX_QUANTITY = 1_000_000_000
 const MAX_RISE_PERCENT = 1000
 const MAX_FALL_PERCENT = 99
+const MAX_TAG_LENGTH = 100
 
 /** The change, or the i18n key of what is wrong with the form. */
 export type BulkFormResult = { change: BulkChange } | { error: string }
@@ -114,6 +135,39 @@ function stockChange(form: BulkForm): BulkFormResult {
       }
 }
 
+function saleChange(form: BulkForm): BulkFormResult {
+  if (form.saleMode === "clear") {
+    return { change: { action: "sale", mode: "clear" } }
+  }
+  const value = parseDecimalInput(form.value, 2)
+  const percent = form.saleMode === "percent"
+  if (value === null || value <= 0 || value > (percent ? MAX_FALL_PERCENT : MAX_AMOUNT)) {
+    return { error: percent ? "products.bulk.errors.fall" : "products.bulk.errors.price" }
+  }
+  if (form.saleStarts && form.saleEnds && form.saleEnds < form.saleStarts) {
+    return { error: "products.bulk.errors.saleDates" }
+  }
+  if (form.saleEnds && form.saleEnds < dayOf(new Date())) {
+    return { error: "products.bulk.errors.saleEnded" }
+  }
+  return {
+    change: {
+      action: "sale",
+      mode: form.saleMode,
+      value,
+      starts_at: dayStart(form.saleStarts)?.toISOString() ?? null,
+      ends_at: dayEnd(form.saleEnds)?.toISOString() ?? null,
+    },
+  }
+}
+
+function tagChange(form: BulkForm): BulkFormResult {
+  const value = form.tag.trim()
+  return value.length > 0 && value.length <= MAX_TAG_LENGTH
+    ? { change: { action: "tag", mode: form.tagMode, value } }
+    : { error: "products.bulk.errors.tag" }
+}
+
 export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult {
   switch (action) {
     case "price":
@@ -149,6 +203,18 @@ export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult
             },
           }
         : { error: "products.bulk.errors.addonTemplate" }
+    case "sale":
+      return saleChange(form)
+    case "brand":
+      return form.brandMode === "clear"
+        ? { change: { action: "brand", brand_id: null } }
+        : form.brand
+          ? { change: { action: "brand", brand_id: form.brand.id } }
+          : { error: "products.bulk.errors.brand" }
+    case "tag":
+      return tagChange(form)
+    case "backorder":
+      return { change: { action: "backorder", allow: form.backorder === "allow" } }
   }
 }
 
@@ -162,6 +228,9 @@ function divideHalfUp(numerator: number, denominator: number): number {
 
 /** What a price change does to an example price, as the server computes it (to the kuruş). */
 export function examplePrice(change: BulkChange, example: number): number | null {
+  if (change.action === "sale") {
+    return exampleSale(change, example)
+  }
   if (change.action !== "price") {
     return null
   }
@@ -172,5 +241,18 @@ export function examplePrice(change: BulkChange, example: number): number | null
       : change.mode === "percent"
         ? divideHalfUp(kurus * (BPS_PER_WHOLE + Math.round(change.value * 100)), BPS_PER_WHOLE)
         : kurus + Math.round(change.value * 100)
+  return next / 100
+}
+
+/** The sale price an example regular price would take (adr/0086), as the server works it out. */
+function exampleSale(change: Extract<BulkChange, { action: "sale" }>, example: number) {
+  if (change.mode === "clear" || change.value === undefined) {
+    return null
+  }
+  const kurus = Math.round(example * 100)
+  const next =
+    change.mode === "percent"
+      ? divideHalfUp(kurus * (BPS_PER_WHOLE - Math.round(change.value * 100)), BPS_PER_WHOLE)
+      : kurus - Math.round(change.value * 100)
   return next / 100
 }

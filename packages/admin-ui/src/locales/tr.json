@@ -34,6 +34,15 @@
     "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
     "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?"
   },
+  "headerSave": {
+    "changes_one": "{{count}} bölümde değişiklik",
+    "changes_other": "{{count}} bölümde değişiklik",
+    "label": "Sayfanın kaydı",
+    "saved": "Kaydedildi"
+  },
+  "headerMenu": {
+    "more": "Diğer işlemler"
+  },
   "infoTip": {
     "label": "Bilgi: {{name}}"
   },
@@ -67,11 +76,6 @@
   },
   "recordStepper": {
     "position": "{{at}} / {{total}}"
-  },
-  "saveBar": {
-    "label": "Kaydedilmemiş değişiklikler",
-    "text_one": "Kaydedilmemiş değişiklikler",
-    "text_other": "Kaydedilmemiş değişiklikler ({{count}} bölümde)"
   },
   "wizard": {
     "stepOf": "Adım {{step}} / {{total}}"

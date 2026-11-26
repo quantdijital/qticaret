@@ -26,6 +26,7 @@ const field = (
     | "show_people"
     | "flexible_month"
     | "date_words"
+    | "boxed_fields"
     | "category_style",
   shown?: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 ): FieldMeta => ({
@@ -54,6 +55,7 @@ export const SEARCH_FORM_META = {
   // The dates' own two, only while the dates are shown
   "search_form.flexible_month": field("flexible_month", datesShown),
   "search_form.date_words": field("date_words", datesShown),
+  "search_form.boxed_fields": field("boxed_fields"),
 } satisfies Record<string, FieldMeta>
 
 /** Names a listing's address keeps for itself: never an attribute's filter there (adr/0077 §2). */

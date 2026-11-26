@@ -1,5 +1,4 @@
-import { ArrowRight } from "lucide-react"
-import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
+import { ResponsiveImage, fieldMark } from "@qticaret/ui"
 import type { HeroFullView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -7,9 +6,8 @@ import { HandNote } from "../parts/HandNote"
 import { Preload } from "../parts/Preload"
 import { SearchForm } from "../parts/SearchForm"
 import { HeroLeaves, HeroSwash, HeroWash } from "./hero-full-art"
+import { HeroButtons, HeroCornerNote, HeroTrustRow } from "./hero-full-parts"
 import { HeroTrust } from "./HeroTrust"
-import { HeroVideo } from "./HeroVideo"
-import { heroVideoWords } from "./hero-video-words"
 import { type Of, headingId } from "./plan"
 
 /** The photograph across the screen, or beside the words from 1024 px. */
@@ -51,8 +49,12 @@ const SIZES = {
  * box under them. The buttons take the shop's accent colour
  * (`button_tone`), the first an arrow after its words (`button_icon`); the
  * second line of the heading a drawn curl (`accent_mark`); a sprig of
- * leaves may stand by the words (`ornament`). Mixed (`title_mix`), the
- * heading is set light and its second part follows on the same line in
+ * leaves may stand by the words (`ornament`). The heading may stand larger
+ * in a narrow column (`title_style: stacked`), the second button clear with
+ * a ringed play mark (`second_button`, `HeroButtons`), the trust badges a
+ * row of icons under the buttons (`trust_place: inside`, `HeroTrustRow`)
+ * and the hand note in the top corner (`note_place: corner`, from 1024 px).
+ * Mixed (`title_mix`), the heading is set light and its second part follows on the same line in
  * the accent face's italic, in the heading's ink. Split (`words_place`,
  * behind the words only), the heading stands at the opening's top and the
  * text and buttons at its foot, the photograph between; the veil may be
@@ -76,7 +78,7 @@ export function HeroFull({
   t: Translate
 }) {
   const id = headingId(hero.id)
-  const { settings, accent, search, trust, video } = full
+  const { settings, accent, search, video } = full
   const { image } = hero
   const both = settings.action === "both"
   const buttons = (search === null || both) && hero.actions.length > 0
@@ -86,9 +88,14 @@ export function HeroFull({
   const blend = side === "blend"
   // The words on the page's ground, in its inks: beside the photograph or on its wash
   const inked = beside || blend
-  const accentTone = settings.button_tone === "accent"
   const leaves = settings.ornament === "leaves"
   const centred = settings.align === "center"
+  // Stacked, the accent line takes the shop's accent colour on the veil (the stage's own is a pale tint)
+  const stacked = settings.title_style === "stacked"
+  // The badges as a row under the buttons: none over the bottom edge then
+  const inside = settings.trust_place === "inside"
+  const trust = inside ? [] : full.trust
+  const corner = full.note && settings.note_place === "corner" ? full.note : null
   // The heading set light, its second part inline in the accent face's italic (`hero-full-mix.css`)
   const mixed = settings.title_mix === "serif_accent"
   // The heading at the top, the text and buttons at the foot: over the photograph only (`hero-full-split.css`)
@@ -111,6 +118,7 @@ export function HeroFull({
       data-scrim={settings.scrim}
       data-edge={settings.edge}
       data-foot={foot ? "" : undefined}
+      data-trust={inside ? "inside" : undefined}
       data-title-mix={mixed ? "serif_accent" : undefined}
       data-words={split ? "split" : undefined}
     >
@@ -141,7 +149,14 @@ export function HeroFull({
           )}
           {blend && <HeroWash id={id} />}
         </div>
-        <Container className={cn("gf-cover-body flex flex-col gap-8", blend && "lg:gap-12")}>
+        <Container
+          className={cn(
+            "gf-cover-body flex flex-col gap-8",
+            blend && "lg:gap-12",
+            corner && "relative"
+          )}
+        >
+          {corner && <HeroCornerNote note={corner} mark={fieldMark(on, "note")} inked={inked} />}
           <div
             className={cn(
               "flex flex-col gap-4 lg:gap-5",
@@ -166,14 +181,16 @@ export function HeroFull({
             {full.note && (
               <HandNote
                 note={full.note}
-                mark={fieldMark(on, "note")}
-                className={inked ? "text-text" : "text-stage-text"}
+                mark={corner ? {} : fieldMark(on, "note")}
+                className={cn(inked ? "text-text" : "text-stage-text", corner && "lg:hidden")}
               />
             )}
             <Heading
               id={id}
               className={cn(
-                "gf-cover-title max-w-[20ch] text-balance",
+                "gf-cover-title",
+                stacked ? "gf-cover-title--stacked" : "max-w-[20ch]",
+                "text-balance",
                 inked ? "text-text" : "text-stage-text"
               )}
             >
@@ -196,7 +213,10 @@ export function HeroFull({
               {accent && !mixed && (
                 <span
                   {...fieldMark(on, "title_accent")}
-                  className={cn("block", inked ? "text-signal" : "text-signal-on-stage")}
+                  className={cn(
+                    "block",
+                    inked ? "text-signal" : stacked ? "text-(--highlight)" : "text-signal-on-stage"
+                  )}
                 >
                   {settings.accent_mark === "swash" ? (
                     <span className="relative inline-block">
@@ -221,27 +241,15 @@ export function HeroFull({
               </p>
             )}
             {(buttons || video) && (
-              <div className={cn("flex flex-wrap gap-3 pt-1", centred && "justify-center")}>
-                {buttons &&
-                  hero.actions.slice(0, 2).map((action, index) => (
-                    <a
-                      key={`${action.path}-${index}`}
-                      href={action.path}
-                      className={cn(
-                        "gf-btn",
-                        index > 0 && "gf-btn--quiet",
-                        index === 0 && accentTone && "gf-btn--accent"
-                      )}
-                      {...fieldMark(on, fieldKey("links", hero.actionsAt?.[index] ?? index))}
-                    >
-                      {action.label}
-                      {index === 0 && settings.button_icon === "arrow" && (
-                        <ArrowRight className="size-4.5" aria-hidden="true" strokeWidth={2} />
-                      )}
-                    </a>
-                  ))}
-                {video && <HeroVideo video={video} words={heroVideoWords(t)} />}
-              </div>
+              <HeroButtons hero={hero} full={full} buttons={buttons} centred={centred} t={t} />
+            )}
+            {inside && full.trust.length > 0 && (
+              <HeroTrustRow
+                badges={full.trust}
+                label={t("footer.trust")}
+                inked={inked}
+                centred={centred}
+              />
             )}
           </div>
           {search && !overlap && <SearchForm form={search} className={box} />}
@@ -250,13 +258,13 @@ export function HeroFull({
       {foot && (
         <Container className="gf-cover-foot relative z-(--z-raised) flex flex-col gap-4">
           {search && overlap && (
-            <SearchForm form={search} className={trust.length > 0 ? "w-full" : box} />
+            <SearchForm form={search} className={trust.length > 0 || inside ? "w-full" : box} />
           )}
           {trust.length > 0 && (
             <HeroTrust
               badges={trust}
               label={t("footer.trust")}
-              className={blend && !(search && overlap) ? "mx-auto lg:w-[76%]" : undefined}
+              className={blend && !(search && overlap) ? "mx-auto lg:w-[82%]" : undefined}
               roomy={blend}
             />
           )}

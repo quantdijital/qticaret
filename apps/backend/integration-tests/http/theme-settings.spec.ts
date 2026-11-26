@@ -26,7 +26,10 @@ interface Frame {
     media_ground: string
     density: string
     motion: string
+    page_width: string
+    accent_ink: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
+    listing_page: { default_view: string; view_switch: string; breadcrumb_current: string }
     search_form: Record<string, unknown>
   }
 }
@@ -39,10 +42,14 @@ const KIT = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  // The page's width and the words on the accent, at today's (adr/0067 Ek 2026-11-25)
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */
 const LISTING_TEXT = { size: "md", align: "start", width: "narrow", collapse: true }
+const LISTING_PAGE = { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" }
 
 /** The search box's fields at their defaults (adr/0077 §1). */
 const SEARCH_FORM = {
@@ -52,6 +59,7 @@ const SEARCH_FORM = {
   show_people: true,
   flexible_month: true,
   date_words: false,
+  boxed_fields: false,
   category_style: "select",
   placeholder: null,
 }
@@ -147,6 +155,7 @@ medusaIntegrationTestRunner({
         ...KIT,
         // and before the listing text, its defaults (adr/0075)
         listing_text: LISTING_TEXT,
+        listing_page: LISTING_PAGE,
         search_form: SEARCH_FORM,
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
@@ -170,6 +179,7 @@ medusaIntegrationTestRunner({
         menu_style: "plain",
         shadow: "none",
         listing_text: { ...LISTING_TEXT, size: "lg" },
+        listing_page: LISTING_PAGE,
         search_form: SEARCH_FORM,
       })
       // The old field stays until the storefront and the panel move over
@@ -212,6 +222,7 @@ medusaIntegrationTestRunner({
         surface_style: "filled",
         ...KIT,
         listing_text: LISTING_TEXT,
+        listing_page: LISTING_PAGE,
         search_form: SEARCH_FORM,
       }
 

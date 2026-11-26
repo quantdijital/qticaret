@@ -7,6 +7,8 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderToolLabels,
+  HeaderToolsStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -45,6 +47,10 @@ export interface HeaderBarView {
    * drops it down). Absent: `field`.
    */
   searchStyle?: HeaderSearchStyle
+  /** The one-row header's tools with words (`show`) or as round icons only (`hide`). Absent: `show`. */
+  toolLabels?: HeaderToolLabels
+  /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */
+  toolsStyle?: HeaderToolsStyle
   /**
    * The one-row header over the page's first section when that is a full
    * photograph opening: see-through, its words light, until the page
@@ -148,6 +154,12 @@ export interface FooterColumnsView {
   about: string | null
   ground: FooterColumnsStep<"ground">
   badgeStyle: FooterColumnsStep<"badge_style">
+  /** The newsletter box under the brand block (absent) or as the last column. */
+  newsPlace?: "column"
+  /** The brand block without the address, phone and e-mail (absent: with them). */
+  brandContact?: "hide"
+  /** The bottom line's words in the middle between two rules (absent: spread). */
+  bottomAlign?: "center"
 }
 
 export interface BackToTopView {

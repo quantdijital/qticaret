@@ -67,6 +67,7 @@ const FIELDS = [
   "product_extension.kind",
   "product_extension.description_doc",
   "product_extension.summary_doc",
+  "product_extension.max_quantity",
   // Its videos (adr/0069 §6): the Store API's own leaves, the ready ones while the flag is on
   ...STORE_VIDEO_LEAVES,
 ]

@@ -71,6 +71,7 @@ export function VariantDraftDialog({
         tracked: values.manage_inventory,
         reserved: null,
         backorder: values.allow_backorder,
+        fixed: true,
       }}
       locationId={defaults.data?.locationId ?? null}
       // Selling past stock is the product's switch beside the table

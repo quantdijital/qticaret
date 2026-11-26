@@ -116,6 +116,8 @@ export const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/bank_transfer" },
   // Every customer's name, address and phone in one file: the order list's export
   { methods: ["POST"], path: "/admin/order-board/export" },
+  // Every customer's name and e-mail in one file: the customer list's export (CU2)
+  { methods: ["POST"], path: "/admin/customer-export" },
   // A shop's data moved in from its old platform, its customers too (F14, adr/0042 §9)
   { methods: "*", path: "/admin/migrations*" },
   // Whether the team must pass 2FA (adr/0040)

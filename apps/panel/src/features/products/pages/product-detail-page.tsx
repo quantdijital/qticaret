@@ -3,9 +3,9 @@ import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
 import { DirtyRegistryProvider } from "@qticaret/admin-ui/patterns/dirty-registry"
+import { HeaderSaveActions } from "@qticaret/admin-ui/patterns/header-save-actions"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
-import { SaveBar } from "@qticaret/admin-ui/patterns/save-bar"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
@@ -13,9 +13,11 @@ import { EditorLayout } from "@/features/content/components/editor-layout"
 import { productQuery } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
+import { publishScheduleOf } from "@/features/products/publish-schedule"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
 import { usePartDraws } from "@/features/products/detail/use-part-draws"
+import { useDataCard } from "@/features/products/detail/use-data-card"
 import { usePartAttention, usePartMarks } from "@/features/products/detail/use-product-findings"
 import { LayoutSheet } from "@/features/products/layout/layout-sheet"
 import { PartNav } from "@/features/products/layout/part-nav"
@@ -44,12 +46,14 @@ function DetailSkeleton() {
 }
 
 /**
- * One product (docs/06 "Ürün sayfası"): what is edited most first (its
- * name and address, its variants, each opening in a dialog, its pictures,
- * its description), its search appearance and seldom-edited parts folded
- * under them to a line each; beside them, following the scroll, its
- * facts, the SEO advisor and short cards for categories, catalog details
- * and the parcel, each edited in place. Every card saves on its own. The
+ * One product (docs/06 "Ürün sayfası"; WooCommerce's layout): what is
+ * edited most first (its name and address, its pictures, its description),
+ * the "Ürün verileri" card with its type and tabs (price, stock, parcel,
+ * attributes, variants, catalog, add-ons and price history), its search
+ * appearance folded to a line; beside them, a narrow column following the
+ * scroll with its facts, the SEO advisor and its categories, edited in
+ * place. Every form saves on its own and with the page's one "Kaydet" in
+ * the header, held under the top bar as the section bar under it. The
  * shop lays the page out for its team ("Sayfayı düzenle"): each column's
  * order and the parts it hides.
  */
@@ -88,7 +92,8 @@ function ProductPage({
 }) {
   const attention = usePartAttention(product)
   const draws = usePartDraws(product.id)
-  const page = usePageLayout(attention, draws)
+  const data = useDataCard(product)
+  const page = usePageLayout(attention, draws, { simple: data.simple, open: data.open })
   const marks = usePartMarks(product)
   const wide = useSideBySide()
   // The layout is the shop's: whoever may change its settings arranges it
@@ -97,7 +102,13 @@ function ProductPage({
     const why = page.shownWhy(key)
     return why === "off" ? undefined : why
   }
-  useGoToCommands({ layout: page.layout, draws, goToKey: page.goToKey, goTo: page.goTo })
+  useGoToCommands({
+    layout: page.layout,
+    draws,
+    goToKey: page.goToKey,
+    goTo: page.goTo,
+    simple: data.simple,
+  })
   const shown = (keys: readonly PartKey[]) => keys.filter((key) => slot(key) !== undefined)
   // Side by side, the bar heads the main column and names its parts; narrower, the whole page's
   const nav = (
@@ -116,11 +127,18 @@ function ProductPage({
         <div className="flex flex-col gap-[var(--grid-gap)]">
           <PageHeader
             title={product.title}
-            badge={<ProductStatusBadge status={product.status} />}
+            badge={
+              <ProductStatusBadge
+                status={product.status}
+                publishAt={publishScheduleOf(product).publish_at}
+              />
+            }
             back={back}
+            sticky
             action={
               <ProductActions
                 product={product}
+                save={<HeaderSaveActions />}
                 onCustomize={
                   canArrange
                     ? () => {
@@ -140,7 +158,11 @@ function ProductPage({
                   const why = slot(key)
                   return why === undefined ? null : (
                     <PartSlot key={key} part={key} why={why}>
-                      <MainPartView part={key} product={product} />
+                      <MainPartView
+                        part={key}
+                        product={product}
+                        data={{ state: data, slot, draws, marks }}
+                      />
                     </PartSlot>
                   )
                 })}
@@ -157,7 +179,6 @@ function ProductPage({
             })}
           />
           <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
-          <SaveBar />
         </div>
       </SectionDefaults>
     </DirtyRegistryProvider>

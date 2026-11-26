@@ -10,6 +10,7 @@ import { CONVERSIONS_MODULE } from "../../../modules/conversions"
 import { eraseGiftRecipients } from "../../gift-cards/kvkk"
 import { eraseAddonTexts } from "../../addons/kvkk"
 import { eraseCheckoutRuns, expireOrderExports } from "./stored-copies"
+import { eraseOrderNotes } from "./order-note"
 import type ConversionsModuleService from "../../../modules/conversions/service"
 import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
@@ -215,6 +216,8 @@ export async function eraseOrders(container: Container, customerId: string, now:
   await eraseGiftRecipients(container, orderIds)
   // A text typed on an add-on line, which can be a person's name (adr/0052 §10)
   await eraseAddonTexts(container, orderIds)
+  // The shopper's note at checkout, on the order and its cart (Batch 8 / O1)
+  await eraseOrderNotes(container, orderIds)
   // Copies kept beside the order: its checkout's stored run, the order list's files
   await eraseCheckoutRuns(
     container,

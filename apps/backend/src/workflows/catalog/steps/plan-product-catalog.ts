@@ -14,6 +14,7 @@ import type { BookingMode, StockVariant } from "../booking-mode"
 import { giftCardKind, kindShipping } from "../kind-rules"
 import { checkSuccessor } from "../successor"
 import { ValidationError } from "../../../lib/errors"
+import { assertKnownShippingClass } from "../../../lib/shipping/classes"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
@@ -54,6 +55,10 @@ export interface SetProductCatalogInput {
   booking_mode?: BookingMode | undefined
   /** Its own card badge, checked and cut (`lib/catalog/badge`); null clears it. */
   badge?: string | null | undefined
+  /** The most of it one order may hold (S5); null: no limit. */
+  max_quantity?: number | null | undefined
+  /** How it ships (adr/0087 §1): `free` or one of the shop's classes; null: Standard. */
+  shipping_class?: string | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -79,6 +84,8 @@ export interface ExtensionFields {
   summary_doc: SummaryDoc | null
   booking_mode: BookingMode
   badge: string | null
+  max_quantity: number | null
+  shipping_class: string | null
 }
 
 export interface ProductCatalogPlan {
@@ -135,6 +142,8 @@ const EXTENSION_KEYS = [
   "summary_doc",
   "booking_mode",
   "badge",
+  "max_quantity",
+  "shipping_class",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -228,6 +237,7 @@ export const planProductCatalogStep = createStep(
         throw new ValidationError("catalog.restriction_disabled", { field: "restriction" })
       }
     }
+    await assertKnownShippingClass(container, input.shipping_class)
     const extension = product.product_extension ?? null
     const kind = await giftCardKind(container, input, extension)
     const currentMode = extension?.booking_mode ?? "none"

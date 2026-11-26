@@ -34,6 +34,8 @@ export function SeoFillButton() {
         type="button"
         size="sm"
         variant="outline"
+        // Its long name wraps on a phone instead of running past the card
+        className="h-auto min-h-8 max-w-full py-1.5 whitespace-normal"
         onClick={() => {
           setOpen(true)
         }}

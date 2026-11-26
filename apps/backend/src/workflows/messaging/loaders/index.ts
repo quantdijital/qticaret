@@ -11,6 +11,7 @@ import { loadGiftCardMessage } from "./gift-card"
 import { loadInvoiceMessage } from "./invoice"
 import { loadMigrationInvite } from "./migration"
 import { loadOrderLink, loadOrderMessage } from "./order"
+import { loadOrderNoteMessage } from "./order-note"
 import { loadParcelMessage } from "./parcel"
 import { loadPaymentLinkMessage } from "./payment-link"
 import { loadReturnMessage } from "./return-request"
@@ -46,6 +47,8 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "order.shipped": (container, id) => loadParcelMessage(container, id),
   "order.delivered": (container, id) => loadParcelMessage(container, id),
   "order.invoiced": (container, id) => loadInvoiceMessage(container, id),
+  // The note named by the send (`extra.note_id`), on the order it is about
+  "order.note": loadOrderNoteMessage,
   // adr/0076 Ek D7b: the booking for its confirmation, a departure's use row for the rest
   "booking.confirmed": (container, id) => loadBookingConfirmed(container, id),
   "booking.reminder": (container, id) => loadBookingReminder(container, id),

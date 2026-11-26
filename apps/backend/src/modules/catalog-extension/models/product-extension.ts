@@ -44,6 +44,13 @@ export const PRODUCT_BOOKING_MODES = ["none", "departure", "range"] as const
  * - `badge`: the product's own card badge ("Sınırlı"), one short line of
  *   clean text (`lib/catalog/badge`), shown while the shop has manual
  *   badges on (`product_badges` settings). Null: none.
+ * - `max_quantity`: the most of the product (all its variants together)
+ *   one order may hold (S5, `lib/catalog/purchase-limit`), checked as lines
+ *   are added or changed and at checkout. Null: no limit.
+ * - `shipping_class`: how the product ships (adr/0087 §1): `free` (the
+ *   built-in "Ücretsiz kargo") or one of the shop's own classes' keys
+ *   (`shipping.shipping_classes`, a surcharge). Null, or a class the shop
+ *   no longer has: Standard.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -59,4 +66,6 @@ export const ProductExtension = model.define("product_extension", {
   summary_doc: model.json().nullable(),
   booking_mode: model.enum([...PRODUCT_BOOKING_MODES]).default("none"),
   badge: model.text().nullable(),
+  max_quantity: model.number().nullable(),
+  shipping_class: model.text().nullable(),
 })
