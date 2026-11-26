@@ -1,6 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   createCartWorkflow,
+  createPaymentCollectionForCartWorkflow,
   listShippingOptionsForCartWithPricingWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
@@ -8,6 +9,7 @@ import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
+import { completeWithSystemPayment } from "../helpers/checkout"
 import { geliverProduct, geliverShop } from "../helpers/geliver"
 import type { GeliverShop } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
@@ -199,6 +201,22 @@ medusaIntegrationTestRunner({
       const refused = await classify(paidVariant, "imaginary")
       expect(refused.status).toBe(400)
       expect(refused.data.message).toBe("shipping.class_unknown")
+    })
+
+    it("stops a checkout whose product changed class after its paid method was chosen", async () => {
+      const cartId = await cartOf([{ variant_id: paidVariant, quantity: 1 }])
+      const chosen = await store<{ cart: { shipping_total: number } }>(
+        `/store/carts/${cartId}/shipping-methods`,
+        { option_id: setup.shop.shippingOptionId }
+      )
+      expect(chosen.data.cart.shipping_total).toBe(90)
+      // Staff move it to a class with a surcharge: the 90 TL method is stale now
+      await classify(paidVariant, "heavy")
+      const { result: collection } = await createPaymentCollectionForCartWorkflow(
+        getContainer()
+      ).run({ input: { cart_id: cartId } })
+      const refused = await completeWithSystemPayment(getContainer(), cartId, collection.id)
+      expect(refused).toEqual({ order_id: null, message: "cart.shipping_changed" })
     })
 
     it("counts the products in each class for the settings card", async () => {

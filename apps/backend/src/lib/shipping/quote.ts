@@ -109,6 +109,14 @@ export interface QuoteLine {
 export const productOfLine = (line: QuoteLine): string =>
   line.product_id ?? line.variant?.product?.id ?? line.variant?.product_id ?? ""
 
+/**
+ * A map's own value for a key: never one an object inherits (`constructor`
+ * is a valid class key; security review 2026-11-26).
+ */
+function ownValue<T>(map: Readonly<Record<string, T>> | undefined, key: string): T | null {
+  return map && Object.hasOwn(map, key) ? (map[key] ?? null) : null
+}
+
 /** How the option's base price is made: once per order, or from the parcel of the lines. */
 export type QuoteBasis = "order" | "parcel"
 
@@ -140,7 +148,7 @@ export async function shippingQuote<Line extends QuoteLine>(
   if (reachesThreshold(context)) {
     return ZERO_KURUS
   }
-  const classOf = (line: Line) => context?.classes?.[productOfLine(line)] ?? null
+  const classOf = (line: Line) => ownValue(context?.classes, productOfLine(line))
   const shipped = input.lines.filter((line) => line.requires_shipping !== false)
   const paid = shipped.filter((line) => classOf(line) !== FREE_SHIPPING_CLASS)
   if (shipped.length > 0 && paid.length === 0) {
@@ -151,7 +159,7 @@ export async function shippingQuote<Line extends QuoteLine>(
     0,
     ...paid.map((line) => {
       const key = classOf(line)
-      return key ? (context?.surcharges?.[key] ?? 0) : 0
+      return key ? (ownValue(context?.surcharges, key) ?? 0) : 0
     })
   )
   return kurus(base + surcharge)

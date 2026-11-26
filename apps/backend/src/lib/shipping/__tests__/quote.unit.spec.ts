@@ -144,6 +144,11 @@ describe("free-shipping products and classes (adr/0087 §2, the owner's answers)
       5_990
     )
   })
+
+  it("reads a removed class named like an object's own property as Standard (security review)", async () => {
+    const ctx = context({ classes: { prod_a: "constructor", prod_b: "tostring" } })
+    expect(await quote([line("prod_a"), line("prod_b")], ctx, "order")).toBe(5_990)
+  })
 })
 
 describe("the hook's reading in a provider's context", () => {

@@ -10,11 +10,12 @@ export async function shippingClassUsage(
     fields: ["shipping_class"],
     filters: { shipping_class: { $ne: null } },
   })
-  const usage: Record<string, number> = {}
+  // A Map: a key such as `constructor` counts like any other
+  const usage = new Map<string, number>()
   for (const row of data as unknown as { shipping_class?: string | null }[]) {
     if (row.shipping_class) {
-      usage[row.shipping_class] = (usage[row.shipping_class] ?? 0) + 1
+      usage.set(row.shipping_class, (usage.get(row.shipping_class) ?? 0) + 1)
     }
   }
-  return usage
+  return Object.fromEntries(usage)
 }
