@@ -5277,7 +5277,7 @@
       "nameRequired": "First and last name are required.",
       "company": "Company name",
       "sameAsDelivery": "Same as the delivery address.",
-      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "invoiced": "The invoice is issued or with the provider; the billing address no longer changes.",
       "email": "E-mail",
       "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
       "emailRequired": "E-mail is required.",

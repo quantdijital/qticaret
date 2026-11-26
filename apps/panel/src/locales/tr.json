@@ -5277,7 +5277,7 @@
       "nameRequired": "Ad ve soyad gerekli.",
       "company": "Firma adı",
       "sameAsDelivery": "Teslimat adresiyle aynı.",
-      "invoiced": "Fatura kesildi; fatura adresi artık değişmez.",
+      "invoiced": "Fatura kesildi ya da sağlayıcıya iletildi; fatura adresi artık değişmez.",
       "email": "E-posta",
       "emailHint": "Siparişin iletileri bundan sonra bu adrese gider. Müşterinin hesabındaki e-posta değişmez.",
       "emailRequired": "E-posta gerekli.",
