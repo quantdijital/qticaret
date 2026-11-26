@@ -20,11 +20,13 @@ function useColumns(): Column<ContentEntry>[] {
     {
       key: "title",
       header: t("content.columns.title"),
+      fill: true,
       cell: (entry) => (
         <div className="flex min-w-0 flex-col">
           <Link
             to="/content/$id"
             params={{ id: entry.id }}
+            title={entry.title}
             className="truncate font-medium hover:underline"
             onClick={(event) => {
               event.stopPropagation()

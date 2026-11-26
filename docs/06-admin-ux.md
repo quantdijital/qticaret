@@ -27,6 +27,13 @@
       - *E-posta:* Entegrasyonlar'daki e-posta satırı ve Bildirimler > E-posta'daki gönderici kartı mağazanın gözünden konuşur. Platformun taşıyıcısı (Resend; geliştiricinin makinesinde yerel posta kutusu) e-postayı gönderiyorsa "E-postalarınız <adres> adresinden gidiyor"; kendi alan adı yalnızca mağazanın doğrulayabildiği yerde (Resend) önerilir, DNS bekleyen alan adı mağazanın işidir ("İlgilenin"). Hiçbir şey göndermiyorsa platformun ayarıdır: mağazaya tek satır ("E-postalarınız şu an gönderilmiyor."), operatöre `messaging.email_transport_missing` olayıyla `error` logu (ayar başına bir kez, `lib/messaging/email`); "platform yöneticisine başvurun" gibi bir yönlendirme yok.
       - *Kalan:* ödeme hesaplarındaki şifreleme anahtarı eksik uyarısı (kaydı engeller, sahibin bilmesi gerekir); operatör için `integration_credentials.key_missing` olayıyla `error` düzeyinde de loglanır.
 
+## Liste sayfası başlığı ve araç çubuğu (2026-11-26)
+Sahip (2026-11-26), ürün sayfasının sadeleşmesinden sonra (PR #434) "bütün panel aynı kalitede olsun"; panelin her sayfası 390 / 820 / 1024 / 1280 / 1440'ta denetlendi:
+- **Başlık** (`PageHeader`): başlık ve açıklama en az 18rem yer tutar; eylemler yanına sığmazsa kendi satırına iner (Raporlar 1024'te açıklama dar sütunda kelime kelime alt alta duruyordu). En çok birincil düğme ve bir ikincil görünür; gerisi tek "…" menüsünde (`HeaderMenu`, adı "Diğer işlemler"). Siparişler: "Dışa aktar" ve "Yeni sipariş" (ödeme bağlantıları açıkken) düğme; İnceleme, İade talepleri, Ters ibrazlar, Faturalar, Ödeme bağlantıları ve Voucher doğrula menüde.
+- **Araç çubuğu** (`FilterBar`): arama kutusu en az 12rem; sıralama ve görünüm düğmeleri sığmazsa alt satıra iner (Ürünler 1024'te arama tek kelimeye eziliyordu).
+- **Tablo** (`DataTable`, sütunun `fill`'i): kaydın adı sütunu öteki sütunların bıraktığı yeri alır, uzun ad üç noktayla kesilir (tamamı üzerine gelince); tablo dizüstünde kartından taşmaz (Ürünler, Blog, Stok, Denetim kaydı). Telefonda sığmayan tablo yine kendi içinde yana kayar.
+- Test: `e2e/layout-overflow.e2e.ts` (ana listeler 390 ve 1024'te: sayfa yana kaymaz, başlık parçası pencereden taşmaz, başlık ve arama ezilmez; siparişlerin kuyrukları menüden açılır).
+
 ## Detay sayfası düzeni (2026-11-04)
 Kullanıcı (2026-11-04): "sipariş detay sayfası çok karmaşık duruyor, iletişim geçmişi büyük bir alan kaplıyor". Bir kaydın sayfası (sipariş, müşteri, ürün ve sonra yazılacaklar) en sık işten seyreğe doğru şu sırayla kurulur:
 

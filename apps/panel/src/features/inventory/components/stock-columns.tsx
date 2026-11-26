@@ -25,17 +25,21 @@ export function useStockColumns(
     {
       key: "item",
       header: t("inventory.columns.item"),
+      // The room the numbers and the shelf field leave; long names and codes are cut short,
+      // so the shelf field stays on the card
+      fill: true,
+      className: "min-w-32",
       cell: (item) => {
         const product = item.variant?.product
         return (
           <div className="flex min-w-0 items-center gap-3">
             <ProductThumb src={product?.thumbnail} />
-            {/* Capped on phones so long codes truncate instead of pushing the shelf field off screen */}
-            <div className="flex max-w-[8.5rem] min-w-0 flex-col sm:max-w-xs">
+            <div className="flex min-w-0 flex-col">
               {product ? (
                 <Link
                   to="/products/$id"
                   params={{ id: product.id }}
+                  title={product.title}
                   className="truncate font-medium hover:underline"
                 >
                   {product.title}
