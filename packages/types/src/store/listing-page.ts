@@ -27,10 +27,18 @@ export type ListingViewSwitch = (typeof LISTING_VIEW_SWITCHES)[number]
 export const LISTING_BREADCRUMB_CURRENTS = ["show", "hide"] as const
 export type ListingBreadcrumbCurrent = (typeof LISTING_BREADCRUMB_CURRENTS)[number]
 
+/**
+ * The longest word the shop may write after the product count in the
+ * page's toolbar (`count_word`: "24 tur" for "24 ürün").
+ */
+export const LISTING_COUNT_WORD_MAX = 24
+
 export interface ListingPageSettings {
   default_view: ListingViewMode
   view_switch: ListingViewSwitch
   breadcrumb_current: ListingBreadcrumbCurrent
+  /** The word after the count ("tur", "oda", "kurs"); none: the page's own "ürün". */
+  count_word: string | null
 }
 
 /** Each setting's default: today's page, a grid with no switch, the trail to the page itself. */
@@ -38,6 +46,7 @@ export const LISTING_PAGE_DEFAULTS: Readonly<ListingPageSettings> = {
   default_view: "grid",
   view_switch: "hide",
   breadcrumb_current: "show",
+  count_word: null,
 }
 
 /** The shopper's choice in the page's address (`?gorunum=liste`); the grid writes none. */
@@ -69,5 +78,12 @@ export function listingPageOf(
       value?.breadcrumb_current,
       LISTING_PAGE_DEFAULTS.breadcrumb_current
     ),
+    count_word: countWordOf(value?.count_word),
   }
+}
+
+/** The shop's word, trimmed and at most its length; empty or anything else: none. */
+function countWordOf(value: unknown): string | null {
+  const text = typeof value === "string" ? value.trim() : ""
+  return text === "" ? null : text.slice(0, LISTING_COUNT_WORD_MAX)
 }

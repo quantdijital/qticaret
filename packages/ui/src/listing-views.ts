@@ -131,6 +131,8 @@ export interface ListingPageView {
   total: number
   /** The count in words where "N ürün" is not the word (a search's "N sonuç"); absent: "N ürün". */
   countLabel?: string
+  /** The filter sheet's button where "N ürünü göster" is not the word ("N tur göster"); absent: it. */
+  showResultsLabel?: string
   pagination: PaginationView
   sort: SortOptionView[]
   filters: FilterGroupView[]

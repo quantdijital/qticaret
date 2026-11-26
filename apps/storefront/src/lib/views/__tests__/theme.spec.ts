@@ -71,7 +71,12 @@ describe("themeSettings", () => {
       section_spacing: "compact",
       surface_style: "lined",
       listing_text: { size: "lg", align: "center", width: "wide", collapse: false },
-      listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
+      listing_page: {
+        default_view: "list",
+        view_switch: "show",
+        breadcrumb_current: "hide",
+        count_word: null,
+      },
       search_form: {
         attribute_key: "gidilecek_yer",
         show_category: false,
@@ -140,7 +145,12 @@ describe("themeSettings", () => {
       // adr/0075 §6: the listing text's defaults
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
       // A listing page as it was: a grid, no switch, the trail to the page itself
-      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
+      listing_page: {
+        default_view: "grid",
+        view_switch: "hide",
+        breadcrumb_current: "show",
+        count_word: null,
+      },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {
         attribute_key: null,

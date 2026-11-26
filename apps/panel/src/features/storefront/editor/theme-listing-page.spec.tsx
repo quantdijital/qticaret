@@ -58,6 +58,26 @@ describe("Liste sayfası in the theme panel", () => {
     })
   })
 
+  it("puts the count's word in the draft, an empty one as none", async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ListingPageGroup theme={THEME} reveal={null} onChange={onChange} />)
+    const box = screen.getByRole("textbox", { name: "Ürün sayısında birim kelimesi" })
+    expect(box).toHaveValue("")
+
+    await user.type(box, "t")
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, count_word: "t" },
+    })
+    await user.type(box, " ")
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, count_word: null },
+    })
+    expect(found("birim")).toContain("listing_page.count_word")
+  })
+
   it("is found by the settings search", () => {
     expect(found("liste")).toContain("listing_page.default_view")
     expect(found("breadcrumb")).toContain("listing_page.breadcrumb_current")
