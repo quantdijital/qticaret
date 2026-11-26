@@ -22,7 +22,13 @@ import {
 } from "../../lib/shipping/geliver"
 import { quoteContextOf, shippingQuote } from "../../lib/shipping/quote"
 import { receiverError } from "../../lib/shipping/receiver"
-import { calculatedPriceOf, packedParcelOf, parcelFor, tableQuoteOf } from "../../lib/shipping/shop"
+import {
+  calculatedPriceOf,
+  cartLinesOf,
+  packedParcelOf,
+  parcelFor,
+  tableQuoteOf,
+} from "../../lib/shipping/shop"
 import { storedGeliverAccount } from "./account"
 import { GELIVER_OPTIONS, choiceOf, isGeliverOption } from "./options"
 import { pickOffer, shipmentData } from "./shipment"
@@ -80,10 +86,12 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
       return tableQuoteOf(context)
     }
     const amount = await shippingQuote({
-      lines: parcelLinesOf(context.items),
+      lines: cartLinesOf(context),
       context: quoteContextOf(context),
+      // The paid lines' parcel: a free product's desi adds nothing (adr/0087 §2.3)
+      basis: "parcel",
       price: async (lines) => {
-        const parcel = await parcelFor([...lines])
+        const parcel = await parcelFor(parcelLinesOf(lines))
         const credentials = await storedGeliverAccount()
         const quote = chooseQuote(
           await geliverApi().quotes(credentials, parcel),

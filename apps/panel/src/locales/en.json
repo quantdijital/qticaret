@@ -1558,6 +1558,29 @@
         "options": "Options and rates",
         "returns": "Returns",
         "locations": "Warehouses and stock"
+      },
+      "classes": {
+        "title": "Shipping classes",
+        "description": "A product's class changes its shipping cost. With several classes in a basket, the highest surcharge is added to the order once.",
+        "name": "Class name",
+        "nameOf": "Name of class {{number}}",
+        "surcharge": "Surcharge",
+        "surchargeOf": "Surcharge of class {{number}}",
+        "products_one": "{{count}} product",
+        "products_other": "{{count}} products",
+        "noProducts": "No products",
+        "freeRow": "Free shipping",
+        "freeHint": "Adds nothing to shipping",
+        "locked": "Built-in class: it cannot be renamed or removed.",
+        "add": "Add class",
+        "remove": "Remove the {{name}} class",
+        "removeUsed_one": "{{count}} product goes back to Standard.",
+        "removeUsed_other": "{{count}} products go back to Standard.",
+        "removeConfirm": "Remove",
+        "keep": "Keep",
+        "nameInvalid": "Give the class a name (60 characters at most).",
+        "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
+        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option."
       }
     },
     "integrations": {
@@ -4857,6 +4880,15 @@
       "hint": "The most of this product (all variants together) one order may hold. Empty means no limit; 1 sells it individually.",
       "none": "No limit",
       "invalid": "Write a whole number from 1 to {{max}}, or leave it empty."
+    },
+    "shippingClass": {
+      "label": "Shipping class",
+      "standard": "Standard",
+      "free": "Free shipping",
+      "hintStandard": "Shipping is priced by the delivery option chosen.",
+      "hintFree": "A free-shipping product adds nothing to the shipping cost; a basket of only such products ships free.",
+      "hintSurcharge": "With this product in the basket, {{amount}} is added to the order's shipping.",
+      "gone": "The class chosen no longer exists; the product counts as Standard."
     }
   },
   "orders": {

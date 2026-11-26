@@ -11,6 +11,7 @@ import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
+import { ShippingClassesCard } from "@/features/settings/components/shipping-classes-card"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard } from "@/features/settings/components/delivery-card"
 import { RatesCard } from "@/features/settings/components/shipping-rules-cards"
@@ -130,6 +131,10 @@ export function ShippingPage() {
                       <DeliveryCard key={JSON.stringify(saved)} saved={saved} />
                       <RatesCard key={`rates-${JSON.stringify(saved)}`} saved={saved} />
                     </div>
+                    <ShippingClassesCard
+                      key={`classes-${JSON.stringify(saved.shipping_classes ?? [])}`}
+                      saved={saved}
+                    />
                     <DefaultParcelCard key={`parcel-${JSON.stringify(saved)}`} saved={saved} />
                   </>
                 ))}

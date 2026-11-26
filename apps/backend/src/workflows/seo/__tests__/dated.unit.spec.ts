@@ -106,6 +106,7 @@ describe("a dated product's offers", () => {
       label_custom: { width_mm: 100, height_mm: 150 },
       default_parcel: { weight: 500, length: 10, width: 10, height: 10 },
       packing_slip_prices: false,
+      shipping_classes: [],
     },
     units: { weight_unit: "g", dimension_unit: "cm" },
     table_offered: true,

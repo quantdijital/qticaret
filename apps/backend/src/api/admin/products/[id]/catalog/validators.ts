@@ -69,6 +69,12 @@ export const AdminPostProductCatalog = z
     badge: productBadgeInput.nullable().optional(),
     // S5: the most of it one order may hold; null clears it
     max_quantity: z.number().int().min(1).max(MAX_PURCHASE_QUANTITY).nullable().optional(),
+    // adr/0087 §1: `free`, or one of the shop's classes (checked in the workflow); null: Standard
+    shipping_class: z
+      .string()
+      .regex(/^[a-z0-9][a-z0-9-]{0,39}$/)
+      .nullable()
+      .optional(),
     variants: z
       .record(
         id,

@@ -6,11 +6,15 @@ import type { Kurus, MedusaAmount } from "../money"
  * carrier table, Geliver's quote or a flat amount is only the base this
  * works from. Nothing here comes from a shopper: the context is laid over
  * Medusa's own by our hook (`workflows/hooks/shipping-quote-context.ts`),
- * which reads the basket and the shop's settings on the server.
+ * which reads the basket, its products' shipping classes and the shop's
+ * settings on the server.
  */
 
 /** Where the hook puts what it read in a calculated price's context. */
 export const QUOTE_CONTEXT_KEY = "qt_shipping"
+
+/** The built-in class: the product ships free (adr/0087 §1); never renamed, never removed. */
+export const FREE_SHIPPING_CLASS = "free"
 
 /** What the hook read for a cart, in kuruş, KDV in. */
 export interface ShippingQuoteContext {
@@ -18,6 +22,10 @@ export interface ShippingQuoteContext {
   threshold: Kurus | null
   /** The cart's lines after their discounts, KDV in (`item_total`, as adr/0024 counts it). */
   item_total: Kurus
+  /** Each product's class in the cart; a product without one is Standard. */
+  classes?: Readonly<Record<string, string>>
+  /** Each of the shop's own classes' surcharge (Settings > Shipping). */
+  surcharges?: Readonly<Record<string, Kurus>>
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -25,6 +33,25 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const kurusOrNull = (value: unknown): Kurus | null =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? kurus(value) : null
+
+const stringsOf = (value: unknown): Record<string, string> =>
+  isRecord(value)
+    ? Object.fromEntries(
+        Object.entries(value).filter(
+          (entry): entry is [string, string] => typeof entry[1] === "string"
+        )
+      )
+    : {}
+
+const amountsOf = (value: unknown): Record<string, Kurus> =>
+  isRecord(value)
+    ? Object.fromEntries(
+        Object.entries(value).flatMap(([key, amount]) => {
+          const read = kurusOrNull(amount)
+          return read === null ? [] : [[key, read]]
+        })
+      )
+    : {}
 
 /**
  * The hook's reading from a provider's context; null when it is missing
@@ -39,7 +66,12 @@ export function quoteContextOf(context: unknown): ShippingQuoteContext | null {
   if (itemTotal === null) {
     return null
   }
-  return { threshold: kurusOrNull(read["threshold"]), item_total: itemTotal }
+  return {
+    threshold: kurusOrNull(read["threshold"]),
+    item_total: itemTotal,
+    classes: stringsOf(read["classes"]),
+    surcharges: amountsOf(read["surcharges"]),
+  }
 }
 
 /** A threshold set in lira (Settings > Promotions) in kuruş; null when off. */
@@ -63,23 +95,64 @@ export function itemTotalKurus(value: MedusaAmount | null | undefined): Kurus {
 export const reachesThreshold = (context: ShippingQuoteContext | null): boolean =>
   context !== null && context.threshold !== null && context.item_total >= context.threshold
 
-export interface ShippingQuoteInput<Line> {
+/** A cart line as the quote reads it: whose product it is, whether it travels. */
+export interface QuoteLine {
+  product_id?: string | null
+  requires_shipping?: boolean | null
+  variant?: {
+    product?: { id?: string | null } | null
+    product_id?: string | null
+  } | null
+}
+
+/** The product a line is of; empty when it does not say. */
+export const productOfLine = (line: QuoteLine): string =>
+  line.product_id ?? line.variant?.product?.id ?? line.variant?.product_id ?? ""
+
+/** How the option's base price is made: once per order, or from the parcel of the lines. */
+export type QuoteBasis = "order" | "parcel"
+
+export interface ShippingQuoteInput<Line extends QuoteLine> {
   /** The lines the option ships (Medusa gives an option its own profile's lines). */
   lines: readonly Line[]
   /** The hook's reading; null when it did not run: the base is charged. */
   context: ShippingQuoteContext | null
+  /** A flat amount is per order; a table or a quote prices the parcel. */
+  basis: QuoteBasis
   /** The option's own price for the lines: a flat amount, the table, Geliver's quote. */
   price: (lines: readonly Line[]) => Kurus | Promise<Kurus>
 }
 
 /**
- * What the shopper pays for the option, KDV in. A basket at or past the
- * threshold ships free with every option, carrier tables and Geliver too
- * (adr/0087 §2.5): the base is not even asked for.
+ * What the shopper pays for the option, KDV in (adr/0087 §2):
+ * - a basket at or past the threshold ships free with every option (§2.5);
+ * - every line that travels in the free class: free, whatever the option;
+ * - otherwise the base: a flat amount in full (it is per order), or the
+ *   parcel of the paid lines alone (a free product's desi adds nothing);
+ * - plus the highest surcharge among the paid lines' classes, once (§2.4).
+ * A class the shop no longer has counts as Standard. The base is not
+ * asked for when the answer is free: Geliver is not called.
  */
-export async function shippingQuote<Line>(input: ShippingQuoteInput<Line>): Promise<Kurus> {
-  if (reachesThreshold(input.context)) {
+export async function shippingQuote<Line extends QuoteLine>(
+  input: ShippingQuoteInput<Line>
+): Promise<Kurus> {
+  const { context } = input
+  if (reachesThreshold(context)) {
     return ZERO_KURUS
   }
-  return input.price(input.lines)
+  const classOf = (line: Line) => context?.classes?.[productOfLine(line)] ?? null
+  const shipped = input.lines.filter((line) => line.requires_shipping !== false)
+  const paid = shipped.filter((line) => classOf(line) !== FREE_SHIPPING_CLASS)
+  if (shipped.length > 0 && paid.length === 0) {
+    return ZERO_KURUS
+  }
+  const base = await input.price(input.basis === "order" || paid.length === 0 ? input.lines : paid)
+  const surcharge = Math.max(
+    0,
+    ...paid.map((line) => {
+      const key = classOf(line)
+      return key ? (context?.surcharges?.[key] ?? 0) : 0
+    })
+  )
+  return kurus(base + surcharge)
 }

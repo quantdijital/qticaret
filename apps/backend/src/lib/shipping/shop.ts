@@ -16,6 +16,7 @@ import { kurus, toMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
 import { quoteContextOf, shippingQuote } from "./quote"
+import type { QuoteLine } from "./quote"
 
 /**
  * What a carrier provider reads of the shop at the time of the call, from
@@ -88,15 +89,24 @@ export const calculatedPriceOf = (amount: Kurus) => ({
   is_calculated_price_tax_inclusive: true,
 })
 
+/** A cart line as the quote and the parcel read it. */
+export type CartLine = OrderItemRow & QuoteLine
+
+/** A provider context's lines, the missing ones left out. */
+export const cartLinesOf = (context: { items?: readonly (CartLine | null)[] | null }): CartLine[] =>
+  (context.items ?? []).filter((item): item is CartLine => item !== null)
+
 /**
  * A cart's price by the shop's desi table (adr/0035), through the one
- * shipping quote (adr/0087 §2): free past the basket threshold.
+ * shipping quote (adr/0087 §2): the paid lines' parcel, free past the
+ * basket threshold or with every product free, plus a class surcharge.
  */
-export async function tableQuoteOf(context: { items?: readonly (OrderItemRow | null)[] | null }) {
+export async function tableQuoteOf(context: { items?: readonly (CartLine | null)[] | null }) {
   const amount = await shippingQuote({
-    lines: parcelLinesOf(context.items),
+    lines: cartLinesOf(context),
     context: quoteContextOf(context),
-    price: async (lines) => tablePriceOf((await parcelFor([...lines])).desi),
+    basis: "parcel",
+    price: async (lines) => tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi),
   })
   return calculatedPriceOf(amount)
 }
@@ -117,13 +127,15 @@ export function flatAmountOf(optionData: Record<string, unknown> | null | undefi
 /** A flat-priced option for a cart: its amount, through the one quote (free past the threshold). */
 export async function flatQuoteOf(
   optionData: Record<string, unknown>,
-  context: { items?: readonly (OrderItemRow | null)[] | null }
+  context: { items?: readonly (CartLine | null)[] | null }
 ) {
   const amount = flatAmountOf(optionData)
   return calculatedPriceOf(
     await shippingQuote({
-      lines: parcelLinesOf(context.items),
+      lines: cartLinesOf(context),
       context: quoteContextOf(context),
+      // Per order: a mixed basket pays it in full (adr/0087, the owner's answer 2)
+      basis: "order",
       price: () => amount,
     })
   )

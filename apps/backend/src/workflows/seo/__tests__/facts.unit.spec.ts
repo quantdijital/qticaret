@@ -137,6 +137,7 @@ describe("productFacts", () => {
       label_custom: { width_mm: 100, height_mm: 150 },
       default_parcel: null,
       packing_slip_prices: false,
+      shipping_classes: [],
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -194,6 +195,7 @@ describe("productFacts", () => {
       // 5 kg: past the first band
       default_parcel: { weight: 5_000, length: 30, width: 20, height: 10 },
       packing_slip_prices: false,
+      shipping_classes: [],
     }
     const shipping = {
       settings,
