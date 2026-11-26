@@ -231,18 +231,26 @@ function AuditLog() {
   return (
     <>
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
-        <FilterTabs
-          label={t("settings.audit.views")}
-          value={search.kind ?? "all"}
-          onChange={(next) => {
-            change({ kind: next === "all" ? undefined : next })
-          }}
-          tabs={AUDIT_KINDS.map((key) => ({
-            key,
-            label: key === "all" ? t("settings.audit.all") : t(`settings.audit.kinds.${key}`),
-          }))}
-        />
-        <AuditFilters search={search} onChange={change} />
+        <AuditFilters search={search} onChange={change}>
+          {({ trigger, chips }) => (
+            <>
+              <FilterTabs
+                label={t("settings.audit.views")}
+                value={search.kind ?? "all"}
+                onChange={(next) => {
+                  change({ kind: next === "all" ? undefined : next })
+                }}
+                tabs={AUDIT_KINDS.map((key) => ({
+                  key,
+                  label: key === "all" ? t("settings.audit.all") : t(`settings.audit.kinds.${key}`),
+                }))}
+                end={trigger}
+              />
+              {/* What is set, under the tabs: only while a filter is */}
+              {chips ? <div className="border-b px-5 py-3">{chips}</div> : null}
+            </>
+          )}
+        </AuditFilters>
         {log.isError ? (
           <div className="p-5">
             <ErrorState text={errorText(t, log.error)} onRetry={() => void log.refetch()} />

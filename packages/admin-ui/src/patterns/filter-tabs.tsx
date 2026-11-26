@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { cn } from "../lib/utils"
 
 export interface FilterTab<K extends string> {
@@ -11,6 +12,12 @@ interface FilterTabsProps<K extends string> {
   value: K
   onChange: (value: K) => void
   label: string
+  /**
+   * Controls at the row's right end (a list without a search: its
+   * "Filtrele" button). They never squeeze the tabs: on a narrow screen
+   * the tabs wrap and the controls stay at the end.
+   */
+  end?: ReactNode
 }
 
 /**
@@ -19,9 +26,19 @@ interface FilterTabsProps<K extends string> {
  * sideways (as PageTabs): a scrolling row showed a scrollbar for the
  * underline's one pixel below the line (the owner, 2026-11-24).
  */
-export function FilterTabs<K extends string>({ tabs, value, onChange, label }: FilterTabsProps<K>) {
-  return (
-    <div role="tablist" aria-label={label} className="flex flex-wrap gap-x-1 border-b px-3">
+export function FilterTabs<K extends string>({
+  tabs,
+  value,
+  onChange,
+  label,
+  end,
+}: FilterTabsProps<K>) {
+  const list = (
+    <div
+      role="tablist"
+      aria-label={label}
+      className={cn("flex flex-wrap gap-x-1", end ? "min-w-0 flex-1" : "border-b px-3")}
+    >
       {tabs.map((tab) => {
         const selected = tab.key === value
         return (
@@ -55,6 +72,15 @@ export function FilterTabs<K extends string>({ tabs, value, onChange, label }: F
           </button>
         )
       })}
+    </div>
+  )
+  if (!end) {
+    return list
+  }
+  return (
+    <div className="flex items-end gap-2 border-b px-3" data-filter-tabs-end="">
+      {list}
+      <div className="flex h-11 shrink-0 items-center gap-2 pr-2">{end}</div>
     </div>
   )
 }
