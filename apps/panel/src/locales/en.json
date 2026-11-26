@@ -1374,9 +1374,9 @@
         "rejected": "Geliver no longer accepts the stored API token; no shipment can be created. Get a new token from the Geliver panel and enter it."
       },
       "options": {
-        "title": "Shipping options",
-        "description": "Shoppers choose one of these at checkout.",
-        "add": "Add option",
+        "title": "Extra shipping options",
+        "description": "Shoppers see these beside the main option at checkout (e.g. express, pickup).",
+        "add": "Add extra option",
         "addTitle": "New shipping option",
         "name": "Name",
         "nameRequired": "Enter a name.",
@@ -1406,7 +1406,48 @@
         "removeConfirm": "Remove",
         "removed": "Shipping option removed.",
         "defaultName": "Standard shipping",
-        "keep": "Keep"
+        "keep": "Keep",
+        "allTitle": "Shipping options",
+        "noExtras": "No extra options"
+      },
+      "fee": {
+        "title": "Shipping fee",
+        "description": "What shoppers pay for shipping at checkout. The price is always worked out on the server.",
+        "modes": {
+          "free": "Free shipping on every order",
+          "threshold": "Free above an amount",
+          "flat": "Flat fee",
+          "carrier": "The carrier's price"
+        },
+        "modeHints": {
+          "free": "No order pays for shipping.",
+          "threshold": "Free once the basket reaches the amount; a flat fee below it.",
+          "flat": "The same fee on every order.",
+          "carrier": "Priced by the parcel's desi from your price table, or by Geliver's quote."
+        },
+        "threshold": "Free shipping from",
+        "thresholdHint": "Orders of this amount and above ship free (VAT included, after discounts).",
+        "thresholdOptional": "Free shipping from (optional)",
+        "thresholdOptionalHint": "Left empty, every order pays the carrier's price.",
+        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL.",
+        "feeBelow": "Fee below that amount",
+        "feeFlat": "Fee per order",
+        "feeInvalid": "Enter an amount above 0, at most 100,000 TL.",
+        "source": "Priced by",
+        "sources": {
+          "aras-table": "Aras Kargo: my price table (desi)",
+          "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
+          "geliver-cheapest": "Geliver: cheapest offer",
+          "geliver-fastest": "Geliver: fastest offer",
+          "geliver-table": "Geliver: my price table (desi)"
+        },
+        "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
+        "tableLink": "Fill in the price table",
+        "primary": "This fee applies to the \"{{name}}\" option ({{carrier}}).",
+        "customNote": "Your shipping prices don't fit one of these; edit them in the list below, or pick one and save.",
+        "noneNote": "No shipping option yet; pick one and save to make it.",
+        "defaultName": "Standard shipping",
+        "replacedKept": "The old option stays as an extra while orders still to ship use it; remove it once they have shipped."
       },
       "rules": {
         "deliveryTitle": "Delivery time",
@@ -1557,16 +1598,9 @@
         "returns": "Returns",
         "locations": "Warehouses and stock"
       },
-      "freeShipping": {
-        "title": "Free shipping threshold",
-        "description": "Once the basket total (VAT included, after discounts) reaches this amount, every shipping option is free.",
-        "switch": "Free shipping from a basket total",
-        "threshold": "Basket total",
-        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL."
-      },
       "classes": {
         "title": "Shipping classes",
-        "description": "A product's class adds a surcharge to shipping; the highest in the basket is added once.",
+        "description": "Adds a shipping surcharge to large or heavy products; the highest in the basket is added once. Mark a product as free shipping on its Shipping tab.",
         "name": "Class name",
         "nameOf": "Name of class {{number}}",
         "surcharge": "Surcharge",
@@ -1574,9 +1608,6 @@
         "products_one": "{{count}} product",
         "products_other": "{{count}} products",
         "noProducts": "No products",
-        "freeRow": "Free shipping",
-        "freeHint": "Adds nothing to shipping",
-        "locked": "Built-in class: it cannot be renamed or removed.",
         "add": "Add class",
         "remove": "Remove the {{name}} class",
         "removeUsed_one": "{{count}} product goes back to Standard.",
@@ -1585,7 +1616,8 @@
         "keep": "Keep",
         "nameInvalid": "Give the class a name (60 characters at most).",
         "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
-        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option."
+        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option.",
+        "empty": "No classes yet. Most shops need none."
       },
       "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
       "ownDeliveryLink": "Legal details",
@@ -1599,7 +1631,8 @@
         "rates_one": "{{count}} row, up to {{desi}} desi",
         "rates_other": "{{count}} rows, up to {{desi}} desi",
         "ratesNeeded": "An option is priced by the price table, but the table is empty.",
-        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)"
+        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)",
+        "noClasses": "No classes"
       },
       "invoiceIdentity": {
         "title": "Carrier details on invoices",
@@ -4933,11 +4966,11 @@
     "shippingClass": {
       "label": "Shipping class",
       "standard": "Standard",
-      "free": "Free shipping",
-      "hintStandard": "Shipping is priced by the delivery option chosen.",
+      "hintStandard": "Shipping is priced by the shop's shipping fee setting.",
       "hintFree": "A free-shipping product adds nothing to the shipping cost; a basket of only such products ships free.",
       "hintSurcharge": "With this product in the basket, {{amount}} is added to the order's shipping.",
-      "gone": "The class chosen no longer exists; the product counts as Standard."
+      "gone": "The class chosen no longer exists; the product counts as Standard.",
+      "freeSwitch": "This product ships free"
     }
   },
   "orders": {

@@ -46,6 +46,13 @@ export interface ShippingSettings {
    * "Ücretsiz kargo" (`free`) is not among them. At most 20.
    */
   shipping_classes: ShippingClass[]
+  /**
+   * The option Settings > Shipping's "Kargo ücreti" choice prices (the
+   * owner, 2026-11-26: one question, not a list); the others are extra.
+   * Null, or an option since removed: the panel takes the cheapest flat
+   * one. Only the panel reads it; checkout prices every option the same.
+   */
+  primary_option_id: string | null
 }
 
 export interface ShippingClass {
@@ -127,6 +134,10 @@ export const shippingSection = defineSection<ShippingSettings>(
           .strict()
       )
       .max(20),
+    primary_option_id: z
+      .string()
+      .regex(/^so_[A-Za-z0-9]{1,60}$/)
+      .nullable(),
   },
   {
     handling_days_min: 1,
@@ -141,6 +152,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     default_parcel: null,
     packing_slip_prices: false,
     shipping_classes: [],
+    primary_option_id: null,
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {

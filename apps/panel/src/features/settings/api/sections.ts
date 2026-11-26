@@ -121,6 +121,8 @@ export interface ShippingSettings {
   packing_slip_prices: boolean
   /** The shop's own shipping classes (adr/0087); absent from an older backend: none. */
   shipping_classes?: ShippingClass[]
+  /** The option the "Kargo ücreti" answer prices; null or absent: the cheapest flat one. */
+  primary_option_id?: string | null
 }
 
 /** A shop's shipping class (adr/0087 §1): its key on products, its name, its surcharge in kuruş. */

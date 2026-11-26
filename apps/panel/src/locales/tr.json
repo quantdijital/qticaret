@@ -1374,9 +1374,9 @@
         "rejected": "Geliver kayıtlı API anahtarını artık kabul etmiyor; gönderi oluşturulamaz. Geliver panelinden yeni bir anahtar alıp girin."
       },
       "options": {
-        "title": "Kargo seçenekleri",
-        "description": "Müşteri ödeme sırasında bunlardan birini seçer.",
-        "add": "Seçenek ekle",
+        "title": "Ek kargo seçenekleri",
+        "description": "Müşteri ödeme adımında ana seçeneğin yanında bunları da görür (ör. hızlı kargo, mağazadan teslim).",
+        "add": "Ek seçenek ekle",
         "addTitle": "Yeni kargo seçeneği",
         "name": "Ad",
         "nameRequired": "Bir ad girin.",
@@ -1406,7 +1406,48 @@
         "removeConfirm": "Kaldır",
         "removed": "Kargo seçeneği kaldırıldı.",
         "defaultName": "Standart kargo",
-        "keep": "Vazgeç"
+        "keep": "Vazgeç",
+        "allTitle": "Kargo seçenekleri",
+        "noExtras": "Ek seçenek yok"
+      },
+      "fee": {
+        "title": "Kargo ücreti",
+        "description": "Müşterinin ödeme adımında ödediği kargo ücreti. Ücret her zaman sunucuda hesaplanır.",
+        "modes": {
+          "free": "Tüm siparişlerde kargo ücretsiz",
+          "threshold": "Belli tutarın üstünde ücretsiz",
+          "flat": "Sabit ücret",
+          "carrier": "Kargo firmasının ücreti"
+        },
+        "modeHints": {
+          "free": "Hiçbir siparişten kargo ücreti alınmaz.",
+          "threshold": "Sepet bu tutara ulaşınca kargo ücretsiz; altında sabit ücret.",
+          "flat": "Her siparişte aynı kargo ücreti.",
+          "carrier": "Ücret paketin desisine göre ücret tablonuzdan ya da Geliver teklifinden gelir."
+        },
+        "threshold": "Ücretsiz kargo sınırı",
+        "thresholdHint": "Bu tutar ve üstü siparişlerde kargo ücretsiz (KDV dahil, indirimlerden sonra).",
+        "thresholdOptional": "Ücretsiz kargo sınırı (isteğe bağlı)",
+        "thresholdOptionalHint": "Boş bırakırsanız her siparişte firmanın ücreti alınır.",
+        "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin.",
+        "feeBelow": "Sınırın altında kargo ücreti",
+        "feeFlat": "Sipariş başına kargo ücreti",
+        "feeInvalid": "0'dan büyük, en çok 100.000 TL bir tutar girin.",
+        "source": "Ücreti veren",
+        "sources": {
+          "aras-table": "Aras Kargo: ücret tablom (desi)",
+          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
+          "geliver-cheapest": "Geliver: en uygun teklif",
+          "geliver-fastest": "Geliver: en hızlı teklif",
+          "geliver-table": "Geliver: ücret tablom (desi)"
+        },
+        "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
+        "tableLink": "Ücret tablosunu doldurun",
+        "primary": "Bu ücret \"{{name}}\" seçeneğine uygulanır ({{carrier}}).",
+        "customNote": "Kargo ücretleriniz bu seçeneklerden birine uymuyor; aşağıdaki listeden düzenleyebilir ya da bir seçim yapıp kaydedebilirsiniz.",
+        "noneNote": "Henüz kargo seçeneği yok; bir seçim yapıp kaydedince oluşur.",
+        "defaultName": "Standart kargo",
+        "replacedKept": "Eski seçenek gönderilmemiş siparişlerde kullanıldığı için ek seçenek olarak kaldı; siparişler gönderilince silebilirsiniz."
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
@@ -1557,16 +1598,9 @@
         "returns": "İade",
         "locations": "Depolar ve stok"
       },
-      "freeShipping": {
-        "title": "Ücretsiz kargo eşiği",
-        "description": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca bütün kargo seçenekleri ücretsiz olur.",
-        "switch": "Belli bir tutardan sonra kargo bedava",
-        "threshold": "En az sepet tutarı",
-        "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin."
-      },
       "classes": {
         "title": "Kargo sınıfları",
-        "description": "Ürüne verilen sınıf kargo ücretine ek ücret ekler; sepette en yüksek olan bir kez eklenir.",
+        "description": "Büyük ya da ağır ürünlere ek kargo ücreti ekler; sepette en yüksek olan bir kez eklenir. Ücretsiz kargolu ürünü ürün sayfasının Kargo sekmesinden seçin.",
         "name": "Sınıf adı",
         "nameOf": "{{number}}. sınıfın adı",
         "surcharge": "Ek ücret",
@@ -1574,9 +1608,6 @@
         "products_one": "{{count}} ürün",
         "products_other": "{{count}} ürün",
         "noProducts": "Ürün yok",
-        "freeRow": "Ücretsiz kargo",
-        "freeHint": "Kargo ücretine eklenmez",
-        "locked": "Hazır sınıf: adı değişmez, silinmez.",
         "add": "Sınıf ekle",
         "remove": "{{name}} sınıfını sil",
         "removeUsed_one": "{{count}} ürün Standart'a döner.",
@@ -1585,7 +1616,8 @@
         "keep": "Vazgeç",
         "nameInvalid": "Sınıfa bir ad verin (en çok 60 karakter).",
         "surchargeInvalid": "Ek ücreti 0 ile 100.000 TL arasında girin.",
-        "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır."
+        "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır.",
+        "empty": "Henüz sınıf yok. Çoğu mağazanın ihtiyacı olmaz."
       },
       "ownDeliveryInvoice": "Kendi gönderdiğiniz paketlerin faturasında mağazanızın unvanı ve VKN'si yazılır:",
       "ownDeliveryLink": "Yasal bilgiler",
@@ -1599,7 +1631,8 @@
         "rates_one": "{{count}} satır, {{desi}} desiye kadar",
         "rates_other": "{{count}} satır, {{desi}} desiye kadar",
         "ratesNeeded": "Ücret tablosuyla fiyatlanan bir seçenek var ama tablo boş.",
-        "platformParcel": "Platform paketi: 1 kg, 30 × 20 × 10 cm (2 desi)"
+        "platformParcel": "Platform paketi: 1 kg, 30 × 20 × 10 cm (2 desi)",
+        "noClasses": "Sınıf yok"
       },
       "invoiceIdentity": {
         "title": "Faturadaki firma bilgisi",
@@ -4933,11 +4966,11 @@
     "shippingClass": {
       "label": "Kargo sınıfı",
       "standard": "Standart",
-      "free": "Ücretsiz kargo",
-      "hintStandard": "Kargo ücreti seçilen kargo seçeneğine göre hesaplanır.",
+      "hintStandard": "Kargo ücreti mağazanın kargo ücreti ayarına göre hesaplanır.",
       "hintFree": "Ücretsiz kargolu ürün kargo ücretine eklenmez; sepette yalnız bu tür ürünler varsa kargo ücretsizdir.",
       "hintSurcharge": "Bu ürün sepetteyse siparişin kargosuna {{amount}} eklenir.",
-      "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor."
+      "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor.",
+      "freeSwitch": "Bu ürünün kargosu ücretsiz"
     }
   },
   "orders": {

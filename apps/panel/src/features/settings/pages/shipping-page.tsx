@@ -9,10 +9,8 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
-import { FreeShippingCard } from "@/features/settings/components/free-shipping-card"
 import { ShippingAdvanced } from "@/features/settings/components/shipping-advanced"
-import { ShippingClassesCard } from "@/features/settings/components/shipping-classes-card"
-import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
+import { ShippingFeeSection } from "@/features/settings/components/shipping-fee-section"
 import { BookingFlowCard } from "@/features/settings/components/booking-flow-card"
 import { ReturnsCard } from "@/features/settings/components/returns-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
@@ -83,11 +81,12 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
 
 /**
  * Settings > Shipping and delivery (F7, adr/0031; the owner, 2026-10-31:
- * one page for delivery, in tabs; 2026-11-26: as simple as WooCommerce's).
- * The carriers, each on its own page with the name its invoices carry; the
- * options shoppers choose from, the free shipping total (F4.5) and the
- * shipping classes (adr/0087), then "Gelişmiş" folded: delivery days, the
- * price table (F7.8), the default parcel (adr/0054), the label size; the
+ * one page for delivery, in tabs; 2026-11-26: as simple as WooCommerce's,
+ * the fee one question). The carriers, each on its own page with the name
+ * its invoices carry; "Kargo ücreti" (free, free above a total, flat, the
+ * carrier's price) and the extra options, then "Gelişmiş" folded: delivery
+ * days, the price table (F7.8), the default parcel (adr/0054), the label
+ * size, the shipping classes (adr/0087); the
  * return rules (F13.4); the warehouses stock ships from. The address data
  * is the platform's (adr/0008 Ek 2026-11-04): an old `?part=addresses`
  * link opens the first tab.
@@ -119,14 +118,9 @@ export function ShippingPage() {
             label: t(`${S}.tabs.options`),
             content: (
               <>
-                <ShippingOptionsCard />
-                <FreeShippingCard />
                 {saved ? (
                   <>
-                    <ShippingClassesCard
-                      key={`classes-${JSON.stringify(saved.shipping_classes ?? [])}`}
-                      saved={saved}
-                    />
+                    <ShippingFeeSection saved={saved} />
                     <ShippingAdvanced saved={saved} />
                   </>
                 ) : rules.isError ? (

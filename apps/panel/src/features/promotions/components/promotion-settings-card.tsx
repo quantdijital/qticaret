@@ -8,7 +8,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { PromotionSettings } from "@/features/settings/api/sections"
-import { FREE_SHIPPING_ANCHOR } from "@/features/settings/components/free-shipping-card"
+import { FREE_SHIPPING_ANCHOR } from "@/features/settings/components/shipping-fee-section"
 import { errorText } from "@/lib/errors"
 
 function SwitchRow({

@@ -6,6 +6,8 @@ const A = "settings.shipping.advanced"
 const number = (value: number) =>
   new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 3 }).format(value)
 
+const money = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" })
+
 const range = (min: number, max: number) =>
   min === max ? number(min) : `${number(min)}–${number(max)}`
 
@@ -18,6 +20,7 @@ export function advancedSummaries(
   const cutoff = saved.same_day_cutoff_hour
   const rows = saved.rate_table
   const parcel = saved.default_parcel
+  const classes = saved.shipping_classes ?? []
   return {
     delivery: [
       t(`${A}.handling`, { days: range(saved.handling_days_min, saved.handling_days_max) }),
@@ -31,6 +34,14 @@ export function advancedSummaries(
     parcel: parcel
       ? `${number(parcel.weight)} ${units.weight} · ${number(parcel.length)} × ${number(parcel.width)} × ${number(parcel.height)} ${units.dimension}`
       : t(`${A}.platformParcel`),
+    classes:
+      classes.length === 0
+        ? t(`${A}.noClasses`)
+        : classes
+            .map((each) =>
+              each.surcharge > 0 ? `${each.name} +${money.format(each.surcharge / 100)}` : each.name
+            )
+            .join(", "),
     label:
       saved.label_format === "custom"
         ? `${String(saved.label_custom.width_mm)} × ${String(saved.label_custom.height_mm)} mm`
