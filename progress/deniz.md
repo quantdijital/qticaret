@@ -40,6 +40,20 @@
 
 Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
 
+## 2026-11-25/26 — ürün sayfası WooCommerce düzeni, panel eksikleri (Woo karşılaştırması), gece işi
+
+- **Ürün sayfası:** odak kelime etiket (#395); sayfa düzeni gizle/sırala + yerinde kartlar (#396, `panel_layout` ayar bölümü); hazır düzenler, bölüm çubuğu, ⌘K/⌘S, sihirbaz düzene uyar (#397, #398); yerinde açılan varyant satırları + seçenek düzenleyici + toplu çubuk (#401); "Ürün verileri" kartı, tür seçimi + dikey sekmeler (#403); genişlik eski 8/4'e döndü (#409); editör araç çubuğu yapışmaz (#408); indirimli fiyat, varyant başına `sale` fiyat listesi (#405, ADR-0086); basit ürüne geçiş (#410); Kaydet/Vazgeç başlıkta, alt çubuk kalktı (#411); stok takibi aç/kapat (#415).
+- **Woo karşılaştırması (rapor `~/.claude/projects/-home-deniz-Desktop-qticaret/woo-gaps-2026-11-26.md`):** ürün listesi araçları (#414), hızlı düzenle (#417), sipariş fatura adresi/e-posta + müşteri filtresi (#413), bekleyen iş rozetleri (#418), kategori ürün sayıları (#419), müşteri rakamları + sipariş kaynağı (#421), toplu düzenleme eklemeleri (#423), müşteri sipariş notu (#422), müşteriye not e-postası (#425), kupon kısıtları: grup + ilk sipariş (#426), medya temizliği (#427), sepet `qt_` anahtar koruması (#428), fatura kilidi backend + panel (#429; #420 onunla kapandı), müşteri dışa aktarma + müşteri raporu (#430), e2e sağlamlaştırma (#431).
+- **Çökme sebebi:** ajanların paralel tsc/eslint/vitest koşuları 30 GB'ı doldurdu (OOM). Sunucular artık `systemd-run --user` servisi (`qt-dev`, `qt-dev-cp`); ajanlara bellek sınırı.
+- **Açık takipler:**
+  - Kararsız testler: `paytr-stock-short.spec.ts` (test DB'si zorla düşürülürken arka plan işi sızıyor), `a11y.e2e.ts` ürün sayfası (`test.slow()` verildi, tarama sayısı büyük).
+  - Medya: "Kullanılmayan" görünümü her istekte her şeyi tarıyor (önbellek yok); toplu silme denetim kaydı silinen görselleri tek tek yazmıyor.
+  - Müşteri dışa aktarma ve sipariş dışa aktarma yollarında hız sınırı yok.
+  - Kupon: aynı alıcının eşzamanlı iki ödemesi ya da ikinci e-postası ilk sipariş indirimini iki kez alabilir (kabul edildi).
+  - Woo raporunun "Later" listesi: ürün başına ücretsiz kargo/kargo sınıfı (ADR ister), sipariş düzenlemede kargo ücreti, planlı yayın, bağlantılı ürünler, stok bitince gizleme.
+- **Sahibin kararları:** operasyon rolü müşteriye not gönderebilsin mi; ürün sayfasındaki SEO danışmanı kilitli kalsın mı.
+- **Sahibin bakması:** gece birleşen her ekran 390/768–820/1024/1280/1440'ta; ajanlar tarayıcıda bakamadı.
+
 ## 2026-11-24 — kilit sızıntısı, iç içe kategori adresleri, panel düzeni, abonelik, ek seçenek şablonları, Medusa 2.22.6
 
 - **Birleşenler (`dev`):**
