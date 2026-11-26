@@ -2,7 +2,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
-import { MANUAL_FULFILLMENT_PROVIDER_ID, carrierOf } from "../../lib/shipping/carriers"
+import { carrierOf, isOwnDelivery } from "../../lib/shipping/carriers"
+import { flatAmountOf } from "../../lib/shipping/shop"
 
 interface OptionRow {
   id: string
@@ -25,6 +26,17 @@ const ruleIs = (option: OptionRow, attribute: string, value: string) =>
   (option.rules ?? []).some(
     (rule) => rule?.attribute === attribute && JSON.stringify(rule.value).includes(value)
   )
+
+function storedAmount(data: Record<string, unknown> | null | undefined) {
+  if (!data || !("amount" in data)) {
+    return null
+  }
+  try {
+    return flatAmountOf(data)
+  } catch {
+    return null
+  }
+}
 
 /** The shop's options as the panel lists them: sending, not returns; amounts as lira. */
 export async function shopShippingOptions(container: MedusaContainer) {
@@ -54,6 +66,8 @@ export async function shopShippingOptions(container: MedusaContainer) {
           each?.currency_code === "try" && !(each.price_rules ?? []).some((rule) => rule !== null)
       )
       const choice = option.data?.["id"]
+      // A flat amount we price ourselves (adr/0087 §2): in the option's data
+      const dataAmount = option.price_type === "calculated" ? storedAmount(option.data) : null
       return {
         id: option.id,
         name: option.name,
@@ -61,11 +75,11 @@ export async function shopShippingOptions(container: MedusaContainer) {
           carrier ??
           (option.service_zone?.fulfillment_set?.type === "pickup"
             ? ("pickup" as const)
-            : option.provider_id === MANUAL_FULFILLMENT_PROVIDER_ID
+            : isOwnDelivery(option.provider_id)
               ? ("manual" as const)
               : null),
         pricing:
-          option.price_type === "flat"
+          option.price_type === "flat" || dataAmount !== null
             ? ("flat" as const)
             : typeof choice === "string" && choice.endsWith("-table")
               ? ("table" as const)
@@ -73,9 +87,11 @@ export async function shopShippingOptions(container: MedusaContainer) {
                 ? ("fastest" as const)
                 : ("cheapest" as const),
         amount:
-          option.price_type === "flat" && price?.amount !== undefined
-            ? toMedusaAmount(fromMedusaAmount(price.amount, { allowRounding: true }))
-            : null,
+          dataAmount !== null
+            ? toMedusaAmount(dataAmount)
+            : option.price_type === "flat" && price?.amount !== undefined
+              ? toMedusaAmount(fromMedusaAmount(price.amount, { allowRounding: true }))
+              : null,
         in_store: ruleIs(option, "enabled_in_store", "true"),
       }
     })

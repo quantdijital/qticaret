@@ -1,6 +1,6 @@
 import "server-only"
 import { isStoreApiError } from "../store-api/errors"
-import { storeGet } from "../store-api/server"
+import { storeGet, storePost } from "../store-api/server"
 
 /**
  * What the backend offers this cart at checkout (D7): shipping options,
@@ -22,7 +22,31 @@ export async function shippingOptions(cartId: string): Promise<ShippingOption[]>
     "/store/shipping-options",
     { cart_id: cartId }
   )
-  return shipping_options
+  return Promise.all(shipping_options.map((option) => priced(option, cartId)))
+}
+
+/**
+ * A calculated option with its price for the cart: Medusa's list leaves
+ * it out, so the backend works it out per option (adr/0087: the shop's own
+ * flat price is calculated too). One that cannot be priced now stays
+ * without a price, as before.
+ */
+async function priced(option: ShippingOption, cartId: string): Promise<ShippingOption> {
+  if (option.price_type !== "calculated" || option.calculated_price) {
+    return option
+  }
+  try {
+    const { shipping_option } = await storePost<{ shipping_option: ShippingOption }>(
+      `/store/shipping-options/${encodeURIComponent(option.id)}/calculate`,
+      { cart_id: cartId, data: {} }
+    )
+    return { ...option, calculated_price: shipping_option.calculated_price ?? null }
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return option
+    }
+    throw error
+  }
 }
 
 /** An option's price for this cart, in lira; null when the carrier did not price it. */

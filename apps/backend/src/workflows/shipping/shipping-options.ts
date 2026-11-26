@@ -20,6 +20,8 @@ import {
   ARAS_FULFILLMENT_PROVIDER_ID,
   GELIVER_FULFILLMENT_PROVIDER_ID,
   MANUAL_FULFILLMENT_PROVIDER_ID,
+  SHOP_FLAT_OPTION,
+  SHOP_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
 
@@ -182,45 +184,60 @@ export function shippingOptionInput(
   ) {
     throw new ValidationError("shipping.manual_flat_only", { field: "pricing" })
   }
-  const data =
-    input.carrier === "geliver"
-      ? {
-          id:
-            pricing.type === "table"
-              ? "geliver-table"
-              : GELIVER_DATA[pricing.type === "quote" ? pricing.choice : "cheapest"],
-        }
-      : contract
-        ? { id: `${contract}-${pricing.type === "table" ? "table" : "flat"}` }
-        : {}
   return {
     name: input.name,
     service_zone_id: place.service_zone_id,
     shipping_profile_id: place.shipping_profile_id,
-    provider_id:
-      input.carrier === "geliver"
-        ? GELIVER_FULFILLMENT_PROVIDER_ID
-        : contract
-          ? CONTRACTS[contract]
-          : MANUAL_FULFILLMENT_PROVIDER_ID,
-    data,
+    ...pricingOf(input, place),
     type: { label: input.name, description: input.name, code: input.carrier },
     rules: [
       { attribute: "enabled_in_store", operator: "eq" as const, value: "true" },
       { attribute: "is_return", operator: "eq" as const, value: "false" },
     ],
-    ...(pricing.type === "flat"
-      ? {
-          price_type: "flat" as const,
-          // By currency, and by the shop's region as Medusa's own seed does
-          prices: [
-            { currency_code: "try", amount: Number(toMedusaAmount(pricing.amount)) },
-            ...(place.region_id
-              ? [{ region_id: place.region_id, amount: Number(toMedusaAmount(pricing.amount)) }]
-              : []),
-          ],
-        }
-      : { price_type: "calculated" as const }),
+  }
+}
+
+/**
+ * How an option is priced in Medusa (adr/0087 §2): a flat amount is ours
+ * to price (Medusa's flat price cannot know a basket of free-shipping
+ * products), so it is a calculated option with the amount in `data.amount`
+ * (kuruş, KDV in). Only pickup keeps Medusa's flat price: nothing travels.
+ */
+function pricingOf(input: ShopOptionInput, place: { region_id: string | null }) {
+  const { pricing } = input
+  if (pricing.type === "flat" && input.carrier === "pickup") {
+    const amount = Number(toMedusaAmount(pricing.amount))
+    return {
+      provider_id: MANUAL_FULFILLMENT_PROVIDER_ID,
+      data: {},
+      price_type: "flat" as const,
+      // By currency, and by the shop's region as Medusa's own seed does
+      prices: [
+        { currency_code: "try", amount },
+        ...(place.region_id ? [{ region_id: place.region_id, amount }] : []),
+      ],
+    }
+  }
+  if (input.carrier === "geliver") {
+    return {
+      provider_id: GELIVER_FULFILLMENT_PROVIDER_ID,
+      data: {
+        id:
+          pricing.type === "table"
+            ? "geliver-table"
+            : GELIVER_DATA[pricing.type === "quote" ? pricing.choice : "cheapest"],
+      },
+      price_type: "calculated" as const,
+    }
+  }
+  const contract = isContract(input.carrier) ? input.carrier : null
+  const amount = pricing.type === "flat" ? { amount: pricing.amount } : {}
+  return {
+    provider_id: contract ? CONTRACTS[contract] : SHOP_FULFILLMENT_PROVIDER_ID,
+    data: contract
+      ? { id: `${contract}-${pricing.type === "table" ? "table" : "flat"}`, ...amount }
+      : { id: SHOP_FLAT_OPTION, ...amount },
+    price_type: "calculated" as const,
   }
 }
 
@@ -239,20 +256,47 @@ export const createShopShippingOptionWorkflow = createWorkflow(
   }
 )
 
-/** A new name, or a flat option's new amount. */
+interface StoredOption {
+  price_type?: string | null
+  data?: Record<string, unknown> | null
+}
+
+/** How the option is priced now: its amount lives in `data` or in Medusa's prices. */
+const readShopOptionStep = createStep(
+  "shipping-read-shop-option",
+  async (input: { id: string }, { container }) => {
+    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "shipping_option",
+      fields: ["id", "price_type", "data"],
+      filters: { id: input.id },
+    })
+    const option = data[0] as StoredOption | undefined
+    if (!option) {
+      throw new ValidationError("shipping.option_invalid")
+    }
+    return new StepResponse(option)
+  }
+)
+
+/** A new name, or a flat option's new amount (in `data.amount`, or pickup's Medusa price). */
 export const updateShopShippingOptionWorkflow = createWorkflow(
   "shipping-update-shop-option",
   (input: { id: string; name?: string | undefined; amount?: Kurus | undefined }) => {
+    const stored = readShopOptionStep({ id: input.id })
     updateShippingOptionsWorkflow.runAsStep({
-      input: transform({ input }, ({ input }) => [
-        {
-          id: input.id,
-          ...(input.name ? { name: input.name } : {}),
-          ...(input.amount === undefined
+      input: transform({ input, stored }, ({ input, stored }) => {
+        const kept = stored.data ?? {}
+        const inData = stored.price_type === "calculated" && "amount" in kept
+        const amount =
+          input.amount === undefined
             ? {}
-            : { prices: [{ currency_code: "try", amount: Number(toMedusaAmount(input.amount)) }] }),
-        },
-      ]),
+            : inData
+              ? { data: { ...kept, amount: input.amount } }
+              : {
+                  prices: [{ currency_code: "try", amount: Number(toMedusaAmount(input.amount)) }],
+                }
+        return [{ id: input.id, ...(input.name ? { name: input.name } : {}), ...amount }]
+      }),
     })
     return new WorkflowResponse(input.id)
   }

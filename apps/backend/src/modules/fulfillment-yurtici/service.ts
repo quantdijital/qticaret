@@ -19,6 +19,7 @@ import {
   shipmentCode,
   shippingRates,
   storedCarrierAccount,
+  flatQuoteOf,
   tableQuoteOf,
 } from "../../lib/shipping/shop"
 import {
@@ -93,16 +94,22 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
   }
 
   override canCalculate(data: CreateShippingOptionDTO): Promise<boolean> {
-    return Promise.resolve(data.data?.["id"] === "yurtici-table")
+    // Both: a flat amount is priced here too, from `data.amount` (adr/0087 §2)
+    return Promise.resolve(isYurticiOption(data.data?.["id"]))
   }
 
-  /** The cart's parcel priced by the shop's table, tax included; free past the threshold (adr/0087). */
+  /**
+   * The option's flat amount, or the cart's parcel priced by the shop's
+   * table; tax included, free past the threshold (adr/0087).
+   */
   override async calculatePrice(
-    _optionData: Record<string, unknown>,
+    optionData: Record<string, unknown>,
     _data: Record<string, unknown>,
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
-    return tableQuoteOf(context)
+    return optionData["id"] === "yurtici-flat"
+      ? flatQuoteOf(optionData, context)
+      : tableQuoteOf(context)
   }
 
   override async createFulfillment(

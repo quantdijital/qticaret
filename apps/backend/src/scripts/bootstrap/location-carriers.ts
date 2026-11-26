@@ -1,14 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createLinksWorkflow } from "@medusajs/medusa/core-flows"
-import { CARRIER_PROVIDERS } from "../../lib/shipping/carriers"
+import { CARRIER_PROVIDERS, SHOP_FULFILLMENT_PROVIDER_ID } from "../../lib/shipping/carriers"
 import { logger } from "../../lib/logging"
 
 /**
  * The carriers a warehouse ships with (adr/0031, adr/0035): every carrier
  * provider the app registers joins the shop's default location, so a
  * shipping option can use it once the shop connects its account. Only the
- * missing ones; Medusa's manual provider is the seed's business.
+ * missing ones; Medusa's manual provider is the seed's business. Our
+ * own flat-price provider (`shop_shop`, adr/0087) joins it too.
  */
 export async function ensureLocationCarriers(container: MedusaContainer): Promise<void> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -26,7 +27,10 @@ export async function ensureLocationCarriers(container: MedusaContainer): Promis
     }),
     container
       .resolve(Modules.FULFILLMENT)
-      .listFulfillmentProviders({ id: [...CARRIER_PROVIDERS] }, { select: ["id"] }),
+      .listFulfillmentProviders(
+        { id: [...CARRIER_PROVIDERS, SHOP_FULFILLMENT_PROVIDER_ID] },
+        { select: ["id"] }
+      ),
   ])
   const linked = new Set(
     (
