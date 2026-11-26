@@ -20,6 +20,7 @@ import {
 } from "./listing-plan"
 import type { Listed } from "./listing-plan"
 import { SEARCH_LISTING, searchListing } from "./listing-search"
+import { hidesOutOfStock, withStockRule } from "./listing-stock"
 import type { ListingSearch } from "./listing-search"
 
 /**
@@ -109,11 +110,13 @@ export async function listingProducts(
   const started = performance.now()
   const isSearch = input.listed.entity_type === SEARCH_LISTING
   const { query } = input
-  const [listed, definitions, dated, category] = await Promise.all([
+  const [listed, definitions, dated, category, hide] = await Promise.all([
     isSearch ? Promise.resolve({}) : listingScope(container, input.listed),
     definitionsCache("definitions", () => filterDefinitions(container)),
     datedListing(container, query),
     query.category ? categorySubtreeByHandle(container, query.category) : null,
+    // T1: the shop may leave sold-out products out of every listing and the search
+    hidesOutOfStock(container),
   ])
   const scope = listed && {
     ...listed,
@@ -136,7 +139,7 @@ export async function listingProducts(
     channels: [...input.sales_channel_ids],
     scope: scope ?? {},
     text: null,
-    filters: planFilters(query.filters),
+    filters: withStockRule(planFilters(query.filters), hide),
     price: {
       key: priceKey(input.region_id, input.currency_code),
       min: query.price?.min ?? null,
