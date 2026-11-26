@@ -204,8 +204,8 @@ export function createSuratApi(options: Partial<Omit<HttpClientOptions, "provide
 
   /**
    * Whether Sürat takes the tracking login: a query for a code nobody has.
-   * A refusal naming the login (or a fault) is `secret_invalid`; "not
-   * found" is a login that works. Sürat has no read that checks the
+   * A refusal naming the login is `secret_invalid`; "not found" is a login
+   * that works; a fault or another refusal is no verdict (thrown). Sürat has no read that checks the
    * shipping login alone: it is checked here only when it is the one pair.
    */
   async function checkLogin(
@@ -217,10 +217,7 @@ export function createSuratApi(options: Partial<Omit<HttpClientOptions, "provide
       await track(credentials, code, options.signal)
       return "valid"
     } catch (error) {
-      if (
-        isProviderError(error) &&
-        (error.providerCode === "login_refused" || error.providerCode.startsWith("error_"))
-      ) {
+      if (isProviderError(error) && error.providerCode === "login_refused") {
         return "secret_invalid"
       }
       throw error

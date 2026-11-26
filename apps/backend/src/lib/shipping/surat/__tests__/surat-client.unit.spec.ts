@@ -3,7 +3,11 @@ import type { FakeSurat } from "@qticaret/testing"
 import { createSuratApi, suratCredentialsOf } from ".."
 import type { SuratApi, SuratCredentials, SuratShipmentInput } from ".."
 import { isProviderError, isValidationError } from "../../../errors"
-import { cancelSuratParcel, openSuratParcel } from "../../../../modules/fulfillment-surat/ship"
+import {
+  SURAT_SETTLE_MS,
+  cancelSuratParcel,
+  openSuratParcel,
+} from "../../../../modules/fulfillment-surat/ship"
 import { receiverOf } from "../../receiver"
 
 let fake: FakeSurat
@@ -54,6 +58,8 @@ function withCari(): SuratCredentials {
 }
 
 beforeAll(async () => {
+  // A lost create is asked about twice; no real pause in the specs
+  SURAT_SETTLE_MS.value = 1
   fake = await startFakeSurat()
 })
 
@@ -144,6 +150,14 @@ describe("Sürat client against the fake service", () => {
     ).toBe("secret_invalid")
   })
 
+  it("gives no verdict on the login when Sürat faults", async () => {
+    fake.queue("KargoTakipHareketDetayi", "fault")
+
+    const error = await failure(() => api.checkLogin(account))
+
+    expect(isProviderError(error) ? error.providerCode : null).toMatch(/^error_/)
+  })
+
   it("reads a SOAP fault as Sürat's refusal", async () => {
     fake.queue("GonderiSil", "fault")
 
@@ -188,6 +202,27 @@ describe("opening and cancelling a Sürat parcel (fulfillment-surat/ship)", () =
 
     expect(isProviderError(error) && error.providerMessage).toBe("Alıcı bilgileri eksik")
     expect(fake.shipments.size).toBe(0)
+  })
+
+  it("asks no parcel back on a refusal that does not say the branch has it", async () => {
+    await api.createShipment(account, input("QTSURAT000000016"))
+    fake.queue("GonderiSil", "say:Sistem meşgul, tekrar deneyiniz")
+
+    const error = await failure(() => cancelSuratParcel(api, account, "QTSURAT000000016"))
+
+    expect(isProviderError(error) && error.providerMessage).toBe("Sistem meşgul, tekrar deneyiniz")
+    expect(fake.shipments.get("QTSURAT000000016")).toMatchObject({
+      canceled: false,
+      withdrawn: false,
+    })
+  })
+
+  it("cleans up after a server fault on create", async () => {
+    fake.queue("GonderiyiKargoyaGonderYeni", "fault")
+
+    await failure(() => openSuratParcel(api, account, input("QTSURAT000000017"), 7))
+
+    expect(fake.requests.map(({ operation }) => operation)).toContain("GonderiSil")
   })
 
   it("cancels by deleting, or by asking the parcel back once the branch has it", async () => {

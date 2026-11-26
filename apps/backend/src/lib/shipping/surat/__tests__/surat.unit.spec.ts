@@ -180,6 +180,32 @@ describe("suratTrackingOf", () => {
     ).toBe("rejected")
   })
 
+  it("masks a password Sürat quotes back before cutting its sentence to 120 characters", () => {
+    const password = "Gizli-Sifre-12345"
+    const said = `${"x".repeat(110)} şifre ${password} hatalı`
+    const error = refusal(() =>
+      suratTrackingOf(JSON.stringify({ IsError: true, errorMessage: said }), [password])
+    )
+
+    expect(Array.from(error?.providerMessage ?? "").length).toBeLessThanOrEqual(120)
+    expect(error?.providerMessage).not.toMatch(/Gizli/)
+  })
+
+  it("refuses an answer nested deeper or longer than any parcel's", () => {
+    let deep: Record<string, unknown> = { A: "1" }
+    for (let level = 0; level < 20; level += 1) {
+      deep = { L: [deep] }
+    }
+    const many = { IsError: false, Gonderiler: [{ H: Array.from({ length: 600 }, () => ({})) }] }
+
+    expect(
+      refusal(() => suratTrackingOf(JSON.stringify({ Gonderiler: [deep] })))?.providerCode
+    ).toBe("invalid_response")
+    expect(refusal(() => suratTrackingOf(JSON.stringify(many)))?.providerCode).toBe(
+      "invalid_response"
+    )
+  })
+
   it("reads an XML DataSet's rows, and refuses one carrying a DOCTYPE (XXE)", () => {
     const tracking = suratTrackingOf(
       "<NewDataSet><Table><KARGO_TAKIP_NO>123456789012</KARGO_TAKIP_NO><HAREKET_ACIKLAMA>Kargo teslim edildi</HAREKET_ACIKLAMA></Table></NewDataSet>"
@@ -233,6 +259,12 @@ describe("suratStatusOf", () => {
     expect(status([{ ACIKLAMA: "Alıcı adreste yok, teslim edilemedi" }]).status).toBe("in_transit")
     expect(status([{ ACIKLAMA: "TESLİM EDİLDİ" }]).status).toBe("delivered")
     expect(status([{ ACIKLAMA: "Kargo dağıtıma çıktı" }]).status).toBe("out_for_delivery")
+  })
+
+  it("keeps only the matched words of Sürat's sentence, never a name in it", () => {
+    expect(
+      status([{ ACIKLAMA: "Kargo Ahmet Yılmaz tarafından teslim alındı" }]).provider_status
+    ).toBe("teslim alındı")
   })
 
   it("reads only Sürat's own columns: a receiver named 'Teslim' moves nothing", () => {

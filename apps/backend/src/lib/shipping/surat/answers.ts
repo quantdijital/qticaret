@@ -1,4 +1,4 @@
-import { ProviderError } from "../../errors"
+import { ProviderError, providerText } from "../../errors"
 
 /**
  * How Sürat Kargo's answers read (docs/entegrasyonlar/surat.md). Opening,
@@ -50,7 +50,8 @@ export const phraseOf = (text: string): string =>
 export const saysDone = (text: string | null, phrases: readonly string[]): boolean =>
   text !== null && phrases.includes(phraseOf(text))
 
-// What staff read of Sürat's sentence: cut before it is made safe (masks, one line)
+// What staff read of Sürat's sentence: made safe first (the account's values masked whole),
+// then cut, so no cut leaves part of a password unmasked (security review 2026-11-26)
 const MAX_SAID = 120
 
 /**
@@ -66,9 +67,14 @@ export const refused = (
     provider: SURAT_PROVIDER,
     providerCode: code,
     retryable: false,
-    providerMessage: said === null ? null : Array.from(said).slice(0, MAX_SAID).join(""),
+    providerMessage: said === null ? null : cutSafe(said, secrets),
     secrets,
   })
+
+function cutSafe(said: string, secrets: readonly (string | null | undefined)[]): string | null {
+  const safe = providerText(said, secrets)
+  return safe === undefined ? null : Array.from(safe).slice(0, MAX_SAID).join("")
+}
 
 export const invalid = () =>
   new ProviderError({

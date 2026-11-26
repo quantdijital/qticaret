@@ -103,14 +103,18 @@ function movementOf(row: SuratRow): { status: ShipmentStatus | null; said: strin
   if (named !== undefined) {
     return { status: EVENTS[columnOf(named)] ?? null, said: named }
   }
+  // Only the words that matched are kept: Sürat's sentence may name the person who signed
+  // for the parcel (KVKK, security review 2026-11-26)
   for (const value of values) {
     const words = value.toLocaleLowerCase("tr")
-    const rule = WORDS.find(([pattern]) => pattern.test(words))
-    if (rule) {
-      return { status: rule[1], said: value }
+    for (const [pattern, status] of WORDS) {
+      const found = pattern.exec(words)
+      if (found) {
+        return { status, said: found[0] }
+      }
     }
   }
-  return { status: null, said: values[0] ?? null }
+  return { status: null, said: null }
 }
 
 /** A movement's time ("26.11.2026 14:30", or ISO); null when it reads as neither. */

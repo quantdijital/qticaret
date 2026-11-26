@@ -138,8 +138,9 @@ class SuratFulfillmentService extends AbstractFulfillmentProviderService {
           )
         ).toString("base64")
     } catch (error) {
-      // No label, no parcel: Sürat's is deleted so nothing waits for a courier
-      await takeBack(api, credentials, input.code, displayId).catch(() => undefined)
+      // No label, no parcel: Sürat's is deleted so nothing waits for a courier; when Sürat
+      // keeps it, staff are told to look there first (`surat.withdraw_failed`)
+      await takeBack(api, credentials, input.code, displayId)
       throw error
     }
     logger.info({

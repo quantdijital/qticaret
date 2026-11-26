@@ -12,8 +12,9 @@ import { checkSecrets, nothingStored, typedSecrets } from "@/features/settings/p
 
 const MAIN = ["username", "password"] as const
 const CARI = ["cari_code", "web_password"] as const
-// What Sürat gives may be short (the server checks the same)
-const SECRET = /^[\x21-\x7E]{1,128}$/
+// What Sürat gives may be short, but not under 3 (the server checks the same: shorter could
+// not be masked where Sürat quotes it back)
+const SECRET = /^[\x21-\x7E]{3,128}$/
 
 export interface SuratFormValues {
   username: string

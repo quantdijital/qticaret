@@ -49,8 +49,17 @@ const answer = z.object({
 
 const textOfScalar = (value: Scalar): string => (value === null ? "" : String(value).trim())
 
+// A parcel's movements come nowhere near these; past them the answer is refused, not read
+// (security review 2026-11-26: a crafted answer must not exhaust the stack or the memory)
+const MAX_DEPTH = 8
+const MAX_ROWS = 500
+const MAX_COLUMNS = 64
+
 /** A JSON row's own values; a list in it (a parcel's movements) becomes rows of their own. */
-function rowsOfJson(row: JsonRow, inherited: Record<string, string> = {}): SuratRow[] {
+function rowsOfJson(row: JsonRow, inherited: Record<string, string> = {}, depth = 0): SuratRow[] {
+  if (depth > MAX_DEPTH) {
+    throw invalid()
+  }
   const own: Record<string, string> = { ...inherited }
   const nested: JsonRow[] = []
   for (const [name, value] of Object.entries(row)) {
@@ -60,8 +69,21 @@ function rowsOfJson(row: JsonRow, inherited: Record<string, string> = {}): Surat
     } else if (Array.isArray(value)) {
       nested.push(...value.filter((each): each is JsonRow => typeof each === "object" && !!each))
     }
+    if (Object.keys(own).length > MAX_COLUMNS || nested.length > MAX_ROWS) {
+      throw invalid()
+    }
   }
-  return nested.length > 0 ? nested.flatMap((each) => rowsOfJson(each, own)) : [own]
+  return nested.length > 0
+    ? capped(nested.flatMap((each) => rowsOfJson(each, own, depth + 1)))
+    : [own]
+}
+
+/** Rows within the cap; more is no parcel's answer. */
+function capped(rows: SuratRow[]): SuratRow[] {
+  if (rows.length > MAX_ROWS) {
+    throw invalid()
+  }
+  return rows
 }
 
 /** XML rows: every element whose children are all plain values (a DataSet's `Table`). */
@@ -104,6 +126,7 @@ function fromJson(text: string, secrets: readonly string[]): SuratTracking {
       const rows = value
         .filter((each): each is JsonRow => typeof each === "object" && !!each)
         .flatMap((each) => rowsOfJson(each))
+      capped(rows)
       return rows.length > 0 ? { found: true, rows } : NOT_FOUND
     }
     throw invalid()
@@ -112,7 +135,7 @@ function fromJson(text: string, secrets: readonly string[]): SuratTracking {
     const said = parsed.data.errorMessage ?? null
     return refusalOf(said, secrets)
   }
-  const rows = (parsed.data.Gonderiler ?? []).flatMap((each) => rowsOfJson(each))
+  const rows = capped((parsed.data.Gonderiler ?? []).flatMap((each) => rowsOfJson(each)))
   return rows.length > 0 ? { found: true, rows } : NOT_FOUND
 }
 
@@ -135,7 +158,7 @@ export function suratTrackingOf(
     } catch {
       throw invalid()
     }
-    const rows = rowsOfXml(tree)
+    const rows = capped(rowsOfXml(tree))
     return rows.length > 0 ? { found: true, rows } : NOT_FOUND
   }
   // A sentence: Sürat's words for a code it does not know, a login it refuses, or else
