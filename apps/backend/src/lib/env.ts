@@ -94,10 +94,9 @@ const envSchema = z.object({
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
-  // Fake PayTR, iyzico and Geliver servers in development and tests; the real addresses are fixed in code
+  // Fake PayTR and iyzico servers in development and tests; the real addresses are fixed in code
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
-  GELIVER_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // A fake Aras or Yurtiçi on a developer's machine (adr/0035); refused when deployed
   ARAS_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   YURTICI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -365,7 +364,6 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   for (const name of [
     "PAYTR_BASE_URL",
     "IYZICO_BASE_URL",
-    "GELIVER_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
     "MAILPIT_URL",

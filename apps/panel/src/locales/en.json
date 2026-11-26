@@ -33,7 +33,6 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
-      "geliver": "Geliver",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1337,10 +1336,6 @@
       "carriersTitle": "Shipping services",
       "carriersDescription": "Shipments, labels and tracking go through these services.",
       "carriers": {
-        "geliver": {
-          "name": "Geliver",
-          "description": "Offers from several carriers through one account; labels and tracking through Geliver."
-        },
         "aras": {
           "name": "Aras Kargo",
           "description": "Parcels, labels and tracking on the shop's own Aras Kargo contract. The details are in Aras's integration document."
@@ -1349,29 +1344,6 @@
           "name": "Yurtiçi Kargo",
           "description": "Parcels and tracking on the shop's own Yurtiçi Kargo contract; the panel draws the parcel label. The details are in Yurtiçi's web service document."
         }
-      },
-      "geliver": {
-        "keys": {
-          "title": "API token",
-          "description": "Create a token on the API tokens page of your Geliver panel (app.geliver.io/apitokens) and copy it. It is stored encrypted and never shown again once saved."
-        },
-        "apiToken": "API token",
-        "notification": {
-          "title": "Tracking notifications",
-          "description": "Geliver reports shipment status changes to this address; the order updates by itself when it ships and when it is delivered. Without notifications, shipments are still checked every half hour.",
-          "where": "Paste it into the Geliver panel's webhook settings for the TRACK_UPDATED event."
-        },
-        "live": {
-          "title": "Test shipments and going live",
-          "description": "Try the shipping flow with Geliver's test shipments before you open your shop."
-        },
-        "testMode": "Test shipments",
-        "testModeHint": "While on, shipments are opened at Geliver as tests: no label is bought and nothing reaches the carrier. The same token works in both modes.",
-        "checks": {
-          "merchant_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel.",
-          "secret_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel."
-        },
-        "rejected": "Geliver no longer accepts the stored API token; no shipment can be created. Get a new token from the Geliver panel and enter it."
       },
       "options": {
         "title": "Extra shipping options",
@@ -1383,7 +1355,6 @@
         "carrier": "Carrier",
         "carriers": {
           "manual": "I ship it myself",
-          "geliver": "Geliver",
           "pickup": "Pickup from the shop",
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo"
@@ -1391,8 +1362,6 @@
         "pricing": "Price",
         "pricings": {
           "flat": "Flat price",
-          "cheapest": "Geliver: cheapest offer",
-          "fastest": "Geliver: fastest offer",
           "table": "Price table (desi)"
         },
         "amount": "Amount",
@@ -1423,7 +1392,7 @@
           "free": "No order pays for shipping.",
           "threshold": "Free once the basket total (VAT included, after discounts) reaches the amount; a flat fee below it.",
           "flat": "The same fee on every order.",
-          "carrier": "Priced by the parcel's desi from your price table, or by Geliver's quote."
+          "carrier": "Priced by the parcel's desi from your price table."
         },
         "threshold": "Free shipping from",
         "thresholdOptional": "Free shipping from (optional)",
@@ -1435,10 +1404,7 @@
         "source": "Priced by",
         "sources": {
           "aras-table": "Aras Kargo: my price table (desi)",
-          "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
-          "geliver-cheapest": "Geliver: cheapest offer",
-          "geliver-fastest": "Geliver: fastest offer",
-          "geliver-table": "Geliver: my price table (desi)"
+          "yurtici-table": "Yurtiçi Kargo: my price table (desi)"
         },
         "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
         "tableLink": "Fill in the price table",
@@ -1688,7 +1654,6 @@
         "iyzico": "iyzico",
         "bank_transfer": "Bank transfer",
         "cash_on_delivery": "Cash on delivery",
-        "geliver": "Geliver",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "netgsm": "Netgsm",
@@ -1703,7 +1668,6 @@
         "iyzico": "Card payments",
         "bank_transfer": "Transfers to the shop's bank account; no provider",
         "cash_on_delivery": "Cash or card at the door; no provider",
-        "geliver": "Several carriers with one account",
         "aras": "The shop's own carrier contract",
         "yurtici": "The shop's own carrier contract",
         "netgsm": "SMS and the consent registry (İYS)",
@@ -5538,7 +5502,6 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
-        "geliver": "Geliver",
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",

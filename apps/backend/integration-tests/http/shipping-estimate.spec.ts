@@ -4,13 +4,13 @@ import {
   createPaymentCollectionForCartWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { completeWithSystemPayment } from "../helpers/checkout"
-import { geliverProduct, geliverShop } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { measuredProduct, carrierShop } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -29,14 +29,14 @@ interface Estimate {
  * The cart's shipping before an address (WooCommerce's shipping
  * calculator, 2026-11-26): the shop's main option priced on the server by
  * the quote checkout charges (adr/0087 §2): the threshold, the classes,
- * the desi table; a carrier's quote waits for the checkout and is never
- * asked from a cart page. Nothing a shopper sends changes the answer.
+ * the desi table; no carrier is asked from a cart page. Nothing a shopper
+ * sends changes the answer.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let storefront: Storefront
     let variant: string
 
@@ -74,16 +74,14 @@ medusaIntegrationTestRunner({
           },
         })
       ).result.id
-    const quotesAsked = () =>
-      fake.requests.filter((request) => request.path.includes("priceList")).length
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
@@ -91,7 +89,8 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       await loadTrAddressFixture(container)
       storefront = await createStorefront(container)
-      setup = await geliverShop(http, container, fake)
+      // An Aras option by the table: the seed's flat one stays the cheapest flat
+      setup = await carrierShop(http, container, fake, { type: "table" })
       await post("/admin/platform-settings/shipping", {
         rate_table: [
           { max_desi: 1, price: 1_000 },
@@ -100,7 +99,7 @@ medusaIntegrationTestRunner({
         shipping_classes: [{ key: "bulky", name: "Büyük ürün", surcharge: 15_000 }],
       })
       // 120 TL a unit, 1 desi
-      variant = await geliverProduct(container, setup.shop)
+      variant = await measuredProduct(container, setup.shop)
       fake.requests.length = 0
     })
 
@@ -181,18 +180,18 @@ medusaIntegrationTestRunner({
       })
     })
 
-    it("leaves Geliver's quote to the checkout, never asking it, unless the cart ships free", async () => {
+    it("never asks the carrier from a cart page, with an address or shipping free", async () => {
       await post("/admin/platform-settings/shipping", { primary_option_id: setup.optionId })
       expect((await estimateOf(await cartOf(1, true))).data.shipping_estimate).toEqual({
-        status: "at_checkout",
-        amount: null,
+        status: "priced",
+        amount: 10,
       })
       await post("/admin/platform-settings/promotions", { free_shipping_threshold: 100 })
       expect((await estimateOf(await cartOf())).data.shipping_estimate).toEqual({
         status: "free",
         amount: null,
       })
-      expect(quotesAsked()).toBe(0)
+      expect(fake.requests).toHaveLength(0)
     })
 
     it("does not find a cart unknown or already an order", async () => {

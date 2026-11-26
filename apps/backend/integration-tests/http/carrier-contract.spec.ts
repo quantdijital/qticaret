@@ -1,7 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PDFDocument } from "pdf-lib"
-import { startFakeAras, startFakeGeliver, startFakeYurtici } from "@qticaret/testing"
+import { startFakeAras, startFakeYurtici } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { MM } from "../../src/lib/pdf"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
@@ -9,7 +9,7 @@ import type PlatformSettingsModuleService from "../../src/modules/platform-setti
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
-import { geliverProduct } from "../helpers/geliver"
+import { measuredProduct } from "../helpers/carrier"
 import type { HttpClient, HttpResponse } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -25,7 +25,7 @@ type Post = <T>(path: string, body: unknown) => Promise<HttpResponse<T & { messa
 
 /** One carrier as the contract drives it: its fake service and how to read it. */
 interface CarrierUnderTest {
-  name: "geliver" | "aras" | "yurtici"
+  name: "aras" | "yurtici"
   env: string
   start: () => Promise<string>
   stop: () => Promise<void>
@@ -38,40 +38,6 @@ interface CarrierUnderTest {
   /** The next shipping fails after the carrier may have opened the parcel. */
   failAfterOpening: () => void
   secrets: () => string[]
-}
-
-function geliver(): CarrierUnderTest {
-  let fake: Awaited<ReturnType<typeof startFakeGeliver>>
-  return {
-    name: "geliver",
-    env: "GELIVER_BASE_URL",
-    start: async () => {
-      fake = await startFakeGeliver()
-      return fake.url
-    },
-    stop: () => fake.close(),
-    connect: async (post) => {
-      await post("/admin/platform-settings/store", { contact_email: "magaza@example.com" })
-      return post("/admin/integrations/credentials/geliver", {
-        settings: { test_mode: true },
-        secrets: { api_token: fake.token },
-      })
-    },
-    pricing: { type: "quote", choice: "cheapest" },
-    reset: () => {
-      fake.shipments.clear()
-    },
-    open: () =>
-      [...fake.shipments.values()].filter((each) => each.statusCode !== "CANCELED").length,
-    // The label cannot be bought once the shipment is open
-    failAfterOpening: () => {
-      fake.queue("POST /transactions", {
-        status: 400,
-        body: { result: false, code: "LOW_BALANCE" },
-      })
-    },
-    secrets: () => [fake.token],
-  }
 }
 
 function aras(): CarrierUnderTest {
@@ -149,7 +115,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    describe.each([geliver(), aras(), yurtici()])("carrier contract: $name", (carrier) => {
+    describe.each([aras(), yurtici()])("carrier contract: $name", (carrier) => {
       let shop: StockShop
       let admin: { headers: Record<string, string> }
       let optionId: string
@@ -210,7 +176,7 @@ medusaIntegrationTestRunner({
           pricing: carrier.pricing,
         })
         optionId = created.data.id
-        variantId = await geliverProduct(container, shop)
+        variantId = await measuredProduct(container, shop)
         carrier.reset()
       })
 

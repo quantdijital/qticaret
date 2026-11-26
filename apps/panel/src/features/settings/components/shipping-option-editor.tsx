@@ -28,15 +28,14 @@ import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "geliver", "aras", "yurtici", "pickup"] as const
-const PRICINGS = ["flat", "cheapest", "fastest", "table"] as const
+const CARRIERS = ["manual", "aras", "yurtici", "pickup"] as const
+const PRICINGS = ["flat", "table"] as const
 export type OptionCarrier = (typeof CARRIERS)[number]
 type Pricing = (typeof PRICINGS)[number]
 
-// Geliver quotes; a contract carrier (adr/0035) takes a flat price or the shop's table
+// A contract carrier (adr/0035) takes a flat price or the shop's table
 const PRICINGS_OF: Readonly<Record<OptionCarrier, readonly Pricing[]>> = {
   manual: ["flat"],
-  geliver: PRICINGS,
   aras: ["flat", "table"],
   yurtici: ["flat", "table"],
   pickup: ["flat"],
@@ -45,10 +44,6 @@ const PRICINGS_OF: Readonly<Record<OptionCarrier, readonly Pricing[]>> = {
 /** The pricing the carrier takes: the one chosen, or a flat price when it takes no other. */
 const pricingFor = (carrier: OptionCarrier, pricing: Pricing): Pricing =>
   PRICINGS_OF[carrier].includes(pricing) ? pricing : "flat"
-
-/** A new option's pricing: Geliver's cheapest quote, else a flat price. */
-const firstPricing = (carrier: OptionCarrier): Pricing =>
-  carrier === "geliver" ? "cheapest" : "flat"
 
 const schema = z
   .object({
@@ -65,15 +60,12 @@ const schema = z
   })
 type Values = z.infer<typeof schema>
 
-/** The server's body for the form: Geliver quotes; Geliver and the contract carriers price by the table. */
+/** The server's body for the form: a flat price, or the contract carrier's table. */
 function newOption(values: Values): NewShippingOption {
-  const chosen = pricingFor(values.carrier, values.pricing)
   const pricing: NewShippingOption["pricing"] =
-    chosen === "flat"
+    pricingFor(values.carrier, values.pricing) === "flat"
       ? { type: "flat", amount: parseMoneyInput(values.amount) ?? 0 }
-      : chosen === "table"
-        ? { type: "table" }
-        : { type: "quote", choice: chosen }
+      : { type: "table" }
   return { name: values.name.trim(), carrier: values.carrier, pricing }
 }
 
@@ -151,7 +143,7 @@ export function ShippingOptionEditor({
     defaultValues: {
       name: option?.name ?? t(`${S}.defaultName`),
       carrier: option?.carrier ?? firstCarrier,
-      pricing: option?.pricing ?? firstPricing(firstCarrier),
+      pricing: option?.pricing ?? "flat",
       amount: option?.amount ? formatMoneyInput(Number(option.amount)) : "",
     },
   })
@@ -208,7 +200,7 @@ export function ShippingOptionEditor({
                   value={field.value}
                   onValueChange={(next) => {
                     field.onChange(next)
-                    form.setValue("pricing", firstPricing(next as OptionCarrier))
+                    form.setValue("pricing", "flat")
                   }}
                 >
                   <SelectTrigger id="shipping-option-carrier" className="w-full">

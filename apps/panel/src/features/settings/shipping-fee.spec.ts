@@ -57,13 +57,21 @@ describe("detectFee", () => {
     expect(detectFee([free, pickup], "so_5", 900).mode).toBe("free")
   })
 
-  it("reads a table- or quote-priced main option as the carrier's price", () => {
+  it("reads a table-priced main option as the carrier's price", () => {
     expect(detectFee([table], null, 2000)).toMatchObject({
       mode: "carrier",
       choice: { carrier: "aras-table", threshold: 2000 },
     })
-    const quote = option("so_6", "Geliver", "fastest", null, "geliver")
-    expect(detectFee([quote], null, null).choice.carrier).toBe("geliver-fastest")
+    const yurtici = option("so_6", "Yurtiçi", "table", null, "yurtici")
+    expect(detectFee([yurtici], null, null).choice.carrier).toBe("yurtici-table")
+  })
+
+  it("says custom for a main option priced by a carrier the panel does not know", () => {
+    const old = option("so_7", "Eski kargo", "table", null, null)
+    expect(detectFee([old, fast], "so_7", null)).toMatchObject({
+      mode: "custom",
+      extras: [old, fast],
+    })
   })
 
   it("says custom when a free main option's threshold still frees paid extras", () => {
@@ -122,21 +130,17 @@ describe("planFee", () => {
   })
 
   it("replaces a flat main option with a carrier-priced one under the same name", () => {
-    expect(
-      planFee(state, choice({ mode: "carrier", carrier: "geliver-cheapest" }), DEFAULTS)
-    ).toEqual({
-      option: {
-        kind: "create",
-        body: {
-          name: "Standart Kargo",
-          carrier: "geliver",
-          pricing: { type: "quote", choice: "cheapest" },
+    expect(planFee(state, choice({ mode: "carrier", carrier: "yurtici-table" }), DEFAULTS)).toEqual(
+      {
+        option: {
+          kind: "create",
+          body: { name: "Standart Kargo", carrier: "yurtici", pricing: { type: "table" } },
+          replaces: "so_2",
         },
-        replaces: "so_2",
-      },
-      threshold: null,
-      condition: null,
-    })
+        threshold: null,
+        condition: null,
+      }
+    )
   })
 
   it("keeps a carrier main option of the same source, and replaces it with a flat one", () => {
@@ -174,15 +178,15 @@ describe("planFee", () => {
   })
 
   it("makes the first option when the shop has none", () => {
-    const quote = option("so_6", "Geliver", "cheapest", null, "geliver")
+    const old = option("so_6", "Eski kargo", "table", null, null)
     expect(planFee({ primary: null }, choice({ mode: "free" }), DEFAULTS).option).toEqual({
       kind: "create",
       body: { name: "Standart kargo", carrier: "manual", pricing: { type: "flat", amount: 0 } },
       replaces: null,
     })
-    // Geliver takes no flat price: the shop's own delivery does
+    // An option the panel does not know takes no flat price: the shop's own delivery does
     expect(
-      planFee({ primary: quote }, choice({ mode: "flat", fee: 50 }), DEFAULTS).option
+      planFee({ primary: old }, choice({ mode: "flat", fee: 50 }), DEFAULTS).option
     ).toMatchObject({ kind: "create", body: { carrier: "manual" }, replaces: "so_6" })
   })
 })

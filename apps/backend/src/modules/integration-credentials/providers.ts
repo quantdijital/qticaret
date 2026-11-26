@@ -52,17 +52,6 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["test_mode"],
     optional: [],
   },
-  // Geliver panel > API tokens (adr/0031). Test shipments use the same token: a flag per shipment
-  geliver: {
-    settings: z.object({ test_mode: z.boolean() }).strict(),
-    secrets: ["api_token"],
-    secret: z
-      .string()
-      .trim()
-      .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid"),
-    identity: [],
-    optional: [],
-  },
   // Aras Kargo's customer service account, given with the shop's contract (adr/0035)
   aras: {
     settings: z

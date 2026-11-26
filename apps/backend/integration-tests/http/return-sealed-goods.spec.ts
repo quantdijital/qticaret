@@ -1,13 +1,13 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver, startFakeMail } from "@qticaret/testing"
-import type { FakeGeliver, FakeMail } from "@qticaret/testing"
+import { startFakeAras, startFakeMail } from "@qticaret/testing"
+import type { FakeAras, FakeMail } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { eventually } from "../helpers/eventually"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -34,9 +34,9 @@ interface ProductExtension {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let geliver: FakeGeliver
+    let fake: FakeAras
     let mail: FakeMail
-    let setup: GeliverShop
+    let setup: CarrierShop
     let store: Storefront
     let customer: TestCustomer
     let clock = Date.now()
@@ -55,7 +55,7 @@ medusaIntegrationTestRunner({
     /** A sealed good's order of the customer's, paid, shipped and delivered; asked back and approved. */
     const approvedReturn = async (quantity: number) => {
       await staff(`/admin/products/${await productId()}/catalog`, { withdrawal_excluded: true })
-      const orderId = await geliverOrder(getContainer(), setup, setup.variantId, quantity)
+      const orderId = await carrierOrder(getContainer(), setup, setup.variantId, quantity)
       const { data } = await query().graph({
         entity: "order",
         fields: ["items.id", "payment_collections.payments.id"],
@@ -92,24 +92,24 @@ medusaIntegrationTestRunner({
       )
 
     beforeAll(async () => {
-      geliver = await startFakeGeliver()
+      fake = await startFakeAras()
       mail = await startFakeMail()
-      process.env["GELIVER_BASE_URL"] = geliver.url
+      process.env["ARAS_BASE_URL"] = fake.url
       process.env["EMAIL_TRANSPORT"] = "mailpit"
       process.env["MAILPIT_URL"] = mail.url
       process.env["EMAIL_FROM"] = "bildirim@platform.example"
     })
 
     afterAll(async () => {
-      for (const name of ["GELIVER_BASE_URL", "EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM"]) {
+      for (const name of ["ARAS_BASE_URL", "EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM"]) {
         Reflect.deleteProperty(process.env, name)
       }
-      await Promise.all([geliver.close(), mail.close()])
+      await Promise.all([fake.close(), mail.close()])
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), geliver)
+      setup = await carrierShop(http, getContainer(), fake)
       store = await createStorefront(getContainer())
       customer = await registerCustomer(http, store)
       mail.messages.length = 0

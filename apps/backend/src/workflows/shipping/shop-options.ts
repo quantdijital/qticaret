@@ -38,7 +38,11 @@ function storedAmount(data: Record<string, unknown> | null | undefined) {
   }
 }
 
-/** The shop's options as the panel lists them: sending, not returns; amounts as lira. */
+/**
+ * The shop's options as the panel lists them: sending, not returns;
+ * amounts as lira. An option of a provider we no longer ship with is
+ * not listed.
+ */
 export async function shopShippingOptions(container: MedusaContainer) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "shipping_option",
@@ -58,6 +62,7 @@ export async function shopShippingOptions(container: MedusaContainer) {
   })
   return (data as unknown as OptionRow[])
     .filter((option) => !ruleIs(option, "is_return", "true"))
+    .filter((option) => carrierOf(option.provider_id) !== null || isOwnDelivery(option.provider_id))
     .map((option) => {
       const carrier = carrierOf(option.provider_id)
       // The shop's own price, not the free one from a basket total (F4.5), which carries a rule
@@ -65,7 +70,6 @@ export async function shopShippingOptions(container: MedusaContainer) {
         (each) =>
           each?.currency_code === "try" && !(each.price_rules ?? []).some((rule) => rule !== null)
       )
-      const choice = option.data?.["id"]
       // A flat amount we price ourselves (adr/0087 §2): in the option's data
       const dataAmount = option.price_type === "calculated" ? storedAmount(option.data) : null
       return {
@@ -81,11 +85,7 @@ export async function shopShippingOptions(container: MedusaContainer) {
         pricing:
           option.price_type === "flat" || dataAmount !== null
             ? ("flat" as const)
-            : typeof choice === "string" && choice.endsWith("-table")
-              ? ("table" as const)
-              : choice === "geliver-fastest"
-                ? ("fastest" as const)
-                : ("cheapest" as const),
+            : ("table" as const),
         amount:
           dataAmount !== null
             ? toMedusaAmount(dataAmount)

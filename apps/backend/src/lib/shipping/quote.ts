@@ -3,7 +3,7 @@ import type { Kurus, MedusaAmount } from "../money"
 
 /**
  * One price for every shipping option the shop sells (adr/0087 §2): the
- * carrier table, Geliver's quote or a flat amount is only the base this
+ * carrier table or a flat amount is only the base this
  * works from. Nothing here comes from a shopper: the context is laid over
  * Medusa's own by our hook (`workflows/hooks/shipping-quote-context.ts`),
  * which reads the basket, its products' shipping classes and the shop's
@@ -125,9 +125,9 @@ export interface ShippingQuoteInput<Line extends QuoteLine> {
   lines: readonly Line[]
   /** The hook's reading; null when it did not run: the base is charged. */
   context: ShippingQuoteContext | null
-  /** A flat amount is per order; a table or a quote prices the parcel. */
+  /** A flat amount is per order; a table prices the parcel. */
   basis: QuoteBasis
-  /** The option's own price for the lines: a flat amount, the table, Geliver's quote. */
+  /** The option's own price for the lines: a flat amount or the table. */
   price: (lines: readonly Line[]) => Kurus | Promise<Kurus>
 }
 
@@ -139,7 +139,7 @@ export interface ShippingQuoteInput<Line extends QuoteLine> {
  *   parcel of the paid lines alone (a free product's desi adds nothing);
  * - plus the highest surcharge among the paid lines' classes, once (§2.4).
  * A class the shop no longer has counts as Standard. The base is not
- * asked for when the answer is free: Geliver is not called.
+ * asked for when the answer is free.
  */
 export async function shippingQuote<Line extends QuoteLine>(
   input: ShippingQuoteInput<Line>

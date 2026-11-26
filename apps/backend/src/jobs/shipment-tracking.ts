@@ -1,9 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
+import { CARRIER_NAMES } from "../lib/shipping/carriers"
 import { shipmentPollInterval } from "../lib/shipping/poll-interval"
 import { SHIPMENT_TRACKING_MODULE } from "../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../modules/shipment-tracking/service"
-import { pollReturnHandovers } from "../workflows/returns/handover"
 import { refreshShipmentWorkflow } from "../workflows/shipping/refresh-shipment"
 
 // Every 30 minutes; shorter locally with SHIPMENT_POLL_MINUTES (lib/shipping/poll-interval)
@@ -18,19 +18,25 @@ const OPEN = ["created", "picked_up", "in_transit", "out_for_delivery"] as const
  * Parcels whose carrier sent no notification (F7.6, adr/0031): each open
  * parcel not asked about lately is asked again, through the same workflow
  * as a notification, those never asked first. A parcel that fails is
- * logged, marked asked, and tried again a run later.
+ * logged, marked asked, and tried again a run later. Only the carriers we
+ * still ship with are asked: an old parcel of a carrier no longer offered
+ * stays as it was, read only.
  */
 export async function pollShipments(container: MedusaContainer, now = new Date()): Promise<number> {
   const service = container.resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
   // Never asked first (the database sorts nulls last), then the least recently asked
   const fresh = await service.listTrackedShipments(
-    { status: [...OPEN], checked_at: null },
+    { status: [...OPEN], provider: [...CARRIER_NAMES], checked_at: null },
     { take: BATCH, order: { created_at: "ASC" }, select: ["id"] }
   )
   const stale =
     fresh.length < BATCH
       ? await service.listTrackedShipments(
-          { status: [...OPEN], checked_at: { $lte: new Date(now.getTime() - RECHECK_MS) } },
+          {
+            status: [...OPEN],
+            provider: [...CARRIER_NAMES],
+            checked_at: { $lte: new Date(now.getTime() - RECHECK_MS) },
+          },
           { take: BATCH - fresh.length, order: { checked_at: "ASC" }, select: ["id"] }
         )
       : []
@@ -63,8 +69,6 @@ export async function pollShipments(container: MedusaContainer, now = new Date()
 
 export default async function shipmentTracking(container: MedusaContainer) {
   await pollShipments(container)
-  // Return parcels too: their handover starts the law's 14 days to refund (adr/0032 Ek 2026-11-03)
-  await pollReturnHandovers(container)
 }
 
 export const config = {

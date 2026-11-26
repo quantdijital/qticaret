@@ -59,7 +59,7 @@ numarası girmiyor.
 - _Varsayım:_ Ödeme şekli kart için "kredi kartı/banka kartı", havalede "EFT/havale", kapıda ödemede
   "kapıda ödeme" olarak yazılır. Ödeme aracısı olarak PayTR ya da iyzico gösterilir.
 - _Cevap:_ Uygun; eksik alan yok.
-- _Soru:_ Gönderim Geliver gibi bir kargo aracısıyla yapıldığında taşıyıcı olarak aracının mı, paketi taşıyan kargo firmasının mı unvanı ve VKN'si yazılır?
+- _Soru:_ Gönderim Geliver gibi bir kargo aracısıyla yapıldığında taşıyıcı olarak aracının mı, paketi taşıyan kargo firmasının mı unvanı ve VKN'si yazılır? [2026-11-26: Geliver kaldırıldı; bugün yalnız doğrudan taşıyıcılar var.]
 - _Cevap:_ Paketi taşıyan kargo firması.
 - _Not:_ Taşıyıcı firmaların unvanı ve VKN'si mağaza ayarlarından bir kez girilecek. Bunlar kargo firmasının mağazaya kestiği faturada yazar.
 

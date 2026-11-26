@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
-import { defineSection, isCleanText } from "./define"
+import { defineSection, isCleanText, isPlainObject } from "./define"
 
 /**
  * Who issues the shop's invoices (adr/0034 §1). `birfatura`: BirFatura
@@ -18,8 +18,8 @@ export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
  */
 export const INVOICING_TRIGGERS = ["shipped", "placed"] as const
 
-/** The carriers an e-Arşiv may name: ours (adr/0031, adr/0035) and the shop's own parcels. */
-export const INVOICE_CARRIERS = ["geliver", "aras", "yurtici", "manual"] as const
+/** The carriers an e-Arşiv may name: ours (adr/0035) and the shop's own parcels. */
+export const INVOICE_CARRIERS = ["aras", "yurtici", "manual"] as const
 export type InvoiceCarrier = (typeof INVOICE_CARRIERS)[number]
 
 export interface CarrierIdentity {
@@ -62,6 +62,23 @@ const carrier = z
   })
   .strict()
 
+/**
+ * A stored row's carriers we still ship with (adr/0062 §4): one no longer
+ * offered (adr/0031, 2026-11-26 addendum) is dropped, so the others' names
+ * and tax ids keep reading instead of the whole field falling back.
+ */
+function upgrade(stored: Record<string, unknown>): Record<string, unknown> {
+  const carriers = stored["carriers"]
+  if (!isPlainObject(carriers)) {
+    return stored
+  }
+  const known: readonly string[] = INVOICE_CARRIERS
+  const kept = Object.fromEntries(Object.entries(carriers).filter(([key]) => known.includes(key)))
+  return Object.keys(kept).length === Object.keys(carriers).length
+    ? stored
+    : { ...stored, carriers: kept }
+}
+
 export const invoicingSection = defineSection<InvoicingSettings>(
   "invoicing",
   {
@@ -75,5 +92,7 @@ export const invoicingSection = defineSection<InvoicingSettings>(
       .regex(/^[A-Z0-9]{3}$/, { message: "platform_settings.invoice_series_invalid" })
       .nullable(),
   },
-  { provider: "none", trigger: "placed", carriers: {}, series: null }
+  { provider: "none", trigger: "placed", carriers: {}, series: null },
+  undefined,
+  upgrade
 )

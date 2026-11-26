@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto"
-import type { FakeRequest, Handler, Reply } from "../geliver/routes"
+import type { FakeRequest, Handler, Reply } from "../fake-routes"
 import { dataOf, jsonApiError, resource } from "./jsonapi"
 import type { FakeEDocument, FakeJob, FakeSalesInvoice } from "./jsonapi"
 

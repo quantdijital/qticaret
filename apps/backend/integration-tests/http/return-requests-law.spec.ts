@@ -1,17 +1,18 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
-import { pollReturnHandovers } from "../../src/workflows/returns/handover"
+import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
+import type ReturnRequestsModuleService from "../../src/modules/return-requests/service"
 import {
   REFUND_DEADLINE_NEAR,
   alertRefundDeadlines,
 } from "../../src/workflows/returns/refund-deadline"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -42,15 +43,15 @@ interface Request {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let customer: TestCustomer
     let clock = Date.now()
 
     const query = () => getContainer().resolve(ContainerRegistrationKeys.QUERY)
-    /** A Geliver order of the customer's, paid, shipped and delivered. */
+    /** An Aras order of the customer's, paid, shipped and delivered. */
     const deliveredOrder = async (quantity = 1) => {
-      const orderId = await geliverOrder(getContainer(), setup, setup.variantId, quantity)
+      const orderId = await carrierOrder(getContainer(), setup, setup.variantId, quantity)
       await getContainer()
         .resolve(Modules.ORDER)
         .updateOrders(orderId, { customer_id: customer.id })
@@ -106,18 +107,18 @@ medusaIntegrationTestRunner({
     }
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
       customer = await registerCustomer(http, await createStorefront(getContainer()))
     })
 
@@ -219,16 +220,14 @@ medusaIntegrationTestRunner({
       expect((await requestOf(plain.orderId, plainId))?.status).toBe("approved")
     })
 
-    it("records the return parcel's handover and tells staff once on the 10th day (md. 12/1)", async () => {
+    it("tells staff once on the 10th day since the parcel's recorded handover (md. 12/1)", async () => {
       const { orderId, lineId } = await deliveredOrder()
       const id = await approved(orderId, lineId)
       const handover = new Date(clock)
+      await getContainer()
+        .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+        .updateReturnRequests({ id, handed_over_at: handover })
 
-      // The fake carrier moves the return parcel a step on each read: on its way at the third
-      const seen: number[] = []
-      for (let read = 0; read < 3; read += 1) {
-        seen.push(await pollReturnHandovers(getContainer(), handover))
-      }
       const recorded = await requestOf(orderId, id)
       const early = await alertRefundDeadlines(
         getContainer(),
@@ -249,7 +248,6 @@ medusaIntegrationTestRunner({
           { select: ["trigger_type", "data"] }
         )
 
-      expect(seen).toEqual([0, 0, 1])
       expect(recorded?.handed_over_at).toBe(handover.toISOString())
       expect(recorded?.refund_due_at).toBe(new Date(handover.getTime() + 14 * DAY).toISOString())
       expect([early, due, again]).toEqual([0, 1, 0])

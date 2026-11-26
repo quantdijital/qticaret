@@ -4,11 +4,10 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { ArasAccount, GeliverAccount, YurticiAccount } from "@/features/settings/api/payments"
+import type { ArasAccount, YurticiAccount } from "@/features/settings/api/payments"
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
-import { GeliverSettings } from "@/features/settings/components/geliver-settings"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
 import { isCarrier } from "@/features/settings/shipping-carriers"
@@ -45,16 +44,10 @@ export function ShippingCarrierPage() {
           account={account as ArasAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
-      ) : carrier === "yurtici" ? (
+      ) : (
         <YurticiSettings
           key={accountKey(account)}
           account={account as YurticiAccount | undefined}
-          keyConfigured={query.data.key_configured}
-        />
-      ) : (
-        <GeliverSettings
-          key={accountKey(account)}
-          account={account as GeliverAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
       )}

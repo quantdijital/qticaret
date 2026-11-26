@@ -19,8 +19,6 @@ export interface TrackingPlace {
 }
 
 export interface TrackingView {
-  /** The carrier, where one source tracks several (Geliver). */
-  carrier?: string
   number: string
   stage: Stage
   /** Every stage reached, the first ("created") included. */
@@ -106,7 +104,7 @@ function unitOf(stage: Stage, view: TrackingView): string {
 export function trackingJson(source: TrackingSource, view: TrackingView) {
   const words = { ...WORDS, ...source.words }
   return {
-    carrier: view.carrier ?? source.carrier,
+    carrier: source.carrier,
     trackingNumber: view.number,
     status: view.canceled ? "canceled" : view.stage,
     statusText: view.canceled ? "İptal edildi" : words[view.stage],
@@ -121,7 +119,7 @@ export function trackingJson(source: TrackingSource, view: TrackingView) {
 
 function page(source: TrackingSource, view: TrackingView | null, number: string): string {
   const words = { ...WORDS, ...source.words }
-  const carrier = view?.carrier ?? source.carrier
+  const carrier = source.carrier
   const head = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(carrier)} Gönderi Takip</title><style>
 :root{--accent:${source.color};--line:#e3e6ea;--muted:#5d6670}
 body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;background:#f4f5f7;color:#1c2127}

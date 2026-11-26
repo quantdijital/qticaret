@@ -37,7 +37,6 @@ export interface IntegrationView extends IntegrationRow {
 const ACCOUNTS: [IntegrationGroup, CredentialStatus["provider"]][] = [
   ["payments", "paytr"],
   ["payments", "iyzico"],
-  ["shipping", "geliver"],
   ["shipping", "aras"],
   ["shipping", "yurtici"],
   ["messaging", "netgsm"],

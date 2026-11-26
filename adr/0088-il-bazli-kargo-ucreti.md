@@ -133,3 +133,7 @@ Aras ve Yurtiçi kurumsal sözleşmeleri çoğunlukla ülke geneli desi fiyatıy
 4. **Gönderim yapılmayan ilden adres girilince ne olsun?** Öneri: adres kaydedilir, ödeme adımında kargo seçenekleri yerine "Bu ile şu an gönderim yapamıyoruz." yazar; mağazadan teslim açıksa o seçilebilir; sipariş kargoyla tamamlanamaz.
 5. **İl yeterli mi, yoksa ilçe de gerekir mi (Bozcaada, Gökçeada, Adalar; kargo firmalarının "mobil bölge" ek ücreti)?** Öneri: **şimdilik il.** İhtiyaç olursa aynı satıra "ilçeler" eklenir, kurulan kurallar bozulmaz.
 6. **Sepette ve ürün sayfasında il seçilmeden ne yazsın?** Öneri: taban ücret ve altında "Teslimat iline göre değişebilir."; il seçilince kesin ücret ödeme adımında. Google'a taban ücret gider.
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+Geliver ve teklif ücret türü projeden çıkarıldı (ADR-0031 ek). Yukarıdaki "Geliver teklifi" geçen yerler tarihseldir; il kuralları sabit ücret ve desi tablosu (ve ücretsiz) türlerine uygulanır.

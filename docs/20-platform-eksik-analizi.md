@@ -59,7 +59,7 @@ S = Shopify, I = ikas, TR = Ticimax / IdeaSoft / T-Soft.
 | Özellik | S | I | TR | Bizde | Not |
 |---|---|---|---|---|---|
 | Aras, Yurtiçi doğrudan | 🟡 | ✅ | ✅ | ✅ | |
-| MNG, Sürat, PTT, HepsiJet | 🟡 | ✅ | ✅ | 🟡 | Geliver üzerinden |
+| MNG, Sürat, PTT, HepsiJet | 🟡 | ✅ | ✅ | ❌ | İstendikçe doğrudan eklenir (Geliver aracılığı 2026-11-26 kaldırıldı) |
 | Etiket, takip, kargoya hazır listesi | ✅ | ✅ | ✅ | ✅ | |
 | İade/değişim akışı | ✅ | ✅ | ✅ | ✅ | iade belgesi ve değişim faturası mali müşavirin 5.4 cevabıyla bitti (E6b, 2026-10-31) |
 | Sipariş düzenleme, iç not | ✅ | ✅ | ✅ | ✅ | |

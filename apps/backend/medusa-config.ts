@@ -205,13 +205,12 @@ module.exports = defineConfig({
         ],
       },
     },
-    // F7 (adr/0031): Geliver beside Medusa's manual provider, which the seed's options use
+    // F7 (adr/0031, adr/0035): the shop's own carrier contracts beside Medusa's manual provider
     {
       resolve: "@medusajs/medusa/fulfillment",
       options: {
         providers: [
           { resolve: "@medusajs/medusa/fulfillment-manual", id: "manual" },
-          { resolve: "./src/modules/fulfillment-geliver", id: "geliver" },
           { resolve: "./src/modules/fulfillment-aras", id: "aras" },
           { resolve: "./src/modules/fulfillment-yurtici", id: "yurtici" },
           // adr/0087: the shop's own delivery at a flat price, priced by our quote

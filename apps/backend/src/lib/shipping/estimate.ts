@@ -7,7 +7,7 @@ import type { QuoteBasis, QuoteLine, ShippingQuoteContext } from "./quote"
  * The cart's shipping before an address (WooCommerce's "shipping
  * calculator", simplified for Türkiye): the shop's main option priced by
  * the one quote checkout uses (adr/0087 §2), from the cart on the server.
- * A price that needs the destination or a carrier's quote is not guessed:
+ * A price that needs the destination is not guessed:
  * the checkout works it out. Nothing comes from the shopper but the cart.
  */
 
@@ -16,8 +16,8 @@ export interface ListedOption {
   id: string
   name: string
   carrier: string | null
-  /** "flat": an amount; "table": the shop's desi table; otherwise a carrier's quote. */
-  pricing: "flat" | "table" | "cheapest" | "fastest"
+  /** "flat": an amount; "table": the shop's desi table. */
+  pricing: "flat" | "table"
   /** Lira as Medusa writes it ("90.00"), KDV in, for a flat one; null otherwise. */
   amount: string | number | null
   /** Offered to shoppers (`enabled_in_store`). */
@@ -49,7 +49,7 @@ export function primaryOptionOf(
   return flats[0] ?? delivering[0] ?? null
 }
 
-/** How the main option's base price is made; null: only the checkout can say (a carrier's quote). */
+/** How the main option's base price is made; null: only the checkout can say. */
 export interface EstimatePricer<Line> {
   basis: QuoteBasis
   price: (lines: readonly Line[]) => Kurus | Promise<Kurus>
@@ -57,7 +57,7 @@ export interface EstimatePricer<Line> {
 
 /**
  * "free": nothing to pay; "priced": `amount` (kuruş, KDV in);
- * "at_checkout": the checkout works it out (a carrier's quote, no option,
+ * "at_checkout": the checkout works it out (an option Medusa prices, no option,
  * a parcel past the table); "not_needed": nothing in the cart travels.
  */
 export type ShippingEstimate =
@@ -75,7 +75,7 @@ export interface EstimateInput<Line extends QuoteLine> {
   lines: readonly Line[]
   /** The hook's reading for the cart (`shippingQuoteContext`); null: the base is charged. */
   context: ShippingQuoteContext | null
-  /** The main option's pricer; null without an option, or for a carrier's quote. */
+  /** The main option's pricer; null without an option, or for one Medusa prices itself. */
   pricer: EstimatePricer<Line> | null
   /** Whether the shop has an option shoppers can be sent with at all. */
   hasOption: boolean

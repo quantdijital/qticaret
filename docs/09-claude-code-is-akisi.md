@@ -84,7 +84,6 @@ Hangi ekran için hangisi başlatılır (her biri ayrı terminalde, backend'den 
 | Ekran / akış | Komut | Backend `.env` satırı |
 |---|---|---|
 | Ayarlar > Ödeme > PayTR; vitrin kart ödemesi (`localhost:8000/odeme`); siparişte iade | `pnpm dev:paytr` | `PAYTR_BASE_URL=http://127.0.0.1:9102` |
-| Ayarlar > Kargo > Geliver; "Kargoya ver", etiket, takip | `pnpm dev:geliver` | `GELIVER_BASE_URL=http://127.0.0.1:9103/api/v1` |
 | Ayarlar > Kargo > Aras Kargo; kargoya verme, etiket, takip bağlantısı | `pnpm dev:aras` | `ARAS_BASE_URL=http://127.0.0.1:9104` |
 | Ayarlar > Kargo > Yurtiçi Kargo; kargoya verme, etiket, takip bağlantısı | `pnpm dev:yurtici` | `YURTICI_BASE_URL=http://127.0.0.1:9105` |
 | Ayarlar > SMS > Netgsm; sipariş ve kargo SMS'leri, toplu SMS | `pnpm dev:netgsm` | `NETGSM_BASE_URL=http://127.0.0.1:9106` |
@@ -98,7 +97,7 @@ Hangi ekran için hangisi başlatılır (her biri ayrı terminalde, backend'den 
 - iyzico'nun sahtesi yalnızca testlerde kullanılır (`IYZICO_BASE_URL`). Yerelde iyzico sandbox hesabı panelden bağlanır.
 - Sahte adresler (`*_BASE_URL`) yalnızca `NODE_ENV=development` ya da `test` ile kabul edilir. Staging ve canlıda env doğrulaması başlatmayı durdurur.
 - **Bağlantılar:** `seo.canonical_host` boşken geliştirmede (`NODE_ENV=development`) e-posta bağlantıları, şifre yenileme, e-posta doğrulama, sepet hatırlatma, taşıma davetleri ve sözleşmelerdeki alan adı yerel vitrine gider (`STOREFRONT_ORIGIN`, yoksa `http://localhost:8000`). Böylece Mailpit'teki e-postalardaki bağlantılar açılır. Yerel dosya deposundan http ile gelen logo da e-postada görünür. Canlıda kural değişmez: alan adı girilene kadar bağlantı yoktur. Testler de canlı kuralıyla çalışır.
-- **Kargo takip bağlantısı:** Aras ya da Yurtiçi sahtesi tanımlıyken gönderinin takip bağlantısı sahtenin kendi sayfasına gider (`http://127.0.0.1:9104/takip/<no>`, `http://127.0.0.1:9105/takip/<no>`). Canlıda taşıyıcının kendi sayfasına gider. Geliver'in bağlantısı Geliver'in yanıtından gelir.
+- **Kargo takip bağlantısı:** Aras ya da Yurtiçi sahtesi tanımlıyken gönderinin takip bağlantısı sahtenin kendi sayfasına gider (`http://127.0.0.1:9104/takip/<no>`, `http://127.0.0.1:9105/takip/<no>`). Canlıda taşıyıcının kendi sayfasına gider.
 - **Takip sıklığı:** Takip işi taşıyıcıya 30 dakikada bir sorar. Sahtenin takip sayfasında ilerletilen gönderinin panele bir dakikada gelmesi için backend `.env`'ine `SHIPMENT_POLL_MINUTES=1` yazılır (1–30; yalnız development/test'te geçerli, staging ve canlıda 30 dakika kalır).
 - **İleti önizlemesi:** Panelin ileti önizlemesi ve `messaging:samples` mağazanın doldurduğu bilgileri kullanır: vitrin adresi, unvan ve MERSİS, banka hesabı, SMS ret satırı. Uydurma değer yalnızca boş bırakılan alanda kalır.
 - **Ödeme denetiminin hız sınırı:** Geliştirmede (`NODE_ENV=development`) bu makinenin kendi adresinden (127.0.0.1, ::1) başlayan ödemeler sayılmaz. Vitrin e2e takımı her ödemede yeni bir e-postayla aynı adresten geldiği için bir günde sert sınıra (saatte 30 başlatma, günde 30 farklı e-posta) takılıyordu. Başka her adres sayılır. Testlerde ve canlıda loopback da her adres gibi sayılır.

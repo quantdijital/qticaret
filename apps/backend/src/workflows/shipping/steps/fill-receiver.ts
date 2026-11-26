@@ -3,7 +3,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { logger } from "../../../lib/logging"
 import { filledReceiver } from "../../../lib/shipping/fill"
 import type { FilledAddress, Person } from "../../../lib/shipping/fill"
-import type { AddressRow } from "../../../lib/shipping/geliver/mappers"
+import type { AddressRow } from "../../../lib/shipping/address"
 import { placeFactsOf } from "../place-facts"
 
 interface OrderRow {

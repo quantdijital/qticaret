@@ -58,7 +58,6 @@ medusaIntegrationTestRunner({
         "iyzico",
         "bank_transfer",
         "cash_on_delivery",
-        "geliver",
         "aras",
         "yurtici",
         "netgsm",

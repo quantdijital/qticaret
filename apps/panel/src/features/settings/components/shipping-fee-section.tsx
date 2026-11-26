@@ -46,10 +46,10 @@ export function ShippingFeeSection({ saved }: { saved: ShippingSettings }) {
   }
   const threshold = promotions.data.values.free_shipping_threshold
   const condition = promotions.data.values.free_shipping_condition
-  const firstSource: CarrierPricing =
-    first === "aras" || first === "yurtici" ? `${first}-table` : "geliver-cheapest"
+  const contract = first === "aras" || first === "yurtici" ? first : null
+  const firstSource: CarrierPricing = `${contract ?? "aras"}-table`
   const state = detectFee(options.data, saved.primary_option_id, threshold, firstSource, condition)
-  const flatCarrier = first === "aras" || first === "yurtici" ? first : "manual"
+  const flatCarrier = contract ?? "manual"
   // Remade from what is stored after every save: the answer shows what the server kept
   const key = JSON.stringify([options.data, saved.primary_option_id, threshold, condition])
   return (

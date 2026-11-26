@@ -263,7 +263,9 @@ Detay: `docs/entegrasyonlar/alternatif-odeme.md`
 ---
 
 ## F7 — Kargo, Sipariş Operasyonu, İade ve Değişim
-Detay: `docs/entegrasyonlar/geliver.md`
+Detay: ADR-0031, ADR-0035.
+
+> **2026-11-26:** Geliver projeden kaldırıldı (ADR-0031 ek). Aşağıdaki Geliver maddeleri (F7.1, F7.2 teklifi, F7.4 iade kodu, F7.5 web kancası) ve Geliver testleri tarihseldir; kargo artık doğrudan Aras ve Yurtiçi (F7.14) ile "Kendi gönderimim". Takip, etiket ve sorgu işi bu taşıyıcılarla sürer.
 
 - F7.1 `fulfillment-geliver` provider: `getFulfillmentOptions`, `validateFulfillmentData`, `validateOption`
 - F7.2 `canCalculate` / `calculatePrice`: desi hesaplama (ürün ölçü/ağırlık; ölçüsü girilmemiş ürün mağazanın varsayılan paketiyle, ADR-0054) + teklif, cache'li

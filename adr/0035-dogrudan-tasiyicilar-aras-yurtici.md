@@ -150,3 +150,7 @@ Mağaza sahibi Yurtiçi'nin "Web Servis Giden Kargo Teknik Döküman V3" belgesi
 - **Kapsam dışı kalan, başka dosya isteyen:** `return_requested` için ayrı bir Türkçe hata mesajı (`lib/errors/messages`), panelde ana hesabın "gönderici ödemeli" kullanıcısı olması gerektiğini söyleyen yardım metni.
 
 - **Güvenlik incelemesi 2026-11-03 (L1):** HTTP 5xx altında gelen SOAP fault artık `outcome_unknown` değil, servisin kesin reddi: HTTP istemcisi XML yanıttaki fault kodunu (`errorCode`, yoksa `faultcode`) `error_<kod>` olarak verir (`lib/clients/soap-fault.ts`); fault yoksa ya da ağ geçidi (502/504) yanıtıysa sonuç bilinmez kalır. Yurtiçi bu retten sonra gönderiyi geri çekmez; hesap kontrolünde yalnızca giriş fault'u (`error_936`, sahtenin verdiği kod; belge söylemiyor) `secret_invalid`, düz 500 "ulaşılamadı", başka fault "doğrulanamadı" olur.
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+Geliver projeden tamamen çıkarıldı (ADR-0031 ek). Taşıyıcı kaydında artık yalnız Aras ve Yurtiçi var; yukarıdaki "Geliver gibi" karşılaştırmaları ve §8'deki "Geliver'le iade açılır" seçeneği tarihseldir. Başka taşıyıcılar istendikçe aynı kayda eklenir.

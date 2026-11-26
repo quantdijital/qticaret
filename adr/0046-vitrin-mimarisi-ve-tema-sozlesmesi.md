@@ -177,7 +177,7 @@ Atölye teması (`packages/themes/atolye`, `design.md` § Components) temanın t
 | `ShopView.paymentMarks?`, `carrierMarks?` | `ShopMarkView[]` (`{ key, label }`) | `GET /store/storefront` → `marks: { payments, carriers }`; anahtarlar: `visa`, `mastercard`, `troy` (bir kart sağlayıcısı bağlıyken; PayTR ve iyzico üçünü de alır), `paytr`, `iyzico`, `bank_transfer` (açık ve IBAN'lı), `cash_on_delivery` (bayrak açık ve kapıda tahsil eden bir kargo seçeneği varken); `aras`, `yurtici` (hesabı kayıtlı). Adlar vitrinin `tr.json`'unda (`marks.*`). |
 
 - **İşaretler (logolar):** depoda sağlayıcıların resmî işaretleri yok; taban tema metin rozeti çizer. Resmî işaret kullanımı sağlayıcının marka kurallarına bağlıdır (sahibin işi); tema yalnız `key`'e bakıp kendi işaretini koyabilir.
-- **Geliver:** bir toplayıcıdır, etiketi aldığı kargo firması önceden belli değildir; işaret listesine girmez.
+- **Geliver:** bir toplayıcıdır, etiketi aldığı kargo firması önceden belli değildir; işaret listesine girmez. [2026-11-26: Geliver projeden kaldırıldı, ADR-0031 ek.]
 - **Vitrin:** `lib/store-api/extras.ts` (üç yeni çağrı, backend yanıt vermezse alan çıkar), `lib/views/card-extras.ts` (saf görünüm yardımcıları, testli). Kart, liste, arama, ana sayfa rafları ve benzer ürünler kart bilgisini sayfa başına tek çağrıyla alır.
 - **Migration'lar:** `catalogExtension` `Migration20261104210343` (`category_image`), `productAttributes` `Migration20261104210344`, `product_reviews` `Migration20261104210345`.
 - **Ortam kütüphanesi:** kategori resmi ve ETBİS karekodu "kullanımda" sayılır (`media.in_use`); ayrıntıda `category` ve `etbis_qr` türleri.

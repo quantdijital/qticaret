@@ -1,6 +1,6 @@
 import { ValidationError } from "../errors"
-import { AddressIncomplete } from "./geliver/mappers"
-import type { AddressRow } from "./geliver/mappers"
+import { AddressIncomplete } from "./address"
+import type { AddressRow } from "./address"
 
 /**
  * The parcel's receiver as a contract carrier takes it (adr/0035): a
@@ -60,7 +60,7 @@ export function localPhone(value: string | null | undefined): string {
 
 /** What a carrier needs of the receiver beyond the name, the street and the phone. */
 export interface ReceiverNeeds {
-  /** Il and ilçe as their own fields: Yurtiçi's are optional, Geliver's and Aras's are not. */
+  /** Il and ilçe as their own fields: Yurtiçi's are optional, Aras's are not. */
   place: "required" | "optional"
 }
 

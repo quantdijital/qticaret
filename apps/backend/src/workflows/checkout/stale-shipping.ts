@@ -7,7 +7,6 @@ import {
 import { errorSummary, logger } from "../../lib/logging"
 import { fromMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
-import { GELIVER_FULFILLMENT_PROVIDER_ID } from "../../lib/shipping/carriers"
 
 interface MethodRow {
   amount?: unknown
@@ -29,20 +28,6 @@ function kurusOf(amount: unknown): Kurus | null {
   } catch {
     return null
   }
-}
-
-/**
- * Whether the shop prices the option itself, with no call outside (adr/0087
- * §2): a flat amount or the desi table. Its price for the cart now is
- * asked again at completion and must match. Geliver's quote moves on its
- * own: only a free one is asked again (the threshold, a free basket).
- */
-const pricedByShop = (option: OptionPrice): boolean => {
-  const id = option.data?.["id"]
-  return (
-    option.provider_id !== GELIVER_FULFILLMENT_PROVIDER_ID ||
-    (typeof id === "string" && id.endsWith("-table"))
-  )
 }
 
 /**
@@ -83,10 +68,9 @@ async function stalePriced(
  * for the cart now (F4.5, adr/0087). Medusa re-prices shipping when the
  * items change, not when a code is applied or staff change a product's
  * shipping class: a method chosen before keeps its old amount. A flat-rate
- * method is compared with its option's price; a calculated one the shop
- * prices itself (flat amount, desi table) is priced again and compared
- * exactly; a carrier's quote only while it is free, so its quote moving on
- * is no reason to stop a checkout.
+ * method is compared with its option's price; a calculated one (the shop
+ * prices them all itself) (flat amount, desi table) is priced again and compared
+ * exactly.
  */
 export async function hasStaleShipping(
   container: MedusaContainer,
@@ -119,11 +103,7 @@ export async function hasStaleShipping(
     if (option?.price_type !== "calculated") {
       return []
     }
-    const amount = kurusOf(method.amount)
-    // An amount that cannot be read is checked too
-    return pricedByShop(option) || amount === null || amount === 0
-      ? [{ option_id: option.id, amount }]
-      : []
+    return [{ option_id: option.id, amount: kurusOf(method.amount) }]
   })
   return stalePriced(container, cartId, calculated)
 }

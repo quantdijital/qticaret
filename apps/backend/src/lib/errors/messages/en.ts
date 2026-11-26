@@ -539,20 +539,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The delivery address has no province or district; the carrier routes the parcel by them. Complete it on the order page.",
   "shipping.receiver_phone_missing":
     "The delivery address has no phone a courier can dial (10 digits with the area code), and neither the billing address nor the customer's account has one. Add one on the order page.",
-  "shipping.sender_address_incomplete":
-    "The warehouse's address is incomplete for shipping and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_location_missing":
-    "The warehouse the parcel leaves from could not be told and the Geliver account has no default sender address. Choose the default warehouse under Settings > Locations, or add a sender address in Geliver's panel.",
-  "shipping.sender_address_missing":
-    "The warehouse has no street address (neighbourhood, street, number) and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_place_missing":
-    "The warehouse has no province or district in Türkiye and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_postal_missing":
-    "The warehouse has no postcode and none was found in the address data (no neighbourhood chosen); the Geliver account has no default sender address either. Add the postcode or the neighbourhood under Settings > Locations.",
-  "shipping.sender_phone_missing":
-    "Neither the warehouse nor the shop has a phone, and the Geliver account has no default sender address. Add the warehouse's under Settings > Locations or the shop's under Settings > Store.",
-  "shipping.sender_contact_missing":
-    "The shop has no contact email (Geliver needs one for the sender) and the Geliver account has no default sender address. Add it under Settings > Store, or add a sender address in Geliver's panel.",
   "shipping.fulfillment_invalid": "That shipment is not a valid one to print a label for.",
   "shipping.label_unavailable": "This shipment has no label.",
   "aras.merchant_invalid":
@@ -940,10 +926,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document; test and live accounts differ.",
   "yurtici.cod_account_missing":
     "Shipping an order paid at the door with Yurtiçi Kargo needs the cash on delivery account. Enter it under Settings > Shipping > Yurtiçi Kargo.",
-  "geliver.merchant_invalid":
-    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
-  "geliver.secret_invalid":
-    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":
@@ -1403,7 +1385,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
   "paytr.not_configured": "The shop has not connected its PayTR account yet.",
   "orders.test_payment_not_shippable":
-    "This order was paid in test mode, no real money was taken: it ships only with a carrier in test mode (Aras, Yurtiçi, Geliver). Its shipping option is your own delivery or a carrier in live mode.",
+    "This order was paid in test mode, no real money was taken: it ships only with a carrier in test mode (Aras, Yurtiçi). Its shipping option is your own delivery or a carrier in live mode.",
   "paytr.refund_locked":
     "PayTR is not taking a refund of this payment right now (a payout is running); try again later.",
   "paytr.refund_exceeds_payment": "The refund is more than what is left of the payment.",
