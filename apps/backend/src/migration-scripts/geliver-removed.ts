@@ -3,7 +3,10 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { deleteShippingOptionsWorkflow } from "@medusajs/medusa/core-flows"
 import { logger } from "../lib/logging"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../modules/integration-credentials"
+import type { CredentialProviderName } from "../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../modules/integration-credentials/service"
+import { RETURN_REQUESTS_MODULE } from "../modules/return-requests"
+import type ReturnRequestsModuleService from "../modules/return-requests/service"
 
 /**
  * The aggregator carrier the app no longer registers (adr/0031, 2026-11-26
@@ -19,15 +22,20 @@ export interface RetiredCarrierPorts {
   /** Warehouses the retired provider is linked to. */
   listLinkedLocations: () => Promise<string[]>
   unlinkLocations: (ids: string[]) => Promise<void>
-  /** The stored account's row ids (sealed secrets inside). */
-  listAccountIds: () => Promise<string[]>
-  deleteAccounts: (ids: string[]) => Promise<void>
+  /** Whether the shop has a stored account for it (sealed secrets inside). */
+  hasAccount: () => Promise<boolean>
+  /** Deletes it, the accounts' cache with it. */
+  deleteAccount: () => Promise<void>
+  /** Approved returns with the carrier's return code, not yet seen handed over. */
+  countOpenCarrierReturns: () => Promise<number>
 }
 
 export interface RetiredCarrierTally {
   options: number
   locations: number
   accounts: number
+  /** Return codes staff may still withdraw in the carrier's own panel. */
+  open_returns: number
 }
 
 /**
@@ -38,7 +46,10 @@ export interface RetiredCarrierTally {
  *   their methods and fulfillments, shown read only;
  * - its links to warehouses;
  * - the shop's stored account for it: a secret no code reads any more is
- *   not kept (docs/04). Only ids and counts are logged.
+ *   not kept (docs/04).
+ * Approved returns still holding its return code are counted, not
+ * changed: staff withdraw them in the carrier's own panel (security
+ * review 2026-11-26). Only counts are logged.
  */
 export async function removeRetiredCarrier(
   ports: RetiredCarrierPorts
@@ -51,11 +62,17 @@ export async function removeRetiredCarrier(
   if (locations.length > 0) {
     await ports.unlinkLocations(locations)
   }
-  const accounts = await ports.listAccountIds()
-  if (accounts.length > 0) {
-    await ports.deleteAccounts(accounts)
+  const open_returns = await ports.countOpenCarrierReturns()
+  const account = await ports.hasAccount()
+  if (account) {
+    await ports.deleteAccount()
   }
-  return { options: options.length, locations: locations.length, accounts: accounts.length }
+  return {
+    options: options.length,
+    locations: locations.length,
+    accounts: account ? 1 : 0,
+    open_returns,
+  }
 }
 
 const idsOf = (rows: unknown[]): string[] =>
@@ -102,13 +119,26 @@ export function retiredCarrierPorts(container: MedusaContainer): RetiredCarrierP
         }))
       )
     },
-    listAccountIds: async () =>
-      idsOf(
-        await accounts.listIntegrationCredentials({ provider: RETIRED_ACCOUNT }, { select: ["id"] })
-      ),
-    deleteAccounts: async (ids) => {
-      await accounts.deleteIntegrationCredentials(ids)
+    hasAccount: async () =>
+      (
+        await accounts.listIntegrationCredentials(
+          { provider: RETIRED_ACCOUNT },
+          { select: ["id"], take: 1 }
+        )
+      ).length > 0,
+    // The service's own removal: the row and the accounts' cache (one row per provider)
+    deleteAccount: async () => {
+      await accounts.remove(RETIRED_ACCOUNT as CredentialProviderName)
     },
+    countOpenCarrierReturns: async () =>
+      (
+        await container
+          .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+          .listReturnRequests(
+            { status: "approved", return_shipment_id: { $ne: null }, handed_over_at: null },
+            { select: ["id"] }
+          )
+      ).length,
   }
 }
 
@@ -116,4 +146,10 @@ export function retiredCarrierPorts(container: MedusaContainer): RetiredCarrierP
 export default async function geliverRemoved({ container }: ExecArgs) {
   const tally = await removeRetiredCarrier(retiredCarrierPorts(container))
   logger.info({ event: "shipping.retired_carrier_removed", ...tally })
+  if (tally.open_returns > 0) {
+    logger.warn(
+      { event: "shipping.retired_carrier_open_returns", count: tally.open_returns },
+      "approved returns still hold the removed carrier's return code: withdraw them in its panel"
+    )
+  }
 }
