@@ -1559,6 +1559,13 @@
         "returns": "İade",
         "locations": "Depolar ve stok"
       },
+      "freeShipping": {
+        "title": "Ücretsiz kargo eşiği",
+        "description": "Sepetteki ürünlerin toplamı (KDV dahil, indirimler düşüldükten sonra) bu tutara ulaşınca bütün kargo seçenekleri ücretsiz olur; ücretsiz kargolu ürünler de tutara sayılır.",
+        "switch": "Belli bir tutardan sonra kargo bedava",
+        "threshold": "En az sepet tutarı",
+        "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin."
+      },
       "classes": {
         "title": "Kargo sınıfları",
         "description": "Ürüne verilen sınıf kargo ücretini değiştirir. Sepette birden çok sınıf varsa en yüksek ek ücret siparişe bir kez eklenir.",
@@ -6697,9 +6704,9 @@
     "settings": {
       "title": "Kampanya ayarları",
       "hint": "Bütün kampanyalar için geçerli kurallar.",
-      "freeShipping": "Belli bir tutardan sonra kargo bedava",
-      "freeShippingHint": "Sepetteki ürünlerin toplamı (KDV dahil, indirimler düşüldükten sonra) bu tutara ulaşınca sabit fiyatlı kargo seçenekleri ücretsiz olur.",
-      "threshold": "En az sepet tutarı",
+      "freeShippingSummary": "Kargo bedava eşiği: {{value}}",
+      "freeShippingOff": "Kapalı",
+      "freeShippingEdit": "Kargo ayarlarında değiştir",
       "combineCodes": "Bir sepette birden fazla kod",
       "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
       "saved": "Kampanya ayarları kaydedildi."

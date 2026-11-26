@@ -11,6 +11,7 @@ import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
+import { FreeShippingCard } from "@/features/settings/components/free-shipping-card"
 import { ShippingClassesCard } from "@/features/settings/components/shipping-classes-card"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard } from "@/features/settings/components/delivery-card"
@@ -74,7 +75,8 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
  * Settings > Shipping and delivery (F7, adr/0031; the owner, 2026-10-31:
  * one page for delivery, in tabs): the carriers and the size their labels
  * print at; the options shoppers choose from, the delivery days and price
- * table (F7.8) and the default parcel of a product without measures
+ * table (F7.8), free shipping from a basket total (F4.5), the shipping
+ * classes (adr/0087) and the default parcel of a product without measures
  * (adr/0054); the return rules (F13.4); the warehouses stock ships from.
  * The address data (il, ilçe, mahalle, köy) is the platform's, kept current
  * without the shop (adr/0008 Ek 2026-11-04): no tab here, and an old
@@ -131,6 +133,7 @@ export function ShippingPage() {
                       <DeliveryCard key={JSON.stringify(saved)} saved={saved} />
                       <RatesCard key={`rates-${JSON.stringify(saved)}`} saved={saved} />
                     </div>
+                    <FreeShippingCard />
                     <ShippingClassesCard
                       key={`classes-${JSON.stringify(saved.shipping_classes ?? [])}`}
                       saved={saved}
