@@ -45,6 +45,8 @@ export interface GrowthOptions {
   rounds?: number
   /** A large run under this passes outright (default 20 ms). */
   floorMs?: number
+  /** Whole measurements before calling the work not linear; the first linear one counts (default 3). */
+  attempts?: number
 }
 
 export interface Growth {
@@ -81,16 +83,27 @@ export function measureGrowth(
   // Warm up both, so the compiler's first pass is not timed
   small()
   large()
-  const smallTimes: number[] = []
-  const largeTimes: number[] = []
-  for (let round = 0; round < rounds; round++) {
-    fastest(small, smallTimes)
-    fastest(large, largeTimes)
-  }
-  const smallMs = Math.min(...smallTimes)
-  const largeMs = Math.min(...largeTimes)
-  // A small run too quick to measure counts as a hundredth of a millisecond
-  const ratio = largeMs / Math.max(smallMs, 0.01)
+  const attempts = Math.max(1, options.attempts ?? 3)
   const limit = factor ** 1.5
-  return { smallMs, largeMs, ratio, limit, linear: largeMs < floorMs || ratio < limit }
+  const measure = (): Growth => {
+    const smallTimes: number[] = []
+    const largeTimes: number[] = []
+    for (let round = 0; round < rounds; round++) {
+      fastest(small, smallTimes)
+      fastest(large, largeTimes)
+    }
+    const smallMs = Math.min(...smallTimes)
+    const largeMs = Math.min(...largeTimes)
+    // A small run too quick to measure counts as a hundredth of a millisecond
+    const ratio = largeMs / Math.max(smallMs, 0.01)
+    return { smallMs, largeMs, ratio, limit, linear: largeMs < floorMs || ratio < limit }
+  }
+  // A busy runner can slow one size's every round (seen on CI, 2026-11-26):
+  // measure again before calling it quadratic. Quadratic work grows about
+  // `factor`² times on every attempt, so it still fails each one.
+  let growth = measure()
+  for (let attempt = 1; attempt < attempts && !growth.linear; attempt++) {
+    growth = measure()
+  }
+  return growth
 }

@@ -26,6 +26,29 @@ describe("measureGrowth", () => {
     expect(growth).toMatchObject({ linear: true })
   })
 
+  it("measures again when one measurement is slowed, as a busy runner does", () => {
+    // The large run is held up through the warm-up and the first attempt
+    // (three rounds), then runs as fast as the small one
+    let held = 4
+    const busy = (ms: number) => {
+      const until = performance.now() + ms
+      while (performance.now() < until) {
+        // wait
+      }
+    }
+    const work = (size: number) => () => {
+      if (size > 1 && held > 0) {
+        held--
+        busy(60)
+      } else {
+        busy(2)
+      }
+    }
+    expect(measureGrowth(work, 1, { rounds: 3, attempts: 1 })).toMatchObject({ linear: false })
+    held = 4
+    expect(measureGrowth(work, 1, { rounds: 3 })).toMatchObject({ linear: true })
+  })
+
   it("takes quadratic work as not linear", () => {
     const growth = measureGrowth(quadratic, 2_000, { rounds: 3 })
     expect(growth.largeMs).toBeGreaterThan(20)
