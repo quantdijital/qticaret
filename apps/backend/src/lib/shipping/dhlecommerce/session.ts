@@ -53,7 +53,13 @@ export interface Call {
 const tokenKey = (base: string, credentials: DhlEcomCredentials): string =>
   createHash("sha256")
     .update(
-      `${base}\0${credentials.app?.clientId ?? ""}\0${credentials.customerNumber}\0${credentials.password}`
+      [
+        base,
+        credentials.app?.clientId ?? "",
+        credentials.app?.clientSecret ?? "",
+        credentials.customerNumber,
+        credentials.password,
+      ].join("\0")
     )
     .digest("hex")
 

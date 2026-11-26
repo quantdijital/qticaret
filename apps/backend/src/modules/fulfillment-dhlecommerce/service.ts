@@ -78,8 +78,9 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     return Promise.resolve(DHL_ECOMMERCE_OPTIONS.map((option) => ({ ...option })))
   }
 
+  // Suspended, Medusa's own option route makes none either
   override validateOption(data: Record<string, unknown>): Promise<boolean> {
-    return Promise.resolve(isDhlEcomOption(data["id"]))
+    return Promise.resolve(isDhlEcomOption(data["id"]) && !suspended())
   }
 
   override validateFulfillmentData(
