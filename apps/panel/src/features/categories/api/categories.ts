@@ -11,6 +11,17 @@ export const categoryTreeQuery = () =>
       (await sdk.admin.productCategory.list({ fields: FIELDS, limit: 1000 })).product_categories,
   })
 
+/**
+ * `GET /admin/category-counts`: each category's products as the product
+ * list's filter shows them (it and the ones below it, drafts too).
+ */
+export const categoryCountsQuery = () =>
+  queryOptions({
+    queryKey: ["categories", "counts"],
+    queryFn: async () =>
+      (await sdk.client.fetch<{ counts: Record<string, number> }>("/admin/category-counts")).counts,
+  })
+
 export type Category = Awaited<
   ReturnType<typeof sdk.admin.productCategory.list>
 >["product_categories"][number]

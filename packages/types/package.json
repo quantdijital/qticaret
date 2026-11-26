@@ -11,6 +11,7 @@
     "./turnstile": "./src/store/turnstile.ts",
     "./popups": "./src/store/popups.ts",
     "./style-kit": "./src/store/style-kit.ts",
+    "./listing-page": "./src/store/listing-page.ts",
     "./listing-text": "./src/store/listing-text.ts",
     "./search-form": "./src/store/search-form.ts",
     "./section-variants": "./src/store/section-variants.ts",

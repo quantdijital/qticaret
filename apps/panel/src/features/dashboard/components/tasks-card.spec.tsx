@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import type { PendingCounts } from "@/features/dashboard/api/pending"
 import type { DashboardTasks } from "@/features/dashboard/api/tasks"
 import { TasksCard } from "./tasks-card"
 
@@ -41,8 +42,18 @@ const tasks = (more: Partial<DashboardTasks> = {}): DashboardTasks => ({
   ...more,
 })
 
-function renderCard(answer: DashboardTasks) {
-  fetchMock.mockResolvedValue(answer)
+const NOTHING_PENDING: PendingCounts = {
+  pending_reviews: 0,
+  pending_questions: 0,
+  open_returns: 0,
+  unread_contact: 0,
+  out_of_stock: 0,
+}
+
+function renderCard(answer: DashboardTasks, pending: PendingCounts = NOTHING_PENDING) {
+  fetchMock.mockImplementation((url: string) =>
+    Promise.resolve(url === "/admin/dashboard/pending" ? pending : answer)
+  )
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
@@ -96,5 +107,29 @@ describe("TasksCard", () => {
     expect(screen.queryByText("Aktarılamayan muhasebe kayıtları")).toBeNull()
     expect(screen.queryByText("Durdurulan webhook'lar")).toBeNull()
     expect(screen.queryByText("SEO kurulumunda eksik")).toBeNull()
+  })
+
+  it("adds the badged lists while something waits in them, each opening filtered", async () => {
+    renderCard(tasks(), {
+      pending_reviews: 3,
+      pending_questions: 1,
+      open_returns: 2,
+      unread_contact: 4,
+      out_of_stock: 0,
+    })
+
+    expect(await hrefOf("Karar bekleyen iadeler")).toBe("/orders/returns?view=requested")
+    expect(await hrefOf("Yanıtlanmayan mesajlar")).toBe("/customers/contact-messages?status=new")
+    expect(await hrefOf("Onay bekleyen yorumlar")).toBe("/reviews?status=pending")
+    expect(await hrefOf("Onay bekleyen sorular")).toBe("/reviews/questions?status=pending")
+    // Nothing sold out: no row
+    expect(screen.queryByText("Tükenen ürünler")).toBeNull()
+  })
+
+  it("leaves out a list the role may not read", async () => {
+    renderCard(tasks(), { ...NOTHING_PENDING, out_of_stock: 5, unread_contact: null })
+
+    expect(await hrefOf("Tükenen ürünler")).toBe("/inventory?view=out")
+    expect(screen.queryByText("Yanıtlanmayan mesajlar")).toBeNull()
   })
 })

@@ -23,13 +23,25 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({
     children,
     params,
+    search: query,
     onClick,
+    "aria-label": label,
   }: {
     children: ReactNode
-    params: { id: string }
+    params?: { id: string }
+    search?: { category: string }
     onClick?: MouseEventHandler
+    "aria-label"?: string
   }) => (
-    <a href={`/categories/${params.id}`} onClick={onClick}>
+    <a
+      href={params ? `/categories/${params.id}` : `/products?category=${query?.category ?? ""}`}
+      aria-label={label}
+      onClick={(event) => {
+        // A test's DOM does not navigate
+        event.preventDefault()
+        onClick?.(event)
+      }}
+    >
       {children}
     </a>
   ),
@@ -80,17 +92,19 @@ describe("CategoriesPage", () => {
     update.mockReset().mockResolvedValue({})
     search.value = {}
     list.mockReset().mockResolvedValue({ product_categories: TREE })
-    fetchMock
-      .mockReset()
-      .mockImplementation((path: string) =>
-        Promise.resolve(
-          path === "/admin/category-images"
-            ? { images: [{ category_id: "mutfak", url: "https://cdn.example/m.webp", alt: null }] }
+    fetchMock.mockReset().mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/category-counts"
+          ? { counts: { mutfak: 12, sef: 7, santoku: 3, ekmek: 5, kamp: 0 } }
+          : path === "/admin/category-images"
+            ? {
+                images: [{ category_id: "mutfak", url: "https://cdn.example/m.webp", alt: null }],
+              }
             : path === "/admin/platform-settings/seo"
               ? { values: { url_style: { category: "prefixed" } } }
               : {}
-        )
       )
+    )
   })
 
   it("lists parents first with their children under them, each with its address and visibility", async () => {
@@ -106,6 +120,16 @@ describe("CategoriesPage", () => {
     expect(names()).toEqual(["Mutfak", "Kamp"])
     await userEvent.click(screen.getByRole("button", { name: "Mutfak alt kategorilerini göster" }))
     expect(names()).toHaveLength(5)
+    expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it("counts each category's products, opening the product list filtered by it", async () => {
+    renderPage()
+
+    const count = await screen.findByRole("link", { name: "Mutfak: 12 ürün" })
+    expect(count).toHaveAttribute("href", "/products?category=mutfak")
+    expect(screen.getByRole("link", { name: "Kamp: 0 ürün" })).toHaveTextContent("0")
+    await userEvent.click(count)
     expect(navigate).not.toHaveBeenCalled()
   })
 

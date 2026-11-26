@@ -5,6 +5,7 @@ import {
   primaryReadable,
   themeSection,
   withCardDefaults,
+  withListingPageDefaults,
   withListingTextDefaults,
 } from "../../modules/platform-settings/sections/theme"
 import { withSearchFormDefaults } from "../../modules/platform-settings/sections/theme-search-form"
@@ -40,7 +41,10 @@ export const withoutNoAccent = (value: unknown): unknown => {
 export const layoutTheme = z
   // A save from a panel before adr/0075 (adr/0077) sends no listing text (search form): defaults stand
   .preprocess(
-    (value) => withoutNoAccent(withSearchFormDefaults(withListingTextDefaults(value))),
+    (value) =>
+      withoutNoAccent(
+        withSearchFormDefaults(withListingPageDefaults(withListingTextDefaults(value)))
+      ),
     themeSection.full
   )
   .nullable()
@@ -77,6 +81,8 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   surface_style: theme.surface_style,
   // A category, brand or collection page's own text at its foot (adr/0075)
   listing_text: theme.listing_text,
+  // A listing page's grid or list, its switch and its trail
+  listing_page: theme.listing_page,
   // The search box's fields (adr/0077 §1)
   search_form: theme.search_form,
   // The style kit (adr/0067 §1)
