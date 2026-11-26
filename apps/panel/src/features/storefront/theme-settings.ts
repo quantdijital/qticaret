@@ -1,6 +1,6 @@
 import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
-import { STYLE_KIT_FIELDS, searchFormOf } from "@qticaret/types"
+import { STYLE_KIT_FIELDS, listingPageOf, searchFormOf } from "@qticaret/types"
 
 /**
  * The theme's settings as the form and its sample hold them (adr/0053 §B):
@@ -27,12 +27,16 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   listing_text: { ...saved.listing_text },
   // A draft from before adr/0077 has none: the box's defaults
   search_form: searchFormOf(saved.search_form),
+  // A draft from before it has none: today's page
+  listing_page: listingPageOf(saved.listing_page),
   menu_style: saved.menu_style,
   shadow: saved.shadow,
   chip_style: saved.chip_style,
   media_ground: saved.media_ground,
   density: saved.density,
   motion: saved.motion,
+  page_width: saved.page_width,
+  accent_ink: saved.accent_ink,
 })
 
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */

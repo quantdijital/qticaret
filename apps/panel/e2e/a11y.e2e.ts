@@ -76,6 +76,9 @@ test("an order's page has no serious accessibility issue", async ({ page }) => {
 })
 
 test("a product's page has no serious accessibility issue", async ({ page }) => {
+  // About 20 axe scans (each part, each data-card tab, the variant forms, two dialogs), each
+  // ~0.5–1.4 s in CI: the walk alone came to ~30 s, the default timeout. Nothing hangs
+  test.slow()
   await page.goto("/products")
   await page.getByRole("table").getByRole("link").first().click()
   await expect(pageHeading(page)).toBeVisible()

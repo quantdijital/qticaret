@@ -15,4 +15,45 @@
       clip-path: ellipse(100% 125% at 0% 50%);
     }
   }
+
+  /*
+   * `button_tone: accent`: the first button in the shop's accent colour and
+   * its measured ink (the root's, not the ground's), a step darker on hover.
+   */
+  .gf-split .gf-btn--accent {
+    --color-signal-deep: color-mix(in oklab, var(--highlight) 86%, black);
+    background: var(--highlight);
+    color: var(--highlight-foreground);
+  }
+
+  /* `ornament: flower`: lilies in the accent colour, leaves and fronds in tints of the main one */
+  .gf-band-flower .gf-band-petal {
+    fill: var(--highlight);
+  }
+  .gf-band-flower .gf-band-stamen {
+    stroke: color-mix(in oklab, var(--highlight) 60%, black);
+    stroke-width: 1.25;
+    stroke-linecap: round;
+  }
+  .gf-band-flower .gf-band-heart {
+    fill: color-mix(in oklab, var(--highlight) 55%, black);
+  }
+  .gf-band-flower .gf-band-leaf {
+    fill: color-mix(in oklab, var(--primary) 55%, white);
+  }
+  .gf-band-flower .gf-band-frond {
+    stroke: color-mix(in oklab, var(--primary) 22%, white);
+  }
+
+  /*
+   * The posts' intro panel (sections/GuidesPanel.tsx): `panel_tone: tint`
+   * lays a light tint of the main colour over its ground; `ornament:
+   * leaves` its leaf sprig in a softer tint of it.
+   */
+  .gf-ground[data-ground][data-tone="tint"] {
+    background: color-mix(in oklab, var(--primary) 7%, var(--color-paper));
+  }
+  .gf-panel-leaves {
+    color: color-mix(in oklab, var(--primary) 45%, white);
+  }
 }

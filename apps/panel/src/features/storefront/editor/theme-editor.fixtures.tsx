@@ -57,6 +57,7 @@ export const THEME: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+  listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
   search_form: { ...SEARCH_FORM_DEFAULTS },
   menu_style: "filled",
   shadow: "float",
@@ -64,6 +65,8 @@ export const THEME: ThemeSettings = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 export const DOC: LayoutDocument = {

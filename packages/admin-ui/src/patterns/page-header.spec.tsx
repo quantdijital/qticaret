@@ -37,4 +37,18 @@ describe("PageHeader", () => {
       ?.parentElement
     expect(row?.children).toHaveLength(1)
   })
+
+  it("held at the top, keeps its title to one line and gives its height to the page", () => {
+    const { unmount } = render(<PageHeader title="Şef Bıçağı 20 cm" sticky />)
+
+    const title = screen.getByRole("heading", { level: 1, name: "Şef Bıçağı 20 cm" })
+    expect(title).toHaveClass("truncate")
+    expect(title).toHaveAttribute("title", "Şef Bıçağı 20 cm")
+    const header = title.closest("header")
+    expect(header).toHaveClass("sticky", "top-[var(--layout-topbar-height)]", "bg-background")
+    expect(document.documentElement.style.getPropertyValue("--page-header-height")).toMatch(/px$/)
+
+    unmount()
+    expect(document.documentElement.style.getPropertyValue("--page-header-height")).toBe("")
+  })
 })

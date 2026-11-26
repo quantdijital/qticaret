@@ -55,7 +55,7 @@ export function CardForm({
   children,
 }: CardFormProps) {
   const { t } = useTranslation(ADMIN_UI_NS)
-  // On a page with one save bar, its changes are saved or let go there too
+  // On a page with one header save, its changes are saved or let go there too
   useDirtyEntry({ dirty, saving, submit: onSubmit, reset: onReset })
   const form = (
     <form

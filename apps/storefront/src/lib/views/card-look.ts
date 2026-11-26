@@ -7,6 +7,7 @@ import type { StoreThemeSettings } from "@qticaret/types"
  */
 export const CARD_LOOK_DEFAULTS: CardLookView = {
   over: false,
+  split: false,
   ratingBadge: false,
   arrow: false,
   duration: false,
@@ -21,7 +22,8 @@ const KEYS = Object.keys(CARD_LOOK_DEFAULTS) as (keyof CardLookView)[]
  */
 export function cardLookOf(card: StoreThemeSettings["product_card"]): CardLookView {
   return {
-    over: card.text_position === "over",
+    over: card.text_position === "over" || card.text_position === "over_split",
+    split: card.text_position === "over_split",
     ratingBadge: card.show_rating && card.rating_badge,
     arrow: card.arrow,
     duration: card.duration_row,

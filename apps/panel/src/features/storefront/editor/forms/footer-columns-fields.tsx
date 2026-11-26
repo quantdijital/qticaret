@@ -80,9 +80,17 @@ export function FooterColumnsContent({
   )
 }
 
+const COLUMNS_ONLY = ["news_place", "brand_contact", "bottom_align"] as const
+
+const isColumns = (
+  section: FooterColumnsSection | FooterRowsSection
+): section is FooterColumnsSection => section.variant === "brand_columns"
+
 /**
  * How the brand columns footer is drawn, under "Stil": its ground and its
  * payment logos; the free rows footer's alike (adr/0070 §2, the same names).
+ * The brand columns' alone: the newsletter's place, the brand's contact and
+ * the bottom line.
  */
 export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSection>({
   section,
@@ -94,9 +102,12 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
   onChange: (section: S, field?: string) => void
 }) {
   const { t } = useTranslation()
+  // The newsletter's place, the brand's contact and the bottom line: the brand columns' own
+  const own = isColumns(section) ? section : null
   const set =
     Number(section.ground !== FOOTER_COLUMNS_DEFAULTS.ground) +
-    Number(section.badge_style !== FOOTER_COLUMNS_DEFAULTS.badge_style)
+    Number(section.badge_style !== FOOTER_COLUMNS_DEFAULTS.badge_style) +
+    COLUMNS_ONLY.filter((key) => own && own[key] !== FOOTER_COLUMNS_DEFAULTS[key]).length
   return (
     <PanelGroup
       name="appearance"
@@ -130,6 +141,23 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
             onChange({ ...section, badge_style })
           }}
         />
+        {own &&
+          COLUMNS_ONLY.map((key) => (
+            <StepChoice
+              key={key}
+              id={CARD_FIELD_IDS.footer(section.id, key)}
+              label={t(`${F}.${key}.label`)}
+              term={t(`${F}.${key}.term`)}
+              {...(key === "brand_contact" ? { hint: t(`${F}.${key}.hint`) } : {})}
+              steps={FOOTER_COLUMNS_SETTINGS[key] as readonly string[]}
+              value={own[key]}
+              fallback={FOOTER_COLUMNS_DEFAULTS[key]}
+              nameOf={(step) => t(`${F}.${key}.${step}`)}
+              onChange={(value) => {
+                onChange({ ...own, [key]: value })
+              }}
+            />
+          ))}
       </div>
     </PanelGroup>
   )

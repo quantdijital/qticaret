@@ -146,6 +146,8 @@ const CARD_FIELDS = [
   "title",
   "handle",
   "thumbnail",
+  // A split card's line under the name (`text_position: over_split`)
+  "subtitle",
   "brand.id",
   "brand.name",
   "brand.handle",
@@ -173,7 +175,6 @@ const PAGE_FIELDS = [
   // The related rails' category (W-02): asked as `categories.id` the store answers
   // each category as `{ is_internal }` only, so the whole category is asked for
   "*categories",
-  "subtitle",
   "description",
   "options.id",
   "options.title",

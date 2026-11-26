@@ -75,7 +75,7 @@ function AdvancedPanel({ productId }: { productId: string }) {
 
 /**
  * What one tab of the "Ürün verileri" card holds (docs/06 "Ürün
- * sayfası"); each saves on its own and on the page's save bar.
+ * sayfası"); each saves on its own and on the page's header save.
  */
 export function DataPanel({
   tab,

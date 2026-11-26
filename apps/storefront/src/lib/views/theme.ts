@@ -15,6 +15,7 @@ import {
   SURFACE_STYLES,
 } from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
+import { LISTING_PAGE_DEFAULTS, listingPageOf } from "@qticaret/types/listing-page"
 import { LISTING_TEXT_DEFAULTS, listingTextOf } from "@qticaret/types/listing-text"
 import { SEARCH_FORM_DEFAULTS, searchFormOf } from "@qticaret/types/search-form"
 import { cardVariantOf } from "@qticaret/types/section-variants"
@@ -71,6 +72,7 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { ...LISTING_TEXT_DEFAULTS },
+  listing_page: { ...LISTING_PAGE_DEFAULTS },
   search_form: { ...SEARCH_FORM_DEFAULTS },
   ...STYLE_KIT_DEFAULTS,
 }
@@ -277,6 +279,8 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     surface_style: oneOf(at(raw, "surface_style"), SURFACE_STYLES, d.surface_style),
     // A listing's text at its foot (adr/0075 §6): each value checked, a backend before it the defaults
     listing_text: listingTextOf(at(raw, "listing_text") as Parameters<typeof listingTextOf>[0]),
+    // A listing page's grid or list, its switch and its trail: each value checked
+    listing_page: listingPageOf(at(raw, "listing_page") as Parameters<typeof listingPageOf>[0]),
     // The search box's fields (adr/0077 §1): each value checked, a backend before it the defaults
     search_form: searchFormOf(at(raw, "search_form") as Parameters<typeof searchFormOf>[0]),
     ...styleKitOf(raw),

@@ -46,18 +46,30 @@ describe("the new variants and settings keep today's drawing by default", () => 
   })
 
   it("draws the figures without icons unless the shop turns them on", () => {
-    expect(STATS_DEFAULTS).toEqual({ dividers: "on", icons: "off" })
-    expect(statsSettingsOf({ dividers: "off" })).toEqual({ dividers: "off", icons: "off" })
-    expect(statsSettingsOf({ icons: "on" })).toEqual({ dividers: "on", icons: "on" })
+    const base = { dividers: "on", icons: "off", arrangement: "stacked", social: "off" }
+    expect(STATS_DEFAULTS).toEqual(base)
+    expect(statsSettingsOf({ dividers: "off" })).toEqual({ ...base, dividers: "off" })
+    expect(statsSettingsOf({ icons: "on" })).toEqual({ ...base, icons: "on" })
     expect(statsSettingsOf({ icons: "big" })).toEqual(STATS_DEFAULTS)
   })
 
+  it("keeps the figures stacked and without profiles unless the shop picks the row", () => {
+    expect(statsSettingsOf({ arrangement: "row", social: "on" })).toMatchObject({
+      arrangement: "row",
+      social: "on",
+    })
+    expect(statsSettingsOf({ arrangement: "grid", social: "yes" })).toEqual(STATS_DEFAULTS)
+  })
+
   it("reads the icon row's settings forgivingly", () => {
-    expect(CATEGORY_ICONS_DEFAULTS).toEqual({ disc: "tint", phone: "scroll" })
+    expect(CATEGORY_ICONS_DEFAULTS).toEqual({ disc: "tint", phone: "scroll", row_style: "stacked" })
     expect(categoryIconsSettingsOf({ disc: "line", phone: "wrap" })).toEqual({
       disc: "line",
       phone: "wrap",
+      row_style: "stacked",
     })
     expect(categoryIconsSettingsOf({ disc: "gold" })).toEqual(CATEGORY_ICONS_DEFAULTS)
+    expect(categoryIconsSettingsOf({ row_style: "strip" }).row_style).toBe("strip")
+    expect(categoryIconsSettingsOf({ row_style: "wide" }).row_style).toBe("stacked")
   })
 })

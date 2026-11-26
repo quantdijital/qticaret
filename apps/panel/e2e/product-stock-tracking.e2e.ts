@@ -5,9 +5,9 @@ import { expect, pageHeading, test } from "./support/guard"
  * Stock tracking turned on after a variant was made (docs/06 "Ürün
  * sayfası", the owner 2026-11-26: "varyantlı üründe stok miktarını
  * değiştiremiyor muyuz sonradan?"): an untracked variant's row gets the
- * "Stok takibi" switch, a count, the page's save bar saves both; turned
- * off, it is asked in place and the count is kept. The test makes its own
- * draft product and deletes it at the end.
+ * "Stok takibi" switch, a count, the page's "Kaydet" in its header saves
+ * both; turned off, it is asked in place and the count is kept. The test
+ * makes its own draft product, named for this run, and deletes it at the end.
  */
 
 interface VariantRow {
@@ -24,23 +24,29 @@ const FIELDS =
 
 async function variantOf(page: Page, id: string, title: string): Promise<VariantRow | undefined> {
   const answer = await page.request.get(`/admin/products/${id}?fields=${FIELDS}`)
-  expect(answer.ok()).toBe(true)
+  expect(answer.ok(), `GET product ${String(answer.status())}: ${await answer.text()}`).toBe(true)
   const { product } = (await answer.json()) as { product: { variants: VariantRow[] } }
   return product.variants.find((each) => each.title === title)
 }
 
 async function defaultLocation(page: Page): Promise<string | null> {
   const answer = await page.request.get("/admin/stores?fields=id,default_location_id")
-  expect(answer.ok()).toBe(true)
+  expect(answer.ok(), `GET stores ${String(answer.status())}: ${await answer.text()}`).toBe(true)
   const { stores } = (await answer.json()) as { stores: { default_location_id: string | null }[] }
   return stores[0]?.default_location_id ?? null
 }
 
-/** A draft of two sizes whose stock is not counted: never shown in the storefront. */
+/**
+ * A draft of two sizes whose stock is not counted: never shown in the
+ * storefront. Its name and address are this run's own: a deleted product
+ * still holds its address.
+ */
 async function makeProduct(page: Page): Promise<string> {
+  const run = `${String(Date.now())}-${String(Math.floor(Math.random() * 1e6))}`
   const answer = await page.request.post("/admin/products", {
     data: {
-      title: "Kamp Bıçağı",
+      title: `Kamp Bıçağı ${run}`,
+      handle: `e2e-kamp-bicagi-${run}`,
       status: "draft",
       options: [{ title: "Boy", values: ["12 cm", "15 cm"] }],
       variants: ["12 cm", "15 cm"].map((value, rank) => ({
@@ -52,11 +58,19 @@ async function makeProduct(page: Page): Promise<string> {
       })),
     },
   })
-  expect(answer.ok()).toBe(true)
+  // The refusal itself in the report, not only "false"
+  expect(
+    answer.ok(),
+    `POST /admin/products ${String(answer.status())}: ${await answer.text()}`
+  ).toBe(true)
   return ((await answer.json()) as { product: { id: string } }).product.id
 }
 
-const saveBar = (page: Page) => page.getByRole("region", { name: "Kaydedilmemiş değişiklikler" })
+const headerSave = (page: Page) => page.getByRole("group", { name: "Sayfanın kaydı" })
+const saveButton = (page: Page) =>
+  headerSave(page).getByRole("button", { name: "Kaydet", exact: true })
+const saved = (page: Page) =>
+  headerSave(page).getByRole("button", { name: "Kaydedildi", exact: true })
 
 test.describe("stock tracking turned on later", () => {
   test("turns an untracked variant's tracking on with a count, then off keeping it", async ({
@@ -82,7 +96,7 @@ test.describe("stock tracking turned on later", () => {
       await data.getByRole("tab", { name: "Varyantlar" }).click()
       await expect(page.locator("[data-variant-row]")).toHaveCount(2)
 
-      // On, with a count, saved by the page's save bar
+      // On, with a count, saved by the header's "Kaydet"
       await page.getByRole("button", { name: /Boy: 12 cm/ }).click()
       const form = page.getByRole("form", { name: "Varyantı düzenle" })
       const tracking = form.getByRole("switch", { name: "Stok takibi" })
@@ -90,9 +104,9 @@ test.describe("stock tracking turned on later", () => {
       await expect(form.getByText("Stok takibi yok: bu varyant her zaman satılır.")).toBeVisible()
       await tracking.click()
       await form.getByLabel("Stok adedi").fill("7")
-      await expect(saveBar(page)).toBeVisible()
-      await saveBar(page).getByRole("button", { name: "Kaydet" }).click()
-      await expect(saveBar(page)).toHaveCount(0)
+      await expect(saveButton(page)).toBeEnabled()
+      await saveButton(page).click()
+      await expect(saved(page)).toBeDisabled()
       await expect.poll(stocked).toEqual({ tracked: true, count: 7 })
 
       // Read again from the server: the count is there
@@ -109,13 +123,14 @@ test.describe("stock tracking turned on later", () => {
       await expect(again.getByText(/Stok takibi kapatılsın mı\?/)).toBeVisible()
       await again.getByRole("button", { name: "Takibi kapat" }).click()
       await expect(again.getByRole("switch", { name: "Stok takibi" })).not.toBeChecked()
-      await saveBar(page).getByRole("button", { name: "Kaydet" }).click()
-      await expect(saveBar(page)).toHaveCount(0)
+      await saveButton(page).click()
+      await expect(saved(page)).toBeDisabled()
       await expect.poll(stocked).toEqual({ tracked: false, count: 7 })
       await guard.assertHealthy()
     } finally {
       // The draft goes as it came
-      await page.request.delete(`/admin/products/${id}`)
+      const gone = await page.request.delete(`/admin/products/${id}`)
+      expect(gone.ok(), `DELETE product ${String(gone.status())}: ${await gone.text()}`).toBe(true)
     }
   })
 })

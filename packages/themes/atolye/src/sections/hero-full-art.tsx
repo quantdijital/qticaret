@@ -8,9 +8,10 @@
 
 /**
  * The page's ground over the photograph from the words' side, from 1024 px:
- * a haze that holds the words (nearly the ground under them, the picture
- * coming through past them), a lighter haze under the header, a soft
- * swirl rising from the start corner, a rise at the far edge and a low
+ * a haze that holds the words (nearly the ground under them, gone past the
+ * button and past the words' column, so the picture stays vivid), a lighter
+ * haze under the header, a pale lobe along the start edge, a wave sweeping
+ * from the start corner to the trust box, a rise at the far edge and a low
  * wave along the foot into the page. Stretched to the opening
  * (`preserveAspectRatio="none"`), so the shapes keep their place on any
  * width; the gradients' colour is the ground's (`hero-full.css`), `id`
@@ -29,36 +30,43 @@ export function HeroWash({ id }: { id: string }) {
     >
       <defs>
         <linearGradient id={across} className="gf-wash-haze" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopOpacity="0.95" />
-          <stop offset="0.38" stopOpacity="0.92" />
-          <stop offset="0.46" stopOpacity="0.8" />
-          <stop offset="0.54" stopOpacity="0.4" />
-          <stop offset="0.64" stopOpacity="0" />
+          <stop offset="0" stopOpacity="0.94" />
+          <stop offset="0.4" stopOpacity="0.9" />
+          <stop offset="0.47" stopOpacity="0.72" />
+          <stop offset="0.54" stopOpacity="0.28" />
+          <stop offset="0.6" stopOpacity="0" />
         </linearGradient>
         <linearGradient id={down} className="gf-wash-haze" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopOpacity="0.6" />
+          <stop offset="0" stopOpacity="0.5" />
           <stop offset="1" stopOpacity="0" />
         </linearGradient>
-        {/* The haze thins under the search box: the picture's foot comes through */}
+        {/* The haze holds the words only: past the button it is gone, the picture's foot vivid */}
         <linearGradient id={`${id}-wash-fade`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0.56" stopColor="#fff" />
-          <stop offset="0.82" stopColor="#fff" stopOpacity="0.3" />
+          <stop offset="0.5" stopColor="#fff" />
+          <stop offset="0.7" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
         <mask id={`${id}-wash-m`}>
           <rect width="1440" height="800" fill={`url(#${id}-wash-fade)`} />
         </mask>
       </defs>
       <rect width="1440" height="800" fill={`url(#${across})`} mask={`url(#${id}-wash-m)`} />
-      <rect width="1440" height="170" fill={`url(#${down})`} />
+      <rect width="1440" height="140" fill={`url(#${down})`} />
+      {/* A pale lobe along the start edge, beside the words */}
       <path
         className="fill-paper"
-        opacity="0.7"
-        d="M0 430c70-20 150 6 196 70 44 62 40 140 96 200 34 36 80 66 130 100H0Z"
+        opacity="0.55"
+        d="M0 190c46 26 78 84 70 150-6 52-40 88-34 140 6 46 40 74 30 116-6 26-30 44-66 52Z"
+      />
+      {/* A wave sweeping from the start edge down to the trust box */}
+      <path
+        className="fill-paper"
+        opacity="0.88"
+        d="M0 600c58-6 110 20 150 66 40 46 92 86 170 108 34 10 70 18 106 26H0Z"
       />
       <path
         className="fill-paper"
-        opacity="0.75"
-        d="M1440 400c-64 30-104 104-80 180 20 60-14 130-92 220h172Z"
+        opacity="0.6"
+        d="M1440 380c-60 26-98 92-80 160 18 66-10 140-80 214 30 22 90 40 160 46Z"
       />
       <path
         className="fill-paper"

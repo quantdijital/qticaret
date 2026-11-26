@@ -43,6 +43,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Paketlenmiş, kargoya verilmiş ya da iptal edilmiş sipariş düzenlenemez.",
   "orders.edit_invoiced":
     "Bu siparişin faturası kesildi ya da kesiliyor; sipariş artık düzenlenemez.",
+  "orders.billing_invoiced":
+    "Bu siparişin faturası kesildi ya da kesiliyor; fatura adresi artık değiştirilemez.",
   "orders.edit_payment_unsupported":
     "Bu siparişin kalemleri düzenlenemez: yalnızca kartla ödenmiş siparişler düzenlenir. Kapıda ödeme ve havalede siparişi iptal edip yenisini oluşturun.",
   "orders.edit_difference_changed":
@@ -117,9 +119,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",
   "bulk_edit.price_out_of_range": "Yeni fiyat sıfırın altına iner ya da üst sınırı aşar.",
   "bulk_edit.product_missing": "Ürün bulunamadı; silinmiş olabilir.",
+  "bulk_edit.sale_out_of_range":
+    "İndirim tutarı bir varyantın normal fiyatına eşit ya da ondan büyük.",
+  "bulk_edit.sale_refused": "İndirimli fiyat bu ürüne uygulanamadı.",
   "bulk_edit.stock_negative": "Yeni stok sıfırın altına iner.",
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
+  "bulk_edit.tag_unknown": "Bu adla bir etiket yok.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
   "cart.out_of_stock":
@@ -943,6 +949,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.filename_invalid": "Dosya adını 1–200 karakter arasında, özel karakter kullanmadan yazın.",
   "media.files_not_removed":
     "Görselin dosyaları şu an silinemedi; görsel kütüphanede kaldı. Biraz sonra yeniden deneyin.",
+  "media.id_duplicate": "Aynı görsel listede iki kez geçiyor.",
+  "media.id_invalid": "Görsel kimliği geçerli değil.",
   "media.import_address_refused":
     "Bu adresten görsel alınamaz. Herkese açık bir https adresi girin.",
   "media.import_unreachable":

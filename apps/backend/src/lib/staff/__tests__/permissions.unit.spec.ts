@@ -622,6 +622,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/search/synonyms/:id": false,
   "POST /admin/search/synonyms": false,
   "POST /admin/catalog/imports": false,
+  // F3.10: a bulk change's preview, the catalog roles' as the job is
+  "POST /admin/catalog/bulk-edit/preview": false,
   "POST /admin/migrations": false,
   "POST /admin/migrations/shopify": false,
   "POST /admin/migrations/feed": false,
@@ -738,6 +740,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/media/:id": false,
   "DELETE /admin/media/:id": false,
   "POST /admin/media/import": false,
+  // M1: unused pictures deleted at once, as one is
+  "POST /admin/media/delete": false,
   "POST /admin/media": false,
   "POST /admin/messaging/sender-domain/check": false,
   "POST /admin/messaging/sender-domain": false,
