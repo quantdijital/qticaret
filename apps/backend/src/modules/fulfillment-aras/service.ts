@@ -11,18 +11,15 @@ import type {
 import { AbstractFulfillmentProviderService } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
-import { toMedusaAmount } from "../../lib/money"
 import { arasApi, arasCredentialsOf } from "../../lib/shipping/aras"
 import type { ArasCredentials } from "../../lib/shipping/aras"
 import { shipInputOf } from "../../lib/shipping/carriers"
-import { parcelLinesOf } from "../../lib/shipping/geliver/mappers"
 import { shipmentReceiverOf } from "../../lib/shipping/receiver"
 import {
   packedParcelOf,
-  parcelFor,
   shipmentCode,
   storedCarrierAccount,
-  tablePriceOf,
+  tableQuoteOf,
 } from "../../lib/shipping/shop"
 
 /**
@@ -72,17 +69,13 @@ class ArasFulfillmentService extends AbstractFulfillmentProviderService {
     return Promise.resolve(data.data?.["id"] === "aras-table")
   }
 
-  /** The cart's parcel priced by the shop's table, tax included. */
+  /** The cart's parcel priced by the shop's table, tax included; free past the threshold (adr/0087). */
   override async calculatePrice(
     _optionData: Record<string, unknown>,
     _data: Record<string, unknown>,
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
-    const parcel = await parcelFor(parcelLinesOf(context.items))
-    return {
-      calculated_amount: Number(toMedusaAmount(await tablePriceOf(parcel.desi))),
-      is_calculated_price_tax_inclusive: true,
-    }
+    return tableQuoteOf(context)
   }
 
   override async createFulfillment(

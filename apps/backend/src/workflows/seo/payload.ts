@@ -15,7 +15,11 @@ import type ProductReviewsModuleService from "../../modules/product-reviews/serv
 import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
 import type { FactRow, ShippingFacts } from "./facts"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
+import type {
+  PromotionSettings,
+  ShippingSettings,
+  StoreSettings,
+} from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
@@ -78,15 +82,17 @@ function primaryCategory(product: ProductRow): CategoryRow | null {
  */
 export async function shippingFactsOf(container: MedusaContainer): Promise<ShippingFacts> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [shipping, store, options] = await Promise.all([
+  const [shipping, store, promotions, options] = await Promise.all([
     settings.getSection("shipping") as Promise<unknown> as Promise<ShippingSettings>,
     settings.getSection("store") as Promise<unknown> as Promise<StoreSettings>,
+    settings.getSection("promotions") as Promise<unknown> as Promise<PromotionSettings>,
     shopShippingOptions(container),
   ])
   return {
     settings: shipping,
     units: { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit },
     table_offered: options.some((option) => option.pricing === "table" && option.in_store),
+    free_shipping_threshold: promotions.free_shipping_threshold,
   }
 }
 

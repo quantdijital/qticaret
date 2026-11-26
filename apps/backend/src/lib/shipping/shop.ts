@@ -12,8 +12,10 @@ import { parcelLinesOf } from "./geliver/mappers"
 import type { OrderItemRow } from "./geliver/mappers"
 import { defaultParcelOf, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
+import { toMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
+import { quoteContextOf, shippingQuote } from "./quote"
 
 /**
  * What a carrier provider reads of the shop at the time of the call, from
@@ -78,6 +80,25 @@ export async function tablePriceOf(desi: number): Promise<Kurus> {
     throw new ValidationError("shipping.no_rate")
   }
   return price
+}
+
+/** A quote in kuruş as Medusa takes a calculated price: lira, KDV in. */
+export const calculatedPriceOf = (amount: Kurus) => ({
+  calculated_amount: Number(toMedusaAmount(amount)),
+  is_calculated_price_tax_inclusive: true,
+})
+
+/**
+ * A cart's price by the shop's desi table (adr/0035), through the one
+ * shipping quote (adr/0087 §2): free past the basket threshold.
+ */
+export async function tableQuoteOf(context: { items?: readonly (OrderItemRow | null)[] | null }) {
+  const amount = await shippingQuote({
+    lines: parcelLinesOf(context.items),
+    context: quoteContextOf(context),
+    price: async (lines) => tablePriceOf((await parcelFor([...lines])).desi),
+  })
+  return calculatedPriceOf(amount)
 }
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"

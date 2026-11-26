@@ -229,6 +229,7 @@ export function productFacts(
       }
       // F3.2: a digital or service product has no parcel, measured or not
       const parcel = shipping && physical ? unitParcelOf(variant, shipping) : null
+      const prices = priceOf(variant, displays)
       return {
         id: variant.id,
         name: variant.title ? `${row.title} – ${variant.title}` : row.title,
@@ -236,10 +237,10 @@ export function productFacts(
         gtin: variantGtin(variant),
         mpn: variant.variant_extension?.mpn ?? null,
         image: null,
-        ...priceOf(variant, displays),
+        ...prices,
         availability: availabilityOf(variant),
         properties,
-        shippingRate: shipping ? shippingRateOf(parcel, shipping) : null,
+        shippingRate: shipping ? shippingRateOf(parcel, shipping, prices.price) : null,
         stock: stockOf(variant),
         // A feed's volume is the product's own: not one the default parcel made up
         desi: parcel?.measured ? parcel.desi : null,

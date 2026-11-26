@@ -13,6 +13,11 @@ export interface ShippingFacts {
    * one checkout charges (security review 2026-10-28).
    */
   table_offered: boolean
+  /**
+   * Every option ships free from this basket total, in lira (Settings >
+   * Promotions; adr/0087 §2.5); null: never.
+   */
+  free_shipping_threshold: number | null
 }
 
 /** A variant's own weight and measures, none of them required (adr/0054). */
@@ -47,11 +52,21 @@ export function unitParcelOf(variant: MeasuredVariant, shipping: ShippingFacts):
 
 /**
  * What the shop's table charges to ship the parcel, in lira; null when no
- * option shoppers see is priced by it, or past the table's bands.
+ * option shoppers see is priced by it, or past the table's bands. One
+ * unit priced at or past the shop's threshold ships free (adr/0087 §5),
+ * as checkout charges a basket of it.
  */
-export function shippingRateOf(parcel: Parcel | null, shipping: ShippingFacts): number | null {
+export function shippingRateOf(
+  parcel: Parcel | null,
+  shipping: ShippingFacts,
+  price: number | null = null
+): number | null {
   if (!parcel || !shipping.table_offered) {
     return null
+  }
+  const threshold = shipping.free_shipping_threshold
+  if (threshold !== null && price !== null && price >= threshold) {
+    return 0
   }
   const rate = tablePrice(
     shipping.settings.rate_table,
