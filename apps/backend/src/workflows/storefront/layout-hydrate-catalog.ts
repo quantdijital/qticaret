@@ -47,6 +47,7 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
       ...shown,
       variant: section.variant,
       title_accent: readers.fill(section.title_accent),
+      title_after: readers.fill(section.title_after),
       action: section.action,
       search_position: section.search_position,
       height: section.height,

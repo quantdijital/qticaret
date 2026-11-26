@@ -63,5 +63,6 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
 /** The heading's accent line at its longest, and the trust badges the opening shows at most. */
 export const HERO_FULL_LIMITS = {
   title_accent: 90,
+  title_after: 90,
   trust: 4,
 } as const

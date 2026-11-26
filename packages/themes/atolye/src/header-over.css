@@ -73,4 +73,15 @@
     .gf-cover-stage {
     padding-top: 6rem;
   }
+  /* The plain tools' row is lower (72 px, `HeaderInline`) */
+  :root:has(#icerik .gf-cover[data-side="full"]:not(.gf-section))
+    .gf-head[data-over-cover][data-tools="plain"] {
+    margin-bottom: -4.5rem;
+  }
+  :root:has(.gf-head[data-over-cover][data-tools="plain"])
+    #icerik
+    .gf-cover[data-side="full"]:not(.gf-section)
+    .gf-cover-stage {
+    padding-top: 4.5rem;
+  }
 }

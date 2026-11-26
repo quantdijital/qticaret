@@ -12070,6 +12070,12 @@
           "placeholder": "E.g. Find your escape.",
           "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
         },
+        "after": {
+          "label": "Last line",
+          "term": "last line",
+          "placeholder": "E.g. Discover beyond the ordinary.",
+          "hint": "A line after the accent line, in the heading's own colour. With the font mix on, the accent ends the first line and this is the second. Leave it empty to draw none."
+        },
         "note": {
           "label": "Note",
           "term": "note",

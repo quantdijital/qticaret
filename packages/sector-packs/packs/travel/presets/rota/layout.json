@@ -10,7 +10,8 @@
       "sticky": true,
       "menu_images": "off",
       "search_style": "icon",
-      "over_cover": true
+      "over_cover": true,
+      "tools_style": "plain"
     }
   ],
   "home": [
@@ -21,8 +22,9 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "full_image",
-      "heading": "Türkiye'yi keşfetmenin",
-      "title_accent": "sınırsız yolu.",
+      "heading": "Türkiye,",
+      "title_accent": "sınır tanımadan.",
+      "title_after": "Sıradanın ötesini keşfedin.",
       "text": "Size göre kurulan Türkiye yolculukları: kendi hızınız, kendi rotanız, kendi merakınız. Her deneyim kişisel, zahmetsiz ve gerçekten sizin.",
       "links": [{ "$href": "/magaza", "label": "Turumu şimdi planla" }],
       "image": {

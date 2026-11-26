@@ -7,7 +7,7 @@ import { NamedGroup } from "../named-group"
 import { F, TextField } from "./fields"
 import { HeroCatalogFields } from "./hero-catalog-fields"
 import { HandNoteField } from "./hand-note-field"
-import { HeroAccentField, HeroFullAction } from "./hero-full-fields"
+import { HeroAccentField, HeroAfterField, HeroFullAction } from "./hero-full-fields"
 import { HeroSlidesField } from "./hero-slides-field"
 import { HeroVideoFields } from "./hero-video-fields"
 import { useProblemText } from "./problem-text"
@@ -95,6 +95,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
           }}
         />
         {full ? <HeroAccentField section={full} problems={problems} onChange={onChange} /> : null}
+        {full ? <HeroAfterField section={full} problems={problems} onChange={onChange} /> : null}
         <TextField
           id={PREVIEW_IDS.text(section.id, "text")}
           label={t(`${F}.text`)}

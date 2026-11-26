@@ -75,6 +75,7 @@ export const VARIANT_FIELDS: {
     full_image: {
       ...HERO_FULL_DEFAULTS,
       title_accent: null,
+      title_after: null,
       show_trust: false,
       video_url: null,
       video_label: null,

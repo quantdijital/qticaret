@@ -79,6 +79,28 @@ export function HeroAccentField({ section, problems, onChange }: SectionFormProp
   )
 }
 
+/** The heading's last line after the accent, in its own ink; empty: no line. */
+export function HeroAfterField({ section, problems, onChange }: SectionFormProps<HeroFull>) {
+  const { t } = useTranslation()
+  const problem = useProblemText()
+  return (
+    <TextField
+      id={PREVIEW_IDS.text(section.id, "title_after")}
+      label={t(`${H}.after.label`)}
+      term={t(`${H}.after.term`)}
+      value={section.title_after ?? null}
+      max={HERO_FULL_LIMITS.title_after}
+      tokens
+      placeholder={t(`${H}.after.placeholder`)}
+      hint={t(`${H}.after.hint`)}
+      error={problem(problems["title_after"], HERO_FULL_LIMITS.title_after)}
+      onChange={(title_after) => {
+        onChange({ ...section, title_after }, "title_after")
+      }}
+    />
+  )
+}
+
 /**
  * What stands under the opening's words, with its content: the buttons or
  * the shop's one search box (its fields the theme's, so a note says where

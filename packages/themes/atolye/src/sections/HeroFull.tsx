@@ -55,7 +55,8 @@ const SIZES = {
  * row of icons under the buttons (`trust_place: inside`, `HeroTrustRow`)
  * and the hand note in the top corner (`note_place: corner`, from 1024 px).
  * Mixed (`title_mix`), the heading is set light and its second part follows on the same line in
- * the accent face's italic, in the heading's ink. Split (`words_place`,
+ * the accent face's italic, in the heading's ink; a last line
+ * (`after`, `title_after`) follows on its own line in the heading's ink. Split (`words_place`,
  * behind the words only), the heading stands at the opening's top and the
  * text and buttons at its foot, the photograph between; the veil may be
  * faint (`scrim`). Each off: drawn as before.
@@ -78,7 +79,7 @@ export function HeroFull({
   t: Translate
 }) {
   const id = headingId(hero.id)
-  const { settings, accent, search, video } = full
+  const { settings, accent, after, search, video } = full
   const { image } = hero
   const both = settings.action === "both"
   const buttons = (search === null || both) && hero.actions.length > 0
@@ -226,6 +227,11 @@ export function HeroFull({
                   ) : (
                     accent
                   )}
+                </span>
+              )}
+              {after && (
+                <span {...fieldMark(on, "title_after")} className="gf-cover-after block">
+                  {after}
                 </span>
               )}
             </Heading>

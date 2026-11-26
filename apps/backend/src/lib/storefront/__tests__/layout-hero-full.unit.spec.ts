@@ -65,6 +65,7 @@ describe("the opening's full image (adr/0077 §9)", () => {
       links: [],
       image: null,
       title_accent: null,
+      title_after: null,
       ...HERO_FULL_DEFAULTS,
       show_trust: false,
       video_url: null,
@@ -125,6 +126,10 @@ describe("the opening's full image (adr/0077 §9)", () => {
     expect(
       issues({ home: [full({ title_accent: "a".repeat(HERO_FULL_LIMITS.title_accent + 1) })] })
     ).not.toEqual([])
+    expect(
+      issues({ home: [full({ title_after: "a".repeat(HERO_FULL_LIMITS.title_after + 1) })] })
+    ).not.toEqual([])
+    expect(issues({ home: [hero({ title_after: "Öte" })] })).not.toEqual([])
     expect(issues({ home: [full({ show_trust: "on" })] })).not.toEqual([])
     expect(issues({ home: [full({ second_button: "video" })] })).not.toEqual([])
     expect(issues({ home: [hero({ title_style: "stacked" })] })).not.toEqual([])
@@ -177,6 +182,7 @@ describe("the opening's full image (adr/0077 §9)", () => {
       image: { url: IMAGE.url, alt: "Vadi", width: 1600, height: 900, derivatives: null },
       variant: "full_image",
       title_accent: "Rota ile",
+      title_after: null,
       ...HERO_FULL_DEFAULTS,
       action: "search",
       show_trust: true,

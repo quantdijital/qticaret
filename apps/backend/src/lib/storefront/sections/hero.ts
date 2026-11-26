@@ -155,6 +155,7 @@ const fullImage = z
     ...common,
     variant: z.literal("full_image"),
     title_accent: optional(shopText(HERO_FULL_LIMITS.title_accent)),
+    title_after: optional(shopText(HERO_FULL_LIMITS.title_after)),
     action: fullStep("action"),
     search_position: fullStep("search_position"),
     height: fullStep("height"),

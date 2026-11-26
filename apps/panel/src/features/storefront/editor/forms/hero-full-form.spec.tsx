@@ -78,6 +78,7 @@ describe("the full image opening's start", () => {
     expect(VARIANT_FIELDS.hero.full_image).toEqual({
       ...HERO_FULL_DEFAULTS,
       title_accent: null,
+      title_after: null,
       show_trust: false,
       video_url: null,
       video_label: null,
@@ -95,6 +96,7 @@ describe("the full image opening's start", () => {
     const back = switchVariant(switched, "standard")
     expect(back).not.toHaveProperty("action")
     expect(back).not.toHaveProperty("title_accent")
+    expect(back).not.toHaveProperty("title_after")
     expect(back).toMatchObject({ variant: "standard", heading: "Doğayı keşfet" })
   })
 
@@ -194,6 +196,8 @@ describe("the full image opening's panel", () => {
 
     expect(sectionProblems(long)["title_accent"]).toBe("tooLong")
     expect(sectionProblems(full({ title_accent: "Kaçışını bul" }))["title_accent"]).toBeUndefined()
+    const after = full({ title_after: "a".repeat(HERO_FULL_LIMITS.title_after + 1) })
+    expect(sectionProblems(after)["title_after"]).toBe("tooLong")
   })
 })
 

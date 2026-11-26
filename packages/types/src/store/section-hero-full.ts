@@ -83,6 +83,7 @@ export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
 /** The heading's accent line at its longest, and the trust badges the opening shows at most. */
 export const HERO_FULL_LIMITS = {
   title_accent: 90,
+  title_after: 90,
   trust: 4,
 } as const
 
@@ -130,6 +131,12 @@ export interface StoreHeroFull extends Partial<HeroFullSettings> {
   variant: "full_image"
   /** A second line of the heading, drawn in the shop's colour; none: no line. */
   title_accent?: string | null
+  /**
+   * A last line of the heading after the accent, in the heading's own face
+   * and ink (with `title_mix`, the accent ends the first line and this is
+   * the second); none: no line, the heading as before.
+   */
+  title_after?: string | null
   /** The shop's trust badges in the opening (at most `HERO_FULL_LIMITS.trust`). */
   show_trust?: boolean
   /**

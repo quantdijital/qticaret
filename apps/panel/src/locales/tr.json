@@ -12070,6 +12070,12 @@
           "placeholder": "Örn. Kaçışını bul.",
           "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
         },
+        "after": {
+          "label": "Son satır",
+          "term": "last line",
+          "placeholder": "Örn. Sıradanın ötesini keşfedin.",
+          "hint": "Vurgulu satırdan sonra, başlığın kendi rengiyle yazılan satır. Yazı karışımı açıkken vurgu ilk satırın sonunda, bu ikinci satırda durur. Boş bırakırsanız çizilmez."
+        },
         "note": {
           "label": "Not",
           "term": "note",

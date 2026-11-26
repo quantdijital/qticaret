@@ -98,6 +98,16 @@ describe("heroFullParts", () => {
       "Kaçışını bul"
     )
   })
+
+  it("carries a last line only when there is one, trimmed", () => {
+    const source = { search: null, badges: [] }
+
+    expect(heroFullParts(section({}), source)).not.toHaveProperty("after")
+    expect(heroFullParts(section({ title_after: "  " }), source)).not.toHaveProperty("after")
+    expect(heroFullParts(section({ title_after: " Sıradanın ötesi " }), source).after).toBe(
+      "Sıradanın ötesi"
+    )
+  })
 })
 
 describe("heroFullView", () => {
