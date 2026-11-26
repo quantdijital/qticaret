@@ -6,6 +6,7 @@ import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
 import type { NewsletterLookView } from "./newsletter-views"
+import type { ProductCardView } from "./product-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -145,6 +146,13 @@ export interface MiniCartView {
    * off with the reason beside it. Null or left out: the button as ever.
    */
   checkoutBlocked?: CheckoutBlockedView | null
+  /**
+   * What the cart's products are bought with (S3, the shop's "Birlikte
+   * alınanlar"), a few, none already in the cart: drawn under the lines
+   * as small links ("Bunu da beğenebilirsiniz"). Null or left out: the
+   * drawer as ever.
+   */
+  suggestions?: { title: string; products: ProductCardView[] } | null
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */

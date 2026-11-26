@@ -335,6 +335,7 @@
   "cart.drawer_note": "Kargo ödeme adımında hesaplanır. İndirim kodunuz varsa sepette girin.",
   "cart.drawer_note_unshipped": "İndirim kodunuz varsa sepette girin.",
   "cart.drawer_note_shipping_known": "İndirim kodunuz varsa sepette girin.",
+  "cart.cross_sells": "Bunu da beğenebilirsiniz",
   "cart.view": "Sepete git",
   "cart.trust": "Alışveriş güvenceleri",
   "cart.offers": "Sepet kampanyaları",
@@ -1376,6 +1377,8 @@
   "product.shipping_free_product": "Bu ürünün kargosu ücretsiz.",
   "product.shipping_surcharge_title": "Kargo ek ücreti",
   "product.shipping_surcharge": "Bu ürün için kargoya {amount} eklenir.",
+  "product.shipping_surcharge_until": "Bu ürün için kargoya {amount} eklenir; {from} ve üzeri siparişlerde kargo ücretsiz.",
   "cart.free_shipping_products": "Sepetinizdeki ürünlerin kargosu ücretsiz.",
-  "cart.line_free_shipping": "Ücretsiz kargo"
+  "cart.line_free_shipping": "Ücretsiz kargo",
+  "cart.line_shipping_surcharge": "Kargoya {amount} eklenir"
 }

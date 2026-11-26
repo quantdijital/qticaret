@@ -198,6 +198,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "Bu seçim bir yönlendirme döngüsü oluşturur.",
   "catalog.successor_self": "Ürün kendi yerine geçemez.",
   "catalog.successor_unknown": "Seçilen ürün bulunamadı.",
+  "catalog.linked_self": "Ürün kendisine bağlanamaz.",
+  "catalog.linked_unknown": "Bağlanan ürünlerden biri bulunamadı.",
+  "catalog.linked_duplicate": "Aynı ürün listede iki kez olamaz.",
   "catalog.variant_image_unknown": "Varyant görsellerinden biri ürünün görselleri arasında yok.",
   "catalog.variant_image_variant_unknown":
     "Varyant görsellerinden biri ürünün sahip olmadığı bir varyanta bağlanmış.",

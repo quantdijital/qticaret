@@ -35,6 +35,8 @@ export const TAB_PARTS = [
   { key: "attributes", targets: [PRODUCT_SECTIONS.attributes] },
   { key: "variants", locked: true, targets: ["product-variants", VARIANT_CODES_TARGET] },
   { key: "catalog", targets: [PRODUCT_SECTIONS.catalog] },
+  // S3: upsells and cross-sells (WooCommerce's "Linked Products")
+  { key: "linked", targets: [] },
   { key: "advanced", targets: [PRODUCT_SECTIONS.addons, PRODUCT_SECTIONS.priceHistory] },
 ] as const satisfies readonly PartInfo[]
 

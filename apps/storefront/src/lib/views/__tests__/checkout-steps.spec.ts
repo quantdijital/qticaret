@@ -183,7 +183,7 @@ describe("checkout steps from the cart", () => {
         new Map(),
         false,
         null,
-        new Set(),
+        { classes: new Map(), surcharges: [], threshold: null },
         "90,00 TL"
       )
     expect(estimated([drawerLine("kupa")])).toMatchObject({

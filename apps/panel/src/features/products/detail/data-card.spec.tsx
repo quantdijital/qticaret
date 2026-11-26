@@ -161,7 +161,15 @@ describe("DataCard", () => {
   it("draws a simple product's tabs, Genel first, with no Varyantlar", async () => {
     renderCard()
     await waitFor(() => {
-      expect(tabNames()).toEqual(["Genel", "Stok", "Kargo", "Özellikler", "Katalog", "Gelişmiş"])
+      expect(tabNames()).toEqual([
+        "Genel",
+        "Stok",
+        "Kargo",
+        "Özellikler",
+        "Katalog",
+        "Bağlantılı ürünler",
+        "Gelişmiş",
+      ])
     })
     expect(screen.getByRole("combobox", { name: "Ürün tipi" })).toHaveTextContent("Basit ürün")
     expect(screen.getByRole("tab", { name: "Genel" })).toHaveAttribute("aria-selected", "true")
@@ -174,7 +182,7 @@ describe("DataCard", () => {
     const parcel = within(open()).getByRole("form", { name: "Paket ölçüleri" })
     expect(within(parcel).getByLabelText("Ağırlık")).toHaveValue("450")
     // The others stay drawn, hidden: an unsaved edit in them is kept
-    expect(screen.getAllByRole("tabpanel", { hidden: true }).length).toBe(6)
+    expect(screen.getAllByRole("tabpanel", { hidden: true }).length).toBe(7)
     expect(Object.keys(localStorage).map((key) => localStorage.getItem(key))).toContain("shipping")
   })
 
@@ -195,7 +203,7 @@ describe("DataCard", () => {
     await waitFor(() => {
       expect(screen.getByText("Dijital ürün: kargo yok")).toBeInTheDocument()
     })
-    expect(tabNames()).toEqual(["Genel", "Stok", "Katalog", "Gelişmiş"])
+    expect(tabNames()).toEqual(["Genel", "Stok", "Katalog", "Bağlantılı ürünler", "Gelişmiş"])
   })
 
   it("says a refused measure in the Kargo tab, its save only once something changed", async () => {

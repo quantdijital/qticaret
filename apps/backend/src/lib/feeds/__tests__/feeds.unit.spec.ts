@@ -180,4 +180,10 @@ describe("a feed's shipping cost by the product's class (adr/0087 §5)", () => {
     // The table's rate holds its class already
     expect(shippingCost(item(199.9, { free: false, surcharge: 150 }), shop)).toBe(199.9)
   })
+
+  it("is free for a surcharged product priced at or past the threshold: the surcharge falls too", () => {
+    const past = { ...shop, freeShippingFrom: 100 }
+    expect(shippingCost(item(null, { free: false, surcharge: 150 }), past)).toBe(0)
+    expect(shippingCost(item(199.9, { free: false, surcharge: 150 }), past)).toBe(0)
+  })
 })

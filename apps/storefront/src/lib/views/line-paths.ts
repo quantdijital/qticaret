@@ -111,27 +111,30 @@ export async function linePicturesOf(
 }
 
 /**
- * The lines' products in the free shipping class (adr/0087 §3), by id: the
- * same answer as `productPathsOf`; none when the backend refuses (the cart
- * then says what the threshold says, and checkout charges what it charges).
+ * The lines' products' shipping classes (adr/0087 §3), by product id:
+ * the free class and the shop's surcharged ones; a Standard product is
+ * absent. The same answer as `productPathsOf`; none when the backend
+ * refuses (the cart then says what the threshold says, and checkout
+ * charges what it charges).
  */
-export async function freeShippingProductsOf(
+export async function shippingClassesOf(
   lines: readonly LineProduct[]
-): Promise<ReadonlySet<string>> {
+): Promise<ReadonlyMap<string, string>> {
   const ids = productIdsOf(lines)
   if (ids.length === 0) {
-    return new Set()
+    return new Map()
   }
   try {
     const products = await shownProducts(ids)
-    return new Set(
-      products.flatMap((product) =>
-        product.product_extension?.shipping_class === "free" ? [product.id] : []
-      )
+    return new Map(
+      products.flatMap((product) => {
+        const key = product.product_extension?.shipping_class
+        return key ? [[product.id, key] as const] : []
+      })
     )
   } catch (error) {
     if (isStoreApiError(error)) {
-      return new Set()
+      return new Map()
     }
     throw error
   }
