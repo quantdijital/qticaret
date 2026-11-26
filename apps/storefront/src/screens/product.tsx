@@ -18,6 +18,7 @@ import { currentCustomer } from "@/lib/account/auth"
 import { productAddonsOrNone } from "@/lib/cart/addons"
 import { productBooking } from "@/lib/booking/store"
 import { EMPTY_BOOKING, bookingViewOf } from "@/lib/views/booking"
+import { linkedProductIds } from "@/lib/store-api/extras"
 import { installmentSummaries } from "@/lib/store-api/installments"
 import { productTexts } from "@/lib/store-api/product-description"
 import { storefrontEnv } from "@/lib/env"
@@ -51,10 +52,12 @@ type Entity = Extract<Resolution, { type: "entity" }>
  */
 export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   // The description's and short description's documents as the backend renders them (adr/0055)
-  const [product, layout, texts] = await Promise.all([
+  // The shop's own "similar products" for it (S3): in place of its category's when it chose some
+  const [product, layout, texts, upsellIds] = await Promise.all([
     productById(page.entity_id),
     currentLayout(),
     productTexts(page.entity_id),
+    linkedProductIds("upsell", [page.entity_id]),
   ])
   const ownRail = showsOwnCategory(layout.product)
   const asked = priceDisplays(variantIdsOf([product]))
@@ -80,13 +83,14 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     storefrontSettings(),
     reviewsView(product.id, t),
     questionsView(product.id, t),
-    ownRail ? Promise.resolve([]) : relatedOf(product),
+    ownRail ? Promise.resolve([]) : relatedOf(product, upsellIds),
     currentCustomer(),
     sectionViews(layout.product, t, {
       product: {
         id: product.id,
         categoryIds: (product.categories ?? []).map((category) => category.id),
         unshipped: !isShipped(product),
+        upsellIds,
       },
     }),
     // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)
