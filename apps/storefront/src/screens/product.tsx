@@ -1,5 +1,4 @@
 import type { Resolution } from "@qticaret/types"
-import { formatLira } from "@qticaret/ui"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
@@ -29,11 +28,12 @@ import { shopMarks } from "@/lib/views/card-extras"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { isVatExclusive, shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
+import { lowestPaidOf } from "@/lib/views/own-shipping"
 import {
-  FREE_SHIPPING_CLASS,
   isShipped,
   productShipping,
   promisesFor,
+  shippingNoteOf,
 } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
@@ -120,6 +120,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     return amount === null ? [] : [amount]
   })
   const lowest = amounts.length > 0 ? Math.min(...amounts) : null
+  // The KDV-included price the free shipping rule reads (a wholesaler's too)
+  const lowestPaid = lowestPaidOf(product, displays)
   const base = productPage({
     product,
     seo: page.seo,
@@ -154,20 +156,21 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         }
       : {}),
     signedIn: customer !== null,
-    // adr/0087 §3: a free-shipping product says so, not the threshold
-    shippingNote: !isShipped(product)
-      ? null
-      : product.product_extension?.shipping_class === FREE_SHIPPING_CLASS
-        ? t("product.shipping_free_product")
-        : free_shipping_threshold && free_shipping_threshold > 0
-          ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
-          : null,
+    // adr/0087 §3: a free or surcharged product says so, with the threshold that waives it
+    shippingNote: shippingNoteOf({
+      product,
+      classes: shipping_classes ?? [],
+      threshold: free_shipping_threshold,
+      lowestPaid,
+      t,
+    }),
     // "Kargo ve Teslimat" beside the specs (owner 2026-11-05): only what the shop set and wrote
     shipping: productShipping({
       product,
       // adr/0087 §3: a free or surcharged product's own shipping line
       classes: shipping_classes ?? [],
       threshold: free_shipping_threshold,
+      lowestPaid,
       // When it leaves and arrives, the same-day hour (adr/0046 Ek 2026-11-06)
       delivery: delivery ?? null,
       badges: shared.trust_badges,

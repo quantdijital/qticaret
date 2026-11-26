@@ -22,7 +22,7 @@ import { newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
 import { drawerSuggestions, withSuggestions } from "./cart-cross-sells"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
-import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "./line-paths"
+import { linePicturesOf, productPathsOf, shippingClassesOf } from "./line-paths"
 import { imageView } from "./image"
 import { navigation, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
@@ -76,7 +76,7 @@ export async function shopView(): Promise<ShopView> {
   const [
     site,
     categories,
-    { storefront: frame, free_shipping_threshold, marks, features },
+    { storefront: frame, free_shipping_threshold, shipping_classes, marks, features },
     identity,
     cart,
     cookies,
@@ -110,7 +110,7 @@ export async function shopView(): Promise<ShopView> {
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
   // A wholesaler's drawer is without KDV (ADR-0068 §5); asked only with lines to show
-  const [paths, linePaths, linePictures, wholesale, freeProducts, suggestions] = await Promise.all([
+  const [paths, linePaths, linePictures, wholesale, lineClasses, suggestions] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
@@ -118,8 +118,8 @@ export async function shopView(): Promise<ShopView> {
     productPathsOf(cart?.items ?? []),
     linePicturesOf(cart?.items ?? []),
     customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
-    // adr/0087 §3: a cart of free-shipping products says so instead of the meter
-    freeShippingProductsOf(cart?.items ?? []),
+    // adr/0087 §3: the lines' shipping classes, for the meter and the lines' notes
+    shippingClassesOf(cart?.items ?? []),
     // S3: what the cart's products are bought with, under the drawer's lines
     drawerSuggestions(cart, t),
   ])
@@ -174,7 +174,11 @@ export async function shopView(): Promise<ShopView> {
         wholesale.active && wholesale.vatExclusive,
         // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
         wholesaleCheckoutBlocked(cart, wholesale, t),
-        freeProducts
+        {
+          classes: lineClasses,
+          surcharges: shipping_classes ?? [],
+          threshold: free_shipping_threshold,
+        }
       ),
       suggestions
     ),

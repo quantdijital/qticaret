@@ -34,7 +34,7 @@ import {
 } from "@/lib/views/cart"
 import { netDiscountOf, netTotalsOf, taxLinesOf } from "@/lib/views/cart-tax"
 import { wholesaleCheckoutBlocked } from "@/lib/views/cart-wholesale"
-import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
+import { linePicturesOf, productPathsOf, shippingClassesOf } from "@/lib/views/line-paths"
 import { shippedPromises } from "@/lib/views/product-shipping"
 import { currentWholesale } from "@/lib/account/wholesale"
 import { cartBooking } from "@/lib/booking/store"
@@ -95,25 +95,24 @@ export default async function CartPage({
           : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons, extras, paths, pictures, amounts, booking, freeProducts] =
-    await Promise.all([
-      shopperGiftLines(cart?.id),
-      // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
-      locked
-        ? new Map<string, StoreProductAddon[]>()
-        : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
-      // Shipping before an address, the shop's cart offers, products to add (adr/0046 Ek 2026-11-05)
-      cartExtras(cart, t),
-      // Each line's product page (a payment link's too); gone or hidden products read as text
-      productPathsOf(cart?.items ?? []),
-      // Each line's picture in its small versions (the same answer as the paths)
-      linePicturesOf(cart?.items ?? []),
-      visitorAmounts(),
-      // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
-      cart && hasBookingLines(cart.items) ? cartBooking(cart.id) : Promise.resolve(null),
-      // adr/0087 §3: the lines of free-shipping products (the same answer as the paths)
-      freeShippingProductsOf(cart?.items ?? []),
-    ])
+  const [gifts, addons, extras, paths, pictures, amounts, booking, classes] = await Promise.all([
+    shopperGiftLines(cart?.id),
+    // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
+    locked
+      ? new Map<string, StoreProductAddon[]>()
+      : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
+    // Shipping before an address, the shop's cart offers, products to add (adr/0046 Ek 2026-11-05)
+    cartExtras(cart, t),
+    // Each line's product page (a payment link's too); gone or hidden products read as text
+    productPathsOf(cart?.items ?? []),
+    // Each line's picture in its small versions (the same answer as the paths)
+    linePicturesOf(cart?.items ?? []),
+    visitorAmounts(),
+    // The dated lines' hold, for its countdown (adr/0076 §10); not asked without one
+    cart && hasBookingLines(cart.items) ? cartBooking(cart.id) : Promise.resolve(null),
+    // adr/0087 §3: the lines' shipping classes (the same answer as the paths)
+    shippingClassesOf(cart?.items ?? []),
+  ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
   const built = withGiftLines(
@@ -125,10 +124,15 @@ export default async function CartPage({
     ),
     gifts
   )
+  const lineShipping = {
+    classes,
+    surcharges: settings.shipping_classes ?? [],
+    threshold: settings.free_shipping_threshold,
+  }
   const lines = withShippingNotes(
     withBookingRead(built, cart?.items ?? [], booking),
     cart,
-    freeProducts,
+    lineShipping,
     t
   )
   const hold = holdViewOf(cart?.items ?? [], booking)
@@ -180,7 +184,7 @@ export default async function CartPage({
                 subtotal,
                 settings.free_shipping_threshold,
                 t,
-                allShipFree(cart?.items ?? [], freeProducts)
+                allShipFree(cart?.items ?? [], classes)
               )
             : null,
           ...(ships ? {} : { ships: false }),
