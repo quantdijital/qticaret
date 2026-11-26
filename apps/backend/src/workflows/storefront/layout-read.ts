@@ -141,6 +141,9 @@ export async function storeLayout(
             // Where its lines sit and how big it is (adr/0049 Ek 2026-11-15)
             align: section.align,
             size: section.size,
+            tone: section.tone,
+            // The small button beside the lines, only once the shop gave one
+            ...(section.link ? { link: resolve(section.link) } : {}),
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),

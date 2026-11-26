@@ -79,6 +79,8 @@ describe("themeSettings", () => {
         date_words: true,
         boxed_fields: true,
         category_style: "tabs",
+        tabs: [],
+        tab_all: true,
         placeholder: "Nereye gitmek istersiniz?",
       },
       menu_style: "underline",
@@ -145,6 +147,8 @@ describe("themeSettings", () => {
         date_words: false,
         boxed_fields: false,
         category_style: "select",
+        tabs: [],
+        tab_all: true,
         placeholder: null,
       },
       // adr/0067 §1: the style kit at today's drawing

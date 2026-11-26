@@ -27,7 +27,9 @@ const field = (
     | "flexible_month"
     | "date_words"
     | "boxed_fields"
-    | "category_style",
+    | "category_style"
+    | "tabs"
+    | "tab_all",
   shown?: (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) => boolean
 ): FieldMeta => ({
   group: "searchForm",
@@ -41,6 +43,9 @@ const field = (
 
 const dated = (_theme: ThemeChoices, _variants: CardVariantsInUse, flags: ShopFlags) =>
   flags.has(DATED_FLAG)
+
+const tabsShown = (theme: ThemeChoices) =>
+  theme.search_form.show_category && theme.search_form.category_style === "tabs"
 
 const datesShown = (theme: ThemeChoices, variants: CardVariantsInUse, flags: ShopFlags) =>
   dated(theme, variants, flags) && theme.search_form.show_dates
@@ -56,6 +61,9 @@ export const SEARCH_FORM_META = {
   "search_form.flexible_month": field("flexible_month", datesShown),
   "search_form.date_words": field("date_words", datesShown),
   "search_form.boxed_fields": field("boxed_fields"),
+  // The tabs' own two, only while the categories stand as tabs
+  "search_form.tabs": field("tabs", tabsShown),
+  "search_form.tab_all": field("tab_all", tabsShown),
 } satisfies Record<string, FieldMeta>
 
 /** Names a listing's address keeps for itself: never an attribute's filter there (adr/0077 §2). */

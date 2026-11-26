@@ -14,6 +14,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { announcementOffers } from "./announcement-registry"
 import { AlignSketch, SizeSketch } from "./announcement-sketches"
+import { LinkField } from "./link-field"
 import { StepChoice } from "./step-choice"
 
 const A = "storefront.editor.announcement"
@@ -144,6 +145,16 @@ export function AnnouncementStyle({
       <div className="flex flex-col gap-5">
         <StepsOf section={section} setting="align" onChange={onChange} />
         <StepsOf section={section} setting="size" onChange={onChange} />
+        <StepsOf section={section} setting="tone" onChange={onChange} />
+        <LinkField
+          id={`${section.id}-announcement-link`}
+          label={t("storefront.editor.announcement.link.label")}
+          hint={t("storefront.editor.announcement.link.hint")}
+          link={section.link ?? null}
+          onChange={(link) => {
+            onChange({ ...section, link })
+          }}
+        />
       </div>
     </PanelGroup>
   )

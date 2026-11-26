@@ -76,6 +76,26 @@ describe("searchFormView", () => {
     expect(none.category).toBeNull()
   })
 
+  it('draws a tab\'s icon, and without "Tümü" stands the first tab chosen', () => {
+    const settings = { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" as const, tab_all: false }
+    const categories = [
+      { handle: "yurt-ici", name: "Yurt içi turlar", icon: "map_pin" as const },
+      { handle: "gemi", name: "Gemi turları", icon: null },
+    ]
+    const form = searchFormView(source({ settings, categories }), EMPTY_VALUES, t)
+    expect(form.category).toMatchObject({ anyLabel: null, value: "yurt-ici" })
+    expect(form.category?.options).toEqual([
+      { value: "yurt-ici", label: "Yurt içi turlar", icon: "map_pin" },
+      { value: "gemi", label: "Gemi turları" },
+    ])
+    const dated = { ...NO_DATED, category: "gemi" }
+    const chosen = searchFormView(source({ settings, categories }), { ...EMPTY_VALUES, dated }, t)
+    expect(chosen.category?.value).toBe("gemi")
+    // "Tümü" kept (today's) and a drop-down: the empty choice stays
+    const all = searchFormView(source({ categories }), EMPTY_VALUES, t)
+    expect(all.category).toMatchObject({ anyLabel: "Tümü", value: "" })
+  })
+
   it("asks for words when the shop names no attribute or it has no values", () => {
     const plain = searchFormView(
       source({ settings: SEARCH_FORM_DEFAULTS, booking: false, categories: [] }),

@@ -177,15 +177,39 @@ describe("the reviews' carousel (adr/0077 §10)", () => {
       "scroll",
     ])
   })
+
+  it("offers the cards' product picture in Diziliş, none by default, dropped back on the grid", async () => {
+    const user = userEvent.setup()
+    const carousel = { ...grid(), variant: "carousel", scroller: SCROLLER_DEFAULTS } as const
+    const changes = renderPanel(carousel)
+    expect(contentFields(carousel).map((each) => [each.key, each.group])).toContainEqual([
+      "reviews_product_image",
+      "layout",
+    ])
+
+    await openGroup(user, "Diziliş")
+    const picture = field(REVIEWS, "reviews_product_image")
+    expect(picture.getByRole("radio", { name: "Yok" })).toHaveAttribute("data-state", "on")
+    await user.click(picture.getByRole("radio", { name: "Kapak" }))
+    expect(changes.at(-1)).toMatchObject({ variant: "carousel", product_image: "cover" })
+
+    await openTab(user, "style")
+    const variant = document.getElementById(FIELD_IDS.variant(REVIEWS))
+    if (!variant) throw new Error("no variant field")
+    await user.click(within(variant).getByRole("radio", { name: "Izgara" }))
+    expect(changes.at(-1)).toMatchObject({ variant: "grid" })
+    expect(changes.at(-1)).not.toHaveProperty("product_image")
+  })
 })
 
 describe("the collage's settings search and preview marks", () => {
-  it("finds its two settings in Diziliş and leads a caption or the intro to its field", () => {
+  it("finds its three settings in Diziliş and leads a caption or the intro to its field", () => {
     const collage = newHomeSection("photo_collage", COLLAGE)
 
     expect(contentFields(collage).map((each) => [each.key, each.group])).toEqual([
       ["collage_layout", "layout"],
       ["collage_phone", "layout"],
+      ["collage_card", "layout"],
     ])
     expect(previewField(collage, "items.1.caption")?.target).toBe(`${COLLAGE}-items-1-caption`)
     expect(previewField(collage, "intro")?.target).toBe(`${COLLAGE}-intro`)

@@ -1,5 +1,5 @@
 import type { PhotoCollageSettings } from "@qticaret/types"
-import type { ImageView } from "./views"
+import type { ImageView, LinkView } from "./views"
 
 /**
  * The photo collage as a theme draws it (`photo_collage`, adr/0077 §10):
@@ -18,6 +18,10 @@ export interface PhotoCollageSectionView extends PhotoCollageSettings {
   label: string
   intro: string | null
   items: PhotoCollageItemView[]
+  /** A small upper-case line over the heading; absent: none. */
+  eyebrow?: string
+  /** The link to the whole list beside the heading; absent: none. */
+  more?: LinkView
 }
 
 export interface PhotoCollageItemView {
@@ -25,4 +29,6 @@ export interface PhotoCollageItemView {
   caption: string | null
   /** Where the photograph leads; null: nowhere. */
   href: string | null
+  /** The `below` card's small line under the name; absent: none. */
+  subtitle?: string
 }

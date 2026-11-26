@@ -22,6 +22,9 @@ export const PHOTO_COLLAGE_LIMITS = {
   intro: 240,
   caption: 60,
   alt: 300,
+  /** A card's small line under its name (`subtitle`) and the section's line over its heading (`eyebrow`). */
+  subtitle: 60,
+  eyebrow: 60,
 } as const
 
 export const PHOTO_COLLAGE_SETTINGS = {
@@ -36,6 +39,11 @@ export const PHOTO_COLLAGE_SETTINGS = {
    * one column.
    */
   phone: ["scroll", "stack"],
+  /**
+   * The cards: the name on a plate over the photo (today's) or a white
+   * card, the photo over its name, small line and a round arrow.
+   */
+  card: ["over", "below"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type PhotoCollageSetting = keyof typeof PHOTO_COLLAGE_SETTINGS
@@ -48,6 +56,7 @@ export const PHOTO_COLLAGE_DEFAULTS: {
 } = {
   layout: "asymmetric",
   phone: "scroll",
+  card: "over",
 }
 
 export const PHOTO_COLLAGE_SETTING_NAMES = Object.keys(
@@ -77,6 +86,8 @@ export interface StorePhotoCollageItem {
   caption: string | null
   /** The shop's link; null (or a broken one): the photograph links nowhere. */
   link: StoreLayoutLink | null
+  /** A small line under the name, drawn by the `below` card only ("Dağ • Macera"); absent: none. */
+  subtitle?: string | null
 }
 
 /** The photo collage in `GET /store/storefront-layout`. */
@@ -87,4 +98,8 @@ export type StorePhotoCollageSection = {
   title: string | null
   intro: string | null
   items: StorePhotoCollageItem[]
+  /** A small upper-case line over the heading ("POPÜLER ROTALAR"); absent: none. */
+  eyebrow?: string | null
+  /** The link to the whole list beside the heading ("Tüm rotalar"); absent: none. */
+  more?: StoreLayoutLink | null
 } & Partial<PhotoCollageSettings>

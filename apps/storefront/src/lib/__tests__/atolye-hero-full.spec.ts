@@ -270,4 +270,14 @@ describe("the full image's stylesheet", () => {
     expect(css).not.toContain("text-decoration")
     expect(css).not.toContain(":hover")
   })
+
+  it("rounds the play button's hover ground with its ring and eases it in, still when asked", () => {
+    expect(ruleBody(css, ".gf-cover .gf-btn--play")).toContain("min-height: calc(2.75rem + 2px)")
+    const eased = ruleBody(css, ".gf-cover .gf-btn.gf-btn--play")
+    expect(eased).toContain("background-color var(--dur-short) ease")
+    expect(eased).toContain("box-shadow var(--dur-short) ease")
+    expect(css).toMatch(
+      /prefers-reduced-motion: reduce\) \{\s*\.gf-cover \.gf-btn\.gf-btn--play \{\s*transition: none;/
+    )
+  })
 })

@@ -36,6 +36,9 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
       })),
       dividers: section.dividers,
       icons: section.icons,
+      item_style: section.item_style,
+      ...(section.eyebrow ? { eyebrow: at.fill(section.eyebrow) } : {}),
+      ...(section.note ? { note: section.note } : {}),
       // Printed only when changed, so a strip before them reads as it did
       ...(section.arrangement !== "stacked" ? { arrangement: section.arrangement } : {}),
       ...(section.social !== "off" ? { social: section.social } : {}),
@@ -75,9 +78,14 @@ export function hydrateCollage(
       image: { ...at.image(each.image.url, each.image.alt), alt: each.image.alt },
       caption: at.fill(each.caption),
       link: at.link(each.link),
+      // The `below` card's small line, only once written
+      ...(each.subtitle ? { subtitle: at.fill(each.subtitle) } : {}),
     })),
     layout: section.layout,
     phone: section.phone,
+    card: section.card,
+    ...(section.eyebrow ? { eyebrow: at.fill(section.eyebrow) } : {}),
+    ...(section.more ? { more: at.link(section.more) } : {}),
   }
 }
 

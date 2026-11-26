@@ -39,6 +39,8 @@ export const ANNOUNCEMENT_SETTINGS = {
   align: ["auto", "left", "center", "right"],
   /** The bar's height and its words' size together; `medium` is the bar as it was. */
   size: ["small", "medium", "large"],
+  /** The bar's ground: the graphite stage (today's) or the shop's main colour. */
+  tone: ["graphite", "primary"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type AnnouncementSetting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -53,6 +55,7 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in AnnouncementSetting]: Annou
   hover_pause: "on",
   align: "auto",
   size: "medium",
+  tone: "graphite",
 }
 
 /** The settings in the order the panel offers them. */

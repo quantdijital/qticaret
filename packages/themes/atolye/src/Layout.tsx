@@ -109,6 +109,7 @@ export function Layout({
         <Announcement
           lines={shop.announcements}
           settings={shop.announcementSettings}
+          button={shop.announcementLink}
           mark={shop.announcementMark}
           links={catalog?.links || inline ? [] : shop.topLinks}
           contact={

@@ -43,7 +43,14 @@
     "placeholder": "Nereye gitmek istersiniz?",
     "boxed_fields": true,
     "flexible_month": false,
-    "date_words": true
+    "date_words": true,
+    "tabs": [
+      { "handle": "yurt-ici-turlar", "icon": "mountain" },
+      { "handle": "yurt-disi-turlar", "icon": "plane" },
+      { "handle": "gemi-turlari", "icon": "compass" },
+      { "handle": "etkinlik-ve-atolyeler", "icon": "sparkles" }
+    ],
+    "tab_all": false
   },
   "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
   "menu_style": "plain",

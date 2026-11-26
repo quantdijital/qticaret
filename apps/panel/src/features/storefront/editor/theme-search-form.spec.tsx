@@ -13,7 +13,20 @@ import { SearchFormGroup } from "./theme-search-form-fields"
 import { whereAttributes } from "./forms/theme-registry-search"
 
 const fetchMock = vi.hoisted(() => vi.fn())
-vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+const listMock = vi.hoisted(() =>
+  vi.fn(() =>
+    Promise.resolve({
+      product_categories: [
+        { id: "c2", name: "Gemi turları", handle: "gemi", parent_category_id: null, rank: 1 },
+        { id: "c1", name: "Yurt içi", handle: "yurt-ici", parent_category_id: null, rank: 0 },
+        { id: "c3", name: "Karadeniz", handle: "karadeniz", parent_category_id: "c1", rank: 0 },
+      ],
+    })
+  )
+)
+vi.mock("@/lib/sdk", () => ({
+  sdk: { client: { fetch: fetchMock }, admin: { productCategory: { list: listMock } } },
+}))
 
 /**
  * adr/0077 §1: the search box's fields in the theme panel. The "where"
@@ -127,6 +140,30 @@ describe("the theme panel's search box group", () => {
     expect(boxed).not.toBeChecked()
     fireEvent.click(boxed)
     expect(onChange).toHaveBeenLastCalledWith(withForm({ boxed_fields: true }))
+  })
+
+  it("offers the tabs' categories and their icons, and the all tab, only as tabs", async () => {
+    const onChange = draw(withForm({ category_style: "tabs" }))
+    const all = screen.getByLabelText('"Tümü" sekmesi')
+    expect(all).toBeChecked()
+    fireEvent.click(all)
+    expect(onChange).toHaveBeenLastCalledWith(withForm({ category_style: "tabs", tab_all: false }))
+    // The top categories in the shop's order; a sub-category is not offered
+    const boxes = await screen.findAllByRole("checkbox", { name: /sekmede$/ })
+    expect(boxes.map((box) => box.getAttribute("aria-label"))).toEqual([
+      "Yurt içi sekmede",
+      "Gemi turları sekmede",
+    ])
+    fireEvent.click(screen.getByLabelText("Gemi turları sekmede"))
+    expect(onChange).toHaveBeenLastCalledWith(
+      withForm({ category_style: "tabs", tabs: [{ handle: "gemi", icon: null }] })
+    )
+  })
+
+  it("keeps the tabs' fields away from a drop-down", () => {
+    draw()
+    expect(screen.queryByLabelText('"Tümü" sekmesi')).toBeNull()
+    expect(screen.queryByText("Sekmelerdeki kategoriler")).toBeNull()
   })
 
   it("hides the categories' look while the categories are off", () => {

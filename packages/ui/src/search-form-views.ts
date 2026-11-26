@@ -1,3 +1,5 @@
+import type { SectionIcon } from "@qticaret/types"
+
 /**
  * The shop's one search box as a theme draws it (adr/0077 §1): in a
  * `search_box` section, on top of `/arama` (its values filled), later in a
@@ -13,6 +15,8 @@
 export interface SearchFormOptionView {
   value: string
   label: string
+  /** A tab's small icon before its name (`search_form.tabs`); absent: none. */
+  icon?: SectionIcon
 }
 
 /** A drop-down: its choices after the empty one (`anyLabel`, value ""). */
@@ -149,7 +153,9 @@ export interface SearchFormView {
   words: { name: string; label: string; placeholder: string; value: string } | null
   /**
    * The categories, as a drop-down (`select`) or as tabs over the bar
-   * (`tabs`: radios, the empty choice first); null: none.
+   * (`tabs`: radios, the empty choice first); null: none. Tabs without
+   * the empty choice (`anyLabel` null, `search_form.tab_all` off) stand
+   * with one always chosen, the first unless the search names another.
    */
   category: (SearchFormSelectView & { style: "select" | "tabs" }) | null
   /** The shop's "where" attribute's values (a travel shop's "Gidilecek yer"); null: none. */

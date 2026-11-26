@@ -139,6 +139,21 @@ describe("the announcement bar's settings", () => {
     expect(changes.at(-1)).toMatchObject({ align: "auto", size: "large" })
   })
 
+  it("offer the ground's colour, the dark one as today, and the bar's button", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
+    await openTab(user, "style")
+    const tone = field("tone")
+    if (!tone) throw new Error("no tone field")
+    expect(within(tone).getByRole("radio", { name: "Koyu" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    )
+    await user.click(within(tone).getByRole("radio", { name: "Ana renk" }))
+    expect(changes.at(-1)).toMatchObject({ tone: "primary" })
+    expect(screen.getByText("Şerit düğmesi")).toBeInTheDocument()
+  })
+
   it("hide the turning's settings side by side", () => {
     renderPanel(bar({ mode: "inline" }))
     expect(field("mode")).not.toBeNull()

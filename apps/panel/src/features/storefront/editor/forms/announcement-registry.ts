@@ -31,6 +31,7 @@ const GROUPS: Readonly<Record<AnnouncementSetting, FieldGroupName>> = {
   hover_pause: "motion",
   align: "appearance",
   size: "appearance",
+  tone: "appearance",
 }
 
 /**
@@ -39,7 +40,7 @@ const GROUPS: Readonly<Record<AnnouncementSetting, FieldGroupName>> = {
  * once it has more than one, the turning's settings only while they take turns.
  */
 export function announcementOffers(section: AnnouncementBar, setting: AnnouncementSetting) {
-  if (setting === "align" || setting === "size") {
+  if (setting === "align" || setting === "size" || setting === "tone") {
     return true
   }
   if (section.lines.length < 2) {

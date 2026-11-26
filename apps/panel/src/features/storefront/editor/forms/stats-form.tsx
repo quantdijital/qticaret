@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { ListFooter, RowActions } from "@/features/settings/components/storefront-rows"
-import { STATS_LIMITS, statsSettingsOf } from "@qticaret/types"
+import { HAND_NOTE_MAX, STATS_LIMITS, statsSettingsOf } from "@qticaret/types"
 import type { StatsItem, StatsSection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { IconSelect } from "../shared/icon-select"
@@ -44,6 +44,28 @@ export function StatsForm({ section, problems, onChange }: SectionFormProps<Stat
         error={problem(problems["title"], L.title)}
         onChange={(title) => {
           onChange({ ...section, title }, "title")
+        }}
+      />
+      <TextField
+        id={PREVIEW_IDS.text(section.id, "eyebrow")}
+        label={t(`${S}.eyebrow`)}
+        hint={t(`${S}.eyebrowHint`)}
+        value={section.eyebrow ?? null}
+        max={STATS_LIMITS.eyebrow}
+        error={problem(problems["eyebrow"], STATS_LIMITS.eyebrow)}
+        onChange={(eyebrow) => {
+          onChange({ ...section, eyebrow }, "eyebrow")
+        }}
+      />
+      <TextField
+        id={PREVIEW_IDS.text(section.id, "note")}
+        label={t(`${S}.note`)}
+        hint={t(`${S}.noteHint`)}
+        value={section.note ?? null}
+        max={HAND_NOTE_MAX}
+        error={problem(problems["note"], HAND_NOTE_MAX)}
+        onChange={(note) => {
+          onChange({ ...section, note }, "note")
         }}
       />
       <ol aria-label={t(`${S}.items`)} className="flex flex-col gap-3">

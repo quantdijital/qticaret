@@ -1,109 +1,129 @@
 <!-- preset lock: travel-patika (docs/tema/bilesen-standardi.md §7) -->
-<div data-qs="nedenpatika">
+<div class="group/look gf-look" data-outer="small" data-below="small" data-qs="nedenpatika">
   <section aria-labelledby="bolum-nedenpatika" class="gf-section">
-    <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
-      <div
-        class="flex items-baseline justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center"
-      >
-        <h2 id="bolum-nedenpatika">
-          Neden bizimle yürümeli?
-        </h2>
+    <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap-s)">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex min-w-0 flex-col gap-2">
+          <p class="text-xs font-semibold tracking-[0.18em] text-text-2 uppercase">
+            Neden bizimle yolculuk
+          </p>
+          <div
+            class="flex items-baseline justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center"
+          >
+            <h2 id="bolum-nedenpatika">
+              Bir turdan fazlası
+            </h2>
+          </div>
+        </div>
+        <div class="w-fit shrink-0 lg:w-52 xl:w-60">
+          <p
+            data-hand=""
+            class="block w-fit max-w-full text-balance font-(family-name:--font-accent) text-2xl font-normal lg:text-3xl -rotate-6 text-text lg:mx-auto lg:text-center"
+          >
+            Yol seni değiştirir
+          </p>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 120 14"
+            class="mx-auto mt-1 h-3 w-28 -rotate-6 ml-0 text-(--highlight) lg:mx-auto"
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+          >
+            <path d="M4 10C30 5 64 3 116 4" stroke-width="3.5">
+            </path>
+            <path d="M14 12C44 8 74 7 104 8" stroke-width="1.5" opacity="0.7">
+            </path>
+          </svg>
+        </div>
       </div>
       <dl
-        class="grid grid-cols-2 gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-4 lg:gap-x-0"
+        class="grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-(--gap-columns) lg:grid-cols-4 lg:gap-x-0"
       >
         <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center border-t border-rule pt-5 lg:border-t-0 lg:border-l lg:px-(--gap-columns) lg:pt-0 lg:first:border-l-0 lg:first:pl-0"
+          class="flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center lg:border-l lg:border-rule lg:px-(--gap-columns)"
         >
-          <dt class="order-2 text-md font-semibold text-text">
-            En kalabalık grup
+          <dt class="order-2 mt-2 text-sm leading-snug font-semibold text-text lg:text-md">
+            Özenle seçilmiş rotalar
           </dt>
+          <dd class="order-3 text-xs leading-snug text-text-2">
+            Her rotayı önce kendimiz geziyoruz.
+          </dd>
           <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
+            aria-hidden="true"
+            class="order-1 grid size-10 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal lg:size-12"
           >
-            12 kişi
-          </dd>
-          <dd class="order-3 max-w-[32ch] text-sm text-text-2">
-            Patikada sıra beklemeden, rehberinizle tanışarak.
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
             <svg
               width="24"
               height="24"
               stroke-width="1.75"
-              class="lucide lucide-users size-8 shrink-0 lg:size-9"
+              class="lucide lucide-compass size-5 shrink-0 lg:size-6"
               aria-hidden="true"
             />
           </dd>
         </div>
         <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center border-t border-rule pt-5 lg:border-t-0 lg:border-l lg:px-(--gap-columns) lg:pt-0 lg:first:border-l-0 lg:first:pl-0"
+          class="flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center lg:border-l lg:border-rule lg:px-(--gap-columns)"
         >
-          <dt class="order-2 text-md font-semibold text-text">
-            Rehberler
+          <dt class="order-2 mt-2 text-sm leading-snug font-semibold text-text lg:text-md">
+            Size göre program
           </dt>
+          <dd class="order-3 text-xs leading-snug text-text-2">
+            Tempo ve konaklama sizin seçiminiz.
+          </dd>
           <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
+            aria-hidden="true"
+            class="order-1 grid size-10 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal lg:size-12"
           >
-            Yerel
-          </dd>
-          <dd class="order-3 max-w-[32ch] text-sm text-text-2">
-            Bölgeyi bilen, yolu yürümüş rehberler.
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
             <svg
               width="24"
               height="24"
               stroke-width="1.75"
-              class="lucide lucide-compass size-8 shrink-0 lg:size-9"
+              class="lucide lucide-calendar-days size-5 shrink-0 lg:size-6"
               aria-hidden="true"
             />
           </dd>
         </div>
         <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center border-t border-rule pt-5 lg:border-t-0 lg:border-l lg:px-(--gap-columns) lg:pt-0 lg:first:border-l-0 lg:first:pl-0"
+          class="flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center lg:border-l lg:border-rule lg:px-(--gap-columns)"
         >
-          <dt class="order-2 text-md font-semibold text-text">
-            Program
+          <dt class="order-2 mt-2 text-sm leading-snug font-semibold text-text lg:text-md">
+            Dert yok
           </dt>
+          <dd class="order-3 text-xs leading-snug text-text-2">
+            Ulaşım, otel ve rehber bizden.
+          </dd>
           <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
+            aria-hidden="true"
+            class="order-1 grid size-10 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal lg:size-12"
           >
-            Açık
-          </dd>
-          <dd class="order-3 max-w-[32ch] text-sm text-text-2">
-            Günlük mesafe, zorluk ve konaklama tur sayfasında yazılı.
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
             <svg
               width="24"
               height="24"
               stroke-width="1.75"
-              class="lucide lucide-map-pin size-8 shrink-0 lg:size-9"
+              class="lucide lucide-leaf size-5 shrink-0 lg:size-6"
               aria-hidden="true"
             />
           </dd>
         </div>
         <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center border-t border-rule pt-5 lg:border-t-0 lg:border-l lg:px-(--gap-columns) lg:pt-0 lg:first:border-l-0 lg:first:pl-0"
+          class="flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center lg:border-l lg:border-rule lg:px-(--gap-columns)"
         >
-          <dt class="order-2 text-md font-semibold text-text">
-            Yolda destek
+          <dt class="order-2 mt-2 text-sm leading-snug font-semibold text-text lg:text-md">
+            Unutulmaz anlar
           </dt>
+          <dd class="order-3 text-xs leading-snug text-text-2">
+            Yıllarca anlatacağınız hikâyeler.
+          </dd>
           <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
+            aria-hidden="true"
+            class="order-1 grid size-10 place-items-center rounded-full bg-[color-mix(in_oklab,var(--highlight)_32%,var(--color-paper))] text-signal lg:size-12"
           >
-            7/24
-          </dd>
-          <dd class="order-3 max-w-[32ch] text-sm text-text-2">
-            Tur boyunca bize her an ulaşabilirsiniz.
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
             <svg
               width="24"
               height="24"
               stroke-width="1.75"
-              class="lucide lucide-headset size-8 shrink-0 lg:size-9"
+              class="lucide lucide-heart size-5 shrink-0 lg:size-6"
               aria-hidden="true"
             />
           </dd>

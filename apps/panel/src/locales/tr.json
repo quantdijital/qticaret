@@ -9909,6 +9909,17 @@
           "medium": "Orta",
           "large": "Büyük",
           "hint": "Şeridin yüksekliği ve yazı boyu birlikte: 32, 36 ya da 44 piksel."
+        },
+        "tone": {
+          "label": "Zemin rengi",
+          "term": "tone",
+          "graphite": "Koyu",
+          "primary": "Ana renk",
+          "hint": "Koyu, şeridin bugünkü grafit zeminidir; Ana renk, mağazanın ana rengini kullanır."
+        },
+        "link": {
+          "label": "Şerit düğmesi",
+          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez."
         }
       },
       "problems": {
@@ -10329,6 +10340,18 @@
           "boxed_fields": {
             "label": "Kutulu alanlar",
             "hint": "Her alanın adı üstte, kendisi açık gri bir kutuda; alanlar arasında boşluk olur. Kapalıyken alanlar ince çizgiyle ayrılır."
+          },
+          "tabs": {
+            "label": "Sekmelerdeki kategoriler",
+            "hint": "İşaretlediğiniz kategoriler bu sırayla sekme olur; her birine küçük bir ikon seçebilirsiniz. Hiçbiri işaretli değilse ana kategorilerin hepsi ikonsuz çıkar.",
+            "tabOf": "{{name}} sekmede",
+            "iconOf": "{{name}} ikonu",
+            "noIcon": "İkon yok",
+            "empty": "Henüz kategori yok."
+          },
+          "tab_all": {
+            "label": "\"Tümü\" sekmesi",
+            "hint": "Kapalıyken ilk sekme seçili açılır ve arama her zaman bir kategoride yapılır."
           }
         }
       },
@@ -11684,6 +11707,17 @@
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
         },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Neden bizimle). Boşsa çizilmez.",
+        "note": "El yazısı not",
+        "noteHint": "Başlığın sağında eğik, el yazısı kısa not; altında fırça çizgisi olur. Boşsa çizilmez.",
+        "item_style": {
+          "label": "Öge görünümü",
+          "term": "style",
+          "hint": "Büyük rakam ya da açık zeminli yuvarlak ikon, kalın başlık ve tek satır açıklama.",
+          "figure": "Büyük rakam",
+          "feature": "İkonlu madde"
+        },
         "arrangement": {
           "label": "Dizilim",
           "term": "arrangement",
@@ -11741,6 +11775,16 @@
           "hint": "Liste: tarih kutusu, tur adı, kalan yer ve fiyat satır satır. Kartlar: turun fotoğrafıyla.",
           "list": "Liste",
           "cards": "Kartlar"
+        }
+      },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Ürün görseli",
+          "term": "product_image",
+          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o).",
+          "none": "Yok",
+          "thumb": "Küçük",
+          "cover": "Kapak"
         }
       },
       "searchBox": {
@@ -12009,6 +12053,19 @@
           "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
+        },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Popüler rotalar). Boşsa çizilmez.",
+        "more": "Tümünü gör bağlantısı",
+        "moreHint": "Başlığın sağında oklu bağlantı (ör. Tüm rotalar). Boşsa çizilmez.",
+        "subtitle": "{{number}}. fotoğrafın alt yazısı",
+        "subtitleHint": "Kartta adın altında küçük tek satır (ör. Dağ • Macera).",
+        "card": {
+          "label": "Kart görünümü",
+          "term": "card",
+          "hint": "Fotoğrafın üstünde ad etiketi ya da altında ad, alt yazı ve ok düğmesi olan beyaz kart.",
+          "over": "Fotoğraf üstünde etiket",
+          "below": "Beyaz kart"
         }
       },
       "program": {

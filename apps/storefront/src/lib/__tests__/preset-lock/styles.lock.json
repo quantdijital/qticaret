@@ -2,6 +2,10 @@
   "note": "Digests of packages/themes/atolye/src/**/*.css; written by `pnpm lock:presets`",
   "files": [
     {
+      "sha256": "3b05ab7ba3aaae2c4aa215267d028db2267c18b8dfd46bcd676a6f9f1fc1bc6a",
+      "file": "announcement.css"
+    },
+    {
       "sha256": "91a544d342cfcd3421de78d95c2188ba9bb1715943fb5f84fd32fe389359edff",
       "file": "banner.css"
     },
@@ -66,7 +70,7 @@
       "file": "header-inline.css"
     },
     {
-      "sha256": "71272ebb86609034a61444c003d4f955b5387acb31915797fdfe3c0076586a29",
+      "sha256": "3443bd86317cadf03bc96d097337943958625e519d2b765ed7c8b20a9d8d03a6",
       "file": "hero-full.css"
     },
     {
@@ -166,7 +170,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "cefc7e909627b93af948ad94c3d015f1b007738353859f1699f93ede60165dd4",
+      "sha256": "b0d227e75f09ce6365f3e291fd02601a78ed7384902d18ea16ec9a816bae472e",
       "file": "styles.css"
     },
     {

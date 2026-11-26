@@ -9909,6 +9909,17 @@
           "medium": "Medium",
           "large": "Large",
           "hint": "The bar's height and text size together: 32, 36 or 44 pixels."
+        },
+        "tone": {
+          "label": "Ground colour",
+          "term": "tone",
+          "graphite": "Dark",
+          "primary": "Main colour",
+          "hint": "Dark is the bar's graphite ground as today; Main colour uses the shop's main colour."
+        },
+        "link": {
+          "label": "Bar button",
+          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn."
         }
       },
       "problems": {
@@ -10329,6 +10340,18 @@
           "boxed_fields": {
             "label": "Boxed fields",
             "hint": "Each field's name on top and the field in a light grey box, with room between them. Off, a hairline divides the fields."
+          },
+          "tabs": {
+            "label": "Categories on the tabs",
+            "hint": "The categories you tick become tabs in this order; each can have a small icon. With none ticked, every top category shows, without icons.",
+            "tabOf": "{{name}} on a tab",
+            "iconOf": "{{name}} icon",
+            "noIcon": "No icon",
+            "empty": "No categories yet."
+          },
+          "tab_all": {
+            "label": "\"All\" tab",
+            "hint": "Off, the first tab opens chosen and a search always names a category."
           }
         }
       },
@@ -11684,6 +11707,17 @@
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
         },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Why us). Empty, none is drawn.",
+        "note": "Hand note",
+        "noteHint": "A short tilted handwritten note beside the heading, a brush stroke under it. Empty, none is drawn.",
+        "item_style": {
+          "label": "Item look",
+          "term": "style",
+          "hint": "A large figure, or an icon on a light round ground with a bold title and one line.",
+          "figure": "Large figure",
+          "feature": "Icon item"
+        },
         "arrangement": {
           "label": "Arrangement",
           "term": "arrangement",
@@ -11741,6 +11775,16 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        }
+      },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Product picture",
+          "term": "product_image",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one).",
+          "none": "None",
+          "thumb": "Small",
+          "cover": "Cover"
         }
       },
       "searchBox": {
@@ -12009,6 +12053,19 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty, none is drawn.",
+        "more": "See all link",
+        "moreHint": "A link with an arrow beside the heading (e.g. All routes). Empty, none is drawn.",
+        "subtitle": "Photo {{number}} small line",
+        "subtitleHint": "A small single line under the name on the card (e.g. Mountain • Adventure).",
+        "card": {
+          "label": "Card look",
+          "term": "card",
+          "hint": "A name plate on the photo, or a white card with the name, a small line and an arrow under it.",
+          "over": "Plate on the photo",
+          "below": "White card"
         }
       },
       "program": {

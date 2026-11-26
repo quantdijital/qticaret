@@ -50,6 +50,8 @@ describe("the figures strip (adr/0077 §10)", () => {
       ],
       dividers: "on",
       icons: "off",
+      item_style: "figure",
+      note: null,
       arrangement: "stacked",
       social: "off",
     })
@@ -79,6 +81,12 @@ describe("the figures strip (adr/0077 §10)", () => {
     expect(issues({ home: [strip({ dividers: "thick" })] })).toEqual([
       "storefront_layout.section_invalid",
     ])
+    expect(issues({ home: [strip({ item_style: "card" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(
+      issues({ home: [strip({ eyebrow: "x".repeat(STATS_LIMITS.eyebrow + 1) })] })
+    ).not.toEqual([])
     expect(
       issues({ home: [strip({ items: [figure("1", "a", { icon: "x" }), figure("2", "b")] })] })
     ).not.toEqual([])
@@ -188,6 +196,7 @@ describe("the figures strip and the steps on the storefront", () => {
       ],
       dividers: "off",
       icons: "off",
+      item_style: "figure",
       look: {
         space_outer: null,
         space_below: null,
@@ -210,6 +219,26 @@ describe("the figures strip and the steps on the storefront", () => {
     expect(issues({ home: [strip({ arrangement: "grid" })] })).toEqual([
       "storefront_layout.section_invalid",
     ])
+  })
+
+  it("prints the feature look with its eyebrow filled and its hand note", async () => {
+    const section = stats.parse(
+      strip({
+        item_style: "feature",
+        eyebrow: " {mağaza_adı} farkı ",
+        note: " Yanınızdayız ",
+      })
+    )
+    const shown = await hydrateSection(section, context())
+
+    expect(shown).toMatchObject({
+      item_style: "feature",
+      eyebrow: "Atölye farkı",
+      note: "Yanınızdayız",
+    })
+    const bare = await hydrateSection(stats.parse(strip()), context())
+    expect(bare).not.toHaveProperty("eyebrow")
+    expect(bare).not.toHaveProperty("note")
   })
 
   it("prints the steps with their link placed, a broken one null", async () => {

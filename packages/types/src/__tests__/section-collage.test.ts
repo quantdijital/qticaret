@@ -18,6 +18,7 @@ describe("the photo collage's contract (adr/0077 §10)", () => {
     expect(photoCollageSettingsOf({ layout: "bento", phone: "stack" })).toEqual({
       layout: "asymmetric",
       phone: "stack",
+      card: "over",
     })
     expect(photoCollageSettingsOf({ layout: "even" }).layout).toBe("even")
   })

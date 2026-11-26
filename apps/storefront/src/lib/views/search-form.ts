@@ -1,4 +1,4 @@
-import type { SearchFormSettings } from "@qticaret/types"
+import type { SearchFormSettings, SectionIcon } from "@qticaret/types"
 import type {
   SearchFormOptionView,
   SearchFormSelectView,
@@ -20,8 +20,8 @@ export interface SearchFormSource {
   settings: SearchFormSettings
   /** The shop sells dated products (`catalog.booking`). */
   booking: boolean
-  /** The shop's top categories, in its order. */
-  categories: { handle: string; name: string }[]
+  /** The shop's top categories in its order, else the ones its tabs name, each with its icon. */
+  categories: { handle: string; name: string; icon?: SectionIcon | null }[]
   /** The "where" attribute's name and values; null: the shop names none, or it has none. */
   where: { label: string; options: SearchFormOptionView[] } | null
   /** Today in the shop's zone, `YYYY-MM-DD`. */
@@ -121,7 +121,14 @@ export function searchFormView(
           ),
         }
       : null
-  const categories = source.categories.map(({ handle, name }) => ({ value: handle, label: name }))
+  const categories = source.categories.map(({ handle, name, icon }) => ({
+    value: handle,
+    label: name,
+    ...(icon ? { icon } : {}),
+  }))
+  // Tabs without "Tümü": one always stands chosen, the first unless the search names another
+  const bare = settings.category_style === "tabs" && !settings.tab_all
+  const chosen = listed(categories, values.dated.category)
   return {
     action: SEARCH_FORM_ACTION,
     label: t("search.label"),
@@ -141,9 +148,9 @@ export function searchFormView(
         ? {
             name: DATED_PARAMS.category,
             label: t("search.form_category"),
-            anyLabel: t("search.form_any"),
+            anyLabel: bare ? null : t("search.form_any"),
             options: categories,
-            value: listed(categories, values.dated.category),
+            value: bare && chosen === "" ? (categories[0]?.value ?? "") : chosen,
             style: settings.category_style,
           }
         : null,

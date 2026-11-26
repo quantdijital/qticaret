@@ -61,6 +61,8 @@ const SEARCH_FORM = {
   date_words: false,
   boxed_fields: false,
   category_style: "select",
+  tabs: [],
+  tab_all: true,
   placeholder: null,
 }
 

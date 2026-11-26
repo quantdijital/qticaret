@@ -14,6 +14,7 @@ import type {
   StepsSectionView,
   Translate,
 } from "@qticaret/ui"
+import { handNoteView } from "./accent"
 import { layoutImage, layoutLink } from "./layout"
 
 /**
@@ -24,9 +25,12 @@ import { layoutImage, layoutLink } from "./layout"
 export function statsView(
   section: StoreStatsSection,
   t: Translate,
-  profiles: readonly SocialLinkView[] = []
+  profiles: readonly SocialLinkView[] = [],
+  /** The hand note in the shop's accent face (`noteInHand`); absent: not. */
+  hand = false
 ): StatsSectionView | null {
   const settings = statsSettingsOf(section)
+  const note = handNoteView(section.note, hand)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -41,6 +45,8 @@ export function statsView(
           ...(settings.icons === "on" ? { icon: sectionIconOf(item.icon) } : {}),
         })),
         ...settings,
+        ...(section.eyebrow ? { eyebrow: section.eyebrow } : {}),
+        ...(note ? { note } : {}),
         // The profiles at the row's end only while the shop asks and has one
         ...(settings.social === "on" && profiles.length > 0
           ? { follow: { title: t("home.stats_follow"), profiles: [...profiles] } }
@@ -83,6 +89,7 @@ export function collageView(
   section: StorePhotoCollageSection,
   t: Translate
 ): PhotoCollageSectionView | null {
+  const more = layoutLink(section.more ?? null, t)
   return section.items.length > 0
     ? {
         id: section.id,
@@ -94,8 +101,11 @@ export function collageView(
           image: layoutImage(item.image, item.caption ?? ""),
           caption: item.caption,
           href: layoutLink(item.link, t)?.path ?? null,
+          ...(item.subtitle ? { subtitle: item.subtitle } : {}),
         })),
         ...photoCollageSettingsOf(section),
+        ...(section.eyebrow ? { eyebrow: section.eyebrow } : {}),
+        ...(more ? { more } : {}),
       }
     : null
 }

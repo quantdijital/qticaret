@@ -1,0 +1,49 @@
+/*
+ * The announcement bar's own options (`frame/Announcement.tsx`): drawn only
+ * while the shop turns one on, so a bar without them stays as it was.
+ *
+ * - `tone: primary`: the ground is the shop's main colour, its inks the
+ *   colour's own (the stage's tokens turned to them, so every part of the
+ *   bar follows).
+ * - `link`: a small pill button beside the lines, the bar's light ink on
+ *   its ground, the ground's colour as its words (Wanderly's "Get a Free
+ *   Quote"). Its height fits the small bar; a touch screen's is 32 px.
+ */
+@layer components {
+  .gf-stage[data-bar="primary"] {
+    --color-stage: var(--primary);
+    --color-stage-text: var(--primary-foreground);
+    --color-stage-text-2: color-mix(in oklab, var(--primary-foreground) 78%, var(--primary));
+    --color-focus: var(--primary-foreground);
+  }
+
+  .gf-bar-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 1.625rem;
+    margin-inline-start: -0.75rem;
+    padding: 0 0.75rem;
+    border-radius: var(--button-radius, var(--radius-pill));
+    background: var(--color-stage-text);
+    color: var(--color-stage);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .gf-bar-btn:hover {
+    background: color-mix(in oklab, var(--color-stage-text) 88%, var(--color-stage));
+  }
+  .gf-bar-btn:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  @media (pointer: coarse) {
+    .gf-bar-btn {
+      min-height: 2rem;
+    }
+  }
+}

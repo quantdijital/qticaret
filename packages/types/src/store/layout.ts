@@ -30,6 +30,7 @@ import type { StoreRichTextSection } from "./section-rich-text.js"
 import type { StorePostsSection } from "./section-posts.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { StorePhotoCollageSection } from "./section-collage.js"
+import type { ReviewsProductImage } from "./section-reviews.js"
 import type {
   CardVariant,
   FaqVariant,
@@ -175,6 +176,8 @@ export interface StoreReviewsSection {
   limit: number
   variant?: ReviewsVariant
   scroller?: ScrollerSettings
+  /** `carousel` only, while set: the reviewed product's picture on each card (`section-reviews.ts`). */
+  product_image?: ReviewsProductImage
 }
 
 /**
@@ -356,6 +359,11 @@ export type StoreAnnouncementBar = {
   id: string
   type: "announcement_bar"
   lines: string[]
+  /**
+   * A small button beside the lines (its words the link's own label);
+   * absent or null (today's): none.
+   */
+  link?: StoreLayoutLink | null
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {
