@@ -41,7 +41,7 @@ const EXTENSION = /product_extension/iu
 const GIFT_MARK = /^(?:[a-z_]+\.)*product_extension\.is_gift_card$/u
 // On the product's own answer only: a cart line has no use for them
 const PRODUCT_OWN =
-  /^product_extension\.(?:description_doc|summary_doc|withdrawal_excluded|kind|booking_mode|max_quantity)$/u
+  /^product_extension\.(?:description_doc|summary_doc|withdrawal_excluded|kind|booking_mode|max_quantity|shipping_class)$/u
 
 /**
  * A product's extension in Store `fields`: its gift card mark and, on the
