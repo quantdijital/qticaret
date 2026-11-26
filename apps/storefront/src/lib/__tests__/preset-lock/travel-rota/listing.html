@@ -7,14 +7,6 @@
           Ana sayfa
         </a>
       </li>
-      <li class="flex items-center gap-x-2">
-        <span aria-hidden="true">
-          /
-        </span>
-        <span aria-current="page" class="text-text-2">
-          El Yapımı Çakılar
-        </span>
-      </li>
     </ol>
   </nav>
   <header class="mt-4 flex flex-col gap-3 lg:mt-6">
@@ -210,9 +202,9 @@
     <div class="grid gap-8 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-(--space-xl)">
       <aside aria-labelledby="filtre-baslik" class="max-lg:hidden">
         <div
-          class="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2"
+          class="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2"
         >
-          <h2 id="filtre-baslik" class="text-title">
+          <h2 id="filtre-baslik" class="flex min-h-11 items-center text-title">
             Filtreler
           </h2>
           <div class="flex flex-col gap-2">
@@ -237,6 +229,120 @@
                 8
               </span>
             </a>
+            <details open="" class="group/filter rounded-media gf-box px-2 py-1">
+              <summary
+                class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold"
+              >
+                <span>
+                  Kalkış tarihi
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="2"
+                  class="lucide lucide-chevron-down size-5 shrink-0 text-text-3 transition-transform duration-(--dur-short) group-open/filter:rotate-180"
+                  aria-hidden="true"
+                />
+              </summary>
+              <ul class="flex flex-col pb-2">
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2026-11"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Kasım 2026
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2026-12"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Aralık 2026
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2027-01"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Ocak 2027
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2027-02"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Şubat 2027
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2027-03"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Mart 2027
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/kategori/el-yapimi-caki?ay=2027-04"
+                    rel="nofollow"
+                    class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                    >
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      Nisan 2027
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </details>
             <details open="" class="group/filter rounded-media gf-box px-2 py-1">
               <summary
                 class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold"
@@ -443,9 +549,11 @@
           </div>
         </div>
       </aside>
-      <div class="flex min-w-0 flex-col gap-6 lg:gap-8">
+      <div class="flex min-w-0 flex-col gap-6">
         <div class="flex flex-col gap-4 max-lg:contents">
-          <div class="max-lg:contents lg:flex lg:items-center lg:justify-between">
+          <div
+            class="max-lg:contents lg:flex lg:min-h-11 lg:items-center lg:justify-between lg:gap-2"
+          >
             <h2
               id="sonuclar"
               class="max-w-none scroll-mt-40 text-md font-semibold tracking-normal text-text-2"
@@ -454,7 +562,7 @@
             </h2>
             <div
               data-gf-stick=""
-              class="gf-listbar -mx-(--gutter) -mt-5 grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2 bg-paper px-(--gutter) py-2 data-js-stuck:shadow-[0_1px_0_var(--color-rule)] lg:contents -mb-2"
+              class="gf-listbar -mx-(--gutter) -mt-5 grid gap-2 bg-paper px-(--gutter) py-2 data-js-stuck:shadow-[0_1px_0_var(--color-rule)] lg:contents -mb-2 grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
             >
               <a
                 href="#filtreler"
@@ -470,7 +578,7 @@
                 />
                 Filtrele
               </a>
-              <details data-menu="" class="group/menu relative">
+              <details data-menu="" class="group/menu relative lg:ml-auto">
                 <summary
                   class="gf-chip w-full cursor-pointer justify-center gap-2 rounded-button gf-box"
                 >
@@ -558,6 +666,48 @@
                   </ul>
                 </div>
               </details>
+              <form
+                role="group"
+                aria-label="Görünüm"
+                class="flex items-center gap-1 rounded-button gf-box p-1 justify-self-end"
+                action="/kategori/el-yapimi-caki"
+                method="get"
+              >
+                <button
+                  type="submit"
+                  value="izgara"
+                  aria-pressed="true"
+                  aria-label="Izgara görünümü"
+                  title="Izgara görünümü"
+                  class="flex size-9 items-center justify-center rounded-inner transition-colors duration-(--dur-micro) bg-text text-paper"
+                  name="gorunum"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    stroke-width="2"
+                    class="lucide lucide-layout-grid size-4"
+                    aria-hidden="true"
+                  />
+                </button>
+                <button
+                  type="submit"
+                  value="liste"
+                  aria-pressed="false"
+                  aria-label="Liste görünümü"
+                  title="Liste görünümü"
+                  class="flex size-9 items-center justify-center rounded-inner transition-colors duration-(--dur-micro) text-text-2 hover:bg-paper-3 hover:text-text"
+                  name="gorunum"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    stroke-width="2"
+                    class="lucide lucide-list size-4"
+                    aria-hidden="true"
+                  />
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -969,7 +1119,7 @@
             </article>
           </li>
         </ul>
-        <div class="pt-4">
+        <div class="pt-4 lg:pt-6">
           <nav aria-label="Sayfalar" class="flex flex-col items-center gap-4">
             <p class="text-sm text-text-3">
               Sayfa 1 / 3
@@ -1062,6 +1212,120 @@
               8
             </span>
           </a>
+          <details open="" class="group/filter rounded-media gf-box px-2 py-1">
+            <summary
+              class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold"
+            >
+              <span>
+                Kalkış tarihi
+              </span>
+              <svg
+                width="24"
+                height="24"
+                stroke-width="2"
+                class="lucide lucide-chevron-down size-5 shrink-0 text-text-3 transition-transform duration-(--dur-short) group-open/filter:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <ul class="flex flex-col pb-2">
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2026-11#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Kasım 2026
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2026-12#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Aralık 2026
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2027-01#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Ocak 2027
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2027-02#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Şubat 2027
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2027-03#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Mart 2027
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/kategori/el-yapimi-caki?ay=2027-04#filtreler"
+                  rel="nofollow"
+                  class="flex min-h-11 items-center gap-3 rounded-inner px-2 text-sm no-underline transition-colors hover:bg-paper-3"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="flex size-5 shrink-0 items-center justify-center rounded-pill border transition-colors border-edge bg-field"
+                  >
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    Nisan 2027
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </details>
           <details open="" class="group/filter rounded-media gf-box px-2 py-1">
             <summary
               class="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold"

@@ -5,6 +5,7 @@
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
 import type { AccentFont } from "./hand-note.js"
+import type { ListingPageSettings } from "./listing-page.js"
 import type { ListingTextSettings } from "./listing-text.js"
 import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
@@ -194,6 +195,11 @@ export interface StoreThemeSettings extends StyleKit {
    * it: `LISTING_TEXT_DEFAULTS` (`listingTextOf`).
    */
   listing_text?: ListingTextSettings
+  /**
+   * How a listing page lays out its products and its trail (`listing-page.ts`).
+   * Absent from a backend before it: `LISTING_PAGE_DEFAULTS` (`listingPageOf`).
+   */
+  listing_page?: ListingPageSettings
   /**
    * The search box's fields (adr/0077 §1, `search-form.ts`). Absent from
    * a backend before it: `SEARCH_FORM_DEFAULTS` (`searchFormOf`).
