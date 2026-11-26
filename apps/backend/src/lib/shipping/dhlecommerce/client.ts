@@ -37,6 +37,16 @@ export interface DhlEcomBarcode {
   pieces: { barcode: string; zpl: string | null }[]
 }
 
+/** DHL's words for a status as we keep and show them: one line, printable, short. */
+const statusWords = (text: string | null): string | null => {
+  const line = text
+    ?.replace(/[\p{Cc}\p{Cf}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120)
+  return line === undefined || line === "" ? null : line
+}
+
 // What DHL prints as a barcode: printable ASCII a Code 128 B symbol takes
 const BARCODE = /^[\x20-\x7E]{1,48}$/
 const SHIPMENT_ID = /^[0-9A-Za-z]{4,30}$/
@@ -212,7 +222,7 @@ export function createDhlEcomApi(options: DhlEcomOptions = {}) {
     return {
       found: row !== null,
       code: Number.isSafeInteger(code) ? code : null,
-      status: textOf(field(row, "shipmentStatus")),
+      status: statusWords(textOf(field(row, "shipmentStatus"))),
       shipmentId: textOf(field(row, "shipmentId")),
       trackingUrl: textOf(field(row, "trackingUrl")),
     }
@@ -235,9 +245,9 @@ export function createDhlEcomApi(options: DhlEcomOptions = {}) {
       if (
         isProviderError(error) &&
         !error.retryable &&
-        error.providerCode !== "subscription_missing" &&
-        error.providerCode !== DHL_CODES.wrongEnvironment &&
-        /^(http_4\d\d|error_.+)$/.test(error.providerCode)
+        // The gateway's 4xx, or DHL's own 401/403 code: a refusal of the account. Another
+        // code (DHL answers its internal errors as HTTP 500 too) is no verdict on it
+        /^(?:http|error)_4(?:01|03|00)$/.test(error.providerCode)
       ) {
         return "secret_invalid"
       }
