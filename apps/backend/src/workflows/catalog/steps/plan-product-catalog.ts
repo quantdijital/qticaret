@@ -12,6 +12,7 @@ import { addonsToWrite } from "../addons"
 import { bookingModeOf, bookingVariantsToAlign } from "../booking-mode"
 import type { BookingMode, StockVariant } from "../booking-mode"
 import { giftCardKind, kindShipping } from "../kind-rules"
+import { linkedToWrite } from "../linked-products"
 import { checkSuccessor } from "../successor"
 import { ValidationError } from "../../../lib/errors"
 import { assertKnownShippingClass } from "../../../lib/shipping/classes"
@@ -59,6 +60,9 @@ export interface SetProductCatalogInput {
   max_quantity?: number | null | undefined
   /** How it ships (adr/0087 §1): `free` or one of the shop's classes; null: Standard. */
   shipping_class?: string | null | undefined
+  /** Its linked products (S3), each list in order; null or empty: none. */
+  upsell_product_ids?: string[] | null | undefined
+  cross_sell_product_ids?: string[] | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -86,6 +90,8 @@ export interface ExtensionFields {
   badge: string | null
   max_quantity: number | null
   shipping_class: string | null
+  upsell_product_ids: string[] | null
+  cross_sell_product_ids: string[] | null
 }
 
 export interface ProductCatalogPlan {
@@ -144,6 +150,8 @@ const EXTENSION_KEYS = [
   "badge",
   "max_quantity",
   "shipping_class",
+  "upsell_product_ids",
+  "cross_sell_product_ids",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -248,6 +256,7 @@ export const planProductCatalogStep = createStep(
       kind ?? extension?.kind ?? "physical"
     )
     const addons = await addonsToWrite(container, input.addons, product.id)
+    const linked = await linkedToWrite(container, product.id, input)
     const description = descriptionChanges(input.description_doc, {
       doc: extension?.description_doc ?? null,
       description: product.description ?? null,
@@ -262,6 +271,7 @@ export const planProductCatalogStep = createStep(
     const { set, previous } = changesOf(
       {
         ...input,
+        ...linked,
         kind,
         addons,
         description_doc: description.doc,

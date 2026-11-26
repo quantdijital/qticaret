@@ -51,6 +51,12 @@ export const PRODUCT_BOOKING_MODES = ["none", "departure", "range"] as const
  *   built-in "Ücretsiz kargo") or one of the shop's own classes' keys
  *   (`shipping.shipping_classes`, a surcharge). Null, or a class the shop
  *   no longer has: Standard.
+ * - `upsell_product_ids`, `cross_sell_product_ids`: the shop's linked
+ *   products (S3, `lib/catalog/linked-products`), each an ordered list of
+ *   at most twelve product ids: better or similar ones shown on the
+ *   product's page, and ones bought with it shown in the cart. No foreign
+ *   key: a product deleted or unpublished since is skipped as they are
+ *   read. Null: none.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -68,4 +74,6 @@ export const ProductExtension = model.define("product_extension", {
   badge: model.text().nullable(),
   max_quantity: model.number().nullable(),
   shipping_class: model.text().nullable(),
+  upsell_product_ids: model.array().nullable(),
+  cross_sell_product_ids: model.array().nullable(),
 })
