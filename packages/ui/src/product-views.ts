@@ -289,6 +289,13 @@ export interface ProductPageView {
    * Null or left out: no such mark.
    */
   withdrawalNote?: string | null
+  /**
+   * The most of the product one order may hold (S5), its variants
+   * together: the count beside "add to cart" stops there and says so.
+   * The backend refuses more whatever the page sends. Left out or null:
+   * no limit.
+   */
+  maxQuantity?: number | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
   /** The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7); absent: today's. */

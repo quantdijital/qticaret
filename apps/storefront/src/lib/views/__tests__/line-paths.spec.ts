@@ -80,7 +80,7 @@ describe("the product pages lines may link to", () => {
     expect(server.storePublicGet).toHaveBeenCalledWith("/store/products", {
       id: ["prod_knife", "prod_draft"],
       fields:
-        "id,media_assets.url,media_assets.width,media_assets.height,media_assets.alt,media_assets.derivatives",
+        "id,media_assets.url,media_assets.width,media_assets.height,media_assets.alt,media_assets.derivatives,product_extension.shipping_class",
       limit: 2,
     })
     expect(requests.pathsOf).toHaveBeenCalledWith("product", ["prod_knife", "prod_draft"])

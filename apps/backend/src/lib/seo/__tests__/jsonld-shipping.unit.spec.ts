@@ -54,5 +54,8 @@ describe("shipping in structured data (F7.8, docs/13 §5)", () => {
     expect(shippingSentence(1, 2)).toBe("1–2 iş gününde kargoda.")
     expect(shippingSentence(2, 2)).toBe("2 iş gününde kargoda.")
     expect(shippingSentence(0, 0)).toBe("Aynı gün kargoda.")
+    // adr/0087 §5: a free-shipping product says so first
+    expect(shippingSentence(1, 2, true)).toBe("Ücretsiz kargo, 1–2 iş gününde kargoda.")
+    expect(shippingSentence(0, 0, true)).toBe("Ücretsiz kargo, aynı gün kargoda.")
   })
 })

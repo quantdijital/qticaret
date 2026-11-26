@@ -20,10 +20,16 @@ import {
   geliverRecipientOf,
   parcelLinesOf,
 } from "../../lib/shipping/geliver"
-import { tablePrice } from "../../lib/shipping/rates"
+import { quoteContextOf, shippingQuote } from "../../lib/shipping/quote"
 import { receiverError } from "../../lib/shipping/receiver"
-import { packedParcelOf, parcelFor } from "../../lib/shipping/shop"
-import { shippingRates, storedGeliverAccount } from "./account"
+import {
+  calculatedPriceOf,
+  cartLinesOf,
+  packedParcelOf,
+  parcelFor,
+  tableQuoteOf,
+} from "../../lib/shipping/shop"
+import { storedGeliverAccount } from "./account"
 import { GELIVER_OPTIONS, choiceOf, isGeliverOption } from "./options"
 import { pickOffer, shipmentData } from "./shipment"
 
@@ -67,34 +73,37 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
 
   /**
    * The cart's parcel priced, tax included: by the shop's table for the
-   * table option, else what Geliver quotes for the option's service.
+   * table option, else what Geliver quotes for the option's service. Past
+   * the shop's basket threshold it is free, and Geliver is not asked
+   * (adr/0087 §2).
    */
   override async calculatePrice(
     optionData: Record<string, unknown>,
     _data: Record<string, unknown>,
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
-    const parcel = await parcelFor(parcelLinesOf(context.items))
     if (optionData["id"] === "geliver-table") {
-      const rates = await shippingRates()
-      const price = tablePrice(rates.rate_table, rates.over_desi_price, parcel.desi)
-      if (price === null) {
-        throw new ValidationError("shipping.no_rate")
-      }
-      return {
-        calculated_amount: Number(toMedusaAmount(price)),
-        is_calculated_price_tax_inclusive: true,
-      }
+      return tableQuoteOf(context)
     }
-    const credentials = await storedGeliverAccount()
-    const quote = chooseQuote(await geliverApi().quotes(credentials, parcel), choiceOf(optionData))
-    if (!quote) {
-      throw new ValidationError("shipping.no_offer")
-    }
-    return {
-      calculated_amount: Number(toMedusaAmount(quote.amount)),
-      is_calculated_price_tax_inclusive: true,
-    }
+    const amount = await shippingQuote({
+      lines: cartLinesOf(context),
+      context: quoteContextOf(context),
+      // The paid lines' parcel: a free product's desi adds nothing (adr/0087 §2.3)
+      basis: "parcel",
+      price: async (lines) => {
+        const parcel = await parcelFor(parcelLinesOf(lines))
+        const credentials = await storedGeliverAccount()
+        const quote = chooseQuote(
+          await geliverApi().quotes(credentials, parcel),
+          choiceOf(optionData)
+        )
+        if (!quote) {
+          throw new ValidationError("shipping.no_offer")
+        }
+        return quote.amount
+      },
+    })
+    return calculatedPriceOf(amount)
   }
 
   override async createFulfillment(

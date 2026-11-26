@@ -81,6 +81,21 @@ describe("PrintOrdersPage", () => {
     expect(within(slip).getByText("Hediye paketi yapılacak")).toBeInTheDocument()
   })
 
+  it("prints the shopper's own note on every slip, and none when they left none", async () => {
+    fetchMock.mockResolvedValue(
+      slips([order({ customer_note: "Zili çalmayın,\nkapıya bırakın" }), order({ id: "order_2" })])
+    )
+    search.current = { kind: "slip", ids: "order_1,order_2" }
+    renderPage()
+
+    const shown = await screen.findAllByRole("region", { name: /paketleme fişi/ })
+    expect(shown).toHaveLength(2)
+    const [first, second] = shown as [HTMLElement, HTMLElement]
+    expect(within(first).getByText("Müşterinin notu")).toBeInTheDocument()
+    expect(within(first).getByText(/Zili çalmayın/)).toBeInTheDocument()
+    expect(within(second).queryByText("Müşterinin notu")).toBeNull()
+  })
+
   it("prints prices and totals when the shop asks for them", async () => {
     fetchMock.mockResolvedValue(
       slips(

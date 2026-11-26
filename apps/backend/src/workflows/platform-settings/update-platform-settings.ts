@@ -7,7 +7,6 @@ import {
 import { scopesForSection } from "../../lib/storefront/refresh"
 import { removeIntegrationCredentialsWorkflow } from "../integration-credentials/remove-credentials"
 import { attachMediaStep } from "../media/steps/attach-media"
-import { syncFreeShippingWorkflow } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { brandImagesStep } from "./steps/brand-images"
@@ -23,16 +22,12 @@ const providerOf = (values: unknown): unknown =>
 export const leftBirfatura = (section: string, before: unknown, after: unknown): boolean =>
   section === "invoicing" && providerOf(before) === "birfatura" && providerOf(after) !== "birfatura"
 
-const thresholdOf = (values: Record<string, unknown> | null | undefined): number | null => {
-  const value = values?.["free_shipping_threshold"]
-  return typeof value === "number" && value > 0 ? value : null
-}
-
 /**
  * Saves a settings section (F2.3, adr/0012); a later failing step puts the
  * old values back. Pages' SEO answers use the shop's name, templates and
  * host, so cached ones are forgotten. The promotions section's free
- * shipping threshold reaches the shipping options' prices (F4.5). The SEO
+ * shipping threshold is read by the shipping quote at each pricing
+ * (adr/0087 §2), so nothing is written for it here. The SEO
  * section's share image must be one of the shop's uploads, and is kept;
  * so must each newly chosen logo and site icon of the appearance section.
  * A section the storefront shows is shown at once (adr/0048 ek 2026-11-03).
@@ -53,13 +48,6 @@ export const updatePlatformSettingsWorkflow = createWorkflow(
       }))
     )
     forgetResolutionsStep()
-    when({ input }, ({ input }) => input.section === "promotions").then(() => {
-      // The options follow the new threshold; a later failure puts their prices back
-      const threshold = transform({ saved }, ({ saved }) => ({
-        threshold: thresholdOf(saved.after as Record<string, unknown>),
-      }))
-      syncFreeShippingWorkflow.runAsStep({ input: threshold })
-    })
     // adr/0072 §3: BirFatura no longer the program, its token goes: picking it again
     // asks the owner for a new one (every admin told, as for any account)
     when({ input, saved }, ({ input, saved }) =>

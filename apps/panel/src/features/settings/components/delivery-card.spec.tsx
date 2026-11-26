@@ -23,6 +23,7 @@ const SHIPPING: ShippingSettings = {
   label_custom: { width_mm: 100, height_mm: 150 },
   default_parcel: null,
   packing_slip_prices: false,
+  shipping_classes: [],
 }
 
 const MARKETING = "/admin/platform-settings/marketing"
@@ -71,9 +72,7 @@ describe("DeliveryCard", () => {
     backend(null)
     const user = userEvent.setup()
     renderCard()
-    expect(
-      screen.getByText(/ürün sayfalarındaki Kargo ve Teslimat kartında ve Akakçe'de/)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/aynı gün kargoya veriliyorsa seçin/)).toBeInTheDocument()
     await user.click(screen.getByRole("combobox", { name: "Aynı gün kargo saati" }))
     await user.click(await screen.findByRole("option", { name: "15:00 öncesi siparişler" }))
     await user.click(screen.getByRole("button", { name: "Kaydet" }))

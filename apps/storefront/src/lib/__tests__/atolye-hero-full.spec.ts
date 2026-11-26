@@ -113,6 +113,18 @@ describe("Atölye's full image opening", () => {
     expect(home([cover()])).not.toContain("text-signal-on-stage")
   })
 
+  it("ends the heading with its last line in the heading's ink, none without one", () => {
+    const html = home([
+      cover(full({ title_mix: "serif_accent" }, { accent: "sınırsız.", after: "Öte." })),
+    ])
+
+    const heading = /<h1[^>]*>(.*?)<\/h1>/.exec(html)?.[1] ?? ""
+    expect(heading).toMatch(
+      /gf-cover-accent">sınırsız\.<\/span><span class="gf-cover-after block">Öte\.<\/span>$/
+    )
+    expect(home([cover()])).not.toContain("gf-cover-after")
+  })
+
   it("preloads its picture and asks for it first; a later opening is an h2 with a lazy one", () => {
     const html = home([cover()])
 

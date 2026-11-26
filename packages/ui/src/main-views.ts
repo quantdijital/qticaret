@@ -51,6 +51,12 @@ export interface HeaderBarView {
   toolLabels?: HeaderToolLabels
   /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */
   toolsStyle?: HeaderToolsStyle
+  /**
+   * The one-row header over the page's first section when that is a full
+   * photograph opening: see-through, its words light, until the page
+   * scrolls; absent: on its own ground, as before.
+   */
+  overCover?: true
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**

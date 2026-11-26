@@ -90,6 +90,12 @@ export interface StoreMainSections {
     tool_labels?: HeaderToolLabels
     /** The one-row header's tools (`HEADER_TOOLS_STYLES`); absent: `round`. */
     tools_style?: HeaderToolsStyle
+    /**
+     * The one-row header (`inline`) over a full photograph opening: true,
+     * see-through with light words while the page's first section is that
+     * opening; absent: on its own ground, as before.
+     */
+    over_cover?: boolean
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
     /**

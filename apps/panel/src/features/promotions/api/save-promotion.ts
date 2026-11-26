@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 import type { createBody } from "../form"
-import { minimumOf, scopeOf } from "../scope"
+import { audienceOf, isAudienceRule, minimumOf, sameAudience, scopeOf } from "../scope"
 import type { BudgetLike, RuleInput, RuleLike } from "../scope"
 import type { Promotion } from "./promotions"
 
@@ -52,15 +52,24 @@ function scopeChange(existing: Promotion & Detail, body: Body) {
   }
 }
 
+const asRules = (rules: readonly RuleInput[]): RuleLike[] =>
+  rules.map((rule) => ({
+    attribute: rule.attribute,
+    values: rule.values.map((value) => ({ value })),
+  }))
+
 // The basket minimum, compared as the form shows it: "150" and "150.00" are one minimum
 function minimumChange(existing: Promotion & Detail, body: Body) {
-  const wanted = minimumOf(
-    body.rules.map((rule) => ({
-      attribute: rule.attribute,
-      values: rule.values.map((value) => ({ value })),
-    }))
-  )
-  return minimumOf(existing.rules) === wanted ? {} : { minimum: body.rules }
+  const rules = body.rules.filter((rule) => !isAudienceRule(rule))
+  return minimumOf(existing.rules) === minimumOf(asRules(rules)) ? {} : { minimum: rules }
+}
+
+// Who may use it (K1/K2): its customer groups and first-order rule, replaced together
+function audienceChange(existing: Promotion & Detail, body: Body) {
+  const rules = body.rules.filter((rule) => isAudienceRule(rule))
+  return sameAudience(audienceOf(existing.rules), audienceOf(asRules(rules)))
+    ? {}
+    : { audience: rules }
 }
 
 /** What the form changed in an existing promotion, as `POST /admin/promotions/:id/offer` takes it. */
@@ -89,6 +98,7 @@ function offerChanges(input: SaveInput) {
           }),
     },
     ...(shipping ? {} : { ...scopeChange(existing, body), ...minimumChange(existing, body) }),
+    ...audienceChange(existing, body),
     ...(input.perCustomerChanged ? { per_customer: { limit: input.perCustomer } } : {}),
     ...(input.datesChanged
       ? {
@@ -105,7 +115,7 @@ function offerChanges(input: SaveInput) {
 /**
  * A new promotion in one call; an existing one's changes in one call too,
  * which the server applies whole or not at all (code, limit and value; the
- * items and basket minimum; its campaign's days and per-customer limit).
+ * items and basket minimum; who may use it; its campaign's days and per-customer limit).
  */
 export function useSavePromotion() {
   const client = useQueryClient()

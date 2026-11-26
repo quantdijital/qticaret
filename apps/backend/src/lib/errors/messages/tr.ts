@@ -43,6 +43,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Paketlenmiş, kargoya verilmiş ya da iptal edilmiş sipariş düzenlenemez.",
   "orders.edit_invoiced":
     "Bu siparişin faturası kesildi ya da kesiliyor; sipariş artık düzenlenemez.",
+  "orders.billing_invoiced":
+    "Bu siparişin faturası kesildi ya da kesiliyor; fatura adresi artık değiştirilemez.",
   "orders.edit_payment_unsupported":
     "Bu siparişin kalemleri düzenlenemez: yalnızca kartla ödenmiş siparişler düzenlenir. Kapıda ödeme ve havalede siparişi iptal edip yenisini oluşturun.",
   "orders.edit_difference_changed":
@@ -117,11 +119,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",
   "bulk_edit.price_out_of_range": "Yeni fiyat sıfırın altına iner ya da üst sınırı aşar.",
   "bulk_edit.product_missing": "Ürün bulunamadı; silinmiş olabilir.",
+  "bulk_edit.sale_out_of_range":
+    "İndirim tutarı bir varyantın normal fiyatına eşit ya da ondan büyük.",
+  "bulk_edit.sale_refused": "İndirimli fiyat bu ürüne uygulanamadı.",
   "bulk_edit.stock_negative": "Yeni stok sıfırın altına iner.",
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
+  "bulk_edit.tag_unknown": "Bu adla bir etiket yok.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
+  "cart.max_quantity": "{title} ürününden bir siparişte en çok {limit} adet alınabilir.",
   "cart.out_of_stock":
     "Bu ürün az önce tükendi: {{name}}. Sepetinizden çıkarın ya da adedini azaltın.",
   "cart.shipping_changed":
@@ -462,6 +469,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.manual_flat_only":
     "Mağazanın kendi gönderdiği seçenek yalnızca sabit ücretle fiyatlanabilir.",
   "shipping.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
+  "shipping.class_unknown":
+    "Bu kargo sınıfı artık yok; Ayarlar > Kargo'daki sınıflardan birini ya da Standart'ı seçin.",
+  "shipping.class_key_taken": "İki kargo sınıfı aynı anahtarı kullanıyor.",
   "returns.unknown": "İade talebi bulunamadı.",
   "returns.status_invalid": "İade talebi bu işlem için uygun durumda değil.",
   "returns.items_invalid":
@@ -583,6 +593,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "account.login_email_missing": "Bu oturumun bir e-posta adresi yok; hesap açılamadı.",
   "messaging.consent_evidence_required": "İznin nasıl verildiğini en az 10 karakterle yazın.",
   "carts.unknown": "Sepet bulunamadı ya da tamamlanmış.",
+  "checkout.order_note_too_long": "Sipariş notu en fazla 500 karakter olabilir.",
   "customer_segments.rules_empty": "Segment için en az bir kural seçin.",
   "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
   "wishlist.product_unknown": "Ürün bulunamadı.",
@@ -600,9 +611,24 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
   "stock_alerts.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Ürün sayfasından yeniden isteyebilirsiniz.",
+  "publish_schedule.not_draft": "Yalnız taslak ürün planlanabilir; bu ürün zaten yayında.",
+  "publish_schedule.past": "Yayın için şu andan sonraki bir zaman seçin.",
+  "publish_schedule.too_far": "Yayın en çok bir yıl sonrasına planlanabilir.",
+  "publish_schedule.failed":
+    "Planlanan yayın tamamlanamadı; ürünü elle yayınlayın ya da yeniden planlayın.",
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",
+  "stock_tracking.variant_unknown": "Varyant bu üründe bulunamadı; sayfayı yenileyin.",
+  "stock_tracking.reserved":
+    "Bu varyantın açık siparişlerde ayrılmış stoğu var; siparişler tamamlanmadan stok takibi kapatılamaz.",
+  "stock_tracking.dated":
+    "Tarihli satılan üründe stok takibi açılamaz; yerleri kalkışlar belirler.",
+  "stock_tracking.no_location":
+    "Mağazanın varsayılan depo adresi yok; stok takibi için önce bir depo adresi ekleyin.",
+  "stock_tracking.kit": "Set ürünün stoğu parçalarından sayılır; adedi buradan yazılamaz.",
+  "stock_tracking.shared_count": "Aynı stok kalemini paylaşan varyantlara farklı adet yazılamaz.",
+  "stock_tracking.quantity_untracked": "Stok takibi kapalı varyanta adet yazılamaz.",
   "reviews.not_purchased": "Yalnızca teslim aldığınız ürünlere yorum yazabilirsiniz.",
   "reviews.photo_unknown": "Fotoğraflardan biri bulunamadı; yeniden ekleyin.",
   "reviews.photos_too_many": "Bir yoruma en çok 3 fotoğraf eklenebilir.",
@@ -764,7 +790,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.address_missing": "Siparişte fatura adresi yok.",
   "einvoice.tax_office_missing": "Kurumsal alıcının vergi dairesi yok.",
   "einvoice.carrier_identity_missing":
-    "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
+    "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.store_url_missing": "Mağazanın vitrin adresi yok.",
   // adr/0072: BirFatura's pull and write-back
   "einvoice.phone_missing":
@@ -774,9 +800,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.pdf_download_failed":
     "Fatura numarası kaydedildi ama BirFatura'nın PDF'i indirilemedi. PDF'i elle yükleyin.",
   "einvoice.parasut_unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı.",
-  "einvoice.parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
+  "einvoice.parasut_not_connected":
+    "Paraşüt hesabı bağlı değil (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.parasut_disconnected":
-    "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > E-Fatura).",
+    "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.parasut_refresh_unknown":
     "Paraşüt jeton yenilemesinin yanıtı alınamadı; sorun sürerse hesabı yeniden bağlayın.",
   "einvoice.parasut_code_refused":
@@ -791,7 +818,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.waived": "Bu satış için fatura kesilmez (yalnız hediye kartı satışı, avans).",
   "einvoice.pdf_present": "Bu faturanın PDF'i zaten kayıtlı.",
   "einvoice.birfatura_not_selected":
-    "BirFatura bağlantı anahtarı yalnız fatura programı BirFatura seçiliyken oluşturulur (Ayarlar > E-Fatura).",
+    "BirFatura bağlantı anahtarı yalnız fatura programı BirFatura seçiliyken oluşturulur (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.cancelled": "Bu fatura iptal edildi.",
   "einvoice.already_issued": "Bu fatura başka bir numarayla kesilmiş.",
   "einvoice.number_taken": "Bu fatura numarası başka bir faturada kayıtlı.",
@@ -1154,6 +1181,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "promotions.one_code":
     "Sepette tek bir indirim kodu kullanılabilir; önce eklediğiniz kodu çıkarın.",
   "promotions.wholesale_no_code": "Toptan siparişlerde indirim kodu kullanılamaz.",
+  "promotions.customer_group_login": "Bu kod üyelere özel; kullanmak için hesabınıza giriş yapın.",
+  "promotions.customer_group_only":
+    "Bu kod yalnızca belirli müşterilere özel; hesabınız için geçerli değil.",
+  "promotions.first_order_only": "Bu kod yalnızca ilk siparişte kullanılabilir.",
+  "promotions.audience_invalid": "Kodu kimlerin kullanabileceği geçerli değil.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
   "seo.entity_type_invalid": "Kayıt türü geçerli değil.",

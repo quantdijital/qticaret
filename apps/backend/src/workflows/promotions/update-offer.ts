@@ -15,6 +15,7 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { EMPTY_BATCH, MINIMUM_ATTRIBUTE, PER_CUSTOMER_ATTRIBUTE, planOffer } from "./offer-plan"
 import type { OfferState, UpdateOfferInput } from "./offer-plan"
+import { AUDIENCE_ATTRIBUTES } from "../../lib/promotions/restrictions"
 
 export type { OfferRule, UpdateOfferInput } from "./offer-plan"
 
@@ -59,6 +60,9 @@ const readOfferStep = createStep(
       minimum_rule_ids: ruleIds(promotion.rules)
         .filter((rule) => rule.attribute === MINIMUM_ATTRIBUTE)
         .map((rule) => rule.id),
+      audience_rule_ids: ruleIds(promotion.rules)
+        .filter((rule) => AUDIENCE_ATTRIBUTES.includes(rule.attribute ?? ""))
+        .map((rule) => rule.id),
       campaign_id: campaignId,
       owns_campaign: members.every((member) => member.id === input.id),
       per_customer_budget:
@@ -72,7 +76,7 @@ const readOfferStep = createStep(
 /**
  * A promotion's changes in one go (F4.4/F4.5, ADR-0024): its code, limit
  * and value; the items it applies to and its "X al Y öde" rules; its basket
- * minimum; its campaign's days and per-customer limit, the campaign made if
+ * minimum; who may use it (K1/K2); its campaign's days and per-customer limit, the campaign made if
  * it had none. Medusa's own workflows do each part and undo it when a
  * later part fails, so no half-saved offer is left live.
  */
@@ -110,6 +114,11 @@ export const updateOfferWorkflow = createWorkflow(
       batchPromotionRulesWorkflow
         .runAsStep({ input: transform({ plan }, (data) => data.plan.minimum ?? EMPTY_BATCH) })
         .config({ name: "promotion-offer-minimum" })
+    })
+    when({ plan }, (data) => data.plan.audience !== null).then(() => {
+      batchPromotionRulesWorkflow
+        .runAsStep({ input: transform({ plan }, (data) => data.plan.audience ?? EMPTY_BATCH) })
+        .config({ name: "promotion-offer-audience" })
     })
     when({ plan }, (data) => data.plan.campaign !== null).then(() => {
       updateCampaignsWorkflow

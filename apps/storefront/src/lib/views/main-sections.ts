@@ -87,6 +87,8 @@ export function headerBarOf(
     toolLabels: headerToolLabelsOf(bar.tool_labels),
     // The one-row header's plain tools only once chosen: a bar without them is the view it was
     ...(headerToolsStyleOf(bar.tools_style) === "plain" ? { toolsStyle: "plain" as const } : {}),
+    // The one-row header over the opening only once chosen: a bar without it is the view it was
+    ...(variant === "inline" && bar.over_cover === true ? { overCover: true as const } : {}),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

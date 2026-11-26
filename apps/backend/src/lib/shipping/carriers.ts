@@ -3,6 +3,19 @@ import { z } from "@medusajs/framework/zod"
 /** Medusa's manual provider: the shop ships the parcel itself. */
 export const MANUAL_FULFILLMENT_PROVIDER_ID = "manual_manual"
 
+/**
+ * Our provider for the shop's own delivery at a flat price (adr/0087 §2):
+ * the panel's "Kendi gönderimim" with a "Sabit ücret", priced by our quote.
+ */
+export const SHOP_FULFILLMENT_PROVIDER_ID = "shop_shop"
+
+/** Its one option's `data.id`. */
+export const SHOP_FLAT_OPTION = "shop-flat"
+
+/** The shop carries the parcel itself: Medusa's manual provider, or ours. */
+export const isOwnDelivery = (providerId: string | null | undefined): boolean =>
+  providerId === MANUAL_FULFILLMENT_PROVIDER_ID || providerId === SHOP_FULFILLMENT_PROVIDER_ID
+
 /** Geliver as Medusa's fulfillment module names it: `<identifier>_<id>` from medusa-config. */
 export const GELIVER_FULFILLMENT_PROVIDER_ID = "geliver_geliver"
 

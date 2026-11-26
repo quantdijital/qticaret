@@ -5,7 +5,7 @@ import { expect, pageHeading, test } from "./support/guard"
  * Variants in place (docs/06 "Ürün sayfası", the owner 2026-11-25:
  * WooCommerce's variations, no dialog): a value typed into an option,
  * "Varyantları oluştur" makes the missing variant, its row opens in place
- * and the page's save bar saves its price, and the bulk bar sets the stock
+ * and the page's "Kaydet" in the header saves its price, and the bulk bar sets the stock
  * of every variant. The test makes its own draft product and deletes it at
  * the end: nothing of the shop's own changes.
  */
@@ -58,7 +58,7 @@ async function makeProduct(page: Page): Promise<string> {
   return ((await answer.json()) as { product: { id: string } }).product.id
 }
 
-const saveBar = (page: Page) => page.getByRole("region", { name: "Kaydedilmemiş değişiklikler" })
+const headerSave = (page: Page) => page.getByRole("group", { name: "Sayfanın kaydı" })
 
 test.describe("product variants in place", () => {
   test("creates a variant from a new value, prices it in its row and sets every stock", async ({
@@ -86,15 +86,18 @@ test.describe("product variants in place", () => {
       await expect(page.locator("[data-variant-row]")).toHaveCount(3)
       await expect.poll(async () => (await variants(page, id)).length).toBe(3)
 
-      // Its row opens in place, no dialog; the save bar saves its price
+      // Its row opens in place, no dialog; the header's "Kaydet" saves its price
       const row = page.getByRole("button", { name: /Renk: Lacivert/ })
       await expect(row).toContainText("Fiyat yok")
       await row.click()
       await expect(page.getByRole("dialog")).toHaveCount(0)
       await page.locator("#variant-price").fill("719,90")
-      await expect(saveBar(page)).toBeVisible()
-      await saveBar(page).getByRole("button", { name: "Kaydet" }).click()
-      await expect(saveBar(page)).toHaveCount(0)
+      const save = headerSave(page).getByRole("button", { name: "Kaydet", exact: true })
+      await expect(save).toBeEnabled()
+      await save.click()
+      await expect(
+        headerSave(page).getByRole("button", { name: "Kaydedildi", exact: true })
+      ).toBeDisabled()
       await expect
         .poll(async () => {
           const made = (await variants(page, id)).find((each) => each.title === "Lacivert")

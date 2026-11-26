@@ -2,7 +2,7 @@
   "settings_version": 2,
   "theme": "atolye",
   "colors": { "primary": "#1f5c4a", "accent": "#b4541f", "background": "warm" },
-  "typography": { "heading": "playfair", "body": "inter" },
+  "typography": { "heading": "inter", "body": "inter", "accent": "playfair" },
   "radius": "soft",
   "product_card": {
     "ratio": "4:3",

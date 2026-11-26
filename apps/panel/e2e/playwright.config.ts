@@ -32,7 +32,7 @@ function groupFiles(group: string | undefined): { testMatch: RegExp; testIgnore?
  * Files that change what every product page draws, the shop's product page
  * layout (it hides parts): run alone, after the others, never beside a test
  * of the product page. Beside one, a part hidden in between left that page
- * once its finding was fixed (product-save-bar's SEO card, 2026-11-25).
+ * once its finding was fixed (product-header-save's SEO card, 2026-11-25).
  */
 const SHOP_WIDE = /product-layout\.e2e\.ts$/
 const group = process.env["E2E_GROUP"]

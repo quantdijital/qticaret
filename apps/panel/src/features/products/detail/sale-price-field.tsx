@@ -136,7 +136,7 @@ export function SalePriceView({
 
 /**
  * The field on its own: saved by its "İndirimi kaydet" and through the
- * page's one save bar (the variant's dialog, the one-variant card).
+ * page's one header save (the variant's dialog, the one-variant card).
  */
 export function SalePriceField({
   productId,

@@ -18,8 +18,11 @@ export const HERO_FULL_SETTINGS = {
   search_position: ["inside", "overlap"],
   /** `screen`: about the screen's height; `tall`: about two thirds of it. */
   height: ["screen", "tall"],
-  /** The veil over the photograph, under the words; `side` darkest on the words' side, fading across. */
-  scrim: ["light", "strong", "side"],
+  /**
+   * The veil over the photograph, under the words; `side` darkest on the words' side, fading across;
+   * `faint` barely there, a shade only at the top and foot.
+   */
+  scrim: ["light", "strong", "side", "faint"],
   align: ["center", "start"],
   /**
    * `full`: the photograph behind the words; `end`: beside them, the words on
@@ -45,6 +48,10 @@ export const HERO_FULL_SETTINGS = {
   trust_place: ["foot", "inside"],
   /** The hand note over the heading, or in the opening's top corner with a brush stroke under it. */
   note_place: ["heading", "corner"],
+  /** The heading in one face, or set light with its second part inline in an italic serif (the accent face). */
+  title_mix: ["none", "serif_accent"],
+  /** The words together, or the heading at the top and the text and buttons at the foot, the picture between. */
+  words_place: ["together", "split"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type HeroFullSetting = keyof typeof HERO_FULL_SETTINGS
@@ -67,6 +74,8 @@ export const HERO_FULL_DEFAULTS: { readonly [S in HeroFullSetting]: HeroFullStep
   title_style: "standard",
   trust_place: "foot",
   note_place: "heading",
+  title_mix: "none",
+  words_place: "together",
 }
 
 export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
@@ -74,6 +83,7 @@ export type HeroFullSettings = { [S in HeroFullSetting]: HeroFullStep<S> }
 /** The heading's accent line at its longest, and the trust badges the opening shows at most. */
 export const HERO_FULL_LIMITS = {
   title_accent: 90,
+  title_after: 90,
   trust: 4,
 } as const
 
@@ -106,6 +116,8 @@ export function heroFullSettingsOf(
     title_style: heroFullStepOf("title_style", section.title_style),
     trust_place: heroFullStepOf("trust_place", section.trust_place),
     note_place: heroFullStepOf("note_place", section.note_place),
+    title_mix: heroFullStepOf("title_mix", section.title_mix),
+    words_place: heroFullStepOf("words_place", section.words_place),
   }
 }
 
@@ -119,6 +131,12 @@ export interface StoreHeroFull extends Partial<HeroFullSettings> {
   variant: "full_image"
   /** A second line of the heading, drawn in the shop's colour; none: no line. */
   title_accent?: string | null
+  /**
+   * A last line of the heading after the accent, in the heading's own face
+   * and ink (with `title_mix`, the accent ends the first line and this is
+   * the second); none: no line, the heading as before.
+   */
+  title_after?: string | null
   /** The shop's trust badges in the opening (at most `HERO_FULL_LIMITS.trust`). */
   show_trust?: boolean
   /**

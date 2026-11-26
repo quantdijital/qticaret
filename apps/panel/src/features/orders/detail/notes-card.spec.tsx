@@ -7,7 +7,7 @@ import type { OrderNote } from "@/features/orders/api/notes"
 import { NotesCard } from "./notes-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
-const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn() }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast }))
@@ -83,6 +83,57 @@ describe("NotesCard", () => {
       body: { body: "Kargo yarın çıkacak." },
     })
     expect(box).toHaveValue("")
+  })
+
+  it("sends a note to the customer when asked, and says when it did not go", async () => {
+    const user = userEvent.setup()
+    serve({ orders: true })
+    fetchMock.mockImplementation((path: string, init?: { method?: string }) => {
+      if (path === "/admin/staff/me") {
+        return Promise.resolve({ user_id: "user_1", role: "operations", can: { orders: true } })
+      }
+      if (init?.method === "POST") {
+        return Promise.resolve({ note: { id: "onote_3" }, sent: "sent" })
+      }
+      return Promise.resolve({ notes: NOTES })
+    })
+    renderCard()
+    const box = await screen.findByRole("textbox", { name: "Yeni not" })
+
+    await user.type(box, "Kılıf yarın geliyor.")
+    await user.click(screen.getByRole("checkbox", { name: /Müşteriye gönder/ }))
+    await user.click(screen.getByRole("button", { name: "Ekle ve gönder" }))
+
+    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/notes", {
+      method: "POST",
+      body: { body: "Kılıf yarın geliyor.", notify_customer: true },
+    })
+    expect(toast.success).toHaveBeenCalledWith("Not eklendi ve müşteriye gönderildi.")
+    // Unticked again for the next note
+    expect(screen.getByRole("checkbox", { name: /Müşteriye gönder/ })).not.toBeChecked()
+
+    fetchMock.mockImplementation((path: string, init?: { method?: string }) =>
+      init?.method === "POST"
+        ? Promise.resolve({ note: { id: "onote_4" }, sent: "template_off" })
+        : Promise.resolve({ notes: NOTES, user_id: "user_1", can: { orders: true } })
+    )
+    await user.type(box, "İkinci not.")
+    await user.click(screen.getByRole("checkbox", { name: /Müşteriye gönder/ }))
+    await user.click(screen.getByRole("button", { name: "Ekle ve gönder" }))
+    expect(toast.warning).toHaveBeenCalledWith(
+      "Not eklendi ama müşteriye gönderilmedi: bu ileti Ayarlar > Müşteri iletileri'nde kapalı."
+    )
+  })
+
+  it("marks the notes that went to the customer", async () => {
+    serve({ orders: true }, [
+      { ...NOTES[0], sent_to_customer: "sent" } as OrderNote,
+      { ...NOTES[1], sent_to_customer: "skipped" } as OrderNote,
+    ])
+    renderCard()
+
+    expect(await screen.findByText("Müşteriye gönderildi")).toBeInTheDocument()
+    expect(screen.getByText("Gönderilemedi")).toBeInTheDocument()
   })
 
   it("asks before it removes a note", async () => {

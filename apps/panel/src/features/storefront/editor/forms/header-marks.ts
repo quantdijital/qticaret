@@ -4,12 +4,13 @@ import { HEADER_GROUPS, headerCatalogIn } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
 import { headerCatalogOffers } from "./header-catalog-steps"
 
-/** Every header's own settings as a new one has them (the steps' first, staying at the top). */
+/** Every header's own settings as a new one has them (the steps' first, staying at the top, on its own ground). */
 const HEADER_DEFAULTS = {
   search_style: "field",
   menu_images: "submenus",
   tool_labels: "show",
   sticky: true,
+  over_cover: false,
 } as const
 
 /**

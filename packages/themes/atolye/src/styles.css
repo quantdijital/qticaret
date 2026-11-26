@@ -44,6 +44,7 @@
 @import "./menu.css";
 @import "./header-catalog.css";
 @import "./header-inline.css";
+@import "./header-over.css";
 @import "./search-toggle.css";
 @import "./look.css";
 @import "./thin.css";
@@ -61,6 +62,8 @@
 @import "./search-boxed.css";
 @import "./search-fields.css";
 @import "./hover.css";
+@import "./hero-full-mix.css";
+@import "./hero-full-split.css";
 @import "./collage.css";
 @import "./panels.css";
 @import "./surface.css";

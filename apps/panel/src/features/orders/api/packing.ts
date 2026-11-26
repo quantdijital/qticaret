@@ -48,6 +48,8 @@ export interface PackingOrder {
   items: PackingItem[]
   /** The team's notes on the order: the pick list's; a slip's only when asked. */
   notes: string[]
+  /** The shopper's own note at checkout, printed on every slip (Batch 8 / O1). */
+  customer_note?: string | null
   totals: { items: string; shipping: string; discount: string; total: string } | null
 }
 

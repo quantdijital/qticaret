@@ -74,8 +74,20 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "f6bd41322804947ea20412facd0faead72e24871506074163b4685723f8c3b9b",
+      "sha256": "7c46a2d7e281fc34384eec4cc6fef82dbea7d2e821841144265136ec0d3ddb6d",
       "file": "header-inline.css"
+    },
+    {
+      "sha256": "f6cb7816473d779f5813ae4a549e88bc94f657552d7a330fda95dc8aef8c7bf7",
+      "file": "header-over.css"
+    },
+    {
+      "sha256": "b07040b5991d71e1d8c3a05572ed988175fd6c2415f4bfaf5c6e1f829e39a292",
+      "file": "hero-full-mix.css"
+    },
+    {
+      "sha256": "2ccd8ed38ecd13a8bbd6b2a5261c9ff85e8195bcca2cd54e620c219365eead65",
+      "file": "hero-full-split.css"
     },
     {
       "sha256": "3443bd86317cadf03bc96d097337943958625e519d2b765ed7c8b20a9d8d03a6",
@@ -178,7 +190,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "dc1d8fd85c097f3633174be32f12b801f4e6114a64b786f0b8fd3fc7dda54f35",
+      "sha256": "271ec20ab09bc06f260dda1c256ed778c0b1346ceb4311b5e65d1724ed2c4752",
       "file": "styles.css"
     },
     {

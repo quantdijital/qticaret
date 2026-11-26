@@ -144,7 +144,7 @@ describe("CommandMenu screens by everyday words (adr/0079 Y1-0)", () => {
 
     const first = (await screen.findAllByRole("option"))[0]
     expect(first).toHaveTextContent("Ayarlar › Kargo ve teslimat › Seçenekler ve ücretler")
-    expect(first).toHaveTextContent("kargo ücretleri ve ücretsiz kargo sınırı")
+    expect(first).toHaveTextContent("kargo ücretleri, ücretsiz kargo sınırı")
     await user.click(screen.getByText("Seçenekler ve ücretler"))
 
     expect(navigate).toHaveBeenCalledWith({ to: "/settings/shipping", search: { part: "options" } })

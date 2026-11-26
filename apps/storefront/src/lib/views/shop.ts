@@ -21,7 +21,7 @@ import { shopMarks } from "./card-extras"
 import { newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
-import { linePicturesOf, productPathsOf } from "./line-paths"
+import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
 import { navigation, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
@@ -109,7 +109,7 @@ export async function shopView(): Promise<ShopView> {
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
   // A wholesaler's drawer is without KDV (ADR-0068 §5); asked only with lines to show
-  const [paths, linePaths, linePictures, wholesale] = await Promise.all([
+  const [paths, linePaths, linePictures, wholesale, freeProducts] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
@@ -117,6 +117,8 @@ export async function shopView(): Promise<ShopView> {
     productPathsOf(cart?.items ?? []),
     linePicturesOf(cart?.items ?? []),
     customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
+    // adr/0087 §3: a cart of free-shipping products says so instead of the meter
+    freeShippingProductsOf(cart?.items ?? []),
   ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
   // Each top entry without the shop's own picture shows its newest product's photo;
@@ -169,7 +171,8 @@ export async function shopView(): Promise<ShopView> {
       linePictures,
       wholesale.active && wholesale.vatExclusive,
       // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
-      wholesaleCheckoutBlocked(cart, wholesale, t)
+      wholesaleCheckoutBlocked(cart, wholesale, t),
+      freeProducts
     ),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>

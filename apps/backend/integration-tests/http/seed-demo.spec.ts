@@ -124,14 +124,23 @@ medusaIntegrationTestRunner({
           },
           { headers }
         )
-        const { data } = await http.get<{ shipping_options: { name: string; amount: number }[] }>(
+        const { data } = await http.get<{ shipping_options: { id: string; name: string }[] }>(
           `/store/shipping-options?cart_id=${created.cart.id}`,
           { headers }
         )
+        // A flat amount priced by our quote (adr/0087): asked per option, as the storefront does
+        const priced = await Promise.all(
+          data.shipping_options.map(async (option) => {
+            const { data: one } = await http.post<{ shipping_option: { amount: number } }>(
+              `/store/shipping-options/${option.id}/calculate`,
+              { cart_id: created.cart.id, data: {} },
+              { headers }
+            )
+            return { name: option.name, amount: one.shipping_option.amount }
+          })
+        )
 
-        expect(
-          data.shipping_options.map((option) => ({ name: option.name, amount: option.amount }))
-        ).toEqual(
+        expect(priced).toEqual(
           expect.arrayContaining(
             DEMO_SHIPPING_OPTIONS.map((option) => ({ name: option.name, amount: option.price }))
           )

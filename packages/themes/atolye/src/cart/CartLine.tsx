@@ -80,6 +80,7 @@ function BookingControls({ line, t }: { line: CartLineView; t: Translate }) {
 function Extras({ line, t, actions }: { line: CartLineView; t: Translate; actions: ThemeActions }) {
   return (
     <>
+      {line.shippingNote && <p className="text-xs text-text-3">{line.shippingNote}</p>}
       {typeof line.maxQuantity === "number" && (
         <p className="text-xs text-text-3">
           {t("addons.max_quantity_hint", { max: line.maxQuantity })}

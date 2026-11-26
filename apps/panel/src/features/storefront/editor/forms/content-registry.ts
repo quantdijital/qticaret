@@ -92,6 +92,8 @@ export type ContentField =
   | "title_style"
   | "trust_place"
   | "note_place"
+  | "title_mix"
+  | "words_place"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {

@@ -1,17 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
-import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
-import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
-import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { PromotionSettings } from "@/features/settings/api/sections"
+import { FREE_SHIPPING_ANCHOR } from "@/features/settings/components/free-shipping-card"
 import { errorText } from "@/lib/errors"
-import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 function SwitchRow({
   id,
@@ -40,85 +38,41 @@ function SwitchRow({
 }
 
 /**
- * Shop-wide promotion rules (F4.4, F4.5, ADR-0024): free shipping from a
- * basket total, given to every flat-rate shipping option, and whether a
- * cart may carry more than one code.
+ * Shop-wide promotion rules (F4.4, ADR-0024): whether a cart may carry
+ * more than one code. Free shipping from a basket total (F4.5) is edited
+ * under Settings > Shipping (the owner, 2026-11-26); here it is a line
+ * that says where it stands and links there.
  */
 export function PromotionSettingsCard() {
   const { t } = useTranslation()
   const section = useQuery(sectionQuery<PromotionSettings>("promotions"))
   const save = useSaveSection<PromotionSettings>("promotions")
   const stored = section.data?.values
-  const [draft, setDraft] = useState<string | null>(null)
-  const [on, setOn] = useState<boolean | null>(null)
-  const freeOn = on ?? (stored?.free_shipping_threshold ?? null) !== null
-  const text =
-    draft ??
-    (stored?.free_shipping_threshold ? formatMoneyInput(stored.free_shipping_threshold) : "")
-  const amount = parseMoneyInput(text)
-  const valid = !freeOn || (amount !== null && amount > 0)
-  const changed = (freeOn ? amount : null) !== (stored?.free_shipping_threshold ?? null) && valid
-  const persist = (values: Partial<PromotionSettings>, done?: () => void) => {
-    save.mutate(values, {
-      onSuccess: () => {
-        done?.()
-        toast.success(t("promotions.settings.saved"))
-      },
-      onError: (failure) => toast.error(errorText(t, failure)),
-    })
-  }
+  const threshold = stored?.free_shipping_threshold ?? null
   return (
     <SectionCard title={t("promotions.settings.title")} description={t("promotions.settings.hint")}>
       {!stored ? (
-        <Skeleton className="h-28" />
+        <Skeleton className="h-20" />
       ) : (
         <div className="flex flex-col gap-5">
-          <form
-            className="flex flex-col gap-3"
-            onSubmit={(event) => {
-              event.preventDefault()
-              persist({ free_shipping_threshold: freeOn ? amount : null }, () => {
-                setDraft(null)
-                setOn(null)
-              })
-            }}
-          >
-            <SwitchRow
-              id="free-shipping-on"
-              label={t("promotions.settings.freeShipping")}
-              hint={t("promotions.settings.freeShippingHint")}
-              checked={freeOn}
-              disabled={save.isPending}
-              onChange={setOn}
-            />
-            {freeOn ? (
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="free-shipping-threshold" className="text-sm font-medium">
-                    {t("promotions.settings.threshold")}
-                  </label>
-                  <NumberField
-                    decimals={2}
-                    min={0}
-                    className="w-44"
-                    suffix="₺"
-                    id="free-shipping-threshold"
-                    value={text}
-                    aria-invalid={!valid || undefined}
-                    onChange={(event) => {
-                      setDraft(event.target.value)
-                    }}
-                  />
-                </div>
-              </div>
-            ) : null}
-            <div>
-              <Button type="submit" size="sm" disabled={!changed || save.isPending}>
-                {save.isPending ? <Loader2 className="animate-spin" /> : null}
-                {t("common.save")}
-              </Button>
-            </div>
-          </form>
+          <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+            <span data-testid="free-shipping-summary">
+              {t("promotions.settings.freeShippingSummary", {
+                value:
+                  threshold === null
+                    ? t("promotions.settings.freeShippingOff")
+                    : formatMoney(threshold, "try"),
+              })}
+            </span>
+            <Link
+              to="/settings/shipping"
+              search={{ part: "options" }}
+              hash={FREE_SHIPPING_ANCHOR}
+              className="text-[13px] font-medium text-primary-text underline-offset-2 hover:underline"
+            >
+              {t("promotions.settings.freeShippingEdit")}
+            </Link>
+          </p>
           <div className="border-t pt-5">
             <SwitchRow
               id="combine-codes"
@@ -127,7 +81,13 @@ export function PromotionSettingsCard() {
               checked={stored.combine_codes}
               disabled={save.isPending}
               onChange={(checked) => {
-                persist({ combine_codes: checked })
+                save.mutate(
+                  { combine_codes: checked },
+                  {
+                    onSuccess: () => toast.success(t("promotions.settings.saved")),
+                    onError: (failure) => toast.error(errorText(t, failure)),
+                  }
+                )
               }}
             />
           </div>

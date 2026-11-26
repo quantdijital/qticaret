@@ -9,7 +9,7 @@ import {
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { updateWarehouseWorkflow } from "../../workflows/stock/warehouses"
-import { TRY_CURRENCY_CODE, TR_COUNTRY_CODE } from "../bootstrap/constants"
+import { TR_COUNTRY_CODE } from "../bootstrap/constants"
 import {
   DEMO_FULFILLMENT_SET_NAME,
   DEMO_METADATA,
@@ -18,6 +18,7 @@ import {
   DEMO_LOCATION_ADDRESS,
   MANUAL_FULFILLMENT_PROVIDER_ID,
 } from "./data"
+import { SHOP_FLAT_OPTION, SHOP_FULFILLMENT_PROVIDER_ID } from "../../lib/shipping/carriers"
 
 export interface DemoFulfillment {
   stockLocationId: string
@@ -25,8 +26,8 @@ export interface DemoFulfillment {
 }
 
 /**
- * The tenant's warehouse shipping to Turkey with the manual provider and
- * flat TRY shipping options. Each piece is created only when missing.
+ * The tenant's warehouse shipping to Turkey with flat-price TRY shipping
+ * options on our own provider (adr/0087). Each piece is created only when missing.
  */
 export async function ensureDemoFulfillment(
   container: MedusaContainer,
@@ -77,14 +78,16 @@ async function ensureStockLocation(
       input: { id: locationId, add: [salesChannelId] },
     })
   }
-  if (!providerIds.includes(MANUAL_FULFILLMENT_PROVIDER_ID)) {
+  // Medusa's manual provider (returns, pickup) and ours for the flat-price options (adr/0087)
+  const unlinked = [MANUAL_FULFILLMENT_PROVIDER_ID, SHOP_FULFILLMENT_PROVIDER_ID].filter(
+    (id) => !providerIds.includes(id)
+  )
+  if (unlinked.length > 0) {
     await createLinksWorkflow(container).run({
-      input: [
-        {
-          [Modules.STOCK_LOCATION]: { stock_location_id: locationId },
-          [Modules.FULFILLMENT]: { fulfillment_provider_id: MANUAL_FULFILLMENT_PROVIDER_ID },
-        },
-      ],
+      input: unlinked.map((providerId) => ({
+        [Modules.STOCK_LOCATION]: { stock_location_id: locationId },
+        [Modules.FULFILLMENT]: { fulfillment_provider_id: providerId },
+      })),
     })
   }
   return locationId
@@ -177,18 +180,16 @@ async function ensureShippingOptions(
   await createShippingOptionsWorkflow(container).run({
     input: missing.map((option) => ({
       name: option.name,
-      price_type: "flat",
-      provider_id: MANUAL_FULFILLMENT_PROVIDER_ID,
+      // A flat amount priced by our quote (adr/0087 §2): kuruş, KDV in
+      price_type: "calculated",
+      provider_id: SHOP_FULFILLMENT_PROVIDER_ID,
+      data: { id: SHOP_FLAT_OPTION, amount: option.price * 100 },
       service_zone_id: input.serviceZoneId,
       shipping_profile_id: input.shippingProfileId,
       type: { label: option.name, description: option.description, code: option.code },
       // `demo:remove` takes only what carries it. The workflow's input type
       // leaves `metadata` out; the module stores it (seed-demo.spec.ts)
       metadata: { ...DEMO_METADATA },
-      prices: [
-        { currency_code: TRY_CURRENCY_CODE, amount: option.price },
-        { region_id: input.regionId, amount: option.price },
-      ],
       rules: [
         { attribute: "enabled_in_store", operator: "eq", value: "true" },
         { attribute: "is_return", operator: "eq", value: "false" },

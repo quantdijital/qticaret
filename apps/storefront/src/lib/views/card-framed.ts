@@ -3,7 +3,7 @@ import type { CardButtonStyle } from "@qticaret/types"
 import type { PriceDisplay, StoreLayoutSection, StoreProduct } from "@qticaret/types"
 import { CARD_VARIANTS } from "@qticaret/types/section-variants"
 import { paidAmount } from "./price"
-import { isShipped } from "./product-shipping"
+import { FREE_SHIPPING_CLASS, isShipped } from "./product-shipping"
 
 /**
  * The framed card's switches (adr/0049 Ek 2026-11-14 §3.3, E5), the theme
@@ -19,7 +19,8 @@ export interface FramedCardOptions {
 }
 
 /**
- * Whether every price the card stands for reaches the free shipping
+ * Whether the product ships free: in the free shipping class (adr/0087 §3,
+ * whatever its price), or every price the card stands for reaches the
  * threshold: its lowest shown price (the backend's, never worked out
  * here) at or over it, for a product the shop ships.
  */
@@ -28,7 +29,13 @@ function shipsFree(
   displays: Readonly<Record<string, PriceDisplay>>,
   from: number | null
 ): boolean {
-  if (from === null || !(from > 0) || !isShipped(product)) {
+  if (!isShipped(product)) {
+    return false
+  }
+  if (product.product_extension?.shipping_class === FREE_SHIPPING_CLASS) {
+    return true
+  }
+  if (from === null || !(from > 0)) {
     return false
   }
   const amounts = (product.variants ?? []).flatMap((variant) => {

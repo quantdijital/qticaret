@@ -34,6 +34,15 @@
     "discardText": "The changes in this window are not saved; they are lost if you go on.",
     "discardTitle": "Discard unsaved changes?"
   },
+  "headerSave": {
+    "changes_one": "Changes in {{count}} part",
+    "changes_other": "Changes in {{count}} parts",
+    "label": "Page save",
+    "saved": "Saved"
+  },
+  "headerMenu": {
+    "more": "More actions"
+  },
   "infoTip": {
     "label": "Info: {{name}}"
   },
@@ -67,11 +76,6 @@
   },
   "recordStepper": {
     "position": "{{at}} / {{total}}"
-  },
-  "saveBar": {
-    "label": "Unsaved changes",
-    "text_one": "Unsaved changes",
-    "text_other": "Unsaved changes (in {{count}} parts)"
   },
   "wizard": {
     "stepOf": "Step {{step}} of {{total}}"

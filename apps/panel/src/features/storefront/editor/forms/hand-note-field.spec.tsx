@@ -96,7 +96,15 @@ describe("a section's hand note in the panel", () => {
           expect(note[key]).toBeTruthy()
         }
       }
-      expect(Object.keys(theme.accentFonts)).toEqual(["none", "caveat", "dancing-script", "kalam"])
+      expect(Object.keys(theme.accentFonts)).toEqual([
+        "none",
+        "caveat",
+        "dancing-script",
+        "kalam",
+        "dm-serif",
+        "fraunces",
+        "playfair",
+      ])
       expect(theme.accentFont && theme.accentFontTerm && theme.accentFontHint).toBeTruthy()
     }
     expect(tr.storefront.editor.heroFull.note.hint).toMatch(
@@ -164,7 +172,7 @@ describe("the theme's accent font in the panel", () => {
     const box = screen.getByRole("combobox", { name: /^Vurgu yazı tipi/ })
     expect(box).toHaveTextContent("Yok")
     expect(box).toHaveAttribute("id", "theme-typography-accent")
-    expect(screen.getByText("el yazısı · font-family").tagName).toBe("SMALL")
+    expect(screen.getByText("el yazısı · tırnaklı · font-family").tagName).toBe("SMALL")
 
     const user = userEvent.setup()
     await user.click(box)

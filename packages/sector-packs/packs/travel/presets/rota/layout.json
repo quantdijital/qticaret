@@ -6,10 +6,12 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "standard",
+      "variant": "inline",
       "sticky": true,
       "menu_images": "off",
-      "search_style": "icon"
+      "search_style": "icon",
+      "over_cover": true,
+      "tools_style": "plain"
     }
   ],
   "home": [
@@ -20,23 +22,25 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "full_image",
-      "eyebrow": "Küçük gruplarla rehberli turlar",
-      "heading": "Türkiye'yi keşfetmenin",
-      "title_accent": "sınırsız yolu",
-      "text": "Kapadokya'dan Karadeniz yaylalarına, Likya Yolu'ndan Ege koylarına. Nereye, ne zaman ve kaç kişi gideceğinizi seçin.",
-      "links": [{ "$href": "/magaza", "label": "Turları incele" }],
+      "heading": "Türkiye,",
+      "title_accent": "sınır tanımadan.",
+      "title_after": "Sıradanın ötesini keşfedin.",
+      "text": "Size göre kurulan Türkiye yolculukları: kendi hızınız, kendi rotanız, kendi merakınız. Her deneyim kişisel, zahmetsiz ve gerçekten sizin.",
+      "links": [{ "$href": "/magaza", "label": "Turumu şimdi planla" }],
       "image": {
-        "$image": "images/kapak-kapadokya.webp",
-        "alt": "Gün doğarken Göreme vadileri üstünde sıcak hava balonları"
+        "$image": "images/kapak-erciyes.webp",
+        "alt": "Gün batımında karlı Erciyes Dağı ve eteklerindeki sırtlar"
       },
-      "action": "search",
+      "action": "button",
       "search_position": "inside",
       "height": "screen",
-      "scrim": "light",
+      "scrim": "faint",
       "align": "center",
       "image_side": "full",
       "edge": "straight",
-      "show_trust": false
+      "show_trust": false,
+      "title_mix": "serif_accent",
+      "words_place": "split"
     },
     {
       "id": "populerturlar",

@@ -17,7 +17,7 @@ export function VariantListHead({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex items-stretch border-t bg-muted/60 sm:border-b">
+    <div className="flex items-stretch border-y bg-muted/60">
       <PickBox
         checked={all ? true : some ? "indeterminate" : false}
         onChange={onPick}
@@ -29,10 +29,9 @@ export function VariantListHead({
       >
         <span />
         <span>{t("products.wizard.variant")}</span>
-        <span className="hidden sm:block">{t("products.wizard.price")}</span>
-        <span className="hidden sm:block">{t("products.wizard.stock")}</span>
-        <span className="hidden sm:block" />
-        <span className="hidden sm:block" />
+        <span className="text-right @lg/variants:text-left">{t("products.wizard.price")}</span>
+        <span className="hidden @lg/variants:block">{t("products.wizard.stock")}</span>
+        <span />
       </div>
     </div>
   )

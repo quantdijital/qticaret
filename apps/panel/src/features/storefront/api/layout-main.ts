@@ -55,6 +55,8 @@ interface HeaderBarCommon extends MainBase {
   tool_labels?: HeaderToolLabels
   /** The one-row header's tools (`inline` only); absent: `round`. */
   tools_style?: HeaderToolsStyle
+  /** The one-row header over a full photograph opening; absent: on its own ground. */
+  over_cover?: boolean
   /**
    * The header's action button, on every variant (the catalog header's
    * highlighted link): its words and where it goes; null or absent: none.

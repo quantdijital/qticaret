@@ -180,15 +180,28 @@ export function HeaderGroups({
       {toolLabels ? group("icons", toolLabels) : null}
       {group(
         "look",
-        <SwitchRow
-          id={FIELD_IDS.sticky(section.id)}
-          label={t(`${H}.sticky`)}
-          hint={t(`${H}.stickyHint`)}
-          checked={section.sticky}
-          onChange={(next) => {
-            onChange({ ...section, sticky: next })
-          }}
-        />
+        <>
+          <SwitchRow
+            id={FIELD_IDS.sticky(section.id)}
+            label={t(`${H}.sticky`)}
+            hint={t(`${H}.stickyHint`)}
+            checked={section.sticky}
+            onChange={(next) => {
+              onChange({ ...section, sticky: next })
+            }}
+          />
+          {section.variant === "inline" && (
+            <SwitchRow
+              id={FIELD_IDS.overCover(section.id)}
+              label={t(`${H}.overCover`)}
+              hint={t(`${H}.overCoverHint`)}
+              checked={section.over_cover === true}
+              onChange={(next) => {
+                onChange({ ...section, over_cover: next })
+              }}
+            />
+          )}
+        </>
       )}
     </>
   )

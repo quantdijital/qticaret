@@ -3,7 +3,15 @@ import { dayEnd, dayOf, dayStart } from "@qticaret/admin-ui/lib/days"
 import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { applicationMethod, buyGetMethod, buyGetOf, offerKind } from "./offer"
 import type { OfferKind } from "./offer"
-import { minimumOf, minimumRulesFor, perCustomerBudget, perCustomerOf, scopeOf } from "./scope"
+import {
+  audienceOf,
+  audienceRulesFor,
+  minimumOf,
+  minimumRulesFor,
+  perCustomerBudget,
+  perCustomerOf,
+  scopeOf,
+} from "./scope"
 import type { BudgetLike, RuleLike } from "./scope"
 import type { Promotion } from "./api/promotions"
 
@@ -37,6 +45,10 @@ export const promotionSchema = z
       .string()
       .trim()
       .regex(/^(?:[1-9]\d{0,4})?$/, { message: "promotions.errors.perCustomer" }),
+    // Who may use it (K1/K2)
+    audience: z.enum(["everyone", "groups"]),
+    groups: z.array(z.string()),
+    firstOrder: z.boolean(),
   })
   .superRefine((values, ctx) => {
     const amount = parseMoneyInput(values.value) ?? 0
@@ -66,6 +78,9 @@ export const promotionSchema = z
     if (values.kind !== "free_shipping" && values.scope !== "all" && values.scopeIds.length === 0) {
       ctx.addIssue({ code: "custom", path: ["scopeIds"], message: "promotions.errors.scope" })
     }
+    if (values.audience === "groups" && values.groups.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["groups"], message: "promotions.errors.groups" })
+    }
     if (values.minimum && !((parseMoneyInput(values.minimum) ?? 0) > 0)) {
       ctx.addIssue({ code: "custom", path: ["minimum"], message: "promotions.errors.minimum" })
     }
@@ -94,6 +109,7 @@ export function valuesOf(promotion: Promotion | null): PromotionValues {
   const campaign = promotion?.campaign as { budget?: BudgetLike | null } | null | undefined
   const counts = buyGetOf(method)
   return {
+    ...audienceOf((promotion as { rules?: RuleLike[] | null } | null)?.rules),
     scope,
     scopeIds: ids,
     minimum: minimumOf((promotion as { rules?: RuleLike[] | null } | null)?.rules),
@@ -145,7 +161,7 @@ export function createBody(values: PromotionValues, currency: string, suffix?: s
           currency,
           scope
         ),
-    rules: minimumRulesFor(parseMoneyInput(values.minimum)),
+    rules: [...minimumRulesFor(parseMoneyInput(values.minimum)), ...audienceRulesFor(values)],
     ...(dated || perCustomer
       ? {
           campaign: {

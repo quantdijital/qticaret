@@ -137,6 +137,7 @@ describe("productFacts", () => {
       label_custom: { width_mm: 100, height_mm: 150 },
       default_parcel: null,
       packing_slip_prices: false,
+      shipping_classes: [],
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -152,12 +153,14 @@ describe("productFacts", () => {
       settings,
       units,
       table_offered: true,
+      free_shipping_threshold: null,
     })
     // No option shoppers see is priced by the table: its rate is not one checkout charges
     const unoffered = productFacts(measured, null, "", undefined, {
       settings,
       units,
       table_offered: false,
+      free_shipping_threshold: null,
     })
 
     expect(facts.delivery).toEqual({ handling: [1, 2], transit: [1, 3] })
@@ -192,11 +195,13 @@ describe("productFacts", () => {
       // 5 kg: past the first band
       default_parcel: { weight: 5_000, length: 30, width: 20, height: 10 },
       packing_slip_prices: false,
+      shipping_classes: [],
     }
     const shipping = {
       settings,
       units: { weight_unit: "g", dimension_unit: "cm" } as const,
       table_offered: true,
+      free_shipping_threshold: null,
     }
     const digital = row({ product_extension: { kind: "digital" } })
 
@@ -206,5 +211,37 @@ describe("productFacts", () => {
         (variant) => variant.shippingRate
       )
     ).toEqual([null, null])
+
+    // adr/0087 §5: a free-shipping product's offers say 0; a surcharged one adds it
+    const classed = (key: string) =>
+      productFacts(
+        row({ product_extension: { condition: "used", shipping_class: key } }),
+        null,
+        "",
+        undefined,
+        {
+          ...shipping,
+          settings: {
+            ...settings,
+            shipping_classes: [{ key: "bulky", name: "Büyük", surcharge: 15_000 }],
+          },
+        }
+      )
+    expect(classed("free").variants.map((variant) => variant.shippingRate)).toEqual([0, 0])
+    expect(classed("free").shippingClass).toEqual({ free: true, surcharge: 0 })
+    expect(classed("bulky").variants.map((variant) => variant.shippingRate)).toEqual([249.9, 249.9])
+    expect(classed("gone").shippingClass).toBeUndefined()
+
+    // adr/0087 §5: a unit priced at or past the threshold ships free by the table too
+    const free = productFacts(row(), null, "", undefined, {
+      ...shipping,
+      free_shipping_threshold: 949,
+    })
+    expect(
+      free.variants.map((variant) => [variant.id, variant.price, variant.shippingRate])
+    ).toEqual([
+      ["variant_a", 899, 99.9],
+      ["variant_b", 949, 0],
+    ])
   })
 })

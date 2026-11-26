@@ -15,6 +15,8 @@ export interface HeroFullView {
   settings: HeroFullSettings
   /** The heading's second line, in the shop's colour; null: none. */
   accent: string | null
+  /** The heading's last line after the accent, in its own ink; absent: none (as before it). */
+  after?: string
   /** Set when `settings.action` is `search`; null: the buttons. */
   search: SearchFormView | null
   /** The shop's trust badges, at most four; empty: none shown. */

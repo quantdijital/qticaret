@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import {
@@ -65,7 +66,14 @@ const valuesOf = (saved: ShippingSettings, legacy: number | null): Values => {
  * it leaves the same day: the product page's "Kargo ve Teslimat" card, the
  * products' shipping details and Akakçe say them.
  */
-export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
+export function DeliveryCard({
+  saved,
+  collapse,
+}: {
+  saved: ShippingSettings
+  /** Folded under the page's "Gelişmiş" to a one-line summary. */
+  collapse?: CollapseOptions | undefined
+}) {
   const { t } = useTranslation()
   const save = useSaveSection<ShippingSettings>("shipping")
   const marketing = useQuery(sectionQuery<MarketingSettings>("marketing"))
@@ -118,7 +126,7 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
             max={99}
             id={`shipping-${kind}-min`}
             aria-label={t(`${S}.min`)}
-            className="w-36"
+            className="w-24"
             {...form.register(`${kind}_days_min`)}
           />
           –
@@ -126,7 +134,7 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
             min={0}
             max={99}
             aria-label={t(`${S}.max`)}
-            className="w-36"
+            className="w-24"
             {...form.register(`${kind}_days_max`)}
           />
           {t(`${S}.days`)}
@@ -137,6 +145,7 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
   return (
     <CardForm
       title={t(`${S}.deliveryTitle`)}
+      collapse={collapse}
       description={t(`${S}.deliveryDescription`)}
       dirty={form.formState.isDirty}
       saving={save.isPending || clearLegacy.isPending}

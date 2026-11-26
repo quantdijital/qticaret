@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { addOrderNoteWorkflow, orderNotes } from "../../../../../workflows/orders/order-notes"
+import { AUDIT_RESOURCE_ID, AUDIT_RESULT } from "../../../../http/audit/notes"
 import type { AdminPostOrderNoteType } from "./validators"
 
 /**
@@ -12,7 +13,12 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   })
 }
 
-/** POST /admin/orders/:id/notes: a note by the signed-in staff member; the shopper never sees it. */
+/**
+ * POST /admin/orders/:id/notes: a note by the signed-in staff member; the
+ * shopper sees it only when `notify_customer` e-mails it to them (Batch 9 /
+ * O3). `sent` says how that send went: `sent`, or why not (`template_off`
+ * when the shop turned the message off, `not_sent` without an address).
+ */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostOrderNoteType>,
   res: MedusaResponse
@@ -22,7 +28,11 @@ export async function POST(
       order_id: req.params["id"] ?? "",
       author_id: req.auth_context.actor_id,
       body: req.validatedBody.body,
+      notify_customer: req.validatedBody.notify_customer === true,
     },
   })
-  res.status(201).json({ note: { id: result.id } })
+  // The audit entry says a note went to the customer, and how; never its text or the address
+  res.locals[AUDIT_RESOURCE_ID] = result.id
+  res.locals[AUDIT_RESULT] = { notify_customer: result.sent !== null, sent: result.sent }
+  res.status(201).json({ note: { id: result.id }, sent: result.sent })
 }

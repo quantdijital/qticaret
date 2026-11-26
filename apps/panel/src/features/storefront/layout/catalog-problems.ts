@@ -38,6 +38,7 @@ export function heroFullProblems(section: HeroSection): Found[] {
       "title_accent",
       textProblem(section.title_accent ?? null, HERO_FULL_LIMITS.title_accent, true),
     ],
+    ["title_after", textProblem(section.title_after ?? null, HERO_FULL_LIMITS.title_after, true)],
     ["video_url", link !== null && heroVideoOf(link) === null ? "videoInvalid" : null],
     ["video_label", textProblem(section.video_label ?? null, HERO_VIDEO_LIMITS.label)],
     // The hand note over the heading: plain text within its length

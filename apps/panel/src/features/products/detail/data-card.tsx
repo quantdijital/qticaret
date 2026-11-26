@@ -51,13 +51,14 @@ const STEP: Partial<Record<string, number>> = {
  * The "Ürün verileri" card (docs/06 "Ürün sayfası"; WooCommerce's product
  * data box): the product's type ("Basit ürün" / "Varyantlı ürün") in its
  * header (making a product with variants simple asks in place below it),
- * then its tabs, a column on the left where the card is wide and
- * a wrapping row of chips above the panel where it is not (no row that
- * scrolls sideways). Genel (price), Stok, Kargo (the parcel; not for a
+ * then its tabs: a column on the left only where the card is wide (56rem),
+ * one row of tabs over the full-width panel in a desktop's main column or
+ * a tablet's (the owner 2026-11-26: the column left the panels cramped),
+ * a wrapping row of chips on a phone (no row that scrolls sideways). Genel (price), Stok, Kargo (the parcel; not for a
  * digital product or a service), Özellikler, Varyantlar (a product with
  * variants), Katalog, Gelişmiş (add-ons, price history). Every panel stays
  * drawn while another is open, so an unsaved edit is kept and saved by
- * the page's save bar; a tab the shop hid is left out.
+ * the page's header save; a tab the shop hid is left out.
  */
 export function DataCard({
   product,
@@ -133,12 +134,18 @@ export function DataCard({
         ) : null}
       </header>
       {state.confirming ? <SimpleSwitch product={product} state={state} /> : null}
-      <div className="flex min-w-0 flex-col @xl/data:flex-row">
+      <div className="flex min-w-0 flex-col @4xl/data:flex-row">
         <div
           ref={list}
           role="tablist"
           aria-label={t(`${D}.title`)}
-          className="flex flex-wrap gap-1.5 border-b p-3 @xl/data:w-40 @xl/data:shrink-0 @xl/data:flex-col @xl/data:flex-nowrap @xl/data:gap-0 @xl/data:border-r @xl/data:border-b-0 @xl/data:bg-muted/40 @xl/data:p-0 @xl/data:py-1"
+          className={cn(
+            "flex flex-wrap gap-1.5 border-b p-3",
+            // A tablet or a desktop's main column: one row of tabs over the full-width panel
+            "@xl/data:gap-x-1 @xl/data:gap-y-0 @xl/data:px-3 @xl/data:py-0",
+            // Only a wide card spares the column on the left (WooCommerce's)
+            "@4xl/data:w-44 @4xl/data:shrink-0 @4xl/data:flex-col @4xl/data:flex-nowrap @4xl/data:gap-0 @4xl/data:border-r @4xl/data:border-b-0 @4xl/data:bg-muted/40 @4xl/data:p-0 @4xl/data:py-1"
+          )}
           onKeyDown={onKeyDown}
         >
           {tabs.map((key) => {
@@ -155,17 +162,21 @@ export function DataCard({
                 data-tab={key}
                 className={cn(
                   "flex min-h-9 items-center gap-2 rounded-full border px-3 text-[13px] outline-none focus-visible:outline-2 focus-visible:outline-ring [html[data-input=pointer]_&]:outline-none",
-                  "@xl/data:min-h-10 @xl/data:rounded-none @xl/data:border-0 @xl/data:border-l-2 @xl/data:border-transparent @xl/data:px-4 @xl/data:text-left",
+                  "@xl/data:-mb-px @xl/data:min-h-11 @xl/data:gap-1.5 @xl/data:rounded-none @xl/data:border-0 @xl/data:border-b-2 @xl/data:border-transparent @xl/data:px-2.5",
+                  "@4xl/data:mb-0 @4xl/data:min-h-10 @4xl/data:gap-2 @4xl/data:border-b-0 @4xl/data:border-l-2 @4xl/data:px-4 @4xl/data:text-left",
                   selected
-                    ? "border-primary bg-primary/10 font-medium text-foreground @xl/data:border-primary @xl/data:bg-card"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "border-primary bg-primary/10 font-medium text-foreground @xl/data:border-primary @xl/data:bg-transparent @4xl/data:bg-card"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground @xl/data:hover:bg-transparent @4xl/data:hover:bg-muted"
                 )}
                 onClick={() => {
                   state.pick(key)
                 }}
               >
                 <span className="min-w-0 flex-1 truncate">{t(`${D}.tabs.${key}`)}</span>
-                <Mark mark={marks(key)} />
+                {/* A tab's tick only in the column: in a row, only what wants attention is marked */}
+                <span className="flex shrink-0 items-center [&>svg]:hidden @4xl/data:[&>svg]:block">
+                  <Mark mark={marks(key)} />
+                </span>
               </button>
             )
           })}

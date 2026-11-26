@@ -236,6 +236,8 @@ export function productPage({
     specGroups: specGroupsOf(product.attribute_values, t),
     trustBadges,
     withdrawalNote: withdrawalNoteOf(product, t),
+    // S5: left out without a limit, so a product without one is drawn as before
+    ...maxQuantityOf(product),
     // Not shipped: the page's own headings are neutral ones (a physical product's view as before)
     ...(isShipped(product) ? {} : { unshipped: true }),
   }
@@ -259,6 +261,14 @@ export function withdrawalNoteOf(product: StoreProduct, t: Translate): string | 
     return t("product.sealed_goods")
   }
   return kind === "digital" || kind === "service" ? t("product.withdrawal_excluded") : null
+}
+
+/** The product's most per order (S5) as the view takes it: a whole number from 1, or nothing. */
+export function maxQuantityOf(product: StoreProduct): { maxQuantity?: number } {
+  const value = product.product_extension?.max_quantity
+  return typeof value === "number" && Number.isInteger(value) && value >= 1
+    ? { maxQuantity: value }
+    : {}
 }
 
 /** Every variant id of the products, for one price display call. */

@@ -48,12 +48,17 @@ export function ConditionLines({
   count,
   minimum,
   perCustomer,
+  groups = 0,
+  firstOrder = false,
 }: {
   kind: string
   scope: Scope
   count: number
   minimum: number | null
   perCustomer: number | null
+  /** The customer groups it is for; 0 when it is for everyone. */
+  groups?: number
+  firstOrder?: boolean
 }) {
   const { t } = useTranslation()
   const lines = [
@@ -64,6 +69,8 @@ export function ConditionLines({
       ? [t("promotions.form.previewMinimum", { amount: formatMoney(minimum, "try") })]
       : []),
     ...(perCustomer ? [t("promotions.form.previewPerCustomer", { count: perCustomer })] : []),
+    ...(groups > 0 ? [t("promotions.form.previewGroups", { count: groups })] : []),
+    ...(firstOrder ? [t("promotions.form.previewFirstOrder")] : []),
   ]
   return lines.length > 0 ? (
     <ul className="flex flex-col gap-0.5 text-[13px] text-muted-foreground">

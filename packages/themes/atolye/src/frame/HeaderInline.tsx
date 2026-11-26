@@ -33,6 +33,8 @@ const TOOL = "gf-icon-btn gf-tool"
  * its own size, the search, account and cart small plain icons and the
  * shop's action button after them as a pill with an arrow; favourites stay
  * in the phone's row, the menu sheet and the account.
+ * Over the opening (`overCover`): marked for `header-over.css`, which lays
+ * it see-through over a first full photograph opening until the page scrolls.
  */
 export function HeaderInline({
   shop,
@@ -64,6 +66,7 @@ export function HeaderInline({
       data-variant="inline"
       data-tool-words={shop.headerBar?.toolLabels === "hide" ? "hidden" : undefined}
       data-tools={plain ? "plain" : undefined}
+      data-over-cover={shop.headerBar?.overCover ? "" : undefined}
     >
       <Container
         data-gf-head-row=""

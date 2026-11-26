@@ -38,6 +38,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.edit_after_packing": "An order packed, shipped or cancelled cannot be edited.",
   "orders.edit_invoiced":
     "This order's invoice is issued or on its way; the order can no longer be edited.",
+  "orders.billing_invoiced":
+    "This order's invoice is issued or on its way; its billing address can no longer be changed.",
   "orders.edit_payment_unsupported":
     "This order's lines cannot be edited: only orders paid by card can. For cash on delivery and bank transfer, cancel the order and place a new one.",
   "orders.edit_difference_changed":
@@ -112,11 +114,16 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.no_price": "Its variants have no TRY price; enter a price first.",
   "bulk_edit.price_out_of_range": "The new price would fall below zero or pass the limit.",
   "bulk_edit.product_missing": "Product not found; it may have been deleted.",
+  "bulk_edit.sale_out_of_range":
+    "The amount off is equal to or more than a variant's regular price.",
+  "bulk_edit.sale_refused": "The sale price could not be applied to this product.",
   "bulk_edit.stock_negative": "The new stock would fall below zero.",
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
+  "bulk_edit.tag_unknown": "There is no tag with this name.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.insufficient_stock": "There are not as many of this item in stock as you asked for.",
+  "cart.max_quantity": "At most {limit} of {title} can be bought in one order.",
   "cart.out_of_stock":
     "This item just sold out: {{name}}. Remove it from your cart or lower its quantity.",
   "cart.shipping_changed":
@@ -450,6 +457,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.setup_incomplete":
     "The shop has several warehouses and none is the default (or none at all); choose the default warehouse under Settings > Locations.",
   "shipping.manual_flat_only": "An option the shop ships itself can only have a flat price.",
+  "shipping.class_unknown":
+    "This shipping class no longer exists; pick one under Settings > Shipping, or Standard.",
+  "shipping.class_key_taken": "Two shipping classes use the same key.",
   "shipping.amount_invalid": "Enter the amount with at most two decimals.",
   "returns.unknown": "Return request not found.",
   "returns.status_invalid": "The return request is not in a state for this.",
@@ -573,6 +583,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.consent_evidence_required":
     "Write how the consent was given, in at least 10 characters.",
   "carts.unknown": "The cart was not found or is already completed.",
+  "checkout.order_note_too_long": "The order note may be at most 500 characters.",
   "customer_segments.rules_empty": "Choose at least one rule for the segment.",
   "wishlist.full": "Your saved list is full; remove a few products first.",
   "wishlist.product_unknown": "The product was not found.",
@@ -590,9 +601,23 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
   "stock_alerts.link_invalid":
     "This link is invalid, expired or already used. You can ask again from the product page.",
+  "publish_schedule.not_draft": "Only a draft can be scheduled; this product is already live.",
+  "publish_schedule.past": "Choose a publish time later than now.",
+  "publish_schedule.too_far": "A publish can be scheduled up to one year ahead.",
+  "publish_schedule.failed":
+    "The scheduled publish could not be completed; publish the product by hand or schedule it again.",
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",
+  "stock_tracking.variant_unknown": "The variant was not found on this product; reload the page.",
+  "stock_tracking.reserved":
+    "Open orders hold stock of this variant; stock tracking can be turned off once they are done.",
+  "stock_tracking.dated":
+    "A product sold by date cannot track stock; its departures decide the places.",
+  "stock_tracking.no_location": "The shop has no default location; add one before tracking stock.",
+  "stock_tracking.kit": "A kit's stock is counted from its parts; its count cannot be set here.",
+  "stock_tracking.shared_count": "Variants sharing one stock item cannot take different counts.",
+  "stock_tracking.quantity_untracked": "A variant whose stock is not tracked takes no count.",
   "reviews.not_purchased": "You can review only products you have received.",
   "reviews.photo_unknown": "One of the photos was not found; add it again.",
   "reviews.photos_too_many": "A review takes at most 3 photos.",
@@ -756,7 +781,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.address_missing": "The order has no billing address.",
   "einvoice.tax_office_missing": "The corporate buyer has no tax office.",
   "einvoice.carrier_identity_missing":
-    "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
+    "The carrier's registered name and tax id are not entered (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.store_url_missing": "The shop has no storefront address.",
   // adr/0072: BirFatura's pull and write-back
   "einvoice.phone_missing":
@@ -766,9 +791,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.pdf_download_failed":
     "The invoice number was recorded but BirFatura's PDF could not be downloaded. Upload the PDF by hand.",
   "einvoice.parasut_unavailable": "Paraşüt cannot be connected on this server yet.",
-  "einvoice.parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
+  "einvoice.parasut_not_connected":
+    "No Paraşüt account is connected (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.parasut_disconnected":
-    "Paraşüt refused the connection; connect the account again (Settings > E-invoice).",
+    "Paraşüt refused the connection; connect the account again (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.parasut_refresh_unknown":
     "Paraşüt's answer to a token refresh was lost; if it keeps failing, connect the account again.",
   "einvoice.parasut_code_refused":
@@ -1144,6 +1170,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Single-use codes can only be made from a standard promotion with a code.",
   "promotions.one_code": "A cart takes one discount code; remove the one you added first.",
   "promotions.wholesale_no_code": "Discount codes cannot be used on wholesale orders.",
+  "promotions.customer_group_login": "This code is for members; log in to your account to use it.",
+  "promotions.customer_group_only":
+    "This code is for certain customers only; it is not valid for your account.",
+  "promotions.first_order_only": "This code can be used on a first order only.",
+  "promotions.audience_invalid": "Who may use the code is not valid.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "The record ID is not valid.",

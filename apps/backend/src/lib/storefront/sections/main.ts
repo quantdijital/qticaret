@@ -181,6 +181,13 @@ const headerCommon = {
    * before it reads and stores as it did (the catalog starts it null).
    */
   highlight_link: storefrontLink.nullable().optional(),
+  /**
+   * The one-row header (`inline`) over a full photograph opening that is the
+   * page's first section: see-through with light words until the page
+   * scrolls. Absent until switched on, so a bar saved before it reads and
+   * stores as it did; read by that variant only.
+   */
+  over_cover: z.boolean().optional(),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

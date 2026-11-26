@@ -6,6 +6,7 @@ const STATE: OfferState = {
   target_rule_ids: ["prule_t1"],
   buy_rule_ids: ["prule_b1"],
   minimum_rule_ids: ["prule_m1"],
+  audience_rule_ids: ["prule_a1"],
   campaign_id: "procamp_1",
   owns_campaign: true,
   per_customer_budget: true,
@@ -33,6 +34,7 @@ describe("planOffer (F4.4/F4.5)", () => {
       basketRules: null,
       buyRules: null,
       minimum: null,
+      audience: null,
       campaign: null,
       newCampaign: null,
     })
@@ -117,5 +119,22 @@ describe("planOffer (F4.4/F4.5)", () => {
     expect(
       planOffer({ ...INPUT, per_customer: { limit: null }, campaign }, loose).newCampaign
     ).toBeNull()
+  })
+
+  it("replaces who may use it apart from the basket minimum (K1/K2)", () => {
+    const audience = [rule("customer.groups.id", ["cusgroup_1"]), rule("first_order", ["true"])]
+    const plan = planOffer({ ...INPUT, audience }, STATE)
+    expect(plan.audience).toEqual({
+      id: "promo_1",
+      rule_type: RuleType.RULES,
+      create: audience,
+      delete: ["prule_a1"],
+    })
+    expect(plan.minimum).toBeNull()
+    // Back to everyone: its rules only come off
+    expect(planOffer({ ...INPUT, audience: [] }, STATE).audience).toMatchObject({
+      create: [],
+      delete: ["prule_a1"],
+    })
   })
 })

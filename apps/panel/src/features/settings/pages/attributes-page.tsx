@@ -15,6 +15,7 @@ import { AddonTemplatesSection } from "@/features/products/addon-templates/addon
 import { TemplateDialog } from "@/features/attributes/components/template-dialog"
 import { CatalogDefaultsCard } from "@/features/settings/components/catalog-defaults-card"
 import { ProductBadgesCard } from "@/features/settings/components/product-badges-card"
+import { OutOfStockCard } from "@/features/settings/components/out-of-stock-card"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 
@@ -122,6 +123,8 @@ export function AttributesPage() {
       <CatalogDefaultsCard />
       {/* The small badge on a product card's photo, each kind on its own switch */}
       <ProductBadgesCard />
+      {/* T1: sold-out products in listings and search, shown or left out */}
+      <OutOfStockCard />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}

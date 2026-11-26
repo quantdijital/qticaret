@@ -48,14 +48,19 @@ function FontName({ font }: { font: HeadingFont | BodyFont }) {
   )
 }
 
-/** An accent face by its name, a handwriting one marked so: "Yok" alone. */
+/** The accent faces that are serifs, not handwriting. */
+const SERIF_ACCENTS: ReadonlySet<AccentFont> = new Set(["dm-serif", "fraunces", "playfair"])
+
+/** An accent face by its name, marked handwriting or serif: "Yok" alone. */
 function AccentName({ font }: { font: AccentFont }) {
   const { t } = useTranslation()
   return (
     <span className="flex items-baseline gap-2">
       {t(`${C}.accentFonts.${font}`)}
       {font === "none" ? null : (
-        <span className="text-xs text-muted-foreground">{t(`${C}.handwriting`)}</span>
+        <span className="text-xs text-muted-foreground">
+          {t(SERIF_ACCENTS.has(font) ? `${C}.serif` : `${C}.handwriting`)}
+        </span>
       )}
     </span>
   )

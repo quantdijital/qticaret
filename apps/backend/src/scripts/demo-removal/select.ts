@@ -5,8 +5,8 @@ import {
   DEMO_ORDER_ADDRESS_1,
   DEMO_PRODUCTS,
   DEMO_SHIPPING_OPTIONS,
-  MANUAL_FULFILLMENT_PROVIDER_ID,
 } from "../seed/data"
+import { isOwnDelivery } from "../../lib/shipping/carriers"
 
 /**
  * What `demo:remove` takes out of a development database, decided from
@@ -132,7 +132,7 @@ export const looksLikeDemoShippingOption = (option: ShippingOptionRow): boolean 
     (demo) =>
       demo.name === option.name &&
       demo.code === option.type?.code &&
-      option.provider_id === MANUAL_FULFILLMENT_PROVIDER_ID
+      isOwnDelivery(option.provider_id)
   )
 
 /**

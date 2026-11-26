@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { notificationText } from "../../lib/notifications/messages"
+import { orderNumberOf, orderRefText } from "../../lib/notifications/order-number"
 import { alertStaff } from "../messaging/staff"
 
 /**
@@ -60,6 +61,13 @@ const PROVIDER_NAMES: Readonly<Record<string, string>> = {
   wholesale: "Toptan fiyat denetimi",
 }
 
+// The issues whose `cart_id` is an order's id (a refund's)
+const ORDER_ISSUES: ReadonlySet<PaymentIssue> = new Set([
+  "refund_incomplete",
+  "refund_unresolved",
+  "cancel_refund_order_open",
+])
+
 const amountText = (kurus: number | null | undefined) =>
   typeof kurus === "number" ? `${(kurus / 100).toFixed(2).replace(".", ",")} TRY` : "—"
 
@@ -73,10 +81,14 @@ export async function alertPaymentIssue(
   input: PaymentIssueInput
 ): Promise<void> {
   const provider = PROVIDER_NAMES[input.provider] ?? input.provider
+  // An order refund's issue carries the order: named by its number, never its id
+  const orderNumber = ORDER_ISSUES.has(input.issue)
+    ? await orderNumberOf(container, input.cart_id)
+    : null
   const values = {
     provider,
     reference: input.reference,
-    cart: input.cart_id ?? "—",
+    cart: ORDER_ISSUES.has(input.issue) ? orderRefText(orderNumber) : (input.cart_id ?? "—"),
     amount: amountText(input.amount),
   }
   try {
@@ -94,6 +106,7 @@ export async function alertPaymentIssue(
         provider: input.provider,
         reference: input.reference,
         cart_id: input.cart_id,
+        ...(orderNumber ? { order_number: orderNumber } : {}),
         amount: input.amount ?? null,
         ...notificationText(`payments.${input.issue}`, values),
       },

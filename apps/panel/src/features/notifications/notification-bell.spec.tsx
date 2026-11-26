@@ -169,7 +169,7 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
     fetchMock.mockReset()
   })
 
-  it("names the provider, reference and cart of a payment that cannot become an order", async () => {
+  it("names the provider and reference of a payment that cannot become an order, never the cart's id", async () => {
     fetchMock.mockResolvedValue(
       feed([
         alert("noti_6", {
@@ -197,11 +197,12 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
     await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 3 yeni" }))
 
     expect(await screen.findByText("PayTR ödemesi siparişe dönüşemiyor")).toBeInTheDocument()
-    expect(screen.getByText(/payses01ABC, sepet cart_01XYZ/)).toBeInTheDocument()
+    expect(screen.getByText(/\(payses01ABC\) için/)).toBeInTheDocument()
+    expect(screen.queryByText(/cart_01XYZ/)).not.toBeInTheDocument()
     expect(
       screen.getByText("İade edilmiş PayTR ödemesi siparişe dönüştürülmedi")
     ).toBeInTheDocument()
-    expect(screen.getByText(/payses01DEF, sepet —/)).toBeInTheDocument()
+    expect(screen.getByText(/\(payses01DEF\) sağlayıcının/)).toBeInTheDocument()
   })
 
   it("words a wholesale cart whose prices could not be set, and leads to the wholesalers", async () => {
@@ -222,7 +223,8 @@ describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)",
 
     const title = await screen.findByText("Toptan sepetin ödemesi başlatılamadı")
     expect(title.closest("a")).toHaveAttribute("href", "/wholesale")
-    expect(screen.getByText(/Sepet cart_01W toptancının/)).toBeInTheDocument()
+    expect(screen.getByText(/Toptancının sepeti bugünkü/)).toBeInTheDocument()
+    expect(screen.queryByText(/cart_01W/)).not.toBeInTheDocument()
   })
 })
 

@@ -14,6 +14,7 @@ import { useHoldLeft } from "../cart/HoldCountdown"
 import { useChallengeForm } from "../frame/useChallengeForm"
 import { ACCEPT_ERRORS, AGE_ERRORS, Consents, type ConsentWords } from "./Consents"
 import { ChoiceRow, FieldError } from "./fields"
+import { OrderNote, type OrderNoteWords } from "./OrderNote"
 
 const ICONS: Record<PaymentKind, LucideIcon> = {
   card: CreditCard,
@@ -22,7 +23,7 @@ const ICONS: Record<PaymentKind, LucideIcon> = {
   credit: Gift,
 }
 
-export interface PaymentWords extends ConsentWords {
+export interface PaymentWords extends ConsentWords, OrderNoteWords {
   methods: string
   /** "Toplam", over the button where the basket's stage is not in sight. */
   total: string
@@ -54,6 +55,7 @@ export function PaymentForm({
   total,
   placeOrder,
   hold,
+  orderNote,
   words,
 }: {
   methods: PaymentMethodView[]
@@ -65,6 +67,8 @@ export function PaymentForm({
   ageLimit: number | null
   marketingVersion: string
   placeOrder: CheckoutActions["placeOrder"]
+  /** The note the cart keeps, filled in again. */
+  orderNote?: string | null | undefined
   words: PaymentWords
 }) {
   const [picked, setMethod] = useState(methods[0]?.id ?? "")
@@ -118,6 +122,7 @@ export function PaymentForm({
           )
         })}
       </fieldset>
+      <OrderNote value={orderNote} words={words} />
       <Consents
         contracts={contracts[kind] ?? []}
         ageLimit={ageLimit}

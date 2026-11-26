@@ -30,7 +30,7 @@ async function ownerOf(req: MedusaRequest, cartId: string): Promise<string | nul
 const session = authenticate("customer", ["session", "bearer"], { allowUnauthenticated: true })
 
 /** The session's customer, for a cart being made (Medusa's route makes it theirs). */
-function sessionCustomer(req: MedusaRequest, res: MedusaResponse): Promise<string | null> {
+export function sessionCustomer(req: MedusaRequest, res: MedusaResponse): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const done = (error?: unknown) => {
       if (error) {

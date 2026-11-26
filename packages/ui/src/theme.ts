@@ -155,7 +155,8 @@ export interface CheckoutActions {
   /**
    * Form fields: `provider_id`, `contracts` (`kind:version`, repeated),
    * `accept`, `birth_date` and `age_confirm` when asked, `marketing_email`,
-   * `marketing_sms`, `challenge` (the solved proof of work, when one was asked).
+   * `marketing_sms`, `order_note` (the shopper's note for the shop; left out,
+   * the cart's stays), `challenge` (the solved proof of work, when one was asked).
    */
   placeOrder: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   /** A province's districts, by its plate. */

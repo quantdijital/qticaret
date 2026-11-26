@@ -1,84 +1,32 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { Plus, UsersRound } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
-import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
-import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
-import { Avatar, AvatarFallback } from "@qticaret/admin-ui/ui/avatar"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCan } from "@/features/auth/api/staff"
 import {
   CUSTOMER_PAGE_SIZE,
   customerCountsQuery,
+  customerStatsQuery,
   customersQuery,
 } from "@/features/customers/api/customers"
-import type { CustomerKind, CustomerListItem } from "@/features/customers/api/customers"
+import type { CustomerKind } from "@/features/customers/api/customers"
+import { ColumnOptions } from "@/features/customers/components/column-options"
+import { CustomerExportButton } from "@/features/customers/components/customer-export"
+import { useCustomerColumns } from "@/features/customers/components/customer-columns"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
-import { customerName, initialsOf } from "@/features/customers/names"
+import { STATS_COLUMNS, useHiddenColumns } from "@/features/customers/list-prefs"
 import { NewCustomerDialog } from "@/features/wholesale/components/new-customer-dialog"
 import { errorText } from "@/lib/errors"
-import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/customers/")
-
-function useColumns(): Column<CustomerListItem>[] {
-  const { t } = useTranslation()
-  return [
-    {
-      key: "customer",
-      header: t("customers.columns.customer"),
-      cell: (customer) => (
-        <div className="flex min-w-0 items-center gap-3">
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-muted text-xs font-medium">
-              {initialsOf(customer)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex min-w-0 flex-col">
-            <Link
-              to="/customers/$id"
-              params={{ id: customer.id }}
-              className="truncate font-medium hover:underline"
-              onClick={(event) => {
-                event.stopPropagation()
-              }}
-            >
-              {customerName(customer) ?? t("orders.noName")}
-            </Link>
-            <span className="truncate text-xs text-muted-foreground">{customer.email}</span>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: "kind",
-      header: t("customers.columns.kind"),
-      cell: (customer) => (
-        <StatusBadge tone={customer.has_account ? "info" : "neutral"}>
-          {t(customer.has_account ? "customers.kind.registered" : "customers.kind.guest")}
-        </StatusBadge>
-      ),
-    },
-    {
-      key: "joined",
-      header: t("customers.columns.joined"),
-      align: "right",
-      className: "hidden sm:table-cell",
-      cell: (customer) => (
-        <span className="text-muted-foreground">
-          {customer.created_at ? formatDate(customer.created_at) : "—"}
-        </span>
-      ),
-    },
-  ]
-}
 
 /** Everyone who ordered or signed up; members and guests apart. */
 export function CustomersPage() {
@@ -90,7 +38,12 @@ export function CustomersPage() {
   const q = search.q ?? ""
   const list = useQuery(customersQuery({ q, kind, page }))
   const counts = useQuery(customerCountsQuery())
-  const columns = useColumns()
+  const [hidden, setHidden] = useHiddenColumns()
+  // The page's customers' numbers in one read (CU1); none when no numbers column stands
+  const wantsStats = STATS_COLUMNS.some((column) => !hidden.includes(column))
+  const ids = wantsStats ? (list.data?.customers.map((customer) => customer.id) ?? []) : []
+  const stats = useQuery(customerStatsQuery(ids))
+  const columns = useCustomerColumns(hidden, stats.isError ? null : stats.data)
   const mayAdd = useCan("customers")
   const [adding, setAdding] = useState(false)
   const setSearch = (next: { q?: string; kind?: CustomerKind; page?: number }) => {
@@ -151,6 +104,10 @@ export function CustomersPage() {
               setSearch({ q: text, page: 1 })
             }}
           />
+          <div className="ml-auto flex items-center gap-2">
+            <CustomerExportButton q={q} kind={kind} />
+            <ColumnOptions hidden={hidden} onChange={setHidden} />
+          </div>
         </div>
         {list.isError ? (
           <div className="px-5 pb-5">

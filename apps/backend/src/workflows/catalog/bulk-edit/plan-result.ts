@@ -1,5 +1,6 @@
 import type { AddonTemplateSource } from "../../../lib/catalog/addons"
 import type { LevelAdjustment, LevelQuantity } from "../../stock/write-levels"
+import type { SaleEntry } from "../../pricing/variant-sale/plan"
 import type { nextPrices } from "../prices"
 
 /**
@@ -34,6 +35,12 @@ export type BulkWrite =
    * when written, under the product's lock, so one made meanwhile is kept.
    */
   | { action: "addon_template"; mode: "add" | "remove"; template_id: string }
+  | { action: "brand"; brand_id: string | null }
+  /** The product's tags after the change, by id. */
+  | { action: "tag"; tag_ids: string[] }
+  | { action: "backorder"; variants: { id: string; allow_backorder: boolean }[] }
+  /** Sales set and cleared, through the product page's own workflow (adr/0086). */
+  | { action: "sale"; set: SaleEntry[]; clear: string[] }
 
 /** A field's value before and after, by a key naming it (`variant:<id>:price:try`). */
 export type BulkDiff = Record<string, { before: unknown; after: unknown }>
@@ -49,6 +56,13 @@ export interface PlanContext {
   locationId: string | null
   /** The shop's add-on templates, for an add-on template change (adr/0052 Ek 2026-11-23). */
   addonTemplates?: ReadonlyMap<string, AddonTemplateSource>
+  /**
+   * A tag change's tag: its id, or null when `add` makes it as the run
+   * starts (a preview plans with null: every product would take it).
+   */
+  tag?: { id: string | null; value: string }
+  /** When a sale's days are checked against (a sale already over is refused). */
+  now?: Date
 }
 
 export const UNCHANGED: BulkPlan = { kind: "unchanged" }

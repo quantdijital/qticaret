@@ -66,3 +66,64 @@ describe("the bell's contact alert (adr/0047; adr/0076 Ek 2026-11-23)", () => {
     expect(title).not.toContain("Ayşe")
   })
 })
+
+describe("the bell's low-stock alert (F3.8, adr/0020)", () => {
+  const alert = (data: Record<string, unknown>) =>
+    renderHook(() => useAlertText({ kind: "low_stock", available: 2, threshold: 5, ...data }))
+      .result.current
+
+  it("names the product and variant and opens the product", () => {
+    const { title, description, link } = alert({
+      name: "Sürmene Şef Bıçağı — Kahve",
+      product_id: "prod_01",
+      inventory_item_id: "iitem_01M7TVZ5MN516RSJ9991Z77SZ6",
+    })
+    expect(title).toBe("Stok azalıyor: Sürmene Şef Bıçağı — Kahve")
+    expect(description).toBe("2 adet kaldı (eşik 5).")
+    expect(link).toEqual({ to: "/products/$id", search: {}, params: { id: "prod_01" } })
+  })
+
+  it("reads an old alert that stored the item's id, or no name, as a product", () => {
+    for (const name of ["iitem_01M7TVZ5MN516RSJ9991Z77SZ6", "", undefined]) {
+      const { title, link } = alert({ name })
+      expect(title).toBe("Stok azalıyor: bir ürün")
+      expect(link).toEqual({ to: "/inventory", search: { view: "low" }, params: {} })
+    }
+  })
+})
+
+describe("the bell's words never show a record's id", () => {
+  it("names an order refund's order by its number, or as this order", () => {
+    const issue = (data: Record<string, unknown>) =>
+      renderHook(() =>
+        useAlertText({
+          kind: "payment_issue",
+          issue: "refund_unresolved",
+          provider: "paytr",
+          reference: "Rpayses01ABC",
+          cart_id: "order_01M7TVZ5MN516RSJ9991Z77SZ6",
+          amount: 21000,
+          ...data,
+        })
+      ).result.current
+    expect(issue({ order_number: "1042" }).description).toMatch(/^#1042 siparişi için/)
+    const old = issue({})
+    expect(old.description).toMatch(/^Bu sipariş için/)
+    expect(old.description).not.toContain("order_01")
+    expect(old.link?.params).toEqual({ id: "order_01M7TVZ5MN516RSJ9991Z77SZ6" })
+  })
+
+  it("takes ids out of the server's own text for an alert it does not word", () => {
+    const { title, description } = renderHook(() =>
+      useAlertText({
+        kind: "payment_recovery",
+        title: "PayTR ödemesi iade edilmedi: siparişi var",
+        description:
+          "210,00 TRY (payses01ABC) iade listesine yazılmıştı, ancak sipariş order_01M7TVZ5MN516RSJ9991Z77SZ6 bu ödemeyle açılmış.",
+      })
+    ).result.current
+    expect(title).toBe("PayTR ödemesi iade edilmedi: siparişi var")
+    expect(description).toContain("payses01ABC")
+    expect(description).not.toContain("order_01")
+  })
+})

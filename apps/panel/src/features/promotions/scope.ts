@@ -93,3 +93,54 @@ export const perCustomerBudget = (limit: number) => ({
   attribute: PER_CUSTOMER_ATTRIBUTE,
   limit,
 })
+
+/**
+ * Who may use it (K1/K2): everyone, or some customer groups (Medusa's own
+ * `customer.groups.id` rule); and on a first order only (a rule the
+ * backend gives Medusa the fact for). Replaced together when they change.
+ */
+export const GROUPS_ATTRIBUTE = "customer.groups.id"
+export const FIRST_ORDER_ATTRIBUTE = "first_order"
+const AUDIENCE_ATTRIBUTES = [GROUPS_ATTRIBUTE, FIRST_ORDER_ATTRIBUTE]
+
+export type Audience = "everyone" | "groups"
+
+export interface AudienceValues {
+  audience: Audience
+  groups: string[]
+  firstOrder: boolean
+}
+
+export function audienceOf(rules: readonly (RuleLike | null)[] | null | undefined): AudienceValues {
+  const groupRule = (rules ?? []).find((rule) => rule?.attribute === GROUPS_ATTRIBUTE)
+  const groups = groupRule ? valuesOf(groupRule) : []
+  return {
+    audience: groups.length > 0 ? "groups" : "everyone",
+    groups,
+    firstOrder: (rules ?? []).some(
+      (rule) =>
+        rule?.attribute === FIRST_ORDER_ATTRIBUTE && rule.values?.some((v) => v?.value === "true")
+    ),
+  }
+}
+
+export function audienceRulesFor(values: AudienceValues): RuleInput[] {
+  return [
+    ...(values.audience === "groups" && values.groups.length > 0
+      ? [{ attribute: GROUPS_ATTRIBUTE, operator: "in" as const, values: [...values.groups] }]
+      : []),
+    ...(values.firstOrder
+      ? [{ attribute: FIRST_ORDER_ATTRIBUTE, operator: "in" as const, values: ["true"] }]
+      : []),
+  ]
+}
+
+/** The rules of a promotion that say who may use it: not the basket minimum. */
+export const isAudienceRule = (rule: Pick<RuleInput, "attribute">): boolean =>
+  AUDIENCE_ATTRIBUTES.includes(rule.attribute)
+
+/** One audience as the form reads it, compared whatever the order of its groups. */
+export const sameAudience = (a: AudienceValues, b: AudienceValues): boolean =>
+  a.firstOrder === b.firstOrder &&
+  (a.audience === "groups" ? [...a.groups].sort().join() : "") ===
+    (b.audience === "groups" ? [...b.groups].sort().join() : "")

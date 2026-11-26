@@ -128,6 +128,7 @@ export const HEADER_GROUPS = {
   menu_images: "menu",
   tool_labels: "icons",
   sticky: "look",
+  over_cover: "look",
 } as const satisfies Readonly<Record<string, FieldGroupName>>
 
 /**
@@ -216,6 +217,7 @@ export const FIELD_IDS = {
   ...SHELF_IDS,
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
+  overCover: (sectionId: string) => `${sectionId}-over-cover`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
   toolLabels: (sectionId: string) => `${sectionId}-tool-labels`,
@@ -314,6 +316,17 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       options: [],
       target: FIELD_IDS.sticky(id),
     })
+    // The one-row header's own: over a full photograph opening
+    if (section.variant === "inline") {
+      fields.push({
+        key: "over_cover",
+        group: HEADER_GROUPS.over_cover,
+        label: "storefront.editor.headerBar.overCover",
+        term: "storefront.editor.headerBar.overCoverTerm",
+        options: [],
+        target: FIELD_IDS.overCover(id),
+      })
+    }
     // Every variant's: the search's look and the menus' pictures (adr/0049 Ek 2026-11-15)
     for (const [key, steps, target] of [
       ["search_style", HEADER_SEARCH_STYLES, FIELD_IDS.searchStyle(id)],

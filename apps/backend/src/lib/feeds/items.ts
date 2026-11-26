@@ -27,8 +27,10 @@ export interface FeedItem {
   gtin: string | null
   mpn: string | null
   properties: Partial<Record<VariesBy, string>>
-  /** Gross TRY the shop's desi table charges to ship one; null when it does not say. */
+  /** Gross TRY the shop's desi table charges to ship one (its class in it); null when it does not say. */
   shippingRate: number | null
+  /** Its shipping class (adr/0087 §5): free, or a surcharge in lira; null: Standard. */
+  shippingClass: { free: boolean; surcharge: number } | null
   /** The variant's own code; null when it has none. */
   sku: string | null
   /** Units available; null when the variant keeps no stock count. */
@@ -87,6 +89,7 @@ export function feedItemsOf(
         mpn: variant.mpn,
         properties: variant.properties,
         shippingRate: typeof variant.shippingRate === "number" ? variant.shippingRate : null,
+        shippingClass: facts.shippingClass ?? null,
         sku: variant.sku,
         stock: typeof variant.stock === "number" ? variant.stock : null,
         desi: typeof variant.desi === "number" ? variant.desi : null,
@@ -128,7 +131,7 @@ export interface FeedShop {
   handlingDays: { min: number; max: number }
   /** The cheapest flat-rate delivery shoppers can pick, gross TRY; null: none. */
   flatShipping: number | null
-  /** Flat-rate shipping is free from this basket total (Settings > Promotions); null: never. */
+  /** Every option ships free from this basket total (Settings > Promotions); null: never. */
   freeShippingFrom: number | null
   /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
   sameDayCutoffHour: number | null
@@ -137,18 +140,31 @@ export interface FeedShop {
 /**
  * What shipping one unit costs a shopper: the shop's desi table when it
  * prices the item, else its cheapest flat rate, free past the basket
- * total the shop set; null when neither says.
+ * total the shop set, whichever prices it (adr/0087 §5: the threshold
+ * holds for every option); null when neither says.
  */
 export function shippingCost(item: FeedItem, shop: FeedShop): number | null {
+  if (item.shippingRate === null && shop.flatShipping === null) {
+    return null
+  }
+  if (
+    item.shippingClass?.free ||
+    (shop.freeShippingFrom !== null && item.price >= shop.freeShippingFrom)
+  ) {
+    return 0
+  }
   if (item.shippingRate !== null) {
+    // The table's rate holds the class's surcharge already
     return item.shippingRate
   }
   if (shop.flatShipping === null) {
     return null
   }
-  return shop.freeShippingFrom !== null && item.price >= shop.freeShippingFrom
-    ? 0
-    : shop.flatShipping
+  // A flat amount is per order: one unit pays it, and its class's surcharge
+  return (
+    (Math.round(shop.flatShipping * 100) + Math.round((item.shippingClass?.surcharge ?? 0) * 100)) /
+    100
+  )
 }
 
 /** Whether the item is in a category the shop keeps out of a feed. */

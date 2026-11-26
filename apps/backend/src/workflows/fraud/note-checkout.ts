@@ -1,3 +1,4 @@
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
@@ -37,7 +38,10 @@ const noteCheckoutStep = createStep(
   }
 )
 
+// Under the cart's own lock: another writer of its metadata (the order note) never drops the counts
 export const noteCheckoutWorkflow = createWorkflow("fraud-note-checkout", (input: Input) => {
+  acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
   noteCheckoutStep(input)
+  releaseLockStep({ key: input.cart_id })
   return new WorkflowResponse(null)
 })

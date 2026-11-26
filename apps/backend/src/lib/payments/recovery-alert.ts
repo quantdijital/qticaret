@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { notificationText } from "../notifications/messages"
+import { orderNumberOf, orderRefText } from "../notifications/order-number"
 
 const PROVIDER_NAMES: Readonly<Record<string, string>> = { paytr: "PayTR", iyzico: "iyzico" }
 
@@ -31,6 +32,8 @@ export async function alertRecovery(
   }
 ): Promise<void> {
   const provider = PROVIDER_NAMES[recovery.provider] ?? recovery.provider
+  // The order is named by its number, never its id
+  const orderNumber = await orderNumberOf(container, recovery.order_id)
   await container.resolve(Modules.NOTIFICATION).createNotifications({
     to: "",
     channel: "feed",
@@ -45,11 +48,12 @@ export async function alertRecovery(
       amount: recovery.amount,
       currency_code: recovery.currency_code,
       ...(recovery.order_id ? { order_id: recovery.order_id } : {}),
+      ...(orderNumber ? { order_number: orderNumber } : {}),
       ...notificationText(`payments.${alert}`, {
         provider,
         reference: recovery.reference,
         amount: amountText(recovery.amount, recovery.currency_code),
-        order: recovery.order_id ?? "—",
+        order: orderRefText(orderNumber),
       }),
     },
   })

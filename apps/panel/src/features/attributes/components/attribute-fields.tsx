@@ -54,12 +54,17 @@ export function AttributeFields({
         }}
       />
       {definitions.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        // One row per attribute (WooCommerce's): no field leaves a gap beside a tall neighbour
+        <div className="flex flex-col divide-y border-y">
           {definitions.map((definition) => {
             const suggested = offered.includes(definition) ? ai.valueFor(definition.key) : undefined
             return (
-              <div key={definition.key}>
+              <div
+                key={definition.key}
+                className="flex flex-col gap-2 py-3 @lg/attrs:[&>:not(:first-child)]:ml-[calc(11rem+1.5rem)]"
+              >
                 <AttributeInput
+                  row
                   definition={definition}
                   value={values[definition.key]}
                   addOption={

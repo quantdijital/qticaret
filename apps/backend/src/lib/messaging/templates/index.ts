@@ -12,6 +12,7 @@ import { consentConfirm } from "./consent"
 import { orderInvoiced } from "./invoice"
 import { announcement } from "./marketing"
 import { orderLink } from "./order-link"
+import { orderNote } from "./order-note"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { paymentLinkSent } from "./payment-link"
@@ -57,6 +58,7 @@ export { orderSummary } from "./order-placed"
 export type { OrderVars } from "./order-placed"
 export type { LineAddonPick, MessageLineAddons } from "./line-addons"
 export type { OrderLinkVars } from "./order-link"
+export type { OrderNoteVars } from "./order-note"
 export type { PaymentFailedVars } from "./payment"
 export type { PaymentLinkVars } from "./payment-link"
 export type { RefusedLineVars, ReturnVars } from "./returns"
@@ -85,6 +87,8 @@ export const MESSAGE_TEMPLATES = {
   "order.delivered": orderDelivered,
   // F8 (adr/0034 §7): the order's invoice, issued
   "order.invoiced": orderInvoiced,
+  // Batch 9 / O3: a note staff wrote on the order, sent to its customer when they choose
+  "order.note": orderNote,
   // adr/0076 Ek D7b: a dated order's booking confirmed, reminded, a departure cancelled
   "booking.confirmed": bookingConfirmed,
   "booking.reminder": bookingReminder,

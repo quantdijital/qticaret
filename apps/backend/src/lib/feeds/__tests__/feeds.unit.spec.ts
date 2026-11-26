@@ -1,6 +1,6 @@
 import type { ProductFacts, VariantFacts } from "../../seo/jsonld"
 import { productJsonLd } from "../../seo/jsonld"
-import { feedItemsOf, googleFeedProblems } from ".."
+import { feedItemsOf, googleFeedProblems, shippingCost } from ".."
 import type { FeedShop } from ".."
 import { googleFeed } from "../google"
 import { metaFeed } from "../meta"
@@ -131,5 +131,53 @@ describe("product feeds (F10.8, KK4)", () => {
     expect(line).toContain(`"Bir, iki; '-cmd|' /C calc'!A0"`)
     expect(line).toContain(`"'\t+SUM(A1)"`)
     expect(line).toContain("in stock,new,499.90 TRY")
+  })
+})
+
+describe("a feed's shipping cost (adr/0087 §5)", () => {
+  const item = (price: number, shippingRate: number | null) => {
+    const [first] = feedItemsOf(facts([variant({ price, shippingRate })]), URL)
+    if (!first) {
+      throw new Error("no feed item")
+    }
+    return first
+  }
+
+  it("is the table's rate, else the cheapest flat rate, free past the threshold with either", () => {
+    const shop = { ...SHOP, flatShipping: 39.9, freeShippingFrom: 500 }
+    expect(shippingCost(item(499.9, 49.9), shop)).toBe(49.9)
+    expect(shippingCost(item(499.9, null), shop)).toBe(39.9)
+    // The desi table is free from the threshold as checkout now charges it
+    expect(shippingCost(item(500, 49.9), shop)).toBe(0)
+    expect(shippingCost(item(750, null), shop)).toBe(0)
+  })
+
+  it("says nothing when no option prices the item, threshold or not", () => {
+    expect(shippingCost(item(750, null), { ...SHOP, freeShippingFrom: 500 })).toBeNull()
+    expect(shippingCost(item(100, 49.9), SHOP)).toBe(49.9)
+  })
+})
+
+describe("a feed's shipping cost by the product's class (adr/0087 §5)", () => {
+  const item = (
+    shippingRate: number | null,
+    shippingClass: { free: boolean; surcharge: number }
+  ) => {
+    const [first] = feedItemsOf(
+      facts([variant({ price: 100, shippingRate })], { shippingClass }),
+      URL
+    )
+    if (!first) {
+      throw new Error("no feed item")
+    }
+    return first
+  }
+  const shop = { ...SHOP, flatShipping: 39.9, freeShippingFrom: 500 }
+
+  it("is free for a free-shipping product, the flat rate and its surcharge otherwise", () => {
+    expect(shippingCost(item(null, { free: true, surcharge: 0 }), shop)).toBe(0)
+    expect(shippingCost(item(null, { free: false, surcharge: 150 }), shop)).toBe(189.9)
+    // The table's rate holds its class already
+    expect(shippingCost(item(199.9, { free: false, surcharge: 150 }), shop)).toBe(199.9)
   })
 })

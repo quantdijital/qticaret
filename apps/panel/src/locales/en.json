@@ -1331,7 +1331,7 @@
     },
     "shipping": {
       "title": "Shipping and delivery",
-      "subtitle": "How orders are shipped. Each shipping service is connected on its own page.",
+      "subtitle": "Carriers, the shipping options shoppers choose from, returns and warehouses.",
       "manage": "Manage",
       "connect": "Connect",
       "carriersTitle": "Shipping services",
@@ -1375,13 +1375,10 @@
       },
       "options": {
         "title": "Shipping options",
-        "description": "Shoppers pick one of these at checkout: who carries it and how it is priced.",
+        "description": "Shoppers choose one of these at checkout.",
         "add": "Add option",
         "addTitle": "New shipping option",
-        "editTitle": "Edit shipping option",
-        "dialogDescription": "The name shoppers see at checkout, who carries the parcel and the price.",
         "name": "Name",
-        "nameHint": "Shown at checkout, e.g. \"Standard shipping\".",
         "nameRequired": "Enter a name.",
         "carrier": "Carrier",
         "carriers": {
@@ -1398,21 +1395,22 @@
           "fastest": "Geliver: fastest offer",
           "table": "Price table (desi)"
         },
-        "amount": "Price (TL)",
-        "amountHint": "Tax included; 0 for free.",
+        "amount": "Amount",
+        "amountHint": "VAT included; 0 for free.",
         "amountInvalid": "Enter the amount with at most two decimals.",
         "free": "Free",
-        "none": "No shipping option yet; shoppers cannot order. Add one.",
+        "none": "No shipping option yet; shoppers cannot place an order.",
         "edit": "Edit {{name}}",
         "remove": "Remove {{name}}",
-        "removeTitle": "Remove {{name}}?",
-        "removeDescription": "Shoppers no longer see it; orders already placed keep theirs.",
+        "removeDescription": "Shoppers no longer see this option; orders already placed are not affected.",
         "removeConfirm": "Remove",
-        "removed": "Shipping option removed."
+        "removed": "Shipping option removed.",
+        "defaultName": "Standard shipping",
+        "keep": "Keep"
       },
       "rules": {
         "deliveryTitle": "Delivery time",
-        "deliveryDescription": "When an order ships, how many days it takes and until what hour it ships the same day. The Shipping and Delivery card on product pages, their shipping sentence and the delivery details given to search engines and Akakçe come from here.",
+        "deliveryDescription": "The delivery time shown on product pages, to search engines and on Akakçe.",
         "handling": "Shipping out",
         "handlingHint": "Working days after the order.",
         "transit": "In transit",
@@ -1423,11 +1421,11 @@
         "daysInvalid": "Enter the days as a number.",
         "daysOrder": "The fewest days cannot be more than the most.",
         "cutoff": "Same-day dispatch until",
-        "cutoffHint": "Pick it if orders placed before this hour leave the same day; the Shipping and Delivery card on product pages and Akakçe show it.",
+        "cutoffHint": "Choose it if orders placed before this hour ship the same day.",
         "noCutoff": "No same-day dispatch",
         "until": "Orders before {{hour}}",
         "ratesTitle": "Price table",
-        "ratesDescription": "What options priced by the table charge by the parcel's desi (tax included).",
+        "ratesDescription": "The price by desi for options priced by \"Price table\" (VAT included).",
         "noRates": "No rows yet.",
         "upTo": "Up to",
         "desi": "desi:",
@@ -1442,7 +1440,7 @@
       },
       "parcel": {
         "title": "Default parcel",
-        "description": "For products without measures; the carrier measures the real parcel itself.",
+        "description": "Products without measures are priced for shipping as this parcel.",
         "weight": "Weight",
         "length": "Length",
         "width": "Width",
@@ -1453,7 +1451,7 @@
       },
       "labels": {
         "title": "Shipping label",
-        "description": "The paper parcels' labels print on. The panel draws Yurtiçi's label at this size; Aras's and Geliver's own labels are fitted to it.",
+        "description": "The paper shipping labels are printed on.",
         "format": "Label size",
         "formatHint": "Pick the label size on your label printer's roll; with an office printer, pick A4.",
         "formats": {
@@ -1558,6 +1556,58 @@
         "options": "Options and rates",
         "returns": "Returns",
         "locations": "Warehouses and stock"
+      },
+      "freeShipping": {
+        "title": "Free shipping threshold",
+        "description": "Once the basket total (VAT included, after discounts) reaches this amount, every shipping option is free.",
+        "switch": "Free shipping from a basket total",
+        "threshold": "Basket total",
+        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL."
+      },
+      "classes": {
+        "title": "Shipping classes",
+        "description": "A product's class adds a surcharge to shipping; the highest in the basket is added once.",
+        "name": "Class name",
+        "nameOf": "Name of class {{number}}",
+        "surcharge": "Surcharge",
+        "surchargeOf": "Surcharge of class {{number}}",
+        "products_one": "{{count}} product",
+        "products_other": "{{count}} products",
+        "noProducts": "No products",
+        "freeRow": "Free shipping",
+        "freeHint": "Adds nothing to shipping",
+        "locked": "Built-in class: it cannot be renamed or removed.",
+        "add": "Add class",
+        "remove": "Remove the {{name}} class",
+        "removeUsed_one": "{{count}} product goes back to Standard.",
+        "removeUsed_other": "{{count}} products go back to Standard.",
+        "removeConfirm": "Remove",
+        "keep": "Keep",
+        "nameInvalid": "Give the class a name (60 characters at most).",
+        "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
+        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option."
+      },
+      "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
+      "ownDeliveryLink": "Legal details",
+      "advanced": {
+        "title": "Advanced",
+        "handling": "Ships in {{days}} days",
+        "transit": "transit {{days}} days",
+        "noSameDay": "no same-day shipping",
+        "sameDay": "same day before {{hour}}",
+        "noRates": "No rows; only options priced by \"Price table\" use it.",
+        "rates_one": "{{count}} row, up to {{desi}} desi",
+        "rates_other": "{{count}} rows, up to {{desi}} desi",
+        "ratesNeeded": "An option is priced by the price table, but the table is empty.",
+        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)"
+      },
+      "invoiceIdentity": {
+        "title": "Carrier details on invoices",
+        "description": "Written on an e-Arşiv as the carrier of the parcel; found on the carrier's own invoice to you.",
+        "titleLabel": "Registered name",
+        "taxId": "Tax id",
+        "both": "Enter the name and the tax id together, or leave both empty.",
+        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
       }
     },
     "integrations": {
@@ -1797,7 +1847,8 @@
             "shipped": "Order shipped",
             "delivered": "Order delivered",
             "access_link": "Order link",
-            "invoiced": "Invoice issued"
+            "invoiced": "Invoice issued",
+            "note": "Order note (sent to the customer)"
           },
           "return": {
             "requested": "Return requested",
@@ -2134,7 +2185,7 @@
       "api": "API keys for your own systems",
       "security": "Your account and two-step verification, team members and invitations, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
-      "einvoice": "Invoicing program, timing and series, carrier details, accounting",
+      "einvoice": "Invoicing program, timing and series, VAT, accounting",
       "migration": "Catalog, customers and 301s from the old platform",
       "subscription": "Your package, limits and usage, payment status",
       "maintenance": "Closing the storefront for a while, the maintenance page and the bypass link"
@@ -2800,7 +2851,7 @@
     },
     "einvoice": {
       "title": "Invoices and accounting",
-      "subtitle": "Who issues the invoices, when and in which series; the carrier details on an e-Arşiv; and the accountant's monthly package.",
+      "subtitle": "Who issues the invoices, when and in which series; the VAT rates and the accountant's monthly package.",
       "program": {
         "title": "Invoicing program",
         "description": "The program that issues the invoices, and when. Only the owner can change it.",
@@ -2912,26 +2963,13 @@
         "external": "My own program: issued with your own program or by hand; the number and PDF are written here.",
         "manual": "If you issue invoices by hand (e.g. Luca), pick \"My own program\": each order's invoice card waits for its number and PDF."
       },
-      "carriers": {
-        "title": "Carriers' details",
-        "description": "An e-Arşiv names the carrier of the parcel by its registered name and tax id. Both are on the carrier's own invoice to you.",
-        "names": {
-          "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo",
-          "geliver": "Sent through Geliver",
-          "manual": "Parcels you send yourself"
-        },
-        "titleLabel": "Registered name",
-        "taxId": "Tax id",
-        "both": "Enter the name and the tax id together, or leave both empty.",
-        "taxIdInvalid": "A tax id has 10 digits (11 for a T.C. kimlik)."
-      },
       "tabs": {
         "program": "Invoicing program",
-        "carriers": "Carrier details",
         "vat": "VAT rates",
         "accounting": "Accounting"
-      }
+      },
+      "carriersMoved": "The carrier details invoices carry are entered on each carrier's own page.",
+      "carriersLink": "Carriers"
     },
     "vatRates": {
       "title": "VAT rates",
@@ -3248,6 +3286,18 @@
       "title": "Maintenance mode",
       "description": "Close the storefront for a while: shoppers see a short maintenance page instead of the shop. A change goes live as soon as it is saved.",
       "dark": "Shop in maintenance"
+    },
+    "outOfStock": {
+      "title": "Out-of-stock products",
+      "description": "Whether products none of whose variants can be sold now show in category, campaign and shop listings and in site search. A product whose stock is not tracked always counts as in stock.",
+      "choices": {
+        "show": "Show",
+        "hide": "Hide from listings"
+      },
+      "hints": {
+        "show": "A sold-out product stays in listings, its card saying it is sold out. Default.",
+        "hide": "A sold-out product leaves listings, search and category counts. Its page still opens by its address and stays in the sitemap; it comes back to listings by itself when stock arrives."
+      }
     }
   },
   "status": {
@@ -3335,7 +3385,8 @@
     },
     "status": {
       "published": "Published",
-      "draft": "Draft"
+      "draft": "Draft",
+      "scheduled": "Scheduled · {{at}}"
     },
     "columns": {
       "product": "Product",
@@ -4097,8 +4148,8 @@
       },
       "edit": "Bulk edit",
       "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
-      "scope_one": "Applies to the {{formatted}} selected product. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
-      "scope_other": "Applies to the {{formatted}} selected products. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
+      "scope_one": "Applied to the {{formatted}} product picked. Each product is checked as its own save would be; before applying you see how many will change and which are left out.",
+      "scope_other": "Applied to the {{formatted}} products picked. Each product is checked as its own save would be; before applying you see how many will change and which are left out.",
       "apply_one": "Apply to {{formatted}} product",
       "apply_other": "Apply to {{formatted}} products",
       "working": "Updating products…",
@@ -4121,7 +4172,11 @@
         "seo_template": "Apply SEO template",
         "alt_text": "Fill missing alt texts",
         "cost": "Change cost",
-        "addon_template": "Add / remove add-on group"
+        "addon_template": "Add / remove add-on group",
+        "sale": "Sale price",
+        "brand": "Change brand",
+        "tag": "Add / remove tag",
+        "backorder": "Selling when out of stock"
       },
       "price": {
         "mode": "Price change",
@@ -4192,7 +4247,11 @@
         "category": "Choose a category.",
         "seoFields": "Choose at least one field.",
         "cost": "Enter a cost between 0 and 10,000,000 ₺.",
-        "addonTemplate": "Choose an add-on group."
+        "addonTemplate": "Choose an add-on group.",
+        "saleDates": "The end day cannot be before the start.",
+        "saleEnded": "The end day is past; pick a later day.",
+        "brand": "Pick a brand.",
+        "tag": "Type a tag of 1–100 characters."
       },
       "cost": {
         "mode": "Cost change",
@@ -4220,6 +4279,57 @@
           "remove": "The group is removed from the selected products; those from an attribute group stay."
         },
         "none": "No add-on groups yet."
+      },
+      "preview": "Preview",
+      "problems": "Products left out",
+      "willChange_one": "{{formatted}} product will change.",
+      "willChange_other": "{{formatted}} products will change.",
+      "willStay_one": "{{formatted}} product is already so; it is left as it is.",
+      "willStay_other": "{{formatted}} products are already so; they are left as they are.",
+      "willSkip_one": "{{formatted}} product will be left out:",
+      "willSkip_other": "{{formatted}} products will be left out:",
+      "sale": {
+        "mode": "Sale",
+        "modes": {
+          "percent": "Percent off",
+          "amount": "Amount off",
+          "clear": "Remove sale"
+        },
+        "percent": "Percent off (%)",
+        "amount": "Amount off (₺)",
+        "hint": "Taken off each variant's regular price; the sale price is worked out on the server.",
+        "starts": "Starts",
+        "ends": "Ends",
+        "daysHint": "Left empty, the sale starts now and runs until you remove it.",
+        "clearHint": "The picked products' variants lose their sale price and sell at the regular price."
+      },
+      "brand": {
+        "mode": "Action",
+        "modes": {
+          "set": "Set brand",
+          "clear": "Remove brand"
+        },
+        "hint": "The picked products get this brand.",
+        "clearHint": "The picked products' brand is removed."
+      },
+      "tag": {
+        "mode": "Action",
+        "modes": {
+          "add": "Add",
+          "remove": "Remove"
+        },
+        "hints": {
+          "add": "The tag is added to the products, and made if the shop has none; their other tags stay.",
+          "remove": "The tag is taken off the products; type the name of one of the shop's tags."
+        }
+      },
+      "backorder": {
+        "label": "When out of stock",
+        "options": {
+          "allow": "Keep selling",
+          "deny": "Stop selling"
+        },
+        "hint": "Only variants whose stock is tracked change; untracked ones always sell."
       }
     },
     "priceHistory": {
@@ -4410,7 +4520,10 @@
       },
       "pricesOnVariants": "Prices are entered on each variant.",
       "stockOnVariants": "Stock and codes are entered on each variant.",
-      "goVariants": "Go to variants"
+      "goVariants": "Go to variants",
+      "variantOptions": "Variant options",
+      "variantOptionsHint": "The options that tell the variants apart; their values are edited in the Variants tab.",
+      "editOnVariants": "Edit in variants"
     },
     "variant": {
       "title": "Edit variant",
@@ -4426,6 +4539,10 @@
       "stockHint": "The quantity at the shop's default location.",
       "onHand": "Stock quantity",
       "untracked": "Stock not tracked: this variant is always sold.",
+      "tracking": "Track stock",
+      "trackingOn": "The count is kept; selling stops when it runs out.",
+      "trackingOffAsk": "Stop tracking stock? The variant will always be sold without a count. The saved count is kept and comes back when tracking is turned on again.",
+      "trackingOff": "Stop tracking",
       "backorderHint": "Orders are taken after it sells out too (preorder).",
       "codes": "Codes",
       "measures": "Measures",
@@ -4476,6 +4593,7 @@
         "none": "This product has no options. Add options such as colour or size to create its variants.",
         "add": "Add options",
         "edit": "Edit options",
+        "valuesLabel": "Values",
         "hint": "Type each option's values and press Enter. \"Create variants\" adds every missing combination; existing variants are never deleted or created twice.",
         "preview_one": "{{count}} variant will be created; you enter its price afterwards.",
         "preview_other": "{{count}} variants will be created; you enter their prices afterwards.",
@@ -4504,7 +4622,8 @@
         "fields": {
           "price": "Regular price",
           "cost": "Cost",
-          "stock": "Stock count"
+          "stock": "Stock count",
+          "tracking": "Stock tracking"
         },
         "applyAll_one": "Apply to {{count}} variant",
         "applyAll_other": "Apply to {{count}} variants",
@@ -4517,7 +4636,12 @@
         "nothing": "Nothing to change: the variants already have this value or their stock is not tracked.",
         "pick": "Select variant {{name}}",
         "pickAll": "Select all variants",
-        "pickGroup": "Select group {{name}}"
+        "pickGroup": "Select group {{name}}",
+        "tracking": {
+          "pick": "On or off",
+          "on": "Turn stock tracking on",
+          "off": "Turn stock tracking off"
+        }
       }
     },
     "rowActions": "Actions for {{title}}",
@@ -4776,6 +4900,44 @@
         "bodyTooLong": "A description holds at most 2,000 characters.",
         "tooMany": "A program holds at most 30 steps."
       }
+    },
+    "schedule": {
+      "label": "Publish date",
+      "manual": "Published by hand",
+      "field": "Publish date and time",
+      "zone": "Türkiye time. The product goes live by itself at this time.",
+      "schedule": "Schedule",
+      "change": "Change",
+      "cancel": "Cancel schedule",
+      "plan": "Schedule",
+      "saved": "Publish scheduled.",
+      "cancelled": "Publish schedule cancelled.",
+      "problem": {
+        "required": "Choose a date and time.",
+        "past": "Choose a time later than now.",
+        "tooFar": "At most one year ahead."
+      },
+      "failed": "The publish planned for {{at}} did not happen: {{reason}} The product stayed a draft.",
+      "reason": {
+        "seo": "Its SEO score was too low to publish.",
+        "other": "Something went wrong while saving."
+      }
+    },
+    "purchaseLimit": {
+      "title": "Purchase limit",
+      "label": "Maximum purchase quantity",
+      "hint": "The most of this product (all variants together) one order may hold. Empty means no limit; 1 sells it individually.",
+      "none": "No limit",
+      "invalid": "Write a whole number from 1 to {{max}}, or leave it empty."
+    },
+    "shippingClass": {
+      "label": "Shipping class",
+      "standard": "Standard",
+      "free": "Free shipping",
+      "hintStandard": "Shipping is priced by the delivery option chosen.",
+      "hintFree": "A free-shipping product adds nothing to the shipping cost; a basket of only such products ships free.",
+      "hintSurcharge": "With this product in the basket, {{amount}} is added to the order's shipping.",
+      "gone": "The class chosen no longer exists; the product counts as Standard."
     }
   },
   "orders": {
@@ -5277,7 +5439,7 @@
       "nameRequired": "First and last name are required.",
       "company": "Company name",
       "sameAsDelivery": "Same as the delivery address.",
-      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "invoiced": "The invoice is issued or with the provider; the billing address no longer changes.",
       "email": "E-mail",
       "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
       "emailRequired": "E-mail is required.",
@@ -5335,9 +5497,12 @@
       "notDelivered_one": "{{count}} order could not be marked: {{reason}}",
       "notDelivered_other": "{{count}} orders could not be marked: {{reason}}"
     },
+    "customerNote": {
+      "title": "Customer's note"
+    },
     "notes": {
       "title": "Internal notes",
-      "text": "Only the team sees them; never shown to the customer.",
+      "text": "Only the team sees them; only a note marked \"Send to customer\" is e-mailed to the customer.",
       "empty": "No notes yet.",
       "new": "New note",
       "placeholder": "For example: the customer called and asked for the parcel to be left at the door.",
@@ -5348,7 +5513,19 @@
       "removeText": "The note is removed for the team; who removed it stays on record.",
       "removed": "Note removed.",
       "unnamed": "Team member",
-      "formerMember": "Former team member"
+      "formerMember": "Former team member",
+      "notify": "Send to customer",
+      "notifyHint": "The note is e-mailed to the order's address in the shop's name and shows in the message history.",
+      "addAndSend": "Add and send",
+      "sent": "Note added and sent to the customer.",
+      "notSent": {
+        "templateOff": "Note added but not sent: this message is turned off in Settings > Customer messages.",
+        "noAddress": "Note added but not sent: the order has no valid e-mail address.",
+        "failed": "Note added; the e-mail could not go now and will be tried again.",
+        "other": "Note added but not sent; the reason is in the message history."
+      },
+      "badgeSent": "Sent to customer",
+      "badgeNotSent": "Not sent"
     },
     "contracts": {
       "title": "Contract consent",
@@ -5427,7 +5604,7 @@
         "einvoice_outcome_unknown": "Paraşüt's answer was lost; the invoice may have been issued. Look at Paraşüt first; if it was not, try again.",
         "parasut_job_error": "Paraşüt did not issue the invoice. Look at it in Paraşüt and fix it, then try again.",
         "einvoice_document_missing": "Paraşüt has not made the e-document for hours. Look at Paraşüt.",
-        "einvoice_carrier_identity_missing": "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
+        "einvoice_carrier_identity_missing": "The carrier's registered name and tax id are not entered (Settings > Shipping and delivery > the carrier's page).",
         "einvoice_parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
         "einvoice_parasut_disconnected": "The Paraşüt connection is lost; connect again (Settings > E-invoice).",
         "einvoice_store_url_missing": "The shop's storefront address is not entered (Settings > SEO).",
@@ -5679,6 +5856,7 @@
       "shipping": "Shipping",
       "total": "Total",
       "notes": "Team notes",
+      "customerNote": "Customer's note",
       "perOrder": "Orders and add-ons",
       "ordersCount_one": "{{count}} order",
       "ordersCount_other": "{{count}} orders",
@@ -5742,6 +5920,17 @@
       "units_other": "{{count}} people",
       "departure_cancelled": "This departure was cancelled",
       "open_order": "Open order"
+    },
+    "history": {
+      "title": "Customer history"
+    },
+    "origin": {
+      "title": "Order source",
+      "source": "Source",
+      "utmSource": "Campaign source",
+      "utmMedium": "Campaign medium",
+      "utmCampaign": "Campaign name",
+      "referrer": "Referring site"
     }
   },
   "customers": {
@@ -5761,7 +5950,12 @@
       "customer": "Customer",
       "phone": "Phone",
       "kind": "Type",
-      "joined": "First seen"
+      "joined": "First seen",
+      "orders": "Orders",
+      "spent": "Total spent",
+      "average": "Average basket",
+      "lastOrder": "Last order",
+      "city": "City"
     },
     "empty": "No customers yet. They show up with the first order or sign-up.",
     "noMatch": "No customers match your search.",
@@ -6189,6 +6383,23 @@
       "eraseConfirm": "Delete for good",
       "erased_one": "{{count}} record deleted.",
       "erased_other": "{{count}} records deleted."
+    },
+    "columnOptions": "Columns",
+    "stats": {
+      "title": "Customer numbers",
+      "orders": "Orders",
+      "spent": "Total spent",
+      "average": "Average basket",
+      "lastOrder": "Last order",
+      "city": "City"
+    },
+    "export": {
+      "button": "Export",
+      "excel": "Download as Excel",
+      "csv": "Download CSV",
+      "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
+      "laterNoJobs": "The file is being prepared in the background.",
+      "failed": "The customer file could not be prepared."
     }
   },
   "categories": {
@@ -6206,7 +6417,8 @@
     "columns": {
       "category": "Category",
       "status": "Status",
-      "order": "Order"
+      "order": "Order",
+      "count": "Products"
     },
     "empty": "No categories yet. Add your first one.",
     "expand": "Show {{name}}'s subcategories",
@@ -6249,7 +6461,8 @@
       "alt": "Alt text",
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."
-    }
+    },
+    "countOf": "{{name}}: {{count}} products"
   },
   "inventory": {
     "description": "Sellable stock; low and sold-out items first",
@@ -6430,7 +6643,20 @@
       "buyCount": "Units taken",
       "payCount": "Units paid",
       "buyWord": "buy",
-      "payWord": "pay"
+      "payWord": "pay",
+      "audience": "Who can use it",
+      "audienceHint": "Customers in the chosen groups can use it once they log in to their account.",
+      "audiences": {
+        "everyone": "Everyone",
+        "groups": "Customer groups"
+      },
+      "audienceGroups": "Customer groups",
+      "noGroups": "No customer groups yet; create one under Customers › Groups.",
+      "firstOrder": "First order only",
+      "firstOrderHint": "Customers who ordered before cannot use it; their e-mail address is checked too.",
+      "previewGroups_one": "For {{count}} chosen customer group",
+      "previewGroups_other": "For {{count}} chosen customer groups",
+      "previewFirstOrder": "On a first order only"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
@@ -6442,7 +6668,8 @@
       "minimum": "Enter an amount above zero, or leave it empty.",
       "perCustomer": "Uses per customer must be a whole number.",
       "buyget": "Units paid must be fewer than units taken, both whole numbers from 1 to 99 (for example buy 3, pay 2).",
-      "buygetScope": "For buy X, pay Y choose products, categories or collections."
+      "buygetScope": "For buy X, pay Y choose products, categories or collections.",
+      "groups": "Choose at least one customer group, or everyone."
     },
     "created": "Promotion created.",
     "saved": "Promotion saved.",
@@ -6484,9 +6711,9 @@
     "settings": {
       "title": "Promotion settings",
       "hint": "Rules for every promotion.",
-      "freeShipping": "Free shipping from a basket total",
-      "freeShippingHint": "Once the basket's products (VAT in, after discounts) reach this total, flat-rate shipping options cost nothing.",
-      "threshold": "Basket total",
+      "freeShippingSummary": "Free shipping from: {{value}}",
+      "freeShippingOff": "Off",
+      "freeShippingEdit": "Change in shipping settings",
       "combineCodes": "More than one code in a cart",
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."
@@ -6575,7 +6802,8 @@
       "marketing": "Campaigns and sources",
       "finance": "Finance",
       "stock": "Stock",
-      "search": "Search"
+      "search": "Search",
+      "customers": "Customers"
     },
     "share": "Share",
     "sales": "Sales",
@@ -6812,6 +7040,35 @@
         "empty": "No search found nothing in this period."
       },
       "empty": "No one searched the storefront in this period."
+    },
+    "customers": {
+      "tiles": {
+        "label": "Customer summary",
+        "new": "New customers",
+        "newHint": "{{registered}} members, {{guest}} guests",
+        "buyers": "Customers who bought",
+        "buyersHint": "Customers who ordered in this period",
+        "returning": "Returning",
+        "returningHint_one": "{{count}} customer had bought before",
+        "returningHint_other": "{{count}} customers had bought before",
+        "spent": "Spend per customer",
+        "spentHint": "The average of those who bought in this period"
+      },
+      "chartTitle": "New customers",
+      "chartHint": "Customers who signed up or ordered for the first time, with the period before.",
+      "chartEmpty": "No new customers in this period.",
+      "chartTable": "New customers by period",
+      "current": "This period",
+      "previous": "Period before",
+      "topTitle": "Top spending customers",
+      "topHint": "The first 10 by what their orders in this period came to.",
+      "topEmpty": "No customer ordered in this period.",
+      "columns": {
+        "customer": "Customer",
+        "orders": "Orders",
+        "spent": "Spent"
+      },
+      "capped": "The period is large; the numbers cover the first records."
     }
   },
   "seo": {
@@ -7682,6 +7939,7 @@
     "deleted": "Attribute group deleted.",
     "productCard": "Attributes",
     "template": "Attribute group",
+    "templateHint": "Decides which attributes are asked; their values are filled in below.",
     "noTemplate": "None",
     "noTemplates": "No attribute groups yet.",
     "openSettings": "Create an attribute group",
@@ -7973,6 +8231,7 @@
     "empty": "No notifications yet.",
     "lowStock": {
       "title": "Running low: {{name}}",
+      "unnamed": "a product",
       "description_one": "{{count}} unit left (threshold {{threshold}}).",
       "description_other": "{{count}} units left (threshold {{threshold}})."
     },
@@ -8062,37 +8321,39 @@
       "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
     },
     "paymentIssue": {
+      "orderRef": "order #{{number}}",
+      "orderRefUnknown": "this order",
       "completion_stuck": {
         "title": "A {{provider}} payment cannot become an order",
-        "description": "No order opened for {{amount}} ({{reference}}, cart {{cart}}); it is still being tried and was not refunded. Check the stock and warehouse settings; if it cannot open, refund it in the provider's panel."
+        "description": "No order opened for {{amount}} ({{reference}}); it is still being tried and was not refunded. Check the stock and warehouse settings; if it cannot open, refund it in the provider's panel."
       },
       "refunded_before_order": {
         "title": "A refunded {{provider}} payment was not made an order",
-        "description": "{{amount}} ({{reference}}, cart {{cart}}) shows as refunded in the provider's panel; no order was opened."
+        "description": "{{amount}} ({{reference}}) shows as refunded in the provider's panel; no order was opened."
       },
       "shelf_restored": {
         "title": "A temporary stock raise was taken back",
-        "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
+        "description": "The stock raised for a cart was lowered again after the run stopped halfway. Check the stock counts."
       },
       "wholesale_price_check": {
         "title": "A wholesale cart's payment could not start",
-        "description": "Cart {{cart}} could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
+        "description": "The wholesale cart could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
       },
       "payment_beside_order": {
         "title": "A second {{provider}} payment for a cart already ordered",
-        "description": "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
+        "description": "{{amount}} ({{reference}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
       },
       "refund_incomplete": {
         "title": "A {{provider}} refund was made, its record is incomplete",
-        "description": "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again."
+        "description": "The {{amount}} refund ({{reference}}) for {{order}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again."
       },
       "refund_unresolved": {
         "title": "A refund could not be confirmed for an hour",
-        "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
+        "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for {{order}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
       },
       "cancel_refund_order_open": {
         "title": "A cancel's refund was made but the order is not canceled",
-        "description": "The {{amount}} cancel refund ({{reference}}, {{provider}}) for order {{cart}} was made, but the order is still open. Cancel the order; do not ship it."
+        "description": "The {{amount}} cancel refund ({{reference}}, {{provider}}) for {{order}} was made, but the order is still open. Cancel the order; do not ship it."
       }
     },
     "markAllRead": "Mark all read",
@@ -10039,14 +10300,17 @@
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
         },
         "accentFont": "Accent font",
-        "accentFontTerm": "handwriting · font-family",
-        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font, like handwriting. With None the note is drawn in the body font, italic. The font loads only on a page with a note.",
+        "accentFontTerm": "handwriting · serif · font-family",
+        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font; with the opening's heading font mix, the heading's accent part is drawn in it, italic. With None the note is drawn in the body font, italic. The font loads only on a page that uses it.",
         "handwriting": "handwriting",
         "accentFonts": {
           "none": "None",
           "caveat": "Caveat",
           "dancing-script": "Dancing Script",
-          "kalam": "Kalam"
+          "kalam": "Kalam",
+          "dm-serif": "DM Serif Display",
+          "fraunces": "Fraunces",
+          "playfair": "Playfair Display"
         },
         "shapes": "Shapes",
         "radius": "Corners",
@@ -10834,6 +11098,9 @@
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
         "stickyTerm": "sticky",
+        "overCover": "Over the cover photo",
+        "overCoverHint": "When the page opens with a full photo cover, the header has no ground and light words over the photo; once the page scrolls it takes its own ground again.",
+        "overCoverTerm": "transparent header",
         "search_placeholder": {
           "label": "Search box text",
           "term": "placeholder",
@@ -11877,6 +12144,12 @@
           "placeholder": "E.g. Find your escape.",
           "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
         },
+        "after": {
+          "label": "Last line",
+          "term": "last line",
+          "placeholder": "E.g. Discover beyond the ordinary.",
+          "hint": "A line after the accent line, in the heading's own colour. With the font mix on, the accent ends the first line and this is the second. Leave it empty to draw none."
+        },
         "note": {
           "label": "Note",
           "term": "note",
@@ -11946,7 +12219,8 @@
           "hint": "The dark veil over the image, so the text reads on any picture.",
           "light": "Light",
           "strong": "Strong",
-          "side": "From the side"
+          "side": "From the side",
+          "faint": "Faint"
         },
         "edge": {
           "label": "Image edge",
@@ -12010,6 +12284,20 @@
           "hint": "The note over the heading, or in the opening's top right corner with a brush stroke under it (1024 px and up; over the heading on a phone).",
           "heading": "Over the heading",
           "corner": "Top right corner"
+        },
+        "title_mix": {
+          "label": "Heading font mix",
+          "term": "font mix",
+          "hint": "The heading's second part follows on the same line in an italic serif; the rest is drawn light. Choose the font in Theme settings › Fonts › Accent font.",
+          "none": "One font",
+          "serif_accent": "Accent in italic serif"
+        },
+        "words_place": {
+          "label": "Words layout",
+          "term": "layout",
+          "hint": "The words stand together, or the heading at the cover's top and the text and button at its foot, the picture showing between.",
+          "together": "Together",
+          "split": "Heading top, button bottom"
         }
       },
       "trustCard": {

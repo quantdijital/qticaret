@@ -10,10 +10,14 @@ import { AddonsCard } from "./addons-card"
 import { CatalogPanel } from "./catalog-panel"
 import { ParcelPanel } from "./parcel-panel"
 import { PriceHistoryCard } from "./price-history-card"
+import { PurchaseLimitCard } from "./purchase-limit-card"
 import { PRODUCT_SECTIONS } from "./sections"
 import { PricingPanel, StockPanel } from "./simple-panels"
 import type { SimpleVariant } from "./use-simple-variant"
 import { useAddonsShown } from "./use-addons-shown"
+import { usePlaceholder } from "./use-option-placeholder"
+import { savedOptions } from "./variant-options"
+import { OptionsSummary } from "./variant-options-summary"
 import { VariantsCard } from "./variants-card"
 
 const D = "products.data"
@@ -56,11 +60,43 @@ function OnVariants({ text, onVariants }: { text: string; onVariants: () => void
   )
 }
 
-/** The Gelişmiş tab: add-ons (while the shop uses them or the product has some) and the price history. */
+/** The options the variants stand for, read in the Özellikler tab; edited in Varyantlar. */
+function VariantOptionsLine({
+  product,
+  onVariants,
+}: {
+  product: ProductDetail
+  onVariants: () => void
+}) {
+  const { t } = useTranslation()
+  const options = savedOptions(product, usePlaceholder())
+  return (
+    <div className="@container/variants min-w-0">
+      <OptionsSummary
+        options={options}
+        title={t(`${D}.variantOptions`)}
+        action={
+          <Button type="button" variant="outline" size="sm" onClick={onVariants}>
+            {t(`${D}.editOnVariants`)}
+            <ArrowRight />
+          </Button>
+        }
+      />
+    </div>
+  )
+}
+
+/**
+ * The Gelişmiş tab: the most per order (S5), add-ons (while the shop uses
+ * them or the product has some) and the price history.
+ */
 function AdvancedPanel({ productId }: { productId: string }) {
   const addons = useAddonsShown(productId) === true
   return (
     <div className="flex min-w-0 flex-col divide-y">
+      <Pad>
+        <PurchaseLimitCard productId={productId} />
+      </Pad>
       {addons ? (
         <Inset id={PRODUCT_SECTIONS.addons}>
           <AddonsCard productId={productId} />
@@ -75,7 +111,7 @@ function AdvancedPanel({ productId }: { productId: string }) {
 
 /**
  * What one tab of the "Ürün verileri" card holds (docs/06 "Ürün
- * sayfası"); each saves on its own and on the page's save bar.
+ * sayfası"); each saves on its own and on the page's header save.
  */
 export function DataPanel({
   tab,
@@ -123,9 +159,15 @@ export function DataPanel({
       )
     case "attributes":
       return (
-        <Inset>
-          <AttributesCard productId={product.id} />
-        </Inset>
+        <div className="flex min-w-0 flex-col divide-y">
+          <Inset>
+            <AttributesCard productId={product.id} />
+          </Inset>
+          {/* A product with variants: its options are attributes too (WooCommerce's "used for variations") */}
+          {simple === null ? (
+            <VariantOptionsLine product={product} onVariants={onVariants} />
+          ) : null}
+        </div>
       )
     case "variants":
       return (

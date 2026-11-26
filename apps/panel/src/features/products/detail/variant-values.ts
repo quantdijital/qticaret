@@ -8,6 +8,7 @@ import {
 } from "@qticaret/admin-ui/lib/money-input"
 import { MEASURES, measureSchema, measureText } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
+import { trackingEdit } from "./variant-tracking"
 import { codeEdits, MPN_MAX, savedCodes, SKU_MAX, typedGtinError } from "./variant-codes"
 import type { CatalogVariant } from "./variant-codes"
 
@@ -40,6 +41,8 @@ const variantSchema = z.object({
     message: "products.errors.stock",
   }),
   backorder: z.boolean(),
+  /** Stock counted (sold while on the shelf) or not (always sold). */
+  tracked: z.boolean(),
   // Unit cost, VAT excluded (F11.4): empty means not entered
   cost: z.string().refine(
     (text) => {
@@ -91,6 +94,7 @@ export const FIELD_TABS = {
   cost: "prices",
   stock: "prices",
   backorder: "prices",
+  tracked: "prices",
   sku: "codes",
   gtin: "codes",
   mpn: "codes",
@@ -121,6 +125,8 @@ export interface StockFacts {
   tracked: boolean
   reserved: number | null
   backorder: boolean
+  /** Tracking is the product's, not the variant's (a new product's wizard): no switch. */
+  fixed?: boolean
 }
 
 export const stockFacts = (variant: Variant, locationId: string | null): StockFacts => ({
@@ -177,6 +183,7 @@ export function savedVariant(
     price: price === null ? "" : formatMoneyInput(price),
     stock: String(levelAt(variant, locationId).stocked),
     backorder: Boolean(variant.allow_backorder),
+    tracked: Boolean(variant.manage_inventory),
     cost: cost === null ? "" : formatMoneyInput(cost),
     ...savedCodes(variant, catalog),
     weight: measureText(variant.weight),
@@ -188,7 +195,7 @@ export function savedVariant(
   }
 }
 
-type Dirty = Partial<Record<VariantField, boolean>> | undefined
+export type Dirty = Partial<Record<VariantField, boolean>> | undefined
 
 const baseEdit = (variant: Variant) => ({
   variantId: variant.id,
@@ -221,11 +228,13 @@ export function variantEdit(
     )
   )
   const level = levelAt(variant, locationId)
+  const tracking = trackingEdit(variant, values, dirty, locationId)
   const edit: VariantEdit = {
     ...baseEdit(variant),
     amount: dirty?.price ? (parseMoneyInput(values.price) ?? 0) : null,
+    // Turned on, the count goes with it; turned off, a typed count is not written
     stock:
-      stockChanged && variant.manage_inventory && level.inventoryItemId
+      !tracking && stockChanged && variant.manage_inventory && level.inventoryItemId
         ? {
             inventoryItemId: level.inventoryItemId,
             quantity: Number(values.stock),
@@ -237,8 +246,10 @@ export function variantEdit(
     codes,
     ...mpn,
     measures: Object.keys(measures).length > 0 ? measures : null,
+    ...(tracking ? { tracking } : {}),
   }
   const changed =
+    edit.tracking !== undefined ||
     edit.amount !== null ||
     edit.stock !== null ||
     edit.backorder !== null ||

@@ -4,7 +4,7 @@ import { expect, pageHeading, test } from "./support/guard"
 /**
  * A variant's sale price (adr/0086, WooCommerce's "İndirimli fiyat"): typed
  * in its row under the regular price, the share off said beside it, saved
- * by the page's save bar, there again after a reload; then removed. The
+ * by the page's "Kaydet" in its header, there again after a reload; then removed. The
  * test makes its own draft product, clears the sale and deletes the
  * product at the end: nothing of the shop's own changes.
  */
@@ -38,7 +38,11 @@ async function sales(page: Page, id: string): Promise<(string | null)[]> {
   return ((await answer.json()) as SaleRead).variants.map((each) => each.sale?.amount ?? null)
 }
 
-const saveBar = (page: Page) => page.getByRole("region", { name: "Kaydedilmemiş değişiklikler" })
+const headerSave = (page: Page) => page.getByRole("group", { name: "Sayfanın kaydı" })
+const saveButton = (page: Page) =>
+  headerSave(page).getByRole("button", { name: "Kaydet", exact: true })
+const saved = (page: Page) =>
+  headerSave(page).getByRole("button", { name: "Kaydedildi", exact: true })
 
 async function openTaba(page: Page, id: string) {
   await page.goto(`/products/${id}`)
@@ -48,7 +52,7 @@ async function openTaba(page: Page, id: string) {
 }
 
 test.describe("a variant's sale price", () => {
-  test("sets it in the row through the save bar, shows it again, and removes it", async ({
+  test("sets it in the row through the header save, shows it again, and removes it", async ({
     page,
     guard,
   }) => {
@@ -60,9 +64,9 @@ test.describe("a variant's sale price", () => {
       // 520 of 650 is 20% off; the regular price is left as it is
       await expect(page.getByText("%20 indirim")).toBeVisible()
       await expect(page.locator("#variant-price")).toHaveValue("650,00")
-      await expect(saveBar(page)).toBeVisible()
-      await saveBar(page).getByRole("button", { name: "Kaydet" }).click()
-      await expect(saveBar(page)).toHaveCount(0)
+      await expect(saveButton(page)).toBeEnabled()
+      await saveButton(page).click()
+      await expect(saved(page)).toBeDisabled()
       await expect.poll(() => sales(page, id)).toContain("520.00")
 
       await page.reload()
@@ -70,10 +74,10 @@ test.describe("a variant's sale price", () => {
       await expect(page.locator("#variant-sale")).toHaveValue("520,00")
       await expect(page.getByText("%20 indirim")).toBeVisible()
 
-      // Removed: the field empties, the save bar saves it
+      // Removed: the field empties, the header's "Kaydet" saves it
       await page.getByRole("button", { name: "İndirimi kaldır" }).click()
-      await saveBar(page).getByRole("button", { name: "Kaydet" }).click()
-      await expect(saveBar(page)).toHaveCount(0)
+      await saveButton(page).click()
+      await expect(saved(page)).toBeDisabled()
       await expect.poll(() => sales(page, id)).toEqual([null, null])
       await guard.assertHealthy()
     } finally {

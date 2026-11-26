@@ -20,6 +20,13 @@ import { useSaveVariant } from "./variant-save"
 import { FIELD_TABS, fieldId, savedVariant, stockFacts, variantSchemaFor } from "./variant-values"
 import type { Variant, VariantField, VariantValues } from "./variant-values"
 
+/**
+ * Two sections side by side only where the list is wide
+ * (`@container/variants`); in a tab one under another, a line between.
+ */
+const STACKED =
+  "grid gap-5 [&>*+*]:border-t [&>*+*]:pt-5 @3xl/variants:grid-cols-2 @3xl/variants:gap-8 @3xl/variants:[&>*+*]:border-t-0 @3xl/variants:[&>*+*]:pt-0"
+
 /** The form's element ids: the barcode keeps the advisor's target (`fieldId`). */
 const ID = "variant"
 
@@ -42,7 +49,7 @@ interface VariantInlineFormProps {
  * Everything about one variant, open in its row (the owner, 2026-11-25:
  * "modal olmasın", WooCommerce's variations): price and stock, codes and
  * its own parcel, its pictures, one under another. "Kaydet" here, the
- * page's save bar or ⌘S save it; a refused field is told beside it and
+ * page's header save or ⌘S save it; a refused field is told beside it and
  * gets the caret. Prices are checked by the server as everywhere else.
  */
 export function VariantInlineForm({
@@ -68,7 +75,7 @@ export function VariantInlineForm({
     defaultValues: saved,
   })
   const save = useSaveVariant(product, locationId)
-  // Its sale price (adr/0086): saved with the row's "Kaydet", one entry on the save bar
+  // Its sale price (adr/0086): saved with the row's "Kaydet", one entry on the page's header save
   const salePrice = useVariantSale({ productId: product.id, variantId: variant.id }, false)
   const formDirty = form.formState.isDirty
   const dirty = formDirty || salePrice.dirty
@@ -139,8 +146,8 @@ export function VariantInlineForm({
         }
       }}
     >
-      {/* Side by side from `lg` up, one under another on a phone or a tablet */}
-      <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+      {/* Side by side only where the list is wide (`@container/variants`); in a tab, one under another */}
+      <div className={STACKED}>
         <PriceFields form={form} idPrefix={ID} sale={sale} others={0} saleOf={salePrice} />
         <StockFields
           form={form}
@@ -154,7 +161,7 @@ export function VariantInlineForm({
       <div className="border-t pt-5">
         <CodeFields form={form} idPrefix={ID} saved={saved} />
       </div>
-      <div className="grid gap-6 border-t pt-5 lg:grid-cols-2 lg:gap-8">
+      <div className={`${STACKED} border-t pt-5`}>
         <MeasureFields form={form} idPrefix={ID} fallback={product} units={units} />
         <VariantPictures form={form} ties={imageTies(product, variant.id)} />
       </div>

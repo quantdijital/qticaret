@@ -183,3 +183,39 @@ describe("the shop's promises on the cart", () => {
     expect(shippedPromises(false, BADGES).map((badge) => badge.icon)).not.toContain("truck")
   })
 })
+
+describe("a product's own shipping class (adr/0087 §3)", () => {
+  it("says a free-shipping product ships free first, in place of the threshold", () => {
+    const facts = productShipping(
+      input({ product: product({ kind: "physical", shipping_class: "free" }) })
+    )?.facts
+    expect(facts?.[0]).toEqual({
+      icon: "truck",
+      title: "Ücretsiz kargo",
+      text: "Bu ürünün kargosu ücretsiz.",
+    })
+    expect(facts?.some((fact) => fact.text === "₺1.500 ve üzeri")).toBe(false)
+  })
+
+  it("says a class's surcharge, beside the threshold", () => {
+    const facts = productShipping(
+      input({
+        product: product({ kind: "physical", shipping_class: "bulky" }),
+        classes: [{ key: "bulky", surcharge: 150 }],
+      })
+    )?.facts
+    expect(facts?.[0]).toEqual({
+      icon: "truck",
+      title: "Kargo ek ücreti",
+      text: "Bu ürün için kargoya 150,00 TL eklenir.",
+    })
+    expect(facts?.[1]).toEqual({ icon: "truck", title: "Ücretsiz kargo", text: "₺1.500 ve üzeri" })
+  })
+
+  it("says nothing of a class the shop no longer has", () => {
+    const facts = productShipping(
+      input({ product: product({ kind: "physical", shipping_class: "gone" }) })
+    )?.facts
+    expect(facts?.[0]).toEqual({ icon: "truck", title: "Ücretsiz kargo", text: "₺1.500 ve üzeri" })
+  })
+})

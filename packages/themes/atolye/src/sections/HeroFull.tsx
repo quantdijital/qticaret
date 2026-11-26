@@ -54,7 +54,12 @@ const SIZES = {
  * a ringed play mark (`second_button`, `HeroButtons`), the trust badges a
  * row of icons under the buttons (`trust_place: inside`, `HeroTrustRow`)
  * and the hand note in the top corner (`note_place: corner`, from 1024 px).
- * Each off: drawn as before.
+ * Mixed (`title_mix`), the heading is set light and its second part follows on the same line in
+ * the accent face's italic, in the heading's ink; a last line
+ * (`after`, `title_after`) follows on its own line in the heading's ink. Split (`words_place`,
+ * behind the words only), the heading stands at the opening's top and the
+ * text and buttons at its foot, the photograph between; the veil may be
+ * faint (`scrim`). Each off: drawn as before.
  * The shop's trust badges, when shown, are a box over the bottom edge too,
  * under the search card, which then takes the same width (one edge for
  * both). Beside the words the photograph ends where that foot begins, so
@@ -74,7 +79,7 @@ export function HeroFull({
   t: Translate
 }) {
   const id = headingId(hero.id)
-  const { settings, accent, search, video } = full
+  const { settings, accent, after, search, video } = full
   const { image } = hero
   const both = settings.action === "both"
   const buttons = (search === null || both) && hero.actions.length > 0
@@ -92,6 +97,10 @@ export function HeroFull({
   const inside = settings.trust_place === "inside"
   const trust = inside ? [] : full.trust
   const corner = full.note && settings.note_place === "corner" ? full.note : null
+  // The heading set light, its second part inline in the accent face's italic (`hero-full-mix.css`)
+  const mixed = settings.title_mix === "serif_accent"
+  // The heading at the top, the text and buttons at the foot: over the photograph only (`hero-full-split.css`)
+  const split = settings.words_place === "split" && side === "full"
   const sizes = SIZES[side]
   const Heading = first ? "h1" : "h2"
   const overlap = search !== null && settings.search_position === "overlap"
@@ -111,6 +120,8 @@ export function HeroFull({
       data-edge={settings.edge}
       data-foot={foot ? "" : undefined}
       data-trust={inside ? "inside" : undefined}
+      data-title-mix={mixed ? "serif_accent" : undefined}
+      data-words={split ? "split" : undefined}
     >
       {first && image && <Preload image={image} sizes={sizes} />}
       <div className="gf-cover-stage relative isolate flex flex-col justify-center">
@@ -185,7 +196,22 @@ export function HeroFull({
               )}
             >
               <span {...fieldMark(on, "heading")}>{hero.heading}</span>
-              {accent && (
+              {accent && mixed && (
+                <>
+                  {" "}
+                  <span {...fieldMark(on, "title_accent")} className="gf-cover-accent">
+                    {settings.accent_mark === "swash" ? (
+                      <span className="relative inline-block">
+                        {accent}
+                        <HeroSwash />
+                      </span>
+                    ) : (
+                      accent
+                    )}
+                  </span>
+                </>
+              )}
+              {accent && !mixed && (
                 <span
                   {...fieldMark(on, "title_accent")}
                   className={cn(
@@ -201,6 +227,11 @@ export function HeroFull({
                   ) : (
                     accent
                   )}
+                </span>
+              )}
+              {after && (
+                <span {...fieldMark(on, "title_after")} className="gf-cover-after block">
+                  {after}
                 </span>
               )}
             </Heading>

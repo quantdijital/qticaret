@@ -303,6 +303,12 @@ export interface StoreProduct {
    */
   product_extension?: {
     is_gift_card?: boolean | null
+    /**
+     * How it ships (adr/0087 §3): `free` (the built-in "Ücretsiz kargo") or
+     * a shop class's key (`shipping_classes` of `/store/storefront`, its
+     * surcharge); null or absent: Standard. The backend prices it.
+     */
+    shipping_class?: string | null
     withdrawal_excluded?: boolean | null
     kind?: string | null
     /**
@@ -311,6 +317,12 @@ export interface StoreProduct {
      * the product's own answer only (`+product_extension.booking_mode`).
      */
     booking_mode?: string | null
+    /**
+     * The most of the product one order may hold (S5), its variants
+     * together; null or absent: no limit. The backend refuses more as lines
+     * are added and at checkout. On the product's own answer only.
+     */
+    max_quantity?: number | null
     /**
      * The shop's short description as a content document (adr/0055 Ek
      * 2026-11-06), with `+product_extension.summary_doc`, on the product's

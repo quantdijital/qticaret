@@ -195,6 +195,22 @@ describe("the theme's checkout", () => {
     )
   })
 
+  it("offers an optional order note in the payment form, filled with the cart's", () => {
+    const empty = renderPage(atolyeTheme, "CheckoutPage", { view: paying(), actions })
+    expect(empty).toMatch(/<textarea[^>]*name="order_note"[^>]*maxLength="500"/)
+    expect(empty).not.toMatch(/<textarea[^>]*name="order_note"[^>]*required/)
+    expect(empty).toContain("Sipariş notu (isteğe bağlı)")
+    const kept = renderPage(atolyeTheme, "CheckoutPage", {
+      view: paying({ orderNote: "Zili çalmayın" }),
+      actions,
+    })
+    expect(kept).toMatch(/name="order_note"[^>]*>Zili çalmayın<\/textarea>/)
+    // Only in the payment step: the address step draws none
+    expect(renderPage(atolyeTheme, "CheckoutPage", { view: view(), actions })).not.toContain(
+      'name="order_note"'
+    )
+  })
+
   it("asks the age the cart needs, in its own well", () => {
     const html = renderPage(atolyeTheme, "CheckoutPage", {
       view: paying({ ageLimit: 18 }),
