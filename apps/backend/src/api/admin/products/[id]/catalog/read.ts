@@ -4,7 +4,9 @@ import { variantGtin } from "../../../../../lib/catalog"
 import { storedAddonsOf } from "../../../../../lib/catalog/addons"
 import { summaryDocOf } from "../../../../../lib/catalog/summary"
 import type { ContentDoc } from "../../../../../lib/content"
+import { storedLinkedIds } from "../../../../../lib/catalog/linked-products"
 import { effectiveAddonsAmong } from "../../../../../workflows/addons/effective"
+import { linkedForAdmin } from "../../../../../workflows/catalog/linked-products"
 
 interface ProductRow {
   id: string
@@ -35,6 +37,8 @@ interface ProductRow {
     badge?: string | null
     max_quantity?: number | null
     shipping_class?: string | null
+    upsell_product_ids?: unknown
+    cross_sell_product_ids?: unknown
   } | null
 }
 
@@ -91,7 +95,14 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
   const extension = product.product_extension ?? null
   const categories = present(product.categories).map(({ id, name }) => ({ id, name }))
   const primary = extension?.primary_category_id ?? null
-  const effective = (await effectiveAddonsAmong(scope, [productId])).get(productId)
+  const [addonsReach, linked] = await Promise.all([
+    effectiveAddonsAmong(scope, [productId]),
+    linkedForAdmin(scope, {
+      upsell: storedLinkedIds(extension?.upsell_product_ids),
+      cross_sell: storedLinkedIds(extension?.cross_sell_product_ids),
+    }),
+  ])
+  const effective = addonsReach.get(productId)
   return {
     condition: extension?.condition ?? "new",
     kind: extension?.kind ?? "physical",
@@ -115,6 +126,9 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     max_quantity: extension?.max_quantity ?? null,
     // adr/0087 §1: `free`, a shop class's key, or null (Standard)
     shipping_class: extension?.shipping_class ?? null,
+    // S3: the linked products in the shop's order (deleted ones left out)
+    upsells: linked.upsells,
+    cross_sells: linked.cross_sells,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

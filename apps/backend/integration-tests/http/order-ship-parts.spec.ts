@@ -2,12 +2,12 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { orderShipments } from "../../src/workflows/shipping/order-shipments"
-import { geliverOrder, geliverShop } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -27,8 +27,8 @@ interface ShipResult {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
 
     const post = <T>(path: string, body: unknown) =>
       settle(http.post<T & { message?: string }>(path, body, { headers: setup.admin.headers }))
@@ -55,18 +55,18 @@ medusaIntegrationTestRunner({
     }
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
     })
 
     it("ships an order in parts, never more than is left", async () => {
@@ -185,7 +185,7 @@ medusaIntegrationTestRunner({
     })
 
     it("ships a test payment only with a carrier in test mode, where nothing leaves the shop", async () => {
-      const withCarrier = await geliverOrder(getContainer(), setup)
+      const withCarrier = await carrierOrder(getContainer(), setup)
       const ownDelivery = await placeOrder(getContainer(), {
         regionId: setup.shop.regionId,
         salesChannelId: setup.shop.salesChannelId,
@@ -205,13 +205,13 @@ medusaIntegrationTestRunner({
       expect(marked.every((count) => count > 0)).toBe(true)
       expect(state.data.test_carrier).toBe(true)
       expect(shipped.status).toBe(200)
-      expect(shipped.data.carrier).toBe("geliver")
+      expect(shipped.data.carrier).toBe("aras")
       expect(refused.data.message).toBe("orders.test_payment_not_shippable")
     })
 
     it("ships picked orders at once, reporting each, and lists where each parcel stands", async () => {
-      const first = await geliverOrder(getContainer(), setup)
-      const second = await geliverOrder(getContainer(), setup)
+      const first = await carrierOrder(getContainer(), setup)
+      const second = await carrierOrder(getContainer(), setup)
 
       const { data } = await post<{ results: ShipResult[] }>("/admin/order-board/ship", {
         order_ids: [first, second, "order_01UNKNOWN0000000000000000"],
@@ -227,8 +227,8 @@ medusaIntegrationTestRunner({
       const listed = board.data.orders.filter(({ id }) => id === first || id === second)
 
       expect(data.results).toEqual([
-        expect.objectContaining({ order_id: first, ok: true, carrier: "geliver" }),
-        expect.objectContaining({ order_id: second, ok: true, carrier: "geliver" }),
+        expect.objectContaining({ order_id: first, ok: true, carrier: "aras" }),
+        expect.objectContaining({ order_id: second, ok: true, carrier: "aras" }),
         expect.objectContaining({ ok: false, error: expect.any(String) as unknown }),
       ])
       expect(data.results[0]?.fulfillment_id).toEqual(expect.any(String))
@@ -240,7 +240,7 @@ medusaIntegrationTestRunner({
           .map(({ fulfillment_id }) => fulfillment_id)
           .sort()
       )
-      expect(listed.map(({ delivery }) => delivery?.carrier)).toEqual(["geliver", "geliver"])
+      expect(listed.map(({ delivery }) => delivery?.carrier)).toEqual(["aras", "aras"])
     })
   },
 })

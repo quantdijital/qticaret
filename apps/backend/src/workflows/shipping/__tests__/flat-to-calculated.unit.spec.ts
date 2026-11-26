@@ -70,7 +70,7 @@ describe("flat-rate options moved to our pricing (adr/0087 §7)", () => {
     expect(
       planFlatConversion(flat({ rules: [{ attribute: "is_return", value: "true" }] }))
     ).toBeNull()
-    expect(planFlatConversion(flat({ provider_id: "geliver_geliver" }))).toBeNull()
+    expect(planFlatConversion(flat({ provider_id: "other_other" }))).toBeNull()
     expect(
       planFlatConversion(flat({ provider_id: "aras_aras", data: { id: "aras-table" } }))
     ).toBeNull()

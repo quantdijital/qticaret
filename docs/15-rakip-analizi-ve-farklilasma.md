@@ -17,7 +17,7 @@
 | TR ödeme | Shopify Payments yok; 3. parti + plan bazlı ek komisyon (%2 → %0,2) | Kendi POS'u, %0 taksitsiz | var | var | var | Tenant'ın kendi iyzico/PayTR hesabı, **platform komisyonu yok** |
 | E-fatura | 3. parti uygulama (kontör) | entegrasyon | var | var | var | Modül: UBL üretimi bizde, entegratör ince katman |
 | Kapıda ödeme / havale | 3. parti uygulama | var | var | var | var | Çekirdek provider'lar |
-| Kargo | 3. parti | var | var | var | 8+ firma | Geliver + doğrudan taşıyıcı adaptörleri |
+| Kargo | 3. parti | var | var | var | 8+ firma | Doğrudan taşıyıcı adaptörleri (Aras, Yurtiçi; diğerleri istendikçe) |
 | KVKK / mesafeli satış metinleri | 3. parti uygulama (ücretli) | var | var | var | var | `legal-consent`: sürümlü, sipariş snapshot'lı |
 | Veri sahipliği | Export var; uygulama verileri uygulamada kalır | kapalı | kapalı | kapalı; sözleşme tek taraflı değişebilir | kapalı | Ayrı DB, tam dışa aktarma paketi, geçiş araçları iki yönlü |
 | Fiyat modeli | $ bazlı + komisyon; Plus $2.300/ay | ₺4.660–8.299/ay, Premium 40.000+ | ~₺2.900/ay'dan, sürekli kampanya | ₺35–105k/yıl | yayınlanmıyor | Şeffaf paket, komisyonsuz, Türkçe destek |

@@ -25,6 +25,7 @@ import {
   releaseLinkClaim,
 } from "../payment-links/cart-guard"
 import type { LinkClaim } from "../payment-links/cart-guard"
+import { assertFreeShippingConditionHolds } from "../promotions/free-shipping-condition"
 import { assertRestrictedCodesHold } from "../promotions/restricted-codes"
 import { assertWholesaleCartCompletes } from "../wholesale/checkout"
 import { overlapsPlacement } from "./completion-overlap"
@@ -95,6 +96,8 @@ completeCartWorkflow.hooks.validate(
     if (await hasStaleShipping(container, cart.id)) {
       throw new ValidationError("cart.shipping_changed", { field: "shipping_methods" })
     }
+    // Shipping a free shipping campaign lowered, still as the shop's condition allows
+    await assertFreeShippingConditionHolds(container, cart.id)
     // Accepted at the payment's start too; a contract published since stops it (adr/0041 §2)
     await assertConsented(container, cart.id)
     // A restricted product's buyer declared their age (adr/0041 §4)

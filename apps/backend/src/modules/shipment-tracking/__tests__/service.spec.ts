@@ -12,7 +12,7 @@ moduleIntegrationTestRunner<ShipmentTrackingModuleService>({
       const tracked = await service.createTrackedShipments({
         fulfillment_id: "ful_1",
         order_id: "order_1",
-        provider: "geliver",
+        provider: "aras",
         provider_shipment_id: "shp_1",
       })
       await service.createShipmentEvents({
@@ -29,7 +29,7 @@ moduleIntegrationTestRunner<ShipmentTrackingModuleService>({
       const twiceParcel = service.createTrackedShipments({
         fulfillment_id: "ful_1",
         order_id: "order_1",
-        provider: "geliver",
+        provider: "aras",
         provider_shipment_id: "shp_2",
       })
 

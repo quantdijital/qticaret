@@ -138,10 +138,20 @@ export function InvitePage() {
               <Input id="invite-email" value={info.data.email} readOnly autoComplete="username" />
             </Field>
             <Field id="first-name" label={t("invite.firstName")} error={errors.first_name?.message}>
-              <Input id="first-name" autoComplete="given-name" {...form.register("first_name")} />
+              <Input
+                placeholder={t("common.placeholder.firstName")}
+                id="first-name"
+                autoComplete="given-name"
+                {...form.register("first_name")}
+              />
             </Field>
             <Field id="last-name" label={t("invite.lastName")} error={errors.last_name?.message}>
-              <Input id="last-name" autoComplete="family-name" {...form.register("last_name")} />
+              <Input
+                placeholder={t("common.placeholder.lastName")}
+                id="last-name"
+                autoComplete="family-name"
+                {...form.register("last_name")}
+              />
             </Field>
             <Field id="password" label={t("login.password")} error={errors.password?.message}>
               <PasswordInput

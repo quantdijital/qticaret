@@ -94,13 +94,25 @@ const envSchema = z.object({
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
-  // Fake PayTR, iyzico and Geliver servers in development and tests; the real addresses are fixed in code
+  // Fake PayTR and iyzico servers in development and tests; the real addresses are fixed in code
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
-  GELIVER_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // A fake Aras or Yurtiçi on a developer's machine (adr/0035); refused when deployed
   ARAS_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   YURTICI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake DHL eCommerce on a developer's machine and in tests; refused when deployed
+  DHL_ECOMMERCE_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake Sürat Kargo on a developer's machine and in tests (Sürat has no test service); refused when deployed
+  SURAT_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake PTT Kargo (both services) on a developer's machine and in tests; refused when deployed
+  PTT_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // The platform's one app at DHL eCommerce's API portal (adr/0027 Ek 2026-11-26): each shop
+  // connects its own customer number with it. Off until both are set; never logged
+  DHL_ECOMMERCE_CLIENT_ID: z.string().max(200).optional(),
+  DHL_ECOMMERCE_CLIENT_SECRET: z.string().max(200).optional(),
+  // DHL eCommerce is suspended (the owner, 2026-11-26; adr/0027 Ek 2026-11-26 "askı"): built
+  // and tested, but hidden and refused on this server until "true" (`lib/integrations/suspended.ts`)
+  CARRIER_DHLECOMMERCE_ENABLED: z.enum(["true", "false"]).optional(),
   // F9 (adr/0036): where e-mail leaves us. Unset sends none; Mailpit only on
   // a developer's machine, Resend once deployed
   EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).optional(),
@@ -365,9 +377,11 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   for (const name of [
     "PAYTR_BASE_URL",
     "IYZICO_BASE_URL",
-    "GELIVER_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
+    "DHL_ECOMMERCE_BASE_URL",
+    "SURAT_BASE_URL",
+    "PTT_BASE_URL",
     "MAILPIT_URL",
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",

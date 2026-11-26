@@ -82,7 +82,11 @@ export function DefinitionAdvanced({ index }: { index: number }) {
                 hint={t(`${A}.optionTitleHint`)}
                 required
               >
-                <Input id={`${base}-option`} {...register(`${base}.option_title`)} />
+                <Input
+                  placeholder={t("attributes.placeholders.optionTitle")}
+                  id={`${base}-option`}
+                  {...register(`${base}.option_title`)}
+                />
               </Field>
               <Field
                 label={t(`${A}.variesBy`)}
@@ -121,7 +125,12 @@ export function DefinitionAdvanced({ index }: { index: number }) {
           </div>
           {definition.type === "text" ? (
             <Field label={t(`${A}.unit`)} htmlFor={`${base}-unit`} hint={t(`${A}.textUnitHint`)}>
-              <Input id={`${base}-unit`} className="sm:w-1/2" {...register(`${base}.unit`)} />
+              <Input
+                placeholder={t("attributes.placeholders.textUnit")}
+                id={`${base}-unit`}
+                className="sm:w-1/2"
+                {...register(`${base}.unit`)}
+              />
             </Field>
           ) : null}
           {variant ? null : (

@@ -8,6 +8,7 @@ import type { ProductDetail } from "@/features/products/api/products"
 import type { TabPart } from "@/features/products/layout/parts"
 import { AddonsCard } from "./addons-card"
 import { CatalogPanel } from "./catalog-panel"
+import { LinkedProductsCard } from "./linked-products-card"
 import { ParcelPanel } from "./parcel-panel"
 import { PriceHistoryCard } from "./price-history-card"
 import { PurchaseLimitCard } from "./purchase-limit-card"
@@ -179,6 +180,12 @@ export function DataPanel({
       return (
         <Pad>
           <CatalogPanel productId={product.id} />
+        </Pad>
+      )
+    case "linked":
+      return (
+        <Pad>
+          <LinkedProductsCard productId={product.id} />
         </Pad>
       )
     case "advanced":

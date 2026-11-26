@@ -114,7 +114,13 @@ export function SmtpDialog({
               error={message(errors.port?.message)}
               required
             >
-              <Input id="smtp-port" inputMode="numeric" maxLength={5} {...form.register("port")} />
+              <Input
+                placeholder={t("settings.placeholders.smtpPort")}
+                id="smtp-port"
+                inputMode="numeric"
+                maxLength={5}
+                {...form.register("port")}
+              />
             </Field>
           </div>
           <Field
@@ -161,6 +167,7 @@ export function SmtpDialog({
               error={message(errors.username?.message)}
             >
               <Input
+                placeholder={t("common.placeholder.email")}
                 id="smtp-username"
                 spellCheck={false}
                 {...NOT_A_LOGIN}
@@ -199,7 +206,12 @@ export function SmtpDialog({
               hint={t(`${S}.fromNameHint`)}
               error={message(errors.fromName?.message)}
             >
-              <Input id="smtp-from-name" maxLength={100} {...form.register("fromName")} />
+              <Input
+                placeholder={t("settings.placeholders.fromName")}
+                id="smtp-from-name"
+                maxLength={100}
+                {...form.register("fromName")}
+              />
             </Field>
           </div>
           <Field
@@ -210,6 +222,7 @@ export function SmtpDialog({
             required
           >
             <Input
+              placeholder={t("settings.placeholders.smtpRate")}
               id="smtp-rate"
               inputMode="numeric"
               maxLength={3}

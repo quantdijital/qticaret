@@ -18,32 +18,35 @@ import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import {
   ARAS_FULFILLMENT_PROVIDER_ID,
-  GELIVER_FULFILLMENT_PROVIDER_ID,
+  DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   MANUAL_FULFILLMENT_PROVIDER_ID,
   SHOP_FLAT_OPTION,
   SHOP_FULFILLMENT_PROVIDER_ID,
+  PTT_FULFILLMENT_PROVIDER_ID,
+  SURAT_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
 
 /**
  * The shop's shipping options as the panel keeps them (F7.8, adr/0031):
- * a name shoppers see, who carries the parcel (the shop itself, Geliver,
- * or the shopper from the shop: pickup) and how it is priced (a flat
- * amount, Geliver's quote, or the shop's table). They live in the default
+ * a name shoppers see, who carries the parcel (the shop itself, its own
+ * Aras or Yurtiçi contract, or the shopper from the shop: pickup) and how
+ * it is priced (a flat amount, or the shop's table). They live in the default
  * warehouse's Türkiye zone (a pickup zone for pickup), made when missing.
  */
 
-export type OptionPricing =
-  | { type: "flat"; amount: Kurus }
-  | { type: "quote"; choice: "cheapest" | "fastest" }
-  | { type: "table" }
+export type OptionPricing = { type: "flat"; amount: Kurus } | { type: "table" }
 
-export type OptionCarrier = "manual" | "geliver" | "aras" | "yurtici" | "pickup"
+export type OptionCarrier =
+  "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt" | "pickup"
 
-// The shop's own contracts (adr/0035): a flat price or the shop's table, never a quote
+// The shop's own contracts (adr/0035): a flat price or the shop's table
 const CONTRACTS = {
   aras: ARAS_FULFILLMENT_PROVIDER_ID,
   yurtici: YURTICI_FULFILLMENT_PROVIDER_ID,
+  dhlecommerce: DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
+  surat: SURAT_FULFILLMENT_PROVIDER_ID,
+  ptt: PTT_FULFILLMENT_PROVIDER_ID,
 } as const
 
 const isContract = (carrier: OptionCarrier): carrier is keyof typeof CONTRACTS =>
@@ -165,11 +168,6 @@ export const ensureShippingZoneStep = createStep(
   }
 )
 
-const GELIVER_DATA: Readonly<Record<string, string>> = {
-  cheapest: "geliver-cheapest",
-  fastest: "geliver-fastest",
-}
-
 /** Medusa's shipping option for the shop's choice of carrier and price. */
 export function shippingOptionInput(
   input: ShopOptionInput,
@@ -177,11 +175,8 @@ export function shippingOptionInput(
 ) {
   const { pricing } = input
   const contract = isContract(input.carrier) ? input.carrier : null
-  // Only Geliver quotes; a contract carrier takes a flat price or the table; the rest a flat price
-  if (
-    (contract && pricing.type === "quote") ||
-    (input.carrier !== "geliver" && !contract && pricing.type !== "flat")
-  ) {
+  // A contract carrier takes a flat price or the table; the rest a flat price
+  if (!contract && pricing.type !== "flat") {
     throw new ValidationError("shipping.manual_flat_only", { field: "pricing" })
   }
   return {
@@ -216,18 +211,6 @@ function pricingOf(input: ShopOptionInput, place: { region_id: string | null }) 
         { currency_code: "try", amount },
         ...(place.region_id ? [{ region_id: place.region_id, amount }] : []),
       ],
-    }
-  }
-  if (input.carrier === "geliver") {
-    return {
-      provider_id: GELIVER_FULFILLMENT_PROVIDER_ID,
-      data: {
-        id:
-          pricing.type === "table"
-            ? "geliver-table"
-            : GELIVER_DATA[pricing.type === "quote" ? pricing.choice : "cheapest"],
-      },
-      price_type: "calculated" as const,
     }
   }
   const contract = isContract(input.carrier) ? input.carrier : null
@@ -294,7 +277,7 @@ export const updateShopShippingOptionWorkflow = createWorkflow(
           (stored.provider_id === SHOP_FULFILLMENT_PROVIDER_ID ||
             (typeof flatId === "string" && flatId.endsWith("-flat")))
         if (input.amount !== undefined && !inData && stored.price_type !== "flat") {
-          // A table or a carrier's quote has no amount of its own
+          // A table has no amount of its own
           throw new ValidationError("shipping.manual_flat_only", { field: "amount" })
         }
         const amount =

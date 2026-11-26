@@ -26,7 +26,11 @@ function Requests({ view, t }: { view: OrderPageView; t: Translate }) {
               {request.kind}, {request.status}
             </span>
             <span className="text-text-2">{request.date}</span>
-            {request.code && <span>{t("order.return_code", { code: request.code })}</span>}
+            {request.codeText ? (
+              <span>{request.codeText}</span>
+            ) : (
+              request.code && <span>{t("order.return_code", { code: request.code })}</span>
+            )}
             {request.refused?.map((line, at) => (
               <span key={String(at)} className="text-text-2">
                 {line}

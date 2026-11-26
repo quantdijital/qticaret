@@ -59,7 +59,7 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
         )
       )
       expect(CREDENTIAL_PROVIDER_NAMES).toEqual(
-        expect.arrayContaining(["paytr", "iyzico", "geliver", "aras", "yurtici", "netgsm"])
+        expect.arrayContaining(["paytr", "iyzico", "aras", "yurtici", "netgsm"])
       )
       expect(await service.read("paytr")).toBeNull()
       expect(await service.read("iyzico")).toBeNull()

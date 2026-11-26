@@ -87,7 +87,12 @@ export function CustomerCard() {
             error={fieldError(errors.guest?.first_name)}
             required
           >
-            <Input id="link-guest-first" maxLength={60} {...register("guest.first_name")} />
+            <Input
+              placeholder={t("common.placeholder.firstName")}
+              id="link-guest-first"
+              maxLength={60}
+              {...register("guest.first_name")}
+            />
           </Field>
           <Field
             label={t(`${C}.lastName`)}
@@ -95,7 +100,12 @@ export function CustomerCard() {
             error={fieldError(errors.guest?.last_name)}
             required
           >
-            <Input id="link-guest-last" maxLength={60} {...register("guest.last_name")} />
+            <Input
+              placeholder={t("common.placeholder.lastName")}
+              id="link-guest-last"
+              maxLength={60}
+              {...register("guest.last_name")}
+            />
           </Field>
           <Field
             label={t(`${C}.email`)}
@@ -104,6 +114,7 @@ export function CustomerCard() {
             required
           >
             <Input
+              placeholder={t("common.placeholder.email")}
               id="link-guest-email"
               type="email"
               autoComplete="off"
@@ -118,6 +129,7 @@ export function CustomerCard() {
             error={fieldError(errors.guest?.phone)}
           >
             <Input
+              placeholder={t("common.placeholder.phone")}
               id="link-guest-phone"
               type="tel"
               autoComplete="off"

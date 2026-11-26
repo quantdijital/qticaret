@@ -70,10 +70,13 @@ async function eraseParcels(container: Container, rows: OrderRow[]) {
   )
   for (const parcel of parcels) {
     const data = parcel.data ?? {}
-    if (data["label_file_id"]) {
-      await deleteFile(container, data["label_file_id"])
-      // Medusa merges `data`: the key is written over, not left out
-      await fulfillments.updateFulfillment(parcel.id, { data: { label_file_id: null } })
+    // Our PDF and, for DHL eCommerce, the carrier's Zebra label beside it
+    for (const key of ["label_file_id", "label_zpl_file_id"] as const) {
+      if (data[key]) {
+        await deleteFile(container, data[key])
+        // Medusa merges `data`: the key is written over, not left out
+        await fulfillments.updateFulfillment(parcel.id, { data: { [key]: null } })
+      }
     }
   }
   const addressIds = parcels.flatMap((parcel) =>

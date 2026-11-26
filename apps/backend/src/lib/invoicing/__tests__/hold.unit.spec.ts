@@ -125,4 +125,26 @@ describe("test payments invoiced on a developer's machine only", () => {
       )
     }
   })
+
+  it("never waits for the parcel while BirFatura ships it (adr/0072 Ek 2026-11-26)", () => {
+    const birfatura = { provider: "birfatura" as const, trigger: "shipped" as const }
+    const cod = order({
+      payment_collections: [
+        { payments: [{ provider_id: COD_PAYMENT_PROVIDER_ID, captured_at: null }] },
+      ],
+    })
+    const waiting = order({}, { captured_at: null })
+    expect(saleInvoiceHold(facts({ settings: birfatura }))).toBe("awaiting_shipment")
+    expect(saleInvoiceHold(facts({ settings: birfatura, birfaturaShips: true }))).toBeNull()
+    expect(
+      saleInvoiceHold(facts({ settings: birfatura, order: cod, birfaturaShips: true }))
+    ).toBeNull()
+    expect(
+      saleInvoiceHold(facts({ settings: birfatura, order: waiting, birfaturaShips: true }))
+    ).toBe("awaiting_payment")
+    // The other holds stay: such an order never reaches BirFatura, staff ship it by hand
+    expect(
+      saleInvoiceHold(facts({ settings: birfatura, order: testPaid, birfaturaShips: true }))
+    ).toBe("test_payment")
+  })
 })

@@ -132,6 +132,7 @@ export function SenderDomainCard() {
                 {t(`${D}.localPart`)}
               </label>
               <Input
+                placeholder={t("settings.placeholders.senderLocal")}
                 id="sender-local"
                 value={localPart}
                 onChange={(event) => {

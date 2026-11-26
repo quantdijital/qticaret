@@ -21,6 +21,7 @@ import type { Category } from "@/features/categories/api/categories"
 import { ancestorHandles, descendantsOf, treeRows } from "@/features/categories/tree"
 import { useCategoryPath } from "@/features/categories/use-category-path"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { isValidSlug, toSlug } from "@/lib/slug"
 
 const ROOT = "__root__"
@@ -32,6 +33,16 @@ interface Values {
   is_active: boolean
   is_internal: boolean
 }
+
+type Stored = Pick<Category, "name" | "handle" | "parent_category_id" | "is_active" | "is_internal">
+
+const valuesOf = (category: Stored): Values => ({
+  name: category.name,
+  handle: category.handle,
+  parent: category.parent_category_id ?? ROOT,
+  is_active: category.is_active,
+  is_internal: category.is_internal,
+})
 
 interface CategoryEditorProps {
   categories: Category[]
@@ -50,14 +61,9 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
   const remove = useDeleteCategory()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const pathOf = useCategoryPath()
-  const saved: Values = {
-    name: category.name,
-    handle: category.handle,
-    parent: category.parent_category_id ?? ROOT,
-    is_active: category.is_active,
-    is_internal: category.is_internal,
-  }
-  const form = useForm<Values>({ values: saved })
+  const saved = valuesOf(category)
+  // A refetch (the tree, after any save) keeps what is being typed
+  const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const [name, handle, parent] = useWatch({
     control: form.control,
     name: ["name", "handle", "parent"],
@@ -72,6 +78,8 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
   ])
 
   const submit = form.handleSubmit((values) => {
+    // What is typed while the save is on its way stays, and leaves the card dirty
+    const settle = beginSave(form)
     const input = {
       name: values.name.trim(),
       ...(values.handle.trim() ? { handle: values.handle.trim() } : {}),
@@ -82,7 +90,10 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
     update.mutate(
       { id: category.id, ...input },
       {
-        onSuccess: () => toast.success(t("categories.saved")),
+        onSuccess: ({ product_category }) => {
+          settle(valuesOf(product_category))
+          toast.success(t("categories.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
@@ -96,7 +107,7 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field
@@ -106,6 +117,7 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
         error={errors.name ? t("categories.nameRequired") : undefined}
       >
         <Input
+          placeholder={t("categories.placeholders.name")}
           id="category-name"
           {...form.register("name", { validate: (text) => text.trim().length >= 2 })}
         />

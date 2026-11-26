@@ -198,6 +198,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "Bu seçim bir yönlendirme döngüsü oluşturur.",
   "catalog.successor_self": "Ürün kendi yerine geçemez.",
   "catalog.successor_unknown": "Seçilen ürün bulunamadı.",
+  "catalog.linked_self": "Ürün kendisine bağlanamaz.",
+  "catalog.linked_unknown": "Bağlanan ürünlerden biri bulunamadı.",
+  "catalog.linked_duplicate": "Aynı ürün listede iki kez olamaz.",
   "catalog.variant_image_unknown": "Varyant görsellerinden biri ürünün görselleri arasında yok.",
   "catalog.variant_image_variant_unknown":
     "Varyant görsellerinden biri ürünün sahip olmadığı bir varyanta bağlanmış.",
@@ -461,6 +464,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kapıda ödemeli sipariş kargo firmasıyla tek koli olarak gönderilir: kurye tutarın tamamını bir kolide tahsil eder.",
   "shipping.no_rate":
     "Bu koli mağazanın kargo ücret tablosunun dışında kalıyor; kargo ücreti hesaplanamıyor.",
+  "shipping.birfatura_not_connected":
+    "Kargoyu BirFatura'dan yönetmek için önce Ayarlar > E-Fatura'da BirFatura'yı seçip bağlantı şifresini oluşturun.",
+  "shipping.manager_owner_only":
+    "Kargonun nereden yönetildiğini yalnız mağaza sahibi değiştirebilir.",
   "shipping.days_order": "En az gün, en çok günden büyük olamaz.",
   "shipping.rate_table_order":
     "Ücret tablosunun desi sınırları artan sırada ve en fazla bir ondalıkla olmalı.",
@@ -548,20 +555,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Teslimat adresinde il ya da ilçe yok; kargo firması gönderiyi bunlarla yönlendiriyor. Sipariş sayfasından teslimat adresini tamamlayın.",
   "shipping.receiver_phone_missing":
     "Teslimat adresinde kuryenin arayabileceği bir telefon (alan koduyla 10 hane) yok; fatura adresinde ve müşteri hesabında da bulunamadı. Sipariş sayfasından teslimat adresine telefon ekleyin.",
-  "shipping.sender_address_incomplete":
-    "Deponun adresi kargo için eksik ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_location_missing":
-    "Gönderinin çıkacağı depo belirlenemedi ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan varsayılan depoyu seçin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
-  "shipping.sender_address_missing":
-    "Deponun açık adresi (mahalle, cadde, sokak, numara) girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_place_missing":
-    "Deponun Türkiye'deki il ya da ilçesi girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_postal_missing":
-    "Deponun posta kodu girilmemiş, adres verisinden de bulunamadı (mahalle seçili değil); Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan posta kodunu ya da mahalleyi girin.",
-  "shipping.sender_phone_missing":
-    "Deponun ve mağazanın telefonu girilmemiş; Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan deponun ya da Ayarlar > Mağaza'dan mağazanın telefonunu girin.",
-  "shipping.sender_contact_missing":
-    "Mağazanın iletişim e-postası girilmemiş (Geliver gönderici için istiyor) ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Mağaza'dan e-postayı ekleyin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
   "shipping.fulfillment_invalid": "Etiketi istenen gönderi geçerli değil.",
   "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
   "aras.merchant_invalid":
@@ -945,10 +938,53 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "yurtici.cod_account_missing":
     "Kapıda ödemeli siparişi Yurtiçi Kargo ile göndermek için tahsilatlı teslimat hesabı gerekir. Ayarlar > Kargo > Yurtiçi Kargo'dan girin.",
-  "geliver.merchant_invalid":
-    "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
-  "geliver.secret_invalid":
-    "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
+  "dhlecommerce.unavailable":
+    "DHL eCommerce için platformun uygulama anahtarları bu sunucuda tanımlı değil. Kendi uygulama anahtarlarınızı girin ya da platform desteğine yazın.",
+  "dhlecommerce.merchant_invalid":
+    "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
+  "dhlecommerce.secret_invalid":
+    "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın (e-postayla gelen geçici şifre değil); test ve canlı hesap ayrıdır.",
+  "dhlecommerce.email_missing":
+    "DHL eCommerce alıcının e-posta adresini ister; siparişte e-posta yok ve mağazanın iletişim e-postası da girilmemiş. Siparişe müşterinin e-postasını ekleyin ya da Ayarlar > Mağaza'da iletişim e-postası girip yeniden deneyin.",
+  "dhlecommerce.withdraw_failed":
+    "DHL eCommerce'te gönderi açılmış olabilir ama geri çekilemedi. Yeniden kargoya vermeden önce Online Şube'de bu siparişin gönderisine bakın; varsa orada iptal edin.",
+  "dhlecommerce.place_unknown":
+    "DHL eCommerce teslimat adresindeki ili ya da ilçeyi tanımadı. Siparişin adresinde il ve ilçeyi düzeltip yeniden deneyin.",
+  "dhlecommerce.branch_pending":
+    'DHL eCommerce alıcının varış şubesini henüz belirlemedi; gönderi açılmadı. Birkaç dakika sonra "Kargoya ver"e yeniden basın.',
+  "ptt.customer_id_invalid":
+    "PTT'nin sözleşmeyle verdiği müşteri numarasını girin: 9 ya da 10 hane.",
+  "ptt.merchant_invalid":
+    "PTT Kargo bu müşteri numarasını kabul etmedi. Numarayı PTT Başmüdürlüğünün sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "ptt.secret_invalid":
+    "PTT Kargo bu müşteri numarasını ve web servis şifresini kabul etmedi. Bilgileri PTT Başmüdürlüğünün sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "ptt.receiver_name_short":
+    "PTT Kargo en az 5 karakterlik alıcı adı istiyor. Siparişin teslimat adresine alıcının adını ve soyadını yazın.",
+  "ptt.withdraw_failed":
+    "PTT Kargo'ya gönderi yüklenmiş olabilir ama silinemedi. Yeniden kargoya vermeden önce PTT şubenize bu siparişin barkodunu sorun; yüklüyse iptal ettirin.",
+  "ptt.already_accepted":
+    "Gönderi PTT şubesinde kabul edildiği için internetten silinemez. İptal için bir PTT şubesine başvurun; gönderi siparişte kalır, takip sürer.",
+  "ptt.barcode_range_missing":
+    "PTT barkod aralığı girilmemiş. PTT'nin verdiği aralığı Ayarlar > Kargo > PTT Kargo'ya ekleyin, sonra yeniden kargoya verin.",
+  "ptt.barcode_range_exhausted":
+    "PTT barkod aralığınız bitti; gönderi yüklenemiyor. PTT'den yeni aralık isteyin ve Ayarlar > Kargo > PTT Kargo'ya ekleyin.",
+  "ptt.barcode_range_invalid": "Aralığın iki ucunu da kontrol hanesi olmadan 12 hane olarak girin.",
+  "ptt.barcode_range_reversed": "Aralığın bitiş numarası başlangıçtan küçük olamaz.",
+  "ptt.barcode_range_too_large":
+    "Bir milyondan fazla numaralık aralık PTT'nin verdiği türden değil. İki numarayı da kontrol edin.",
+  "ptt.barcode_range_overlaps":
+    "Bu aralık daha önce girdiğiniz bir aralıkla çakışıyor. Her barkod bir kez kullanılır: PTT'nin verdiği yeni aralığı girin.",
+  "ptt.barcode_range_unknown": "Bu aralık artık listede yok.",
+  "ptt.barcode_range_in_use":
+    "Bu aralıktan barkod kullanıldı; aralık silinemez, numaraları bir daha verilmemeli.",
+  "surat.merchant_invalid":
+    "Sürat Kargo bu cari kodu ve web şifresini kabul etmedi. Bilgileri Sürat'ın sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "surat.secret_invalid":
+    "Sürat Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Sürat'ın sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "surat.withdraw_failed":
+    "Sürat Kargo'da gönderi açılmış olabilir ama silinemedi. Yeniden kargoya vermeden önce Sürat şubenize bu siparişin gönderisini sorun; açıksa iptal ettirin.",
+  "surat.withdraw_requested":
+    "Gönderi Sürat Kargo şubesine ulaştığı için silinemedi; Sürat'tan gönderiyi size geri getirmesi istendi. Gönderi siparişte kalır, takip dönüşünü izler.",
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":
@@ -1099,6 +1135,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "ETBİS kayıt numarası harf, rakam ve tireden oluşur.",
   "platform_settings.withdrawal_days_invalid":
     "Cayma süresi 14 ile 365 gün arasında bir tam sayı olmalı; yasa en az 14 gün istiyor.",
+  "platform_settings.return_code_invalid":
+    "Anlaşmalı iade kodu en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
+  "platform_settings.return_carrier_both": "İade kargosu için firma adını ve kodu birlikte girin.",
   "platform_settings.return_shipping_shop_only":
     "Cayma iadesinde iade kargo ücreti müşteriden istenemez (Mesafeli Sözleşmeler Yönetmeliği md. 12); iade kargosunu mağaza öder.",
   "platform_settings.hours_invalid":
@@ -1185,6 +1224,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "promotions.customer_group_only":
     "Bu kod yalnızca belirli müşterilere özel; hesabınız için geçerli değil.",
   "promotions.first_order_only": "Bu kod yalnızca ilk siparişte kullanılabilir.",
+  "promotions.free_shipping_code_below_total":
+    "Ücretsiz kargo kuponu, sepet tutarı ücretsiz kargo sınırına ulaşınca geçerli olur.",
+  "promotions.free_shipping_code_off":
+    "Bu mağazada kargo, yalnız sepet tutarıyla ücretsiz olur; bu kupon kullanılamıyor.",
   "promotions.audience_invalid": "Kodu kimlerin kullanabileceği geçerli değil.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
@@ -1414,7 +1457,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
   "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
   "orders.test_payment_not_shippable":
-    "Bu sipariş test modunda ödendi, gerçek para alınmadı: yalnızca test modundaki bir kargo firmasıyla (Aras, Yurtiçi, Geliver) gönderilebilir. Bu siparişin kargo seçeneği kendi gönderiminiz ya da canlı moddaki bir firma.",
+    "Bu sipariş test modunda ödendi, gerçek para alınmadı: yalnızca test modundaki bir kargo firmasıyla (Aras, Yurtiçi) gönderilebilir. Bu siparişin kargo seçeneği kendi gönderiminiz ya da canlı moddaki bir firma.",
   "paytr.refund_locked":
     "PayTR şu an bu ödemenin iadesini kabul etmiyor (hesap kesimi sürüyor); biraz sonra tekrar deneyin.",
   "paytr.refund_exceeds_payment": "İade tutarı ödemeden kalanı aşıyor.",

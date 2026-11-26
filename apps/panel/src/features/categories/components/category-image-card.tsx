@@ -10,7 +10,7 @@ import { categoryImagesQuery, useSetCategoryImage } from "@/features/categories/
 import type { CategoryImage } from "@/features/categories/api/images"
 import { errorText } from "@/lib/errors"
 import { CategoryImageFallback } from "./category-image-fallback"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const I = "categories.image"
 // The media library's alt text limit (backend lib/media ALT_MAX)
@@ -33,10 +33,11 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
   const form = useForm<Values>({ values: initial, resetOptions: { keepDirtyValues: true } })
   const url = useWatch({ control: form.control, name: "url" })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const image = values.url ? { url: values.url, alt: values.alt.trim() || null } : null
     save.mutate(image, {
       onSuccess: (result) => {
-        form.reset(valuesOf(result.image), FULL_RESET)
+        settle(valuesOf(result.image))
         toast.success(t(`${I}.saved`))
       },
       onError: (failure) => toast.error(errorText(t, failure)),
@@ -72,7 +73,12 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
         }}
       >
         <Field label={t(`${I}.alt`)} htmlFor="category-image-alt" hint={t(`${I}.altHint`)}>
-          <Input id="category-image-alt" maxLength={ALT_MAX} {...form.register("alt")} />
+          <Input
+            placeholder={t("common.placeholder.imageAlt")}
+            id="category-image-alt"
+            maxLength={ALT_MAX}
+            {...form.register("alt")}
+          />
         </Field>
       </MediaField>
     </CardForm>

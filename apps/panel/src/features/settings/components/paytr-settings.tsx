@@ -75,6 +75,7 @@ export function PaytrSettings({
             error={message(errors.merchant_id?.message)}
           >
             <Input
+              placeholder={t("settings.placeholders.paytrMerchant")}
               id="paytr-merchant-id"
               inputMode="numeric"
               {...NOT_A_LOGIN}

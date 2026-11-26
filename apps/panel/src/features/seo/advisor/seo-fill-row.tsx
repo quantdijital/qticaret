@@ -80,6 +80,7 @@ export function SeoFillRow({
         </div>
       ) : null}
       <Textarea
+        // placeholder-exempt: always holds the suggestion being reviewed
         id={fieldId}
         value={text}
         rows={suggestion.task === "seo_title" ? 1 : 2}

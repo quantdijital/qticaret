@@ -106,6 +106,7 @@ export function GroupsCard() {
                     {t(`${G}.renameTitle`)}
                   </label>
                   <Input
+                    placeholder={t("customers.placeholders.group")}
                     id={`rename-${group.id}`}
                     autoFocus
                     maxLength={100}

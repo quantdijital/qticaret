@@ -39,7 +39,6 @@ export function GuidanceText({
   const common = {
     id,
     value,
-    placeholder,
     disabled,
     "aria-invalid": over || undefined,
     "aria-describedby": hintId,
@@ -50,7 +49,11 @@ export function GuidanceText({
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      {rows ? <Textarea rows={rows} {...common} /> : <Input {...common} />}
+      {rows ? (
+        <Textarea rows={rows} placeholder={placeholder} {...common} />
+      ) : (
+        <Input placeholder={placeholder} {...common} />
+      )}
       <div
         id={hintId}
         className="flex items-start justify-between gap-3 text-xs text-muted-foreground"

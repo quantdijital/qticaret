@@ -47,6 +47,7 @@ export function RejectReturnDialog({
         </DialogHeader>
         <Field label={t(`${R}.rejectNote`)} htmlFor="return-reject-note">
           <Textarea
+            placeholder={t("orders.placeholders.rejectReason")}
             id="return-reject-note"
             rows={3}
             maxLength={1000}

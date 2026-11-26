@@ -20,7 +20,24 @@
     "actions": "Actions",
     "delete": "Delete",
     "more": "More actions",
-    "previous": "Previous"
+    "previous": "Previous",
+    "placeholder": {
+      "imageAlt": "e.g. Brown leather wallet, front view",
+      "firstName": "e.g. Ayşe",
+      "lastName": "e.g. Yılmaz",
+      "email": "name@example.com",
+      "phone": "0532 123 45 67",
+      "company": "e.g. Yılmaz Ticaret Ltd. Şti.",
+      "price": "0.00",
+      "sku": "ABC-001",
+      "ean": "8691234567890",
+      "neighborhood": "e.g. Caferağa Mah.",
+      "addressLine": "e.g. Moda Cad. No: 12 D: 3",
+      "postalCode": "34710",
+      "fullName": "e.g. Ayşe Yılmaz",
+      "taxOffice": "e.g. Kadıköy",
+      "taxNumber": "10-digit tax number"
+    }
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -33,7 +50,8 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
-      "geliver": "Geliver",
+      "dhlecommerce": "DHL eCommerce",
+      "surat": "Sürat Kargo",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -41,7 +59,8 @@
       "google": "Google",
       "meta": "Meta",
       "shopify": "Shopify",
-      "turkiyeapi": "TürkiyeAPI"
+      "turkiyeapi": "TürkiyeAPI",
+      "ptt": "PTT Kargo"
     }
   },
   "nav": {
@@ -1336,11 +1355,8 @@
       "connect": "Connect",
       "carriersTitle": "Shipping services",
       "carriersDescription": "Shipments, labels and tracking go through these services.",
+      "carrierUnavailable": "The platform's app keys are not set on this server; you can connect with your own app keys.",
       "carriers": {
-        "geliver": {
-          "name": "Geliver",
-          "description": "Offers from several carriers through one account; labels and tracking through Geliver."
-        },
         "aras": {
           "name": "Aras Kargo",
           "description": "Parcels, labels and tracking on the shop's own Aras Kargo contract. The details are in Aras's integration document."
@@ -1348,51 +1364,40 @@
         "yurtici": {
           "name": "Yurtiçi Kargo",
           "description": "Parcels and tracking on the shop's own Yurtiçi Kargo contract; the panel draws the parcel label. The details are in Yurtiçi's web service document."
+        },
+        "dhlecommerce": {
+          "name": "DHL eCommerce",
+          "description": "Shipping and tracking on the shop's own DHL eCommerce contract; the panel prepares the parcel label. The details are in your DHL eCommerce contract and the Online Şube."
+        },
+        "surat": {
+          "name": "Sürat Kargo",
+          "description": "Shipping and tracking on the shop's own Sürat Kargo contract; when Sürat gives no label, the panel prepares the parcel label. The details are in the web service document Sürat gives with the contract."
+        },
+        "ptt": {
+          "name": "PTT Kargo",
+          "description": "Shipping and tracking on the shop's own PTT Kargo contract; each parcel takes a number from the barcode range PTT gave, and the panel prints the label."
         }
       },
-      "geliver": {
-        "keys": {
-          "title": "API token",
-          "description": "Create a token on the API tokens page of your Geliver panel (app.geliver.io/apitokens) and copy it. It is stored encrypted and never shown again once saved."
-        },
-        "apiToken": "API token",
-        "notification": {
-          "title": "Tracking notifications",
-          "description": "Geliver reports shipment status changes to this address; the order updates by itself when it ships and when it is delivered. Without notifications, shipments are still checked every half hour.",
-          "where": "Paste it into the Geliver panel's webhook settings for the TRACK_UPDATED event."
-        },
-        "live": {
-          "title": "Test shipments and going live",
-          "description": "Try the shipping flow with Geliver's test shipments before you open your shop."
-        },
-        "testMode": "Test shipments",
-        "testModeHint": "While on, shipments are opened at Geliver as tests: no label is bought and nothing reaches the carrier. The same token works in both modes.",
-        "checks": {
-          "merchant_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel.",
-          "secret_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel."
-        },
-        "rejected": "Geliver no longer accepts the stored API token; no shipment can be created. Get a new token from the Geliver panel and enter it."
-      },
       "options": {
-        "title": "Shipping options",
-        "description": "Shoppers choose one of these at checkout.",
-        "add": "Add option",
+        "title": "Extra shipping options",
+        "description": "Shoppers see these beside the main option at checkout (e.g. express, pickup).",
+        "add": "Add extra option",
         "addTitle": "New shipping option",
         "name": "Name",
         "nameRequired": "Enter a name.",
         "carrier": "Carrier",
         "carriers": {
           "manual": "I ship it myself",
-          "geliver": "Geliver",
           "pickup": "Pickup from the shop",
           "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo"
+          "yurtici": "Yurtiçi Kargo",
+          "dhlecommerce": "DHL eCommerce",
+          "surat": "Sürat Kargo",
+          "ptt": "PTT Kargo"
         },
         "pricing": "Price",
         "pricings": {
           "flat": "Flat price",
-          "cheapest": "Geliver: cheapest offer",
-          "fastest": "Geliver: fastest offer",
           "table": "Price table (desi)"
         },
         "amount": "Amount",
@@ -1406,7 +1411,62 @@
         "removeConfirm": "Remove",
         "removed": "Shipping option removed.",
         "defaultName": "Standard shipping",
-        "keep": "Keep"
+        "keep": "Keep",
+        "allTitle": "Shipping options",
+        "noExtras": "No extra options",
+        "namePlaceholder": "E.g. Standard shipping"
+      },
+      "fee": {
+        "title": "Shipping fee",
+        "description": "What shoppers pay for shipping at checkout. The price is always worked out on the server.",
+        "modes": {
+          "free": "Free shipping on every order",
+          "threshold": "Free above an amount",
+          "flat": "Flat fee",
+          "carrier": "The carrier's price"
+        },
+        "modeHints": {
+          "free": "No order pays for shipping.",
+          "threshold": "Free once the basket total (VAT included, after discounts) reaches the amount; a flat fee below it.",
+          "flat": "The same fee on every order.",
+          "carrier": "Priced by the parcel's desi from your price table."
+        },
+        "threshold": "Free shipping from",
+        "thresholdOptional": "Free shipping from (optional)",
+        "thresholdOptionalHint": "Left empty, every order pays the carrier's price.",
+        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL.",
+        "feeBelow": "Fee below that amount",
+        "feeFlat": "Fee per order",
+        "feeInvalid": "Enter an amount above 0, at most 100,000 TL.",
+        "source": "Priced by",
+        "sources": {
+          "aras-table": "Aras Kargo: my price table (desi)",
+          "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
+          "dhlecommerce-table": "DHL eCommerce: my price table (desi)",
+          "surat-table": "Sürat Kargo: my price table (desi)",
+          "ptt-table": "PTT Kargo: my price table (desi)"
+        },
+        "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
+        "tableLink": "Fill in the price table",
+        "primary": "This fee applies to the \"{{name}}\" option ({{carrier}}).",
+        "customNote": "Your shipping prices don't fit one of these; edit them in the list below, or pick one and save.",
+        "noneNote": "No shipping option yet; pick one and save to make it.",
+        "defaultName": "Standard shipping",
+        "replacedKept": "The old option stays as an extra while orders still to ship use it; remove it once they have shipped.",
+        "notConnected": "Your {{carrier}} account is not connected; connect it on the Carriers tab. Until then this option may not be priced at checkout.",
+        "condition": {
+          "label": "Condition",
+          "options": {
+            "amount": "Amount",
+            "amount_or_coupon": "Amount or a free shipping coupon",
+            "amount_and_coupon": "Amount and a free shipping coupon"
+          },
+          "hints": {
+            "amount": "Shipping is free only once the basket reaches this amount. Free shipping coupons and automatic free shipping campaigns do not lower it.",
+            "amount_or_coupon": "Shipping is free once the basket reaches this amount, or with a free shipping coupon.",
+            "amount_and_coupon": "Shipping is free when the basket reaches this amount and a free shipping coupon is used. Below the amount the coupon is refused."
+          }
+        }
       },
       "rules": {
         "deliveryTitle": "Delivery time",
@@ -1494,7 +1554,8 @@
           "merchant_invalid": "Aras Kargo did not accept this user name. Copy it again from Aras's integration document.",
           "secret_invalid": "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document."
         },
-        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave."
+        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave.",
+        "customerCodePlaceholder": "E.g. 1234567"
       },
       "yurtici": {
         "keys": {
@@ -1521,6 +1582,61 @@
         },
         "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave.",
         "keysHint": "Enter Yurtiçi's “Gönderici Ödemeli” (sender pays) user. Yurtiçi allows one tracking query per minute; shipment statuses update at that pace."
+      },
+      "dhlecommerce": {
+        "keys": {
+          "title": "Customer details",
+          "description": "The customer number DHL eCommerce gave with the contract and your Online Şube password. Test and live accounts differ."
+        },
+        "customerNumber": "Customer number",
+        "password": "Password",
+        "keysHint": "The password is the permanent one you sign in to the Online Şube with, not the temporary one DHL e-mailed. If you change your Online Şube password, update it here too.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels go to DHL eCommerce's test system; no courier comes."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels open on the real DHL eCommerce account. Test and live details differ, so they are asked again.",
+        "unavailable": "The platform's DHL eCommerce app keys are not set on this server. To connect, enter the keys of your own app registered at DHL's API portal below, or contact platform support.",
+        "app": {
+          "title": "App keys",
+          "description": "Shipments go out with the platform's DHL eCommerce app by default. If you have your own app at DHL's API portal, its keys are used instead.",
+          "toggle": "I have my own app keys",
+          "clientId": "Client Id (X-IBM-Client-Id)",
+          "clientSecret": "Client Secret (X-IBM-Client-Secret)",
+          "hint": "On your app's page at DHL's API portal (apizone.mngkargo.com.tr). Once entered, they are used in place of the platform's. Test and live keys differ."
+        },
+        "checks": {
+          "merchant_invalid": "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
+          "secret_invalid": "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with; test and live accounts differ."
+        },
+        "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one.",
+        "customerNumberPlaceholder": "E.g. 123456789"
+      },
+      "surat": {
+        "keys": {
+          "title": "Web service details",
+          "description": "The web service user name and password Sürat Kargo gave with the contract. Parcels are opened with them. Sürat has no test environment; the connection is the live account."
+        },
+        "username": "User name",
+        "usernamePlaceholder": "E.g. shopname_ws",
+        "password": "Password",
+        "keysHint": "This user name and password can only be tried when a parcel is opened; if they are wrong, Sürat's answer shows at the first “Ship”.",
+        "cari": {
+          "title": "Cari code and web password",
+          "description": "Sürat asks for your cari code and web password to track, label and delete parcels. If Sürat gave you a separate cari code and web password, enter them here; if not, leave them empty and the details above are used.",
+          "hint": "Optional; enter the cari code and web password together."
+        },
+        "cariCode": "Cari code",
+        "cariCodePlaceholder": "E.g. 1234567",
+        "webPassword": "Web password",
+        "cariHint": "On saving, a tracking query is made to Sürat with these details to check them.",
+        "labelHint": "If Sürat gave your account permission to create barcodes, the label comes from Sürat. If not, the panel prepares it, with the parcel's own tracking code as its barcode. Have your Sürat representative confirm that your branch scans this label.",
+        "checks": {
+          "merchant_invalid": "Sürat Kargo did not accept this cari code and web password. Copy them again from the document Sürat gave you.",
+          "secret_invalid": "Sürat Kargo did not accept this user name and password. Copy them again from the document Sürat gave you."
+        },
+        "rejected": "Sürat Kargo no longer accepts the stored details; nothing can be shipped. Enter the current details Sürat gave you."
       },
       "returns": {
         "title": "Return terms",
@@ -1557,16 +1673,9 @@
         "returns": "Returns",
         "locations": "Warehouses and stock"
       },
-      "freeShipping": {
-        "title": "Free shipping threshold",
-        "description": "Once the basket total (VAT included, after discounts) reaches this amount, every shipping option is free.",
-        "switch": "Free shipping from a basket total",
-        "threshold": "Basket total",
-        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL."
-      },
       "classes": {
         "title": "Shipping classes",
-        "description": "A product's class adds a surcharge to shipping; the highest in the basket is added once.",
+        "description": "Adds a shipping surcharge to large or heavy products; the highest in the basket is added once. Mark a product as free shipping on its Shipping tab.",
         "name": "Class name",
         "nameOf": "Name of class {{number}}",
         "surcharge": "Surcharge",
@@ -1574,9 +1683,6 @@
         "products_one": "{{count}} product",
         "products_other": "{{count}} products",
         "noProducts": "No products",
-        "freeRow": "Free shipping",
-        "freeHint": "Adds nothing to shipping",
-        "locked": "Built-in class: it cannot be renamed or removed.",
         "add": "Add class",
         "remove": "Remove the {{name}} class",
         "removeUsed_one": "{{count}} product goes back to Standard.",
@@ -1585,7 +1691,9 @@
         "keep": "Keep",
         "nameInvalid": "Give the class a name (60 characters at most).",
         "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
-        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option."
+        "optionsNote": "Free-shipping products and class surcharges apply to every delivery option.",
+        "empty": "No classes yet. Most shops need none.",
+        "namePlaceholder": "E.g. Large parcel"
       },
       "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
       "ownDeliveryLink": "Legal details",
@@ -1599,7 +1707,8 @@
         "rates_one": "{{count}} row, up to {{desi}} desi",
         "rates_other": "{{count}} rows, up to {{desi}} desi",
         "ratesNeeded": "An option is priced by the price table, but the table is empty.",
-        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)"
+        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)",
+        "noClasses": "No classes"
       },
       "invoiceIdentity": {
         "title": "Carrier details on invoices",
@@ -1607,7 +1716,96 @@
         "titleLabel": "Registered name",
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
-        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
+        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11.",
+        "titlePlaceholder": "E.g. Example Cargo Transport Inc."
+      },
+      "manager": {
+        "title": "Where do you manage shipping?",
+        "description": "Choose where you make shipping labels. Customers still pay the shipping fee set on the Options tab.",
+        "options": {
+          "own": "My own contract (Aras / Yurtiçi)",
+          "birfatura": "BirFatura"
+        },
+        "hints": {
+          "own": "You get labels from the panel; the order is shipped when the carrier picks the parcel up.",
+          "birfatura": "You make labels in BirFatura's panel; the tracking number comes back here by itself."
+        },
+        "notConnected": "To choose BirFatura, first pick BirFatura in the E-invoicing settings and make its connection password.",
+        "ownerOnly": "Only the store owner can change this.",
+        "einvoiceLink": "Go to E-invoicing settings",
+        "birfatura": {
+          "labels": "Labels are made in BirFatura's cargo module; the carrier connections here are not used.",
+          "tracking": "When BirFatura writes the tracking number, the order becomes \"Shipped\" and the customer gets the shipping e-mail. You can still ship an order from the panel with a tracking number yourself.",
+          "invoice": "BirFatura can only ship orders it has received, so an order goes to BirFatura once paid (right away for cash on delivery); when the invoice is issued depends on your BirFatura settings.",
+          "price": "At checkout the shipping fee comes from the shop's own fee settings; on the Options tab choose free, flat or free above a total instead of \"The carrier's price\"."
+        }
+      },
+      "returnCode": {
+        "title": "Contracted return code",
+        "description": "The fixed return code the carrier gives a contracted shop. Shown to the customer on an approved return, by e-mail and on the order page.",
+        "descriptionOther": "The name of the carrier you use with BirFatura and the fixed return code it gave you. Shown to the customer on an approved return.",
+        "label": "Contracted return code",
+        "hint": "The customer says this code when handing the return parcel in at a branch; the fee is paid from your contract.",
+        "carrier": "Carrier",
+        "carrierPlaceholder": "E.g. Aras Kargo",
+        "both": "Enter the carrier's name and the code together, or leave both empty.",
+        "invalid": "A code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
+        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch.",
+        "placeholder": "E.g. 4578912"
+      },
+      "ptt": {
+        "keys": {
+          "title": "Web service details",
+          "description": "The customer number and web service password the PTT Başmüdürlük gave with your contract. Test and live accounts may differ."
+        },
+        "customerId": "Customer number",
+        "customerIdPlaceholder": "E.g. 900123456",
+        "customerIdHint": "9 or 10 digits.",
+        "customerIdInvalid": "The customer number has 9 or 10 digits.",
+        "password": "Web service password",
+        "keysHint": "When you save, PTT is asked a tracking query with these details to check them.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels are loaded on PTT's test system; no branch accepts them."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels are loaded on your real PTT account. Test and live details may differ, so the password is asked again.",
+        "checks": {
+          "merchant_invalid": "PTT Kargo did not accept this customer number. Copy it again from what the PTT Başmüdürlük gave you.",
+          "secret_invalid": "PTT Kargo did not accept this customer number and password. Copy them again from what the PTT Başmüdürlük gave you."
+        },
+        "rejected": "PTT Kargo no longer accepts the stored details; no parcel can be loaded. Enter the current password PTT gave you.",
+        "ranges": {
+          "title": "Barcode range",
+          "description": "The barcode numbers PTT set aside for you. Each parcel takes the next number; a number is never used again.",
+          "empty": "No barcode range entered yet. Without one no parcel can be loaded at PTT.",
+          "remaining": "Barcodes left: {{left}}",
+          "low": "Your barcodes are running low: {{left}} left. Ask PTT for a new range and add it below.",
+          "exhausted": "Your barcode range is used up; no parcel can be loaded at PTT. Ask PTT for a new range and add it below.",
+          "range": "{{first}} – {{last}}",
+          "usage": "{{used}} / {{size}} used · {{remaining}} left",
+          "first": "First number",
+          "last": "Last number",
+          "firstPlaceholder": "E.g. 275036569000",
+          "lastPlaceholder": "E.g. 275036569999",
+          "hint": "12 digits, without the check digit.",
+          "add": "Add range",
+          "added": "Range added.",
+          "remove": "Remove",
+          "removeLabel": "Remove the range {{range}}",
+          "removed": "Range removed.",
+          "invalid": "Enter a 12-digit number.",
+          "reversed": "The last number cannot be below the first."
+        },
+        "checklist": {
+          "title": "What to ask PTT for",
+          "description": "Get these from the PTT Başmüdürlük before connecting.",
+          "contract": "A signed carrier contract with the PTT Başmüdürlük.",
+          "privacy": "A signed third-party confidentiality undertaking (from the Başmüdürlük).",
+          "account": "Your customer number and web service password.",
+          "range": "A barcode range for e-commerce parcels (first and last number, 12 digits). Do not share it with another program.",
+          "cod": "If you take cash on delivery, the \"ödeme şartlı gönderi\" (OS) service in your contract."
+        }
       }
     },
     "integrations": {
@@ -1642,30 +1840,34 @@
         "iyzico": "iyzico",
         "bank_transfer": "Bank transfer",
         "cash_on_delivery": "Cash on delivery",
-        "geliver": "Geliver",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
         "resend": "E-mail (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Product feeds"
+        "feeds": "Product feeds",
+        "ptt": "PTT Kargo"
       },
       "purposes": {
         "paytr": "Card payments",
         "iyzico": "Card payments",
         "bank_transfer": "Transfers to the shop's bank account; no provider",
         "cash_on_delivery": "Cash or card at the door; no provider",
-        "geliver": "Several carriers with one account",
         "aras": "The shop's own carrier contract",
         "yurtici": "The shop's own carrier contract",
+        "dhlecommerce": "The shop's own carrier contract",
+        "surat": "The shop's own carrier contract",
         "netgsm": "SMS and the consent registry (İYS)",
         "meta": "Measuring ad conversions",
         "ga4": "Measuring sales",
         "resend": "Order and account e-mails",
         "google": "Search results and shopping listings",
-        "feeds": "Product lists for Google, Meta, Akakçe and Cimri"
+        "feeds": "Product lists for Google, Meta, Akakçe and Cimri",
+        "ptt": "The shop's own carrier contract"
       },
       "states": {
         "connected": "Connected",
@@ -2755,7 +2957,8 @@
         "publishedHint": "The published text. Change it and save to open a new draft version; the text in force stays until you publish.",
         "titleLabel": "Title",
         "body": "The text's body",
-        "saved": "Draft saved."
+        "saved": "Draft saved.",
+        "titlePlaceholder": "e.g. Distance Sales Agreement"
       },
       "tokens": {
         "title": "Tokens",
@@ -2879,7 +3082,8 @@
         },
         "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell.",
         "series": "Web sales series",
-        "seriesHint": "Web sales are invoiced in this series (such as WEB); a number typed in that does not start with it is refused. Empty: any series is taken."
+        "seriesHint": "Web sales are invoiced in this series (such as WEB); a number typed in that does not start with it is refused. Empty: any series is taken.",
+        "triggerBirfaturaShips": "BirFatura manages shipping, so an order goes to BirFatura once paid (right away for cash on delivery); your BirFatura settings decide when the invoice is issued. To change this, choose \"My own contract\" in Settings > Shipping."
       },
       "parasut": {
         "title": "Paraşüt connection",
@@ -3298,6 +3502,39 @@
         "show": "A sold-out product stays in listings, its card saying it is sold out. Default.",
         "hide": "A sold-out product leaves listings, search and category counts. Its page still opens by its address and stays in the sitemap; it comes back to listings by itself when stock arrives."
       }
+    },
+    "placeholders": {
+      "apiKeyName": "e.g. Warehouse software",
+      "brandColor": "#1F5EFF",
+      "bankName": "e.g. Ziraat Bankası",
+      "iban": "TR00 0000 0000 0000 0000 0000 00",
+      "blockReason": "e.g. Repeated bogus orders",
+      "ga4": "G-ABC123XYZ",
+      "merchantId": "123456789",
+      "mersis": "16-digit MERSİS number",
+      "taxOrId": "10 or 11 digits",
+      "kep": "company@hs01.kep.tr",
+      "etbis": "Your ETBİS registration number",
+      "documentName": "e.g. TÜRSAB licence no",
+      "documentNumber": "e.g. 12345",
+      "location": "e.g. Main warehouse",
+      "pixelId": "123456789012345",
+      "testEventCode": "TEST12345",
+      "shopifyClientId": "e.g. 1a2b3c4d5e6f…",
+      "smsHeader": "e.g. SHOPNAME",
+      "iysCode": "e.g. 123456",
+      "parasutCompany": "e.g. 123456",
+      "parasutCode": "The code Paraşüt shows",
+      "paytrMerchant": "e.g. 123456",
+      "senderLocal": "orders",
+      "robots": "User-agent: *",
+      "smtpPort": "587",
+      "fromName": "e.g. Kuzey Deri",
+      "smtpRate": "60",
+      "staffEmails": "name@example.com, store@example.com",
+      "storeName": "e.g. Kuzey Deri",
+      "storeAddress": "e.g. Caferağa Mah. Moda Cad. No: 12, Kadıköy / İstanbul",
+      "vatName": "e.g. VAT 10%"
     }
   },
   "status": {
@@ -4435,6 +4672,7 @@
         "advisor": "SEO advisor",
         "organize": "Categories, brand and VAT",
         "catalog": "Catalog details",
+        "linked": "Linked products",
         "shipping": "Shipping (parcel)",
         "data": "Product data",
         "pricing": "General (price)",
@@ -4516,6 +4754,7 @@
         "attributes": "Attributes",
         "variants": "Variants",
         "catalog": "Catalog",
+        "linked": "Linked products",
         "advanced": "Advanced"
       },
       "pricesOnVariants": "Prices are entered on each variant.",
@@ -4923,6 +5162,20 @@
         "other": "Something went wrong while saving."
       }
     },
+    "linked": {
+      "title": "Linked products",
+      "add": "Add a product",
+      "noResults": "No products found.",
+      "full": "At most {{max}} products. Remove one to add another.",
+      "upsells": {
+        "label": "Similar / better products",
+        "hint": "Shown in this order where the product page shows similar products. Left empty, products of the same category are shown. Drafts appear once published."
+      },
+      "cross_sells": {
+        "label": "Bought together",
+        "hint": "Offered in the cart as \"You may also like\" while this product is in it. Products already in the cart are not offered."
+      }
+    },
     "purchaseLimit": {
       "title": "Purchase limit",
       "label": "Maximum purchase quantity",
@@ -4933,11 +5186,23 @@
     "shippingClass": {
       "label": "Shipping class",
       "standard": "Standard",
-      "free": "Free shipping",
-      "hintStandard": "Shipping is priced by the delivery option chosen.",
+      "hintStandard": "Shipping is priced by the shop's shipping fee setting.",
       "hintFree": "A free-shipping product adds nothing to the shipping cost; a basket of only such products ships free.",
       "hintSurcharge": "With this product in the basket, {{amount}} is added to the order's shipping.",
-      "gone": "The class chosen no longer exists; the product counts as Standard."
+      "gone": "The class chosen no longer exists; the product counts as Standard.",
+      "freeSwitch": "This product ships free"
+    },
+    "placeholders": {
+      "addonGroup": "e.g. Personalisation",
+      "tag": "e.g. new-season",
+      "addonLabel": "e.g. Name engraving",
+      "addonHelp": "e.g. Up to 12 letters",
+      "addonChoice": "e.g. Gift wrap",
+      "badge": "e.g. Limited",
+      "faqQuestion": "e.g. How long does delivery take?",
+      "faqAnswer": "e.g. Your order ships within 1–3 business days.",
+      "title": "e.g. Leather wallet",
+      "mpn": "e.g. AB-1234"
     }
   },
   "orders": {
@@ -5010,7 +5275,8 @@
       "trackingInvalid": "Type the carrier and a 4–40 character tracking number.",
       "trackingUrlInvalid": "The tracking link must be a web address (tracking.example.com/…).",
       "packedParcel": "Packed parcel",
-      "restTitle": "Products in no parcel yet (in a parcel of their own)"
+      "restTitle": "Products in no parcel yet (in a parcel of their own)",
+      "birfatura": "Shipping is managed in BirFatura: make the label in BirFatura's panel; the order is shipped by itself when the tracking number comes back. If you ship it from here, enter the tracking number below."
     },
     "deliver": {
       "title": "Was the order delivered?",
@@ -5394,7 +5660,9 @@
       "cancelReason": "Reason",
       "cancelReasonHint": "A note for the team; the customer does not see it.",
       "canceled": "Return request cancelled; the customer was emailed.",
-      "dialogTitle": "Request on order #{{number}}"
+      "dialogTitle": "Request on order #{{number}}",
+      "codeMissing": "No contracted return code entered. Approved returns show the customer no carrier code; they are told the shop will be in touch.",
+      "codeMissingLink": "Go to shipping settings"
     },
     "edit": {
       "title": "Edit order #{{number}}",
@@ -5476,8 +5744,10 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
-        "geliver": "Geliver",
-        "own": "The shop's own delivery"
+        "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
+        "own": "The shop's own delivery",
+        "ptt": "PTT Kargo"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
       "days": "Order date",
@@ -5931,6 +6201,16 @@
       "utmMedium": "Campaign medium",
       "utmCampaign": "Campaign name",
       "referrer": "Referring site"
+    },
+    "placeholders": {
+      "cancelReturn": "e.g. The customer changed their mind and keeps the item.",
+      "chargebackReference": "e.g. CB-2026-001234",
+      "chargebackNote": "e.g. Proof of delivery sent.",
+      "invoiceNumber": "e.g. ABC2026000000123",
+      "ettn": "00000000-0000-0000-0000-000000000000",
+      "returnNote": "e.g. The customer called about it.",
+      "refundNote": "e.g. Shipping was refunded too.",
+      "rejectReason": "e.g. The item was used and its tag removed."
     }
   },
   "customers": {
@@ -6382,7 +6662,12 @@
       "eraseText": "The records are deleted for good; this cannot be undone. The order stays, with its amounts and lines, for the books. The deletion is recorded.",
       "eraseConfirm": "Delete for good",
       "erased_one": "{{count}} record deleted.",
-      "erased_other": "{{count}} records deleted."
+      "erased_other": "{{count}} records deleted.",
+      "placeholders": {
+        "first_name": "e.g. Ayşe",
+        "last_name": "e.g. Yılmaz",
+        "document_no": "e.g. 12345678901"
+      }
     },
     "columnOptions": "Columns",
     "stats": {
@@ -6400,6 +6685,12 @@
       "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
       "laterNoJobs": "The file is being prepared in the background.",
       "failed": "The customer file could not be prepared."
+    },
+    "placeholders": {
+      "addressName": "e.g. Home",
+      "note": "e.g. Prefers gift wrapping.",
+      "group": "e.g. Loyal customers",
+      "segment": "e.g. Bought in the last 90 days"
     }
   },
   "categories": {
@@ -6462,7 +6753,10 @@
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."
     },
-    "countOf": "{{name}}: {{count}} products"
+    "countOf": "{{name}}: {{count}} products",
+    "placeholders": {
+      "name": "e.g. Wallets"
+    }
   },
   "inventory": {
     "description": "Sellable stock; low and sold-out items first",
@@ -6714,11 +7008,20 @@
       "freeShippingSummary": "Free shipping from: {{value}}",
       "freeShippingOff": "Off",
       "freeShippingEdit": "Change in shipping settings",
+      "freeShippingCoupon": "Free shipping coupons: {{value}}",
+      "freeShippingCouponValues": {
+        "any": "valid at any amount",
+        "off": "do not lower shipping (amount only)",
+        "from": "valid from {{amount}}"
+      },
       "combineCodes": "More than one code in a cart",
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."
     },
-    "limited": "The newest {{total}} promotions are shown."
+    "limited": "The newest {{total}} promotions are shown.",
+    "placeholders": {
+      "code": "NOVEMBER20"
+    }
   },
   "reports": {
     "description": "The chosen period's sales, where they came from, their VAT, collections, stock and storefront searches",
@@ -7868,6 +8171,9 @@
           "hint": "Turn it on to tell Bing and Yandex about changed pages at once."
         }
       }
+    },
+    "placeholders": {
+      "description": "e.g. Handmade leather wallets; free shipping and 14-day returns."
     }
   },
   "attributes": {
@@ -8099,7 +8405,15 @@
     "newValue": "Add a new value",
     "newValueName": "New value for {{label}}",
     "addValue": "Add",
-    "valueAdded": "{{value}} added."
+    "valueAdded": "{{value}} added.",
+    "placeholders": {
+      "value": "e.g. Stainless steel",
+      "optionTitle": "e.g. Size",
+      "textUnit": "e.g. HRC",
+      "unit": "e.g. cm",
+      "groupName": "e.g. Dimensions",
+      "description": "e.g. Shared attributes of clothing"
+    }
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -8138,7 +8452,11 @@
     "fieldHint": "Shown on the product page and in the search result title.",
     "pick": "Choose a brand",
     "noneFound": "No brand found.",
-    "noLogo": "No logo"
+    "noLogo": "No logo",
+    "placeholders": {
+      "name": "e.g. Kuzey Deri",
+      "handle": "kuzey-deri"
+    }
   },
   "collections": {
     "description": "Collections gather products under a theme; each has its own page, picture and products.",
@@ -8201,6 +8519,10 @@
     "gate": {
       "off": "Collections are off in this shop. Your collections were not deleted; turn them on to manage them here again.",
       "turnOn": "Go to features"
+    },
+    "placeholders": {
+      "name": "e.g. Summer collection",
+      "handle": "summer-collection"
     }
   },
   "address": {
@@ -8723,6 +9045,16 @@
         "category": "Category",
         "product": "Product"
       }
+    },
+    "placeholders": {
+      "jobTitle": "e.g. Designer",
+      "bio": "e.g. Has written about craft and design for ten years.",
+      "title": "e.g. 5 tips for leather care",
+      "handle": "5-tips-for-leather-care",
+      "excerpt": "e.g. Five easy ways to keep leather looking new for years.",
+      "landingTitle": "e.g. November deals",
+      "landingHandle": "november-deals",
+      "term": "e.g. Care guide"
     }
   },
   "priceLists": {
@@ -8837,6 +9169,10 @@
       "done_other": "{{count}} prices written.",
       "skipped_one": "{{count}} variant has no price of its own and was left out.",
       "skipped_other": "{{count}} variants have no price of their own and were left out."
+    },
+    "placeholders": {
+      "title": "e.g. Summer sale",
+      "description": "e.g. Prices valid until the end of June"
     }
   },
   "giftCards": {
@@ -8894,7 +9230,11 @@
       "used": "Used",
       "expired": "Expired"
     },
-    "limited": "This view looks at the newest 5,000 cards; older ones are not listed."
+    "limited": "This view looks at the newest 5,000 cards; older ones are not listed.",
+    "placeholders": {
+      "closeReason": "e.g. The order was returned",
+      "note": "e.g. Birthday gift for Ayşe Yılmaz"
+    }
   },
   "storeCredit": {
     "title": "Store credit",
@@ -12685,6 +13025,15 @@
       "search": "Search titles",
       "empty": "No pages yet. Open the first one; you write it in the theme editor.",
       "full": "At most {{max}} pages can have their own layout; a new page's text cannot be added as a section, only shown."
+    },
+    "placeholders": {
+      "maintenance": "e.g. We're doing a short update and will be back soon.",
+      "menuTitle": "e.g. Company",
+      "footerAbout": "e.g. Handmade leather goods; free returns within 14 days.",
+      "pageTitle": "e.g. About us",
+      "designName": "e.g. Winter look",
+      "search_placeholder": "e.g. Search products or brands",
+      "strip_note": "e.g. Free shipping over 750 TL"
     }
   },
   "bulkMessages": {
@@ -13008,6 +13357,12 @@
         "title": "Suggest SMS text",
         "description": "AI writes three short texts from the message's name and its current text; each fits one SMS with the shop's name and the opt-out line. No recipient list is sent; nothing changes until you save."
       }
+    },
+    "placeholders": {
+      "name": "e.g. November sale announcement",
+      "sms": "e.g. Our November sale has started: 20% off everything.",
+      "subject": "e.g. Our November sale has started",
+      "preheader": "e.g. 20% off everything until Sunday night"
     }
   },
   "popups": {
@@ -13210,6 +13565,13 @@
       "title": "Summary",
       "created": "Created",
       "updated": "Last changed"
+    },
+    "placeholders": {
+      "name": "e.g. November newsletter prompt",
+      "title": "e.g. 10% off your first order",
+      "body": "e.g. Join our newsletter and hear about offers first.",
+      "submitLabel": "Sign up",
+      "buttonLabel": "e.g. Start shopping"
     }
   },
   "paymentLinks": {
@@ -13464,6 +13826,10 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Note",
       "noNote": "No note."
+    },
+    "placeholders": {
+      "discountReason": "e.g. Loyal customer",
+      "note": "e.g. Phone order, wants delivery on Friday."
     }
   },
   "media": {
@@ -13617,6 +13983,9 @@
       "deleted_other": "{{formatted}} pictures deleted.",
       "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
       "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
+    },
+    "placeholders": {
+      "filename": "e.g. leather-wallet-front"
     }
   },
   "confirmEmail": {
@@ -14075,6 +14444,9 @@
       "hint": "Pass the password on to the wholesaler; suggest they change it at first sign-in. Their open sessions end. This password is not shown again.",
       "save": "Save password",
       "saved": "New password saved; the wholesaler's open sessions were ended."
+    },
+    "placeholders": {
+      "tier": "e.g. Wholesale A"
     }
   },
   "ai": {

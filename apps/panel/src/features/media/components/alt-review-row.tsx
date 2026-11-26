@@ -48,6 +48,7 @@ export function AltReviewRow({
           {name}
         </label>
         <Textarea
+          placeholder={t("common.placeholder.imageAlt")}
           id={fieldId}
           value={text}
           rows={2}

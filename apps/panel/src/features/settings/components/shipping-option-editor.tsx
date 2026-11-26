@@ -24,31 +24,30 @@ import type {
   NewShippingOption,
   ShopShippingOption,
 } from "@/features/settings/api/shipping-options"
+import { useCarrierShown } from "@/features/settings/api/carriers"
 import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "geliver", "aras", "yurtici", "pickup"] as const
-const PRICINGS = ["flat", "cheapest", "fastest", "table"] as const
+const CARRIERS = ["manual", "aras", "yurtici", "dhlecommerce", "surat", "ptt", "pickup"] as const
+const PRICINGS = ["flat", "table"] as const
 export type OptionCarrier = (typeof CARRIERS)[number]
 type Pricing = (typeof PRICINGS)[number]
 
-// Geliver quotes; a contract carrier (adr/0035) takes a flat price or the shop's table
+// A contract carrier (adr/0035) takes a flat price or the shop's table
 const PRICINGS_OF: Readonly<Record<OptionCarrier, readonly Pricing[]>> = {
   manual: ["flat"],
-  geliver: PRICINGS,
   aras: ["flat", "table"],
   yurtici: ["flat", "table"],
+  dhlecommerce: ["flat", "table"],
+  surat: ["flat", "table"],
+  ptt: ["flat", "table"],
   pickup: ["flat"],
 }
 
 /** The pricing the carrier takes: the one chosen, or a flat price when it takes no other. */
 const pricingFor = (carrier: OptionCarrier, pricing: Pricing): Pricing =>
   PRICINGS_OF[carrier].includes(pricing) ? pricing : "flat"
-
-/** A new option's pricing: Geliver's cheapest quote, else a flat price. */
-const firstPricing = (carrier: OptionCarrier): Pricing =>
-  carrier === "geliver" ? "cheapest" : "flat"
 
 const schema = z
   .object({
@@ -65,15 +64,12 @@ const schema = z
   })
 type Values = z.infer<typeof schema>
 
-/** The server's body for the form: Geliver quotes; Geliver and the contract carriers price by the table. */
+/** The server's body for the form: a flat price, or the contract carrier's table. */
 function newOption(values: Values): NewShippingOption {
-  const chosen = pricingFor(values.carrier, values.pricing)
   const pricing: NewShippingOption["pricing"] =
-    chosen === "flat"
+    pricingFor(values.carrier, values.pricing) === "flat"
       ? { type: "flat", amount: parseMoneyInput(values.amount) ?? 0 }
-      : chosen === "table"
-        ? { type: "table" }
-        : { type: "quote", choice: chosen }
+      : { type: "table" }
   return { name: values.name.trim(), carrier: values.carrier, pricing }
 }
 
@@ -143,6 +139,7 @@ export function ShippingOptionEditor({
   onDone: () => void
 }) {
   const { t } = useTranslation()
+  const shown = useCarrierShown()
   const create = useCreateShippingOption()
   const update = useUpdateShippingOption()
   const remove = useDeleteShippingOption()
@@ -151,7 +148,7 @@ export function ShippingOptionEditor({
     defaultValues: {
       name: option?.name ?? t(`${S}.defaultName`),
       carrier: option?.carrier ?? firstCarrier,
-      pricing: option?.pricing ?? firstPricing(firstCarrier),
+      pricing: option?.pricing ?? "flat",
       amount: option?.amount ? formatMoneyInput(Number(option.amount)) : "",
     },
   })
@@ -196,7 +193,12 @@ export function ShippingOptionEditor({
           htmlFor={`shipping-option-name-${id}`}
           error={errors.name?.message ? t(errors.name.message) : undefined}
         >
-          <Input id={`shipping-option-name-${id}`} maxLength={80} {...form.register("name")} />
+          <Input
+            id={`shipping-option-name-${id}`}
+            maxLength={80}
+            placeholder={t(`${S}.namePlaceholder`)}
+            {...form.register("name")}
+          />
         </Field>
         {option ? null : (
           <Field label={t(`${S}.carrier`)} htmlFor="shipping-option-carrier">
@@ -208,14 +210,14 @@ export function ShippingOptionEditor({
                   value={field.value}
                   onValueChange={(next) => {
                     field.onChange(next)
-                    form.setValue("pricing", firstPricing(next as OptionCarrier))
+                    form.setValue("pricing", "flat")
                   }}
                 >
                   <SelectTrigger id="shipping-option-carrier" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CARRIERS.map((each) => (
+                    {CARRIERS.filter((each) => shown(each)).map((each) => (
                       <SelectItem key={each} value={each}>
                         {t(`${S}.carriers.${each}`)}
                       </SelectItem>

@@ -66,13 +66,23 @@ const cashOnDelivery = (order: OrderRow): boolean =>
  * - cash on delivery once delivered, or once the cash is recorded as
  *   collected, whatever the shop's setting;
  * - otherwise by the setting: once placed and paid (the default), or when
- *   its parcel leaves (a delivery counts, in case the parcel's event was missed).
+ *   its parcel leaves (a delivery counts, in case the parcel's event was missed);
+ * - with BirFatura managing the parcels, neither: once paid, cash on
+ *   delivery once placed (BirFatura must have the order to ship it).
  */
 export function invoiceDue(
   order: OrderRow,
   moment: InvoiceMoment,
-  settings: Pick<InvoicingSettings, "trigger">
+  settings: Pick<InvoicingSettings, "trigger">,
+  birfaturaShips = false
 ): boolean {
+  // BirFatura's cargo module ships only orders it has pulled (adr/0072 Ek
+  // 2026-11-26): waiting for the parcel would never let it go. Handed over
+  // once paid, cash on delivery once placed; BirFatura's own rules say when
+  // it issues the invoice
+  if (birfaturaShips) {
+    return cashOnDelivery(order) || invoicePaid(order)
+  }
   if (cashOnDelivery(order)) {
     return moment === "delivered" || (moment === "paid" && invoicePaid(order))
   }
@@ -130,6 +140,12 @@ export interface InvoiceFacts {
    * once paid, whatever the setting; unknown until its lines are read.
    */
   advanceOnly?: boolean
+  /**
+   * BirFatura's cargo module manages the shop's parcels (`birfaturaShips`,
+   * adr/0072 Ek 2026-11-26): the order goes to BirFatura before its parcel
+   * leaves, whatever the setting says.
+   */
+  birfaturaShips?: boolean
 }
 
 /**
@@ -153,11 +169,18 @@ export function saleInvoiceHold(facts: InvoiceFacts): InvoiceHold | null {
   if ((order.currency_code ?? "").toLowerCase() !== "try") {
     return "currency"
   }
-  if (facts.moments.some((moment) => invoiceDue(order, moment, settings))) {
+  if (
+    facts.moments.some((moment) =>
+      invoiceDue(order, moment, settings, facts.birfaturaShips === true)
+    )
+  ) {
     return null
   }
   if (facts.advanceOnly && invoicePaid(order)) {
     return null
+  }
+  if (facts.birfaturaShips === true) {
+    return "awaiting_payment"
   }
   if (cashOnDelivery(order)) {
     return "awaiting_delivery"

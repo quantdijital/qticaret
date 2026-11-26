@@ -1,15 +1,22 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PDFDocument } from "pdf-lib"
-import { startFakeAras, startFakeGeliver, startFakeYurtici } from "@qticaret/testing"
+import {
+  startFakeAras,
+  startFakeDhlEcom,
+  startFakePtt,
+  startFakeSurat,
+  startFakeYurtici,
+} from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { MM } from "../../src/lib/pdf"
+import { DHL_ECOMMERCE_DEV_APP } from "../../src/lib/shipping/dhlecommerce"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
-import { geliverProduct } from "../helpers/geliver"
+import { measuredProduct } from "../helpers/carrier"
 import type { HttpClient, HttpResponse } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -25,7 +32,7 @@ type Post = <T>(path: string, body: unknown) => Promise<HttpResponse<T & { messa
 
 /** One carrier as the contract drives it: its fake service and how to read it. */
 interface CarrierUnderTest {
-  name: "geliver" | "aras" | "yurtici"
+  name: "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
   env: string
   start: () => Promise<string>
   stop: () => Promise<void>
@@ -38,40 +45,6 @@ interface CarrierUnderTest {
   /** The next shipping fails after the carrier may have opened the parcel. */
   failAfterOpening: () => void
   secrets: () => string[]
-}
-
-function geliver(): CarrierUnderTest {
-  let fake: Awaited<ReturnType<typeof startFakeGeliver>>
-  return {
-    name: "geliver",
-    env: "GELIVER_BASE_URL",
-    start: async () => {
-      fake = await startFakeGeliver()
-      return fake.url
-    },
-    stop: () => fake.close(),
-    connect: async (post) => {
-      await post("/admin/platform-settings/store", { contact_email: "magaza@example.com" })
-      return post("/admin/integrations/credentials/geliver", {
-        settings: { test_mode: true },
-        secrets: { api_token: fake.token },
-      })
-    },
-    pricing: { type: "quote", choice: "cheapest" },
-    reset: () => {
-      fake.shipments.clear()
-    },
-    open: () =>
-      [...fake.shipments.values()].filter((each) => each.statusCode !== "CANCELED").length,
-    // The label cannot be bought once the shipment is open
-    failAfterOpening: () => {
-      fake.queue("POST /transactions", {
-        status: 400,
-        body: { result: false, code: "LOW_BALANCE" },
-      })
-    },
-    secrets: () => [fake.token],
-  }
 }
 
 function aras(): CarrierUnderTest {
@@ -130,6 +103,107 @@ function yurtici(): CarrierUnderTest {
   }
 }
 
+function dhlEcom(): CarrierUnderTest {
+  let fake: Awaited<ReturnType<typeof startFakeDhlEcom>>
+  return {
+    name: "dhlecommerce",
+    // No app keys set: with a fake, the backend's development app (the fake's)
+    env: "DHL_ECOMMERCE_BASE_URL",
+    start: async () => {
+      fake = await startFakeDhlEcom({ ...DHL_ECOMMERCE_DEV_APP })
+      return fake.url
+    },
+    stop: () => fake.close(),
+    connect: (post) =>
+      post("/admin/integrations/credentials/dhlecommerce", {
+        settings: { test_mode: true },
+        secrets: { customer_number: fake.account.customerNumber, password: fake.account.password },
+      }),
+    pricing: { type: "table" },
+    reset: () => {
+      fake.orders.clear()
+    },
+    open: () => [...fake.orders.values()].filter((each) => !each.canceled).length,
+    // The order is open; its barcode is refused
+    failAfterOpening: () => {
+      fake.queue("createbarcode", "30099")
+    },
+    secrets: () => [fake.account.customerNumber, fake.account.password],
+  }
+}
+
+function surat(): CarrierUnderTest {
+  let fake: Awaited<ReturnType<typeof startFakeSurat>>
+  return {
+    name: "surat",
+    // Sürat has no test service: the fake stands in for the live one
+    env: "SURAT_BASE_URL",
+    start: async () => {
+      fake = await startFakeSurat()
+      return fake.url
+    },
+    stop: () => fake.close(),
+    connect: (post) =>
+      post("/admin/integrations/credentials/surat", {
+        settings: {},
+        secrets: {
+          ...fake.accounts.shipping,
+          cari_code: fake.accounts.tracking.cariCode,
+          web_password: fake.accounts.tracking.webPassword,
+        },
+      }),
+    pricing: { type: "table" },
+    reset: () => {
+      fake.shipments.clear()
+    },
+    open: () => [...fake.shipments.values()].filter((each) => !each.canceled).length,
+    // The parcel is opened; Sürat answers a sentence that is no known success
+    failAfterOpening: () => {
+      fake.queue("GonderiyiKargoyaGonderYeni", "open:Kayıt alındı")
+    },
+    secrets: () => [
+      fake.accounts.shipping.username,
+      fake.accounts.shipping.password,
+      fake.accounts.tracking.cariCode,
+      fake.accounts.tracking.webPassword,
+    ],
+  }
+}
+
+function ptt(): CarrierUnderTest {
+  let fake: Awaited<ReturnType<typeof startFakePtt>>
+  return {
+    name: "ptt",
+    env: "PTT_BASE_URL",
+    start: async () => {
+      fake = await startFakePtt()
+      return fake.url
+    },
+    stop: () => fake.close(),
+    // The account, then the barcode range PTT gave (no parcel goes without one)
+    connect: async (post) => {
+      await post("/admin/integrations/credentials/ptt", {
+        settings: { customer_id: fake.account.customerId, test_mode: false },
+        secrets: { password: fake.account.password },
+      })
+      return post("/admin/shipping-setup/ptt-barcodes", {
+        first: "275036569000",
+        last: "275036569999",
+      })
+    },
+    pricing: { type: "table" },
+    reset: () => {
+      fake.shipments.clear()
+    },
+    open: () => [...fake.shipments.values()].filter((each) => !each.canceled).length,
+    // The parcel is loaded; its answer never comes
+    failAfterOpening: () => {
+      fake.queue("kabulEkle2", "lost")
+    },
+    secrets: () => [fake.account.password],
+  }
+}
+
 interface FulfillmentRow {
   id: string
   shipped_at: Date | null
@@ -149,176 +223,185 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    describe.each([geliver(), aras(), yurtici()])("carrier contract: $name", (carrier) => {
-      let shop: StockShop
-      let admin: { headers: Record<string, string> }
-      let optionId: string
-      let variantId: string
-      let clock = Date.now()
+    describe.each([aras(), yurtici(), dhlEcom(), surat(), ptt()])(
+      "carrier contract: $name",
+      (carrier) => {
+        let shop: StockShop
+        let admin: { headers: Record<string, string> }
+        let optionId: string
+        let variantId: string
+        let clock = Date.now()
 
-      const post: Post = (path, body) => settle(http.post(path, body, { headers: admin.headers }))
-      const order = () =>
-        placeOrder(getContainer(), {
-          regionId: shop.regionId,
-          salesChannelId: shop.salesChannelId,
-          shippingOptionId: optionId,
-          items: [{ variant_id: variantId, quantity: 1 }],
-          address: PAYTR_ADDRESS,
-        })
-      const ship = (orderId: string) => post(`/admin/orders/${orderId}/ship`, { notify: false })
-      const fulfillmentsOf = async (orderId: string) => {
-        const { data } = await getContainer()
-          .resolve(ContainerRegistrationKeys.QUERY)
-          .graph({
-            entity: "order",
-            fields: [
-              "fulfillments.id",
-              "fulfillments.shipped_at",
-              "fulfillments.delivered_at",
-              "fulfillments.canceled_at",
-              "fulfillments.data",
-            ],
-            filters: { id: orderId },
+        const post: Post = (path, body) => settle(http.post(path, body, { headers: admin.headers }))
+        const order = () =>
+          placeOrder(getContainer(), {
+            regionId: shop.regionId,
+            salesChannelId: shop.salesChannelId,
+            shippingOptionId: optionId,
+            items: [{ variant_id: variantId, quantity: 1 }],
+            address: PAYTR_ADDRESS,
+            // DHL eCommerce refuses a receiver without one; the others ignore it
+            email: "ayse.yilmaz@example.com",
           })
-        return ((data[0] as { fulfillments?: FulfillmentRow[] }).fulfillments ?? []).filter(
-          (each) => !each.canceled_at
-        )
+        const ship = (orderId: string) => post(`/admin/orders/${orderId}/ship`, { notify: false })
+        const fulfillmentsOf = async (orderId: string) => {
+          const { data } = await getContainer()
+            .resolve(ContainerRegistrationKeys.QUERY)
+            .graph({
+              entity: "order",
+              fields: [
+                "fulfillments.id",
+                "fulfillments.shipped_at",
+                "fulfillments.delivered_at",
+                "fulfillments.canceled_at",
+                "fulfillments.data",
+              ],
+              filters: { id: orderId },
+            })
+          return ((data[0] as { fulfillments?: FulfillmentRow[] }).fulfillments ?? []).filter(
+            (each) => !each.canceled_at
+          )
+        }
+
+        beforeAll(async () => {
+          process.env[carrier.env] = await carrier.start()
+        })
+
+        afterAll(async () => {
+          Reflect.deleteProperty(process.env, carrier.env)
+          await carrier.stop()
+        })
+
+        beforeEach(async () => {
+          const container = getContainer()
+          await loadTrAddressFixture(container)
+          shop = await stockShop(container)
+          admin = await createAdminUser(http, container)
+          await ensureLocationCarriers(container)
+          // A table for the carriers priced by it: a 1 desi parcel costs 49.90
+          await post("/admin/platform-settings/shipping", {
+            rate_table: [{ max_desi: 10, price: 4_990 }],
+          })
+          const created = await post<{ id: string }>("/admin/shipping-setup/options", {
+            name: carrier.name,
+            carrier: carrier.name,
+            pricing: carrier.pricing,
+          })
+          optionId = created.data.id
+          variantId = await measuredProduct(container, shop)
+          carrier.reset()
+        })
+
+        it("opens no parcel once the shop's account is gone", async () => {
+          // A quoting carrier prices the cart with the account: the order comes first
+          await carrier.connect(post)
+          const orderId = await order()
+          await settle(
+            http.delete(`/admin/integrations/credentials/${carrier.name}`, {
+              headers: admin.headers,
+            })
+          )
+
+          const refused = await ship(orderId)
+
+          expect(refused.status).toBe(400)
+          expect(refused.data.message).toBe("shipping.carrier_not_connected")
+          expect(carrier.open()).toBe(0)
+        })
+
+        it("ships on our route only, keeps the label privately, holds no secret, and follows the parcel to its end", async () => {
+          await carrier.connect(post)
+          const orderId = await order()
+          const { data: lines } = await getContainer()
+            .resolve(ContainerRegistrationKeys.QUERY)
+            .graph({ entity: "order", fields: ["items.id"], filters: { id: orderId } })
+          const items = (lines[0] as { items: { id: string }[] }).items
+
+          const medusas = await post(`/admin/orders/${orderId}/fulfillments`, {
+            items: items.map(({ id }) => ({ id, quantity: 1 })),
+          })
+          const shipped = await ship(orderId)
+          const [packed] = await fulfillmentsOf(orderId)
+          const labelPath = `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/label`
+          const label = await settle(
+            http.get<{ url: string }>(labelPath, { headers: admin.headers })
+          )
+          const anonymous = await settle(http.get(labelPath))
+          const bulkPath = `/admin/shipping-labels?fulfillment_id=${packed?.id ?? ""}`
+          const bulk = await settle(
+            http.get<string>(bulkPath, { headers: admin.headers, responseType: "text" })
+          )
+          const bulkAnonymous = await settle(http.get(bulkPath))
+          // On the shop's label size: four to an A4 sheet for an office printer
+          await getContainer()
+            .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+            .saveSection("shipping", { label_format: "a4" }, null)
+          const sheet = await http.get<ArrayBuffer>(bulkPath, {
+            headers: admin.headers,
+            responseType: "arraybuffer",
+          })
+          const [a4] = (await PDFDocument.load(sheet.data)).getPages()
+          for (let read = 0; read < 8; read += 1) {
+            clock += 30 * MINUTE
+            await pollShipments(getContainer(), new Date(clock))
+          }
+          const [arrived] = await fulfillmentsOf(orderId)
+
+          expect(JSON.stringify(medusas.data)).toMatch(/shipping\.use_ship_route/)
+          expect(shipped.status).toBe(200)
+          expect(shipped.data).toMatchObject({ carrier: carrier.name })
+          expect(carrier.open()).toBe(1)
+          expect(packed?.data["shipment_id"]).toEqual(expect.any(String))
+          expect(packed?.data["label_file_id"]).toEqual(expect.any(String))
+          expect(packed?.data["label_base64"] ?? null).toBeNull()
+          expect(packed?.data["label_source"] ?? null).toBeNull()
+          // The label opens for staff by a short-lived link, never for anyone else
+          expect(label.status).toBe(200)
+          expect(anonymous.status).toBe(401)
+          // Picked parcels print as one PDF (F7.7, pdf-lib): every carrier's label merges
+          expect(bulk.status).toBe(200)
+          expect(bulk.headers["content-type"]).toMatch(/^application\/pdf/)
+          expect(bulk.headers["x-labels-missing"]).toBe("0")
+          expect(bulk.data.startsWith("%PDF-")).toBe(true)
+          expect(bulkAnonymous.status).toBe(401)
+          expect(
+            [a4?.getWidth(), a4?.getHeight()].map((side) => Math.round((side ?? 0) / MM))
+          ).toEqual([210, 297])
+          for (const secret of carrier.secrets()) {
+            expect(JSON.stringify(packed?.data)).not.toContain(secret)
+          }
+          expect(arrived?.shipped_at).toBeTruthy()
+          expect(arrived?.delivered_at).toBeTruthy()
+        })
+
+        it("leaves nothing open at the carrier when shipping fails after it opened the parcel", async () => {
+          await carrier.connect(post)
+          const orderId = await order()
+          carrier.failAfterOpening()
+
+          const failed = await ship(orderId)
+
+          expect(failed.status).toBeGreaterThanOrEqual(400)
+          expect(carrier.open()).toBe(0)
+          expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+        })
+
+        it("withdraws the parcel at the carrier when the shop cancels before handing it over", async () => {
+          await carrier.connect(post)
+          const orderId = await order()
+          await ship(orderId)
+          const [packed] = await fulfillmentsOf(orderId)
+
+          const canceled = await post(
+            `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/cancel`,
+            {}
+          )
+
+          expect(canceled.status).toBe(200)
+          expect(carrier.open()).toBe(0)
+          expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+        })
       }
-
-      beforeAll(async () => {
-        process.env[carrier.env] = await carrier.start()
-      })
-
-      afterAll(async () => {
-        Reflect.deleteProperty(process.env, carrier.env)
-        await carrier.stop()
-      })
-
-      beforeEach(async () => {
-        const container = getContainer()
-        await loadTrAddressFixture(container)
-        shop = await stockShop(container)
-        admin = await createAdminUser(http, container)
-        await ensureLocationCarriers(container)
-        // A table for the carriers priced by it: a 1 desi parcel costs 49.90
-        await post("/admin/platform-settings/shipping", {
-          rate_table: [{ max_desi: 10, price: 4_990 }],
-        })
-        const created = await post<{ id: string }>("/admin/shipping-setup/options", {
-          name: carrier.name,
-          carrier: carrier.name,
-          pricing: carrier.pricing,
-        })
-        optionId = created.data.id
-        variantId = await geliverProduct(container, shop)
-        carrier.reset()
-      })
-
-      it("opens no parcel once the shop's account is gone", async () => {
-        // A quoting carrier prices the cart with the account: the order comes first
-        await carrier.connect(post)
-        const orderId = await order()
-        await settle(
-          http.delete(`/admin/integrations/credentials/${carrier.name}`, { headers: admin.headers })
-        )
-
-        const refused = await ship(orderId)
-
-        expect(refused.status).toBe(400)
-        expect(refused.data.message).toBe("shipping.carrier_not_connected")
-        expect(carrier.open()).toBe(0)
-      })
-
-      it("ships on our route only, keeps the label privately, holds no secret, and follows the parcel to its end", async () => {
-        await carrier.connect(post)
-        const orderId = await order()
-        const { data: lines } = await getContainer()
-          .resolve(ContainerRegistrationKeys.QUERY)
-          .graph({ entity: "order", fields: ["items.id"], filters: { id: orderId } })
-        const items = (lines[0] as { items: { id: string }[] }).items
-
-        const medusas = await post(`/admin/orders/${orderId}/fulfillments`, {
-          items: items.map(({ id }) => ({ id, quantity: 1 })),
-        })
-        const shipped = await ship(orderId)
-        const [packed] = await fulfillmentsOf(orderId)
-        const labelPath = `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/label`
-        const label = await settle(http.get<{ url: string }>(labelPath, { headers: admin.headers }))
-        const anonymous = await settle(http.get(labelPath))
-        const bulkPath = `/admin/shipping-labels?fulfillment_id=${packed?.id ?? ""}`
-        const bulk = await settle(
-          http.get<string>(bulkPath, { headers: admin.headers, responseType: "text" })
-        )
-        const bulkAnonymous = await settle(http.get(bulkPath))
-        // On the shop's label size: four to an A4 sheet for an office printer
-        await getContainer()
-          .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-          .saveSection("shipping", { label_format: "a4" }, null)
-        const sheet = await http.get<ArrayBuffer>(bulkPath, {
-          headers: admin.headers,
-          responseType: "arraybuffer",
-        })
-        const [a4] = (await PDFDocument.load(sheet.data)).getPages()
-        for (let read = 0; read < 8; read += 1) {
-          clock += 30 * MINUTE
-          await pollShipments(getContainer(), new Date(clock))
-        }
-        const [arrived] = await fulfillmentsOf(orderId)
-
-        expect(JSON.stringify(medusas.data)).toMatch(/shipping\.use_ship_route/)
-        expect(shipped.status).toBe(200)
-        expect(shipped.data).toMatchObject({ carrier: carrier.name })
-        expect(carrier.open()).toBe(1)
-        expect(packed?.data["shipment_id"]).toEqual(expect.any(String))
-        expect(packed?.data["label_file_id"]).toEqual(expect.any(String))
-        expect(packed?.data["label_base64"] ?? null).toBeNull()
-        expect(packed?.data["label_source"] ?? null).toBeNull()
-        // The label opens for staff by a short-lived link, never for anyone else
-        expect(label.status).toBe(200)
-        expect(anonymous.status).toBe(401)
-        // Picked parcels print as one PDF (F7.7, pdf-lib): every carrier's label merges
-        expect(bulk.status).toBe(200)
-        expect(bulk.headers["content-type"]).toMatch(/^application\/pdf/)
-        expect(bulk.headers["x-labels-missing"]).toBe("0")
-        expect(bulk.data.startsWith("%PDF-")).toBe(true)
-        expect(bulkAnonymous.status).toBe(401)
-        expect(
-          [a4?.getWidth(), a4?.getHeight()].map((side) => Math.round((side ?? 0) / MM))
-        ).toEqual([210, 297])
-        for (const secret of carrier.secrets()) {
-          expect(JSON.stringify(packed?.data)).not.toContain(secret)
-        }
-        expect(arrived?.shipped_at).toBeTruthy()
-        expect(arrived?.delivered_at).toBeTruthy()
-      })
-
-      it("leaves nothing open at the carrier when shipping fails after it opened the parcel", async () => {
-        await carrier.connect(post)
-        const orderId = await order()
-        carrier.failAfterOpening()
-
-        const failed = await ship(orderId)
-
-        expect(failed.status).toBeGreaterThanOrEqual(400)
-        expect(carrier.open()).toBe(0)
-        expect(await fulfillmentsOf(orderId)).toHaveLength(0)
-      })
-
-      it("withdraws the parcel at the carrier when the shop cancels before handing it over", async () => {
-        await carrier.connect(post)
-        const orderId = await order()
-        await ship(orderId)
-        const [packed] = await fulfillmentsOf(orderId)
-
-        const canceled = await post(
-          `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/cancel`,
-          {}
-        )
-
-        expect(canceled.status).toBe(200)
-        expect(carrier.open()).toBe(0)
-        expect(await fulfillmentsOf(orderId)).toHaveLength(0)
-      })
-    })
+    )
   },
 })

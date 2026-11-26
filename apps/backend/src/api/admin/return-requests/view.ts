@@ -1,6 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { kurus, toMedusaAmount } from "../../../lib/money"
 import { refundDueAt } from "../../../lib/orders/withdrawal-rules"
+import { requestReturnCode } from "../../../lib/shipping/contracted-return"
+import type { ContractedReturn } from "../../../lib/shipping/contracted-return"
+import { readContractedReturn } from "../../../workflows/returns/contracted-return"
 import { withWithdrawalMark } from "../../../workflows/returns/request-items"
 
 /** Kuruş as exact lira, signed: an exchange's difference may be the shop's to pay. */
@@ -18,15 +21,19 @@ type When = Date | string | null | undefined
 export const returnRequestView = <
   T extends {
     kind?: string
+    status: string
+    return_code?: string | null | undefined
     refund_amount: number | null
     difference: number | null
     handed_over_at?: When
     received_at?: When
   },
 >(
-  request: T
+  request: T,
+  contracted: ContractedReturn | null
 ) => ({
   ...request,
+  ...requestReturnCode(request, contracted),
   refund_amount: request.refund_amount === null ? null : liraOf(request.refund_amount),
   difference: request.difference === null ? null : liraOf(request.difference),
   refund_due_at: request.kind === "exchange" ? null : (refundDueAt(request)?.toISOString() ?? null),
@@ -40,10 +47,16 @@ export const returnRequestDetail = async <
   T extends {
     order_id: string
     items: unknown
+    status: string
+    return_code?: string | null | undefined
     refund_amount: number | null
     difference: number | null
   },
 >(
   container: Pick<MedusaContainer, "resolve">,
   request: T
-) => returnRequestView(await withWithdrawalMark(container, request))
+) =>
+  returnRequestView(
+    await withWithdrawalMark(container, request),
+    request.status === "approved" ? await readContractedReturn(container) : null
+  )

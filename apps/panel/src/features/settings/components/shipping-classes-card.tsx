@@ -1,19 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Lock, Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { useSaveSection } from "@/features/settings/api/sections"
-import { FREE_SHIPPING_CLASS } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import {
   SHIPPING_CLASS_USAGE_KEY,
@@ -52,12 +52,20 @@ const valuesOf = (saved: ShippingSettings): Values => ({
 })
 
 /**
- * Settings > Shipping > "Kargo sınıfları" (adr/0087 §4): the shop's own
- * classes edited in place, no dialog. "Ücretsiz kargo" is the built-in
- * first row, locked. A class some products use asks before it goes, in
- * its row: those products count as Standard (a warning, not a stop).
+ * Settings > Shipping > Gelişmiş > "Kargo sınıfları" (adr/0087 §4): the
+ * shop's own surcharge classes edited in place, no dialog. The built-in
+ * free class is not a row (the owner, 2026-11-26: a locked row said
+ * nothing): a product's "Bu ürünün kargosu ücretsiz" switch is it. A class
+ * some products use asks before it goes, in its row: those products count
+ * as Standard (a warning, not a stop).
  */
-export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
+export function ShippingClassesCard({
+  saved,
+  collapse,
+}: {
+  saved: ShippingSettings
+  collapse?: CollapseOptions | undefined
+}) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const save = useSaveSection<ShippingSettings>("shipping")
@@ -79,6 +87,7 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
   }
 
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         shipping_classes: next.rows.map((row) => ({
@@ -89,7 +98,7 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           setAsking(null)
           void client.invalidateQueries({ queryKey: SHIPPING_CLASS_USAGE_KEY })
           toast.success(t("settings.saved"))
@@ -103,6 +112,7 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
     <CardForm
       title={t(`${S}.title`)}
       description={t(`${S}.description`)}
+      collapse={collapse}
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}
@@ -111,20 +121,13 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
         setAsking(null)
       }}
     >
-      <ul className="flex flex-col divide-y rounded-md border" data-testid="shipping-classes">
-        <li className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5 text-sm">
-          <span className="flex min-w-0 flex-[1_1_12rem] items-center gap-2 font-medium">
-            <Lock aria-hidden className="size-3.5 text-muted-foreground" />
-            {t(`${S}.freeRow`)}
-          </span>
-          <span className="w-40 text-muted-foreground">{t(`${S}.freeHint`)}</span>
-          <span className="w-24 text-[13px] text-muted-foreground">
-            {productsText(FREE_SHIPPING_CLASS)}
-          </span>
-          <span className="sr-only">{t(`${S}.locked`)}</span>
-          {/* The trash column's room: the rows line up */}
-          <span aria-hidden className="size-9" />
-        </li>
+      {rows.fields.length === 0 ? (
+        <p className="text-[13px] text-muted-foreground">{t(`${S}.empty`)}</p>
+      ) : null}
+      <ul
+        className="flex flex-col divide-y rounded-md border empty:hidden"
+        data-testid="shipping-classes"
+      >
         {rows.fields.map((row, index) => {
           const used = usage[row.key] ?? 0
           const typed = names[index]?.name ?? ""
@@ -138,6 +141,7 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
                   aria-label={t(`${S}.nameOf`, { number: index + 1 })}
                   aria-invalid={Boolean(errors.rows?.[index]?.name)}
                   maxLength={60}
+                  placeholder={t(`${S}.namePlaceholder`)}
                   className="min-w-0 flex-[1_1_12rem]"
                   {...form.register(`rows.${index}.name`)}
                 />

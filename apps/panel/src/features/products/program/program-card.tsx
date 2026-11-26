@@ -5,7 +5,7 @@ import { useState } from "react"
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
@@ -53,10 +53,11 @@ export function ProgramEditor({ productId, program }: { productId: string; progr
     setOver(null)
   }
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     setFailure(null)
     save.mutate(programOf(values), {
       onSuccess: (answer) => {
-        form.reset(valuesOf(answer.program), FULL_RESET)
+        settle(valuesOf(answer.program))
         toast.success(t("products.detail.saved"))
       },
       onError: (error) => {

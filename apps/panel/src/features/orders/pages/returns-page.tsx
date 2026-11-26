@@ -9,6 +9,7 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
 import { ReturnActions } from "@/features/orders/components/return-actions"
@@ -16,7 +17,7 @@ import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/componen
 import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { ReturnQueueDialog } from "@/features/orders/components/return-queue-dialog"
-import { RETURN_TONE } from "@/features/orders/return-rules"
+import { RETURN_TONE, returnCodeText } from "@/features/orders/return-rules"
 import { differenceText } from "@/features/orders/exchange-text"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
@@ -32,7 +33,9 @@ const TONE = RETURN_TONE
 /**
  * Orders > Returns (F7.9, adr/0032): shoppers' requests, those waiting for
  * a decision first; approve or turn down, receive what came back (its
- * money goes back), the return label.
+ * money goes back), the return label. Without a contracted return code
+ * for the way the shop ships, a gentle warning: approvals go on, the
+ * shopper is told the shop will be in touch (adr/0031 Ek 2026-11-26).
  */
 export function ReturnsPage() {
   const { t } = useTranslation()
@@ -112,7 +115,7 @@ export function ReturnsPage() {
       header: t(`${R}.columns.code`),
       className: "hidden lg:table-cell",
       cell: (row) => (
-        <span className="tabular-nums text-muted-foreground">{row.return_code ?? "—"}</span>
+        <span className="tabular-nums text-muted-foreground">{returnCodeText(row) ?? "—"}</span>
       ),
     },
     {
@@ -149,6 +152,16 @@ export function ReturnsPage() {
         title={t(`${R}.queue`)}
         description={t(`${R}.queueDescription`)}
       />
+      {query.data?.contracted_return === null ? (
+        <Alert data-testid="return-code-missing">
+          <AlertDescription>
+            {t(`${R}.codeMissing`)}{" "}
+            <Link to="/settings/shipping" className="font-medium text-foreground underline">
+              {t(`${R}.codeMissingLink`)}
+            </Link>
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t(`${R}.queue`)}

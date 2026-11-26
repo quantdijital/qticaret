@@ -25,7 +25,7 @@ süre dolarsa    → job: sipariş iptal, rezervasyon serbest, müşteriye bildi
 - Feature flag: `cash_on_delivery`. Kapalıyken provider region'da listelenmez.
 - Ayarlar: ek ücret (sabit/oran), sipariş tutarı üst sınırı, nakit/kart seçenekleri.
 - Ek ücret sunucuda hesaplanır ve sepette ayrı kalem olarak görünür; faturada ayrı satır (mali müşavirle doğrula).
-- Yalnızca kapıda ödemeyi destekleyen kargo seçenekleriyle birlikte sunulur (Geliver desteği doğrulanır).
+- Yalnızca kapıda ödemeyi destekleyen kargo seçenekleriyle birlikte sunulur (Aras ve Yurtiçi desteği doğrulanır; Geliver 2026-11-26 kaldırıldı).
 - Teslimde tahsilat → kargo firmasından mutabakat bilgisi → `captured`; iade/teslim edilemezse sipariş iptal akışı.
 
 - **Uygulama (F6 W3, ADR-0029):**

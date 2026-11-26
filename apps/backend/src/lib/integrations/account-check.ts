@@ -5,9 +5,11 @@ import type { CredentialProviderName } from "../../modules/integration-credentia
 import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 import { arasApi, arasCredentialsOf } from "../shipping/aras"
-import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
+import { dhlEcomApi, dhlEcomCredentialsOf } from "../shipping/dhlecommerce"
+import { suratApi, suratCredentialsOf } from "../shipping/surat"
+import { pttApi, pttCredentialsOf } from "../shipping/ptt"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
@@ -51,10 +53,6 @@ const CHECKERS = {
     const credentials = iyzicoCredentialsOf(account)
     return credentials ? iyzicoApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
   },
-  geliver: async (account, signal) => {
-    const credentials = geliverCredentialsOf(account)
-    return credentials ? geliverApi().checkCredentials(credentials, { signal }) : "secret_invalid"
-  },
   aras: async (account, signal) => {
     const credentials = arasCredentialsOf(account)
     return credentials ? arasApi().checkCredentials(credentials, { signal }) : "secret_invalid"
@@ -73,6 +71,31 @@ const CHECKERS = {
       (await api.checkLogin(credentials.cod, credentials.testMode, { signal })) !== "valid"
       ? "merchant_invalid"
       : "valid"
+  },
+  // A token for the customer number and password; the platform's app missing a subscription
+  // or keys of the other environment is no verdict on them (thrown: `failed`)
+  dhlecommerce: async (account, signal) => {
+    const credentials = dhlEcomCredentialsOf(account)
+    return credentials ? dhlEcomApi().checkLogin(credentials, { signal }) : "secret_invalid"
+  },
+  // Sürat has no read for the shipping login alone: a tracking query checks the cari pair
+  // (`merchant_invalid`), or the shipping login when it is the one pair (`secret_invalid`)
+  surat: async (account, signal) => {
+    const credentials = suratCredentialsOf(account)
+    if (!credentials) {
+      return "secret_invalid"
+    }
+    const verdict = await suratApi().checkLogin(credentials, { signal })
+    if (verdict === "valid") {
+      return "valid"
+    }
+    return credentials.tracking === credentials.shipping ? "secret_invalid" : "merchant_invalid"
+  },
+  // A tracking query with the customer number and password; PTT's words for a wrong
+  // password are to confirm with a real account
+  ptt: async (account, signal) => {
+    const credentials = pttCredentialsOf(account)
+    return credentials ? pttApi().checkLogin(credentials, { signal }) : "secret_invalid"
   },
   // `merchant_invalid`: the login works, the sender name is not on it
   netgsm: async (account, signal) => {
@@ -176,12 +199,16 @@ export async function checkAccount(
 export const CHECK_FIELDS = {
   paytr: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.merchant_key" },
   iyzico: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.secret_key" },
-  // One token: whatever Geliver refuses is the token
-  geliver: { merchant_invalid: "secrets.api_token", secret_invalid: "secrets.api_token" },
   // A refused login is the user name or the password; the panel points at the password
   aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
   // The main login, or the door account's (see its checker)
   yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
+  dhlecommerce: {
+    merchant_invalid: "secrets.customer_number",
+    secret_invalid: "secrets.password",
+  },
+  surat: { merchant_invalid: "secrets.web_password", secret_invalid: "secrets.password" },
+  ptt: { merchant_invalid: "settings.customer_id", secret_invalid: "secrets.password" },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
   meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },

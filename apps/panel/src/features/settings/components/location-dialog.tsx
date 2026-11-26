@@ -110,7 +110,13 @@ function LocationFormBody({ location, onDone }: { location: Location | null; onD
           error={message(errors.name?.message)}
           required
         >
-          <Input id="location-name" autoComplete="off" maxLength={100} {...form.register("name")} />
+          <Input
+            placeholder={t("settings.placeholders.location")}
+            id="location-name"
+            autoComplete="off"
+            maxLength={100}
+            {...form.register("name")}
+          />
         </Field>
         {isForeign ? (
           <p className="flex items-start gap-2 rounded-md bg-muted px-3 py-2.5 text-[13px] text-muted-foreground">

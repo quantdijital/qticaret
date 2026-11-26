@@ -62,6 +62,7 @@ export function SecretField({
   registration,
   optional = false,
   hint,
+  example,
 }: {
   id: string
   label: string
@@ -74,6 +75,8 @@ export function SecretField({
   optional?: boolean
   /** Shown in place of the usual hint while nothing is stored. */
   hint?: string
+  /** An example of the value while nothing is stored (a customer number's shape); none for a password. */
+  example?: string
 }) {
   const { t } = useTranslation()
   return (
@@ -88,7 +91,7 @@ export function SecretField({
         id={id}
         type="password"
         spellCheck={false}
-        placeholder={kept ? "••••••••••••" : ""}
+        placeholder={kept ? "••••••••••••" : (example ?? "")}
         {...NOT_A_LOGIN}
         {...registration}
       />

@@ -1,15 +1,13 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
-import { SHIPMENT_TRACKING_MODULE } from "../../src/modules/shipment-tracking"
-import type ShipmentTrackingModuleService from "../../src/modules/shipment-tracking/service"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -32,15 +30,15 @@ interface Request {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let customer: TestCustomer
     let clock = Date.now()
 
     const query = () => getContainer().resolve(ContainerRegistrationKeys.QUERY)
-    /** A Geliver order of the customer's, paid (captured), shipped and, unless told, delivered. */
+    /** An Aras order of the customer's, paid (captured), shipped and, unless told, delivered. */
     const deliveredOrder = async (deliver = true, quantity = 1) => {
-      const orderId = await geliverOrder(getContainer(), setup, setup.variantId, quantity)
+      const orderId = await carrierOrder(getContainer(), setup, setup.variantId, quantity)
       await getContainer()
         .resolve(Modules.ORDER)
         .updateOrders(orderId, { customer_id: customer.id })
@@ -96,22 +94,22 @@ medusaIntegrationTestRunner({
     }
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
       customer = await registerCustomer(http, await createStorefront(getContainer()))
     })
 
-    it("takes a delivered line back: approved with Geliver's return code, received, refunded", async () => {
+    it("takes a delivered line back: approved without a carrier label, received, refunded", async () => {
       const { orderId, lineId } = await deliveredOrder()
       const before = await stocked()
 
@@ -144,9 +142,10 @@ medusaIntegrationTestRunner({
       expect(asked.data.return_request).toMatchObject({ status: "requested" })
       expect(twice.data.message).toBe("returns.already_open")
       expect(approved.data.return_request).toMatchObject({ status: "approved" })
-      expect(approved.data.return_request.return_code).toEqual(expect.any(String))
+      // No carrier opens a return: the shopper sends the parcel back
+      expect(approved.data.return_request.return_code).toBeNull()
       expect(approved.data.return_request.return_id).toEqual(expect.any(String))
-      expect(label.status).toBe(200)
+      expect(label.status).toBe(404)
       expect(received.data.refund_error).toBeNull()
       // Staff found it the shop's fault: the 120 TL line and its 60 TL shipping come back
       expect(listed.return_requests[0]).toMatchObject({
@@ -287,27 +286,13 @@ medusaIntegrationTestRunner({
       expect(await stocked()).toBe((before ?? 0) + 1)
     })
 
-    it("approves once when two clicks race, and keeps the request when the carrier refuses", async () => {
+    it("approves once when two clicks race", async () => {
       const { orderId, lineId } = await deliveredOrder()
       const asked = await ask(orderId, {
         items: [{ line_item_id: lineId, quantity: 1 }],
         reason: "changed_mind",
       })
       const id = asked.data.return_request.id
-      const [parcel] = await getContainer()
-        .resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
-        .listTrackedShipments({ order_id: orderId })
-      fake.queue(`POST /shipments/${parcel?.provider_shipment_id ?? ""}`, {
-        status: 400,
-        body: { result: false, code: "RETURN_NOT_ALLOWED" },
-      })
-
-      const refused = await staff(`/admin/return-requests/${id}/approve`)
-      const { data: undone } = await query().graph({
-        entity: "order",
-        fields: ["items.detail.return_requested_quantity", "returns.id", "returns.status"],
-        filters: { id: orderId },
-      })
       const clicks = await Promise.all([
         staff(`/admin/return-requests/${id}/approve`),
         staff(`/admin/return-requests/${id}/approve`),
@@ -322,13 +307,6 @@ medusaIntegrationTestRunner({
           (each) => each.status !== "canceled"
         )
 
-      expect(refused.status).toBeGreaterThanOrEqual(400)
-      // Medusa's return undone with it: nothing held against the line
-      expect(
-        (undone[0] as { items: { detail: { return_requested_quantity: number } }[] }).items[0]
-          ?.detail.return_requested_quantity
-      ).toBe(0)
-      expect(open(undone[0])).toHaveLength(0)
       expect(clicks.map((click) => click.status).sort()).toEqual([200, 400])
       expect(clicks.find((click) => click.status === 400)?.data.message).toBe(
         "returns.status_invalid"

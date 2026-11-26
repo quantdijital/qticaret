@@ -3,9 +3,9 @@ import { stateFileFor } from "./tracking"
 import type { AdvanceMode } from "./tracking"
 
 /**
- * What the carriers' dev runners (`pnpm dev:aras`, `dev:yurtici`,
- * `dev:geliver`) share: the shop's sender as a contract carrier knows it
- * and the lines that tell the owner how to use the tracking pages.
+ * What the carriers' dev runners (`pnpm dev:aras`, `dev:yurtici`) share:
+ * the shop's sender as a contract carrier knows it and the lines that
+ * tell the owner how to use the tracking pages.
  */
 
 const env = (name: string): string | undefined => {
@@ -30,7 +30,7 @@ export const devSender = (): LabelParty => ({
 /** The runner's lines on tracking: the page, its buttons, the JSON, how parcels move, the file. */
 export function trackingHelp(
   url: string,
-  /** The fake's name in its state file: "aras", "yurtici", "geliver". */
+  /** The fake's name in its state file: "aras", "yurtici". */
   key: string,
   port: number,
   advance: AdvanceMode

@@ -1,4 +1,5 @@
-import { MedusaError, generateEntityId } from "@medusajs/framework/utils"
+import { MedusaError } from "@medusajs/framework/utils"
+import { ledgerEntryId } from "./entry-id"
 import type { AiCreditBucket, AiCreditEntryKind } from "./models/entry"
 import { AI_DAILY_CAP_DEFAULT, AI_PURCHASED_LIFETIME_MONTHS } from "../../lib/ai-credits/settings"
 
@@ -110,7 +111,7 @@ export async function addGrantEntry(
      ON CONFLICT (grant_ref) WHERE grant_ref IS NOT NULL AND deleted_at IS NULL DO NOTHING
      RETURNING id`,
     [
-      generateEntityId(undefined, "aient"),
+      ledgerEntryId(),
       row.tenantId,
       row.kind,
       row.amount,
@@ -154,7 +155,7 @@ export async function addEntries(manager: Executor, rows: readonly EntryRow[]): 
   if (kept.length === 0) {
     return []
   }
-  const ids = kept.map(() => generateEntityId(undefined, "aient"))
+  const ids = kept.map(() => ledgerEntryId())
   const values = kept.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")
   const params = kept.flatMap((row, index) => [
     ids[index],

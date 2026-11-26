@@ -107,7 +107,12 @@ export function ReturnDocumentDialog({
                 htmlFor="return-number"
                 error={errors.number?.message ? t(errors.number.message) : undefined}
               >
-                <Input id="return-number" autoComplete="off" {...form.register("number")} />
+                <Input
+                  placeholder={t("orders.placeholders.invoiceNumber")}
+                  id="return-number"
+                  autoComplete="off"
+                  {...form.register("number")}
+                />
               </Field>
               <Field
                 label={t("orders.invoice.entry.issuedOn")}

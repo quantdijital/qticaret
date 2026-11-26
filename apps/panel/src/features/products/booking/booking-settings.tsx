@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
@@ -48,10 +48,11 @@ export function BookingSettings({
   const { errors } = form.formState
   const errorOf = (message: string | undefined) => (message ? t(message) : undefined)
   const submit = form.handleSubmit((draft) => {
+    const settle = beginSave(form)
     setFailure(null)
     save.mutate(settingsInputOf(draft), {
       onSuccess: (answer) => {
-        form.reset(settingsDraftOf(answer.bookable, variants), FULL_RESET)
+        settle(settingsDraftOf(answer.bookable, variants))
         toast.success(t("products.detail.saved"))
       },
       onError: (error) => {

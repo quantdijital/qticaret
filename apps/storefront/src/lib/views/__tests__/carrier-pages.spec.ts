@@ -6,7 +6,7 @@ import { carrierPages } from "../carrier-pages"
 
 describe("the carriers' tracking pages", () => {
   it("lists only the connected carriers it knows a page for", () => {
-    expect(carrierPages(["aras", "geliver", "yurtici"], t)).toEqual([
+    expect(carrierPages(["aras", "mng", "yurtici"], t)).toEqual([
       { label: "Aras Kargo", path: "https://kargotakip.araskargo.com.tr/" },
       {
         label: "Yurtiçi Kargo",

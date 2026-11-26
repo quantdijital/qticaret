@@ -6,7 +6,7 @@ import { MediaField } from "@/components/patterns/media-field"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const S = "settings.seo.shareImage"
 
@@ -22,11 +22,12 @@ export function ShareImageCard({ saved }: { saved: SeoSettings }) {
   const form = useForm({ values: initial, resetOptions: { keepDirtyValues: true } })
   const url = useWatch({ control: form.control, name: "image" })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     save.mutate(
       { default_og_image: values.image || null },
       {
         onSuccess: (result) => {
-          form.reset({ image: result.values.default_og_image ?? "" }, FULL_RESET)
+          settle({ image: result.values.default_og_image ?? "" })
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

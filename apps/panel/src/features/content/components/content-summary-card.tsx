@@ -11,7 +11,7 @@ import { NO_FINDINGS } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { Counter } from "@/features/seo/components/seo-card"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { AuthorSelect } from "./author-select"
 import { FindingsNote } from "./findings-note"
 
@@ -49,6 +49,7 @@ export function ContentSummaryCard({
   const excerpt = useWatch({ control: form.control, name: "excerpt" })
   const post = entry.kind === "post"
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     update.mutate(
       {
@@ -57,7 +58,7 @@ export function ContentSummaryCard({
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.entry), FULL_RESET)
+          settle(valuesOf(result.entry))
           toast.success(t("content.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -81,6 +82,7 @@ export function ContentSummaryCard({
       >
         <div className="flex flex-col gap-1">
           <Textarea
+            placeholder={t("content.placeholders.excerpt")}
             id="content-excerpt"
             maxLength={EXCERPT_MAX}
             // Grows with the text, up to a few lines; longer scrolls inside

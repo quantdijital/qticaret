@@ -99,7 +99,7 @@ F5'te iki sağlayıcı yazılır, önce PayTR. Kullanıcı 2026-10-27'de ilk mü
 
 ## Sonuçlar
 
-- **Ortak modül.** Yeni `webhook-events` modülünü iyzico ve F7'deki Geliver de kullanır.
+- **Ortak modül.** Yeni `webhook-events` modülünü iyzico ve F7'deki Geliver de kullanır. [2026-11-26: Geliver kaldırıldı, ADR-0031 ek.]
 - **Form gövdesi.** `lib/clients` form-encoded gövde desteği kazanır (PayTR).
 - **Dev'de bildirim.** Bildirim için dev'de herkese açık bir adres (tünel) gerekir. PayTR hesabının bildirim adresi tek olduğundan, canlı satış yapan bir hesapla uçtan uca test edilemez (docs/12).
 - **İstemci IP'si.** `user_ip` istemcinin gerçek IP'si olmalı; değilse PayTR token'ı geçersiz olur. F16'daki proxy şartı (`trust proxy`) ödeme için de geçerli.

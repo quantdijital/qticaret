@@ -40,6 +40,60 @@
 
 Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
 
+## 2026-11-26 (akşam/gece) — kargo firmaları yeniden: Geliver çıktı, BirFatura modu, DHL eCommerce, Sürat, PTT
+
+- **Birleşenler (`dev`, #454–#474):**
+  - **Sepet ve kargo:** sepette kargo tahmini, adres girilmeden (#458). Ek ücret ve eşik yazısı (#454). Ücretsiz kargo koşulları tek yerde (#456). Bağlantılı ürünler: panel (#455) ve vitrin (#457).
+  - **Geliver kaldırıldı (#460):** sahibin kararı. Kod, sahte sunucu, panel kartı ve belgeleri silindi. `geliver-removed` dönüşüm betiği seçenekleri, depo bağlantısını ve kayıtlı hesabı temizler; sahibin dev DB'sinde çalıştırıldı. Taşıyıcıdan iade gönderisi açma artık yok. BasitKargo yapılmayacak.
+  - **"Kargoyu nereden yönetiyorsun?" (#461):** iki seçenek var: kendi anlaşmam (Aras/Yurtiçi…) ya da BirFatura. BirFatura modunda `orderCargoUpdate` takip numarasını siparişe yazar ve "kargoya verildi" e-postası gider. Fatura bekletme kuralı bu modda kargoyu beklemez. Ayarı yalnız sahip değiştirebilir (ADR-0072 Ek).
+  - **Anlaşmalı iade kodu (#462):** her taşıyıcıya sabit tek kod. Onaylanan iadede kod e-postada ve sipariş sayfasında görünür. Kod girilmemişse uyarı çıkar (ADR-0031 Ek).
+  - **Araştırma (#463):** `docs/entegrasyonlar/dhlecommerce.md`, `surat.md`, `ptt.md` ve `aras.md`. Kaynak olarak sahibin PHP eklentisi yalnız bilgi için kullanıldı, kod alınmadı.
+  - **DHL eCommerce (eski MNG):** ortak PDF etiket (`lib/shipping/label`), istemci ve sahte sunucu (#464); sağlayıcı ve panel (#468). Varsayılan anahtar platformun uygulama anahtarı, mağaza kendi anahtarını da girebilir. **Askıda (#472):** sunucuda `CARRIER_DHLECOMMERCE_ENABLED=true` yoksa hiçbir yerde görünmez; kod ve testler duruyor.
+  - **Sürat (#471):** SOAP. Başarı yalnız bilinen cümlelerle sayılır, belirsiz cevapta gönderi geri alınır. Etiket Sürat'ın kendi etiketi ya da ortak PDF.
+  - **PTT (#474):** barkod aralığı zorunlu. Yeni `ptt_barcode` modülü ve `Migration20261126231504`; numara satır kilidiyle verilir, hiçbir zaman tekrar kullanılmaz. Ayar sayfasında "PTT'den istenecekler" listesi var. Sahibin dev DB'sine migration uygulandı.
+  - **Panel:** 170 alana placeholder eklendi ve placeholder için ev kuralı yazıldı (#466, #467). Kaydet sürerken yazılan değer korunuyor (`beginSave`, #470, #473; kategori ekranı dahil).
+  - **Kararsız test ve onarımlar:** yapay zekâ kredi defteri sırası (#459), kargo sınıfı e2e (#465), stok defteri uyarısı (#469).
+- **Sahibin kararları (2026-11-26):**
+  - Geliver tamamen kaldırıldı, BasitKargo yok.
+  - Diğer firmalar ancak bir mağaza isterse eklenir. Sıra DHL → Sürat → PTT'ydi, üçü de yapıldı.
+  - MNG'nin adı her yerde "DHL eCommerce".
+  - DHL askıya alındı.
+  - Depo açık kalıyor (CI dakikaları; ek sunucu yok).
+- **Sahipte açık:**
+  - Yeni kargo ekranları 390/768–820/1024/1280/1440'ta bakılacak: Ayarlar > Kargo (soru kartı, iade kodu, Sürat, PTT barkod aralığı) ve Siparişler > İadeler uyarısı.
+  - `.env`'deki `DHL_ECOMMERCE_BASE_URL` satırı artık gereksiz, silinebilir.
+  - Önceden açık: operasyon rolünün müşteriye not göndermesi; SEO danışmanı kartının gizlenebilirliği; Aras ve Yurtiçi fatura unvanı ve VKN.
+- **Gerçek hesapla doğrulanacaklar** (her firmanın belgesinde "doğrulanacaklar" listesi var): Sürat'ın başarı cümleleri; PTT'nin yanlış şifre cevabı ve durum kodları; şubelerin bizim Code 128 etiketimizi okuyup okumadığı; BirFatura'nın `orderCargoUpdate` davranışı.
+- **Takipler:**
+  - Taşıyıcının API'sinden iade başına kod (Aras/Yurtiçi) yok, sabit kod var.
+  - Sürat ve DHL hesap formları kaydettikten sonra yeniden kuruluyor (`key`); kayıt sırasında yazılan değer burada kaybolabilir.
+  - `appearance-form.tsx` aynı desende, bakılmadı.
+  - PTT'nin test modu da mağazanın aralığından numara harcıyor (belgelendi).
+
+## 2026-11-26 (gün) — ürün sayfası sadeleştirme, panel görsel denetimi, kargo yeniden düzeni
+
+- **Birleşenler (`dev`, #434–#451):**
+  - **Ürün sayfası:** başlık sadeleşti: "Vitrinde gör" tek simge, Yayınla/Sayfayı düzenle/Kopyala/Sil "…" menüsünde, 1024 altında düğmeler kendi satırında; "Ürün verileri" sekmeleri kartın genişliğine göre (#434). Planlı yayın: "Yayın tarihi" satırı, Türkiye saati, `product.metadata.publish_at`, rozet "Planlı · tarih" (#436). En çok satın alma adedi (Gelişmiş sekmesi, 1 = tek tek satılır; `product_extension.max_quantity`, migration `Migration20261126130000`) (#437). Başlıktaki "n bölümde değişiklik" yazısı yalnız ekran okuyucuda (#446).
+  - **Panel geneli (görsel denetim, 118 rota × 390/820/1024/1280/1440):** PageHeader eylemleri sığmazsa alt satıra iner; yeni `HeaderMenu` ("…" Diğer işlemler; Siparişler başlığında 8 düğme yerine 2 + menü); FilterBar arama kutusu en az 12rem; DataTable `fill` sütunu (Ürünler/Blog/Stok/Denetim tabloları kartından taşmıyor) (#438). SEO > Öneriler ve Entegrasyonlar telefonda kartın içinde (#439). Bildirimlerde ham kimlik yerine ürün/sipariş adı; silinmiş kalemler düşük stok uyarısı üretmiyor (#443). Denetim kaydında "Filtrele" sekme satırının sağ ucunda (`FilterTabs` `end` yuvası) (#448).
+  - **Kargo (ADR-0087):** ADR önerisi (#435). Adım 0: ücretsiz kargo eşiği desi tablosu ve Geliver dahil bütün seçeneklere; tek ücret yolu `shippingQuote` (#441). Adım 2: sabit ücret kendi sağlayıcımızda (`shop_shop`) hesaplanıyor (#442). Adım 3: üründe ücretsiz kargo ve kargo sınıfları (`product_extension.shipping_class`, migration `Migration20261126160000`; ayar `shipping.shipping_classes`) (#445). Adım 4: vitrin kartı, ürün sayfası, sepet, akışlar ve JSON-LD ödeme adımıyla aynı şeyi söylüyor (#447). Ücretsiz kargo eşiği Ayarlar > Kargo'ya taşındı, Kampanyalar'da salt okunur satır + bağlantı (#449). Kargo ayarları sadeleşti: satır içi seçenekler, katlanmış Gelişmiş; taşıyıcı unvan + VKN fatura ayarlarından her firmanın kargo sayfasına taşındı (#450). "Kargo ücreti" tek soru, 4 mod (tümü ücretsiz / tutarın üstünde ücretsiz / sabit ücret / kargo firmasının ücreti); yeni `shipping.primary_option_id`; sınıflar Gelişmiş'te; üründe "Bu ürünün kargosu ücretsiz" anahtarı (#451).
+  - **Katalog:** stokta olmayan ürünler listelerde gizlenebilir (Ayarlar > Ürün özellikleri; `inventory.out_of_stock_listing`, tek boğaz noktası `listingProducts`) (#440).
+  - **Altyapı/test:** kararsız doğrusal süre yardımcısı (`@qticaret/testing` `measureGrowth`) meşgul runner'a dayanıklı (#444).
+- **Sahibin bugünkü kararları:**
+  - ADR-0087'nin yedi cevabı kabul: ücretsiz ürünün desisi sayılmaz; karışık sepette sabit ücret tam alınır; en yüksek sınıf ek ücreti bir kez; mağaza sınıfları şimdi, yalnız ek ücret; eşik desi tablosu/Geliver'e de uygulanır; eşik ücretsiz ürünleri de sayar; ürün sayfası ek ücreti söyler.
+  - Kargo ekranı tek soru: "Kargo ücreti", 4 mod (#451); eşik Ayarlar > Kargo'da (#449).
+  - Başlıktaki değişiklik sayısı yazısı gizli (#446); denetim kaydı filtresi sekme satırında (#448).
+- **Sahipte açık:**
+  - Geçici hesabı sil: `e2e-audit-1795678576@example.com` (Ayarlar > Güvenlik > Ekip).
+  - Aras ve Yurtiçi sayfalarında "Faturadaki firma bilgisi" unvan + VKN girilecek (güvenilir kaynaktan doğrulanamadı, önden doldurulmadı).
+  - Kararlar: operasyon rolü müşteriye not gönderebilsin mi; ürün sayfasındaki SEO danışmanı kartı gizlenebilsin mi.
+- **Diğer takipler:**
+  - Stoksuz gizleme ana sayfa raflarına ve ilgili ürünlere uygulanmıyor (Oğuzhan).
+  - Hızlı bakıştaki adet seçici en çok adedi dikkate almıyor (Oğuzhan).
+  - Toplu "Kargo sınıfı ata" + sınıf filtresi; CSV'de sınıf sütunu; varyant düzeyinde sınıf.
+  - Ödeme bağlantısı, sonradan düşürülen en çok adedi aşabiliyor.
+  - Kargo ücreti modunu sabit ↔ kargo firması arasında değiştirmek birden çok istek; işlemsel değil (yarıda kalırsa ara durum kalır).
+- **Süreç notları:** kararsız doğrusal süre testi #444 ile sağlamlaştı; üst üste kurulu (stacked) PR'lar alttaki birleşince elle `dev`'e yeniden hedeflenmeli (`delete_branch_on_merge` kapalı, taban kendiliğinden değişmiyor).
+
 ## 2026-11-25/26 — ürün sayfası WooCommerce düzeni, panel eksikleri (Woo karşılaştırması), gece işi
 
 - **Ürün sayfası:** odak kelime etiket (#395); sayfa düzeni gizle/sırala + yerinde kartlar (#396, `panel_layout` ayar bölümü); hazır düzenler, bölüm çubuğu, ⌘K/⌘S, sihirbaz düzene uyar (#397, #398); yerinde açılan varyant satırları + seçenek düzenleyici + toplu çubuk (#401); "Ürün verileri" kartı, tür seçimi + dikey sekmeler (#403); genişlik eski 8/4'e döndü (#409); editör araç çubuğu yapışmaz (#408); indirimli fiyat, varyant başına `sale` fiyat listesi (#405, ADR-0086); basit ürüne geçiş (#410); Kaydet/Vazgeç başlıkta, alt çubuk kalktı (#411); stok takibi aç/kapat (#415).

@@ -11,7 +11,7 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { returnsLockKey } from "../../lib/orders/locks"
 import { RETURN_REQUEST_CANCELED } from "./events"
-import { readCancellableRequestStep, withdrawCarrierReturnStep } from "./steps/cancel"
+import { readCancellableRequestStep } from "./steps/cancel"
 import { returnRequestOrderStep, updateReturnRequestStep } from "./steps/return-request"
 import { acquireLocksStep } from "../locking/acquire-locks"
 import { releaseLocksStep } from "../locking/release-locks"
@@ -27,8 +27,7 @@ export interface CancelReturnInput {
  * Staff take back an approval before anything came back (order #691: the
  * shopper gave up, or the approval was a mistake). Under the order's
  * returns lock: the request read and checked (`cancellableRequest`), the
- * carrier's return withdrawn first (a carrier that has the parcel refuses
- * it and nothing changes), the request marked cancelled with the staff
+ * request marked cancelled with the staff
  * member and their reason (the approval's note kept), then Medusa's
  * return (or exchange, its new items released) cancelled, so the lines
  * can be asked back again. A step that fails undoes the ones before it;
@@ -41,12 +40,6 @@ export const cancelReturnRequestWorkflow = createWorkflow(
     const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
     const held = acquireLocksStep({ key: lockKey, timeout: 10, ttl: 120 })
     const request = readCancellableRequestStep({ id: input.id })
-    withdrawCarrierReturnStep(
-      transform({ request }, ({ request }) => ({
-        request_id: request.id,
-        shipment_id: request.return_shipment_id,
-      }))
-    )
     const canceled = updateReturnRequestStep(
       transform({ input }, ({ input }) => ({
         id: input.id,

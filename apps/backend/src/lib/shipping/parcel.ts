@@ -117,3 +117,35 @@ export function parcelOf(
     measured: packed.every((line) => FIELDS.every((field) => usable(line[field]))),
   }
 }
+
+export interface OrderItemRow {
+  id?: string
+  title?: string | null
+  product_title?: string | null
+  quantity?: unknown
+  variant?: {
+    weight?: number | null
+    length?: number | null
+    width?: number | null
+    height?: number | null
+  } | null
+}
+
+/** An order's or cart's lines as the parcel reads them: the variant's weight and measures. */
+export const parcelLinesOf = (
+  items: readonly (OrderItemRow | null)[] | null | undefined
+): ParcelLine[] =>
+  (items ?? []).flatMap((item) =>
+    item
+      ? [
+          {
+            title: item.product_title ?? item.title ?? "",
+            quantity: Number(item.quantity ?? 0),
+            weight: item.variant?.weight ?? null,
+            length: item.variant?.length ?? null,
+            width: item.variant?.width ?? null,
+            height: item.variant?.height ?? null,
+          },
+        ]
+      : []
+  )

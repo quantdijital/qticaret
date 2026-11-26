@@ -194,6 +194,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "This choice would create a redirect loop.",
   "catalog.successor_self": "A product cannot succeed itself.",
   "catalog.successor_unknown": "The selected product was not found.",
+  "catalog.linked_self": "A product cannot be linked to itself.",
+  "catalog.linked_unknown": "One of the linked products was not found.",
+  "catalog.linked_duplicate": "The same product cannot be in the list twice.",
   "catalog.variant_image_unknown": "A variant picture is not among the product's pictures.",
   "catalog.variant_image_variant_unknown":
     "A variant picture names a variant the product does not have.",
@@ -452,6 +455,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "An order paid at the door ships with a carrier as one parcel: the courier collects the whole amount with one parcel.",
   "shipping.no_rate":
     "This parcel is past the shop's shipping price table; shipping cannot be priced.",
+  "shipping.birfatura_not_connected":
+    "To manage shipping from BirFatura, first pick BirFatura in Settings > E-invoicing and make its connection password.",
+  "shipping.manager_owner_only": "Only the store owner can change where shipping is managed.",
   "shipping.days_order": "The fewest days cannot be more than the most.",
   "shipping.rate_table_order": "The price table's desi limits must rise, with at most one decimal.",
   "shipping.setup_incomplete":
@@ -536,20 +542,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The delivery address has no province or district; the carrier routes the parcel by them. Complete it on the order page.",
   "shipping.receiver_phone_missing":
     "The delivery address has no phone a courier can dial (10 digits with the area code), and neither the billing address nor the customer's account has one. Add one on the order page.",
-  "shipping.sender_address_incomplete":
-    "The warehouse's address is incomplete for shipping and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_location_missing":
-    "The warehouse the parcel leaves from could not be told and the Geliver account has no default sender address. Choose the default warehouse under Settings > Locations, or add a sender address in Geliver's panel.",
-  "shipping.sender_address_missing":
-    "The warehouse has no street address (neighbourhood, street, number) and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_place_missing":
-    "The warehouse has no province or district in Türkiye and the Geliver account has no default sender address. Complete it under Settings > Locations.",
-  "shipping.sender_postal_missing":
-    "The warehouse has no postcode and none was found in the address data (no neighbourhood chosen); the Geliver account has no default sender address either. Add the postcode or the neighbourhood under Settings > Locations.",
-  "shipping.sender_phone_missing":
-    "Neither the warehouse nor the shop has a phone, and the Geliver account has no default sender address. Add the warehouse's under Settings > Locations or the shop's under Settings > Store.",
-  "shipping.sender_contact_missing":
-    "The shop has no contact email (Geliver needs one for the sender) and the Geliver account has no default sender address. Add it under Settings > Store, or add a sender address in Geliver's panel.",
   "shipping.fulfillment_invalid": "That shipment is not a valid one to print a label for.",
   "shipping.label_unavailable": "This shipment has no label.",
   "aras.merchant_invalid":
@@ -937,10 +929,54 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document; test and live accounts differ.",
   "yurtici.cod_account_missing":
     "Shipping an order paid at the door with Yurtiçi Kargo needs the cash on delivery account. Enter it under Settings > Shipping > Yurtiçi Kargo.",
-  "geliver.merchant_invalid":
-    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
-  "geliver.secret_invalid":
-    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
+  "dhlecommerce.unavailable":
+    "The platform's DHL eCommerce app keys are not set on this server. Enter your own app keys or contact platform support.",
+  "dhlecommerce.merchant_invalid":
+    "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
+  "dhlecommerce.secret_invalid":
+    "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with (not the temporary one e-mailed to you); test and live accounts differ.",
+  "dhlecommerce.email_missing":
+    "DHL eCommerce asks for the receiver's e-mail; the order has none and the shop's contact e-mail is not set. Add the customer's e-mail to the order, or set a contact e-mail under Settings > Store, and try again.",
+  "dhlecommerce.withdraw_failed":
+    "A parcel may have been opened at DHL eCommerce and could not be withdrawn. Before shipping again, look for this order's parcel in the Online Şube and cancel it there if it is open.",
+  "dhlecommerce.place_unknown":
+    "DHL eCommerce does not know the province or district of the delivery address. Correct them on the order's address and try again.",
+  "dhlecommerce.branch_pending":
+    'DHL eCommerce has not yet found the receiver\'s branch; nothing was shipped. Press "Ship" again in a few minutes.',
+  "ptt.customer_id_invalid":
+    "Enter the customer number PTT gave with your contract: 9 or 10 digits.",
+  "ptt.merchant_invalid":
+    "PTT Kargo did not accept this customer number. Copy it again from what the PTT Başmüdürlük gave with your contract.",
+  "ptt.secret_invalid":
+    "PTT Kargo did not accept this customer number and web service password. Copy them again from what the PTT Başmüdürlük gave with your contract.",
+  "ptt.receiver_name_short":
+    "PTT Kargo needs a receiver name of at least 5 characters. Write the receiver's full name in the order's delivery address.",
+  "ptt.withdraw_failed":
+    "A parcel may have been loaded at PTT Kargo and could not be deleted. Before shipping again, ask your PTT branch about this order's barcode and have it cancelled if it is loaded.",
+  "ptt.already_accepted":
+    "A PTT branch has already accepted this parcel, so it cannot be deleted online. Cancel it at a PTT branch; the shipment stays on the order and tracking follows it.",
+  "ptt.barcode_range_missing":
+    "No PTT barcode range is entered. Add the range PTT gave you in Settings > Shipping > PTT Kargo, then ship again.",
+  "ptt.barcode_range_exhausted":
+    "Your PTT barcode range is used up, so no parcel can be loaded. Ask PTT for a new range and add it in Settings > Shipping > PTT Kargo.",
+  "ptt.barcode_range_invalid":
+    "Enter both ends of the range as 12 digits, without the check digit.",
+  "ptt.barcode_range_reversed": "The range's last number must not be below its first.",
+  "ptt.barcode_range_too_large":
+    "A range of more than a million numbers is not what PTT hands out. Check both numbers.",
+  "ptt.barcode_range_overlaps":
+    "This range overlaps one you entered before. A barcode is used once only: enter the new range PTT gave you.",
+  "ptt.barcode_range_unknown": "That range is no longer on the list.",
+  "ptt.barcode_range_in_use":
+    "Barcodes of this range were already used, so it stays: its numbers must never be handed out again.",
+  "surat.merchant_invalid":
+    "Sürat Kargo did not accept this cari code and web password. Copy them again from what Sürat gave with your contract.",
+  "surat.secret_invalid":
+    "Sürat Kargo did not accept this user name and password. Copy them again from what Sürat gave with your contract.",
+  "surat.withdraw_failed":
+    "A parcel may have been opened at Sürat Kargo and could not be deleted. Before shipping again, ask your Sürat branch about this order's parcel and have it cancelled if it is open.",
+  "surat.withdraw_requested":
+    "Sürat Kargo's branch already has this parcel, so it could not be deleted; Sürat was asked to bring it back to you. The shipment stays on the order and tracking follows it home.",
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":
@@ -1089,6 +1125,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
   "platform_settings.withdrawal_days_invalid":
     "The withdrawal period must be a whole number of days between 14 and 365; the law asks for at least 14.",
+  "platform_settings.return_code_invalid":
+    "A contracted return code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
+  "platform_settings.return_carrier_both": "Enter the return carrier's name and its code together.",
   "platform_settings.return_shipping_shop_only":
     "A withdrawal's return shipping cannot be charged to the customer (Distance Contracts Regulation art. 12); the shop pays it.",
   "platform_settings.hours_invalid":
@@ -1174,6 +1213,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "promotions.customer_group_only":
     "This code is for certain customers only; it is not valid for your account.",
   "promotions.first_order_only": "This code can be used on a first order only.",
+  "promotions.free_shipping_code_below_total":
+    "A free shipping code applies once the basket reaches the free shipping total.",
+  "promotions.free_shipping_code_off":
+    "This shop frees shipping by the basket total only; this code cannot be used.",
   "promotions.audience_invalid": "Who may use the code is not valid.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",
@@ -1396,7 +1439,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
   "paytr.not_configured": "The shop has not connected its PayTR account yet.",
   "orders.test_payment_not_shippable":
-    "This order was paid in test mode, no real money was taken: it ships only with a carrier in test mode (Aras, Yurtiçi, Geliver). Its shipping option is your own delivery or a carrier in live mode.",
+    "This order was paid in test mode, no real money was taken: it ships only with a carrier in test mode (Aras, Yurtiçi). Its shipping option is your own delivery or a carrier in live mode.",
   "paytr.refund_locked":
     "PayTR is not taking a refund of this payment right now (a payout is running); try again later.",
   "paytr.refund_exceeds_payment": "The refund is more than what is left of the payment.",

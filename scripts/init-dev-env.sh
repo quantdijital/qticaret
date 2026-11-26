@@ -19,7 +19,7 @@ storefront_env="$root/apps/storefront/.env.local"
 # and SMS servers): the dev file's only. The tests start their own fakes, or
 # check what is sent with no transport set; these would point them elsewhere.
 # The local provisioner (adr/0061 Ek C10) is development's only: the tests use a fake.
-test_skipped=" EMAIL_TRANSPORT MAILPIT_URL EMAIL_FROM PAYTR_BASE_URL GELIVER_BASE_URL ARAS_BASE_URL YURTICI_BASE_URL NETGSM_BASE_URL CP_PROVISIONER CP_LOCAL_PG_ADMIN_URL "
+test_skipped=" EMAIL_TRANSPORT MAILPIT_URL EMAIL_FROM PAYTR_BASE_URL ARAS_BASE_URL YURTICI_BASE_URL DHL_ECOMMERCE_BASE_URL SURAT_BASE_URL PTT_BASE_URL NETGSM_BASE_URL CP_PROVISIONER CP_LOCAL_PG_ADMIN_URL "
 
 fail() { echo "error: $*" >&2; exit 1; }
 rand() { openssl rand -hex 32; }

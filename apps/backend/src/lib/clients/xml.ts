@@ -72,29 +72,46 @@ export function xmlElement(name: string, value: XmlValue): string {
 }
 
 /**
- * A SOAP 1.1 request. A .NET (ASMX) service takes its parameters in the
+ * A SOAP request, 1.1 unless asked for 1.2 (an Axis2 port that offers only
+ * that: PTT's tracking). A .NET (ASMX) service takes its parameters in the
  * operation's namespace (the default); a JAX-WS one in no namespace, the
- * operation alone prefixed (`prefixed`).
+ * operation alone prefixed (`prefixed`). `namespaces` declares more
+ * prefixes on the operation, for parameters qualified by another schema's
+ * namespace (Axis2: `xsd:dongu`); their names carry the prefix.
  */
 export function soapEnvelope(input: {
   namespace: string
   operation: string
   params: XmlFields
   prefixed?: boolean
+  namespaces?: Readonly<Record<string, string>>
+  version?: "1.1" | "1.2"
 }): string {
+  if (!NAME.test(input.operation)) {
+    throw new XmlRefused("invalid operation name")
+  }
   const inner = Object.entries(input.params)
     .map(([name, value]) => xmlElement(name, value))
     .join("")
   const ns = escapeXml(input.namespace)
+  const more = Object.entries(input.namespaces ?? {})
+    .map(([prefix, uri]) => {
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(prefix) || prefix === "op" || prefix === "soap") {
+        throw new XmlRefused(`invalid namespace prefix ${JSON.stringify(prefix)}`)
+      }
+      return ` xmlns:${prefix}="${escapeXml(uri)}"`
+    })
+    .join("")
   const operation = input.prefixed
-    ? `<op:${input.operation} xmlns:op="${ns}">${inner}</op:${input.operation}>`
-    : `<${input.operation} xmlns="${ns}">${inner}</${input.operation}>`
-  if (!NAME.test(input.operation)) {
-    throw new XmlRefused("invalid operation name")
-  }
+    ? `<op:${input.operation} xmlns:op="${ns}"${more}>${inner}</op:${input.operation}>`
+    : `<${input.operation} xmlns="${ns}"${more}>${inner}</${input.operation}>`
+  const envelope =
+    input.version === "1.2"
+      ? "http://www.w3.org/2003/05/soap-envelope"
+      : "http://schemas.xmlsoap.org/soap/envelope/"
   return (
     `<?xml version="1.0" encoding="utf-8"?>` +
-    `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">` +
+    `<soap:Envelope xmlns:soap="${envelope}">` +
     `<soap:Body>${operation}</soap:Body></soap:Envelope>`
   )
 }

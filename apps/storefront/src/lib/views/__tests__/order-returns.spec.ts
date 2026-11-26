@@ -245,3 +245,18 @@ describe("a request in words", () => {
     expect(page.cancelText).toBe(t("order.cancel_text_gift"))
   })
 })
+
+describe("the shop's contracted return code (adr/0031 Ek 2026-11-26)", () => {
+  it("says where to hand the parcel in, the code to say and that it costs nothing", () => {
+    const approved = { ...request("approved", null, "AR-48213"), return_carrier: "Aras Kargo" }
+    expect(requestWordsOf(approved, new Set(), t)).toMatchObject({
+      code: "AR-48213",
+      codeText:
+        "İade paketinizi Aras Kargo şubesine verin ve gönderirken 'AR-48213' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz.",
+    })
+    // An old request's own code, without a carrier: the bare code as before
+    expect(requestWordsOf(request("approved", null, "RC1"), new Set(), t)).not.toHaveProperty(
+      "codeText"
+    )
+  })
+})

@@ -22,7 +22,7 @@ import {
 } from "@/features/settings/opening-hours"
 import type { DayHours, TimeRange } from "@/features/settings/opening-hours"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const H = "settings.store.hours"
 
@@ -203,11 +203,12 @@ export function OpeningHoursCard({
     form.setValue("days", next, { shouldDirty: true, shouldValidate: isSubmitted })
   }
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       { opening_hours: rangesOf(next.days) },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

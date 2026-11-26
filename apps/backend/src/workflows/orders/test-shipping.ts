@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { carrierOf } from "../../lib/shipping/carriers"
+import { birfaturaShips } from "../../lib/shipping/manager"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 
@@ -37,7 +38,8 @@ export async function shipsWithTestCarrier(
   const carrier = carrierOf(
     (options[0] as { provider_id?: string | null } | undefined)?.provider_id
   )
-  if (!carrier) {
+  // BirFatura manages the parcels: no carrier of ours takes it (adr/0072 Ek 2026-11-26)
+  if (!carrier || (await birfaturaShips(container))) {
     return false
   }
   const account = await container

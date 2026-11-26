@@ -6,6 +6,7 @@ import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
 import { headerCart } from "@/lib/cart/cart"
+import { cartShippingEstimate } from "@/lib/cart/shipping-estimate"
 import { cookieConsent, onCookiePreferencesPage } from "@/lib/legal/cookies"
 import { t } from "@/lib/i18n"
 import {
@@ -20,8 +21,10 @@ import { bottomNavOf, isCheckoutPage, pathOf } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
+import { drawerSuggestions, withSuggestions } from "./cart-cross-sells"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
-import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "./line-paths"
+import { linePicturesOf, productPathsOf, shippingClassesOf } from "./line-paths"
+import { drawerShippingOf } from "./shipping-estimate"
 import { imageView } from "./image"
 import { navigation, subcategoryLinks, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
@@ -75,7 +78,7 @@ export async function shopView(): Promise<ShopView> {
   const [
     site,
     categories,
-    { storefront: frame, free_shipping_threshold, marks, features },
+    { storefront: frame, free_shipping_threshold, shipping_classes, marks, features },
     identity,
     cart,
     cookies,
@@ -109,17 +112,22 @@ export async function shopView(): Promise<ShopView> {
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
   // A wholesaler's drawer is without KDV (ADR-0068 §5); asked only with lines to show
-  const [paths, linePaths, linePictures, wholesale, freeProducts] = await Promise.all([
-    pathsOf(
-      "product_category",
-      categories.map((category) => category.id)
-    ),
-    productPathsOf(cart?.items ?? []),
-    linePicturesOf(cart?.items ?? []),
-    customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
-    // adr/0087 §3: a cart of free-shipping products says so instead of the meter
-    freeShippingProductsOf(cart?.items ?? []),
-  ])
+  const [paths, linePaths, linePictures, wholesale, lineClasses, suggestions, estimate] =
+    await Promise.all([
+      pathsOf(
+        "product_category",
+        categories.map((category) => category.id)
+      ),
+      productPathsOf(cart?.items ?? []),
+      linePicturesOf(cart?.items ?? []),
+      customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
+      // adr/0087 §3: the lines' shipping classes, for the meter and the lines' notes
+      shippingClassesOf(cart?.items ?? []),
+      // S3: what the cart's products are bought with, under the drawer's lines
+      drawerSuggestions(cart, t),
+      // The drawer's shipping row: the server's estimate, asked only with lines to show
+      cart && cart.items.length > 0 ? cartShippingEstimate(cart.id) : Promise.resolve(null),
+    ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
   // Each top entry without the shop's own picture shows its newest product's photo;
   // each category's page its product count (the dropdown's and the sheet's badges)
@@ -164,16 +172,24 @@ export async function shopView(): Promise<ShopView> {
       : null,
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
-    cart: miniCartOf(
-      cart,
-      free_shipping_threshold,
-      t,
-      linePaths,
-      linePictures,
-      wholesale.active && wholesale.vatExclusive,
-      // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
-      wholesaleCheckoutBlocked(cart, wholesale, t),
-      freeProducts
+    cart: withSuggestions(
+      miniCartOf(
+        cart,
+        free_shipping_threshold,
+        t,
+        linePaths,
+        linePictures,
+        wholesale.active && wholesale.vatExclusive,
+        // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
+        wholesaleCheckoutBlocked(cart, wholesale, t),
+        {
+          classes: lineClasses,
+          surcharges: shipping_classes ?? [],
+          threshold: free_shipping_threshold,
+        },
+        drawerShippingOf(estimate, t)
+      ),
+      suggestions
     ),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>

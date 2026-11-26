@@ -842,6 +842,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/shipping-setup/options/:id": false,
   "DELETE /admin/shipping-setup/options/:id": false,
   "POST /admin/shipping-setup/options": false,
+  // PTT's barcode ranges: the shop's settings, not the day's work
+  "POST /admin/shipping-setup/ptt-barcodes": false,
+  "DELETE /admin/shipping-setup/ptt-barcodes/:id": false,
   "POST /admin/staff/invites/:id/resend": false,
   "DELETE /admin/staff/invites/:id": false,
   "POST /admin/staff/invites/accept": false,

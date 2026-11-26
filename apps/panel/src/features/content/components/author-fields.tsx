@@ -117,7 +117,12 @@ export function AuthorFields({
         error={form.formState.errors.name?.message}
         required
       >
-        <Input id={id("name")} maxLength={AUTHOR_LIMITS.name} {...form.register("name")} />
+        <Input
+          placeholder={t("common.placeholder.fullName")}
+          id={id("name")}
+          maxLength={AUTHOR_LIMITS.name}
+          {...form.register("name")}
+        />
       </Field>
       <Field label={t(`${A}.fields.handle`)} htmlFor={id("handle")} hint={t(`${A}.handleHint`)}>
         <div className="flex items-center rounded-md border">
@@ -139,6 +144,7 @@ export function AuthorFields({
         hint={t(`${A}.jobTitleHint`)}
       >
         <Input
+          placeholder={t("content.placeholders.jobTitle")}
           id={id("job_title")}
           maxLength={AUTHOR_LIMITS.jobTitle}
           {...form.register("job_title")}
@@ -147,6 +153,7 @@ export function AuthorFields({
       <Field label={t(`${A}.fields.bio`)} htmlFor={id("bio")} hint={t(`${A}.bioHint`)}>
         <div className="flex flex-col gap-1">
           <Textarea
+            placeholder={t("content.placeholders.bio")}
             id={id("bio")}
             maxLength={AUTHOR_LIMITS.bio}
             className="max-h-60 min-h-24"

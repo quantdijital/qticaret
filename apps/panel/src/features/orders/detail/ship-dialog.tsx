@@ -37,6 +37,11 @@ interface ShipDialogProps {
   rest?: Lines | undefined
   /** A parcel already packed goes whole: its lines cannot be changed. */
   packed: boolean
+  /**
+   * BirFatura's cargo module makes the shop's labels (adr/0072 Ek
+   * 2026-11-26): no carrier label here, the tracking typed by hand.
+   */
+  birfatura?: boolean | undefined
   open: boolean
   busy: boolean
   onOpenChange: (open: boolean) => void
@@ -100,6 +105,7 @@ export function ShipDialog({
   items,
   rest = [],
   packed,
+  birfatura = false,
   open,
   busy,
   onOpenChange,
@@ -171,6 +177,11 @@ export function ShipDialog({
           <DialogDescription>{t("orders.ship.description")}</DialogDescription>
         </DialogHeader>
         <DialogBody list>
+          {birfatura ? (
+            <p className="text-[13px] text-muted-foreground" data-testid="ship-birfatura">
+              {t("orders.ship.birfatura")}
+            </p>
+          ) : null}
           {packed && rest.length > 0 ? (
             <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium">
               <Checkbox
@@ -189,7 +200,7 @@ export function ShipDialog({
               <ul className={list}>{rest.map(({ id, quantity }) => line(id, quantity, true))}</ul>
             </>
           ) : null}
-          <details className="rounded-md border px-3 py-2 text-sm">
+          <details className="rounded-md border px-3 py-2 text-sm" open={birfatura || undefined}>
             <summary className="cursor-pointer font-medium">
               {t("orders.ship.trackingTitle")}
             </summary>

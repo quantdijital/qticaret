@@ -56,6 +56,11 @@ medusaIntegrationTestRunner({
       throw new Error(`expected ${String(count)} movements: ${JSON.stringify(movements)}`)
     }
 
+    /**
+     * The item's alerts as they are now. The alert is the stock workflow's
+     * second step, after the movement is written: a read right after a
+     * movement shows can miss it, so expected alerts go through `alertsOf`.
+     */
     const lowStockAlerts = async (itemId: string) => {
       const { data } = await http.get<{ notifications: { data: Record<string, unknown> }[] }>(
         "/admin/notifications?channel=feed&limit=50",
@@ -165,15 +170,16 @@ medusaIntegrationTestRunner({
         5
       )
       await movementsOf(itemId, 1)
+      await armed(itemId)
 
       await orderOne(getContainer(), shop, variantId)
       await movementsOf(itemId, 2)
-      expect(await lowStockAlerts(itemId)).toHaveLength(0)
+      expect(await alertsOf(itemId, 0)).toHaveLength(0)
 
       // Sellable 3: at the threshold
       await orderOne(getContainer(), shop, variantId)
       await movementsOf(itemId, 3)
-      const [alert] = await lowStockAlerts(itemId)
+      const [alert] = await alertsOf(itemId, 1)
       // Named by its product and variant, opening the product; never the item's id
       expect(alert?.data).toMatchObject({
         available: 3,
@@ -186,7 +192,7 @@ medusaIntegrationTestRunner({
 
       await orderOne(getContainer(), shop, variantId)
       await movementsOf(itemId, 4)
-      expect(await lowStockAlerts(itemId)).toHaveLength(1)
+      expect(await alertsOf(itemId, 1)).toHaveLength(1)
 
       // Restocked above the line, then low again: a second alert
       await setLevel(itemId, 10)
@@ -265,6 +271,7 @@ medusaIntegrationTestRunner({
       expect(await movementsOf(itemId, 1)).toEqual([
         expect.objectContaining({ reason: "reconcile", delta_stocked: 7, stocked_after: 7 }),
       ])
+      await armed(itemId)
 
       // The first change after it is a change (7 → 4), and it crosses the threshold (5)
       await setLevel(itemId, 4)
@@ -273,7 +280,7 @@ medusaIntegrationTestRunner({
         delta_stocked: -3,
         stocked_after: 4,
       })
-      expect(await lowStockAlerts(itemId)).toHaveLength(1)
+      expect(await alertsOf(itemId, 1)).toHaveLength(1)
 
       // Straight through the module, no event: the night's check writes it
       await getContainer()

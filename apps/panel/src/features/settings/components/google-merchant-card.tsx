@@ -120,6 +120,7 @@ export function GoogleMerchantCard() {
                 {t(`${G}.merchantId`)}
               </label>
               <Input
+                placeholder={t("settings.placeholders.merchantId")}
                 id="google-merchant-id"
                 inputMode="numeric"
                 className="w-56 tabular-nums"

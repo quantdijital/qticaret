@@ -128,3 +128,7 @@ Medusa v2'nin iade modeli (Kaynak: core-flows v2.21.2) şöyle çalışıyor:
 - reddedilen ürünün müşteriye geri gönderim ücreti;
 - değer kaybı kesintisi (md. 13/2). Platformda yok;
 - iade için öngörülen taşıyıcının adı (md. 5/1-g). Ayarlarda yok.
+
+## Ek 2026-11-26: taşıyıcıda iade gönderisi kalktı
+
+Geliver projeden kaldırıldı (ADR-0031 ek). Taşıyıcıda açılan iade gönderisi (§4: iade kodu/etiketi) ve onun teslim sorgusu (`handed_over_at`) yalnız Geliver'deydi, onlarla birlikte kalktı. İade talebi taşıyıcı iade etiketi olmadan onaylanır; paketi müşteri kendisi geri gönderir, para iadesi süresi depoya varıştan (`received_at`) sayılır. Daha önce saklanmış iade etiketleri indirilebilir kalır. Aras/Yurtiçi iade kodu istenirse bu bölüm yeniden açılır.

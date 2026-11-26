@@ -197,6 +197,7 @@ export function AddonDialog({
             required
           >
             <Input
+              placeholder={t("products.placeholders.addonLabel")}
               id="addon-label"
               maxLength={ADDON_LIMITS.label}
               aria-invalid={Boolean(errors.label)}
@@ -210,6 +211,7 @@ export function AddonDialog({
             error={error(errors.help?.message)}
           >
             <Input
+              placeholder={t("products.placeholders.addonHelp")}
               id="addon-help"
               maxLength={ADDON_LIMITS.help}
               aria-invalid={Boolean(errors.help)}

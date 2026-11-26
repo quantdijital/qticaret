@@ -85,11 +85,6 @@ medusaIntegrationTestRunner({
           secrets: { api_key: false, secret_key: false },
         }),
         expect.objectContaining({
-          provider: "geliver",
-          state: "not_configured",
-          secrets: { api_token: false },
-        }),
-        expect.objectContaining({
           provider: "aras",
           state: "not_configured",
           secrets: { username: false, password: false },
@@ -98,6 +93,26 @@ medusaIntegrationTestRunner({
           provider: "yurtici",
           state: "not_configured",
           secrets: { username: false, password: false, cod_username: false, cod_password: false },
+        }),
+        expect.objectContaining({
+          provider: "dhlecommerce",
+          state: "not_configured",
+          secrets: {
+            customer_number: false,
+            password: false,
+            client_id: false,
+            client_secret: false,
+          },
+        }),
+        expect.objectContaining({
+          provider: "surat",
+          state: "not_configured",
+          secrets: { username: false, password: false, cari_code: false, web_password: false },
+        }),
+        expect.objectContaining({
+          provider: "ptt",
+          state: "not_configured",
+          secrets: { password: false },
         }),
         expect.objectContaining({
           provider: "netgsm",

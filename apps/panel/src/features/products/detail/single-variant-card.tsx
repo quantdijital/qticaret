@@ -9,7 +9,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { VARIANT_CODES_TARGET } from "./sections"
 import { VariantDialog } from "./variant-dialog"
 import { variantFacts } from "./variant-facts"
@@ -69,12 +69,13 @@ export function SingleVariantCard({ product }: { product: ProductDetail }) {
     displays.get(variant.id)
   )
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const dirty = form.formState.dirtyFields as Partial<Record<VariantField, boolean>>
     save.mutate(
       { variant, values, saved, dirty },
       {
         onSuccess: () => {
-          form.reset(values, FULL_RESET)
+          settle(values)
           toast.success(t("products.variant.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

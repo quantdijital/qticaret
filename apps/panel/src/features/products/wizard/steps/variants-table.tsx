@@ -85,21 +85,36 @@ export function SingleVariant() {
         htmlFor="variant-sku"
         error={message(errors?.sku?.message)}
       >
-        <Input id="variant-sku" spellCheck={false} {...register("variants.0.sku")} />
+        <Input
+          placeholder={t("common.placeholder.sku")}
+          id="variant-sku"
+          spellCheck={false}
+          {...register("variants.0.sku")}
+        />
       </Field>
       <Field
         label={t("products.wizard.ean")}
         htmlFor="variant-ean"
         error={message(errors?.ean?.message)}
       >
-        <Input id="variant-ean" inputMode="numeric" {...register("variants.0.ean")} />
+        <Input
+          placeholder={t("common.placeholder.ean")}
+          id="variant-ean"
+          inputMode="numeric"
+          {...register("variants.0.ean")}
+        />
       </Field>
       <Field
         label={t("products.detail.codes.mpn")}
         htmlFor="variant-mpn"
         error={message(errors?.mpn?.message)}
       >
-        <Input id="variant-mpn" spellCheck={false} {...register("variants.0.mpn")} />
+        <Input
+          placeholder={t("products.placeholders.mpn")}
+          id="variant-mpn"
+          spellCheck={false}
+          {...register("variants.0.mpn")}
+        />
       </Field>
     </div>
   )
@@ -227,6 +242,7 @@ export function VariantsTable() {
                   </td>
                   <td className="px-3 py-2">
                     <Input
+                      placeholder={t("common.placeholder.sku")}
                       spellCheck={false}
                       aria-label={`${variant.title} ${t("products.wizard.sku")}`}
                       {...register(`variants.${index}.sku`)}
@@ -234,6 +250,7 @@ export function VariantsTable() {
                   </td>
                   <td className="px-3 py-2">
                     <Input
+                      placeholder={t("common.placeholder.ean")}
                       inputMode="numeric"
                       aria-label={`${variant.title} ${t("products.wizard.ean")}`}
                       {...register(`variants.${index}.ean`)}

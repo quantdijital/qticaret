@@ -14,7 +14,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { BankTransferSettings } from "@/features/settings/api/sections"
 import { formatIban, isValidTrIban, normalizeIban } from "@/features/settings/iban"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const B = "settings.payments.bankTransfer"
 
@@ -84,7 +84,12 @@ function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, Ac
         required
         error={message(errors.account_holder?.message)}
       >
-        <Input id="bank-holder" autoComplete="off" {...form.register("account_holder")} />
+        <Input
+          placeholder={t("common.placeholder.company")}
+          id="bank-holder"
+          autoComplete="off"
+          {...form.register("account_holder")}
+        />
       </Field>
       <Field
         label={t(`${B}.bank`)}
@@ -92,7 +97,12 @@ function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, Ac
         required
         error={message(errors.bank_name?.message)}
       >
-        <Input id="bank-name" autoComplete="off" {...form.register("bank_name")} />
+        <Input
+          placeholder={t("settings.placeholders.bankName")}
+          id="bank-name"
+          autoComplete="off"
+          {...form.register("bank_name")}
+        />
       </Field>
       <Field
         label="IBAN"
@@ -102,6 +112,7 @@ function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, Ac
         error={message(errors.iban?.message)}
       >
         <Input
+          placeholder={t("settings.placeholders.iban")}
           id="bank-iban"
           autoComplete="off"
           spellCheck={false}
@@ -145,11 +156,12 @@ function AccountCard({ saved }: { saved: BankTransferSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       { ...next, iban: normalizeIban(next.iban) },
       {
         onSuccess: (result) => {
-          form.reset(accountOf(result.values), FULL_RESET)
+          settle(accountOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import type { Reply } from "../geliver/routes"
+import type { Reply } from "../fake-routes"
 
 /**
  * Paraşüt's OAuth2 as its API v4 describes it (apidocs.parasut.com

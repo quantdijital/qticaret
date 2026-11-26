@@ -17,7 +17,7 @@
 └──────┬──────┘          └─────────────┘            └─────────────┘
        │  ortak: Redis (namespace'li) veya tenant başına, obje depolama (bucket/prefix)
        ▼
- iyzico · PayTR · Geliver · e-fatura entegratörü · SMS · e-posta
+ iyzico · PayTR · Aras · Yurtiçi · e-fatura entegratörü · SMS · e-posta
 ```
 
 ## Üst panel (control plane, F17)
@@ -35,7 +35,7 @@ bir tenant'ın yükünün diğerini etkilememesi, Medusa'nın tek-mağaza varsay
 İleride tenant sayısı yüzleri bulursa paylaşımlı-kaynak optimizasyonu ayrı ADR ile değerlendirilir.
 
 ## Sağlayıcı kimlik bilgileri (önemli)
-Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatura, SMS) **panelden girilir** (adr/0027; adr/0002'nin yerini aldı, 2026-10-27):
+Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, Aras, Yurtiçi, e-fatura, SMS) **panelden girilir** (adr/0027; adr/0002'nin yerini aldı, 2026-10-27):
 - Bilgiler `integration-credentials` modülünde durur. Gizli alanlar kayıt başına veri anahtarıyla AES-256-GCM ile şifrelenir, veri anahtarı env'deki KEK ile sarılır (`CREDENTIALS_ENCRYPTION_KEYS`, en yeni başta; ya da tek `CREDENTIALS_ENCRYPTION_KEY`; adr/0061 Ek C17). Anahtar kesintisiz döndürülür (docs/08).
 - Gizli alanlar yalnızca yazılır: hiçbir yanıtta, logda ya da denetim kaydında görünmez.
 - Kayıttan önce sağlayıcıya sorulur; değişiklik yeniden başlatma gerektirmez (sürümlü önbellek).
@@ -61,7 +61,8 @@ Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatur
 | `webhook-events` | Custom modül | Gelen sağlayıcı bildirimlerinin tekil kaydı, idempotency (F5; F7 de kullanır) |
 | `payment-bank-transfer` | Payment provider | Havale/EFT, manuel onay, süre aşımı iptali (F6) |
 | `payment-cod` | Payment provider | Kapıda ödeme, ek ücret, tutar sınırı (F6) |
-| `fulfillment-geliver` | Fulfillment provider | Teklif, etiket, takip, iade gönderisi |
+| `fulfillment-aras`, `fulfillment-yurtici` | Fulfillment provider | Etiket, takip; sabit ücret ya da desi tablosu (adr/0035; Geliver 2026-11-26 kaldırıldı) |
+| `fulfillment-shop` | Fulfillment provider | "Kendi gönderimim": sabit ücret ya da tablo (adr/0087) |
 | `notification-sms` | Notification provider | Netgsm vb. SMS |
 | `notification-email` | Notification provider | Resend/SES |
 | `einvoice` | Custom modül + provider deseni | e-Arşiv/e-Fatura, adaptör tabanlı |
@@ -106,8 +107,8 @@ cart.complete → stok rezervasyonu → order.placed
   ├─ subscriber: yasal onay snapshot'ı siparişe bağlanır
   ├─ subscriber: sunucu taraflı dönüşüm olayı (çerez onayı varsa)
   └─ subscriber: tenant webhook'ları (abonelik varsa)
-order.fulfillment_created → kargo etiketi (Geliver)
-shipment tracking webhook → fulfillment güncellemesi → müşteri bildirimi
+order.fulfillment_created → kargo etiketi (Aras/Yurtiçi)
+shipment tracking sorgusu → fulfillment güncellemesi → müşteri bildirimi
 order.shipped (veya placed; tenant ayarı) → e-arşiv fatura workflow'u → muhasebe aktarımı
 iade talebi → onay → iade gönderisi → depoya varış → para iadesi + stok + iade faturası
 inventory güncellendi → stok bildirimi abonelerine haber, düşük stok uyarısı

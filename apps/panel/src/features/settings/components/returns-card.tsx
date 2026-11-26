@@ -12,7 +12,7 @@ import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { MIN_WITHDRAWAL_DAYS, sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ReturnsSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const R = "settings.shipping.returns"
 
@@ -42,12 +42,13 @@ function Form({ saved }: { saved: ReturnsSettings }) {
   const packageTravel = useWatch({ control: form.control, name: "package_travel" })
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       // Who pays the return is the law's, not a choice: never sent (adr/0032 Ek 2026-11-03)
       { withdrawal_days: Number(next.withdrawal_days), package_travel: next.package_travel },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

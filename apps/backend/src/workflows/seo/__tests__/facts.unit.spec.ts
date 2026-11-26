@@ -138,6 +138,8 @@ describe("productFacts", () => {
       default_parcel: null,
       packing_slip_prices: false,
       shipping_classes: [],
+      primary_option_id: null,
+      manager: "own" as const,
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -196,6 +198,8 @@ describe("productFacts", () => {
       default_parcel: { weight: 5_000, length: 30, width: 20, height: 10 },
       packing_slip_prices: false,
       shipping_classes: [],
+      primary_option_id: null,
+      manager: "own" as const,
     }
     const shipping = {
       settings,
@@ -243,5 +247,22 @@ describe("productFacts", () => {
       ["variant_a", 899, 99.9],
       ["variant_b", 949, 0],
     ])
+
+    // ...a surcharged one too: past the threshold its surcharge falls with the rest
+    const bulkyPast = productFacts(
+      row({ product_extension: { condition: "used", shipping_class: "bulky" } }),
+      null,
+      "",
+      undefined,
+      {
+        ...shipping,
+        free_shipping_threshold: 949,
+        settings: {
+          ...settings,
+          shipping_classes: [{ key: "bulky", name: "Büyük", surcharge: 15_000 }],
+        },
+      }
+    )
+    expect(bulkyPast.variants.map((variant) => variant.shippingRate)).toEqual([249.9, 0])
   })
 })

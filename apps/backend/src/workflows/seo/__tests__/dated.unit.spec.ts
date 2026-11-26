@@ -107,6 +107,8 @@ describe("a dated product's offers", () => {
       default_parcel: { weight: 500, length: 10, width: 10, height: 10 },
       packing_slip_prices: false,
       shipping_classes: [],
+      primary_option_id: null,
+      manager: "own",
     },
     units: { weight_unit: "g", dimension_unit: "cm" },
     table_offered: true,

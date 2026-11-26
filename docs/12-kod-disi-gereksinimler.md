@@ -46,7 +46,7 @@
 | PayTR testi (karar 2026-11-17): PayTR'ye e-posta ve ayrı test mağazası yok. Test, gerçek bir mağazanın PayTR hesabında (My L'arte'ninki ya da yeni açılan mağazanınki) test modunda yapılır, sonra aynı hesap canlıya geçer. Bildirim adresi hesap başına tek; dev için herkese açık bildirim adresi (tünel). Taksit oranları API'sine erişim (alt satır) o hesapta denenene kadar doğrulanmamış sayılır | Kullanıcı | F5 (adr/0026) |
 | PayTR: yalnızca iFrame kullanan hesabın taksit oranları API'sine erişimi | PayTR | F5.8 |
 | iyzico webhook V3 imzasının açtırılması (entegrasyon@iyzico.com); sandbox hesabı | Kullanıcı + iyzico | F5.11 |
-| Geliver: tenant hesabı, kapıda ödeme desteği, iade kodu süreçleri | Geliver | F6.6, F7 |
+| Aras/Yurtiçi: mağazanın kendi kurumsal sözleşmesi ve API hesabı, kapıda ödeme desteği (Geliver gereksinimi 2026-11-26 Geliver'le birlikte kalktı) | Mağaza + taşıyıcı | F6.6, F7 |
 | E-fatura entegratörü seçimi ve fiyatlandırma | Entegratörler | F8 |
 | BirFatura canlıya çıkmadan önce: mağaza ile BirFatura arasında veri işleme (veri işleyen) sözleşmesi; alıcı verisinin (ad, adres, telefon, e-posta, TCKN/VKN) yalnız Türkiye'de işlenip saklandığının yazılı teyidi (KVKK md. 9; `docs/kvkk-envanter.md` BirFatura satırında "yurt içi" doğrulanmadı) | Mağaza + BirFatura (+ KVKK danışmanı) | F16 (ADR-0072) |
 | SMS sağlayıcısı (başlık onayı, İYS entegrasyonu) | SMS sağlayıcısı | F9 |

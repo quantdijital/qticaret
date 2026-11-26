@@ -65,7 +65,13 @@ type Fulfillment = {
 
 type FullRow = ExportOrderRow & DeliveryOrder & { fulfillments?: Fulfillment[] | null }
 
-const CARRIER_TITLES = { aras: "Aras Kargo", yurtici: "Yurtiçi Kargo", geliver: "Geliver" } as const
+const CARRIER_TITLES = {
+  aras: "Aras Kargo",
+  yurtici: "Yurtiçi Kargo",
+  dhlecommerce: "DHL eCommerce",
+  surat: "Sürat Kargo",
+  ptt: "PTT Kargo",
+} as const
 
 /** The order's latest standing parcel: who carries it and its label's number. */
 function parcelOf(order: FullRow) {
@@ -74,7 +80,7 @@ function parcelOf(order: FullRow) {
     .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
   const latest = standing[0]
   return {
-    carrier: latest ? carrierNameOf(latest.provider_id, latest.data, latest.metadata) : null,
+    carrier: latest ? carrierNameOf(latest.provider_id, latest.metadata) : null,
     tracking: latest?.labels?.find((label) => label?.tracking_number)?.tracking_number ?? null,
   }
 }

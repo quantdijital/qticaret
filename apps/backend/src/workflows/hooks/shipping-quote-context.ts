@@ -6,6 +6,7 @@ import {
   listShippingOptionsForCartWithPricingWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { kurus } from "../../lib/money"
+import { standaloneThreshold } from "../../lib/promotions/free-shipping"
 import type { Kurus, MedusaAmount } from "../../lib/money"
 import { QUOTE_CONTEXT_KEY, itemTotalKurus, thresholdKurus } from "../../lib/shipping/quote"
 import type { ShippingQuoteContext } from "../../lib/shipping/quote"
@@ -82,7 +83,7 @@ export async function shippingQuoteContext(
     shipping.shipping_classes.map((each) => [each.key, kurus(each.surcharge)])
   )
   return {
-    threshold: thresholdKurus(promotions.free_shipping_threshold),
+    threshold: thresholdKurus(standaloneThreshold(promotions)),
     item_total: itemTotalKurus(cart.item_total),
     classes: await classesOf(container, productIds),
     surcharges,

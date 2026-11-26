@@ -1,13 +1,13 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createProductsWorkflow, updateProductVariantsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
-import { geliverShop } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierShop } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -32,8 +32,8 @@ interface FilledEntry {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
 
     const inventory = () => getContainer().resolve(Modules.INVENTORY)
     const query = () => getContainer().resolve(ContainerRegistrationKeys.QUERY)
@@ -128,18 +128,18 @@ medusaIntegrationTestRunner({
       })
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
     })
 
     it("ships a line whose reservation was deleted, holding it first", async () => {
@@ -231,10 +231,8 @@ medusaIntegrationTestRunner({
       await inventory().updateReservationItems({ id: held?.id ?? "", quantity: 1 })
       await trackFromNow(later)
       const laterItem = (await itemOf(later)) ?? ""
-      fake.queue("POST /transactions", {
-        status: 400,
-        body: { result: false, code: "LOW_BALANCE" },
-      })
+      // Aras opens the order but refuses its label: the shipping fails
+      fake.queue("GetArasBarcode", "1")
 
       const refused = await ship(orderId)
 

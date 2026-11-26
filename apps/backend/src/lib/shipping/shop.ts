@@ -7,11 +7,15 @@ import type IntegrationCredentialsModuleService from "../../modules/integration-
 import type { AccountDetails } from "../integrations/account-check"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
-import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
-import { parcelLinesOf } from "./geliver/mappers"
-import type { OrderItemRow } from "./geliver/mappers"
-import { defaultParcelOf, parcelOf } from "./parcel"
-import type { ParcelLine, ParcelUnits } from "./parcel"
+import type {
+  LegalSettings,
+  ShippingSettings,
+  StoreSettings,
+} from "../../modules/platform-settings/sections"
+import type { LabelSender } from "./label"
+import { localPhone } from "./receiver"
+import { defaultParcelOf, parcelLinesOf, parcelOf } from "./parcel"
+import type { OrderItemRow, ParcelLine, ParcelUnits } from "./parcel"
 import { kurus, toMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
@@ -46,6 +50,39 @@ const settings = () => container.resolve<PlatformSettingsModuleService>(PLATFORM
 export async function storeUnits(): Promise<ParcelUnits> {
   const store = (await settings().getSection("store")) as unknown as StoreSettings
   return { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit }
+}
+
+/**
+ * The sender a carrier label prints when the carrier wants it (DHL
+ * eCommerce): the shop's legal name and address and its phone, all of
+ * them already public (the storefront's footer, adr/0048). Null without a
+ * name: the label goes without a sender, the carrier knows it from the
+ * contract.
+ */
+export async function shopSender(): Promise<LabelSender | null> {
+  const [legal, store] = (await Promise.all([
+    settings().getSection("legal"),
+    settings().getSection("store"),
+  ])) as unknown as [LegalSettings, StoreSettings]
+  const name = legal.company_title?.trim()
+  if (!name) {
+    return null
+  }
+  return {
+    name,
+    address: legal.address?.trim() ? legal.address.trim() : null,
+    phone: localPhone(store.contact_phone) || null,
+  }
+}
+
+/**
+ * The shop's own contact e-mail (Settings > Store), for a carrier that
+ * refuses a receiver without one when the order has none (DHL eCommerce:
+ * an order staff made by hand). Null when the shop set none.
+ */
+export async function shopContactEmail(): Promise<string | null> {
+  const store = (await settings().getSection("store")) as unknown as StoreSettings
+  return store.contact_email
 }
 
 /** The shop's price table by desi (Settings > Shipping, F7.8), read per call. */
@@ -96,6 +133,11 @@ export type CartLine = OrderItemRow & QuoteLine
 export const cartLinesOf = (context: { items?: readonly (CartLine | null)[] | null }): CartLine[] =>
   (context.items ?? []).filter((item): item is CartLine => item !== null)
 
+/** The lines' parcel by the shop's desi table: the base the table quote and the cart's estimate share. */
+export async function tableBaseOf(lines: readonly OrderItemRow[]): Promise<Kurus> {
+  return tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi)
+}
+
 /**
  * A cart's price by the shop's desi table (adr/0035), through the one
  * shipping quote (adr/0087 §2): the paid lines' parcel, free past the
@@ -106,7 +148,7 @@ export async function tableQuoteOf(context: { items?: readonly (CartLine | null)
     lines: cartLinesOf(context),
     context: quoteContextOf(context),
     basis: "parcel",
-    price: async (lines) => tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi),
+    price: tableBaseOf,
   })
   return calculatedPriceOf(amount)
 }
