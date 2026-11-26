@@ -82,8 +82,11 @@ function useColumns(staff: Map<string, string> | undefined): Column<AuditEntry>[
     {
       key: "action",
       header: t("settings.audit.columns.action"),
+      // What the others leave: a long path is cut short, the actor's column stays on the card
+      fill: true,
+      className: "min-w-32",
       cell: (entry) => (
-        <div className="flex max-w-72 min-w-0 flex-col">
+        <div className="flex min-w-0 flex-col">
           <span className="truncate font-mono text-[12px]">{entry.action}</span>
           {entry.resource_type ? (
             <span className="truncate text-xs text-muted-foreground">

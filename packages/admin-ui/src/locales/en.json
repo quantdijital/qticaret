@@ -40,6 +40,9 @@
     "label": "Page save",
     "saved": "Saved"
   },
+  "headerMenu": {
+    "more": "More actions"
+  },
   "infoTip": {
     "label": "Info: {{name}}"
   },
