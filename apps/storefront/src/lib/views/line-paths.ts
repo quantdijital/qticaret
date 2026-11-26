@@ -23,9 +23,11 @@ const LINE_FIELDS = [
   "media_assets.height",
   "media_assets.alt",
   "media_assets.derivatives",
+  // adr/0087 §3: a free-shipping product's lines say so in the cart
+  "product_extension.shipping_class",
 ].join(",")
 
-type LineProductAnswer = Pick<StoreProduct, "id" | "media_assets">
+type LineProductAnswer = Pick<StoreProduct, "id" | "media_assets" | "product_extension">
 
 /**
  * The products the shop shows now, with their pictures: the Store API's
@@ -103,6 +105,33 @@ export async function linePicturesOf(
   } catch (error) {
     if (isStoreApiError(error)) {
       return new Map()
+    }
+    throw error
+  }
+}
+
+/**
+ * The lines' products in the free shipping class (adr/0087 §3), by id: the
+ * same answer as `productPathsOf`; none when the backend refuses (the cart
+ * then says what the threshold says, and checkout charges what it charges).
+ */
+export async function freeShippingProductsOf(
+  lines: readonly LineProduct[]
+): Promise<ReadonlySet<string>> {
+  const ids = productIdsOf(lines)
+  if (ids.length === 0) {
+    return new Set()
+  }
+  try {
+    const products = await shownProducts(ids)
+    return new Set(
+      products.flatMap((product) =>
+        product.product_extension?.shipping_class === "free" ? [product.id] : []
+      )
+    )
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return new Set()
     }
     throw error
   }

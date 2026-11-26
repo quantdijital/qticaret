@@ -112,6 +112,25 @@ describe("a framed card (adr/0049 Ek 2026-11-14 §3.3)", () => {
     expect(card({}, quiet).framed?.freeShipping).toBe(false)
   })
 
+  it("says free shipping for a product in the free class whatever its price (adr/0087 §3)", () => {
+    const free = { kind: "physical", is_gift_card: false, shipping_class: "free" }
+    expect(
+      card({ product_extension: free, variants: [variant("variant_a", 99)] }).framed?.freeShipping
+    ).toBe(true)
+    const none = { ...FRAMED, framed: { ...SWITCHES, freeShippingFrom: null } }
+    expect(card({ product_extension: free }, none).framed?.freeShipping).toBe(true)
+    // A surcharged class is no free shipping; a digital product never says it
+    expect(
+      card({
+        product_extension: { ...free, shipping_class: "bulky" },
+        variants: [variant("variant_a", 99)],
+      }).framed?.freeShipping
+    ).toBe(false)
+    expect(card({ product_extension: { ...free, kind: "digital" } }).framed?.freeShipping).toBe(
+      false
+    )
+  })
+
   it("keeps its empty stars only when the facts say there is no review", () => {
     const framed = card()
     const facts = (rating: { average: number; count: number } | null | undefined) => ({

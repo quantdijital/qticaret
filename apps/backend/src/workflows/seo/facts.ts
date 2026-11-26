@@ -7,7 +7,7 @@ import type { PriceDisplay } from "../../lib/pricing"
 import { VARIES_BY_PROPERTIES } from "../../lib/seo/jsonld"
 import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/seo/jsonld"
 import type { ReturnsSettings } from "../../modules/platform-settings/sections"
-import { shippingRateOf, unitParcelOf } from "./shipping-facts"
+import { shippingClassFacts, shippingRateOf, unitParcelOf } from "./shipping-facts"
 import type { ShippingFacts } from "./shipping-facts"
 
 export type { ShippingFacts } from "./shipping-facts"
@@ -28,6 +28,8 @@ export const PRODUCT_FACT_FIELDS = [
   "product_extension.withdrawal_excluded",
   "product_extension.restriction",
   "product_extension.booking_mode",
+  // adr/0087 §5: a free or surcharged product's shipping in its offers and feeds
+  "product_extension.shipping_class",
   "categories.id",
   "categories.mpath",
   "attribute_template.definitions.scope",
@@ -72,6 +74,8 @@ export interface FactRow {
     restriction?: string | null
     /** adr/0076 §2: sold by date (`none` or absent: not); its offers name no shipping or returns. */
     booking_mode?: string | null
+    /** adr/0087: `free`, a shop class's key, or null (Standard). */
+    shipping_class?: string | null
   } | null
   categories?: ({ id: string; mpath?: string | null } | null)[] | null
   attribute_template?: {
@@ -206,6 +210,7 @@ export function productFacts(
   const physical = (row.product_extension?.kind ?? "physical") === "physical"
   // adr/0076 §10: a dated product names no shipping or return policy in its offers
   const dated = (row.product_extension?.booking_mode ?? "none") !== "none"
+  const shippingClass = shippingClassFacts(row.product_extension?.shipping_class, shipping)
   const images = [...(row.images ?? [])]
     .filter((image): image is { url: string; rank?: number | null } => image !== null)
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
@@ -240,7 +245,9 @@ export function productFacts(
         ...prices,
         availability: availabilityOf(variant),
         properties,
-        shippingRate: shipping ? shippingRateOf(parcel, shipping, prices.price) : null,
+        shippingRate: shipping
+          ? shippingRateOf(parcel, shipping, prices.price, shippingClass)
+          : null,
         stock: stockOf(variant),
         // A feed's volume is the product's own: not one the default parcel made up
         desi: parcel?.measured ? parcel.desi : null,
@@ -258,6 +265,7 @@ export function productFacts(
       (property, index, all) => used.has(property) && all.indexOf(property) === index
     ),
     variants,
+    ...(physical && shippingClass ? { shippingClass } : {}),
     delivery:
       shipping && !dated
         ? {

@@ -6,7 +6,7 @@ import type {
   Translate,
   TrustBadgeView,
 } from "@qticaret/ui"
-import type { StoreDelivery, StoreProduct } from "@qticaret/types"
+import type { StoreDelivery, StoreProduct, StoreShippingClass } from "@qticaret/types"
 
 /**
  * The product page's "Kargo ve Teslimat" card (owner 2026-11-05: "bu ürün
@@ -107,8 +107,13 @@ export const shippedPromises = (
 ): TrustBadgeView[] =>
   ships ? [...badges] : badges.filter((badge) => !DELIVERY_ICONS.has(badge.icon))
 
+/** The built-in class (adr/0087 §1): the product ships free. */
+export const FREE_SHIPPING_CLASS = "free"
+
 export interface ProductShippingInput {
   product: StoreProduct
+  /** The shop's own classes (`shipping_classes`); a product's surcharge is said by them. */
+  classes?: readonly StoreShippingClass[]
   /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */
   threshold: number | null
   /** The shop's delivery settings (`delivery`); absent from an older backend: its own lines say it. */
@@ -126,6 +131,7 @@ export interface ProductShippingInput {
 /** The card for a shipped product; null for one that is not shipped. */
 export function productShipping({
   product,
+  classes = [],
   threshold,
   delivery = null,
   badges,
@@ -146,17 +152,41 @@ export function productShipping({
       from !== null &&
       amountsIn(`${badge.title} ${badge.text ?? ""}`).includes(from)
   )
-  const free: TrustBadgeView[] = named
-    ? [named]
-    : from !== null
+  const shippingClass = product.product_extension?.shipping_class ?? null
+  const surcharge = classes.find((each) => each.key === shippingClass)?.surcharge ?? 0
+  // adr/0087 §3: this product's own shipping first; a surcharge is said, never a surprise
+  const own: TrustBadgeView[] =
+    shippingClass === FREE_SHIPPING_CLASS
       ? [
           {
             icon: "truck",
             title: t("product.shipping_free"),
-            text: t("product.shipping_free_from", { amount: formatLira(from) }),
+            text: t("product.shipping_free_product"),
           },
         ]
-      : []
+      : surcharge > 0
+        ? [
+            {
+              icon: "truck",
+              title: t("product.shipping_surcharge_title"),
+              text: t("product.shipping_surcharge", { amount: formatLira(surcharge) }),
+            },
+          ]
+        : []
+  const free: TrustBadgeView[] =
+    shippingClass === FREE_SHIPPING_CLASS
+      ? []
+      : named
+        ? [named]
+        : from !== null
+          ? [
+              {
+                icon: "truck",
+                title: t("product.shipping_free"),
+                text: t("product.shipping_free_from", { amount: formatLira(from) }),
+              },
+            ]
+          : []
   // The settings say when it leaves; without them, the shop's own shipping and clock lines
   const leaves = delivery
     ? deliveryFacts(delivery, t)
@@ -174,7 +204,7 @@ export function productShipping({
           },
         ]
   return {
-    facts: [...free, ...leaves, ...withdrawal],
+    facts: [...own, ...free, ...leaves, ...withdrawal],
     carriers,
     links: [
       ...(shippingPath ? [{ label: t("product.shipping_more"), path: shippingPath }] : []),

@@ -1,4 +1,5 @@
-import { toMedusaAmount } from "../../lib/money"
+import { kurus, toMedusaAmount } from "../../lib/money"
+import { FREE_SHIPPING_CLASS } from "../../modules/platform-settings/sections/shipping"
 import { defaultParcelOf, parcelOf } from "../../lib/shipping/parcel"
 import type { Parcel, ParcelUnits } from "../../lib/shipping/parcel"
 import { tablePrice } from "../../lib/shipping/rates"
@@ -50,22 +51,45 @@ export function unitParcelOf(variant: MeasuredVariant, shipping: ShippingFacts):
   )
 }
 
+/** A product's shipping class as offers and feeds tell it (adr/0087 §5); null: Standard. */
+export interface ShippingClassFacts {
+  free: boolean
+  /** Lira, KDV in, added once per order. */
+  surcharge: number
+}
+
+/** The product's class from its key; a class the shop no longer has is Standard (null). */
+export function shippingClassFacts(
+  key: string | null | undefined,
+  shipping: ShippingFacts | undefined
+): ShippingClassFacts | null {
+  if (!key) {
+    return null
+  }
+  if (key === FREE_SHIPPING_CLASS) {
+    return { free: true, surcharge: 0 }
+  }
+  const found = shipping?.settings.shipping_classes.find((each) => each.key === key)
+  return found ? { free: false, surcharge: Number(toMedusaAmount(kurus(found.surcharge))) } : null
+}
+
 /**
- * What the shop's table charges to ship the parcel, in lira; null when no
- * option shoppers see is priced by it, or past the table's bands. One
- * unit priced at or past the shop's threshold ships free (adr/0087 §5),
- * as checkout charges a basket of it.
+ * What the shop's table charges to ship one unit, in lira; null when no
+ * option shoppers see is priced by it, or past the table's bands. As
+ * checkout charges a basket of it (adr/0087 §5): free in the free class or
+ * at or past the shop's threshold; the class's surcharge added otherwise.
  */
 export function shippingRateOf(
   parcel: Parcel | null,
   shipping: ShippingFacts,
-  price: number | null = null
+  price: number | null = null,
+  shippingClass: ShippingClassFacts | null = null
 ): number | null {
   if (!parcel || !shipping.table_offered) {
     return null
   }
   const threshold = shipping.free_shipping_threshold
-  if (threshold !== null && price !== null && price >= threshold) {
+  if (shippingClass?.free || (threshold !== null && price !== null && price >= threshold)) {
     return 0
   }
   const rate = tablePrice(
@@ -73,5 +97,7 @@ export function shippingRateOf(
     shipping.settings.over_desi_price,
     parcel.desi
   )
-  return rate === null ? null : Number(toMedusaAmount(rate))
+  return rate === null
+    ? null
+    : Number(toMedusaAmount(kurus(rate + Math.round((shippingClass?.surcharge ?? 0) * 100))))
 }

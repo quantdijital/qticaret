@@ -72,6 +72,11 @@ export interface ProductFacts {
   groupId: string
   variesBy: VariesBy[]
   variants: VariantFacts[]
+  /**
+   * Its shipping class (adr/0087 §5): free, or a surcharge in lira added
+   * once per order; absent: Standard. Feeds price their flat rate by it.
+   */
+  shippingClass?: { free: boolean; surcharge: number } | null
   /** How long an order takes; with a variant's shipping rate it makes `shippingDetails`. */
   delivery?: DeliveryFacts | null
   /** Approved reviews (F10.6): `aggregateRating`, only when the page shows them. */

@@ -212,6 +212,26 @@ describe("productFacts", () => {
       )
     ).toEqual([null, null])
 
+    // adr/0087 §5: a free-shipping product's offers say 0; a surcharged one adds it
+    const classed = (key: string) =>
+      productFacts(
+        row({ product_extension: { condition: "used", shipping_class: key } }),
+        null,
+        "",
+        undefined,
+        {
+          ...shipping,
+          settings: {
+            ...settings,
+            shipping_classes: [{ key: "bulky", name: "Büyük", surcharge: 15_000 }],
+          },
+        }
+      )
+    expect(classed("free").variants.map((variant) => variant.shippingRate)).toEqual([0, 0])
+    expect(classed("free").shippingClass).toEqual({ free: true, surcharge: 0 })
+    expect(classed("bulky").variants.map((variant) => variant.shippingRate)).toEqual([249.9, 249.9])
+    expect(classed("gone").shippingClass).toBeUndefined()
+
     // adr/0087 §5: a unit priced at or past the threshold ships free by the table too
     const free = productFacts(row(), null, "", undefined, {
       ...shipping,

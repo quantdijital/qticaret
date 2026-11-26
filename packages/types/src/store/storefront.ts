@@ -276,6 +276,12 @@ export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
 export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 export type CardTextPosition = (typeof CARD_TEXT_POSITIONS)[number]
 
+/** A shop's shipping class (adr/0087): its key on products and its surcharge in lira (its name stays in the panel). */
+export interface StoreShippingClass {
+  key: string
+  surcharge: number
+}
+
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {
   storefront: StorefrontFrame
@@ -283,6 +289,11 @@ export interface StorefrontAnswer {
   theme?: StoreThemeSettings
   /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
   free_shipping_threshold: number | null
+  /**
+   * The shop's own shipping classes (adr/0087 §3), a surcharge in lira each,
+   * added once per order; absent from a backend before it: none.
+   */
+  shipping_classes?: StoreShippingClass[]
   /**
    * When an order leaves and arrives, as the shop set them (adr/0046 Ek
    * 2026-11-06); absent from a backend before it: the product page says

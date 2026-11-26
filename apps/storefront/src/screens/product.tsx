@@ -28,7 +28,12 @@ import { shopMarks } from "@/lib/views/card-extras"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { isVatExclusive, shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
-import { isShipped, productShipping, promisesFor } from "@/lib/views/product-shipping"
+import {
+  FREE_SHIPPING_CLASS,
+  isShipped,
+  productShipping,
+  promisesFor,
+} from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
 import { sharedSettingsOf } from "@/lib/views/shared-settings"
@@ -57,7 +62,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     displays,
     installments,
     brandPaths,
-    { storefront, free_shipping_threshold, delivery, features, marks },
+    { storefront, free_shipping_threshold, shipping_classes, delivery, features, marks },
     reviews,
     questions,
     related,
@@ -145,13 +150,19 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         }
       : {}),
     signedIn: customer !== null,
-    shippingNote:
-      isShipped(product) && free_shipping_threshold && free_shipping_threshold > 0
-        ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
-        : null,
+    // adr/0087 §3: a free-shipping product says so, not the threshold
+    shippingNote: !isShipped(product)
+      ? null
+      : product.product_extension?.shipping_class === FREE_SHIPPING_CLASS
+        ? t("product.shipping_free_product")
+        : free_shipping_threshold && free_shipping_threshold > 0
+          ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
+          : null,
     // "Kargo ve Teslimat" beside the specs (owner 2026-11-05): only what the shop set and wrote
     shipping: productShipping({
       product,
+      // adr/0087 §3: a free or surcharged product's own shipping line
+      classes: shipping_classes ?? [],
       threshold: free_shipping_threshold,
       // When it leaves and arrives, the same-day hour (adr/0046 Ek 2026-11-06)
       delivery: delivery ?? null,

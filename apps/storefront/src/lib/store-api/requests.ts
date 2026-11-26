@@ -163,6 +163,8 @@ const CARD_FIELDS = [
   // A framed card's free shipping line is for a product the shop ships (adr/0049 §3.3)
   "product_extension.kind",
   "product_extension.is_gift_card",
+  // adr/0087 §3: a free-shipping product's card says so whatever its price
+  "product_extension.shipping_class",
   "variants.id",
   "variants.manage_inventory",
   "variants.allow_backorder",
