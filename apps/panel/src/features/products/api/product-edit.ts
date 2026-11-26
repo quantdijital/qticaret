@@ -4,6 +4,8 @@ import type { Restriction } from "@/features/categories/api/restrictions"
 import type { ProductAddonTemplate } from "@/features/products/api/addon-templates"
 import type { AddonInput, ProductAddon } from "@/features/products/api/addons"
 import type { BookingMode } from "@/features/products/api/booking"
+import { saveTracking } from "@/features/products/api/stock-tracking"
+import type { TrackingChange } from "@/features/products/api/stock-tracking"
 import { sdk } from "@/lib/sdk"
 
 /** Saving what the product page edits beyond the product's own fields. */
@@ -116,6 +118,8 @@ export interface VariantEdit {
   amount: number | null
   /** Null for a variant whose stock is not tracked. */
   stock: { inventoryItemId: string; quantity: number; hasLevel: boolean } | null
+  /** Stock tracking turned on (with its count) or off; absent leaves it alone. */
+  tracking?: TrackingChange
   /** Whether it sells past its stock (preorder); null leaves it alone. */
   backorder: boolean | null
   /** The unit cost in lira (F11.4); null clears it, undefined leaves it alone. */
@@ -160,6 +164,13 @@ export async function saveVariantEdits(
   productId: string,
   { edits, locationId }: { edits: VariantEdit[]; locationId: string | null }
 ): Promise<void> {
+  // Tracking first: a variant turned on has its item and count before anything reads them
+  const tracking = edits.flatMap((edit) =>
+    edit.tracking ? [{ variantId: edit.variantId, change: edit.tracking }] : []
+  )
+  if (tracking.length > 0) {
+    await saveTracking(productId, tracking)
+  }
   const stocked = edits.flatMap((edit) => (edit.stock ? [edit.stock] : []))
   if (locationId && stocked.length > 0) {
     const row = (stock: (typeof stocked)[number]) => ({

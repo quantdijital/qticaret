@@ -4486,6 +4486,10 @@
       "stockHint": "Mağazanın varsayılan depo adresindeki adet.",
       "onHand": "Stok adedi",
       "untracked": "Stok takibi yok: bu varyant her zaman satılır.",
+      "tracking": "Stok takibi",
+      "trackingOn": "Stok adedi sayılır; bitince satış durur.",
+      "trackingOffAsk": "Stok takibi kapatılsın mı? Varyant stok sayılmadan her zaman satılır. Kayıtlı adet silinmez; takibi yeniden açınca geri gelir.",
+      "trackingOff": "Takibi kapat",
       "backorderHint": "Stok bitince de sipariş alınır (ön sipariş).",
       "codes": "Kodlar",
       "measures": "Ölçüler",
@@ -4564,7 +4568,8 @@
         "fields": {
           "price": "Normal fiyat",
           "cost": "Maliyet",
-          "stock": "Stok adedi"
+          "stock": "Stok adedi",
+          "tracking": "Stok takibi"
         },
         "applyAll_one": "{{count}} varyanta uygula",
         "applyAll_other": "{{count}} varyanta uygula",
@@ -4577,7 +4582,12 @@
         "nothing": "Değişecek bir şey yok: varyantlar zaten bu değerde ya da stokları sayılmıyor.",
         "pick": "{{name}} varyantını seç",
         "pickAll": "Tüm varyantları seç",
-        "pickGroup": "{{name}} grubunu seç"
+        "pickGroup": "{{name}} grubunu seç",
+        "tracking": {
+          "pick": "Açık mı kapalı mı",
+          "on": "Stok takibini aç",
+          "off": "Stok takibini kapat"
+        }
       }
     },
     "rowActions": "{{title}} işlemleri",

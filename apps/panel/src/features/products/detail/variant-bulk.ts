@@ -5,8 +5,11 @@ import { valuesOf } from "./variant-options"
 import { levelAt, priceOf } from "./variant-values"
 import type { Variant } from "./variant-values"
 
-/** What a bulk change writes (the owner, 2026-11-25: "Tümüne fiyat uygula / stok uygula"). */
-export const BULK_FIELDS = ["price", "cost", "stock"] as const
+/**
+ * What a bulk change writes (the owner, 2026-11-25: "Tümüne fiyat uygula /
+ * stok uygula"); `tracking` turns stock tracking on (1) or off (0).
+ */
+export const BULK_FIELDS = ["price", "cost", "stock", "tracking"] as const
 export type BulkField = (typeof BULK_FIELDS)[number]
 
 const MAX_STOCK = 1_000_000
@@ -33,6 +36,9 @@ export function filtered(
 
 /** The typed value as the field takes it; null when it is not one. */
 export function bulkValue(field: BulkField, text: string): number | null {
+  if (field === "tracking") {
+    return text === "1" ? 1 : text === "0" ? 0 : null
+  }
   if (field === "stock") {
     const trimmed = text.trim()
     return /^\d+$/.test(trimmed) && Number(trimmed) <= MAX_STOCK ? Number(trimmed) : null
@@ -78,6 +84,11 @@ export function bulkEdit(
   }
   if (field === "cost") {
     return { ...base, cost: value }
+  }
+  if (field === "tracking") {
+    // On, an item and a level are made with the count it has (none: 0); then "stok uygula" works
+    const tracked = value === 1
+    return Boolean(variant.manage_inventory) === tracked ? null : { ...base, tracking: { tracked } }
   }
   const level = levelAt(variant, locationId)
   if (!variant.manage_inventory || !level.inventoryItemId || locationId === null) {

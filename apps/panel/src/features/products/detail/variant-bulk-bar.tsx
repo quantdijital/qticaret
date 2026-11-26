@@ -116,25 +116,37 @@ export function VariantBulkBar({
           ))}
         </SelectContent>
       </Select>
-      <NumberField
-        className="w-full sm:w-36"
-        aria-label={t(`${D}.value`)}
-        aria-invalid={text.trim() !== "" && value === null}
-        decimals={field === "stock" ? 0 : 2}
-        min={0}
-        {...(field === "stock" ? {} : { suffix: "₺" })}
-        placeholder={t(`${D}.fields.${field}`)}
-        value={text}
-        onChange={(event) => {
-          setText(event.target.value)
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault()
-            apply()
-          }
-        }}
-      />
+      {field === "tracking" ? (
+        <Select value={text} onValueChange={setText}>
+          <SelectTrigger className="w-full sm:w-44" aria-label={t(`${D}.value`)}>
+            <SelectValue placeholder={t(`${D}.tracking.pick`)} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">{t(`${D}.tracking.on`)}</SelectItem>
+            <SelectItem value="0">{t(`${D}.tracking.off`)}</SelectItem>
+          </SelectContent>
+        </Select>
+      ) : (
+        <NumberField
+          className="w-full sm:w-36"
+          aria-label={t(`${D}.value`)}
+          aria-invalid={text.trim() !== "" && value === null}
+          decimals={field === "stock" ? 0 : 2}
+          min={0}
+          {...(field === "stock" ? {} : { suffix: "₺" })}
+          placeholder={t(`${D}.fields.${field}`)}
+          value={text}
+          onChange={(event) => {
+            setText(event.target.value)
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault()
+              apply()
+            }
+          }}
+        />
+      )}
       {selected.size === 0 && options.length > 0 ? (
         <Select
           value={filter === "" ? ALL : filter}

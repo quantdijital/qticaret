@@ -6,15 +6,17 @@ import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import { DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { MEASURES, measureText } from "./measures"
 import { SalePriceField, SalePriceView } from "./sale-price-field"
 import type { MeasureName } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
 import type { SaleTarget, VariantSale } from "./use-variant-sale"
 import { storedGtinNote } from "./variant-codes"
-import type { StockFacts, VariantField, VariantValues } from "./variant-values"
+import type { VariantField, VariantValues } from "./variant-values"
+
+// Stock has its own file; the dialog, the rows and the cards import it from here
+export { StockFields } from "./stock-fields"
 
 type Form = UseFormReturn<VariantValues>
 
@@ -126,91 +128,6 @@ export function PriceFields({
             </label>
           )}
         />
-      ) : null}
-    </DialogSection>
-  )
-}
-
-/** Stock at the default location, what orders hold, and selling past it (preorder). */
-export function StockFields({
-  form,
-  idPrefix,
-  stock,
-  locationId,
-  preorder,
-  preorderOn,
-}: {
-  form: Form
-  idPrefix: string
-  /** Tracked or not, what orders hold, preorder as stored (`stockFacts`). */
-  stock: StockFacts
-  locationId: string | null
-  /** The switch shows; `preorderOn` says whether it may be turned on. */
-  preorder: boolean
-  preorderOn: boolean
-}) {
-  const { t } = useTranslation()
-  const error = useError(form)
-  if (!stock.tracked) {
-    return (
-      <DialogSection title={t(`${D}.stock`)}>
-        <p className="text-[13px] text-muted-foreground">{t(`${D}.untracked`)}</p>
-      </DialogSection>
-    )
-  }
-  return (
-    // The location's note sits under the count, as the price's does under the price: a
-    // section description would push the stock fields below the price fields beside them
-    <DialogSection title={t(`${D}.stock`)}>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          label={t(`${D}.onHand`)}
-          htmlFor={`${idPrefix}-stock`}
-          error={error("stock")}
-          hint={t(locationId ? `${D}.stockHint` : "products.detail.variantsNoLocation")}
-        >
-          <NumberField
-            id={`${idPrefix}-stock`}
-            min={0}
-            aria-invalid={Boolean(error("stock"))}
-            disabled={!locationId}
-            {...form.register("stock")}
-          />
-        </Field>
-        {stock.reserved === null ? null : (
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-medium">{t("products.detail.reserved")}</span>
-            <span className="flex h-9 items-center text-sm tabular-nums">
-              {formatCount(stock.reserved)}
-            </span>
-          </div>
-        )}
-      </div>
-      {preorder ? (
-        <div className="flex items-start justify-between gap-4 border-t pt-4">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <label htmlFor={`${idPrefix}-backorder`} className="text-sm font-medium">
-              {t("products.detail.backorder")}
-            </label>
-            <span id={`${idPrefix}-backorder-hint`} className="text-[13px] text-muted-foreground">
-              {t(`${D}.backorderHint`)}
-            </span>
-          </div>
-          <Controller
-            control={form.control}
-            name="backorder"
-            render={({ field }) => (
-              <Switch
-                id={`${idPrefix}-backorder`}
-                aria-describedby={`${idPrefix}-backorder-hint`}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                // Without the flag, one already on can only be turned off
-                disabled={!preorderOn && !stock.backorder}
-              />
-            )}
-          />
-        </div>
       ) : null}
     </DialogSection>
   )
