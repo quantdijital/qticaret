@@ -117,10 +117,15 @@ class PttBarcodeModuleService extends MedusaService({ PttBarcodeRange }) {
       return { status: "exhausted" }
     }
     const number = Number(open.next_number)
-    await manager.execute(
-      `UPDATE ${TABLE} SET next_number = ?, updated_at = now() WHERE id = ? AND next_number = ?`,
+    const moved = await manager.execute<{ id: string }[]>(
+      `UPDATE ${TABLE} SET next_number = ?, updated_at = now()
+       WHERE id = ? AND next_number = ? RETURNING id`,
       [serialOf(number + 1), open.id, open.next_number]
     )
+    // Under the row lock it always moves; were it not to, the number is not handed out
+    if (moved.length !== 1) {
+      throw new Error("ptt-barcode: the range moved under its lock")
+    }
     const remaining = rows.reduce((sum, row) => sum + remainingOf(row), 0) - 1
     return { status: "ok", barcode: pttBarcodeOf(serialOf(number)), remaining }
   }
@@ -145,7 +150,8 @@ class PttBarcodeModuleService extends MedusaService({ PttBarcodeRange }) {
     // Against a range added at the same time; reads go on, handing out waits
     await manager.execute(`LOCK TABLE ${TABLE} IN EXCLUSIVE MODE`)
     const rows = await manager.execute<RangeRow[]>(
-      `SELECT id, first_number, last_number FROM ${TABLE} WHERE deleted_at IS NULL`
+      // Removed ranges too: a number of a range set aside is never handed out again
+      `SELECT id, first_number, last_number FROM ${TABLE}`
     )
     const overlaps = rows.some(
       (row) => Number(first) <= Number(row.last_number) && Number(row.first_number) <= Number(last)

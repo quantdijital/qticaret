@@ -170,6 +170,15 @@ describe("PTT status", () => {
     expect(statusOf(event("1"), event(null, "Göndericisine teslim edildi"))).toBe("returned")
   })
 
+  it("keeps PTT's words for staff on one line, made safe", () => {
+    const read = pttStatusOf(
+      { found: true, events: [event("100", "Teslim Edildi\nAlan: 0532 123 45 67")] },
+      "2750365698456"
+    )
+    expect(read.provider_status).not.toMatch(/\n|0532 123 45 67/)
+    expect(read.provider_status).toMatch(/^Teslim Edildi/)
+  })
+
   it("links PTT's page by the barcode, or the fake's on a developer's machine", () => {
     expect(pttTrackingUrl("2750365698456")).toBe(
       "https://gonderitakip.ptt.gov.tr/Track/Verify?q=2750365698456"

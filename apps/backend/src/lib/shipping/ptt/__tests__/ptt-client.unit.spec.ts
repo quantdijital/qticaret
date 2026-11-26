@@ -165,6 +165,12 @@ describe("PTT client against the fake services", () => {
     expect(fake.shipments.get(late)?.canceled).toBe(false)
   })
 
+  it("masks the receiver in what PTT quotes back of a refused field", async () => {
+    fake.queue("kabulEkle2", "code:-7:Alıcı adresi hatalı: Ayşe Yılmaz, Atatürk Cad. No: 5")
+    const refused = await failure(() => api.upload(account, input(nextBarcode()), "QTKVKK-1"))
+    expect(JSON.stringify(refused)).not.toMatch(/Ayşe Yılmaz|Atatürk Cad/)
+  })
+
   it("masks the account in what PTT quotes back", async () => {
     fake.queue("kabulEkle2", `code:-9:Hatalı şifre ${fake.account.password}`)
     const refused = await failure(() => api.upload(account, input(nextBarcode()), "QTMASK-1"))

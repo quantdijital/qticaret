@@ -17,8 +17,16 @@ moduleIntegrationTestRunner<PttBarcodeModuleService>({
 
       expect(taken).toEqual([
         { status: "ok", barcode: "2750365698456", remaining: 2 },
-        { status: "ok", barcode: expect.stringMatching(/^275036569846\d$/) as unknown, remaining: 1 },
-        { status: "ok", barcode: expect.stringMatching(/^100000000000\d$/) as unknown, remaining: 0 },
+        {
+          status: "ok",
+          barcode: expect.stringMatching(/^275036569846\d$/) as unknown,
+          remaining: 1,
+        },
+        {
+          status: "ok",
+          barcode: expect.stringMatching(/^100000000000\d$/) as unknown,
+          remaining: 0,
+        },
       ])
       expect(after).toEqual({ status: "exhausted" })
     })

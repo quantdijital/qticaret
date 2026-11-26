@@ -1,4 +1,5 @@
 import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
+import { providerText } from "../../errors"
 import { fakeTrackingUrl } from "../carriers"
 import type { PttEvent, PttTracking } from "./client"
 
@@ -114,7 +115,13 @@ export function pttStatusOf(
   }
   return {
     status: tracking.found ? status : "created",
-    provider_status: said === null ? null : Array.from(said).slice(0, 120).join(""),
+    // One line, made safe (a name or a number PTT may write in it masked), cut
+    provider_status:
+      said === null
+        ? null
+        : Array.from(providerText(said) ?? "")
+            .slice(0, 120)
+            .join("") || null,
     // The barcode is PTT's number from the start: the label carries it
     tracking_number: barcode,
     tracking_url: pttTrackingUrl(barcode, fakeBase),

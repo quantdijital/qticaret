@@ -158,7 +158,14 @@ export function createPttApi(options: Partial<Omit<HttpClientOptions, "provider"
     input: PttShipmentInput,
     fileName: string
   ): Promise<void> {
-    const secrets = pttSecrets(credentials)
+    // The receiver too: PTT may quote a field it refuses (KVKK, security review 2026-11-26)
+    const secrets = [
+      ...pttSecrets(credentials),
+      input.receiver.name,
+      input.receiver.address,
+      input.receiver.phone,
+      input.receiver.phone.replace(/^0/, ""),
+    ]
     const result = await call(
       credentials,
       "upload",
