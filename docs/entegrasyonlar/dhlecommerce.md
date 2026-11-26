@@ -1,6 +1,8 @@
-# MNG Kargo (DHL eCommerce Türkiye) Fulfillment Provider — araştırma
+# DHL eCommerce Türkiye (eski MNG Kargo) Fulfillment Provider
 
-> Durum: **araştırma, kod yok** (2026-11-26). Sahip MNG, Sürat ve PTT'yi doğrudan taşıyıcı olarak sıraya aldı (ADR-0035 Ek 2026-11-26; sıra MNG → Sürat → PTT). Bu belge kodlayıcının arama yapmadan başlaması içindir; gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
+> Durum: **kodlanıyor** (2026-11-26): istemci, ortak etiket ve sahte servis PR 1'de; sağlayıcı ve panel PR 2'de. Kullanıcıya görünen her yerde ad **"DHL eCommerce"**; "MNG Kargo" yazılmaz (sahip, 2026-11-26). İç ad `dhlecommerce`; API alan adları hâlâ `mngkargo.com.tr`.
+>
+> İlk durum (2026-11-26): **araştırma, kod yok**. Sahip MNG, Sürat ve PTT'yi doğrudan taşıyıcı olarak sıraya aldı (ADR-0035 Ek 2026-11-26; sıra MNG → Sürat → PTT). Bu belge kodlayıcının arama yapmadan başlaması içindir; gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
 >
 > Kaynaklar (hepsi 2026-11-26'da okundu):
 > - MNG'nin geliştirici portalı `https://apizone.mngkargo.com.tr` (herkese açık ana sayfa: "Kargo Takip", "Gönderi Hazırla", "Barkod Oluştur" ürünleri, test portalı bağlantısı `sandbox.mngkargo.com.tr`, "hesap aç → onay → API'yi uygulamana ekle → API KEY"). Ayrıntılı belge (swagger) üyelikle açılıyor, okunmadı.

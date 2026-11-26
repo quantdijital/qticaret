@@ -22,6 +22,14 @@ export interface HttpClientOptions {
   hidePaths?: boolean
   /** Reads the provider's own code (`card_declined`) from an error body. */
   errorCode?: (body: unknown, status: number) => string | undefined
+  /**
+   * A JSON service's own refusal in an error body, with its code and its
+   * sentence: `error_<code>` with the sentence kept for staff (made safe of
+   * `secrets`), as a SOAP fault. Read under any 4xx or 5xx but a gateway's
+   * or a busy service's (429, 502, 503, 504): a service that answers its
+   * refusals as HTTP 500 (DHL eCommerce) refused the call, it did not lose it.
+   */
+  jsonFault?: (body: unknown) => { code: string; text: string | null } | undefined
   /** Where a failed call is noted for the Integrations page; the tenant's shared log by default. */
   failureLog?: () => FailureLog
   logger?: StructuredLogger
