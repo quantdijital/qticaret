@@ -257,6 +257,7 @@ export const createShopShippingOptionWorkflow = createWorkflow(
 )
 
 interface StoredOption {
+  provider_id?: string | null
   price_type?: string | null
   data?: Record<string, unknown> | null
 }
@@ -267,7 +268,7 @@ const readShopOptionStep = createStep(
   async (input: { id: string }, { container }) => {
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "shipping_option",
-      fields: ["id", "price_type", "data"],
+      fields: ["id", "price_type", "provider_id", "data"],
       filters: { id: input.id },
     })
     const option = data[0] as StoredOption | undefined
@@ -286,7 +287,16 @@ export const updateShopShippingOptionWorkflow = createWorkflow(
     updateShippingOptionsWorkflow.runAsStep({
       input: transform({ input, stored }, ({ input, stored }) => {
         const kept = stored.data ?? {}
-        const inData = stored.price_type === "calculated" && "amount" in kept
+        const flatId = kept["id"]
+        // Our flat price by the option's kind, never by what its data happens to hold
+        const inData =
+          stored.price_type === "calculated" &&
+          (stored.provider_id === SHOP_FULFILLMENT_PROVIDER_ID ||
+            (typeof flatId === "string" && flatId.endsWith("-flat")))
+        if (input.amount !== undefined && !inData && stored.price_type !== "flat") {
+          // A table or a carrier's quote has no amount of its own
+          throw new ValidationError("shipping.manual_flat_only", { field: "amount" })
+        }
         const amount =
           input.amount === undefined
             ? {}

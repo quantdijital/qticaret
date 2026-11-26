@@ -30,6 +30,7 @@ import {
  */
 
 interface PriceRow {
+  id?: string
   amount?: MedusaAmount | null
   currency_code?: string | null
   price_rules?: ({ attribute?: string | null; operator?: string | null } | null)[] | null
@@ -57,6 +58,7 @@ const FIELDS = [
   "price_type",
   "provider_id",
   "data",
+  "prices.id",
   "prices.amount",
   "prices.currency_code",
   "prices.price_rules.attribute",
@@ -71,24 +73,73 @@ const CONTRACT_FLAT: Readonly<Record<string, string>> = {
   [YURTICI_FULFILLMENT_PROVIDER_ID]: "yurtici-flat",
 }
 
+/** The old free price from a basket total (F4.5): 0, one `item_total gte` rule. */
+const isOldFreePrice = (price: PriceRow): boolean => {
+  const rules = (price.price_rules ?? []).filter((rule) => rule !== null)
+  return (
+    Number(price.amount) === 0 &&
+    rules.length === 1 &&
+    rules[0]?.attribute === "item_total" &&
+    rules[0].operator === "gte"
+  )
+}
+
+export type OptionUpdate = FlatOptionUpdate | { id: string; prices: { id: string }[] }
+
+/**
+ * A flat option that stays flat (pickup) loses the old free price the sync
+ * wrote: nothing keeps it in step with the threshold any more. Medusa keeps
+ * the prices named by id alone and drops the rest.
+ */
+export function planFreePriceCleanup(option: FlatOptionRow): OptionUpdate | null {
+  if (option.price_type !== "flat") {
+    return null
+  }
+  const prices = (option.prices ?? []).filter((price): price is PriceRow => price !== null)
+  if (!prices.some(isOldFreePrice)) {
+    return null
+  }
+  return {
+    id: option.id,
+    prices: prices.flatMap((price) =>
+      !isOldFreePrice(price) && price.id ? [{ id: price.id }] : []
+    ),
+  }
+}
+
 /** The shop's own price: the lira price without rules, else a region's (Medusa Admin's way). */
 function baseAmountOf(option: FlatOptionRow): Kurus | null {
   const prices = (option.prices ?? []).filter((price): price is PriceRow => price !== null)
   const rulesOf = (price: PriceRow) => (price.price_rules ?? []).filter((rule) => rule !== null)
-  const plain = prices.find((price) => price.currency_code === "try" && rulesOf(price).length === 0)
-  const region = prices.find((price) => {
+  const plain = prices.filter(
+    (price) => price.currency_code === "try" && rulesOf(price).length === 0
+  )
+  // Lira regions only (security review 2026-11-26): another currency's amount is no kuruş
+  const regions = prices.filter((price) => {
     const rules = rulesOf(price)
-    return rules.length === 1 && rules[0]?.attribute === "region_id" && rules[0].operator === "eq"
+    return (
+      price.currency_code === "try" &&
+      rules.length === 1 &&
+      rules[0]?.attribute === "region_id" &&
+      rules[0].operator === "eq"
+    )
   })
-  const chosen = plain ?? region
-  if (chosen?.amount === null || chosen?.amount === undefined) {
-    return null
+  const amounts = [
+    ...new Set((plain.length > 0 ? plain : regions).flatMap((price) => kurusOf(price.amount))),
+  ]
+  // None, or several that differ: which one the shop meant is not ours to guess; it stays flat
+  return amounts.length === 1 ? (amounts[0] ?? null) : null
+}
+
+function kurusOf(amount: MedusaAmount | null | undefined): Kurus[] {
+  if (amount === null || amount === undefined) {
+    return []
   }
   try {
-    const amount = fromMedusaAmount(chosen.amount, { allowRounding: true })
-    return amount >= 0 ? amount : null
+    const read = fromMedusaAmount(amount, { allowRounding: true })
+    return read >= 0 ? [read] : []
   } catch {
-    return null
+    return []
   }
 }
 
@@ -130,8 +181,8 @@ const planFlatConversionStep = createStep(
       fields: FIELDS,
     })
     return new StepResponse(
-      (data as unknown as FlatOptionRow[]).flatMap((option) => {
-        const update = planFlatConversion(option)
+      (data as unknown as FlatOptionRow[]).flatMap((option): OptionUpdate[] => {
+        const update = planFlatConversion(option) ?? planFreePriceCleanup(option)
         return update ? [update] : []
       })
     )

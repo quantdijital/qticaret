@@ -1,8 +1,50 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createLinksWorkflow } from "@medusajs/medusa/core-flows"
-import { CARRIER_PROVIDERS, SHOP_FULFILLMENT_PROVIDER_ID } from "../../lib/shipping/carriers"
+import {
+  CARRIER_PROVIDERS,
+  MANUAL_FULFILLMENT_PROVIDER_ID,
+  SHOP_FULFILLMENT_PROVIDER_ID,
+} from "../../lib/shipping/carriers"
 import { logger } from "../../lib/logging"
+
+/**
+ * Our flat-price provider beside Medusa's manual one in every warehouse
+ * that ships with it (adr/0087 §7): a "Kendi gönderimim" option of any
+ * warehouse can move to it, not only the default's (security review
+ * 2026-11-26).
+ */
+export async function ensureShopProviderWhereManual(container: MedusaContainer): Promise<void> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "stock_location",
+    fields: ["id", "fulfillment_providers.id"],
+  })
+  const rows = data as unknown as {
+    id: string
+    fulfillment_providers?: ({ id: string } | null)[] | null
+  }[]
+  const unlinked = rows.filter((row) => {
+    const ids = (row.fulfillment_providers ?? []).flatMap((provider) =>
+      provider ? [provider.id] : []
+    )
+    return (
+      ids.includes(MANUAL_FULFILLMENT_PROVIDER_ID) && !ids.includes(SHOP_FULFILLMENT_PROVIDER_ID)
+    )
+  })
+  if (unlinked.length === 0) {
+    return
+  }
+  await createLinksWorkflow(container).run({
+    input: unlinked.map((row) => ({
+      [Modules.STOCK_LOCATION]: { stock_location_id: row.id },
+      [Modules.FULFILLMENT]: { fulfillment_provider_id: SHOP_FULFILLMENT_PROVIDER_ID },
+    })),
+  })
+  logger.info(
+    { event: "bootstrap.shop_provider_linked", locationIds: unlinked.map((row) => row.id) },
+    "shop provider linked to locations"
+  )
+}
 
 /**
  * The carriers a warehouse ships with (adr/0031, adr/0035): every carrier
