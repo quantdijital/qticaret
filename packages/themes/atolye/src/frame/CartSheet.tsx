@@ -8,6 +8,7 @@ import { CheckoutLink } from "../cart/CheckoutLink"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { answersCartAdded, mountCartTrigger } from "./cart-sheet-owner"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
+import { CartSheetSuggestions } from "./CartSheetSuggestions"
 import {
   CART_ADDED_EVENT,
   cartAddedMessage,
@@ -128,6 +129,12 @@ export function CartSheetBody({
             words={words.line}
           />
         ))}
+        {/* S3: drawn only when the shop linked products to these; the drawer is otherwise as ever */}
+        {cart.suggestions && cart.suggestions.products.length > 0 && (
+          <li>
+            <CartSheetSuggestions suggestions={cart.suggestions} />
+          </li>
+        )}
       </ul>
       <div className="flex flex-col gap-3 bg-paper px-4 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:px-6">
         {cart.locked && (
