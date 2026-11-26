@@ -93,7 +93,7 @@ export function PublishScheduleRow({ product }: { product: ProductDetail }) {
           <div className="flex justify-end gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="cancel"
               size="sm"
               onClick={() => {
                 setEditing(false)
