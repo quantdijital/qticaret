@@ -9,6 +9,7 @@ export const SHIPPING_CARRIERS = [
   { id: "yurtici" },
   { id: "dhlecommerce" },
   { id: "surat" },
+  { id: "ptt" },
 ] as const
 
 export type CarrierId = (typeof SHIPPING_CARRIERS)[number]["id"]

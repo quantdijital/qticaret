@@ -174,6 +174,7 @@ export interface ContractedReturnCodes {
   yurtici: string | null
   dhlecommerce: string | null
   surat: string | null
+  ptt: string | null
   other_carrier: string | null
   other_code: string | null
 }

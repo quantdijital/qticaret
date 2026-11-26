@@ -31,6 +31,7 @@ export function settingsLinkOf(id: string) {
     case "yurtici":
     case "dhlecommerce":
     case "surat":
+    case "ptt":
       return carrier(id)
     case "meta":
     case "ga4":

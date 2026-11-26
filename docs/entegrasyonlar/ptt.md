@@ -1,6 +1,6 @@
 # PTT Kargo Fulfillment Provider — araştırma
 
-> Durum: **araştırma, kod yok** (2026-11-26). Sıra MNG → Sürat → PTT (ADR-0035 Ek 2026-11-26). Gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
+> Durum: **kodlandı, gerçek hesapla doğrulanmadı** (2026-11-26; aşağıda "Uygulama"). Araştırma 2026-11-26. Sıra MNG → Sürat → PTT (ADR-0035 Ek 2026-11-26). Gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
 >
 > Kaynaklar (hepsi 2026-11-26'da okundu):
 > - PTT'nin **canlı servis tanımları** (WSDL, herkese açık): `https://pttws.ptt.gov.tr/PttVeriYukleme/services/Sorgu?wsdl` ve `https://pttws.ptt.gov.tr/GonderiTakipV2/services/Sorgu?wsdl`.
@@ -168,6 +168,18 @@ PTT etiket PDF'i vermez; `etiketGetir` EPL döndürür (belgesiz). Öneri:
 - **Birim testleri:** kontrol hanesi (PTT örneği `275036569845` → `6`, toplam 10'un katı → `0`), aralıktan atomik ayırma ve bitme uyarısı (eşzamanlı iki ayırma testi), gram/desi/telefon eşleme, `OS` + tutar, durum eşlemesi (üst durum tablosu, geçici "teslim edilemedi"), https sabitleme.
 - **HTTP entegrasyon testi:** "Kargoya ver" iki koliyle art arda (farklı barkod), iptal, sahte PTT ile.
 - Ortak sözleşme test paketi.
+
+## Uygulama (2026-11-26)
+
+- **Kod:** `lib/shipping/ptt` (istemci, eşleme, durum, kontrol hanesi), `modules/fulfillment-ptt` (`ptt_ptt`), `modules/ptt-barcode` (aralık tablosu `ptt_barcode_range`, migration `Migration20261126231504`), `workflows/shipping/ptt-barcodes.ts` + `steps/ptt-barcode.ts`, `GET/POST /admin/shipping-setup/ptt-barcodes`, `DELETE /admin/shipping-setup/ptt-barcodes/:id`; panel `Ayarlar > Kargo > PTT Kargo`; sahte PTT `packages/testing/src/ptt` (`pnpm dev:ptt`, 9112).
+- **SOAP:** yükleme SOAP 1.1 (`SOAPAction: "urn:kabulEkle2"`), takip SOAP 1.2 (`application/soap+xml; action="urn:gonderiSorgu2"`). Sarmalayıcı (`input`, `inpDelete`) servis ad alanında, alanlar `…/xsd` ad alanında nitelikli (WSDL: iki şema da `elementFormDefault="qualified"`). Alanlar WSDL'deki sırayla. Adresler https sabit; test modunda `…Test/services/Sorgu`.
+- **Hesap:** müşteri numarası (`customer_id`, ayar, 9–10 hane) + web servis şifresi (gizli, en az 3 karakter) + test modu. `kullanici` sabit `PttWs` (PTT belgesi); takipte `kullanici` = müşteri numarası. Hesap kontrolü: aralık dışı uydurma barkodla `gonderiSorgu2`; yanıt cümlesi şifre/kullanıcı/müşteri/yetki derse `secret_invalid`, değilse geçerli sayılır (yanlış şifrenin gerçek dönüşü doğrulanacak).
+- **Barkod aralığı (sahip kararı: zorunlu):** aralık panelden girilir (12 hane iki uç, en çok 1.000.000 numara, çakışan aralık reddedilir). Numara ship workflow'unda, PTT hesabı bağlıyken, gönderi açılmadan alınır; servis tüm aralık satırlarını `FOR UPDATE` ile kilitler, en eski aralıktan sıradakini verir; ekleme/silme tabloyu `EXCLUSIVE` kilitler. Verilen numara hiçbir durumda (PTT reddi, belirsiz yanıt, iptal) yeniden verilmez. Hiç kullanılmamış aralık silinebilir; kullanılan kalır. Kalan < %10 ya da < 50 iken panelde uyarı; aralık yoksa `ptt.barcode_range_missing`, bitmişse `ptt.barcode_range_exhausted`. Test modunda da aralıktan numara harcanır.
+- **Gönderi:** `kabulEkle2`, `dosyaAdi` = `<bizim kod>-<UTC zaman>` (silmede yeniden istenir, `data.file_name`'de saklanır), `musteriReferansNo` = bizim kod, `odemesekli` `MH`, kapıda ödemede `ekhizmet` `OS` + `odeme_sart_ucreti` (TL, nokta ayraçlı 2 ondalık). Ölçülü kolide gram/desi/cm; ölçüsüzde gönderilmez. Alıcı adı 5 karakterden kısaysa gönderimden önce `ptt.receiver_name_short`. E-posta ve ikinci telefon gönderilmez. Başarı: `hataKodu` 1 ve satırın `donguHataKodu` 1, `donguSonuc` true. PTT'nin kendi reddi (kodlu yanıt) hiçbir şey yüklemedi sayılır; belirsiz sonuçta (yanıt yok, sunucu hatası) hemen `barkodVeriSil`; silinemezse `ptt.withdraw_failed`.
+- **İptal:** `barkodVeriSil`; reddedilir ve takip gönderiyi biliyorsa `ptt.already_accepted` (gönderi siparişte kalır, şubeden iptal).
+- **Etiket:** ortak PDF etiketimiz, barkod 13 haneli PTT barkodu (Code 128), gönderici basılmaz (PTT sözleşmeden bilir); test modunda "TEST" kutusu.
+- **Takip:** `gonderiSorgu2` olayları `siraNo` sırasıyla; `gonderiDurumId` tablodaki kodlarla, bilinmeyen kod Türkçe sözcüklerle eşlenir. `ALICI`, `GONDEREN`, `TESALAN` okunmaz. Takip numarası barkodun kendisi; bağlantı `https://gonderitakip.ptt.gov.tr/Track/Verify?q=<barkod>` (doğrulanacak).
+- **Vitrin:** alt bilgide "PTT Kargo" işareti ve PTT'nin genel takip sayfası (`https://gonderitakip.ptt.gov.tr/`; doğrulanacak).
 
 ## Doğrulanacaklar (gerçek hesapla)
 

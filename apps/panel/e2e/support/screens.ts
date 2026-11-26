@@ -77,6 +77,7 @@ export const SETTINGS = [
   "/settings/shipping/yurtici",
   "/settings/shipping/dhlecommerce",
   "/settings/shipping/surat",
+  "/settings/shipping/ptt",
   "/settings/notifications",
   "/settings/notifications?part=sms",
   // The messages the shop sends its customers, and the staff's own alerts

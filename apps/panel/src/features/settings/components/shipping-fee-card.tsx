@@ -76,7 +76,7 @@ export function ShippingFeeCard({
   /** The shop's desi table has no rows: a table-priced answer warns (it does not stop). */
   tableEmpty: boolean
   /** Who carries a new flat-priced main option: the first contract carrier connected, else the shop. */
-  flatCarrier: "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat"
+  flatCarrier: "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
   /** The carriers whose account is connected: a source of one that is not warns. */
   connected: readonly string[]
 }) {

@@ -25,7 +25,7 @@ const base = z.object({ carrier: z.string().trim().max(60), code })
 type Values = z.infer<typeof base>
 
 /** Which code the card edits: one of our carriers', or BirFatura's carrier with its name. */
-type Target = "aras" | "yurtici" | "dhlecommerce" | "surat" | "other"
+type Target = "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt" | "other"
 
 // Our carrier is named by the page; BirFatura's is named with its code, both or neither
 const schemaOf = (target: Target) =>
@@ -41,6 +41,7 @@ const EMPTY: ContractedReturnCodes = {
   yurtici: null,
   dhlecommerce: null,
   surat: null,
+  ptt: null,
   other_carrier: null,
   other_code: null,
 }
