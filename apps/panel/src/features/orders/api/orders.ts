@@ -98,6 +98,8 @@ export interface OrderState {
   cancelable: boolean
   /** It goes with a carrier in test mode: an order paid in test mode may still ship that way. */
   test_carrier: boolean
+  /** The invoice provider holds the buyer: the billing address no longer changes. */
+  billing_locked: boolean
 }
 
 export const orderStateQuery = (id: string) =>

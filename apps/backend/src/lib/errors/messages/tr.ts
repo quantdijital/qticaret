@@ -43,6 +43,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Paketlenmiş, kargoya verilmiş ya da iptal edilmiş sipariş düzenlenemez.",
   "orders.edit_invoiced":
     "Bu siparişin faturası kesildi ya da kesiliyor; sipariş artık düzenlenemez.",
+  "orders.billing_invoiced":
+    "Bu siparişin faturası kesildi ya da kesiliyor; fatura adresi artık değiştirilemez.",
   "orders.edit_payment_unsupported":
     "Bu siparişin kalemleri düzenlenemez: yalnızca kartla ödenmiş siparişler düzenlenir. Kapıda ödeme ve havalede siparişi iptal edip yenisini oluşturun.",
   "orders.edit_difference_changed":
@@ -934,6 +936,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.filename_invalid": "Dosya adını 1–200 karakter arasında, özel karakter kullanmadan yazın.",
   "media.files_not_removed":
     "Görselin dosyaları şu an silinemedi; görsel kütüphanede kaldı. Biraz sonra yeniden deneyin.",
+  "media.id_duplicate": "Aynı görsel listede iki kez geçiyor.",
+  "media.id_invalid": "Görsel kimliği geçerli değil.",
   "media.import_address_refused":
     "Bu adresten görsel alınamaz. Herkese açık bir https adresi girin.",
   "media.import_unreachable":
