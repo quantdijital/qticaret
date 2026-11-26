@@ -1188,6 +1188,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "promotions.customer_group_only":
     "Bu kod yalnızca belirli müşterilere özel; hesabınız için geçerli değil.",
   "promotions.first_order_only": "Bu kod yalnızca ilk siparişte kullanılabilir.",
+  "promotions.free_shipping_code_below_total":
+    "Ücretsiz kargo kuponu, sepet tutarı ücretsiz kargo sınırına ulaşınca geçerli olur.",
+  "promotions.free_shipping_code_off":
+    "Bu mağazada kargo, yalnız sepet tutarıyla ücretsiz olur; bu kupon kullanılamıyor.",
   "promotions.audience_invalid": "Kodu kimlerin kullanabileceği geçerli değil.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
