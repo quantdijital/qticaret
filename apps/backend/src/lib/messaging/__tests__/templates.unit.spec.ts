@@ -164,8 +164,9 @@ describe("return.canceled (order #691)", () => {
     expect(template.channels).toEqual(["email"])
     expect(mail?.subject).toBe("İade talebiniz iptal edildi (#1042)")
     expect(mail?.text).toContain("Örnek ürün")
-    expect(mail?.text).toContain("geri göndermenize gerek yok")
-    expect(mail?.text).toContain("kargo kodu artık geçerli değil")
+    expect(mail?.text).toContain("Lütfen ürünleri kargoya vermeyin.")
+    // The contracted return code stays valid shop-wide: never called invalid
+    expect(mail?.text).not.toContain("geçerli değil")
     expect(mail?.text).toContain("yeni talep oluşturabilirsiniz")
     // The code given on approval is not repeated
     expect(mail?.text).not.toContain("48213")

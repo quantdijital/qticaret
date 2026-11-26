@@ -176,7 +176,8 @@ export const returnRefunded = template("return.refunded", "return_refunded", fal
 
 /**
  * "Talebiniz iptal edildi": staff took an approval back before anything
- * came back (order #691). Nothing need be sent, the code no longer works,
+ * came back (order #691). The parcel is not to be sent (the contracted
+ * return code stays valid shop-wide, so it is not called invalid),
  * and a new request may be made within the period. Staff's reason is
  * the team's, never in it.
  */

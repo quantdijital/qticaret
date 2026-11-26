@@ -70,9 +70,9 @@ export const RETURN_TEXTS: Readonly<Record<string, string>> = {
   "return_canceled.heading.return": "{{name}}, iade talebiniz iptal edildi",
   "return_canceled.heading.exchange": "{{name}}, değişim talebiniz iptal edildi",
   "return_canceled.intro.return":
-    "#{{number}} numaralı siparişinizdeki iade talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+    "#{{number}} numaralı siparişinizdeki iade talebiniz iptal edildi. Lütfen ürünleri kargoya vermeyin.",
   "return_canceled.intro.exchange":
-    "#{{number}} numaralı siparişinizdeki değişim talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+    "#{{number}} numaralı siparişinizdeki değişim talebiniz iptal edildi. Lütfen ürünleri kargoya vermeyin.",
   "return_canceled.again":
     "Ürünleri yine de iade etmek ya da değiştirmek isterseniz süre içinde sipariş sayfanızdan yeni talep oluşturabilirsiniz. Bu iptal size bir hata gibi geldiyse bizimle iletişime geçin.",
 }
