@@ -184,6 +184,18 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
+                onEscapeKeyDown={(event) => {
+                  // Escape from a link inside: the focus back on its item's button, not lost
+                  // with the panel as it hides (WCAG 2.4.3)
+                  const { target } = event
+                  const trigger =
+                    target instanceof Element
+                      ? target.closest("[data-aisle-item]")?.querySelector("button")
+                      : null
+                  requestAnimationFrame(() => {
+                    trigger?.focus()
+                  })
+                }}
                 className={cn(mega ? "gf-mega" : "gf-drop", "data-[state=closed]:hidden")}
               >
                 {mega ? (

@@ -120,6 +120,11 @@
     color: var(--color-text);
     text-decoration: none;
   }
+  /* No pictures (`menu_images: off`): a quiet "Tümünü gör" box, as tall as its words */
+  .gf-mega-grid--words .gf-mega-feature {
+    min-height: 0;
+    align-self: start;
+  }
   .gf-mega-feature .gf-mega-picture {
     position: absolute;
     inset: 0;
