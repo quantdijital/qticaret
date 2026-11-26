@@ -194,6 +194,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "This choice would create a redirect loop.",
   "catalog.successor_self": "A product cannot succeed itself.",
   "catalog.successor_unknown": "The selected product was not found.",
+  "catalog.linked_self": "A product cannot be linked to itself.",
+  "catalog.linked_unknown": "One of the linked products was not found.",
+  "catalog.linked_duplicate": "The same product cannot be in the list twice.",
   "catalog.variant_image_unknown": "A variant picture is not among the product's pictures.",
   "catalog.variant_image_variant_unknown":
     "A variant picture names a variant the product does not have.",

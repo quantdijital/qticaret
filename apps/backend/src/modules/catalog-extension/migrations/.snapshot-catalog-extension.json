@@ -849,6 +849,38 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "upsell_product_ids": {
+          "name": "upsell_product_ids",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "array"
+        },
+        "cross_sell_product_ids": {
+          "name": "cross_sell_product_ids",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "array"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",

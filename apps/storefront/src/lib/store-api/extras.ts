@@ -129,6 +129,34 @@ export async function cardFacts(
   return found
 }
 
+/** A cart's products the cross-sells are asked for at most (the backend's bound). */
+const LINKED_SOURCES = 50
+
+/**
+ * The products the given ones link to (S3), as ids in the shop's order:
+ * a product page's `upsell` (its "similar products"), a cart's
+ * `cross_sell`. Only published ones the shopper may buy, none of the given
+ * products; none from a backend that does not answer (an older one).
+ */
+export async function linkedProductIds(
+  kind: "upsell" | "cross_sell",
+  productIds: readonly string[]
+): Promise<string[]> {
+  const unique = [...new Set(productIds)].slice(0, LINKED_SOURCES)
+  if (unique.length === 0) {
+    return []
+  }
+  const { product_ids } = await orNone(
+    () =>
+      storeGet<{ product_ids: string[] }>("/store/linked-products", {
+        kind,
+        product_id: unique,
+      }),
+    { product_ids: [] }
+  )
+  return product_ids
+}
+
 /** The shop's approved reviews in short (adr/0046 Ek 2026-11-05); null without one or an answer. */
 export const reviewSummary = cache(
   async (): Promise<StoreReviewSummary["rating"]> =>

@@ -250,6 +250,9 @@ export function storeAnswer(
       return priceDisplay(query)
     case "/store/card-facts":
       return cardFacts(query)
+    // S3: the fixed shop links no products; pages draw as they did before linked products
+    case "/store/linked-products":
+      return { product_ids: [] }
     case "/store/category-images":
       return { images: CATEGORY_IMAGES }
     case "/store/category-counts":

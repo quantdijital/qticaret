@@ -4468,6 +4468,7 @@
         "advisor": "SEO danışmanı",
         "organize": "Kategori, marka ve KDV",
         "catalog": "Katalog bilgileri",
+        "linked": "Bağlantılı ürünler",
         "shipping": "Kargo (paket ölçüleri)",
         "data": "Ürün verileri",
         "pricing": "Genel (fiyat)",
@@ -4549,6 +4550,7 @@
         "attributes": "Özellikler",
         "variants": "Varyantlar",
         "catalog": "Katalog",
+        "linked": "Bağlantılı ürünler",
         "advanced": "Gelişmiş"
       },
       "pricesOnVariants": "Fiyatlar her varyantta ayrı girilir.",
@@ -4954,6 +4956,20 @@
       "reason": {
         "seo": "SEO puanı yayın için yetersizdi.",
         "other": "Kayıt sırasında bir sorun oluştu."
+      }
+    },
+    "linked": {
+      "title": "Bağlantılı ürünler",
+      "add": "Ürün ekle",
+      "noResults": "Ürün bulunamadı.",
+      "full": "En çok {{max}} ürün eklenebilir. Yenisi için birini kaldırın.",
+      "upsells": {
+        "label": "Benzer / daha iyi ürünler",
+        "hint": "Ürün sayfasında benzer ürünler alanında bu sırayla gösterilir. Boş bırakılırsa aynı kategoriden ürünler gösterilir. Taslak ürünler yayına alınınca görünür."
+      },
+      "cross_sells": {
+        "label": "Birlikte alınanlar",
+        "hint": "Bu ürün sepetteyken \"Bunu da beğenebilirsiniz\" başlığıyla sepette önerilir. Sepette olan ürünler önerilmez."
       }
     },
     "purchaseLimit": {

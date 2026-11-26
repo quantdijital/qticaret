@@ -40,6 +40,31 @@
 
 Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
 
+## 2026-11-26 (gün) — ürün sayfası sadeleştirme, panel görsel denetimi, kargo yeniden düzeni
+
+- **Birleşenler (`dev`, #434–#451):**
+  - **Ürün sayfası:** başlık sadeleşti: "Vitrinde gör" tek simge, Yayınla/Sayfayı düzenle/Kopyala/Sil "…" menüsünde, 1024 altında düğmeler kendi satırında; "Ürün verileri" sekmeleri kartın genişliğine göre (#434). Planlı yayın: "Yayın tarihi" satırı, Türkiye saati, `product.metadata.publish_at`, rozet "Planlı · tarih" (#436). En çok satın alma adedi (Gelişmiş sekmesi, 1 = tek tek satılır; `product_extension.max_quantity`, migration `Migration20261126130000`) (#437). Başlıktaki "n bölümde değişiklik" yazısı yalnız ekran okuyucuda (#446).
+  - **Panel geneli (görsel denetim, 118 rota × 390/820/1024/1280/1440):** PageHeader eylemleri sığmazsa alt satıra iner; yeni `HeaderMenu` ("…" Diğer işlemler; Siparişler başlığında 8 düğme yerine 2 + menü); FilterBar arama kutusu en az 12rem; DataTable `fill` sütunu (Ürünler/Blog/Stok/Denetim tabloları kartından taşmıyor) (#438). SEO > Öneriler ve Entegrasyonlar telefonda kartın içinde (#439). Bildirimlerde ham kimlik yerine ürün/sipariş adı; silinmiş kalemler düşük stok uyarısı üretmiyor (#443). Denetim kaydında "Filtrele" sekme satırının sağ ucunda (`FilterTabs` `end` yuvası) (#448).
+  - **Kargo (ADR-0087):** ADR önerisi (#435). Adım 0: ücretsiz kargo eşiği desi tablosu ve Geliver dahil bütün seçeneklere; tek ücret yolu `shippingQuote` (#441). Adım 2: sabit ücret kendi sağlayıcımızda (`shop_shop`) hesaplanıyor (#442). Adım 3: üründe ücretsiz kargo ve kargo sınıfları (`product_extension.shipping_class`, migration `Migration20261126160000`; ayar `shipping.shipping_classes`) (#445). Adım 4: vitrin kartı, ürün sayfası, sepet, akışlar ve JSON-LD ödeme adımıyla aynı şeyi söylüyor (#447). Ücretsiz kargo eşiği Ayarlar > Kargo'ya taşındı, Kampanyalar'da salt okunur satır + bağlantı (#449). Kargo ayarları sadeleşti: satır içi seçenekler, katlanmış Gelişmiş; taşıyıcı unvan + VKN fatura ayarlarından her firmanın kargo sayfasına taşındı (#450). "Kargo ücreti" tek soru, 4 mod (tümü ücretsiz / tutarın üstünde ücretsiz / sabit ücret / kargo firmasının ücreti); yeni `shipping.primary_option_id`; sınıflar Gelişmiş'te; üründe "Bu ürünün kargosu ücretsiz" anahtarı (#451).
+  - **Katalog:** stokta olmayan ürünler listelerde gizlenebilir (Ayarlar > Ürün özellikleri; `inventory.out_of_stock_listing`, tek boğaz noktası `listingProducts`) (#440).
+  - **Altyapı/test:** kararsız doğrusal süre yardımcısı (`@qticaret/testing` `measureGrowth`) meşgul runner'a dayanıklı (#444).
+- **Sahibin bugünkü kararları:**
+  - ADR-0087'nin yedi cevabı kabul: ücretsiz ürünün desisi sayılmaz; karışık sepette sabit ücret tam alınır; en yüksek sınıf ek ücreti bir kez; mağaza sınıfları şimdi, yalnız ek ücret; eşik desi tablosu/Geliver'e de uygulanır; eşik ücretsiz ürünleri de sayar; ürün sayfası ek ücreti söyler.
+  - Kargo ekranı tek soru: "Kargo ücreti", 4 mod (#451); eşik Ayarlar > Kargo'da (#449).
+  - Başlıktaki değişiklik sayısı yazısı gizli (#446); denetim kaydı filtresi sekme satırında (#448).
+- **Sahipte açık:**
+  - Geçici hesabı sil: `e2e-audit-1795678576@example.com` (Ayarlar > Güvenlik > Ekip).
+  - Aras ve Yurtiçi sayfalarında "Faturadaki firma bilgisi" unvan + VKN girilecek (güvenilir kaynaktan doğrulanamadı, önden doldurulmadı).
+  - Kararlar: operasyon rolü müşteriye not gönderebilsin mi; ürün sayfasındaki SEO danışmanı kartı gizlenebilsin mi.
+- **Sürüyor (2026-11-26 akşam):** ek ücret satırı ile eşik ilişkisinin düzeltmesi + sepette kargo tahmini; il bazlı kargo fiyatı ADR'si + ücretsiz kargo koşulları tek yerde; bağlantılı ürünler.
+- **Diğer takipler:**
+  - Stoksuz gizleme ana sayfa raflarına ve ilgili ürünlere uygulanmıyor (Oğuzhan).
+  - Hızlı bakıştaki adet seçici en çok adedi dikkate almıyor (Oğuzhan).
+  - Toplu "Kargo sınıfı ata" + sınıf filtresi; CSV'de sınıf sütunu; varyant düzeyinde sınıf.
+  - Ödeme bağlantısı, sonradan düşürülen en çok adedi aşabiliyor.
+  - Kargo ücreti modunu sabit ↔ kargo firması arasında değiştirmek birden çok istek; işlemsel değil (yarıda kalırsa ara durum kalır).
+- **Süreç notları:** kararsız doğrusal süre testi #444 ile sağlamlaştı; üst üste kurulu (stacked) PR'lar alttaki birleşince elle `dev`'e yeniden hedeflenmeli (`delete_branch_on_merge` kapalı, taban kendiliğinden değişmiyor).
+
 ## 2026-11-25/26 — ürün sayfası WooCommerce düzeni, panel eksikleri (Woo karşılaştırması), gece işi
 
 - **Ürün sayfası:** odak kelime etiket (#395); sayfa düzeni gizle/sırala + yerinde kartlar (#396, `panel_layout` ayar bölümü); hazır düzenler, bölüm çubuğu, ⌘K/⌘S, sihirbaz düzene uyar (#397, #398); yerinde açılan varyant satırları + seçenek düzenleyici + toplu çubuk (#401); "Ürün verileri" kartı, tür seçimi + dikey sekmeler (#403); genişlik eski 8/4'e döndü (#409); editör araç çubuğu yapışmaz (#408); indirimli fiyat, varyant başına `sale` fiyat listesi (#405, ADR-0086); basit ürüne geçiş (#410); Kaydet/Vazgeç başlıkta, alt çubuk kalktı (#411); stok takibi aç/kapat (#415).

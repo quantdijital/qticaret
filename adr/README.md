@@ -93,3 +93,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0085 | [Yapay zekâ platform kredisi: üst panelde ağ geçidi, kredi defteri, paket hakkı ve yükleme](0085-yapay-zeka-platform-kredisi.md) | — |
 | 0086 | [Varyantın indirimli fiyatı (WooCommerce "İndirimli fiyat" ve "Zamanla")](0086-varyant-indirimli-fiyati.md) | — |
 | 0087 | [Üründe ücretsiz kargo ve kargo sınıfları](0087-urun-ucretsiz-kargo-ve-kargo-siniflari.md) | — |
+| 0088 | [İllere göre kargo ücreti ve gönderim yapılmayan iller](0088-il-bazli-kargo-ucreti.md) | Deniz (önerildi, 2026-11-26) |

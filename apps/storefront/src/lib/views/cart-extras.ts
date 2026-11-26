@@ -8,6 +8,7 @@ import type { ShippingOption } from "@/lib/checkout/options"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { listProducts, priceDisplays, storefrontLayout } from "@/lib/store-api/requests"
 import type { PriceDisplay } from "@qticaret/types"
+import { crossSellProducts } from "./cart-cross-sells"
 import { cartOfferText } from "./price"
 import { railCards } from "./section-data"
 import { isWholesaleDisplays } from "./wholesale-displays"
@@ -93,8 +94,13 @@ async function upsellSource(t: Translate): Promise<{ title: string; products: St
 }
 
 async function upsellOf(cart: Cart | null, t: Translate): Promise<CartPageView["upsell"]> {
-  const source = await upsellSource(t)
   const inCart = new Set((cart?.items ?? []).flatMap((line) => line.product_id ?? []))
+  // What the cart's products are bought with (S3) before the shop's best sellers
+  const crossSells = await crossSellProducts([...inCart], UPSELL_COUNT)
+  if (crossSells.length > 0) {
+    return { title: t("cart.cross_sells"), products: await railCards(crossSells) }
+  }
+  const source = await upsellSource(t)
   const products = notInCart(source.products, inCart, UPSELL_COUNT)
   if (products.length === 0) {
     return null
