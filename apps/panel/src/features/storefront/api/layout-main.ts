@@ -110,6 +110,7 @@ export interface FooterColumnsFields {
   news_place: FooterColumnsStep<"news_place">
   brand_contact: FooterColumnsStep<"brand_contact">
   bottom_align: FooterColumnsStep<"bottom_align">
+  wordmark: FooterColumnsStep<"wordmark">
 }
 
 export type FooterColumnsSection = FooterBarCommon & {

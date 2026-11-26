@@ -11325,6 +11325,13 @@
           "spread": "Spread",
           "center": "Centred"
         },
+        "wordmark": {
+          "label": "Large wordmark",
+          "term": "wordmark",
+          "hint": "The shop's name very large and faint under the bottom line, cut by the footer's edge.",
+          "off": "Off",
+          "on": "On"
+        },
         "bottom_badges": {
           "label": "Payment logos in the bottom line",
           "term": "payment badges",

@@ -153,6 +153,12 @@ export function FooterColumns({
         )}
       </Container>
       <BottomLine shop={shop} t={t} center={columns.bottomAlign === "center"} />
+      {columns.wordmark === "on" && (
+        // The shop's name once more, large and faint, cut by the footer's edge: drawing, not words
+        <div aria-hidden="true" className="gf-footer-mark">
+          <Container>{shop.name}</Container>
+        </div>
+      )}
     </footer>
   )
 }

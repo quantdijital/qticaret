@@ -90,6 +90,8 @@ export const FOOTER_COLUMNS_SETTINGS = {
   brand_contact: ["show", "hide"],
   /** The bottom line spread across the page, or its words in the middle between two rules. */
   bottom_align: ["spread", "center"],
+  /** The shop's name once more under the bottom line, very large and faint, cut by the footer's edge (`on`), or none. */
+  wordmark: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type FooterColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
@@ -109,6 +111,7 @@ export const FOOTER_COLUMNS_DEFAULTS = {
   news_place: "brand",
   brand_contact: "show",
   bottom_align: "spread",
+  wordmark: "off",
 } as const satisfies { [S in FooterColumnsSetting]: FooterColumnsStep<S> } & {
   top_strip: boolean
   about: null
@@ -127,6 +130,8 @@ export interface StoreFooterColumns {
   brand_contact?: FooterColumnsStep<"brand_contact">
   /** Printed only when not the default; absent: `spread`. */
   bottom_align?: FooterColumnsStep<"bottom_align">
+  /** Printed only when not the default; absent: `off`. */
+  wordmark?: FooterColumnsStep<"wordmark">
 }
 
 /** The footer bar's own settings as `GET /store/storefront-layout` prints them. */
