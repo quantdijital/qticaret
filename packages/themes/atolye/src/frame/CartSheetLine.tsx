@@ -105,6 +105,8 @@ function Words({ line, words }: { line: CartLineView; words: SheetLineWords }) {
       )}
       {line.booking && <span className="font-semibold">{line.booking.departure}</span>}
       <LineAddons addons={line.addons} note={line.nonWithdrawable ? words.nonWithdrawable : null} />
+      {/* adr/0087 §3: a free-shipping line in a mixed cart, the order's surcharge under its line */}
+      {line.shippingNote && <span className="text-xs text-text-3">{line.shippingNote}</span>}
     </div>
   )
 }

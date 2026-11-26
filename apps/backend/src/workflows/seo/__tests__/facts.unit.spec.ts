@@ -245,5 +245,22 @@ describe("productFacts", () => {
       ["variant_a", 899, 99.9],
       ["variant_b", 949, 0],
     ])
+
+    // ...a surcharged one too: past the threshold its surcharge falls with the rest
+    const bulkyPast = productFacts(
+      row({ product_extension: { condition: "used", shipping_class: "bulky" } }),
+      null,
+      "",
+      undefined,
+      {
+        ...shipping,
+        free_shipping_threshold: 949,
+        settings: {
+          ...settings,
+          shipping_classes: [{ key: "bulky", name: "Büyük", surcharge: 15_000 }],
+        },
+      }
+    )
+    expect(bulkyPast.variants.map((variant) => variant.shippingRate)).toEqual([249.9, 0])
   })
 })
