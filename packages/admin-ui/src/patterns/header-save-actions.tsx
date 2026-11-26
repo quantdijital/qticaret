@@ -15,8 +15,9 @@ const inDialog = (target: EventTarget | null): boolean =>
  * The page's one save, in its header (docs/06 "Ürün sayfası"; the owner
  * 2026-11-26, WordPress's "Güncelle"): "Kaydet" is the header's primary
  * button, always there and resting as "Kaydedildi" while nothing has
- * changed. While any card holds unsaved changes, a quiet "n bölümde
- * değişiklik" and "Vazgeç" (asked first) stand beside it; "Kaydet" saves
+ * changed. While any card holds unsaved changes, "Vazgeç" (asked first)
+ * stands beside it and "n bölümde değişiklik" is read out to screen readers
+ * only (never drawn, the header row stays short); "Kaydet" saves
  * each card through its own save, the cards keep their own buttons too.
  * ⌘S / Ctrl+S is "Kaydet" on the page (never the browser's save), and
  * leaving the page with changes asks first. Outside a page with a dirty
@@ -61,11 +62,8 @@ export function HeaderSaveActions() {
       data-header-save=""
       className="flex items-center gap-2"
     >
-      {/* Read out as it changes; shown only where the row has room, the buttons come first */}
-      <p
-        aria-live="polite"
-        className="text-xs whitespace-nowrap text-muted-foreground max-xl:sr-only"
-      >
+      {/* Read out as it changes, never drawn: the header row stays short (the owner 2026-11-26) */}
+      <p aria-live="polite" className="sr-only">
         {changed ? t("headerSave.changes", { count: dirty }) : null}
       </p>
       {changed ? (
