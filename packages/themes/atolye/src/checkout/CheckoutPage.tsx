@@ -203,6 +203,7 @@ export function CheckoutPage({
                   total={view.summary.total}
                   placeOrder={actions.placeOrder}
                   hold={view.summary.hold}
+                  orderNote={view.orderNote}
                   words={{
                     methods: t("checkout.methods"),
                     total: t("checkout.total"),
@@ -215,6 +216,8 @@ export function CheckoutPage({
                     marketingTitle: t("checkout.marketing_title"),
                     marketingEmail: t("checkout.marketing_email"),
                     marketingSms: t("checkout.marketing_sms"),
+                    orderNote: t("checkout.order_note"),
+                    orderNoteHint: t("checkout.order_note_hint"),
                     payCard: t("checkout.pay_with_card"),
                     placeOrder: t("checkout.place_order"),
                     working: t("checkout.working"),

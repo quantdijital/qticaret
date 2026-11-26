@@ -19,6 +19,7 @@ import { returnRequestsQuery } from "@/features/orders/api/returns"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { StockShortBadge } from "@/features/orders/components/stock-short-badge"
 import { BookingCancelCard } from "@/features/orders/detail/booking-cancel-card"
+import { CustomerNoteCard } from "@/features/orders/detail/customer-note"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
@@ -180,6 +181,8 @@ export function OrderDetailPage() {
         </PageColumn>
         <PageColumn span={4}>
           <CustomerCard order={order} editable={state.data.cancelable} />
+          {/* The shopper's own words at checkout, read before packing */}
+          <CustomerNoteCard metadata={order.metadata} />
           <CustomerHistoryCard customerId={order.customer?.id} />
           <OriginCard orderId={order.id} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}

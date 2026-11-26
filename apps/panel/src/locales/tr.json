@@ -5405,6 +5405,9 @@
       "notDelivered_one": "{{count}} sipariş işaretlenemedi: {{reason}}",
       "notDelivered_other": "{{count}} sipariş işaretlenemedi: {{reason}}"
     },
+    "customerNote": {
+      "title": "Müşterinin notu"
+    },
     "notes": {
       "title": "İç notlar",
       "text": "Yalnızca ekip görür; müşteriye yalnızca \"Müşteriye gönder\" seçilen not e-postayla gider.",
@@ -5761,6 +5764,7 @@
       "shipping": "Kargo",
       "total": "Toplam",
       "notes": "Ekip notları",
+      "customerNote": "Müşterinin notu",
       "perOrder": "Siparişler ve ekler",
       "ordersCount_one": "{{count}} sipariş",
       "ordersCount_other": "{{count}} sipariş",

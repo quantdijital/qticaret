@@ -74,6 +74,7 @@ import { INVOICE_ROUTES } from "./http/invoice-routes"
 import { MIGRATION_ROUTES } from "./http/migration-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
+import { ORDER_NOTE_ROUTES } from "./http/order-note-routes"
 import { PAYMENT_LINK_ROUTES } from "./http/payment-link-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
@@ -407,6 +408,7 @@ export default defineMiddlewares({
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,
+    ...ORDER_NOTE_ROUTES,
     // adr/0051: payment links behind their flag; a link's cart locked; Medusa's draft orders closed
     ...PAYMENT_LINK_ROUTES,
     // F3.11: brands

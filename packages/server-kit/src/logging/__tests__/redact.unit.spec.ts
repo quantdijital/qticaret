@@ -40,6 +40,8 @@ describe("isSensitiveKey", () => {
     "document_no",
     "passportNumber",
     "birth_date",
+    "qt_order_note",
+    "orderNote",
     "password",
     "newPassword",
     "token",

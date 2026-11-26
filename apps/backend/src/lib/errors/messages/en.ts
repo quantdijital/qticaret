@@ -579,6 +579,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.consent_evidence_required":
     "Write how the consent was given, in at least 10 characters.",
   "carts.unknown": "The cart was not found or is already completed.",
+  "checkout.order_note_too_long": "The order note may be at most 500 characters.",
   "customer_segments.rules_empty": "Choose at least one rule for the segment.",
   "wishlist.full": "Your saved list is full; remove a few products first.",
   "wishlist.product_unknown": "The product was not found.",

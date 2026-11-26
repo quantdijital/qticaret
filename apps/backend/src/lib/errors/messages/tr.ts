@@ -589,6 +589,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "account.login_email_missing": "Bu oturumun bir e-posta adresi yok; hesap açılamadı.",
   "messaging.consent_evidence_required": "İznin nasıl verildiğini en az 10 karakterle yazın.",
   "carts.unknown": "Sepet bulunamadı ya da tamamlanmış.",
+  "checkout.order_note_too_long": "Sipariş notu en fazla 500 karakter olabilir.",
   "customer_segments.rules_empty": "Segment için en az bir kural seçin.",
   "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
   "wishlist.product_unknown": "Ürün bulunamadı.",

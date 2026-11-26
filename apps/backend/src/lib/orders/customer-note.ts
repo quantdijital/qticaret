@@ -1,0 +1,80 @@
+/**
+ * The shopper's note at checkout ("Sipariş notu"): kept under a `qt_` key
+ * on the cart, which storefronts cannot write (`refuseReservedMetadata`);
+ * Medusa's cart completion copies the cart's metadata to the order, where
+ * staff read it on the order page and the packing slip. Personal data: never
+ * logged, erased with the order's other texts (KVKK).
+ */
+export const ORDER_NOTE_KEY = "qt_order_note"
+
+/** At most this many characters (code points), counted after cleaning. */
+export const ORDER_NOTE_MAX = 500
+
+/** What a storefront may send before cleaning: room for the spaces and breaks cleaning drops. */
+export const ORDER_NOTE_RAW_MAX = 2000
+
+// Unicode's invisible format characters (Cf): what turns text around or hides it on screen
+const FORMAT = /^\p{Cf}$/u
+
+/**
+ * The note as kept: one form of each letter (NFC), line breaks as `\n`,
+ * a tab as a space, other control characters, invisible format characters
+ * (direction marks and overrides, zero-width spaces, tag characters; the
+ * joiners that shape emoji and some scripts stay) and lone surrogates
+ * dropped, at most one empty line in a row, no spaces at either end.
+ */
+export function cleanOrderNote(text: string): string {
+  let out = ""
+  for (const char of text.normalize("NFC").replace(/\r\n?|[\u2028\u2029]/g, "\n")) {
+    const code = char.codePointAt(0) ?? 0
+    if (code === 0x0a) {
+      out += "\n"
+    } else if (code === 0x09) {
+      out += " "
+    } else if (
+      code < 0x20 ||
+      (code >= 0x7f && code <= 0x9f) ||
+      (code >= 0xd800 && code <= 0xdfff) ||
+      (FORMAT.test(char) && code !== 0x200c && code !== 0x200d)
+    ) {
+      continue
+    } else {
+      out += char
+    }
+  }
+  return out
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim()
+}
+
+/** Its length as the limit counts it: characters, not UTF-16 units. */
+export const orderNoteLength = (note: string): number => Array.from(note).length
+
+/** The note kept on a cart's or an order's metadata; anything else there is no note. */
+export function orderNoteOf(metadata: unknown): string | null {
+  if (metadata === null || typeof metadata !== "object") {
+    return null
+  }
+  const value = (metadata as Record<string, unknown>)[ORDER_NOTE_KEY]
+  if (typeof value !== "string") {
+    return null
+  }
+  const note = cleanOrderNote(value)
+  return note === "" ? null : Array.from(note).slice(0, ORDER_NOTE_MAX).join("")
+}
+
+/**
+ * The metadata with the note set, or taken off when it is empty. Medusa's
+ * modules merge a metadata update into what is kept (2.22.6
+ * `mergeMetadata`): a key left out stays, and only an empty string removes
+ * it, so an empty note is written as "" (read back as no note either way).
+ */
+export function withOrderNote(
+  metadata: Record<string, unknown> | null | undefined,
+  note: string
+): Record<string, unknown> {
+  return { ...(metadata ?? {}), [ORDER_NOTE_KEY]: note }
+}
