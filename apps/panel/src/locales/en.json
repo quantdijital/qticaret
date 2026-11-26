@@ -4528,6 +4528,27 @@
       "pageSize_other": "{{count}} products",
       "columns": "Columns"
     },
+    "quickEdit": {
+      "toggle": "Quick edit",
+      "lockedHint": "Save or discard the changes first.",
+      "label": "Quick edit",
+      "save_one": "Save {{count}} change",
+      "save_other": "Save {{count}} changes",
+      "saved_one": "{{formatted}} product updated.",
+      "saved_other": "{{formatted}} products updated.",
+      "failed_one": "{{formatted}} product could not be saved; its change stays in the list.",
+      "failed_other": "{{formatted}} products could not be saved; their changes stay in the list.",
+      "discardTitle": "Discard the changes?",
+      "discardText_one": "{{count}} unsaved change is dropped.",
+      "discardText_other": "{{count}} unsaved changes are dropped.",
+      "discard": "Discard changes",
+      "priceOf": "Price of {{title}}",
+      "stockOf": "Stock of {{title}}",
+      "statusOf": "Status of {{title}}",
+      "inVariants": "Edit in variants",
+      "untracked": "Not tracked",
+      "untrackedHint": "Stock is not counted: this product always sells."
+    },
     "duplicate": {
       "action": "Duplicate",
       "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
@@ -13173,7 +13194,8 @@
         "collection": "Collection picture",
         "popup": "Pop-up",
         "storefront_design": "Saved look",
-        "favicon": "Site icon"
+        "favicon": "Site icon",
+        "booking": "Tour programme"
       },
       "seoTypes": {
         "product": "product page",
@@ -13188,6 +13210,33 @@
       },
       "etbisQrLink": "The shop's ETBİS QR code",
       "faviconLink": "The shop's site icon"
+    },
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "unused": "Unused",
+      "missing_alt": "Missing alt text",
+      "empty": {
+        "unused": "No unused pictures; each one is used by a product, page, setting or the storefront.",
+        "missing_alt": "No pictures without alt text."
+      }
+    },
+    "cleanup": {
+      "hint": "No product, page, setting, campaign or storefront uses these pictures. Click to pick the ones to delete.",
+      "hintReadOnly": "No product, page, setting, campaign or storefront uses these pictures.",
+      "selected_one": "{{formatted}} picture picked",
+      "selected_other": "{{formatted}} pictures picked",
+      "selectPage": "Pick all on this page",
+      "clear": "Clear selection",
+      "delete": "Delete permanently",
+      "confirmTitle_one": "Delete {{formatted}} picture permanently?",
+      "confirmTitle_other": "Delete {{formatted}} pictures permanently?",
+      "confirmText": "The pictures are deleted with their files and cannot be brought back. Each is checked again first; one that has come into use meanwhile is kept.",
+      "confirm": "Delete",
+      "deleted_one": "{{formatted}} picture deleted.",
+      "deleted_other": "{{formatted}} pictures deleted.",
+      "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
+      "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
     }
   },
   "confirmEmail": {

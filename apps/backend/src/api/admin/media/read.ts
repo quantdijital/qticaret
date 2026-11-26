@@ -5,6 +5,7 @@ import { containsPattern } from "../../../lib/security"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import type { MediaAssetRecord } from "../../../modules/media/service"
+import { unusedMediaPage } from "../../../workflows/media/unused"
 import { mediaUses } from "../../../workflows/media/usage"
 import type { AdminGetMediaType } from "./validators"
 
@@ -32,28 +33,41 @@ export const presentMedia = (asset: MediaAssetRecord) => ({
 /**
  * The library: files in the shop's own storage, newest first, by name, alt
  * text or storage key. An image a product holds by an outside address alone
- * has no file here and is not listed.
+ * has no file here and is not listed. `missing_alt` keeps those without an
+ * alt text; `unused` those nothing shows (M1, checked against every source).
  */
 export async function readMediaList(container: MedusaContainer, query: AdminGetMediaType) {
   const pattern = query.q ? containsPattern(query.q) : null
+  const search = pattern
+    ? {
+        $or: [
+          { filename: { $ilike: pattern } },
+          { alt: { $ilike: pattern } },
+          { file_id: { $ilike: pattern } },
+        ],
+      }
+    : {}
+  const page = { offset: query.offset, limit: query.limit }
+  if (query.view === "unused") {
+    const { media, count } = await unusedMediaPage(
+      container,
+      { file_id: { $ne: null }, ...search },
+      page
+    )
+    return { media: media.map(presentMedia), count, ...page }
+  }
+  const filters =
+    query.view === "missing_alt"
+      ? { $and: [{ file_id: { $ne: null } }, { $or: [{ alt: null }, { alt: "" }] }, search] }
+      : { file_id: { $ne: null }, ...search }
   const [assets, count] = await container
     .resolve<MediaModuleService>(MEDIA_MODULE)
-    .listAndCountMediaAssets(
-      {
-        file_id: { $ne: null },
-        ...(pattern
-          ? {
-              $or: [
-                { filename: { $ilike: pattern } },
-                { alt: { $ilike: pattern } },
-                { file_id: { $ilike: pattern } },
-              ],
-            }
-          : {}),
-      },
-      { skip: query.offset, take: query.limit, order: { created_at: "DESC", id: "DESC" } }
-    )
-  return { media: assets.map(presentMedia), count, offset: query.offset, limit: query.limit }
+    .listAndCountMediaAssets(filters, {
+      skip: query.offset,
+      take: query.limit,
+      order: { created_at: "DESC", id: "DESC" },
+    })
+  return { media: assets.map(presentMedia), count, ...page }
 }
 
 /** Who uploaded it: a team member's name, else their e-mail; null for older uploads. */

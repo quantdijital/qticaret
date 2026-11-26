@@ -4528,6 +4528,27 @@
       "pageSize_other": "{{count}} ürün",
       "columns": "Sütunlar"
     },
+    "quickEdit": {
+      "toggle": "Hızlı düzenle",
+      "lockedHint": "Önce değişiklikleri kaydedin ya da vazgeçin.",
+      "label": "Hızlı düzenleme",
+      "save_one": "{{count}} değişikliği kaydet",
+      "save_other": "{{count}} değişikliği kaydet",
+      "saved_one": "{{formatted}} ürün güncellendi.",
+      "saved_other": "{{formatted}} ürün güncellendi.",
+      "failed_one": "{{formatted}} ürün kaydedilemedi; değişikliği listede duruyor.",
+      "failed_other": "{{formatted}} ürün kaydedilemedi; değişiklikleri listede duruyor.",
+      "discardTitle": "Değişikliklerden vazgeçilsin mi?",
+      "discardText_one": "Kaydedilmemiş {{count}} değişiklik silinir.",
+      "discardText_other": "Kaydedilmemiş {{count}} değişiklik silinir.",
+      "discard": "Değişikliklerden vazgeç",
+      "priceOf": "{{title}} fiyatı",
+      "stockOf": "{{title}} stoku",
+      "statusOf": "{{title}} durumu",
+      "inVariants": "Varyantlarda düzenle",
+      "untracked": "Takip yok",
+      "untrackedHint": "Stok sayılmıyor: bu ürün her zaman satılır."
+    },
     "duplicate": {
       "action": "Kopyala",
       "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
@@ -13173,7 +13194,8 @@
         "collection": "Koleksiyon görseli",
         "popup": "Pop-up",
         "storefront_design": "Kayıtlı görünüm",
-        "favicon": "Site simgesi"
+        "favicon": "Site simgesi",
+        "booking": "Tur programı"
       },
       "seoTypes": {
         "product": "ürün sayfası",
@@ -13188,6 +13210,33 @@
       },
       "etbisQrLink": "Mağazanın ETBİS karekodu",
       "faviconLink": "Mağazanın site simgesi"
+    },
+    "views": {
+      "label": "Görünümler",
+      "all": "Tümü",
+      "unused": "Kullanılmayan",
+      "missing_alt": "Alt metni eksik",
+      "empty": {
+        "unused": "Kullanılmayan görsel yok; her görsel bir ürün, sayfa, ayar ya da vitrinde kullanılıyor.",
+        "missing_alt": "Alt metni eksik görsel yok."
+      }
+    },
+    "cleanup": {
+      "hint": "Bu görselleri hiçbir ürün, sayfa, ayar, kampanya ya da vitrin kullanmıyor. Silmek için tıklayıp seçin.",
+      "hintReadOnly": "Bu görselleri hiçbir ürün, sayfa, ayar, kampanya ya da vitrin kullanmıyor.",
+      "selected_one": "{{formatted}} görsel seçildi",
+      "selected_other": "{{formatted}} görsel seçildi",
+      "selectPage": "Bu sayfadakilerin hepsini seç",
+      "clear": "Seçimi kaldır",
+      "delete": "Kalıcı olarak sil",
+      "confirmTitle_one": "{{formatted}} görsel kalıcı olarak silinsin mi?",
+      "confirmTitle_other": "{{formatted}} görsel kalıcı olarak silinsin mi?",
+      "confirmText": "Görseller dosyalarıyla birlikte silinir ve geri alınamaz. Silmeden önce her biri yeniden denetlenir; bu arada bir yerde kullanılmaya başlanan görsel silinmez.",
+      "confirm": "Sil",
+      "deleted_one": "{{formatted}} görsel silindi.",
+      "deleted_other": "{{formatted}} görsel silindi.",
+      "kept_one": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı.",
+      "kept_other": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı."
     }
   },
   "confirmEmail": {

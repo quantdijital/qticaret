@@ -34,6 +34,8 @@ export type MediaUseKind =
   | "collection"
   // adr/0080: a storefront pop-up's picture (its id; `label` its name)
   | "popup"
+  // adr/0076: a dated product's programme step (the product's id; `label` its title)
+  | "booking"
 
 export interface MediaUse {
   kind: MediaUseKind
@@ -278,6 +280,29 @@ async function describedProducts(container: Container, ids: string[]): Promise<M
   )
 }
 
+/** Dated products whose programme shows it (adr/0076), through their bookable's link. */
+async function bookings(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+  const rows = (await knex("bookable")
+    .select("id")
+    .whereNull("deleted_at")
+    .andWhereRaw("position(? in coalesce(program::text, '')) > 0", [JSON.stringify(target.url)])
+    .limit(LIMIT)) as { id: string }[]
+  if (rows.length === 0) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "bookable",
+    fields: ["id", "product.id", "product.title"],
+    filters: { id: rows.map((row) => row.id) },
+  })
+  return (data as { id: string; product?: Named | null }[]).map((row) =>
+    row.product
+      ? { kind: "booking" as const, id: row.product.id, label: row.product.title ?? null }
+      : { kind: "booking" as const, id: null, label: null }
+  )
+}
+
 /** Orders placed with it as a line's picture: their pages and e-mails show it for good. */
 async function orders(container: Container, target: MediaTarget): Promise<MediaUse[]> {
   const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
@@ -302,6 +327,7 @@ export async function mediaUses(container: Container, target: MediaTarget): Prom
     categories(container, target),
     collections(container, target),
     popups(container, target),
+    bookings(container, target),
     orders(container, target),
   ])
   return found.flat()
