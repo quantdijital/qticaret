@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest"
 import {
   CARD_BUTTON_STYLES,
   CARD_DENSITIES,
+  CARD_META_PLACES,
   CARD_NO_REVIEWS,
   CARD_RATIOS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
+  CARD_STYLES,
   CARD_TEXT_POSITIONS,
 } from "./storefront.js"
 
@@ -23,5 +25,7 @@ describe("the product card's choices", () => {
     // sahip 2026-11-26: today's shapes and rows first
     expect(CARD_RATIOS).toEqual(["4:5", "1:1", "3:4", "4:3"])
     expect(CARD_DENSITIES).toEqual(["regular", "compact"])
+    expect(CARD_META_PLACES).toEqual(["below", "over"])
+    expect(CARD_STYLES).toEqual(["plain", "glass"])
   })
 })

@@ -2,10 +2,12 @@ import {
   ACCENT_FONTS,
   CARD_BUTTON_STYLES,
   CARD_DENSITIES,
+  CARD_META_PLACES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
+  CARD_STYLES,
   CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
   LISTING_PAGE_DEFAULTS,
@@ -98,7 +100,7 @@ export const QUICK_VIEW_SWITCHES = [
  * switch; a dated card's length row and "kişi başı", each a switch shown
  * only while the shop sells dated products.
  */
-export { CARD_TEXT_POSITIONS }
+export { CARD_META_PLACES, CARD_STYLES, CARD_TEXT_POSITIONS }
 export const TOUR_CARD_SWITCHES = ["rating_badge", "arrow"] as const
 export const DATED_CARD_SWITCHES = ["duration_row", "per_person"] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
@@ -162,6 +164,9 @@ export interface ThemeSettings extends StyleKit {
     quick_view_trigger: (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
     /** A standard card's words under or over its photo (adr/0077 Ek "tur kartı"). */
     text_position: (typeof CARD_TEXT_POSITIONS)[number]
+    /** The stars, length and departure on the photo; the frosted panel card (sahip 2026-11-26). */
+    meta_place: (typeof CARD_META_PLACES)[number]
+    style: (typeof CARD_STYLES)[number]
   } & Record<
     | (typeof FRAMED_CARD_SWITCHES)[number]
     | (typeof CARD_BADGE_SWITCHES)[number]
@@ -231,6 +236,8 @@ export const GRAFIT_THEME: ThemeChoices = {
     arrow: false,
     duration_row: false,
     per_person: false,
+    meta_place: "below",
+    style: "plain",
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",

@@ -54,6 +54,18 @@ export const textOver = (product: ProductCardView): boolean =>
   !!product.look?.over && drawnCardVariant(product) === "standard"
 
 /**
+ * Whether a standard card's stars, length and nearest departure stand as
+ * frosted pills on its photo (`meta_place: over`, sahip 2026-11-26) and
+ * leave its rows; other variants keep their rows.
+ */
+export const metaOnPhoto = (product: ProductCardView): boolean =>
+  !!product.look?.metaOver && drawnCardVariant(product) === "standard"
+
+/** Whether a standard card draws its frosted panel (`style: glass`, sahip 2026-11-26). */
+export const glassCard = (product: ProductCardView): boolean =>
+  !!product.look?.glass && drawnCardVariant(product) === "standard"
+
+/**
  * Whether the card's stars stand as a pill on its photo (adr/0077 Ek "tur
  * kartı"): the card has them, it has the pills on its photo (the compact
  * card keeps its row), and the shop asked for the pill or put the words
@@ -75,7 +87,9 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
   const badges = badgesOf(product)
   const discount = badges.sale ? (product.price?.discount ?? null) : null
   const out = isOut(product)
-  const rating = ratingBadged(product) ? product.rating : null
+  // The details on the photo (`meta_place: over`) carry the stars themselves (`CardMeta`)
+  const meta = metaOnPhoto(product)
+  const rating = ratingBadged(product) && !meta ? product.rating : null
   const badge = product.badge ?? null
   return (
     <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
@@ -89,7 +103,7 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
         </li>
       )}
       {/* A compact card with its words over the photo: the stars' count and the length join the pill */}
-      {product.look?.compact && textOver(product) ? (
+      {product.look?.compact && textOver(product) && !meta ? (
         <CompactPill product={product} />
       ) : (
         rating && (

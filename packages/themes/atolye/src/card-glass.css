@@ -1,0 +1,63 @@
+/*
+ * The frosted look (sahip 2026-11-26): a standard card's details as pills
+ * on its photo (`meta_place: over`, `parts/card-meta.tsx`) and the glass
+ * card's floating panel (`style: glass`, `parts/card-glass.tsx`). Both are
+ * the paper's own tone, part see-through and blurred, so they read on any
+ * photograph in the shop's inks; a hairline of light at their edge. The
+ * panel lifts and "İncele →" shows on hover with a fine pointer; a
+ * visitor who asks for less motion sees them still, a touch screen the
+ * arrow always.
+ */
+@layer components {
+  .gf-card-glass-pill,
+  .gf-card-glass-panel {
+    background: color-mix(in oklab, var(--color-paper) 74%, transparent);
+    color: var(--color-text);
+    border: 1px solid color-mix(in oklab, white 45%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+  }
+  .gf-card-glass-pill {
+    box-shadow: 0 1px 2px oklch(20% 0.012 255 / 0.12);
+  }
+  .gf-card-glass-panel {
+    box-shadow: var(--shadow-float);
+  }
+  /* The departure pill's icon and the meta words in the pill's ink */
+  .gf-card-meta .gf-card-glass-pill svg:not(.fill-star) {
+    color: var(--color-text-2);
+  }
+  .gf-card-glass-go {
+    color: var(--color-text);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .gf-card-glass-go {
+      opacity: 0;
+    }
+    .gf-card-glass:hover .gf-card-glass-go,
+    .gf-card-glass:focus-within .gf-card-glass-go {
+      opacity: 1;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .gf-card-glass-panel {
+      transition:
+        translate var(--dur-short) var(--ease-out),
+        box-shadow var(--dur-short) var(--ease-out);
+    }
+    .gf-card-glass-go {
+      translate: -4px 0;
+      transition:
+        opacity var(--dur-micro) var(--ease-out),
+        translate var(--dur-short) var(--ease-out);
+    }
+    .gf-card-glass:hover .gf-card-glass-panel,
+    .gf-card-glass:focus-within .gf-card-glass-panel {
+      translate: 0 -4px;
+    }
+    .gf-card-glass:hover .gf-card-glass-go,
+    .gf-card-glass:focus-within .gf-card-glass-go {
+      translate: 0 0;
+    }
+  }
+}

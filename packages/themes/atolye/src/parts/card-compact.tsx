@@ -1,7 +1,7 @@
 import type { ProductCardView, Translate } from "@qticaret/ui"
 import { CardArrow } from "./card-arrow"
 import { BookingNext, BookingPrice } from "./card-booking"
-import { ratingBadged } from "./card-parts"
+import { metaOnPhoto, ratingBadged } from "./card-parts"
 import { DurationWords, RatingWords, durationOf } from "./card-pill"
 import { CardPriceRow, CardStars } from "./card-rows"
 
@@ -16,8 +16,10 @@ import { CardPriceRow, CardStars } from "./card-rows"
  * stars on the photo's pill when the shop puts them there.
  */
 export function CompactWords({ product, t }: { product: ProductCardView; t: Translate }) {
-  const duration = durationOf(product)
-  const rated = !!product.rating && !ratingBadged(product)
+  // The stars, length and departure on the photo instead (`meta_place: over`, `CardMeta`)
+  const meta = metaOnPhoto(product)
+  const duration = meta ? undefined : durationOf(product)
+  const rated = !!product.rating && !ratingBadged(product) && !meta
   const price = product.booking ? (
     <BookingPrice product={product} t={t} className="min-w-0" />
   ) : (
@@ -50,7 +52,7 @@ export function CompactWords({ product, t }: { product: ProductCardView; t: Tran
         </p>
       )}
       {!product.rating && <CardStars product={product} t={t} />}
-      {product.booking && <BookingNext product={product} t={t} />}
+      {product.booking && !meta && <BookingNext product={product} t={t} />}
     </div>
   )
 }

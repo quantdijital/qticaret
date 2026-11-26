@@ -13,6 +13,8 @@ export const CARD_LOOK_DEFAULTS: CardLookView = {
   duration: false,
   perPerson: false,
   compact: false,
+  metaOver: false,
+  glass: false,
 }
 
 const KEYS = Object.keys(CARD_LOOK_DEFAULTS) as (keyof CardLookView)[]
@@ -30,6 +32,8 @@ export function cardLookOf(card: StoreThemeSettings["product_card"]): CardLookVi
     duration: card.duration_row,
     perPerson: card.per_person,
     compact: card.density === "compact",
+    metaOver: card.meta_place === "over",
+    glass: card.style === "glass",
   }
 }
 

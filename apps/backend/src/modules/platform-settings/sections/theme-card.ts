@@ -58,6 +58,9 @@ export interface ProductCardSettings {
   arrow: boolean
   duration_row: boolean
   per_person: boolean
+  /** sahip 2026-11-26: a standard card's stars, length and departure on the photo; its frosted panel. */
+  meta_place: (typeof CARD_META_PLACES)[number]
+  style: (typeof CARD_STYLES)[number]
 }
 
 /**
@@ -76,6 +79,10 @@ export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 export const CARD_RATIOS = ["4:5", "1:1", "3:4", "4:3"] as const
 /** A standard card's rows (`CARD_DENSITIES`): today's first. */
 export const CARD_DENSITIES = ["regular", "compact"] as const
+/** A standard card's stars, length and departure (`CARD_META_PLACES`): in its rows (today's) or on the photo. */
+export const CARD_META_PLACES = ["below", "over"] as const
+/** A standard card's frame (`CARD_STYLES`): today's `plain` or the frosted `glass` panel. */
+export const CARD_STYLES = ["plain", "glass"] as const
 
 /**
  * The card's defaults, the Grafit look's (adr/0062 §2): today's card. A
@@ -107,6 +114,8 @@ export const PRODUCT_CARD_DEFAULTS: ProductCardSettings = {
   arrow: false,
   duration_row: false,
   per_person: false,
+  meta_place: "below",
+  style: "plain",
 }
 
 const CHOICE_ERROR = { error: "platform_settings.invalid" }
@@ -170,5 +179,7 @@ export const productCardSchema = z
     arrow: z.boolean(),
     duration_row: z.boolean(),
     per_person: z.boolean(),
+    meta_place: choice(CARD_META_PLACES),
+    style: choice(CARD_STYLES),
   })
   .strict()

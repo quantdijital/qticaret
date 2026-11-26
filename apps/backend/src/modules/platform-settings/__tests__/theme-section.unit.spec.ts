@@ -67,6 +67,8 @@ describe("theme section", () => {
         arrow: false,
         duration_row: false,
         per_person: false,
+        meta_place: "below",
+        style: "plain",
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",

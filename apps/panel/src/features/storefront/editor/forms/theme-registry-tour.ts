@@ -1,4 +1,9 @@
-import { CARD_DENSITIES, CARD_TEXT_POSITIONS } from "@/features/storefront/api/theme"
+import {
+  CARD_DENSITIES,
+  CARD_META_PLACES,
+  CARD_STYLES,
+  CARD_TEXT_POSITIONS,
+} from "@/features/storefront/api/theme"
 import type {
   DATED_CARD_SWITCHES,
   ThemeChoices,
@@ -49,6 +54,22 @@ export const TOUR_CARD_META = {
     group: "card",
     label: `${C}.tourCard.density`,
     options: CARD_DENSITIES.map((option) => `${C}.tourCard.densities.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
+  // sahip 2026-11-26: the stars, date and length as frosted pills on the photo
+  "product_card.meta_place": {
+    group: "card",
+    label: `${C}.tourCard.meta_place`,
+    options: CARD_META_PLACES.map((option) => `${C}.tourCard.metaPlaces.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
+  // sahip 2026-11-26: the name and price on a frosted panel floating on the photo
+  "product_card.style": {
+    group: "card",
+    label: `${C}.tourCard.style`,
+    options: CARD_STYLES.map((option) => `${C}.tourCard.styles.${option}`),
     keywords: KEYWORDS,
     shown: standardInUse,
   },

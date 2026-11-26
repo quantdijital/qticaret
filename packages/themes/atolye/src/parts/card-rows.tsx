@@ -1,7 +1,7 @@
 import { BellRing, PenLine } from "lucide-react"
 import type { CardShownView, ProductCardView, Translate } from "@qticaret/ui"
 import { REVIEWS_ID, STOCK_ALERT_ID } from "../product/anchors"
-import { BookingPriceRow } from "./card-booking"
+import { BookingPrice, BookingPriceRow } from "./card-booking"
 import { CardRating, isOut, ratingBadged } from "./card-parts"
 import { Price } from "./Price"
 import { Stars } from "./Stars"
@@ -71,13 +71,20 @@ export function CardPriceRow({
   product,
   t,
   className = "",
+  bare = false,
 }: {
   product: ProductCardView
   t: Translate
   className?: string
+  /** A dated card's price alone, its length and departure drawn elsewhere (`CardMeta`). */
+  bare?: boolean
 }) {
   if (product.booking) {
-    return <BookingPriceRow product={product} t={t} className={className} />
+    return bare ? (
+      <BookingPrice product={product} t={t} className={className} />
+    ) : (
+      <BookingPriceRow product={product} t={t} className={className} />
+    )
   }
   const row = isOut(product) ? shownOf(product).soldOutRow : "price"
   if (row === "text") {

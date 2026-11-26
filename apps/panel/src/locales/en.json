@@ -10510,7 +10510,31 @@
           "duration_row": "Show the tour's length",
           "duration_rowHint": "A \"5 days • 4 nights\" row on a dated product, read from its Tour details' Length field; none when it is empty.",
           "per_person": "Write \"per person\" after the price",
-          "per_personHint": "Only on a dated product."
+          "per_personHint": "Only on a dated product.",
+          "meta_place": "Rating, date and length",
+          "meta_placeHint": "Over the photo: the stars and review count, the nearest departure and the tour's length stand in frosted badges on the photo's corners; under it only the name and price remain. Standard cards only.",
+          "metaPlaces": {
+            "below": "Under the photo",
+            "over": "Over the photo (badges)"
+          },
+          "style": "Card style",
+          "styleHint": "Glass panel: the photo fills the card; the name and price float on a frosted panel at its foot, which lifts a little on hover as \"View\" shows. Standard cards only.",
+          "styles": {
+            "plain": "Plain",
+            "glass": "Glass panel"
+          },
+          "presets": {
+            "title": "Ready-made card looks",
+            "hint": "Picking one fills in its settings; you can still change each one afterwards.",
+            "custom": "Custom",
+            "customHint": "The settings match none of the ready-made looks.",
+            "classic": "Classic",
+            "classicHint": "Under the photo: the name, price, rating, length and date rows.",
+            "modern": "Modern",
+            "modernHint": "The rating, date and length in badges on the photo; only the name and price under it. The name and price can go inside the photo too, with \"Where the text stands\".",
+            "glass": "Glass panel",
+            "glassHint": "The name and price on a frosted panel floating on the photo; badges on its corners, every photo in turn on hover."
+          }
         },
         "cardVariant": "Card style",
         "cardVariants": {

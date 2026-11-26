@@ -4,10 +4,12 @@ import {
   CARD_BADGE_SWITCHES,
   CARD_BUTTON_STYLES,
   CARD_DENSITIES,
+  CARD_META_PLACES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
+  CARD_STYLES,
   CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
   DATED_CARD_SWITCHES,
@@ -19,6 +21,7 @@ import type { ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
 import { useSectionFlags } from "./section-flags"
+import { CardPresetPicker } from "./theme-card-presets"
 import { ChoiceSelect, SwitchRow } from "./theme-fields"
 import { THEME_FIELD, THEME_GROUP_TITLES } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeGroupName, ThemeRegistryField } from "./forms/theme-registry"
@@ -35,6 +38,8 @@ type CardChoice =
   | "quick_view_trigger"
   | "text_position"
   | "density"
+  | "meta_place"
+  | "style"
 
 /** A card choice's list, as the registry names its options in this order. */
 const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
@@ -46,6 +51,8 @@ const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
   quick_view_trigger: CARD_QUICK_VIEW_TRIGGERS,
   text_position: CARD_TEXT_POSITIONS,
   density: CARD_DENSITIES,
+  meta_place: CARD_META_PLACES,
+  style: CARD_STYLES,
 }
 
 /** The tour card's switches in the panel's order: every card's, then a dated card's. */
@@ -137,12 +144,18 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
   return (
     <>
       <PanelGroup name="card" title={t(THEME_GROUP_TITLES.card)} reveal={reveal("card")}>
+        {/* sahip 2026-11-26: ready-made looks over the settings, a standard card's */}
+        {visible(THEME_FIELD["product_card.style"]) && (
+          <CardPresetPicker card={card} onPick={set} />
+        )}
         <Pair>
           {choice("ratio")}
           {choice("variant")}
         </Pair>
         {choice("text_position")}
         {choice("density")}
+        {choice("meta_place")}
+        {choice("style")}
         {toggle("show_brand")}
         {toggle("show_rating")}
         {choice("no_reviews")}

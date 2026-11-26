@@ -103,6 +103,8 @@ const CARD = {
   arrow: false,
   duration_row: false,
   per_person: false,
+  meta_place: "below",
+  style: "plain",
 }
 
 /** F18 D11 (adr/0053): the shop picks its look from fixed lists; the storefront reads it. */

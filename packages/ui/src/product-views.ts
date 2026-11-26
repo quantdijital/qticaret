@@ -126,6 +126,18 @@ export interface CardLookView {
    * carries the count and the length. Absent: false.
    */
   compact?: boolean
+  /**
+   * The stars, a dated card's length and its nearest departure as frosted
+   * pills on the photo's corners instead of rows (`meta_place: over`, sahip
+   * 2026-11-26), on a standard card. Absent: false.
+   */
+  metaOver?: boolean
+  /**
+   * A standard card's frosted panel (`style: glass`, sahip 2026-11-26): the
+   * photo fills the card, the name and price float on a blurred panel at its
+   * foot that lifts on hover with a "İncele" arrow. Absent: false.
+   */
+  glass?: boolean
 }
 
 /** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */

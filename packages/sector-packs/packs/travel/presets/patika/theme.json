@@ -27,7 +27,9 @@
     "rating_badge": false,
     "arrow": true,
     "duration_row": true,
-    "per_person": true
+    "per_person": true,
+    "meta_place": "over",
+    "style": "plain"
   },
   "header": {
     "layout": "left",

@@ -7,10 +7,12 @@ import type {
 import {
   CARD_BUTTON_STYLES,
   CARD_DENSITIES,
+  CARD_META_PLACES,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_NO_REVIEWS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
+  CARD_STYLES,
   CARD_TEXT_POSITIONS,
   RADIUS_STEPS,
   SECTION_SPACINGS,
@@ -70,6 +72,8 @@ export const DEFAULT_THEME: StoreThemeSettings = {
     arrow: false,
     duration_row: false,
     per_person: false,
+    meta_place: "below",
+    style: "plain",
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
@@ -275,6 +279,12 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
         d.product_card.text_position
       ),
       density: oneOf(at(raw, "product_card", "density"), CARD_DENSITIES, d.product_card.density),
+      meta_place: oneOf(
+        at(raw, "product_card", "meta_place"),
+        CARD_META_PLACES,
+        d.product_card.meta_place
+      ),
+      style: oneOf(at(raw, "product_card", "style"), CARD_STYLES, d.product_card.style),
     },
     header: {
       layout: oneOf(at(raw, "header", "layout"), ["centered", "left"], d.header.layout),

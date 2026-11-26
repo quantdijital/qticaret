@@ -1,6 +1,7 @@
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { BookingDuration, BookingNext, BookingPrice } from "./card-booking"
-import { CardBadges, isOut, quickAddWords } from "./card-parts"
+import { CardMeta } from "./card-meta"
+import { CardBadges, isOut, metaOnPhoto, quickAddWords } from "./card-parts"
 import { CardPhoto } from "./CardPhoto"
 import { CardQuickView } from "./card-quick-view"
 import { CardPriceRow } from "./card-rows"
@@ -33,6 +34,7 @@ export function OverCard({
   const out = isOut(product)
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   const split = !!product.look?.split
+  const meta = metaOnPhoto(product)
   return (
     <article
       className="group gf-card gf-card-over @container relative h-full"
@@ -61,7 +63,7 @@ export function OverCard({
             ) : (
               <CardPriceRow product={product} t={t} />
             )}
-            {product.booking && (
+            {product.booking && !meta && (
               <>
                 {/* A compact card's length stands in its pill on the photo (`CompactPill`) */}
                 {!product.look?.compact && <BookingDuration product={product} />}
@@ -71,6 +73,7 @@ export function OverCard({
           </div>
         )}
         <CardBadges product={product} t={t} />
+        {meta && <CardMeta product={product} t={t} foot={false} />}
         <CardQuickView product={product} t={t} />
         {add && quickAdd && (
           <QuickAdd

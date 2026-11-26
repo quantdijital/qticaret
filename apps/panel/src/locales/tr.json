@@ -10510,7 +10510,31 @@
           "duration_row": "Tur süresini göster",
           "duration_rowHint": "Tarihli üründe \"5 gün • 4 gece\" satırı. Süre, ürünün Tur bilgileri özelliklerindeki Süre alanından okunur; boşsa satır çıkmaz.",
           "per_person": "Fiyatın yanına \"kişi başı\" yaz",
-          "per_personHint": "Yalnız tarihli üründe görünür."
+          "per_personHint": "Yalnız tarihli üründe görünür.",
+          "meta_place": "Puan, tarih ve süre",
+          "meta_placeHint": "Görselin üstünde: yıldız ve yorum sayısı, en yakın kalkış tarihi ve tur süresi fotoğrafın köşelerinde buzlu cam rozetlerde durur; kartın altında yalnız ad ve fiyat kalır. Yalnız standart kartta geçer.",
+          "metaPlaces": {
+            "below": "Kartın altında",
+            "over": "Görselin üstünde (rozet)"
+          },
+          "style": "Kart stili",
+          "styleHint": "Cam panel: fotoğraf kartın tamamını kaplar; ad ve fiyat fotoğrafın altında yüzen buzlu cam bir panelde durur, üstüne gelince panel hafifçe kalkar ve \"İncele\" belirir. Yalnız standart kartta geçer.",
+          "styles": {
+            "plain": "Düz",
+            "glass": "Cam panel"
+          },
+          "presets": {
+            "title": "Hazır kart görünümü",
+            "hint": "Birini seçince ilgili ayarlar doldurulur; sonra her ayarı tek tek değiştirebilirsiniz.",
+            "custom": "Özel",
+            "customHint": "Ayarlar hazır görünümlerden hiçbirine tam uymuyor.",
+            "classic": "Klasik",
+            "classicHint": "Fotoğrafın altında ad, fiyat, puan, süre ve tarih satırları.",
+            "modern": "Modern",
+            "modernHint": "Puan, tarih ve süre görselin üstünde rozetlerde; altta yalnız ad ve fiyat. Ad ve fiyat da \"Yazının yeri\" ayarıyla görselin içine alınabilir.",
+            "glass": "Cam panel",
+            "glassHint": "Ad ve fiyat görselin üstünde yüzen buzlu cam panelde; rozetler köşelerde, üstüne gelince fotoğraflar sırayla geçer."
+          }
         },
         "cardVariant": "Kart biçimi",
         "cardVariants": {
