@@ -42,7 +42,12 @@ export function ContentCard({ isNew = false }: { isNew?: boolean }) {
             error={error("name")}
             required
           >
-            <Input id="popup-name" maxLength={POPUP_LIMITS.name} {...register("name")} />
+            <Input
+              placeholder={t("popups.placeholders.name")}
+              id="popup-name"
+              maxLength={POPUP_LIMITS.name}
+              {...register("name")}
+            />
           </Field>
           <Field label={t(`${F}.type`)} htmlFor="popup-type">
             <Select
@@ -73,10 +78,21 @@ export function ContentCard({ isNew = false }: { isNew?: boolean }) {
           </Field>
         </div>
         <Field label={t(`${F}.title`)} htmlFor="popup-title" error={error("title")} required>
-          <Input id="popup-title" maxLength={POPUP_LIMITS.title} {...register("title")} />
+          <Input
+            placeholder={t("popups.placeholders.title")}
+            id="popup-title"
+            maxLength={POPUP_LIMITS.title}
+            {...register("title")}
+          />
         </Field>
         <Field label={t(`${F}.body`)} htmlFor="popup-body" error={error("body")}>
-          <Textarea id="popup-body" rows={4} maxLength={POPUP_LIMITS.body} {...register("body")} />
+          <Textarea
+            placeholder={t("popups.placeholders.body")}
+            id="popup-body"
+            rows={4}
+            maxLength={POPUP_LIMITS.body}
+            {...register("body")}
+          />
         </Field>
         {type === "campaign" ? <PromotionPicker /> : null}
         {type === "newsletter" ? (
@@ -87,6 +103,7 @@ export function ContentCard({ isNew = false }: { isNew?: boolean }) {
             error={error("button_label")}
           >
             <Input
+              placeholder={t("popups.placeholders.submitLabel")}
               id="popup-button-label"
               maxLength={POPUP_LIMITS.buttonLabel}
               {...register("button_label")}
@@ -100,6 +117,7 @@ export function ContentCard({ isNew = false }: { isNew?: boolean }) {
               error={error("button_label")}
             >
               <Input
+                placeholder={t("popups.placeholders.buttonLabel")}
                 id="popup-button-label"
                 maxLength={POPUP_LIMITS.buttonLabel}
                 {...register("button_label")}
@@ -147,6 +165,7 @@ export function ContentCard({ isNew = false }: { isNew?: boolean }) {
                     error={error("image_alt")}
                   >
                     <Input
+                      placeholder={t("common.placeholder.imageAlt")}
                       id="popup-image-alt"
                       maxLength={POPUP_LIMITS.imageAlt}
                       {...register("image_alt")}

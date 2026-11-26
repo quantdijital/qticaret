@@ -56,6 +56,7 @@ export function FooterColumnsContent({
           </small>
         </label>
         <Input
+          placeholder={t("storefront.placeholders.footerAbout")}
           id={about}
           value={section.about ?? ""}
           maxLength={FOOTER_COLUMNS_LIMITS.about}

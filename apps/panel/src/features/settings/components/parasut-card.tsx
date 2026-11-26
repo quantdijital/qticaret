@@ -53,6 +53,7 @@ function ConnectForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label={t(`${P}.companyId`)} htmlFor="parasut-company">
           <Input
+            placeholder={t("settings.placeholders.parasutCompany")}
             id="parasut-company"
             inputMode="numeric"
             value={company}
@@ -63,6 +64,7 @@ function ConnectForm({
         </Field>
         <Field label={t(`${P}.code`)} htmlFor="parasut-code">
           <Input
+            placeholder={t("settings.placeholders.parasutCode")}
             id="parasut-code"
             autoComplete="off"
             value={code}

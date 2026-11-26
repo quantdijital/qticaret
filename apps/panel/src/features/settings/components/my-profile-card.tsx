@@ -84,10 +84,20 @@ export function ProfileDialog({ profile, onClose }: { profile: Profile; onClose:
       <DialogBody>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label={t(`${P}.firstName`)} htmlFor="profile-first_name" required>
-            <Input {...field("first_name")} autoComplete="given-name" maxLength={NAME_MAX} />
+            <Input
+              placeholder={t("common.placeholder.firstName")}
+              {...field("first_name")}
+              autoComplete="given-name"
+              maxLength={NAME_MAX}
+            />
           </Field>
           <Field label={t(`${P}.lastName`)} htmlFor="profile-last_name" required>
-            <Input {...field("last_name")} autoComplete="family-name" maxLength={NAME_MAX} />
+            <Input
+              placeholder={t("common.placeholder.lastName")}
+              {...field("last_name")}
+              autoComplete="family-name"
+              maxLength={NAME_MAX}
+            />
           </Field>
         </div>
         <Field label={t(`${P}.jobTitle`)} htmlFor="profile-job_title" hint={t(`${P}.jobTitleHint`)}>

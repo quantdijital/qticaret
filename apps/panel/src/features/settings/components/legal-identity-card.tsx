@@ -122,22 +122,52 @@ export function LegalIdentityCard({
       ) : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field {...field("company_title", { required: true })}>
-          <Input id="legal-company_title" maxLength={200} {...form.register("company_title")} />
+          <Input
+            placeholder={t("common.placeholder.company")}
+            id="legal-company_title"
+            maxLength={200}
+            {...form.register("company_title")}
+          />
         </Field>
         <Field {...field("mersis", { hint: t(`${K}.mersisHint`) })}>
-          <Input id="legal-mersis" inputMode="numeric" {...form.register("mersis")} />
+          <Input
+            placeholder={t("settings.placeholders.mersis")}
+            id="legal-mersis"
+            inputMode="numeric"
+            {...form.register("mersis")}
+          />
         </Field>
         <Field {...field("tax_office", { required: true })}>
-          <Input id="legal-tax_office" maxLength={100} {...form.register("tax_office")} />
+          <Input
+            placeholder={t("common.placeholder.taxOffice")}
+            id="legal-tax_office"
+            maxLength={100}
+            {...form.register("tax_office")}
+          />
         </Field>
         <Field {...field("tax_number", { required: true, hint: t(`${K}.taxNumberHint`) })}>
-          <Input id="legal-tax_number" inputMode="numeric" {...form.register("tax_number")} />
+          <Input
+            placeholder={t("settings.placeholders.taxOrId")}
+            id="legal-tax_number"
+            inputMode="numeric"
+            {...form.register("tax_number")}
+          />
         </Field>
         <Field {...field("kep")}>
-          <Input id="legal-kep" type="email" autoComplete="off" {...form.register("kep")} />
+          <Input
+            placeholder={t("settings.placeholders.kep")}
+            id="legal-kep"
+            type="email"
+            autoComplete="off"
+            {...form.register("kep")}
+          />
         </Field>
         <Field {...field("etbis", { hint: t(`${K}.etbisHint`) })}>
-          <Input id="legal-etbis" {...form.register("etbis")} />
+          <Input
+            placeholder={t("settings.placeholders.etbis")}
+            id="legal-etbis"
+            {...form.register("etbis")}
+          />
         </Field>
         <EtbisQrField
           url={qr}
@@ -153,10 +183,16 @@ export function LegalIdentityCard({
         <p className="text-[13px] text-muted-foreground">{t(`${K}.documentHint`)}</p>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field {...field("document_name", { hint: t(`${K}.documentNameHint`) })}>
-            <Input id="legal-document_name" maxLength={100} {...form.register("document_name")} />
+            <Input
+              placeholder={t("settings.placeholders.documentName")}
+              id="legal-document_name"
+              maxLength={100}
+              {...form.register("document_name")}
+            />
           </Field>
           <Field {...field("document_number")}>
             <Input
+              placeholder={t("settings.placeholders.documentNumber")}
               id="legal-document_number"
               maxLength={60}
               autoComplete="off"
@@ -165,6 +201,7 @@ export function LegalIdentityCard({
           </Field>
           <Field {...field("document_holder", { hint: t(`${K}.documentHolderHint`) })}>
             <Input
+              placeholder={t("common.placeholder.company")}
               id="legal-document_holder"
               maxLength={200}
               {...form.register("document_holder")}

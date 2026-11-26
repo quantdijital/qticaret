@@ -76,7 +76,12 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
     >
       <Orphaned landing={landing} />
       <Field label={t("content.fields.title")} htmlFor="landing-title-edit" required>
-        <Input id="landing-title-edit" maxLength={200} {...form.register("title")} />
+        <Input
+          placeholder={t("content.placeholders.landingTitle")}
+          id="landing-title-edit"
+          maxLength={200}
+          {...form.register("title")}
+        />
       </Field>
       <Field
         label={t("content.fields.handle")}
@@ -88,6 +93,7 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
             {prefixOf(landing)}
           </span>
           <Input
+            placeholder={t("content.placeholders.landingHandle")}
             id="landing-handle"
             spellCheck={false}
             className="min-w-0 flex-1 border-0 pl-0 font-mono text-[13px] shadow-none"

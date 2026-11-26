@@ -90,6 +90,7 @@ export function NewContentDialog({
               required
             >
               <Input
+                placeholder={t("content.placeholders.title")}
                 id="content-new-title"
                 value={title}
                 autoFocus

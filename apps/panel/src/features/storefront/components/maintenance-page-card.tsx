@@ -114,6 +114,7 @@ export function MaintenancePageCard({
               }}
             >
               <Textarea
+                placeholder={t("storefront.placeholders.maintenance")}
                 id="maintenance-message"
                 rows={4}
                 maxLength={L.message}

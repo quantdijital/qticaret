@@ -87,6 +87,7 @@ export function InviteDialog({
           <div className="flex flex-col gap-5">
             <Field label={t(`${T}.email`)} htmlFor="invite-email">
               <Input
+                placeholder={t("common.placeholder.email")}
                 id="invite-email"
                 type="email"
                 autoComplete="off"

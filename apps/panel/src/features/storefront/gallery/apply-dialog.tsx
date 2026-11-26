@@ -143,6 +143,7 @@ function ApplyContent({
                 {t("storefront.gallery.save.name")}
               </Label>
               <Input
+                placeholder={t("storefront.placeholders.designName")}
                 id={`${ids}-name`}
                 value={name}
                 maxLength={NAME_MAX}

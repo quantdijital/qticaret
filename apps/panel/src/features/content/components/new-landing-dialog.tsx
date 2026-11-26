@@ -120,6 +120,7 @@ export function NewLandingDialog({
               required
             >
               <Input
+                placeholder={t("content.placeholders.landingTitle")}
                 id="landing-title"
                 value={title}
                 maxLength={200}

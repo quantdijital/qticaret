@@ -74,6 +74,7 @@ function CatalogField({
       <div className="flex flex-col gap-1.5">
         <Name id={id} field={field} htmlFor={id} />
         <Input
+          placeholder={t(`storefront.placeholders.${field}`)}
           id={id}
           value={section[field] ?? ""}
           maxLength={max}

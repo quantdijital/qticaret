@@ -85,7 +85,12 @@ export function TermForm({
         error={form.formState.errors.name?.message}
         required
       >
-        <Input id={id("name")} maxLength={120} {...form.register("name")} />
+        <Input
+          placeholder={t("content.placeholders.term")}
+          id={id("name")}
+          maxLength={120}
+          {...form.register("name")}
+        />
       </Field>
       <Field label={t(`${T}.fields.handle`)} htmlFor={id("handle")} hint={t(`${T}.handleHint`)}>
         <div className="flex items-center rounded-md border">

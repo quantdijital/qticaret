@@ -102,6 +102,7 @@ export function HomeSeoCard({ saved, storeName }: { saved: SeoSettings; storeNam
       >
         <div className="flex flex-col gap-1">
           <Textarea
+            placeholder={t("seo.placeholders.description")}
             id="seo-home-description"
             className="min-h-20"
             aria-invalid={Boolean(descriptionError)}

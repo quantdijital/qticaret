@@ -54,7 +54,12 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
       }}
     >
       <Field label={t("content.fields.title")} htmlFor="content-title" required>
-        <Input id="content-title" maxLength={200} {...form.register("title")} />
+        <Input
+          placeholder={t("content.placeholders.title")}
+          id="content-title"
+          maxLength={200}
+          {...form.register("title")}
+        />
       </Field>
       <Field
         label={t("content.fields.handle")}
@@ -66,6 +71,7 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
             {pathPrefix(entry.kind)}
           </span>
           <Input
+            placeholder={t("content.placeholders.handle")}
             id="content-handle"
             spellCheck={false}
             className="border-0 pl-0 font-mono text-[13px] shadow-none"
