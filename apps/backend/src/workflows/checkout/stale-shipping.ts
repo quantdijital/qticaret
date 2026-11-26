@@ -4,6 +4,9 @@ import {
   listShippingOptionsForCartWithPricingWorkflow,
   listShippingOptionsForCartWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { errorSummary, logger } from "../../lib/logging"
+import { fromMedusaAmount } from "../../lib/money"
+import type { MedusaAmount } from "../../lib/money"
 
 interface MethodRow {
   amount?: unknown
@@ -35,9 +38,24 @@ async function staleFreeCalculated(
       input: { cart_id: cartId, options: optionIds.map((id) => ({ id })) },
     })
     const priced = new Map((result as OptionPrice[]).map((option) => [option.id, option]))
-    return optionIds.some((id) => !priced.has(id) || Number(priced.get(id)?.amount) !== 0)
-  } catch {
+    return optionIds.some((id) => !isZero(priced.get(id)?.amount))
+  } catch (error) {
+    // Stale is the safe answer; the cause is kept for staff (security review 2026-11-26)
+    logger.warn({
+      event: "checkout.stale_shipping_reprice_failed",
+      cartId,
+      err: errorSummary(error),
+    })
     return true
+  }
+}
+
+/** Whether a Medusa amount is exactly zero; one that cannot be read is not. */
+function isZero(amount: unknown): boolean {
+  try {
+    return fromMedusaAmount(amount as MedusaAmount, { allowRounding: true }) === 0
+  } catch {
+    return false
   }
 }
 
@@ -78,7 +96,9 @@ export async function hasStaleShipping(
   }
   const freeCalculated = methods.flatMap((method) => {
     const option = options.get(method.shipping_option_id ?? "")
-    return option?.price_type === "calculated" && Number(method.amount) === 0 ? [option.id] : []
+    // An amount that cannot be read is checked too
+    const free = isZero(method.amount) || !Number.isFinite(Number(method.amount))
+    return option?.price_type === "calculated" && free ? [option.id] : []
   })
   return staleFreeCalculated(container, cartId, freeCalculated)
 }

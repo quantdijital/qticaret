@@ -158,6 +158,12 @@ medusaIntegrationTestRunner({
       )
       expect(chosen.status).toBe(200)
       expect(chosen.data.cart.shipping_total).toBe(49.9)
+      // Nor on Medusa's single option price route
+      const single = await store<{ shipping_option: { amount: number } }>(
+        `/store/shipping-options/${tableOptionId}/calculate`,
+        { cart_id: cartId, data: { qt_shipping: { threshold: 0, item_total: 1_000_000 } } }
+      )
+      expect(single.data.shipping_option.amount).toBe(49.9)
     })
 
     it("stops a checkout whose code took the basket under the threshold after a free table option was chosen", async () => {
