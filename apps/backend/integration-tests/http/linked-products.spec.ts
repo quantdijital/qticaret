@@ -101,6 +101,7 @@ medusaIntegrationTestRunner({
     it("answers published products only, in order; a deleted one is skipped", async () => {
       const [a, b, c] = others as [string, string, string]
       await save(main, { upsell_product_ids: [b, a, c] })
+      await save(a, { upsell_product_ids: [b] })
       const draft = await settle(
         http.post(`/admin/products/${a}`, { status: "draft" }, { headers: admin.headers })
       )
@@ -111,6 +112,8 @@ medusaIntegrationTestRunner({
       const answer = await linked("upsell", [main])
       expect(answer.status).toBe(200)
       expect(answer.data.product_ids).toEqual([b])
+      // A draft says nothing of its own links
+      expect((await linked("upsell", [a])).data.product_ids).toEqual([])
       // The admin still lists the draft (marked), not the deleted one
       const read = await settle(
         http.get<Catalog>(`/admin/products/${main}/catalog`, { headers: admin.headers })
