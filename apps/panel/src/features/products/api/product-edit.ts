@@ -54,6 +54,10 @@ export interface ProductCatalog {
    */
   summary_doc: JSONContent | null
   successor: { id: string; title: string; handle: string } | null
+  /** Better or similar products for its page (S3), in the shop's order; absent from an older backend: none. */
+  upsells?: LinkedProduct[]
+  /** Products bought with it, offered in the cart (S3), in order; absent: none. */
+  cross_sells?: LinkedProduct[]
   categories: { id: string; name: string }[]
   variants: {
     id: string
@@ -64,6 +68,15 @@ export interface ProductCatalog {
     cost: number | null
     gtin: string | null
   }[]
+}
+
+/** A linked product as the catalog read names it (S3); a deleted one is not listed. */
+export interface LinkedProduct {
+  id: string
+  title: string
+  handle: string
+  status: string
+  thumbnail: string | null
 }
 
 const catalogUrl = (id: string) => `/admin/products/${encodeURIComponent(id)}/catalog`
@@ -92,6 +105,9 @@ export function useSaveCatalog(id: string) {
       shipping_class?: string | null
       /** The most of it one order may hold (S5); null clears it. */
       max_quantity?: number | null
+      /** The linked products in order (S3), twelve each at most; [] clears a list. */
+      upsell_product_ids?: string[]
+      cross_sell_product_ids?: string[]
       /** The whole list, ids kept; null clears it. */
       addons?: AddonInput[] | null
       /** The description as a document; the server writes its plain text too (ADR-0055). */

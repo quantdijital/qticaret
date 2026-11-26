@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { AddonsInput } from "../../../../../lib/catalog/addons"
 import { productBadgeInput } from "../../../../../lib/catalog/badge"
+import { linkedProductIdsInput } from "../../../../../lib/catalog/linked-products"
 import { MAX_PURCHASE_QUANTITY } from "../../../../../lib/catalog/purchase-limit"
 import { productDescriptionDoc } from "../../../../../lib/catalog/description"
 import { productSummaryDoc } from "../../../../../lib/catalog/summary"
@@ -75,6 +76,9 @@ export const AdminPostProductCatalog = z
       .regex(/^[a-z0-9][a-z0-9-]{0,39}$/)
       .nullable()
       .optional(),
+    // S3: linked products in the shop's order, twelve each at most; null or [] clears a list
+    upsell_product_ids: linkedProductIdsInput.nullable().optional(),
+    cross_sell_product_ids: linkedProductIdsInput.nullable().optional(),
     variants: z
       .record(
         id,
