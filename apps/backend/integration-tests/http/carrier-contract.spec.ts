@@ -160,6 +160,8 @@ medusaIntegrationTestRunner({
           shippingOptionId: optionId,
           items: [{ variant_id: variantId, quantity: 1 }],
           address: PAYTR_ADDRESS,
+          // DHL eCommerce refuses a receiver without one; the others ignore it
+          email: "ayse.yilmaz@example.com",
         })
       const ship = (orderId: string) => post(`/admin/orders/${orderId}/ship`, { notify: false })
       const fulfillmentsOf = async (orderId: string) => {

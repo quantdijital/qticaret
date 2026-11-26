@@ -51,10 +51,10 @@ medusaIntegrationTestRunner({
       settle(
         http.post<T & { message?: string; field?: string }>(path, body, { headers: admin.headers })
       )
-    const connect = (secrets: Partial<Record<string, string>>) =>
+    const connect = (account: { customerNumber: string; password: string }) =>
       post("/admin/integrations/credentials/dhlecommerce", {
         settings: { test_mode: true },
-        secrets,
+        secrets: { customer_number: account.customerNumber, password: account.password },
       })
     const order = (address: PlaceOrderInput["address"] = PAYTR_ADDRESS) =>
       placeOrder(getContainer(), {
@@ -63,6 +63,7 @@ medusaIntegrationTestRunner({
         shippingOptionId: optionId,
         items: [{ variant_id: variantId, quantity: 1 }],
         address,
+        email: "ayse.yilmaz@example.com",
       })
     const fulfillmentsOf = async (orderId: string) => {
       const { data } = await getContainer()
@@ -234,14 +235,14 @@ medusaIntegrationTestRunner({
     })
 
     it("refuses an ilçe DHL does not list before asking DHL anything", async () => {
-      // A real ilçe of the address data the fake DHL does not list (it has Afyon's Merkez only)
+      // A real ilçe of the test address data the fake DHL does not list (Şanlıurfa: Merkez only)
       const orderId = await order({
         first_name: PAYTR_ADDRESS.first_name,
         last_name: PAYTR_ADDRESS.last_name,
         phone: PAYTR_ADDRESS.phone,
         address_1: PAYTR_ADDRESS.address_1,
-        province: "Afyonkarahisar",
-        city: "Sandıklı",
+        province: "Şanlıurfa",
+        city: "Haliliye",
       })
 
       const refused = await ship(orderId)

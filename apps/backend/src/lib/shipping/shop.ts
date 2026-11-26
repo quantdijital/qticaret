@@ -75,6 +75,16 @@ export async function shopSender(): Promise<LabelSender | null> {
   }
 }
 
+/**
+ * The shop's own contact e-mail (Settings > Store), for a carrier that
+ * refuses a receiver without one when the order has none (DHL eCommerce:
+ * an order staff made by hand). Null when the shop set none.
+ */
+export async function shopContactEmail(): Promise<string | null> {
+  const store = (await settings().getSection("store")) as unknown as StoreSettings
+  return store.contact_email
+}
+
 /** The shop's price table by desi (Settings > Shipping, F7.8), read per call. */
 export const shippingRates = async (): Promise<ShippingSettings> =>
   (await settings().getSection("shipping")) as unknown as ShippingSettings

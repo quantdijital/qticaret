@@ -936,7 +936,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "dhlecommerce.secret_invalid":
     "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with (not the temporary one e-mailed to you); test and live accounts differ.",
   "dhlecommerce.email_missing":
-    "DHL eCommerce asks for the receiver's e-mail and the order has none. Add the customer's e-mail to the order and try again.",
+    "DHL eCommerce asks for the receiver's e-mail; the order has none and the shop's contact e-mail is not set. Add the customer's e-mail to the order, or set a contact e-mail under Settings > Store, and try again.",
   "dhlecommerce.withdraw_failed":
     "A parcel may have been opened at DHL eCommerce and could not be withdrawn. Before shipping again, look for this order's parcel in the Online Şube and cancel it there if it is open.",
   "dhlecommerce.place_unknown":

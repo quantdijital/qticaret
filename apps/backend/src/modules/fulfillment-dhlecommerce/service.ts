@@ -22,6 +22,7 @@ import {
   packedParcelOf,
   shipmentCode,
   shippingRates,
+  shopContactEmail,
   shopSender,
   storedCarrierAccount,
   tableQuoteOf,
@@ -113,8 +114,10 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
       throw new ValidationError("shipping.use_ship_route")
     }
     const credentials = await storedDhlEcomAccount()
-    // DHL refuses a receiver without an e-mail; the order's own, from our workflow
-    if (!ship.email) {
+    // DHL refuses a receiver without an e-mail: the order's own, from our workflow; for an
+    // order without one (made by hand), the shop's contact address (warn, don't block)
+    const email = ship.email ?? (await shopContactEmail())
+    if (!email) {
       throw new ValidationError("dhlecommerce.email_missing")
     }
     const parcel = await packedParcelOf(items, order?.items)
@@ -127,7 +130,7 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
       referenceId: shipmentCode(),
       orderNumber: number,
       receiver,
-      email: ship.email,
+      email,
       ...places,
       ...piecesOf(parcel),
       cashOnDelivery: ship.cash_on_delivery,
