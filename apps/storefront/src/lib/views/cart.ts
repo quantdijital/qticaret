@@ -195,6 +195,8 @@ export function cartLinesOf(
  * free shipping still measured on the KDV-included amount, as the
  * backend's rule reads it. `checkoutBlocked`: why the cart cannot go to
  * the payment yet, as the cart page says it (`wholesaleCheckoutBlocked`).
+ * `lineShipping`: the lines' classes for their notes and the meter;
+ * `shipping`: the server's estimate in words (`drawerShippingOf`).
  */
 export function miniCartOf(
   cart: Cart | null,
@@ -204,7 +206,8 @@ export function miniCartOf(
   pictures: ReadonlyMap<string, ImageView> = new Map(),
   vatExcluded = false,
   checkoutBlocked: CheckoutBlockedView | null = null,
-  shipping: LineShipping = NO_LINE_SHIPPING
+  lineShipping: LineShipping = NO_LINE_SHIPPING,
+  shipping: string | null = null
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
@@ -215,15 +218,17 @@ export function miniCartOf(
     lines: withShippingNotes(
       cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
       cart,
-      shipping,
+      lineShipping,
       t
     ),
     subtotal: formatLira(net ? net.net / 100 : cart.item_total),
     // Nothing to ship (adr/0076 §6): no free shipping meter, no word of shipping
     freeShipping: ships
-      ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, shipping.classes))
+      ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, lineShipping.classes))
       : null,
     ...(ships ? {} : { note: t("cart.drawer_note_unshipped") }),
+    // The server's figure for its main option: a row, and the note no longer says checkout prices it
+    ...(ships && shipping ? { shipping, note: t("cart.drawer_note_shipping_known") } : {}),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
     ...(checkoutBlocked ? { checkoutBlocked } : {}),

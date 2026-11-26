@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
-import type { ShippingOption } from "@/lib/checkout/options"
 import { t } from "@/lib/i18n"
-import { cheapestShipping, notInCart, offersOf } from "../cart-extras"
+import { notInCart, offersOf } from "../cart-extras"
+import { drawerShippingOf, shippingEstimateText } from "../shipping-estimate"
 
 /**
  * The cart page's extras (adr/0046 Ek 2026-11-05): shipping before an
@@ -10,22 +10,38 @@ import { cheapestShipping, notInCart, offersOf } from "../cart-extras"
  * are the backend's; nothing is priced here.
  */
 
-const option = (amount: number | null): ShippingOption =>
-  ({ id: "so_1", name: "Aras Kargo", amount, calculated_price: null }) as unknown as ShippingOption
-
-describe("the cart's shipping estimate", () => {
-  it("says free when the cheapest option costs nothing", () => {
-    expect(cheapestShipping([option(0), option(95)], t)).toBe("Ücretsiz")
+describe("the cart's shipping estimate (the backend's, before an address)", () => {
+  it("says free, or the server's figure", () => {
+    expect(shippingEstimateText({ status: "free", amount: null }, t)).toBe("Ücretsiz")
+    expect(shippingEstimateText({ status: "priced", amount: 90 }, t)).toBe("90,00 TL")
+    expect(shippingEstimateText({ status: "priced", amount: 240.5 }, t)).toBe("240,50 TL")
+    // A zero figure is free in words
+    expect(shippingEstimateText({ status: "priced", amount: 0 }, t)).toBe("Ücretsiz")
   })
 
-  it("says the price, or where prices start when they differ", () => {
-    expect(cheapestShipping([option(85), option(85)], t)).toBe("85,00 TL")
-    expect(cheapestShipping([option(95), option(85)], t)).toBe("85,00 TL'den başlayan")
+  it("leaves to the checkout what only it can price, never guessing", () => {
+    expect(shippingEstimateText({ status: "at_checkout", amount: null }, t)).toBe(
+      "Ödeme adımında hesaplanır"
+    )
+    // An answer this build does not know, or a priced one without its figure
+    expect(shippingEstimateText({ status: "by_province", amount: 50 }, t)).toBe(
+      "Ödeme adımında hesaplanır"
+    )
+    expect(shippingEstimateText({ status: "priced", amount: null }, t)).toBe(
+      "Ödeme adımında hesaplanır"
+    )
   })
 
-  it("says nothing without a priced option", () => {
-    expect(cheapestShipping([], t)).toBeNull()
-    expect(cheapestShipping([option(null)], t)).toBeNull()
+  it("says nothing when nothing travels or the backend gave no answer", () => {
+    expect(shippingEstimateText({ status: "not_needed", amount: null }, t)).toBeNull()
+    expect(shippingEstimateText(null, t)).toBeNull()
+  })
+
+  it("puts only a figure in the drawer; its note says the rest", () => {
+    expect(drawerShippingOf({ status: "priced", amount: 90 }, t)).toBe("90,00 TL")
+    expect(drawerShippingOf({ status: "free", amount: null }, t)).toBe("Ücretsiz")
+    expect(drawerShippingOf({ status: "at_checkout", amount: null }, t)).toBeNull()
+    expect(drawerShippingOf(null, t)).toBeNull()
   })
 })
 

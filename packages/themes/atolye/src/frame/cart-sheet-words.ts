@@ -10,6 +10,7 @@ export const cartSheetWords = (t: Translate, count: number): CartSheetWords => (
   browse: t("home.shop_categories"),
   continue: t("cart.continue"),
   subtotal: t("cart.subtotal"),
+  shipping: t("cart.shipping"),
   note: t("cart.drawer_note"),
   viewCart: t("cart.view"),
   checkout: t("cart.checkout"),

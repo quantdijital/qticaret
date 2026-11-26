@@ -120,6 +120,12 @@ export interface MiniCartView {
   lines: CartLineView[]
   subtotal: string
   freeShipping: FreeShippingView | null
+  /**
+   * The cart's shipping before an address, the shop's main option as the
+   * server priced it: "Ücretsiz", "90,00 TL". Absent or null: no row (the
+   * drawer's note says the checkout works it out).
+   */
+  shipping?: string | null
   /** A payment link's cart (adr/0051): its lines are fixed; the note, in words. */
   locked?: string | null
   /**

@@ -78,6 +78,9 @@ export const RATE_LIMIT_PROFILES = {
   // A storefront page's card facts (adr/0046 Ek 2026-11-04); a date search's read the
   // departures in its dates (adr/0077 §4). A page asks once a listing, once a home rail
   card_facts: { name: "card_facts", perIp: { max: 240, windowMs: MINUTE } },
+  // The cart's shipping before an address (WooCommerce parity, 2026-11-26): the cart page and
+  // the header's drawer ask once a page view with a cart; reads only, no carrier is called
+  shipping_estimate: { name: "shipping_estimate", perIp: { max: 240, windowMs: MINUTE } },
   // S3: a product page's linked products and a cart's cross-sells, once a page view
   linked_products: { name: "linked_products", perIp: { max: 240, windowMs: MINUTE } },
   // A month's departure calendar (adr/0077 §6): asked as a shopper opens the date

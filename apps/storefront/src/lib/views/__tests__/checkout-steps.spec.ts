@@ -172,5 +172,24 @@ describe("checkout steps from the cart", () => {
     expect(shipped).not.toHaveProperty("note")
     expect(unshipped?.note).toBe(t("cart.drawer_note_unshipped"))
     expect(unshipped?.note).not.toMatch(/Kargo/)
+
+    // The server's estimate: a "Kargo" row, the note no longer says the payment step prices it
+    const estimated = (items: ReturnType<typeof drawerLine>[]) =>
+      miniCartOf(
+        { ...base, id: "cart_3", items },
+        1000,
+        t,
+        new Map(),
+        new Map(),
+        false,
+        null,
+        { classes: new Map(), surcharges: [], threshold: null },
+        "90,00 TL"
+      )
+    expect(estimated([drawerLine("kupa")])).toMatchObject({
+      shipping: "90,00 TL",
+      note: "İndirim kodunuz varsa sepette girin.",
+    })
+    expect(estimated([drawerLine("atolye", false)])).not.toHaveProperty("shipping")
   })
 })
