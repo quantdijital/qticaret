@@ -174,8 +174,6 @@
     .gf-mega-head:hover .gf-menu-word,
     .gf-mega-link:hover {
       color: var(--color-text);
-      text-decoration: underline;
-      text-underline-offset: 0.2em;
     }
     .gf-mega-feature:hover .gf-mega-feature-all svg {
       transform: translateX(0.25rem);
