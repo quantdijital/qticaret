@@ -741,6 +741,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/media/:id": false,
   "DELETE /admin/media/:id": false,
   "POST /admin/media/import": false,
+  // M1: unused pictures deleted at once, as one is
+  "POST /admin/media/delete": false,
   "POST /admin/media": false,
   "POST /admin/messaging/sender-domain/check": false,
   "POST /admin/messaging/sender-domain": false,

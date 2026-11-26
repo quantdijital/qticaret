@@ -3,7 +3,7 @@ import { MapPin, Pencil } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { orderInvoicesQuery } from "@/features/orders/api/invoices"
+import { orderStateQuery } from "@/features/orders/api/orders"
 import type { OrderDetail } from "@/features/orders/api/orders"
 import { AddressForm } from "./address-form"
 import type { AddressKind } from "./address-form"
@@ -21,13 +21,15 @@ function addressLines(address: Address): string[] {
   ].filter((line) => line.trim() !== "")
 }
 
-/** Whether the order's sale invoice is issued (or being issued): its billing address stays. */
-function useInvoiced(orderId: string): boolean {
-  const invoices = useQuery(orderInvoicesQuery(orderId))
-  return (invoices.data?.invoices ?? []).some(
-    (invoice) =>
-      invoice.kind === "sale" && (invoice.status === "issued" || invoice.status === "issuing")
-  )
+/**
+ * Whether the invoice provider holds the order's buyer (issued or issuing,
+ * or a waiting invoice it already took): its billing address stays. The
+ * server's own rule (`billing_locked`), the one its order update refuses
+ * by; locked until it is known.
+ */
+function useBillingLocked(orderId: string): boolean {
+  const state = useQuery(orderStateQuery(orderId))
+  return state.data?.billing_locked !== false
 }
 
 function Section({
@@ -78,8 +80,8 @@ function Lines({ lines }: { lines: string[] }) {
 /**
  * Where the parcel goes and where the invoice is made out to, each
  * changed in place (docs/06 "Sipariş detay"): the delivery address until
- * the order is packed (`shippingEditable`), the billing address until its
- * sale invoice is issued.
+ * the order is packed (`shippingEditable`), the billing address until the
+ * invoice provider holds it.
  */
 export function AddressSections({
   order,
@@ -94,7 +96,7 @@ export function AddressSections({
   onEditing: (kind: AddressKind | null) => void
 }) {
   const { t } = useTranslation()
-  const invoiced = useInvoiced(order.id)
+  const invoiced = useBillingLocked(order.id)
   const shipping = order.shipping_address ? addressLines(order.shipping_address) : []
   const billing = order.billing_address ? addressLines(order.billing_address) : []
   const sameBilling = billing.length === 0 || billing.join("|") === shipping.join("|")

@@ -9,6 +9,8 @@ import { ProductStatusBadge } from "@/features/products/components/product-statu
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { availableStock, listSku, priceRange } from "@/features/products/product-math"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
+import { QuickPrice, QuickStatusCell, QuickStock } from "@/features/products/quick-edit/quick-cells"
+import type { QuickEdit } from "@/features/products/quick-edit/use-quick-edit"
 import type { StoredAssessment } from "@/features/seo/api/advisor"
 import { GRADE_TEXT } from "@/features/seo/advisor/grades"
 import { formatCount, formatMoney, formatRelative } from "@qticaret/admin-ui/lib/format"
@@ -26,7 +28,9 @@ export function useProductColumns(
   scores: ReadonlyMap<string, StoredAssessment>,
   onDuplicate: (product: ProductListItem) => void,
   /** The columns the person turned off in "Görünüm" (`list-prefs.ts`). */
-  hidden: readonly string[] = []
+  hidden: readonly string[] = [],
+  /** "Hızlı düzenle": while on, price, stock and status are fields (`quick-edit/`). */
+  quick?: QuickEdit
 ): Column<ProductListItem>[] {
   const { t } = useTranslation()
   const prefix = useProductPathPrefix()
@@ -173,5 +177,26 @@ export function useProductColumns(
       cell: (product) => <ProductRowMenu product={product} onDuplicate={onDuplicate} />,
     },
   ]
-  return columns.filter((column) => !hidden.includes(column.key))
+  const shown = columns.filter((column) => !hidden.includes(column.key))
+  return quick?.on ? withQuickEdit(shown, quick) : shown
+}
+
+// The quick edit's fields in the price, stock and status cells; what they show otherwise falls back
+const QUICK_CELLS = { price: QuickPrice, stock: QuickStock, status: QuickStatusCell } as const
+
+function withQuickEdit(
+  columns: Column<ProductListItem>[],
+  edit: QuickEdit
+): Column<ProductListItem>[] {
+  return columns.map((column) => {
+    const Cell = QUICK_CELLS[column.key as keyof typeof QUICK_CELLS] as
+      (typeof QUICK_CELLS)[keyof typeof QUICK_CELLS] | undefined
+    if (!Cell) {
+      return column
+    }
+    return {
+      ...column,
+      cell: (product) => <Cell product={product} edit={edit} fallback={column.cell(product)} />,
+    }
+  })
 }

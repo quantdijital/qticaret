@@ -29,6 +29,7 @@ const NO_QUERY_READS = [
   "/admin/api-access",
   "/admin/openapi.json",
   "/admin/dashboard/tasks",
+  "/admin/dashboard/pending",
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
   "/admin/order-board/:id",

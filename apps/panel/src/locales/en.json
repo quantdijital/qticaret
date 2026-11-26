@@ -253,6 +253,26 @@
       "legalIdentity": {
         "label": "Legal identity incomplete",
         "hint": "Required details missing"
+      },
+      "openReturns": {
+        "label": "Returns to decide",
+        "hint": "Requests to approve or reject"
+      },
+      "unreadContact": {
+        "label": "Unanswered messages",
+        "hint": "New messages from the contact form"
+      },
+      "pendingReviews": {
+        "label": "Reviews to approve",
+        "hint": "Checked before they show in the store"
+      },
+      "pendingQuestions": {
+        "label": "Questions to approve",
+        "hint": "Questions and the answers they got"
+      },
+      "outOfStock": {
+        "label": "Sold out",
+        "hint": "Variants with no sellable stock left"
       }
     },
     "recent": {
@@ -4362,8 +4382,23 @@
         "digital": "Digital product: no shipping",
         "service": "Service: no shipping"
       },
-      "variableLocked_one": "This product has {{count}} variant.",
-      "variableLocked_other": "This product has {{count}} variants; reduce them to one to make it a simple product.",
+      "toSimple": {
+        "title": "Make it a simple product?",
+        "several_one": "As a simple product only the variant you pick stays; the other {{count}} variant is deleted. Orders keep their records.",
+        "several_other": "As a simple product only the variant you pick stays; the other {{count}} variants are deleted. Orders keep their records.",
+        "keep": "Variant to keep",
+        "noPrice": "No price",
+        "untracked": "Stock not tracked",
+        "stock_one": "Stock: {{formatted}}",
+        "stock_other": "Stock: {{formatted}}",
+        "stockWarning_one": "{{count}} variant to delete holds stock ({{units}} in all); that stock goes too.",
+        "stockWarning_other": "{{count}} variants to delete hold stock ({{units}} in all); that stock goes too.",
+        "options": "The options ({{options}}) are removed; price, stock and codes are kept.",
+        "cancel": "Cancel",
+        "switch": "Make it simple",
+        "deleteAndSwitch_one": "Delete {{count}} variant and make it simple",
+        "deleteAndSwitch_other": "Delete {{count}} variants and make it simple"
+      },
       "tabs": {
         "pricing": "General",
         "stock": "Inventory",
@@ -4492,6 +4527,27 @@
       "pageSize_one": "{{count}} product",
       "pageSize_other": "{{count}} products",
       "columns": "Columns"
+    },
+    "quickEdit": {
+      "toggle": "Quick edit",
+      "lockedHint": "Save or discard the changes first.",
+      "label": "Quick edit",
+      "save_one": "Save {{count}} change",
+      "save_other": "Save {{count}} changes",
+      "saved_one": "{{formatted}} product updated.",
+      "saved_other": "{{formatted}} products updated.",
+      "failed_one": "{{formatted}} product could not be saved; its change stays in the list.",
+      "failed_other": "{{formatted}} products could not be saved; their changes stay in the list.",
+      "discardTitle": "Discard the changes?",
+      "discardText_one": "{{count}} unsaved change is dropped.",
+      "discardText_other": "{{count}} unsaved changes are dropped.",
+      "discard": "Discard changes",
+      "priceOf": "Price of {{title}}",
+      "stockOf": "Stock of {{title}}",
+      "statusOf": "Status of {{title}}",
+      "inVariants": "Edit in variants",
+      "untracked": "Not tracked",
+      "untrackedHint": "Stock is not counted: this product always sells."
     },
     "duplicate": {
       "action": "Duplicate",
@@ -5221,7 +5277,7 @@
       "nameRequired": "First and last name are required.",
       "company": "Company name",
       "sameAsDelivery": "Same as the delivery address.",
-      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "invoiced": "The invoice is issued or with the provider; the billing address no longer changes.",
       "email": "E-mail",
       "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
       "emailRequired": "E-mail is required.",
@@ -10292,6 +10348,27 @@
           },
           "words": "description text category brand collection read more fold"
         },
+        "listingPageTitle": "Listing page",
+        "listingPageHint": "How products are laid out on the all products, category and brand pages. Every default is today's page.",
+        "listingPage": {
+          "default_view": {
+            "label": "Default view",
+            "hint": "How products are laid out when a visitor opens the page. Grid: cards side by side. List: one product per row, picture on the left, price on the right.",
+            "steps": {
+              "grid": "Grid",
+              "list": "List"
+            }
+          },
+          "view_switch": {
+            "label": "Let visitors switch the view",
+            "hint": "Grid/list buttons appear beside the sort. The choice stays in the address (?gorunum=liste) and can be shared; search engines still see one page."
+          },
+          "breadcrumb_current": {
+            "label": "Page's own name in the breadcrumb",
+            "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
+          },
+          "words": "list grid view row breadcrumb trail category page all products"
+        },
         "searchFormTitle": "Search box",
         "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",
         "searchForm": {
@@ -13123,7 +13200,8 @@
         "collection": "Collection picture",
         "popup": "Pop-up",
         "storefront_design": "Saved look",
-        "favicon": "Site icon"
+        "favicon": "Site icon",
+        "booking": "Tour programme"
       },
       "seoTypes": {
         "product": "product page",
@@ -13138,6 +13216,33 @@
       },
       "etbisQrLink": "The shop's ETBİS QR code",
       "faviconLink": "The shop's site icon"
+    },
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "unused": "Unused",
+      "missing_alt": "Missing alt text",
+      "empty": {
+        "unused": "No unused pictures; each one is used by a product, page, setting or the storefront.",
+        "missing_alt": "No pictures without alt text."
+      }
+    },
+    "cleanup": {
+      "hint": "No product, page, setting, campaign or storefront uses these pictures. Click to pick the ones to delete.",
+      "hintReadOnly": "No product, page, setting, campaign or storefront uses these pictures.",
+      "selected_one": "{{formatted}} picture picked",
+      "selected_other": "{{formatted}} pictures picked",
+      "selectPage": "Pick all on this page",
+      "clear": "Clear selection",
+      "delete": "Delete permanently",
+      "confirmTitle_one": "Delete {{formatted}} picture permanently?",
+      "confirmTitle_other": "Delete {{formatted}} pictures permanently?",
+      "confirmText": "The pictures are deleted with their files and cannot be brought back. Each is checked again first; one that has come into use meanwhile is kept.",
+      "confirm": "Delete",
+      "deleted_one": "{{formatted}} picture deleted.",
+      "deleted_other": "{{formatted}} pictures deleted.",
+      "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
+      "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
     }
   },
   "confirmEmail": {

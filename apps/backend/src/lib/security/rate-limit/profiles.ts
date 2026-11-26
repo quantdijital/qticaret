@@ -150,6 +150,8 @@ export const RATE_LIMIT_PROFILES = {
   },
   // The media library bringing in an image by its address: each is a fetch from the internet
   media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },
+  // M1: a bulk delete reads every place a picture may be shown, each time
+  media_cleanup: { name: "media_cleanup", perIp: { max: 30, windowMs: 10 * MINUTE } },
   // A product video's upload (adr/0069 §3): up to 50 MB and an ffprobe run each; per
   // address and per staff member wherever they are
   media_video: {

@@ -19,6 +19,7 @@ import type { PartKey, TabPart } from "@/features/products/layout/parts"
 import type { ShownWhy } from "@/features/products/layout/use-page-layout"
 import { DataPanel } from "./data-panels"
 import { DATA_CARD_ID, PRICING_TARGET, PRODUCT_SECTIONS, STOCK_TARGET } from "./sections"
+import { SimpleSwitch } from "./simple-switch"
 import { useSimpleVariant } from "./use-simple-variant"
 import type { DataCardState, ProductType } from "./use-data-card"
 import type { PartMark } from "./use-product-findings"
@@ -49,7 +50,8 @@ const STEP: Partial<Record<string, number>> = {
 /**
  * The "Ürün verileri" card (docs/06 "Ürün sayfası"; WooCommerce's product
  * data box): the product's type ("Basit ürün" / "Varyantlı ürün") in its
- * header, then its tabs, a column on the left where the card is wide and
+ * header (making a product with variants simple asks in place below it),
+ * then its tabs, a column on the left where the card is wide and
  * a wrapping row of chips above the panel where it is not (no row that
  * scrolls sideways). Genel (price), Stok, Kargo (the parcel; not for a
  * digital product or a service), Özellikler, Varyantlar (a product with
@@ -79,7 +81,6 @@ export function DataCard({
     (key) => (key !== "variants" || !state.simple) && draws(key) && slot(key) !== undefined
   )
   const active = tabs.includes(state.tab) ? state.tab : (tabs[0] ?? "pricing")
-  const count = product.variants?.length ?? 0
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const at = tabs.indexOf(active)
     const step = STEP[event.key]
@@ -111,7 +112,8 @@ export function DataCard({
           —
         </span>
         <Select
-          value={state.type}
+          // "Basit ürün" shows while the card asks whether to make it so
+          value={state.confirming ? "simple" : state.type}
           onValueChange={(value) => {
             state.setType(value as ProductType)
           }}
@@ -120,9 +122,7 @@ export function DataCard({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="simple" disabled={!state.canBeSimple}>
-              {t(`${D}.types.simple`)}
-            </SelectItem>
+            <SelectItem value="simple">{t(`${D}.types.simple`)}</SelectItem>
             <SelectItem value="variable">{t(`${D}.types.variable`)}</SelectItem>
           </SelectContent>
         </Select>
@@ -131,12 +131,8 @@ export function DataCard({
             {t(`${D}.kind.${kind}`)}
           </span>
         ) : null}
-        {state.canBeSimple ? null : (
-          <p className="basis-full text-xs text-muted-foreground">
-            {t(`${D}.variableLocked`, { count })}
-          </p>
-        )}
       </header>
+      {state.confirming ? <SimpleSwitch product={product} state={state} /> : null}
       <div className="flex min-w-0 flex-col @xl/data:flex-row">
         <div
           ref={list}

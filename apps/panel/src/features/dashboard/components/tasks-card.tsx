@@ -13,7 +13,6 @@ import {
   Truck,
   Webhook,
 } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -21,32 +20,11 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import type { DashboardTasks } from "@/features/dashboard/api/tasks"
+import { pendingQuery } from "@/features/dashboard/api/pending"
+import { pendingRows } from "@/features/dashboard/components/pending-rows"
+import type { TaskRow } from "@/features/dashboard/components/pending-rows"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-
-interface TaskRow {
-  key:
-    | "toShip"
-    | "awaitingPayment"
-    | "lowStock"
-    | "drafts"
-    | "orphanPayments"
-    | "accountingStopped"
-    | "webhooksDisabled"
-    | "seoSetup"
-    | "legalIdentity"
-  icon: LucideIcon
-  count: number
-  to: string
-  search?:
-    | { status: "draft" }
-    | { view: "low" }
-    | { stage: "to_ship" | "awaiting_payment" }
-    // A settings page's tab
-    | { part: string }
-  /** A count here needs the shop's attention (amber) rather than routine work. */
-  urgent: boolean
-}
 
 /** What the person may act on: the accounting program and the hooks are the set-up's (adr/0040). */
 interface Reach {
@@ -155,7 +133,12 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
 
 function TaskList({ tasks }: { tasks: DashboardTasks }) {
   const { t } = useTranslation()
-  const list = rows(tasks, { settings: useCan("settings"), keys: useCan("keys") })
+  // The lists the menu badges, while anything waits in them; the card does not wait for them
+  const { data: pending } = useQuery(pendingQuery())
+  const list = [
+    ...rows(tasks, { settings: useCan("settings"), keys: useCan("keys") }),
+    ...pendingRows(pending),
+  ]
   if (list.every((row) => row.count === 0)) {
     return (
       <p className="flex items-start gap-2 px-5 pb-5 text-sm text-muted-foreground">
