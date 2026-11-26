@@ -14,6 +14,7 @@ import { AdminGetPackingSlips } from "./packing-slips/validators"
 import { AdminGetGlobalSearch } from "./global-search/validators"
 import { AdminGetBulkLabels } from "./shipping-labels/validators"
 import { AdminPostCustomerConsent } from "./customers/[id]/consents/validators"
+import { AdminGetCustomerStats } from "./customer-stats/validators"
 import { AdminPostDeliverOrders } from "./order-board/deliver/validators"
 import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
@@ -33,6 +34,8 @@ const NO_QUERY_READS = [
   "/admin/category-counts",
   "/admin/order-board/:id",
   "/admin/orders/:id/money",
+  // O6: where the order's shopper landed from (no personal data)
+  "/admin/orders/:id/origin",
   "/admin/price-lists/:id/lines",
   "/admin/products/:id/sale-prices",
   "/admin/seo/setup",
@@ -176,6 +179,12 @@ export const PANEL_ROUTES = [
     matcher: "/admin/customers/:id/consents",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
+  },
+  // CU1, O4: customers' order totals and city, a recorded read (SENSITIVE_READS)
+  {
+    matcher: "/admin/customer-stats",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetCustomerStats, {})],
   },
   {
     matcher: "/admin/products/:id/price-history",

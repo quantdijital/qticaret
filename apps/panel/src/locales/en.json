@@ -5801,6 +5801,17 @@
       "units_other": "{{count}} people",
       "departure_cancelled": "This departure was cancelled",
       "open_order": "Open order"
+    },
+    "history": {
+      "title": "Customer history"
+    },
+    "origin": {
+      "title": "Order source",
+      "source": "Source",
+      "utmSource": "Campaign source",
+      "utmMedium": "Campaign medium",
+      "utmCampaign": "Campaign name",
+      "referrer": "Referring site"
     }
   },
   "customers": {
@@ -5820,7 +5831,12 @@
       "customer": "Customer",
       "phone": "Phone",
       "kind": "Type",
-      "joined": "First seen"
+      "joined": "First seen",
+      "orders": "Orders",
+      "spent": "Total spent",
+      "average": "Average basket",
+      "lastOrder": "Last order",
+      "city": "City"
     },
     "empty": "No customers yet. They show up with the first order or sign-up.",
     "noMatch": "No customers match your search.",
@@ -6248,6 +6264,15 @@
       "eraseConfirm": "Delete for good",
       "erased_one": "{{count}} record deleted.",
       "erased_other": "{{count}} records deleted."
+    },
+    "columnOptions": "Columns",
+    "stats": {
+      "title": "Customer numbers",
+      "orders": "Orders",
+      "spent": "Total spent",
+      "average": "Average basket",
+      "lastOrder": "Last order",
+      "city": "City"
     }
   },
   "categories": {

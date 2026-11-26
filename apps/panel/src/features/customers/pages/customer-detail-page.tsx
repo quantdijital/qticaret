@@ -25,6 +25,7 @@ import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { ConsentCard } from "@/features/customers/components/consent-card"
 import { CustomerGroupsCard } from "@/features/customers/components/customer-groups-card"
 import { CustomerInfoCard } from "@/features/customers/components/customer-info-card"
+import { CustomerStatsCard } from "@/features/customers/components/customer-stats-card"
 import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
 import { PrivacyRequestsCard } from "@/features/customers/components/privacy-requests-card"
 
@@ -132,7 +133,7 @@ function CustomerTabs({ customer }: { customer: CustomerDetail }) {
 
 /**
  * One customer (docs/06 "Detay sayfası düzeni"): how to reach and bill
- * them in one card at the top, then their orders, what they were sent,
+ * them in one card at the top, their numbers under it, then their orders, what they were sent,
  * their message permissions, groups, KVKK requests and store credit, one
  * tab each.
  */
@@ -177,6 +178,7 @@ export function CustomerDetailPage() {
         back={back}
       />
       <CustomerInfoCard customer={customer} />
+      <CustomerStatsCard customerId={customer.id} />
       <CustomerTabs customer={customer} />
     </div>
   )

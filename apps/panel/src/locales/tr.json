@@ -5801,6 +5801,17 @@
       "units_other": "{{count}} kişi",
       "departure_cancelled": "Bu kalkış iptal edildi",
       "open_order": "Siparişi aç"
+    },
+    "history": {
+      "title": "Müşteri geçmişi"
+    },
+    "origin": {
+      "title": "Sipariş kaynağı",
+      "source": "Kaynak",
+      "utmSource": "Kampanya kaynağı",
+      "utmMedium": "Kampanya ortamı",
+      "utmCampaign": "Kampanya adı",
+      "referrer": "Yönlendiren site"
     }
   },
   "customers": {
@@ -5820,7 +5831,12 @@
       "customer": "Müşteri",
       "phone": "Telefon",
       "kind": "Tür",
-      "joined": "İlk kayıt"
+      "joined": "İlk kayıt",
+      "orders": "Sipariş",
+      "spent": "Toplam harcama",
+      "average": "Ortalama sepet",
+      "lastOrder": "Son sipariş",
+      "city": "Şehir"
     },
     "empty": "Henüz müşteri yok. İlk sipariş ya da üyelikle burada görünür.",
     "noMatch": "Aramanızla eşleşen müşteri yok.",
@@ -6248,6 +6264,15 @@
       "eraseConfirm": "Kalıcı sil",
       "erased_one": "{{count}} kayıt silindi.",
       "erased_other": "{{count}} kayıt silindi."
+    },
+    "columnOptions": "Sütunlar",
+    "stats": {
+      "title": "Müşterinin rakamları",
+      "orders": "Sipariş",
+      "spent": "Toplam harcama",
+      "average": "Ortalama sepet",
+      "lastOrder": "Son sipariş",
+      "city": "Şehir"
     }
   },
   "categories": {
