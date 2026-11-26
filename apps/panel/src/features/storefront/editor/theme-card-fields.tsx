@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import {
   CARD_BADGE_SWITCHES,
   CARD_BUTTON_STYLES,
+  CARD_DENSITIES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
@@ -33,6 +34,7 @@ type CardChoice =
   | "button_style"
   | "quick_view_trigger"
   | "text_position"
+  | "density"
 
 /** A card choice's list, as the registry names its options in this order. */
 const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
@@ -43,6 +45,7 @@ const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
   button_style: CARD_BUTTON_STYLES,
   quick_view_trigger: CARD_QUICK_VIEW_TRIGGERS,
   text_position: CARD_TEXT_POSITIONS,
+  density: CARD_DENSITIES,
 }
 
 /** The tour card's switches in the panel's order: every card's, then a dated card's. */
@@ -105,6 +108,7 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
       | "show_brand"
       | "show_rating"
       | "hover_image"
+      | "hover_cycle"
       | (typeof CARD_BADGE_SWITCHES)[number]
       | (typeof FRAMED_CARD_SWITCHES)[number]
       | "quick_view"
@@ -138,10 +142,12 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
           {choice("variant")}
         </Pair>
         {choice("text_position")}
+        {choice("density")}
         {toggle("show_brand")}
         {toggle("show_rating")}
         {choice("no_reviews")}
         {toggle("hover_image")}
+        {toggle("hover_cycle")}
         <p className="pt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
           {t(`${C}.badges`)}
         </p>

@@ -10135,7 +10135,8 @@
         "ratios": {
           "4x5": "4:5 (portrait)",
           "1x1": "1:1 (square)",
-          "3x4": "3:4 (tall)"
+          "3x4": "3:4 (tall)",
+          "4x3": "4:3 (wide, short)"
         },
         "ratioHint": "The shape of the picture on product cards. Grafit draws a square (1:1).",
         "show_brand": "Show the brand",
@@ -10193,6 +10194,12 @@
             "over": "Over the photo",
             "over_split": "Over the photo, price at the right"
           },
+          "density": "Card density",
+          "densityHint": "Compact: the price right under the name; the rating, review count and tour length on one line (on the photo's badge when the text stands over it). Standard cards only.",
+          "densities": {
+            "regular": "Regular",
+            "compact": "Compact"
+          },
           "rating_badge": "Show the rating as a badge on the photo",
           "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
           "arrow": "Show an arrow at the card's bottom right",
@@ -10213,6 +10220,8 @@
         "framedHint": "Applies wherever a card is drawn framed: as the shop's style or on a rail set to framed.",
         "hover_image": "Second photo on hover",
         "hover_imageHint": "The product's second photo shows when the pointer is over the card; on a phone the photos of a large card swipe sideways. Applies to every card style; no effect on a product with one photo.",
+        "hover_cycle": "Every photo in turn on hover",
+        "hover_cycleHint": "While the pointer rests on the card, the product's photos (up to 5) follow one another. Not on a phone nor for a visitor who asks for less motion; each photo loads when its turn comes.",
         "delivery_note": "Free shipping note",
         "delivery_noteHint": "\"Free shipping\" under the price of a product whose price reaches the free shipping threshold. The threshold is set on the Promotions page.",
         "full_button": "Full-width button",

@@ -66,6 +66,8 @@ const SEARCH_FORM = {
 const CARD = {
   variant: "standard",
   hover_image: true,
+  hover_cycle: false,
+  density: "regular",
   delivery_note: true,
   full_button: true,
   // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews

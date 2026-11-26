@@ -125,7 +125,8 @@ export interface StoreThemeSettings extends StyleKit {
   }
   radius: RadiusStep
   product_card: {
-    ratio: "4:5" | "1:1" | "3:4"
+    /** The photo's shape (`CARD_RATIOS`); `4:3` the short, wide one (sahip 2026-11-26). */
+    ratio: CardRatio
     show_brand: boolean
     show_rating: boolean
     /** How cards are drawn; a product rail may draw its own (`card_variant`). */
@@ -135,6 +136,14 @@ export interface StoreThemeSettings extends StyleKit {
      * screen (sahip 2026-11-18; the framed card's E5 before).
      */
     hover_image: boolean
+    /**
+     * While `hover_image` is on: every photo of the product in turn while a
+     * mouse rests on the card, not only the second (sahip 2026-11-26). Off:
+     * today's second photo.
+     */
+    hover_cycle: boolean
+    /** A standard card's rows, today's `regular` or `compact` (`CARD_DENSITIES`). */
+    density: CardDensity
     /** A framed card's "free shipping" line, from its price and the shop's threshold (E5). */
     delivery_note: boolean
     /** A framed card's add button across its foot instead of the round "+" (E5). */
@@ -269,6 +278,22 @@ export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
  */
 export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 export type CardTextPosition = (typeof CARD_TEXT_POSITIONS)[number]
+
+/**
+ * A card photo's shape, width to height: today's square first among the
+ * tall ones; `4:3` (sahip 2026-11-26) a short, wide photo for a compact card.
+ */
+export const CARD_RATIOS = ["4:5", "1:1", "3:4", "4:3"] as const
+export type CardRatio = (typeof CARD_RATIOS)[number]
+
+/**
+ * A standard card's rows (sahip 2026-11-26, a tour card): `regular`
+ * today's; `compact` the price right under the name, the stars with their
+ * count and a dated product's length on one line (on the photo's pill when
+ * the words stand over it), less room between them.
+ */
+export const CARD_DENSITIES = ["regular", "compact"] as const
+export type CardDensity = (typeof CARD_DENSITIES)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

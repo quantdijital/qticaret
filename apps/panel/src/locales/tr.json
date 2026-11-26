@@ -10135,7 +10135,8 @@
         "ratios": {
           "4x5": "4:5 (dikey)",
           "1x1": "1:1 (kare)",
-          "3x4": "3:4 (uzun)"
+          "3x4": "3:4 (uzun)",
+          "4x3": "4:3 (yatay, kısa)"
         },
         "ratioHint": "Ürün kartlarındaki görselin biçimi. Grafit kare (1:1) çizer.",
         "show_brand": "Markayı göster",
@@ -10193,6 +10194,12 @@
             "over": "Görselin üstünde",
             "over_split": "Görselin üstünde, fiyat sağda"
           },
+          "density": "Kart sıklığı",
+          "densityHint": "Sık: fiyat ürün adının hemen altında; puan, yorum sayısı ve tur süresi tek satırda (yazı görselin üstündeyse görseldeki rozette). Yalnız standart kartta geçer.",
+          "densities": {
+            "regular": "Normal",
+            "compact": "Sık"
+          },
           "rating_badge": "Puanı görselde rozet olarak göster",
           "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
           "arrow": "Kartın sağ altında ok göster",
@@ -10213,6 +10220,8 @@
         "framedHint": "Kart çerçeveli çizildiği her yerde geçer: genel biçimde ya da çerçeveli seçilmiş bir rafta.",
         "hover_image": "Üstüne gelince ikinci fotoğraf",
         "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda büyük kartlarda fotoğraflar yana kaydırılır. Bütün kart biçimlerinde geçer; tek fotoğraflı üründe etkisi yok.",
+        "hover_cycle": "Üstüne gelince bütün fotoğraflar sırayla",
+        "hover_cycleHint": "Fare kartın üstünde durdukça ürünün fotoğrafları (en çok 5) sırayla geçer. Telefonda ve hareketi azaltmak isteyen ziyaretçide geçmez; fotoğraflar sırası gelince yüklenir.",
         "delivery_note": "Ücretsiz kargo notu",
         "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
         "full_button": "Tam genişlik düğme",

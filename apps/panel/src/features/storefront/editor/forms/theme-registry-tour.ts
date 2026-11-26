@@ -1,4 +1,4 @@
-import { CARD_TEXT_POSITIONS } from "@/features/storefront/api/theme"
+import { CARD_DENSITIES, CARD_TEXT_POSITIONS } from "@/features/storefront/api/theme"
 import type {
   DATED_CARD_SWITCHES,
   ThemeChoices,
@@ -41,6 +41,14 @@ export const TOUR_CARD_META = {
     group: "card",
     label: `${C}.tourCard.text_position`,
     options: CARD_TEXT_POSITIONS.map((option) => `${C}.tourCard.textPositions.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
+  // sahip 2026-11-26: the price right under the name, the stars, count and length on one line
+  "product_card.density": {
+    group: "card",
+    label: `${C}.tourCard.density`,
+    options: CARD_DENSITIES.map((option) => `${C}.tourCard.densities.${option}`),
     keywords: KEYWORDS,
     shown: standardInUse,
   },

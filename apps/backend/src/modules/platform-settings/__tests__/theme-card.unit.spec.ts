@@ -3,8 +3,10 @@ import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
   CARD_BUTTON_STYLES,
+  CARD_DENSITIES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
+  CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
   CARD_TEXT_POSITIONS,
   themeSection,
@@ -246,6 +248,43 @@ describe("theme section: the product card's tour look", () => {
   it("reads a row or preset saved before it as today's card", () => {
     const card = Object.fromEntries(
       Object.entries(defaults.product_card).filter(([key]) => !TOUR_KEYS.includes(key))
+    )
+    expect(parseStored("theme", { ...defaults, product_card: card })).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, product_card: card })).toEqual(defaults)
+  })
+})
+
+/** sahip 2026-11-26: the compact tour card, its short photo and every photo on hover. */
+describe("theme section: the product card's density, short photo and photo cycle", () => {
+  const issue = (product_card: Record<string, unknown>) =>
+    full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
+      .error?.issues[0]
+
+  it("holds the contract's lists and draws today's card by default", () => {
+    const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
+    expect(CARD_RATIOS).toEqual(contract["CARD_RATIOS"])
+    expect(CARD_DENSITIES).toEqual(contract["CARD_DENSITIES"])
+    expect(defaults.product_card).toMatchObject({ hover_cycle: false, density: "regular" })
+  })
+
+  it("takes each choice and refuses one off the list", () => {
+    for (const density of CARD_DENSITIES) {
+      expect(issue({ density })).toBeUndefined()
+    }
+    expect(issue({ ratio: "4:3", hover_cycle: true })).toBeUndefined()
+    expect(issue({ density: "airy" })).toMatchObject({
+      message: "platform_settings.invalid",
+      path: ["product_card", "density"],
+    })
+    expect(issue({ ratio: "16:9" })).toBeDefined()
+    expect(issue({ hover_cycle: "yes" })).toBeDefined()
+  })
+
+  it("reads a row or preset saved before them as today's card", () => {
+    const card = Object.fromEntries(
+      Object.entries(defaults.product_card).filter(
+        ([key]) => key !== "hover_cycle" && key !== "density"
+      )
     )
     expect(parseStored("theme", { ...defaults, product_card: card })).toEqual(defaults)
     expect(withCardDefaults({ ...defaults, product_card: card })).toEqual(defaults)

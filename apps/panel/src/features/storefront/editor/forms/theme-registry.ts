@@ -269,6 +269,12 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   "product_card.quick_view_quantity": quickViewSwitch("quick_view_quantity"),
   // Every card's since sahip 2026-11-18 (the framed card's before)
   "product_card.hover_image": { group: "card", label: `${C}.hover_image` },
+  // Every photo in turn (sahip 2026-11-26): only while the second photo is on
+  "product_card.hover_cycle": {
+    group: "card",
+    label: `${C}.hover_cycle`,
+    shown: (theme) => theme.product_card.hover_image,
+  },
   "product_card.delivery_note": framedSwitch("delivery_note"),
   "product_card.full_button": framedSwitch("full_button"),
   // The tour card's look (adr/0077 Ek "tur kartı"), each hidden where it means nothing

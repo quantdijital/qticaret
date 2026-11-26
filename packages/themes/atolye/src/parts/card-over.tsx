@@ -63,7 +63,8 @@ export function OverCard({
             )}
             {product.booking && (
               <>
-                <BookingDuration product={product} />
+                {/* A compact card's length stands in its pill on the photo (`CompactPill`) */}
+                {!product.look?.compact && <BookingDuration product={product} />}
                 <BookingNext product={product} t={t} />
               </>
             )}

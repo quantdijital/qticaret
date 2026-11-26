@@ -42,6 +42,8 @@ export async function cardOptions(): Promise<CardOptions> {
     variant: card.variant,
     // The second photo on hover, on every variant (sahip 2026-11-18)
     hoverImage: card.hover_image,
+    // Every photo in turn (sahip 2026-11-26), only beside the second
+    hoverCycle: card.hover_image && card.hover_cycle,
     // Every card's pills and rows (adr/0049 Ek 2026-11-15): the no-reviews row only where the stars are shown
     shown: {
       saleBadge: card.sale_badge,

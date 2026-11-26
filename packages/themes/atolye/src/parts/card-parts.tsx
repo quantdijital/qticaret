@@ -1,5 +1,6 @@
 import { Star } from "lucide-react"
 import type { CardRatingView, CardVariant, ProductCardView, Translate } from "@qticaret/ui"
+import { CompactPill } from "./card-pill"
 import type { QuickAddWords } from "./QuickAdd"
 import { Stars } from "./Stars"
 
@@ -87,20 +88,25 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
           {badge.text}
         </li>
       )}
-      {rating && (
-        <li
-          className={
-            product.look?.split
-              ? "gf-card-pill-dark flex items-center gap-1 rounded-pill px-2 py-1"
-              : "flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text"
-          }
-        >
-          <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
-          <span aria-hidden="true" className="tabular">
-            {rating.average}
-          </span>
-          <span className="sr-only">{rating.label}</span>
-        </li>
+      {/* A compact card with its words over the photo: the stars' count and the length join the pill */}
+      {product.look?.compact && textOver(product) ? (
+        <CompactPill product={product} />
+      ) : (
+        rating && (
+          <li
+            className={
+              product.look?.split
+                ? "gf-card-pill-dark flex items-center gap-1 rounded-pill px-2 py-1"
+                : "flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text"
+            }
+          >
+            <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+            <span aria-hidden="true" className="tabular">
+              {rating.average}
+            </span>
+            <span className="sr-only">{rating.label}</span>
+          </li>
+        )
       )}
       {discount !== null && (
         <li className="rounded-pill bg-deal px-2 py-1 text-deal-ink">

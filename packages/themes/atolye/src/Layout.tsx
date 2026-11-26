@@ -15,6 +15,7 @@ import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { FooterGroup } from "./frame/FooterGroup"
 import { HEADER_VARIANTS, Header, catalogOf } from "./frame/Header"
+import { CardCycle } from "./frame/CardCycle"
 import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
 import { layerMarks, rootMarks } from "./frame/root-marks"
@@ -36,7 +37,8 @@ import { WhatsAppClear } from "./frame/WhatsAppClear"
  * The WhatsApp button stays away from the checkout and the cart, and
  * while the cookie question waits. `ScrollCue` tells the stylesheet
  * which way the page scrolls (the header folds, WhatsApp steps aside);
- * `ImageCue` which images are decoded (a card's second photo fades in).
+ * `ImageCue` which images are decoded (a card's second photo fades in);
+ * `CardCycle` a card's photos in turn under a resting mouse.
  * Each page sets its own width. The pages of paying (`shop.checkout`)
  * have a focused frame instead: the checkout's header and the small
  * print, nothing else to leave by (`frame/CheckoutFrame`).
@@ -189,6 +191,7 @@ export function Layout({
         {consent}
         <ScrollCue />
         <ImageCue />
+        <CardCycle />
         <PointerCue />
       </LayerMarks>
     </div>

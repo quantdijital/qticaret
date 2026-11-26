@@ -33,6 +33,8 @@ export const THEME: ThemeSettings = {
     show_rating: false,
     variant: "standard",
     hover_image: true,
+    hover_cycle: false,
+    density: "regular",
     delivery_note: true,
     full_button: true,
     sale_badge: true,
