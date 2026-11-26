@@ -57,6 +57,8 @@ const CART_ERRORS = new Set([
   "messaging.email_domain_refuses",
   // A line's add-on picks or its quantity, refused (adr/0052)
   ...ADDON_ERROR_KEYS,
+  // S5: more of a product than one order may hold
+  "cart.max_quantity",
   // A payment link's cart: its lines and code are fixed (adr/0051)
   LINK_CART_LOCKED,
 ])

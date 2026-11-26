@@ -312,6 +312,12 @@ export interface StoreProduct {
      */
     booking_mode?: string | null
     /**
+     * The most of the product one order may hold (S5), its variants
+     * together; null or absent: no limit. The backend refuses more as lines
+     * are added and at checkout. On the product's own answer only.
+     */
+    max_quantity?: number | null
+    /**
      * The shop's short description as a content document (adr/0055 Ek
      * 2026-11-06), with `+product_extension.summary_doc`, on the product's
      * own answer only. The storefront prints the backend's HTML of it

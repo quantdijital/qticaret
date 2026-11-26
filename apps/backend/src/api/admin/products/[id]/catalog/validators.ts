@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { AddonsInput } from "../../../../../lib/catalog/addons"
 import { productBadgeInput } from "../../../../../lib/catalog/badge"
+import { MAX_PURCHASE_QUANTITY } from "../../../../../lib/catalog/purchase-limit"
 import { productDescriptionDoc } from "../../../../../lib/catalog/description"
 import { productSummaryDoc } from "../../../../../lib/catalog/summary"
 import { isCleanText } from "../../../../../lib/security"
@@ -66,6 +67,8 @@ export const AdminPostProductCatalog = z
     booking_mode: z.enum(PRODUCT_BOOKING_MODES).optional(),
     // The product's own card badge ("Sınırlı"): one short line; empty or null clears it
     badge: productBadgeInput.nullable().optional(),
+    // S5: the most of it one order may hold; null clears it
+    max_quantity: z.number().int().min(1).max(MAX_PURCHASE_QUANTITY).nullable().optional(),
     variants: z
       .record(
         id,

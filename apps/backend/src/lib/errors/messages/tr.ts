@@ -128,6 +128,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.tag_unknown": "Bu adla bir etiket yok.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
+  "cart.max_quantity": "{title} ürününden bir siparişte en çok {limit} adet alınabilir.",
   "cart.out_of_stock":
     "Bu ürün az önce tükendi: {{name}}. Sepetinizden çıkarın ya da adedini azaltın.",
   "cart.shipping_changed":

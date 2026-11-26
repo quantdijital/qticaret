@@ -124,6 +124,8 @@ const KNOWN = new Set([
   "addons.required",
   "addons.max_quantity",
   "catalog.addons_disabled",
+  // S5: more of a product than one order may hold, fixed in the cart
+  "cart.max_quantity",
   "cart.prices_changed",
   // A payment link's cart (adr/0051): the link closed, a newer cart, lines or prices moved;
   // its code on another cart; cash on delivery
