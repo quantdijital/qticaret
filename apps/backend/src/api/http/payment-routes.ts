@@ -11,6 +11,7 @@ import { StoreGetInstallments } from "../store/payment/installments/validators"
 import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
 import { isFeeLine } from "../../lib/payments/cod"
 import type { FeeCart } from "../../lib/payments/cod"
+import { keepReservedMetadata, refuseReservedMetadata } from "./cart-metadata"
 import { guardCheckout, guardPaymentStart } from "./checkout-guard"
 import { holdFloodingCheckoutSms } from "./checkout-sms"
 import { requireMailDomain } from "./mail-domain"
@@ -18,8 +19,6 @@ import { refuseSuspendedCartWrite, refuseSuspendedCheckout } from "./plan-guard"
 import { rateLimit } from "./rate-limit"
 
 const FEE_LINE_FIELDS = ["items.id", "items.metadata", "items.variant_id", "items.is_custom_price"]
-// Metadata keys the server alone writes (the fee line's `qt_fee`, the cart's `qt_sms_held`)
-const RESERVED_METADATA_PREFIX = "qt_"
 
 /**
  * Medusa's own session route is closed to shoppers (security review,
@@ -113,29 +112,6 @@ async function protectFeeLine(req: MedusaRequest, _res: MedusaResponse, next: Me
   }
 }
 
-const reservedKeys = (metadata: unknown): boolean =>
-  metadata !== null &&
-  typeof metadata === "object" &&
-  Object.keys(metadata).some((key) => key.startsWith(RESERVED_METADATA_PREFIX))
-
-/**
- * Metadata under `qt_` is the server's (the fee line's marker, a cart's
- * held texts): a storefront creating or changing a cart or its lines may
- * not set it.
- */
-function refuseReservedMetadata(
-  req: MedusaRequest,
-  _res: MedusaResponse,
-  next: MedusaNextFunction
-) {
-  const body = req.body as { metadata?: unknown; items?: unknown } | undefined
-  const items = Array.isArray(body?.items) ? (body.items as ({ metadata?: unknown } | null)[]) : []
-  const reserved =
-    req.method === "POST" &&
-    (reservedKeys(body?.metadata) || items.some((item) => reservedKeys(item?.metadata)))
-  next(reserved ? new ValidationError("cart.metadata_reserved", { field: "metadata" }) : undefined)
-}
-
 // Starting and completing call the provider: a budget per address and per cart
 const checkoutLimit = rateLimit(() => RATE_LIMIT_PROFILES.checkout, {
   identity: (req) => req.params["id"],
@@ -171,7 +147,7 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/line-items/:line_id",
-    middlewares: [refuseReservedMetadata, protectFeeLine],
+    middlewares: [refuseReservedMetadata, protectFeeLine, keepReservedMetadata],
   },
   {
     matcher: "/store/carts/:id/line-items",
@@ -184,7 +160,7 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id",
-    middlewares: [refuseReservedMetadata, requireMailDomain()],
+    middlewares: [refuseReservedMetadata, keepReservedMetadata, requireMailDomain()],
   },
   // F6 W3: which ways to pay a cart can take (cash on delivery by its cart)
   {

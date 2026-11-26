@@ -24,3 +24,26 @@ export function bulkRow(
 ): SheetCell[] {
   return [product.handle, product.title, OUTCOME_TEXT[outcome], message]
 }
+
+/** A product left out or failed, as the panel lists it under the run's counts. */
+export interface BulkProblem {
+  handle: string
+  title: string | null
+  message: string
+}
+
+/** Problems a summary names at most; the report file has them all. */
+export const MAX_PROBLEMS = 50
+
+/** The problem a product's outcome is, if any, while there is room for one more. */
+export function problemOf(
+  problems: readonly BulkProblem[],
+  product: { handle: string; title: string | null },
+  outcome: BulkOutcome,
+  message: string | null
+): BulkProblem | null {
+  if ((outcome !== "skipped" && outcome !== "failed") || problems.length >= MAX_PROBLEMS) {
+    return null
+  }
+  return { handle: product.handle, title: product.title, message: message ?? "" }
+}

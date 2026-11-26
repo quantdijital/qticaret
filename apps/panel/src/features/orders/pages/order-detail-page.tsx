@@ -27,6 +27,8 @@ import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { InvoiceSection } from "@/features/orders/detail/invoice-card"
 import { OrderTabs } from "@/features/orders/detail/order-tabs"
 import { CustomerCard } from "@/features/orders/detail/people-cards"
+import { CustomerHistoryCard } from "@/features/orders/detail/customer-history-card"
+import { OriginCard } from "@/features/orders/detail/origin-card"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { ReturnsCard } from "@/features/orders/detail/returns-card"
 import { StockShortAlert } from "@/features/orders/detail/stock-short-alert"
@@ -52,8 +54,8 @@ function buyerOf(order: OrderDetail): string {
  * One order (docs/06 "Detay sayfası düzeni"): its number, stage, customer,
  * total and next step at the top; how far it has come; a return waiting
  * for a decision; then what was bought, the money and the invoice in the
- * main column, the customer with the address and the team's notes beside
- * them; what the customer was sent, refunds, disputes and the contracts
+ * main column, the customer with the address, their history, where the
+ * order came from and the team's notes beside them; what the customer was sent, refunds, disputes and the contracts
  * in tabs under them.
  */
 export function OrderDetailPage() {
@@ -181,6 +183,8 @@ export function OrderDetailPage() {
           <CustomerCard order={order} editable={state.data.cancelable} />
           {/* The shopper's own words at checkout, read before packing */}
           <CustomerNoteCard metadata={order.metadata} />
+          <CustomerHistoryCard customerId={order.customer?.id} />
+          <OriginCard orderId={order.id} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}
           <NotesCard orderId={order.id} />
         </PageColumn>

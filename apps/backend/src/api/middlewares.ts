@@ -28,6 +28,7 @@ import { STAFF_ACCOUNT_ROUTES } from "./http/staff-account-routes"
 import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
+import { AdminPostBulkEditPreview } from "./admin/catalog/bulk-edit/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { VariantImagesInput } from "../lib/catalog/variant-images"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
@@ -315,6 +316,12 @@ export default defineMiddlewares({
       matcher: "/admin/description-facts/preview",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostDescriptionFactsPreview)],
+    },
+    // F3.10: what a bulk change would do, before the job applies it
+    {
+      matcher: "/admin/catalog/bulk-edit/preview",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostBulkEditPreview)],
     },
     // A new product's variant pictures, picked before it existed: tied within the create's workflow
     {

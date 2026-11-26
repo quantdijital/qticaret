@@ -20,7 +20,17 @@ import { useFeatureState } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 
-const CATALOG_ACTIONS = ["price", "cost", "stock", "status", "category"] as const
+const CATALOG_ACTIONS = [
+  "price",
+  "sale",
+  "cost",
+  "stock",
+  "backorder",
+  "status",
+  "category",
+  "brand",
+  "tag",
+] as const
 const SEO_ACTIONS = ["seo_template", "alt_text"] as const
 
 interface BulkBarProps {

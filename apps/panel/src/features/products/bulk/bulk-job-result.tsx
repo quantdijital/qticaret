@@ -1,12 +1,61 @@
 import { AlertTriangle, CircleCheck, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
-import type { BulkSummary } from "@/features/products/api/bulk"
+import type { BulkPreview, BulkProblem, BulkSummary } from "@/features/products/api/bulk"
 import type { SheetJob } from "@/features/products/api/sheets"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const count = (value: number) => ({ count: value, formatted: formatCount(value) })
+
+/** Products left out or failed, each with why; the first ones the server named. */
+export function BulkProblems({ problems }: { problems: readonly BulkProblem[] }) {
+  const { t } = useTranslation()
+  if (problems.length === 0) {
+    return null
+  }
+  return (
+    <ul
+      aria-label={t("products.bulk.problems")}
+      data-scroll-area="y"
+      className="flex max-h-48 flex-col gap-1.5 overflow-y-auto rounded-md border px-3 py-2 text-[13px]"
+    >
+      {problems.map((problem) => (
+        <li key={problem.handle} className="flex flex-col">
+          <span className="font-medium">{problem.title ?? problem.handle}</span>
+          <span className="text-muted-foreground">{problem.message}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** What a change would do, before it is applied: how many change, are so already, are left out and why. */
+export function BulkPreviewResult({ preview }: { preview: BulkPreview }) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-col gap-3" aria-live="polite">
+      <div className="flex flex-col gap-1.5 text-sm">
+        <p className="flex items-start gap-2 font-medium">
+          <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
+          {t("products.bulk.willChange", count(preview.changed))}
+        </p>
+        {preview.unchanged > 0 ? (
+          <p className="text-muted-foreground">
+            {t("products.bulk.willStay", count(preview.unchanged))}
+          </p>
+        ) : null}
+        {preview.skipped > 0 ? (
+          <p className="flex items-start gap-2 text-warning-text">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {t("products.bulk.willSkip", count(preview.skipped))}
+          </p>
+        ) : null}
+      </div>
+      <BulkProblems problems={preview.problems} />
+    </div>
+  )
+}
 
 /** A bulk edit's progress, then what it changed and left, and its report. */
 export function BulkJobResult({ job }: { job: SheetJob }) {
@@ -51,6 +100,7 @@ export function BulkJobResult({ job }: { job: SheetJob }) {
           </p>
         ) : null}
       </div>
+      <BulkProblems problems={summary.problems ?? []} />
       <div>
         <JobDownloadButton job={job} label={t("products.bulk.report")} />
       </div>
