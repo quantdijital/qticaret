@@ -29,7 +29,7 @@ export function HeroTrust({
     <ul
       aria-label={label}
       className={cn(
-        "grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2",
+        "gf-trust-box grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2",
         roomy && "lg:py-7",
         COLUMNS[Math.min(badges.length, COLUMNS.length) - 1],
         className

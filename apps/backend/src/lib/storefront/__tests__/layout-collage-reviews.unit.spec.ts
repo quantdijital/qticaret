@@ -57,6 +57,7 @@ describe("the photo collage (adr/0077 §10)", () => {
       layout: "asymmetric",
       phone: "scroll",
       card: "over",
+      height: "standard",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "photo_collage", layout: "asymmetric" })
   })
@@ -122,6 +123,8 @@ describe("the photo collage (adr/0077 §10)", () => {
     expect(section.items[1]).not.toHaveProperty("subtitle")
     expect(photoCollage.parse(collage())).not.toHaveProperty("eyebrow")
     expect(photoCollage.safeParse(collage({ card: "flat" })).success).toBe(false)
+    expect(photoCollage.parse(collage({ height: "tall" }))).toMatchObject({ height: "tall" })
+    expect(photoCollage.safeParse(collage({ height: "huge" })).success).toBe(false)
     expect(photoCollage.safeParse(collage({ eyebrow: "x".repeat(61) })).success).toBe(false)
   })
 

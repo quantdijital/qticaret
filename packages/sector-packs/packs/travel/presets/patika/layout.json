@@ -149,7 +149,8 @@
       ],
       "layout": "even",
       "phone": "scroll",
-      "card": "below"
+      "card": "below",
+      "height": "tall"
     },
     {
       "id": "nedenpatika",

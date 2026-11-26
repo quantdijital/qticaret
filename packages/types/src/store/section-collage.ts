@@ -44,6 +44,12 @@ export const PHOTO_COLLAGE_SETTINGS = {
    * card, the photo over its name, small line and a round arrow.
    */
   card: ["over", "below"],
+  /**
+   * How tall each photograph stands: `standard` "Standart", today's
+   * (landscape, 4:3); `tall` "Uzun", portrait (4:5), the mosaic's rows a
+   * third taller.
+   */
+  height: ["standard", "tall"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type PhotoCollageSetting = keyof typeof PHOTO_COLLAGE_SETTINGS
@@ -57,6 +63,7 @@ export const PHOTO_COLLAGE_DEFAULTS: {
   layout: "asymmetric",
   phone: "scroll",
   card: "over",
+  height: "standard",
 }
 
 export const PHOTO_COLLAGE_SETTING_NAMES = Object.keys(

@@ -11,6 +11,8 @@
  *   crossfade (`card.css`); the well (a framed card: the whole card) lifts
  *   3 px with a soft shadow (none where the shop's `shadow` is `none`); a
  *   hover-only quick view button rises 6 px into place as it fades in.
+ * - The opening's trust badges and the figures strip's features (not
+ *   links) rise 3 px under a mouse, their icons growing and tilting.
  * - Scroll reveal: a section without cards, and each product card, fades
  *   in and rises 14 px as it enters the viewport (a scroll-driven
  *   animation; where the browser has none, everything simply shows). The
@@ -85,6 +87,48 @@
         .gf-card:is(:hover, :focus-within)
         .gf-quick-view[data-quick-view="hover"] {
         translate: none;
+      }
+
+      /*
+       * Things that are not links answer a mouse too (owner 2026-11-26):
+       * the opening's trust badges (the row on the photograph,
+       * `gf-cover-trust`, and the box under it, `gf-trust-box`) and the
+       * figures strip's features (`gf-features`) rise 3 px; a badge's icon
+       * grows and tilts a little (the row's takes the accent), a feature's
+       * disc grows inside a soft halo of the accent, its icon tilting. The
+       * cursor stays the arrow: nothing here is clicked.
+       */
+      [data-motion="lively"] :is(.gf-cover-trust, .gf-trust-box) > li,
+      [data-motion="lively"] .gf-features > div {
+        transition: translate var(--dur-short) var(--ease-gentle);
+      }
+      [data-motion="lively"] :is(.gf-cover-trust, .gf-trust-box) > li > svg:first-child,
+      [data-motion="lively"] .gf-features > div > dd[aria-hidden="true"] > svg {
+        transition:
+          transform var(--dur-short) var(--ease-gentle),
+          color var(--dur-micro) var(--ease-out);
+      }
+      [data-motion="lively"] .gf-features > div > dd[aria-hidden="true"] {
+        transition:
+          scale var(--dur-short) var(--ease-gentle),
+          box-shadow var(--dur-short) var(--ease-gentle);
+      }
+      [data-motion="lively"] :is(.gf-cover-trust, .gf-trust-box) > li:hover,
+      [data-motion="lively"] .gf-features > div:hover {
+        translate: 0 -3px;
+      }
+      [data-motion="lively"] :is(.gf-cover-trust, .gf-trust-box) > li:hover > svg:first-child {
+        transform: scale(1.14) rotate(-8deg);
+      }
+      [data-motion="lively"] .gf-cover-trust > li:hover > svg:first-child {
+        color: var(--highlight);
+      }
+      [data-motion="lively"] .gf-features > div:hover > dd[aria-hidden="true"] {
+        scale: 1.08;
+        box-shadow: 0 0 0 4px color-mix(in oklab, var(--highlight) 30%, transparent);
+      }
+      [data-motion="lively"] .gf-features > div:hover > dd[aria-hidden="true"] > svg {
+        transform: rotate(-10deg);
       }
     }
 

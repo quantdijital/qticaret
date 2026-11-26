@@ -73,6 +73,7 @@ export type ContentField =
   | "collage_layout"
   | "collage_phone"
   | "collage_card"
+  | "collage_height"
   | "reviews_product_image"
   | "departures_layout"
   | "action"
@@ -182,11 +183,12 @@ function pointsFields(section: AnySection): RegistryField[] {
   })
 }
 
-/** The collage's two steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
+/** The collage's steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
 export const COLLAGE_FIELDS = [
   ["layout", "collage_layout"],
   ["phone", "collage_phone"],
   ["card", "collage_card"],
+  ["height", "collage_height"],
 ] as const satisfies readonly (readonly [keyof typeof PHOTO_COLLAGE_SETTINGS, ContentField])[]
 
 /** The photo collage's layout from 1024 px and on a phone (adr/0077 §10). */

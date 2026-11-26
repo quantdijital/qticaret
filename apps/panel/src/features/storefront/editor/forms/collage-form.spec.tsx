@@ -203,13 +203,14 @@ describe("the reviews' carousel (adr/0077 §10)", () => {
 })
 
 describe("the collage's settings search and preview marks", () => {
-  it("finds its three settings in Diziliş and leads a caption or the intro to its field", () => {
+  it("finds its four settings in Diziliş and leads a caption or the intro to its field", () => {
     const collage = newHomeSection("photo_collage", COLLAGE)
 
     expect(contentFields(collage).map((each) => [each.key, each.group])).toEqual([
       ["collage_layout", "layout"],
       ["collage_phone", "layout"],
       ["collage_card", "layout"],
+      ["collage_height", "layout"],
     ])
     expect(previewField(collage, "items.1.caption")?.target).toBe(`${COLLAGE}-items-1-caption`)
     expect(previewField(collage, "intro")?.target).toBe(`${COLLAGE}-intro`)

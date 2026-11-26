@@ -64,3 +64,68 @@ ul[data-variant="icons"] > li > a > span:first-child {
     background-color: var(--color-paper-2);
   }
 }
+
+/* The header's wordmark (`frame/Wordmark`): a step lighter under a pointer */
+.gf-wordmark {
+  transition: opacity 200ms ease;
+}
+@media (hover: hover) {
+  .gf-wordmark:hover {
+    opacity: 0.78;
+  }
+}
+
+/* A link with an arrow after its words (a section's "Tüm rotalar"): the arrow steps forward */
+.gf-link > svg:last-child {
+  transition: translate 200ms ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gf-link:hover > svg:last-child {
+    translate: 3px 0;
+  }
+}
+
+/*
+ * The photo collage's tiles (`PhotoCollage`). A linked photograph (`over`)
+ * zooms a little inside its frame. A white route card (`card: below`,
+ * `collage-card`) rises 4 px, its photograph zooms inside the well and its
+ * round arrow fills with the shop's colour, the arrow stepping forward.
+ * Without motion only the arrow's colours change. Unlayered: it answers
+ * the card's own utilities and `motion.css`'s lazy fade (kept here).
+ */
+:is(.gf-collage-tile, .gf-route-card) img {
+  transition:
+    scale var(--dur-slow) var(--ease-gentle),
+    opacity var(--dur-long) var(--ease-gentle);
+}
+.gf-route-card {
+  transition: transform var(--dur-short) var(--ease-gentle);
+}
+.gf-route-arrow {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+.gf-route-arrow > svg {
+  transition: translate 200ms ease;
+}
+@media (hover: hover) {
+  a.gf-route-card:hover .gf-route-arrow {
+    border-color: var(--color-signal);
+    background-color: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gf-collage-tile:has(> a:hover) img,
+  a.gf-route-card:hover img {
+    scale: 1.06;
+  }
+  a.gf-route-card:hover {
+    transform: translateY(-4px);
+  }
+  a.gf-route-card:hover .gf-route-arrow > svg {
+    translate: 2px 0;
+  }
+}

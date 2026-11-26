@@ -4528,6 +4528,27 @@
       "pageSize_other": "{{count}} products",
       "columns": "Columns"
     },
+    "quickEdit": {
+      "toggle": "Quick edit",
+      "lockedHint": "Save or discard the changes first.",
+      "label": "Quick edit",
+      "save_one": "Save {{count}} change",
+      "save_other": "Save {{count}} changes",
+      "saved_one": "{{formatted}} product updated.",
+      "saved_other": "{{formatted}} products updated.",
+      "failed_one": "{{formatted}} product could not be saved; its change stays in the list.",
+      "failed_other": "{{formatted}} products could not be saved; their changes stay in the list.",
+      "discardTitle": "Discard the changes?",
+      "discardText_one": "{{count}} unsaved change is dropped.",
+      "discardText_other": "{{count}} unsaved changes are dropped.",
+      "discard": "Discard changes",
+      "priceOf": "Price of {{title}}",
+      "stockOf": "Stock of {{title}}",
+      "statusOf": "Status of {{title}}",
+      "inVariants": "Edit in variants",
+      "untracked": "Not tracked",
+      "untrackedHint": "Stock is not counted: this product always sells."
+    },
     "duplicate": {
       "action": "Duplicate",
       "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
@@ -12066,6 +12087,13 @@
           "hint": "A name plate on the photo, or a white card with the name, a small line and an arrow under it.",
           "over": "Plate on the photo",
           "below": "White card"
+        },
+        "height": {
+          "label": "Photo height",
+          "term": "height",
+          "hint": "Landscape photos, or taller portrait ones.",
+          "standard": "Standard",
+          "tall": "Tall"
         }
       },
       "program": {

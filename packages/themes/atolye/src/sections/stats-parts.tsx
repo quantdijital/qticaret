@@ -56,8 +56,8 @@ export function StatsHead({ section, heading }: { section: Stats; heading: React
  * shop's accent, its label in bold and its one quiet line in the small
  * size; the value is not drawn (it stays the figure's, should the shop
  * turn the figures back). Two a line on a phone, all in one line from
- * 1024 px, a hairline before each there while `dividers` is on (the first
- * too, the row standing in from the heading). A list (`dl`): each label a
+ * 1024 px, a hairline between each two there while `dividers` is on (none
+ * before the first: the row starts flush with the heading). A list (`dl`): each label a
  * term, its line its description.
  */
 export function StatsFeatures({ section }: { section: Stats }) {
@@ -66,7 +66,7 @@ export function StatsFeatures({ section }: { section: Stats }) {
   return (
     <dl
       className={cn(
-        "grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-(--gap-columns)",
+        "gf-features grid grid-cols-2 gap-x-4 gap-y-6 sm:gap-x-(--gap-columns)",
         WIDE[section.items.length],
         lined && "lg:gap-x-0"
       )}
@@ -76,7 +76,8 @@ export function StatsFeatures({ section }: { section: Stats }) {
           key={`${String(at)}-${item.label}`}
           className={cn(
             "flex min-w-0 flex-col gap-1 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center",
-            lined && "lg:border-l lg:border-rule lg:px-(--gap-columns)"
+            lined &&
+              "lg:border-l lg:border-rule lg:px-(--gap-columns) lg:first:border-l-0 lg:first:pl-0"
           )}
         >
           <dt

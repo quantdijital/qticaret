@@ -26,6 +26,7 @@ export const PHOTO_COLLAGE_SETTINGS = {
   layout: ["asymmetric", "even"],
   phone: ["scroll", "stack"],
   card: ["over", "below"],
+  height: ["standard", "tall"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof PHOTO_COLLAGE_SETTINGS
@@ -35,6 +36,7 @@ export const PHOTO_COLLAGE_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   layout: "asymmetric",
   phone: "scroll",
   card: "over",
+  height: "standard",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -74,6 +76,7 @@ export const photoCollage = z
     layout: setting("layout"),
     phone: setting("phone"),
     card: setting("card"),
+    height: setting("height"),
     eyebrow: shopText(PHOTO_COLLAGE_LIMITS.eyebrow).nullable().optional(),
     more: storefrontLink.nullable().optional(),
   })

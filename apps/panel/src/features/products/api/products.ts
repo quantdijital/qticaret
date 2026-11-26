@@ -25,9 +25,14 @@ const LIST_FIELDS = [
   "variants.id",
   "variants.sku",
   "variants.manage_inventory",
+  "variants.prices.id",
   "variants.prices.amount",
   "variants.prices.currency_code",
   "variants.inventory_items.inventory.location_levels.available_quantity",
+  // The quick edit's shelf at the shop's location (quick-edit/quick-drafts.ts)
+  "variants.inventory_items.inventory_item_id",
+  "variants.inventory_items.inventory.location_levels.location_id",
+  "variants.inventory_items.inventory.location_levels.stocked_quantity",
   // A gift card product's badge (adr/0025 Ek 2026-11-03): the catalog extension's mark
   "product_extension.is_gift_card",
 ].join(",")
