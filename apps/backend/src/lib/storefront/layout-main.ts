@@ -140,6 +140,9 @@ export function mainSectionsOf<L>(
       ...(header.tools_style ? { tools_style: header.tools_style } : {}),
       // Over the opening only once switched on: a bar without it prints as before
       ...(header.over_cover ? { over_cover: true } : {}),
+
+      // How the submenus open: only once set (absent: the dropdown list)
+      ...(header.submenu_style ? { submenu_style: header.submenu_style } : {}),
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
       // The other variants' action button (the catalog prints it in its own): only once set
       ...(header.variant !== "catalog" && header.highlight_link

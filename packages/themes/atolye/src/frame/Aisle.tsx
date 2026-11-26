@@ -7,6 +7,7 @@ import type { LinkView, NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useAisleFit } from "./aisle-fit"
 import { Drop, Word } from "./AisleDrop"
+import { Mega } from "./AisleMega"
 import { BarLinks, MORE_PANEL, MorePanel } from "./AisleMore"
 import type { MenuWords } from "./menu-words"
 
@@ -35,7 +36,9 @@ const BAR_ITEM = "gf-menu-item--bar px-2 xl:px-3"
  * each link reaches a crawler without a script (docs/13). A closed
  * dropdown still listens for presses outside it; it lets them pass, or a
  * press inside the open one would close the menu before its link is
- * followed. Dropdowns take the page's ink, never the bar's.
+ * followed. Dropdowns take the page's ink, never the bar's. With
+ * `mega` each item opens a wide panel instead (`AisleMega`), centred on
+ * the page under the line, with the same keys, delays and first HTML.
  *
  * In the catalog header's menu bar (`inBar`) the bar's ground is on its
  * items, and the line never wraps: the categories that do not fit go
@@ -54,6 +57,7 @@ export function Aisle({
   more = "",
   tail,
   pictures = true,
+  mega = false,
   links = [],
   linksLabel = "",
   inRow = false,
@@ -72,6 +76,8 @@ export function Aisle({
   tail?: ReactNode
   /** The dropdowns' small pictures (`HeaderBarView.menuImages` not `off`); else words only. */
   pictures?: boolean
+  /** Each item's children as a wide panel (`submenuStyle: mega`, `AisleMega`); else the dropdown list. */
+  mega?: boolean
   /** In the bar, the shop's top links at its end (under "Daha fazla" when they do not fit). */
   links?: readonly LinkView[]
   /** The links' group's name for a screen reader. */
@@ -100,10 +106,19 @@ export function Aisle({
     )
     const bounds = root.current?.getBoundingClientRect()
     const item = drop?.parentElement?.getBoundingClientRect()
+    if (mega) {
+      // The wide panel stands centred on the page, whatever the item or the header it hangs in
+      const holder = drop?.offsetParent?.getBoundingClientRect()
+      if (drop && holder) {
+        const x = (document.documentElement.clientWidth - drop.offsetWidth) / 2 - holder.left
+        drop.style.setProperty("--gf-mega-x", `${String(Math.round(x))}px`)
+      }
+      return
+    }
     if (drop && bounds && item) {
       drop.setAttribute("data-align", item.left + drop.offsetWidth > bounds.right ? "end" : "start")
     }
-  }, [open])
+  }, [open, mega])
 
   const menu = (
     <NavigationMenu.Root
@@ -151,7 +166,7 @@ export function Aisle({
               key={category.path}
               value={category.path}
               data-aisle-item=""
-              className={cn("relative", away && "hidden")}
+              className={cn(!mega && "relative", away && "hidden") || undefined}
             >
               <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
                 <Word text={category.label} />
@@ -169,9 +184,25 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
-                className="gf-drop data-[state=closed]:hidden"
+                onEscapeKeyDown={(event) => {
+                  // Escape from a link inside: the focus back on its item's button, not lost
+                  // with the panel as it hides (WCAG 2.4.3)
+                  const { target } = event
+                  const trigger =
+                    target instanceof Element
+                      ? target.closest("[data-aisle-item]")?.querySelector("button")
+                      : null
+                  requestAnimationFrame(() => {
+                    trigger?.focus()
+                  })
+                }}
+                className={cn(mega ? "gf-mega" : "gf-drop", "data-[state=closed]:hidden")}
               >
-                <Drop category={category} words={words} pictures={pictures} />
+                {mega ? (
+                  <Mega category={category} words={words} pictures={pictures} />
+                ) : (
+                  <Drop category={category} words={words} pictures={pictures} />
+                )}
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )

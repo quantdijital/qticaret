@@ -8,7 +8,8 @@
       "ends_at": null,
       "variant": "inline",
       "sticky": true,
-      "menu_images": "off",
+      "menu_images": "submenus",
+      "submenu_style": "mega",
       "search_style": "icon",
       "over_cover": true,
       "tools_style": "plain"

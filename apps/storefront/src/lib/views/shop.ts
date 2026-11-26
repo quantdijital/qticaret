@@ -23,7 +23,7 @@ import { miniCartOf } from "./cart"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
 import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
-import { navigation, withPicturesOf } from "./categories"
+import { navigation, subcategoryLinks, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
 import { withNavCounts } from "./nav-counts"
 import { cookieBannerOf } from "./cookies"
@@ -125,7 +125,8 @@ export async function shopView(): Promise<ShopView> {
   // each category's page its product count (the dropdown's and the sheet's badges)
   const menu = withNavCounts(
     await withNavPictures(
-      mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures),
+      mainMenu(menus, t, pictures, (id) => subcategoryLinks(categories, paths, id)) ??
+        navigation(categories, paths, pictures),
       categories,
       paths
     ),

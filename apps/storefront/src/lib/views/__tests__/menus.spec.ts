@@ -100,4 +100,40 @@ describe("menu links", () => {
     // No header menu: the category tree shows
     expect(mainMenu([], t)).toBeNull()
   })
+
+  it("gives a child its own links for the wide panel: its menu children, else its subcategories", () => {
+    const menus = [
+      menu("main", [
+        link({
+          label: "Yurt içi",
+          kind: "category",
+          target: "pcat_ic",
+          path: "/yurt-ici",
+          children: [
+            link({
+              label: "Ege",
+              kind: "category",
+              target: "pcat_ege",
+              path: "/ege",
+              children: [link({ label: "Efes", kind: "page", path: "/efes" })],
+            }),
+            link({ label: "Kapadokya", kind: "category", target: "pcat_kap", path: "/kapadokya" }),
+            link({ label: "Rehber", kind: "page", path: "/rehber" }),
+          ],
+        }),
+      ]),
+    ]
+    const subcategories = (id: string) =>
+      id === "pcat_kap" ? [{ label: "Balon turları", path: "/balon" }] : []
+
+    expect(mainMenu(menus, t, new Map(), subcategories)?.[0]?.children).toEqual([
+      { label: "Ege", path: "/ege", links: [{ label: "Efes", path: "/efes" }] },
+      {
+        label: "Kapadokya",
+        path: "/kapadokya",
+        links: [{ label: "Balon turları", path: "/balon" }],
+      },
+      { label: "Rehber", path: "/rehber" },
+    ])
+  })
 })

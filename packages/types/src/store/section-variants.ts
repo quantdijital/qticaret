@@ -252,6 +252,25 @@ export function productImageRatioOf(value: unknown): ProductImageRatio {
     : "square"
 }
 
+/**
+ * How a header menu item's children open from 1024 px (adr/0049 Ek
+ * 2026-11-26, adr/0066 §2 "tek davranış → bölüm ayarı"), every variant's
+ * setting: `list` the dropdown under the item, one column of rows (the
+ * drawing from before the setting, so the default); `mega` a wide panel
+ * under the menu line, each child a column with its picture and its own
+ * children as links, the item's own picture as a card beside them. A
+ * phone's sheet is the same in both. Mirrored by the backend's
+ * `HEADER_SUBMENU_STYLES`.
+ */
+export const HEADER_SUBMENU_STYLES = ["list", "mega"] as const
+
+export type HeaderSubmenuStyle = (typeof HEADER_SUBMENU_STYLES)[number]
+
+/** The submenus' look as a reader takes it: absent or off the list, the default (`list`). */
+export function headerSubmenuStyleOf(value: unknown): HeaderSubmenuStyle {
+  return value === "mega" ? "mega" : "list"
+}
+
 /** The search's look as a reader takes it: absent or off the list, the default (`field`). */
 export function headerSearchStyleOf(value: unknown): HeaderSearchStyle {
   return (HEADER_SEARCH_STYLES as readonly unknown[]).includes(value)

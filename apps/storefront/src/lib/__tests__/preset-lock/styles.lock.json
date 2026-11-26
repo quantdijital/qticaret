@@ -122,6 +122,10 @@
       "file": "media.css"
     },
     {
+      "sha256": "bad61e5d53c7dd3976ba8156a6c133adffac849aa0c7a5631e2caa38aab98bfb",
+      "file": "mega.css"
+    },
+    {
       "sha256": "ff54ce28a1bbb8f52f0c64b01ca60e971a75852144c4f9571cc2507dc0b97c67",
       "file": "menu.css"
     },
@@ -162,7 +166,7 @@
       "file": "search-toggle.css"
     },
     {
-      "sha256": "c5b8abb98e34e8679c59eed0088d136c120617ceaff68d90548b46ce4638313a",
+      "sha256": "3af39894ae6a98865164655826b237f9d35c30562afe1ccb01f4928bef5a42ea",
       "file": "shadow.css"
     },
     {
@@ -190,7 +194,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "271ec20ab09bc06f260dda1c256ed778c0b1346ceb4311b5e65d1724ed2c4752",
+      "sha256": "ab1e0308081127282efdc8fbf27196e36ab877945a037d9c57fd8f4f1b009d93",
       "file": "styles.css"
     },
     {
