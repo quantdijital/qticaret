@@ -40,6 +40,36 @@
 
 Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
 
+## 2026-11-26 (akşam/gece) — kargo firmaları yeniden: Geliver çıktı, BirFatura modu, DHL eCommerce, Sürat, PTT
+
+- **Birleşenler (`dev`, #454–#474):**
+  - **Sepet ve kargo:** sepette kargo tahmini, adres girilmeden (#458). Ek ücret ve eşik yazısı (#454). Ücretsiz kargo koşulları tek yerde (#456). Bağlantılı ürünler: panel (#455) ve vitrin (#457).
+  - **Geliver kaldırıldı (#460):** sahibin kararı. Kod, sahte sunucu, panel kartı ve belgeleri silindi. `geliver-removed` dönüşüm betiği seçenekleri, depo bağlantısını ve kayıtlı hesabı temizler; sahibin dev DB'sinde çalıştırıldı. Taşıyıcıdan iade gönderisi açma artık yok. BasitKargo yapılmayacak.
+  - **"Kargoyu nereden yönetiyorsun?" (#461):** iki seçenek var: kendi anlaşmam (Aras/Yurtiçi…) ya da BirFatura. BirFatura modunda `orderCargoUpdate` takip numarasını siparişe yazar ve "kargoya verildi" e-postası gider. Fatura bekletme kuralı bu modda kargoyu beklemez. Ayarı yalnız sahip değiştirebilir (ADR-0072 Ek).
+  - **Anlaşmalı iade kodu (#462):** her taşıyıcıya sabit tek kod. Onaylanan iadede kod e-postada ve sipariş sayfasında görünür. Kod girilmemişse uyarı çıkar (ADR-0031 Ek).
+  - **Araştırma (#463):** `docs/entegrasyonlar/dhlecommerce.md`, `surat.md`, `ptt.md` ve `aras.md`. Kaynak olarak sahibin PHP eklentisi yalnız bilgi için kullanıldı, kod alınmadı.
+  - **DHL eCommerce (eski MNG):** ortak PDF etiket (`lib/shipping/label`), istemci ve sahte sunucu (#464); sağlayıcı ve panel (#468). Varsayılan anahtar platformun uygulama anahtarı, mağaza kendi anahtarını da girebilir. **Askıda (#472):** sunucuda `CARRIER_DHLECOMMERCE_ENABLED=true` yoksa hiçbir yerde görünmez; kod ve testler duruyor.
+  - **Sürat (#471):** SOAP. Başarı yalnız bilinen cümlelerle sayılır, belirsiz cevapta gönderi geri alınır. Etiket Sürat'ın kendi etiketi ya da ortak PDF.
+  - **PTT (#474):** barkod aralığı zorunlu. Yeni `ptt_barcode` modülü ve `Migration20261126231504`; numara satır kilidiyle verilir, hiçbir zaman tekrar kullanılmaz. Ayar sayfasında "PTT'den istenecekler" listesi var. Sahibin dev DB'sine migration uygulandı.
+  - **Panel:** 170 alana placeholder eklendi ve placeholder için ev kuralı yazıldı (#466, #467). Kaydet sürerken yazılan değer korunuyor (`beginSave`, #470, #473; kategori ekranı dahil).
+  - **Kararsız test ve onarımlar:** yapay zekâ kredi defteri sırası (#459), kargo sınıfı e2e (#465), stok defteri uyarısı (#469).
+- **Sahibin kararları (2026-11-26):**
+  - Geliver tamamen kaldırıldı, BasitKargo yok.
+  - Diğer firmalar ancak bir mağaza isterse eklenir. Sıra DHL → Sürat → PTT'ydi, üçü de yapıldı.
+  - MNG'nin adı her yerde "DHL eCommerce".
+  - DHL askıya alındı.
+  - Depo açık kalıyor (CI dakikaları; ek sunucu yok).
+- **Sahipte açık:**
+  - Yeni kargo ekranları 390/768–820/1024/1280/1440'ta bakılacak: Ayarlar > Kargo (soru kartı, iade kodu, Sürat, PTT barkod aralığı) ve Siparişler > İadeler uyarısı.
+  - `.env`'deki `DHL_ECOMMERCE_BASE_URL` satırı artık gereksiz, silinebilir.
+  - Önceden açık: operasyon rolünün müşteriye not göndermesi; SEO danışmanı kartının gizlenebilirliği; Aras ve Yurtiçi fatura unvanı ve VKN.
+- **Gerçek hesapla doğrulanacaklar** (her firmanın belgesinde "doğrulanacaklar" listesi var): Sürat'ın başarı cümleleri; PTT'nin yanlış şifre cevabı ve durum kodları; şubelerin bizim Code 128 etiketimizi okuyup okumadığı; BirFatura'nın `orderCargoUpdate` davranışı.
+- **Takipler:**
+  - Taşıyıcının API'sinden iade başına kod (Aras/Yurtiçi) yok, sabit kod var.
+  - Sürat ve DHL hesap formları kaydettikten sonra yeniden kuruluyor (`key`); kayıt sırasında yazılan değer burada kaybolabilir.
+  - `appearance-form.tsx` aynı desende, bakılmadı.
+  - PTT'nin test modu da mağazanın aralığından numara harcıyor (belgelendi).
+
 ## 2026-11-26 (gün) — ürün sayfası sadeleştirme, panel görsel denetimi, kargo yeniden düzeni
 
 - **Birleşenler (`dev`, #434–#451):**
@@ -56,7 +86,6 @@ Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa k
   - Geçici hesabı sil: `e2e-audit-1795678576@example.com` (Ayarlar > Güvenlik > Ekip).
   - Aras ve Yurtiçi sayfalarında "Faturadaki firma bilgisi" unvan + VKN girilecek (güvenilir kaynaktan doğrulanamadı, önden doldurulmadı).
   - Kararlar: operasyon rolü müşteriye not gönderebilsin mi; ürün sayfasındaki SEO danışmanı kartı gizlenebilsin mi.
-- **Sürüyor (2026-11-26 akşam):** ek ücret satırı ile eşik ilişkisinin düzeltmesi + sepette kargo tahmini; il bazlı kargo fiyatı ADR'si + ücretsiz kargo koşulları tek yerde; bağlantılı ürünler.
 - **Diğer takipler:**
   - Stoksuz gizleme ana sayfa raflarına ve ilgili ürünlere uygulanmıyor (Oğuzhan).
   - Hızlı bakıştaki adet seçici en çok adedi dikkate almıyor (Oğuzhan).
