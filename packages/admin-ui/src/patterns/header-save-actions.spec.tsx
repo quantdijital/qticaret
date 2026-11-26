@@ -64,6 +64,8 @@ describe("the page's one save in its header (docs/06 'Ürün sayfası')", () => 
     await userEvent.type(screen.getByRole("textbox", { name: "Genel" }), "Kupa")
     await userEvent.type(screen.getByRole("textbox", { name: "SEO" }), "Kupa al")
     expect(group()).toHaveTextContent("2 bölümde değişiklik")
+    // Read out, never drawn: the header row stays short (the owner 2026-11-26)
+    expect(within(group()).getByText("2 bölümde değişiklik")).toHaveClass("sr-only")
 
     await userEvent.click(headerButton("Kaydet"))
     expect(first).toHaveBeenCalledWith("Kupa")
