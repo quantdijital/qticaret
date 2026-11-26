@@ -1,4 +1,6 @@
 export { reasonOf } from "./reason"
+export { stockItemLabel } from "./item-label"
+export type { StockItemNames } from "./item-label"
 export {
   INSUFFICIENT_INVENTORY,
   STOCK_REFUSALS,

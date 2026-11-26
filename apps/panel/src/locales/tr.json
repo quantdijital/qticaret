@@ -8150,6 +8150,7 @@
     "empty": "Henüz bildirim yok.",
     "lowStock": {
       "title": "Stok azalıyor: {{name}}",
+      "unnamed": "bir ürün",
       "description_one": "{{count}} adet kaldı (eşik {{threshold}}).",
       "description_other": "{{count}} adet kaldı (eşik {{threshold}})."
     },
@@ -8239,37 +8240,39 @@
       "description": "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin."
     },
     "paymentIssue": {
+      "orderRef": "#{{number}} siparişi",
+      "orderRefUnknown": "Bu sipariş",
       "completion_stuck": {
         "title": "{{provider}} ödemesi siparişe dönüşemiyor",
-        "description": "{{amount}} ({{reference}}, sepet {{cart}}) için sipariş açılamadı; denenmeye devam ediyor, iade edilmedi. Stok ve depo ayarlarını kontrol edin; açılamayacaksa ödemeyi sağlayıcının panelinden iade edin."
+        "description": "{{amount}} ({{reference}}) için sipariş açılamadı; denenmeye devam ediyor, iade edilmedi. Stok ve depo ayarlarını kontrol edin; açılamayacaksa ödemeyi sağlayıcının panelinden iade edin."
       },
       "refunded_before_order": {
         "title": "İade edilmiş {{provider}} ödemesi siparişe dönüştürülmedi",
-        "description": "{{amount}} ({{reference}}, sepet {{cart}}) sağlayıcının panelinde iade edilmiş görünüyor; sipariş açılmadı."
+        "description": "{{amount}} ({{reference}}) sağlayıcının panelinde iade edilmiş görünüyor; sipariş açılmadı."
       },
       "shelf_restored": {
         "title": "Geçici stok düzeltmesi geri alındı",
-        "description": "Sepet {{cart}} için artırılan stok, işlem yarıda kaldığı için geri alındı. Stok sayılarını kontrol edin."
+        "description": "Bir sepet için artırılan stok, işlem yarıda kaldığı için geri alındı. Stok sayılarını kontrol edin."
       },
       "wholesale_price_check": {
         "title": "Toptan sepetin ödemesi başlatılamadı",
-        "description": "Sepet {{cart}} toptancının bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin."
+        "description": "Toptancının sepeti bugünkü fiyatlarına getirilemedi; ödeme alınmadı. Bu sepetteki ürünlerin toptan ve perakende fiyatlarını kontrol edin."
       },
       "payment_beside_order": {
         "title": "Siparişi olan sepete ikinci {{provider}} ödemesi",
-        "description": "{{amount}} ({{reference}}, sepet {{cart}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazlasını sağlayıcının panelinden iade edin."
+        "description": "{{amount}} ({{reference}}) başka bir ödemeyle açılmış siparişin sepetine alındı; otomatik iade yapılmadı. Müşterinin iki kez ödeyip ödemediğini kontrol edin; öyleyse fazlasını sağlayıcının panelinden iade edin."
       },
       "refund_incomplete": {
         "title": "{{provider}} iadesi yapıldı, kaydı yarım kaldı",
-        "description": "Sipariş {{cart}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden kontrol edin. Aynı iadeyi yeniden yapmayın."
+        "description": "{{order}} için {{amount}} iade ({{reference}}) {{provider}} tarafında yapılmış ya da yapılmış olabilir, ancak kaydı tamamlanamadı. Kayıt otomatik olarak denetleniyor; bir saat sonra hâlâ yarımsa {{provider}} panelinden kontrol edin. Aynı iadeyi yeniden yapmayın."
       },
       "refund_unresolved": {
         "title": "Bir iade bir saattir doğrulanamadı",
-        "description": "Sipariş {{cart}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın."
+        "description": "{{order}} için {{amount}} iadenin ({{reference}}, {{provider}}) kaydı otomatik denetimde tamamlanamadı. Sipariş sayfasındaki iadeyi ödeme kuruluşunun kaydıyla karşılaştırın; aynı iadeyi yeniden yapmayın."
       },
       "cancel_refund_order_open": {
         "title": "İptal iadesi tamamlandı ama sipariş iptal edilmedi",
-        "description": "Sipariş {{cart}} için {{amount}} iptal iadesi ({{reference}}, {{provider}}) yapıldı, ancak sipariş hâlâ açık. Siparişi iptal edin; kargolamayın."
+        "description": "{{order}} için {{amount}} iptal iadesi ({{reference}}, {{provider}}) yapıldı, ancak sipariş hâlâ açık. Siparişi iptal edin; kargolamayın."
       }
     },
     "markAllRead": "Tümünü okundu say",

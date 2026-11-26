@@ -51,14 +51,18 @@ export function paymentIssueAlert(t: TFunction, data: Record<string, unknown>) {
     return null
   }
   const issue = data["issue"]
+  const order = ORDER_ISSUES.has(issue) ? text(data["cart_id"]) : ""
+  // The order by its number, never its id; one stored before the number was kept is "this order"
+  const number = text(data["order_number"])
   const values = {
     provider: PROVIDERS[text(data["provider"])] ?? text(data["provider"]),
     reference: text(data["reference"]) || "—",
-    cart: text(data["cart_id"]) || "—",
+    order: number
+      ? t("notifications.paymentIssue.orderRef", { number })
+      : t("notifications.paymentIssue.orderRefUnknown"),
     amount: money(data["amount"]),
   }
   const shelf = issue === "shelf_restored"
-  const order = ORDER_ISSUES.has(issue) ? text(data["cart_id"]) : ""
   return {
     title: t(`notifications.paymentIssue.${issue}.title`, values),
     description: t(`notifications.paymentIssue.${issue}.description`, values),

@@ -158,7 +158,12 @@ medusaIntegrationTestRunner({
 
     it("alerts once when an item runs low, and again only after it was restocked (KK)", async () => {
       await settings().saveSection("inventory", { low_stock_threshold: 3 }, null)
-      const { variantId, itemId } = await stockedProduct(getContainer(), shop, "uyari-kupa", 5)
+      const { productId, variantId, itemId } = await stockedProduct(
+        getContainer(),
+        shop,
+        "uyari-kupa",
+        5
+      )
       await movementsOf(itemId, 1)
 
       await orderOne(getContainer(), shop, variantId)
@@ -169,7 +174,15 @@ medusaIntegrationTestRunner({
       await orderOne(getContainer(), shop, variantId)
       await movementsOf(itemId, 3)
       const [alert] = await lowStockAlerts(itemId)
-      expect(alert?.data).toMatchObject({ available: 3, threshold: 3 })
+      // Named by its product and variant, opening the product; never the item's id
+      expect(alert?.data).toMatchObject({
+        available: 3,
+        threshold: 3,
+        name: "uyari-kupa — Standart",
+        product_id: productId,
+        variant_id: variantId,
+        title: "Düşük stok: uyari-kupa — Standart",
+      })
 
       await orderOne(getContainer(), shop, variantId)
       await movementsOf(itemId, 4)
@@ -181,6 +194,17 @@ medusaIntegrationTestRunner({
       await setLevel(itemId, 5)
       await movementsOf(itemId, 6)
       expect(await alertsOf(itemId, 2)).toHaveLength(2)
+    })
+
+    it("does not alert for a deleted product's stock, at once or at night", async () => {
+      const { productId, itemId } = await stockedProduct(getContainer(), shop, "silinen-kupa", 10)
+      await movementsOf(itemId, 1)
+      await armed(itemId)
+
+      await settle(http.delete(`/admin/products/${productId}`, admin))
+      // The nightly check reads deleted levels too: a deleted item's emptied level is no alert
+      await stockReconcile(getContainer())
+      expect(await alertsOf(itemId, 1)).toHaveLength(0)
     })
 
     it("alerts once when two orders take an item under the line together", async () => {
