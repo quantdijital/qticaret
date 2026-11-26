@@ -6,6 +6,7 @@ import {
   ARAS_FULFILLMENT_PROVIDER_ID,
   DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   SHOP_FULFILLMENT_PROVIDER_ID,
+  SURAT_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
 import { flatAmountOf, tableBaseOf } from "../../lib/shipping/shop"
@@ -58,6 +59,8 @@ export function pricerOf(option: OptionRow | null): EstimatePricer<CartLine> | n
       return id === "yurtici-flat" ? flat(data) : TABLE
     case DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID:
       return id === "dhlecommerce-flat" ? flat(data) : TABLE
+    case SURAT_FULFILLMENT_PROVIDER_ID:
+      return id === "surat-flat" ? flat(data) : TABLE
     default:
       return null
   }

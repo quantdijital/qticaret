@@ -60,6 +60,7 @@ medusaIntegrationTestRunner({
         "cash_on_delivery",
         "aras",
         "yurtici",
+        "surat",
         "netgsm",
         "meta",
         "ga4",

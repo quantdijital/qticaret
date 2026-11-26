@@ -51,6 +51,7 @@
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
       "dhlecommerce": "DHL eCommerce",
+      "surat": "Sürat Kargo",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1366,6 +1367,10 @@
         "dhlecommerce": {
           "name": "DHL eCommerce",
           "description": "Shipping and tracking on the shop's own DHL eCommerce contract; the panel prepares the parcel label. The details are in your DHL eCommerce contract and the Online Şube."
+        },
+        "surat": {
+          "name": "Sürat Kargo",
+          "description": "Shipping and tracking on the shop's own Sürat Kargo contract; when Sürat gives no label, the panel prepares the parcel label. The details are in the web service document Sürat gives with the contract."
         }
       },
       "options": {
@@ -1381,7 +1386,8 @@
           "pickup": "Pickup from the shop",
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo",
-          "dhlecommerce": "DHL eCommerce"
+          "dhlecommerce": "DHL eCommerce",
+          "surat": "Sürat Kargo"
         },
         "pricing": "Price",
         "pricings": {
@@ -1430,7 +1436,8 @@
         "sources": {
           "aras-table": "Aras Kargo: my price table (desi)",
           "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
-          "dhlecommerce-table": "DHL eCommerce: my price table (desi)"
+          "dhlecommerce-table": "DHL eCommerce: my price table (desi)",
+          "surat-table": "Sürat Kargo: my price table (desi)"
         },
         "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
         "tableLink": "Fill in the price table",
@@ -1591,6 +1598,31 @@
         "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one.",
         "customerNumberPlaceholder": "E.g. 123456789"
       },
+      "surat": {
+        "keys": {
+          "title": "Web service details",
+          "description": "The web service user name and password Sürat Kargo gave with the contract. Parcels are opened with them. Sürat has no test environment; the connection is the live account."
+        },
+        "username": "User name",
+        "usernamePlaceholder": "E.g. shopname_ws",
+        "password": "Password",
+        "keysHint": "This user name and password can only be tried when a parcel is opened; if they are wrong, Sürat's answer shows at the first “Ship”.",
+        "cari": {
+          "title": "Cari code and web password",
+          "description": "Sürat asks for your cari code and web password to track, label and delete parcels. If Sürat gave you a separate cari code and web password, enter them here; if not, leave them empty and the details above are used.",
+          "hint": "Optional; enter the cari code and web password together."
+        },
+        "cariCode": "Cari code",
+        "cariCodePlaceholder": "E.g. 1234567",
+        "webPassword": "Web password",
+        "cariHint": "On saving, a tracking query is made to Sürat with these details to check them.",
+        "labelHint": "If Sürat gave your account permission to create barcodes, the label comes from Sürat. If not, the panel prepares it, with the parcel's own tracking code as its barcode. Have your Sürat representative confirm that your branch scans this label.",
+        "checks": {
+          "merchant_invalid": "Sürat Kargo did not accept this cari code and web password. Copy them again from the document Sürat gave you.",
+          "secret_invalid": "Sürat Kargo did not accept this user name and password. Copy them again from the document Sürat gave you."
+        },
+        "rejected": "Sürat Kargo no longer accepts the stored details; nothing can be shipped. Enter the current details Sürat gave you."
+      },
       "returns": {
         "title": "Return terms",
         "description": "How long a shopper may withdraw. The return policy text and the products' details for search engines show it.",
@@ -1742,6 +1774,7 @@
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
@@ -1757,6 +1790,7 @@
         "aras": "The shop's own carrier contract",
         "yurtici": "The shop's own carrier contract",
         "dhlecommerce": "The shop's own carrier contract",
+        "surat": "The shop's own carrier contract",
         "netgsm": "SMS and the consent registry (İYS)",
         "meta": "Measuring ad conversions",
         "ga4": "Measuring sales",
@@ -5640,6 +5674,7 @@
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",

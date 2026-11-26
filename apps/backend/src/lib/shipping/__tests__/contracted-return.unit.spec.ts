@@ -4,6 +4,7 @@ const NONE = {
   aras: null,
   yurtici: null,
   dhlecommerce: null,
+  surat: null,
   other_carrier: null,
   other_code: null,
 }
@@ -22,7 +23,7 @@ describe("contractedReturnOf (adr/0031 Ek 2026-11-26)", () => {
     // Nor BirFatura's once the shop ships with its own contracts
     expect(
       contractedReturnOf({
-        codes: { ...NONE, other_carrier: "Sürat Kargo", other_code: "555" },
+        codes: { ...NONE, other_carrier: "PTT Kargo", other_code: "555" },
         birfatura: false,
         primaryCarrier: null,
       })
@@ -62,14 +63,33 @@ describe("contractedReturnOf (adr/0031 Ek 2026-11-26)", () => {
     })
   })
 
+  it("puts Sürat last without a main option, and names it as shoppers know it", () => {
+    const codes = { ...NONE, dhlecommerce: "333", surat: "444" }
+    expect(contractedReturnOf({ codes, birfatura: false, primaryCarrier: null })).toEqual({
+      carrier: "DHL eCommerce",
+      code: "333",
+    })
+    expect(contractedReturnOf({ codes, birfatura: false, primaryCarrier: "surat" })).toEqual({
+      carrier: "Sürat Kargo",
+      code: "444",
+    })
+    expect(
+      contractedReturnOf({
+        codes: { ...NONE, surat: "444" },
+        birfatura: false,
+        primaryCarrier: null,
+      })
+    ).toEqual({ carrier: "Sürat Kargo", code: "444" })
+  })
+
   it("names BirFatura's carrier as the shop wrote it", () => {
     expect(
       contractedReturnOf({
-        codes: { ...NONE, aras: "111", other_carrier: "Sürat Kargo", other_code: "555" },
+        codes: { ...NONE, aras: "111", other_carrier: "PTT Kargo", other_code: "555" },
         birfatura: true,
         primaryCarrier: "aras",
       })
-    ).toEqual({ carrier: "Sürat Kargo", code: "555" })
+    ).toEqual({ carrier: "PTT Kargo", code: "555" })
   })
 })
 

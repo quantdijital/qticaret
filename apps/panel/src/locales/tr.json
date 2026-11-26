@@ -51,6 +51,7 @@
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
       "dhlecommerce": "DHL eCommerce",
+      "surat": "Sürat Kargo",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1366,6 +1367,10 @@
         "dhlecommerce": {
           "name": "DHL eCommerce",
           "description": "Mağazanın kendi DHL eCommerce sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler DHL eCommerce sözleşmenizde ve Online Şube'de."
+        },
+        "surat": {
+          "name": "Sürat Kargo",
+          "description": "Mağazanın kendi Sürat Kargo sözleşmesiyle gönderi ve takip; Sürat etiket vermezse koli etiketini panel hazırlar. Bilgiler Sürat'ın sözleşmeyle verdiği web servis belgesinde."
         }
       },
       "options": {
@@ -1381,7 +1386,8 @@
           "pickup": "Mağazadan teslim",
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo",
-          "dhlecommerce": "DHL eCommerce"
+          "dhlecommerce": "DHL eCommerce",
+          "surat": "Sürat Kargo"
         },
         "pricing": "Ücret",
         "pricings": {
@@ -1430,7 +1436,8 @@
         "sources": {
           "aras-table": "Aras Kargo: ücret tablom (desi)",
           "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
-          "dhlecommerce-table": "DHL eCommerce: ücret tablom (desi)"
+          "dhlecommerce-table": "DHL eCommerce: ücret tablom (desi)",
+          "surat-table": "Sürat Kargo: ücret tablom (desi)"
         },
         "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
         "tableLink": "Ücret tablosunu doldurun",
@@ -1591,6 +1598,31 @@
         "rejected": "DHL eCommerce kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Online Şube şifreniz değiştiyse yenisini girin.",
         "customerNumberPlaceholder": "Örn. 123456789"
       },
+      "surat": {
+        "keys": {
+          "title": "Web servis bilgileri",
+          "description": "Sürat Kargo'nun sözleşmeyle verdiği web servis kullanıcı adı ve şifresi. Gönderiler bu bilgilerle açılır. Sürat'ın test ortamı yoktur; bağlantı doğrudan canlı hesaptır."
+        },
+        "username": "Kullanıcı adı",
+        "usernamePlaceholder": "Örn. magazaadi_ws",
+        "password": "Şifre",
+        "keysHint": "Bu kullanıcı adı ve şifre yalnız gönderi açarken denenebilir; yanlışsa ilk “Kargoya ver”de Sürat'ın yanıtı gösterilir.",
+        "cari": {
+          "title": "Cari kodu ve web şifresi",
+          "description": "Sürat takip, etiket ve gönderi silme için cari kodunuzu ve web şifrenizi ister. Sürat size ayrı bir cari kodu ve web şifresi verdiyse buraya girin; vermediyse boş bırakın, yukarıdaki bilgiler kullanılır.",
+          "hint": "İsteğe bağlı; cari kodu ve web şifresini birlikte girin."
+        },
+        "cariCode": "Cari kodu",
+        "cariCodePlaceholder": "Örn. 1234567",
+        "webPassword": "Web şifresi",
+        "cariHint": "Kaydederken Sürat'a bu bilgilerle bir takip sorgusu yapılır ve doğrulanır.",
+        "labelHint": "Sürat hesabınıza barkod oluşturma yetkisi verdiyse etiketi Sürat'tan alırız. Vermediyse etiketi panel hazırlar: barkodu gönderinin özel takip numarasıdır. Şubenizin bu etiketi okuttuğunu Sürat temsilcinize teyit ettirin.",
+        "checks": {
+          "merchant_invalid": "Sürat Kargo bu cari kodu ve web şifresini kabul etmedi. Bilgileri Sürat'ın verdiği belgeden yeniden kopyalayın.",
+          "secret_invalid": "Sürat Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Sürat'ın verdiği belgeden yeniden kopyalayın."
+        },
+        "rejected": "Sürat Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Sürat'ın verdiği güncel bilgileri girin."
+      },
       "returns": {
         "title": "İade koşulları",
         "description": "Müşterinin cayma hakkını kullanabileceği süre. İade politikası metni ve ürünlerin arama motorlarına verilen bilgisi bunu gösterir.",
@@ -1742,6 +1774,7 @@
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
@@ -1757,6 +1790,7 @@
         "aras": "Mağazanın kendi kargo sözleşmesi",
         "yurtici": "Mağazanın kendi kargo sözleşmesi",
         "dhlecommerce": "Mağazanın kendi kargo sözleşmesi",
+        "surat": "Mağazanın kendi kargo sözleşmesi",
         "netgsm": "SMS ve İYS",
         "meta": "Reklam dönüşümlerinin ölçümü",
         "ga4": "Satışların ölçümü",
@@ -5640,6 +5674,7 @@
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",

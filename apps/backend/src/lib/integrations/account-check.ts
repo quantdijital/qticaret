@@ -8,6 +8,7 @@ import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 import { dhlEcomApi, dhlEcomCredentialsOf } from "../shipping/dhlecommerce"
+import { suratApi, suratCredentialsOf } from "../shipping/surat"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
@@ -75,6 +76,19 @@ const CHECKERS = {
   dhlecommerce: async (account, signal) => {
     const credentials = dhlEcomCredentialsOf(account)
     return credentials ? dhlEcomApi().checkLogin(credentials, { signal }) : "secret_invalid"
+  },
+  // Sürat has no read for the shipping login alone: a tracking query checks the cari pair
+  // (`merchant_invalid`), or the shipping login when it is the one pair (`secret_invalid`)
+  surat: async (account, signal) => {
+    const credentials = suratCredentialsOf(account)
+    if (!credentials) {
+      return "secret_invalid"
+    }
+    const verdict = await suratApi().checkLogin(credentials, { signal })
+    if (verdict === "valid") {
+      return "valid"
+    }
+    return credentials.tracking === credentials.shipping ? "secret_invalid" : "merchant_invalid"
   },
   // `merchant_invalid`: the login works, the sender name is not on it
   netgsm: async (account, signal) => {
@@ -186,6 +200,7 @@ export const CHECK_FIELDS = {
     merchant_invalid: "secrets.customer_number",
     secret_invalid: "secrets.password",
   },
+  surat: { merchant_invalid: "secrets.web_password", secret_invalid: "secrets.password" },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
   meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },

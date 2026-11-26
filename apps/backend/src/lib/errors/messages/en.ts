@@ -943,6 +943,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "DHL eCommerce does not know the province or district of the delivery address. Correct them on the order's address and try again.",
   "dhlecommerce.branch_pending":
     'DHL eCommerce has not yet found the receiver\'s branch; nothing was shipped. Press "Ship" again in a few minutes.',
+  "surat.merchant_invalid":
+    "Sürat Kargo did not accept this cari code and web password. Copy them again from what Sürat gave with your contract.",
+  "surat.secret_invalid":
+    "Sürat Kargo did not accept this user name and password. Copy them again from what Sürat gave with your contract.",
+  "surat.withdraw_failed":
+    "A parcel may have been opened at Sürat Kargo and could not be deleted. Before shipping again, ask your Sürat branch about this order's parcel and have it cancelled if it is open.",
+  "surat.withdraw_requested":
+    "Sürat Kargo's branch already has this parcel, so it could not be deleted; Sürat was asked to bring it back to you. The shipment stays on the order and tracking follows it home.",
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":

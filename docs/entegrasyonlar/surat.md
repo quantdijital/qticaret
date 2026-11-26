@@ -1,6 +1,6 @@
 # Sürat Kargo Fulfillment Provider — araştırma
 
-> Durum: **araştırma, kod yok** (2026-11-26). Sıra MNG → Sürat → PTT (ADR-0035 Ek 2026-11-26). Gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
+> Durum: **kodlandı, gerçek hesapla doğrulanmadı** (2026-11-26; uygulama aşağıda "Uygulama (2026-11-26)"). İlk araştırma notu: Sıra MNG → Sürat → PTT (ADR-0035 Ek 2026-11-26). Gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
 >
 > Kaynaklar (hepsi 2026-11-26'da okundu):
 > - Sürat'ın **canlı servis tanımı** (WSDL, herkese açık): `https://webservices.suratkargo.com.tr/services.asmx?WSDL`. İşlem adları, parametreler, `GonderiModel` alanları ve sayım tipleri (enum) buradan.
@@ -177,3 +177,23 @@ Kod tarafında etiket ortak bir yardımcıya çekilir (Yurtiçi + Sürat + PTT +
 - [ ] Sözleşmenizde **kapıda ödeme** var mı; nakit mi kartlı mı; ayrı bir cari kod mu kullanılıyor.
 - [ ] Desi/kg fiyat tablonuz ve desi böleniniz (genelde 3000).
 - [ ] İade için anlaşmalı **iade kodunuz** varsa o kod.
+
+## Uygulama (2026-11-26)
+
+Kod: `apps/backend/src/lib/shipping/surat/` (istemci, yanıt kuralları, eşleme, takip okuma, durum), `modules/fulfillment-surat/` (`surat_surat`), sahte `packages/testing/src/surat/` (`pnpm dev:surat`, port 9111), panel `surat-settings.tsx`. DHL eCommerce'in bağlandığı her yere bağlandı (adr/0035 Ek 2026-11-26 (3)).
+
+Verilen kararlar (gerçek hesapla değişebilir):
+
+- **Hesap:** gizli `username` + `password` (gönderi açma `GonderiyiKargoyaGonderYeni`, geri çekme `GonderiGeriCek`); isteğe bağlı gizli `cari_code` + `web_password` (takip `KargoTakipHareketDetayi`, etiket `KargoBarkodu`, silme `GonderiSil`), ikisi birlikte; boşsa ilk çift her işte kullanılır. **Test modu yok** (Sürat'ın test ortamı yok); geliştirmede `SURAT_BASE_URL` sahteyi gösterir, yayında reddedilir.
+- **Hesap kontrolü:** rastgele kodla takip sorgusu. `IsError` + şifre/cari/yetki sözcükleri → reddedildi; "bulunamadı/kayıt yok" ya da boş metin → geçerli; başka hata → kayıt yapılmaz. Cari çifti girildiyse yalnız o doğrulanır (yanlışsa web şifresi alanında hata); gönderi çiftini tek başına doğrulayan güvenli bir okuma yok, yanlışsa ilk "Kargoya ver"de Sürat'ın cümlesi gösterilir.
+- **Başarı izin listesi** (`lib/shipping/surat/answers.ts`; büyük/küçük harf ve sondaki noktalama yok sayılır): açma `tamam`, `başarılı`, `işlem başarılı`; silme bunlar + `silindi`, `gönderi silindi`, `kayıt silindi`; geri çekme bunlar + `geri çekildi`, `gönderi geri çekildi`. Listede olmayan her yanıt başarısızlıktır; Sürat'ın cümlesi (en çok 120 karakter, hesap bilgileri maskeli) personele gösterilir. **Doğrulanacak:** gerçek hesaptan gelen başarı cümleleri listeye eklenmeli.
+- **Belirsiz sonuç:** açma yanıtı başarı değilse (bilinmeyen metin, yanıt gelmedi) açılmış olabilecek gönderi hemen `GonderiSil` ile silinir; Sürat "bulunamadı" derse açılmamıştır. Silinemezse personele "Sürat şubenize sorun" (`surat.withdraw_failed`) denir. SOAP hatası (fault) açılmamış sayılır.
+- **Alanlar:** `OzelKargoTakipNo` = `ReferansNo` = bizim `QT…` kodumuz (takipte `WebSiparisKodu` olarak bu gider), sipariş no `IrsaliyeSiraNo`'da; `KargoTuru` 3, `OdemeTipi` 1, `TasimaSekli`/`TeslimSekli` 1, `GonderiSekli` 0, `Pazaryerimi` 0, `Iademi` false; telefon 10 rakam; e-posta boş (KVKK); `Adet` 1, `BirimDesi`/`BirimKg` noktalı iki ondalık, ölçüsüz kolide boş (şube ölçer). Alıcı Sürat'a yalnız "Kargoya ver"de gider.
+- **Kapıda ödeme:** `KapidanOdemeTahsilatTipi` 1 (nakit), `KapidanOdemeTutari` TL noktalı (`1259.90`); ayrı cari kodu varsayılmadı.
+- **Etiket:** önce `KargoBarkodu`; `PdfBarkod` geçerli bir PDF ise (≤ 2 MB base64) o saklanır. Yoksa (Sürat'ta olağan) ortak etiketimiz: barkod = `OzelKargoTakipNo` (Code 128), gönderici basılmaz (Sürat sözleşmeden bilir). **Doğrulanacak:** şubenin bu barkodu okutması.
+- **Takip:** yanıt metni JSON (`IsError`, `errorMessage`, `Gonderiler[]`; satır içindeki listeler hareket satırı sayılır) ya da XML (yalnız kendi okuyucumuz, DOCTYPE reddi) okunur; sütun adları büyük harfe/Türkçe karaktersiz yazıya indirgenip aranır. Durum yalnız Sürat'ın kendi sütunlarından (hareket/durum/açıklama) okunur: önce `KargoHareketTip`/`KTeslimatDurum`/`KIptalDurumu` adları (yukarıdaki tablo), sonra Türkçe sözcük yedeği. Satırların hepsinde tarih varsa tarihe göre sıralanır. `KargoTakipNo` (6–20 rakam) takip numarası olur; takip bağlantısı `https://suratkargo.com.tr/KargoTakip/?kargotakipno=<no>`.
+- **İptal:** önce `GonderiSil`; Sürat silmezse (şube almış) `GonderiGeriCek` ile geri getirme istenir, fulfillment kalır, personele `surat.withdraw_requested` gösterilir; takip dönüşü (`returned`) izler.
+- **Anlaşmalı iade kodu:** `contracted_return.surat`; seçim sırası Aras → Yurtiçi → DHL eCommerce → Sürat (ana seçenek Sürat'sa önce o).
+
+Gerçek hesap gelince bakılacaklar (yukarıdaki "Doğrulanacaklar"a ek): başarı cümleleri (izin listesi), `KargoBarkodu` yanıtının alan adları, takip JSON'unun sütun adları ve olay adlarının geçip geçmediği, `GonderiSil`'in "bulunamadı" cümlesi, `GonderiGeriCek`'in anlamı (iade mi, şubede durdurma mı), cari çifti olmadan tek çiftin takipte çalışıp çalışmadığı.
+

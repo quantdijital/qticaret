@@ -21,17 +21,20 @@ export const ARAS_FULFILLMENT_PROVIDER_ID = "aras_aras"
 export const YURTICI_FULFILLMENT_PROVIDER_ID = "yurtici_yurtici"
 /** DHL eCommerce Türkiye, formerly MNG Kargo (docs/entegrasyonlar/dhlecommerce.md). */
 export const DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID = "dhlecommerce_dhlecommerce"
+/** Sürat Kargo (docs/entegrasyonlar/surat.md). */
+export const SURAT_FULFILLMENT_PROVIDER_ID = "surat_surat"
 
 /** A carrier we open shipments with: the shop's own contract. */
-export type CarrierName = "aras" | "yurtici" | "dhlecommerce"
+export type CarrierName = "aras" | "yurtici" | "dhlecommerce" | "surat"
 
 /** The carriers we open shipments with, as tracked parcels name them. */
-export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici", "dhlecommerce"]
+export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici", "dhlecommerce", "surat"]
 
 const CARRIERS: Readonly<Record<string, CarrierName>> = {
   [ARAS_FULFILLMENT_PROVIDER_ID]: "aras",
   [YURTICI_FULFILLMENT_PROVIDER_ID]: "yurtici",
   [DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID]: "dhlecommerce",
+  [SURAT_FULFILLMENT_PROVIDER_ID]: "surat",
 }
 
 /** Providers that open shipments with a carrier: their parcels leave when the carrier picks them up. */
@@ -66,6 +69,8 @@ export function carrierNameOf(
     // Never "MNG Kargo": the brand is gone (the owner, 2026-11-26)
     case "dhlecommerce":
       return "DHL eCommerce"
+    case "surat":
+      return "Sürat Kargo"
     case null:
       return typeof named === "string" && named !== "" ? named : null
   }
@@ -74,7 +79,8 @@ export function carrierNameOf(
 /**
  * A fake carrier's own tracking page (`<base>/takip/<no>`), which the
  * fakes on a developer's machine serve: with a fake address set
- * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`, `DHL_ECOMMERCE_BASE_URL`; refused when deployed), a parcel's
+ * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`, `DHL_ECOMMERCE_BASE_URL`, `SURAT_BASE_URL`; refused
+ * when deployed), a parcel's
  * link opens the fake's page, as a live shop's opens the carrier's.
  */
 export const fakeTrackingUrl = (fakeBase: string, number: string): string =>

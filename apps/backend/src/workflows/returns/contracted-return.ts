@@ -46,7 +46,8 @@ export async function readContractedReturn(container: Container): Promise<Contra
   const codes = returns.contracted_return
   const birfatura = birfaturaShipsWith(shipping, invoicing)
   const primaryCarrier =
-    !birfatura && [codes.aras, codes.yurtici, codes.dhlecommerce].filter(Boolean).length > 1
+    !birfatura &&
+    [codes.aras, codes.yurtici, codes.dhlecommerce, codes.surat].filter(Boolean).length > 1
       ? await primaryCarrierOf(container, shipping.primary_option_id)
       : null
   return contractedReturnOf({ codes, birfatura, primaryCarrier })

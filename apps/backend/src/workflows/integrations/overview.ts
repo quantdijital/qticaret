@@ -41,6 +41,7 @@ const ACCOUNTS: [IntegrationGroup, CredentialStatus["provider"]][] = [
   ["shipping", "aras"],
   ["shipping", "yurtici"],
   ["shipping", "dhlecommerce"],
+  ["shipping", "surat"],
   ["messaging", "netgsm"],
   ["marketing", "meta"],
   ["marketing", "ga4"],
