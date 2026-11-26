@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import type { DayRange } from "@qticaret/admin-ui/patterns/day-range-filter"
 import { FilterBar } from "@qticaret/admin-ui/patterns/filter-bar"
@@ -13,14 +14,17 @@ const F = "settings.audit.filters"
 interface AuditFiltersProps {
   search: AuditSearch
   onChange: (next: Partial<AuditSearch>) => void
+  /** Places the "Filtrele" button and the chips (`null` while nothing is set). */
+  children: (parts: { trigger: ReactNode; chips: ReactNode }) => ReactNode
 }
 
 /**
  * Who, what and when (F12.5), above the log's table: the list's filter
- * bar (docs/18 §7), a "Filtrele" menu with chips under it. Every choice
- * goes into the address.
+ * bar (docs/18 §7), a "Filtrele" menu with chips under it; the page puts
+ * the button at the end of its tabs (the log has no search to sit beside).
+ * Every choice goes into the address.
  */
-export function AuditFilters({ search, onChange }: AuditFiltersProps) {
+export function AuditFilters({ search, onChange, children }: AuditFiltersProps) {
   const { t } = useTranslation()
   const team = useQuery(teamQuery())
   const types = useQuery(auditResourceTypesQuery())
@@ -55,7 +59,8 @@ export function AuditFilters({ search, onChange }: AuditFiltersProps) {
 
   return (
     <FilterBar
-      className="border-b px-5 py-3"
+      layout={children}
+      compact
       filters={[
         {
           key: "actor",
