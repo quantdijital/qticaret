@@ -66,13 +66,15 @@ export function orderNoteOf(metadata: unknown): string | null {
   return note === "" ? null : Array.from(note).slice(0, ORDER_NOTE_MAX).join("")
 }
 
-/** The metadata with the note set, or taken off when it is empty. */
+/**
+ * The metadata with the note set, or taken off when it is empty. Medusa's
+ * modules merge a metadata update into what is kept (2.22.6
+ * `mergeMetadata`): a key left out stays, and only an empty string removes
+ * it, so an empty note is written as "" (read back as no note either way).
+ */
 export function withOrderNote(
   metadata: Record<string, unknown> | null | undefined,
   note: string
 ): Record<string, unknown> {
-  const rest = Object.fromEntries(
-    Object.entries(metadata ?? {}).filter(([key]) => key !== ORDER_NOTE_KEY)
-  )
-  return note === "" ? rest : { ...rest, [ORDER_NOTE_KEY]: note }
+  return { ...(metadata ?? {}), [ORDER_NOTE_KEY]: note }
 }

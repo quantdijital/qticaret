@@ -46,9 +46,12 @@ describe("orderNoteOf", () => {
 })
 
 describe("withOrderNote", () => {
-  it("sets the note beside the other keys, and takes it off when empty", () => {
+  it("sets the note beside the other keys, and empties it as Medusa's merge removes a key", () => {
     expect(withOrderNote({ a: 1 }, "not")).toEqual({ a: 1, [ORDER_NOTE_KEY]: "not" })
-    expect(withOrderNote({ a: 1, [ORDER_NOTE_KEY]: "not" }, "")).toEqual({ a: 1 })
-    expect(withOrderNote(null, "")).toEqual({})
+    expect(withOrderNote({ a: 1, [ORDER_NOTE_KEY]: "not" }, "")).toEqual({
+      a: 1,
+      [ORDER_NOTE_KEY]: "",
+    })
+    expect(orderNoteOf(withOrderNote(null, ""))).toBeNull()
   })
 })

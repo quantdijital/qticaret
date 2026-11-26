@@ -10,8 +10,11 @@ interface NoteRow {
   cart?: { id: string; metadata?: Record<string, unknown> | null } | null
 }
 
-const holds = (metadata: Record<string, unknown> | null | undefined): boolean =>
-  metadata !== null && metadata !== undefined && ORDER_NOTE_KEY in metadata
+// An emptied note ("") is none: run again, erasure changes nothing more
+const holds = (metadata: Record<string, unknown> | null | undefined): boolean => {
+  const note = metadata?.[ORDER_NOTE_KEY]
+  return typeof note === "string" && note !== ""
+}
 
 /**
  * The shopper's order notes (Batch 8 / O1) go with the rest of what they
