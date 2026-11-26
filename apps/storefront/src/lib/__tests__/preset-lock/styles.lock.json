@@ -70,6 +70,10 @@
       "file": "hero-full.css"
     },
     {
+      "sha256": "3beee3bcb91134bf5d5b699022315d5daa1d964ebced3f28f0f718d58794861b",
+      "file": "hover.css"
+    },
+    {
       "sha256": "64528ad209dbb9f42bfea320dccf69e385044060045d6a7bb254a5162402e123",
       "file": "kit-steps.css"
     },
@@ -126,6 +130,10 @@
       "file": "search-boxed.css"
     },
     {
+      "sha256": "145898ab80065ddb3e9fea61a2ba9c0a19009dc49c04286d908ccafe3e98d42a",
+      "file": "search-fields.css"
+    },
+    {
       "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
       "file": "search-toggle.css"
     },
@@ -158,7 +166,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "d2511f26b57b13c26381d362e6ce10af7c4a27e6a0210aa2c0b932f946d322cc",
+      "sha256": "cefc7e909627b93af948ad94c3d015f1b007738353859f1699f93ede60165dd4",
       "file": "styles.css"
     },
     {

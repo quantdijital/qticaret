@@ -1,0 +1,79 @@
+import path from "node:path"
+import { layoutTheme, shownTheme, storedTheme } from "../../../lib/storefront/layout-theme"
+import { mergePatch } from "../sections/define"
+import { LISTING_PAGE, LISTING_PAGE_DEFAULTS, themeSection } from "../sections/theme"
+
+const CONTRACT_FILE = path.resolve(
+  __dirname,
+  "../../../../../../packages/types/src/store/listing-page.ts"
+)
+
+const { full, patch, defaults } = themeSection
+
+/** The theme without the group: a design's theme, a preset or a panel save before it. */
+const before = (): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(defaults).filter(([key]) => key !== "listing_page"))
+
+/** A listing page's grid or list, its switch and its trail; today's page by default. */
+describe("theme section: the listing page", () => {
+  it("holds the contract's lists and defaults", () => {
+    const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
+    expect(LISTING_PAGE.default_view).toEqual(contract["LISTING_VIEWS"])
+    expect(LISTING_PAGE.view_switch).toEqual(contract["LISTING_VIEW_SWITCHES"])
+    expect(LISTING_PAGE.breadcrumb_current).toEqual(contract["LISTING_BREADCRUMB_CURRENTS"])
+    expect(LISTING_PAGE_DEFAULTS).toEqual(contract["LISTING_PAGE_DEFAULTS"])
+    expect(defaults.listing_page).toEqual({
+      default_view: "grid",
+      view_switch: "hide",
+      breadcrumb_current: "show",
+    })
+  })
+
+  it("takes every step on its lists, a patch of one field keeping the others", () => {
+    for (const default_view of LISTING_PAGE.default_view) {
+      for (const view_switch of LISTING_PAGE.view_switch) {
+        for (const breadcrumb_current of LISTING_PAGE.breadcrumb_current) {
+          const listing_page = { default_view, view_switch, breadcrumb_current }
+          expect(full.safeParse({ ...defaults, listing_page }).success).toBe(true)
+        }
+      }
+    }
+    const body = patch.parse({ listing_page: { view_switch: "show" } })
+    expect(full.parse(mergePatch(defaults, body)).listing_page).toEqual({
+      ...LISTING_PAGE_DEFAULTS,
+      view_switch: "show",
+    })
+  })
+
+  it("refuses a step off its lists and a field it does not have", () => {
+    const off = (listing_page: Record<string, unknown>) =>
+      full.safeParse({ ...defaults, listing_page: { ...LISTING_PAGE_DEFAULTS, ...listing_page } })
+        .success
+    expect(off({ default_view: "table" })).toBe(false)
+    expect(off({ view_switch: true })).toBe(false)
+    expect(off({ breadcrumb_current: "none" })).toBe(false)
+    expect(off({ columns: 4 })).toBe(false)
+  })
+
+  it("reads a design's theme and takes a design save without it at its defaults", () => {
+    const read = full.parse(storedTheme(before()))
+    expect(read.listing_page).toEqual(LISTING_PAGE_DEFAULTS)
+    expect(layoutTheme.parse(before())?.listing_page).toEqual(LISTING_PAGE_DEFAULTS)
+    expect(
+      layoutTheme.parse({ ...before(), listing_page: { view_switch: "show" } })?.listing_page
+    ).toEqual({ ...LISTING_PAGE_DEFAULTS, view_switch: "show" })
+    expect(layoutTheme.safeParse({ ...defaults, listing_page: "list" }).success).toBe(false)
+  })
+
+  it("is applied with the rest of the theme", () => {
+    const written = {
+      ...defaults,
+      listing_page: { ...LISTING_PAGE_DEFAULTS, breadcrumb_current: "hide" as const },
+    }
+    expect(shownTheme(written, defaults, null).listing_page).toEqual({
+      ...LISTING_PAGE_DEFAULTS,
+      breadcrumb_current: "hide",
+    })
+    expect(shownTheme(null, defaults, null).listing_page).toEqual(LISTING_PAGE_DEFAULTS)
+  })
+})

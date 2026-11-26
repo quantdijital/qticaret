@@ -62,6 +62,8 @@ export type MediaUseKind =
   | "collection"
   /** A storefront pop-up's picture (adr/0080): `id` the pop-up, `label` its name. */
   | "popup"
+  /** A dated product's programme (adr/0076): `id` the product, `label` its title. */
+  | "booking"
 
 export interface MediaUse {
   kind: MediaUseKind
@@ -76,23 +78,56 @@ export interface MediaDetail extends MediaAsset {
   derived_from?: { id: string; url: string; filename: string } | null
 }
 
+/** The library's views (M1): every picture, those nothing shows, those without an alt text. */
+export const MEDIA_VIEWS = ["all", "unused", "missing_alt"] as const
+export type MediaView = (typeof MEDIA_VIEWS)[number]
+
 export const mediaListQuery = ({
   q,
   page,
   limit = MEDIA_PAGE_SIZE,
+  view = "all",
 }: {
   q: string
   page: number
   limit?: number
+  view?: MediaView
 }) =>
   queryOptions({
-    queryKey: [...MEDIA_KEY, "list", { q, page, limit }],
+    queryKey: [...MEDIA_KEY, "list", { q, page, limit, view }],
     queryFn: () =>
       sdk.client.fetch<{ media: MediaAsset[]; count: number }>("/admin/media", {
-        query: { offset: page * limit, limit, ...(q ? { q } : {}) },
+        query: {
+          offset: page * limit,
+          limit,
+          ...(q ? { q } : {}),
+          ...(view === "all" ? {} : { view }),
+        },
       }),
     placeholderData: keepPreviousData,
   })
+
+/** What a bulk delete did: the server keeps any picture something shows, whatever was sent. */
+export interface MediaBatchDeleted {
+  deleted: string[]
+  /** Storage refused their files: back in the library. */
+  failed: string[]
+  in_use: string[]
+  missing: string[]
+}
+
+/** `POST /admin/media/delete` (M1): pictures nothing shows, deleted with their files. */
+export function useDeleteUnusedMedia() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (ids: string[]) =>
+      sdk.client.fetch<MediaBatchDeleted>("/admin/media/delete", {
+        method: "POST",
+        body: { ids },
+      }),
+    onSettled: () => client.invalidateQueries({ queryKey: MEDIA_KEY }),
+  })
+}
 
 export const mediaDetailQuery = (id: string) =>
   queryOptions({

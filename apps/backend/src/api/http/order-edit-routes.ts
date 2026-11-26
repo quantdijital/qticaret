@@ -2,6 +2,7 @@ import { validateAndTransformBody } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { isBillingLocked } from "../../lib/invoicing/billing-lock"
 import { AdminPostOrderEdit, AdminPostOrderEditPreview } from "../admin/orders/[id]/edit/validators"
 import { existingOrderAddresses, validateTrAddresses } from "../validation/tr-address"
 import { requireUserActor } from "./actor"
@@ -43,6 +44,28 @@ async function keepAddressOncePacked(
   }
 }
 
+/**
+ * An issued (or issuing) sale invoice names the buyer as it was: the billing
+ * address stays, as the panel's order page shows it (PR #413).
+ */
+async function keepBillingOnceInvoiced(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const body = req.validatedBody as { billing_address?: unknown } | undefined
+  if (req.method !== "POST" || body?.billing_address === undefined) {
+    next()
+    return
+  }
+  try {
+    const locked = await isBillingLocked(req.scope, req.params["id"] ?? "")
+    next(locked ? new ValidationError("orders.billing_invoiced") : undefined)
+  } catch (error) {
+    next(error)
+  }
+}
+
 /** F7.12 (adr/0033): staff edit an order's lines and addresses. */
 export const ORDER_EDIT_ROUTES = [
   {
@@ -69,6 +92,8 @@ export const ORDER_EDIT_ROUTES = [
       // Not while "Kargoya ver" buys a label with the old address
       holdCancelLocks,
       keepAddressOncePacked,
+      // Nor the billing address once the sale invoice is issued or issuing
+      keepBillingOnceInvoiced,
       validateTrAddresses(["shipping_address", "billing_address"], existingOrderAddresses),
     ],
   },
