@@ -77,16 +77,18 @@ export function PageHeader({
   const row = (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between",
-        sticky ? "gap-x-4 gap-y-2" : "gap-4"
+        "flex flex-col",
+        // Held (the owner 2026-11-26: a cramped row): below `lg` the actions always take
+        // their own line under the title, from `lg` one row whose title gives way; so the
+        // header never changes height when "Vazgeç" comes and goes
+        sticky
+          ? "gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4"
+          : "gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
       )}
     >
-      {/* Held to one line, the title keeps room enough to be read: the actions wrap under it sooner */}
+      {/* The title keeps room enough to be read: the actions wrap under it sooner */}
       <div
-        className={cn(
-          "flex min-w-0 flex-col gap-1",
-          sticky ? "sm:flex-[1_1_12rem]" : "sm:flex-[1_1_5.5rem]"
-        )}
+        className={cn("flex min-w-0 flex-col gap-1", sticky ? "lg:flex-1" : "sm:flex-[1_1_5.5rem]")}
       >
         <div className={cn("flex items-center gap-3", sticky ? "min-w-0" : "flex-wrap")}>
           {/* A title with no break in it (a customer known by e-mail only) wraps anywhere; held, it keeps one line */}

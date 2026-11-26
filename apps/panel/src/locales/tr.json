@@ -4470,7 +4470,10 @@
       },
       "pricesOnVariants": "Fiyatlar her varyantta ayrı girilir.",
       "stockOnVariants": "Stok ve kodlar her varyantta ayrı girilir.",
-      "goVariants": "Varyantlara git"
+      "goVariants": "Varyantlara git",
+      "variantOptions": "Varyant seçenekleri",
+      "variantOptionsHint": "Varyantları ayıran seçenekler; değerleri Varyantlar sekmesinde düzenlenir.",
+      "editOnVariants": "Varyantlarda düzenle"
     },
     "variant": {
       "title": "Varyantı düzenle",
@@ -4540,6 +4543,7 @@
         "none": "Bu ürünün seçeneği yok. Renk, beden gibi seçenekler ekleyip varyantlarını oluşturabilirsiniz.",
         "add": "Seçenek ekle",
         "edit": "Seçenekleri düzenle",
+        "valuesLabel": "Değerler",
         "hint": "Her seçeneğin değerlerini yazıp Enter'a basın. \"Varyantları oluştur\" eksik bütün birleşimleri ekler; var olan varyantlar silinmez, aynısı ikinci kez oluşturulmaz.",
         "preview_one": "{{count}} varyant oluşturulacak; fiyatını oluşturduktan sonra girersiniz.",
         "preview_other": "{{count}} varyant oluşturulacak; fiyatlarını oluşturduktan sonra girersiniz.",
@@ -7847,6 +7851,7 @@
     "deleted": "Özellik grubu silindi.",
     "productCard": "Özellikler",
     "template": "Özellik grubu",
+    "templateHint": "Hangi özelliklerin sorulacağını seçer; değerler aşağıda doldurulur.",
     "noTemplate": "Seçilmedi",
     "noTemplates": "Henüz özellik grubu yok.",
     "openSettings": "Özellik grubu oluşturun",

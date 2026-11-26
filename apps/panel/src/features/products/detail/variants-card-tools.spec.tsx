@@ -50,7 +50,12 @@ describe("the variants card's options", () => {
   it("adds a value and creates the missing variant, counted first, without a price", async () => {
     const user = userEvent.setup()
     renderCard()
-    expect(await screen.findByText("Renk: Sarı, Pembe, Mor")).toBeInTheDocument()
+    // Closed, one row per option: its name and its values as chips (WooCommerce's attributes)
+    const option = (await screen.findByText("Renk", { selector: "span" })).closest("li")
+    expect(option).not.toBeNull()
+    expect(
+      Array.from(option?.querySelectorAll("li") ?? []).map((chip) => chip.textContent)
+    ).toEqual(["Sarı", "Pembe", "Mor"])
     await user.click(screen.getByRole("button", { name: "Seçenekleri düzenle" }))
     await user.type(screen.getByRole("textbox", { name: "Renk değerleri" }), "Mavi{Enter}")
     expect(screen.getByText(/1 varyant oluşturulacak/)).toBeInTheDocument()

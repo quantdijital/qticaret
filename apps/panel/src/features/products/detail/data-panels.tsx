@@ -14,6 +14,9 @@ import { PRODUCT_SECTIONS } from "./sections"
 import { PricingPanel, StockPanel } from "./simple-panels"
 import type { SimpleVariant } from "./use-simple-variant"
 import { useAddonsShown } from "./use-addons-shown"
+import { usePlaceholder } from "./use-option-placeholder"
+import { savedOptions } from "./variant-options"
+import { OptionsSummary } from "./variant-options-summary"
 import { VariantsCard } from "./variants-card"
 
 const D = "products.data"
@@ -52,6 +55,32 @@ function OnVariants({ text, onVariants }: { text: string; onVariants: () => void
         {t(`${D}.goVariants`)}
         <ArrowRight />
       </Button>
+    </div>
+  )
+}
+
+/** The options the variants stand for, read in the Özellikler tab; edited in Varyantlar. */
+function VariantOptionsLine({
+  product,
+  onVariants,
+}: {
+  product: ProductDetail
+  onVariants: () => void
+}) {
+  const { t } = useTranslation()
+  const options = savedOptions(product, usePlaceholder())
+  return (
+    <div className="@container/variants min-w-0">
+      <OptionsSummary
+        options={options}
+        title={t(`${D}.variantOptions`)}
+        action={
+          <Button type="button" variant="outline" size="sm" onClick={onVariants}>
+            {t(`${D}.editOnVariants`)}
+            <ArrowRight />
+          </Button>
+        }
+      />
     </div>
   )
 }
@@ -123,9 +152,15 @@ export function DataPanel({
       )
     case "attributes":
       return (
-        <Inset>
-          <AttributesCard productId={product.id} />
-        </Inset>
+        <div className="flex min-w-0 flex-col divide-y">
+          <Inset>
+            <AttributesCard productId={product.id} />
+          </Inset>
+          {/* A product with variants: its options are attributes too (WooCommerce's "used for variations") */}
+          {simple === null ? (
+            <VariantOptionsLine product={product} onVariants={onVariants} />
+          ) : null}
+        </div>
       )
     case "variants":
       return (

@@ -19,6 +19,7 @@ import {
   usedValues,
 } from "./variant-options"
 import type { OptionDraft, Placeholder } from "./variant-options"
+import { OptionsSummary } from "./variant-options-summary"
 
 const D = "products.variant.options"
 const W = "products.wizard.options"
@@ -135,32 +136,14 @@ export function VariantOptionsEditor({
     setRefused(null)
     setDrafts(drafts.map((draft, at) => (at === index ? next : draft)))
   }
-  const summary = saved.map((option) => `${option.title}: ${option.values.join(", ")}`).join(" · ")
-
   if (!open) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-5 py-3">
-        <p className="min-w-0 flex-[1_1_16rem] text-[13px] text-muted-foreground">
-          {summary ? (
-            <>
-              <span className="font-medium text-foreground">{t(`${D}.title`)}: </span>
-              {summary}
-            </>
-          ) : (
-            t(`${D}.none`)
-          )}
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            onOpenChange(true)
-          }}
-        >
-          {summary ? t(`${D}.edit`) : t(`${D}.add`)}
-        </Button>
-      </div>
+      <OptionsSummary
+        options={saved}
+        onEdit={() => {
+          onOpenChange(true)
+        }}
+      />
     )
   }
 
@@ -169,35 +152,50 @@ export function VariantOptionsEditor({
   const button =
     plan.create.length > 0 ? t(`${D}.create`, { count: plan.create.length }) : t(`${D}.save`)
   return (
-    <div className="flex flex-col gap-3 px-5 py-4" data-variant-options="">
-      <p className="text-[13px] text-muted-foreground">{t(`${D}.hint`)}</p>
+    <div className="flex flex-col gap-4 px-5 py-4" data-variant-options="">
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm font-medium">{t(`${D}.title`)}</h3>
+        <p className="text-[13px] text-muted-foreground">{t(`${D}.hint`)}</p>
+      </div>
       {drafts.map((draft, index) => (
         <div
           key={draft.id ?? `new-${index}`}
-          className="grid gap-2 rounded-lg border bg-background/60 p-3 sm:grid-cols-[11rem_minmax(0,1fr)_auto] sm:items-start"
+          // Its name and values labelled above; side by side once the list has room
+          className="relative grid gap-3 rounded-lg border bg-background/60 p-4 pr-12 @lg/variants:grid-cols-[10rem_minmax(0,1fr)]"
         >
-          <Input
-            value={draft.title}
-            // A stored option keeps its name: its values and variants hang on it
-            readOnly={draft.id !== null}
-            aria-label={t(`${W}.name`)}
-            placeholder={t(`${W}.namePlaceholder`)}
-            onChange={(event) => {
-              update(index, { ...draft, title: event.target.value })
-            }}
-          />
-          <ValueChips
-            option={draft}
-            used={used.get(draft.title) ?? new Set()}
-            onChange={(values) => {
-              update(index, { ...draft, values })
-            }}
-            onRefused={setRefused}
-          />
+          <div className="flex flex-col gap-1.5">
+            <span aria-hidden="true" className="text-xs font-medium text-muted-foreground">
+              {t(`${W}.name`)}
+            </span>
+            <Input
+              value={draft.title}
+              // A stored option keeps its name: its values and variants hang on it
+              readOnly={draft.id !== null}
+              aria-label={t(`${W}.name`)}
+              placeholder={t(`${W}.namePlaceholder`)}
+              onChange={(event) => {
+                update(index, { ...draft, title: event.target.value })
+              }}
+            />
+          </div>
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span aria-hidden="true" className="text-xs font-medium text-muted-foreground">
+              {t(`${D}.valuesLabel`)}
+            </span>
+            <ValueChips
+              option={draft}
+              used={used.get(draft.title) ?? new Set()}
+              onChange={(values) => {
+                update(index, { ...draft, values })
+              }}
+              onRefused={setRefused}
+            />
+          </div>
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            className="absolute top-2 right-2"
             disabled={!removable(draft)}
             title={removable(draft) ? undefined : t(`${D}.optionUsed`)}
             aria-label={t(`${W}.remove`)}

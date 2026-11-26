@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import type {
   AttributeDefinition,
   AttributeOption,
@@ -33,7 +34,18 @@ interface AttributeInputProps {
   error?: string | undefined
   /** A list field's missing value added to the group from here; none: only its values. */
   addOption?: AddValue | undefined
+  /** One row of a list (`@container/attrs`): the name on the left once there is room. */
+  row?: boolean
 }
+
+/**
+ * A field as one row of the product's attributes (the owner 2026-11-26,
+ * WooCommerce's attribute rows): its name above on a phone, on the left
+ * of its control once the list (`@container/attrs`) has room; a hint, an
+ * error or a new value's field stays under the control.
+ */
+export const ATTRIBUTE_ROW =
+  "@lg/attrs:grid @lg/attrs:grid-cols-[11rem_minmax(0,1fr)] @lg/attrs:items-start @lg/attrs:gap-x-6 @lg/attrs:gap-y-2 @lg/attrs:[&>*:not(label)]:col-start-2 @lg/attrs:[&>label]:pt-2"
 
 /** The field for one attribute, by its type; an empty field means "no value" (null). */
 export function AttributeInput({
@@ -42,6 +54,7 @@ export function AttributeInput({
   onChange,
   error,
   addOption,
+  row = false,
 }: AttributeInputProps) {
   const { t } = useTranslation()
   const id = `attribute-${definition.key}`
@@ -68,7 +81,12 @@ export function AttributeInput({
     return (
       <label
         htmlFor={id}
-        className="flex cursor-pointer items-center justify-between gap-3 rounded-md border px-3 py-2.5"
+        className={cn(
+          "flex cursor-pointer items-center justify-between gap-3 rounded-md border px-3 py-2.5",
+          // A row: the name in the names' column, the switch where the controls start
+          row &&
+            "@lg/attrs:grid @lg/attrs:grid-cols-[11rem_minmax(0,1fr)] @lg/attrs:justify-items-start @lg/attrs:gap-x-6 @lg/attrs:rounded-none @lg/attrs:border-0 @lg/attrs:p-0 @lg/attrs:py-2"
+        )}
       >
         <span className="text-sm font-medium">{label}</span>
         <Switch
@@ -84,7 +102,12 @@ export function AttributeInput({
   if (definition.type === "multi_select") {
     const selected = Array.isArray(value) ? value : []
     return (
-      <Field label={label} required={definition.is_required} error={error}>
+      <Field
+        label={label}
+        required={definition.is_required}
+        error={error}
+        className={row ? ATTRIBUTE_ROW : ""}
+      >
         <div role="group" aria-label={label} className="flex flex-wrap items-center gap-2">
           {options.map((option) => (
             <label
@@ -115,7 +138,13 @@ export function AttributeInput({
     )
   }
   return (
-    <Field label={label} htmlFor={id} required={definition.is_required} error={error}>
+    <Field
+      label={label}
+      htmlFor={id}
+      required={definition.is_required}
+      error={error}
+      className={row ? ATTRIBUTE_ROW : ""}
+    >
       {definition.type === "select" ? (
         <div className="flex flex-col gap-2">
           <Select

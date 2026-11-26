@@ -15,7 +15,7 @@ import { VariantInlineForm } from "./variant-inline-form"
 import { VariantListRow } from "./variant-list-row"
 import { VariantOptionsEditor } from "./variant-options-editor"
 import { savedOptions } from "./variant-options"
-import type { Placeholder } from "./variant-options"
+import { usePlaceholder } from "./use-option-placeholder"
 import { priceOf } from "./variant-values"
 import type { Variant } from "./variant-values"
 import { useVariantContext } from "./use-variant-context"
@@ -23,15 +23,6 @@ import { useVariantContext } from "./use-variant-context"
 const D = "products.variant"
 
 type Open = { id: string; focus: string | null } | null
-
-/** The option a product of no options gets (the wizard's): left out of the editor. */
-function usePlaceholder(): Placeholder {
-  const { t } = useTranslation()
-  return {
-    title: t("products.wizard.defaultOption"),
-    value: t("products.wizard.defaultValue"),
-  }
-}
 
 /**
  * The product's variants (docs/06 "Ürün sayfası", the owner 2026-11-25:
@@ -53,7 +44,7 @@ function SingleVariant({ product }: { product: ProductDetail }) {
   const placeholder = usePlaceholder()
   const [editing, setEditing] = useState(false)
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="@container/variants flex min-w-0 flex-col gap-4">
       <SingleVariantCard product={product} />
       <SectionCard title={t(`${D}.options.title`)} flush>
         <div className="border-t">
@@ -165,75 +156,78 @@ function VariantList({ product }: { product: ProductDetail }) {
   }
 
   return (
-    <SectionCard
-      title={t(`${D}.listTitle`, { count: variants.length })}
-      description={t(`${D}.listHint`)}
-      flush
-    >
-      <div className="border-t">
-        <VariantOptionsEditor
-          product={product}
-          placeholder={placeholder}
-          open={editing}
-          onOpenChange={setEditing}
-        />
-      </div>
-      <VariantBulkBar
-        product={product}
-        variants={variants}
-        options={options}
-        locationId={locationId}
-        selected={selected}
-        onDone={() => {
-          setSelected(new Set())
-        }}
-      />
-      <VariantListHead
-        all={variants.length > 0 && selected.size === variants.length}
-        some={selected.size > 0}
-        onPick={(on) => {
-          pick(
-            variants.map((variant) => variant.id),
-            on
-          )
-        }}
-      />
-      {groups ? (
-        <div className="flex flex-col divide-y">
-          {groups.map((group) => {
-            const ids = group.variants.map((variant) => variant.id)
-            const closed = folded.has(group.key)
-            return (
-              <section key={group.key} aria-label={group.label}>
-                <VariantGroupHead
-                  label={group.label}
-                  count={ids.length}
-                  open={!closed}
-                  picked={ids.filter((id) => selected.has(id)).length}
-                  onToggle={() => {
-                    const next = new Set(folded)
-                    if (closed) {
-                      next.delete(group.key)
-                    } else {
-                      next.add(group.key)
-                    }
-                    setFolded(next)
-                  }}
-                  onPick={(on) => {
-                    pick(ids, on)
-                  }}
-                />
-                {closed ? null : (
-                  <ul className="flex flex-col divide-y border-t">{group.variants.map(row)}</ul>
-                )}
-              </section>
-            )
-          })}
+    // The list's columns follow its own width: it stands in a tab of the data card
+    <div className="@container/variants min-w-0">
+      <SectionCard
+        title={t(`${D}.listTitle`, { count: variants.length })}
+        description={t(`${D}.listHint`)}
+        flush
+      >
+        <div className="border-t">
+          <VariantOptionsEditor
+            product={product}
+            placeholder={placeholder}
+            open={editing}
+            onOpenChange={setEditing}
+          />
         </div>
-      ) : (
-        <ul className="flex flex-col divide-y border-t sm:border-t-0">{variants.map(row)}</ul>
-      )}
-      {guard.confirm}
-    </SectionCard>
+        <VariantBulkBar
+          product={product}
+          variants={variants}
+          options={options}
+          locationId={locationId}
+          selected={selected}
+          onDone={() => {
+            setSelected(new Set())
+          }}
+        />
+        <VariantListHead
+          all={variants.length > 0 && selected.size === variants.length}
+          some={selected.size > 0}
+          onPick={(on) => {
+            pick(
+              variants.map((variant) => variant.id),
+              on
+            )
+          }}
+        />
+        {groups ? (
+          <div className="flex flex-col divide-y">
+            {groups.map((group) => {
+              const ids = group.variants.map((variant) => variant.id)
+              const closed = folded.has(group.key)
+              return (
+                <section key={group.key} aria-label={group.label}>
+                  <VariantGroupHead
+                    label={group.label}
+                    count={ids.length}
+                    open={!closed}
+                    picked={ids.filter((id) => selected.has(id)).length}
+                    onToggle={() => {
+                      const next = new Set(folded)
+                      if (closed) {
+                        next.delete(group.key)
+                      } else {
+                        next.add(group.key)
+                      }
+                      setFolded(next)
+                    }}
+                    onPick={(on) => {
+                      pick(ids, on)
+                    }}
+                  />
+                  {closed ? null : (
+                    <ul className="flex flex-col divide-y border-t">{group.variants.map(row)}</ul>
+                  )}
+                </section>
+              )
+            })}
+          </div>
+        ) : (
+          <ul className="flex flex-col divide-y">{variants.map(row)}</ul>
+        )}
+        {guard.confirm}
+      </SectionCard>
+    </div>
   )
 }
