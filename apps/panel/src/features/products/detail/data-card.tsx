@@ -34,6 +34,7 @@ const PANEL_IDS: Record<TabPart, string> = {
   attributes: PRODUCT_SECTIONS.attributes,
   variants: "product-data-variants",
   catalog: PRODUCT_SECTIONS.catalog,
+  linked: "product-data-linked",
   advanced: "product-data-advanced",
 }
 
@@ -56,7 +57,7 @@ const STEP: Partial<Record<string, number>> = {
  * a tablet's (the owner 2026-11-26: the column left the panels cramped),
  * a wrapping row of chips on a phone (no row that scrolls sideways). Genel (price), Stok, Kargo (the parcel; not for a
  * digital product or a service), Özellikler, Varyantlar (a product with
- * variants), Katalog, Gelişmiş (add-ons, price history). Every panel stays
+ * variants), Katalog, Bağlantılı ürünler (S3), Gelişmiş (add-ons, price history). Every panel stays
  * drawn while another is open, so an unsaved edit is kept and saved by
  * the page's header save; a tab the shop hid is left out.
  */

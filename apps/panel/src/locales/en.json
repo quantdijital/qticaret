@@ -4468,6 +4468,7 @@
         "advisor": "SEO advisor",
         "organize": "Categories, brand and VAT",
         "catalog": "Catalog details",
+        "linked": "Linked products",
         "shipping": "Shipping (parcel)",
         "data": "Product data",
         "pricing": "General (price)",
@@ -4549,6 +4550,7 @@
         "attributes": "Attributes",
         "variants": "Variants",
         "catalog": "Catalog",
+        "linked": "Linked products",
         "advanced": "Advanced"
       },
       "pricesOnVariants": "Prices are entered on each variant.",
@@ -4954,6 +4956,20 @@
       "reason": {
         "seo": "Its SEO score was too low to publish.",
         "other": "Something went wrong while saving."
+      }
+    },
+    "linked": {
+      "title": "Linked products",
+      "add": "Add a product",
+      "noResults": "No products found.",
+      "full": "At most {{max}} products. Remove one to add another.",
+      "upsells": {
+        "label": "Similar / better products",
+        "hint": "Shown in this order where the product page shows similar products. Left empty, products of the same category are shown. Drafts appear once published."
+      },
+      "cross_sells": {
+        "label": "Bought together",
+        "hint": "Offered in the cart as \"You may also like\" while this product is in it. Products already in the cart are not offered."
       }
     },
     "purchaseLimit": {
