@@ -16,6 +16,7 @@
     "dev:yurtici": "ts-node ../../packages/testing/src/dev/yurtici.ts",
     "dev:dhlecommerce": "ts-node ../../packages/testing/src/dev/dhlecommerce.ts",
     "dev:surat": "ts-node ../../packages/testing/src/dev/surat.ts",
+    "dev:ptt": "ts-node ../../packages/testing/src/dev/ptt.ts",
     "dev:google": "ts-node ../../packages/testing/src/dev/google.ts",
     "build": "medusa build && node ../../scripts/stamp-release.mjs",
     "start": "medusa start",

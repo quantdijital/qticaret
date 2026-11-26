@@ -19,6 +19,7 @@
     "dev:yurtici": "pnpm --filter backend dev:yurtici",
     "dev:dhlecommerce": "pnpm --filter backend dev:dhlecommerce",
     "dev:surat": "pnpm --filter backend dev:surat",
+    "dev:ptt": "pnpm --filter backend dev:ptt",
     "dev:google": "pnpm --filter backend dev:google",
     "build": "turbo run build",
     "lint": "turbo run lint",

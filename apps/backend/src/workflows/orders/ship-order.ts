@@ -14,6 +14,7 @@ import { shipLockKey } from "../../lib/orders/locks"
 import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
 import { fillReceiverStep } from "../shipping/steps/fill-receiver"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
+import { reservePttBarcodeStep } from "../shipping/steps/ptt-barcode"
 import { noteManualCarrierStep } from "../shipping/steps/manual-carrier"
 import { forgetLabelSourceStep, storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { trackShipmentStep } from "../shipping/steps/track"
@@ -98,11 +99,20 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     })
   )
 
+  // A PTT parcel's barcode from the shop's range, taken for good (docs/entegrasyonlar/ptt.md)
+  const ptt = when(
+    "shipping-ptt-barcode",
+    { carrier, plan },
+    ({ carrier, plan }) => carrier.carrier === "ptt" && plan.fulfillment_id === null
+  ).then(() =>
+    reservePttBarcodeStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
+  )
+
   const packed = when({ plan }, ({ plan }) => plan.fulfillment_id === null).then(() =>
     createOrderFulfillmentWorkflow.runAsStep({
       input: transform(
-        { input, plan, carrier, receiver },
-        ({ input, plan, carrier, receiver }) => ({
+        { input, plan, carrier, receiver, ptt },
+        ({ input, plan, carrier, receiver, ptt }) => ({
           order_id: input.order_id,
           items: plan.items,
           no_notification: !input.notify,
@@ -121,6 +131,7 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
                     receiver: receiver?.address ?? null,
                     plate: receiver?.plate ?? null,
                     email: receiver?.email ?? null,
+                    barcode: ptt?.barcode ?? null,
                   },
                 },
               }

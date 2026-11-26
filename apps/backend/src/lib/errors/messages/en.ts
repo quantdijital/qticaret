@@ -943,6 +943,32 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "DHL eCommerce does not know the province or district of the delivery address. Correct them on the order's address and try again.",
   "dhlecommerce.branch_pending":
     'DHL eCommerce has not yet found the receiver\'s branch; nothing was shipped. Press "Ship" again in a few minutes.',
+  "ptt.customer_id_invalid":
+    "Enter the customer number PTT gave with your contract: 9 or 10 digits.",
+  "ptt.merchant_invalid":
+    "PTT Kargo did not accept this customer number. Copy it again from what the PTT Başmüdürlük gave with your contract.",
+  "ptt.secret_invalid":
+    "PTT Kargo did not accept this customer number and web service password. Copy them again from what the PTT Başmüdürlük gave with your contract.",
+  "ptt.receiver_name_short":
+    "PTT Kargo needs a receiver name of at least 5 characters. Write the receiver's full name in the order's delivery address.",
+  "ptt.withdraw_failed":
+    "A parcel may have been loaded at PTT Kargo and could not be deleted. Before shipping again, ask your PTT branch about this order's barcode and have it cancelled if it is loaded.",
+  "ptt.already_accepted":
+    "A PTT branch has already accepted this parcel, so it cannot be deleted online. Cancel it at a PTT branch; the shipment stays on the order and tracking follows it.",
+  "ptt.barcode_range_missing":
+    "No PTT barcode range is entered. Add the range PTT gave you in Settings > Shipping > PTT Kargo, then ship again.",
+  "ptt.barcode_range_exhausted":
+    "Your PTT barcode range is used up, so no parcel can be loaded. Ask PTT for a new range and add it in Settings > Shipping > PTT Kargo.",
+  "ptt.barcode_range_invalid":
+    "Enter both ends of the range as 12 digits, without the check digit.",
+  "ptt.barcode_range_reversed": "The range's last number must not be below its first.",
+  "ptt.barcode_range_too_large":
+    "A range of more than a million numbers is not what PTT hands out. Check both numbers.",
+  "ptt.barcode_range_overlaps":
+    "This range overlaps one you entered before. A barcode is used once only: enter the new range PTT gave you.",
+  "ptt.barcode_range_unknown": "That range is no longer on the list.",
+  "ptt.barcode_range_in_use":
+    "Barcodes of this range were already used, so it stays: its numbers must never be handed out again.",
   "surat.merchant_invalid":
     "Sürat Kargo did not accept this cari code and web password. Copy them again from what Sürat gave with your contract.",
   "surat.secret_invalid":

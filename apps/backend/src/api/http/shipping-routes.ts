@@ -6,6 +6,7 @@ import {
   AdminPostShippingOption,
   AdminPostShippingOptionUpdate,
 } from "../admin/shipping-setup/options/validators"
+import { AdminPostPttBarcodeRange } from "../admin/shipping-setup/ptt-barcodes/validators"
 import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess, orderActor } from "./order-access"
 import { rateLimit } from "./rate-limit"
@@ -80,6 +81,22 @@ export const SHIPPING_ROUTES = [
   {
     matcher: "/admin/shipping-setup/classes",
     methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  // PTT's barcode ranges (docs/entegrasyonlar/ptt.md): the shop's settings, staff only
+  {
+    matcher: "/admin/shipping-setup/ptt-barcodes",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/shipping-setup/ptt-barcodes",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPttBarcodeRange)],
+  },
+  {
+    matcher: "/admin/shipping-setup/ptt-barcodes/:id",
+    methods: ["DELETE" as const],
     middlewares: [requireUserActor],
   },
   {

@@ -9,6 +9,7 @@ import { netgsmHealthCheck } from "./netgsm-check"
 import { yurticiHealthCheck } from "./yurtici-check"
 import { dhlEcomHealthCheck } from "./dhlecommerce-check"
 import { suratHealthCheck } from "./surat-check"
+import { pttHealthCheck } from "./ptt-check"
 import { registerProcessCache } from "../../cache/process-caches"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
@@ -27,6 +28,7 @@ export { netgsmHealthCheck } from "./netgsm-check"
 export { yurticiHealthCheck } from "./yurtici-check"
 export { dhlEcomHealthCheck } from "./dhlecommerce-check"
 export { suratHealthCheck } from "./surat-check"
+export { pttHealthCheck } from "./ptt-check"
 
 /** The shop's stored provider accounts (adr/0027), as the checks read them. */
 export interface AccountSource {
@@ -46,6 +48,7 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
     yurticiHealthCheck(() => accounts.read("yurtici")),
     dhlEcomHealthCheck(() => accounts.read("dhlecommerce")),
     suratHealthCheck(() => accounts.read("surat")),
+    pttHealthCheck(() => accounts.read("ptt")),
     netgsmHealthCheck(() => accounts.read("netgsm")),
   ]
 }

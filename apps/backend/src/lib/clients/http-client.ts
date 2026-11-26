@@ -109,7 +109,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       { accept: request.xml === undefined ? "application/json" : "text/xml" },
       options.defaultHeaders,
       request.headers,
-      contentTypeHeader(request.json, request.form, request.xml),
+      contentTypeHeader(request.json, request.form, request.xml, request.xmlType),
       requestId === undefined ? undefined : { "x-request-id": requestId }
     )
     const path = options.hidePaths ? "[hidden]" : (request.logPath ?? url.pathname)

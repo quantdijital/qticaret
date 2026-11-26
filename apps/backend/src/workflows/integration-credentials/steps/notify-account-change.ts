@@ -17,6 +17,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   yurtici: "Yurtiçi Kargo",
   dhlecommerce: "DHL eCommerce",
   surat: "Sürat Kargo",
+  ptt: "PTT Kargo",
   netgsm: "Netgsm",
   google: "Google",
   meta: "Meta",

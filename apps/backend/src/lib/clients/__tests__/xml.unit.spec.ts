@@ -42,6 +42,24 @@ describe("xml (adr/0035)", () => {
     )
   })
 
+  it("writes SOAP 1.2 with fields qualified by another namespace (Axis2)", () => {
+    const axis2 = soapEnvelope({
+      namespace: "http://takip.ptt.gov.tr",
+      operation: "gonderiSorgu2",
+      params: { "op:input": { "ax:barkod": "1" } },
+      prefixed: true,
+      namespaces: { ax: "http://takip.ptt.gov.tr/xsd" },
+      version: "1.2",
+    })
+    expect(axis2).toContain('xmlns:soap="http://www.w3.org/2003/05/soap-envelope"')
+    expect(axis2).toContain(
+      '<op:gonderiSorgu2 xmlns:op="http://takip.ptt.gov.tr" xmlns:ax="http://takip.ptt.gov.tr/xsd"><op:input><ax:barkod>1</ax:barkod></op:input>'
+    )
+    expect(() =>
+      soapEnvelope({ namespace: "x", operation: "o", params: {}, namespaces: { "a b": "y" } })
+    ).toThrow(XmlRefused)
+  })
+
   it("reads an answer: prefixes off, entities and CDATA in, attributes kept", () => {
     const tree = parseXml(
       `<?xml version="1.0"?><soap:Envelope xmlns:soap="x"><soap:Body>` +

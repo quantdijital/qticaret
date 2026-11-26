@@ -5,6 +5,7 @@ const NONE = {
   yurtici: null,
   dhlecommerce: null,
   surat: null,
+  ptt: null,
   other_carrier: null,
   other_code: null,
 }

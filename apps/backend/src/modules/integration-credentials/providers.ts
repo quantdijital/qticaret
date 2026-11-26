@@ -117,6 +117,28 @@ export const CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: ["cari_code", "web_password"],
   },
+  // PTT Kargo's web service (docs/entegrasyonlar/ptt.md): the customer number the Başmüdürlük
+  // gives with the contract (9 or 10 digits, shown) and its web service password. PTT's test
+  // services take another account: switching asks for the password again. The barcode range is
+  // not here: it lives in its own table, handed out once each (modules/ptt-barcode)
+  ptt: {
+    settings: z
+      .object({
+        customer_id: z
+          .string()
+          .trim()
+          .regex(/^\d{9,10}$/, "ptt.customer_id_invalid"),
+        test_mode: z.boolean(),
+      })
+      .strict(),
+    secrets: ["password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{3,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["customer_id", "test_mode"],
+    optional: [],
+  },
   // Netgsm's SMS account (adr/0036): the shop's own, its sender name registered to its company
   netgsm: {
     settings: z
