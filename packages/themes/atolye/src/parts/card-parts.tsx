@@ -83,16 +83,31 @@ export const ratingBadged = (product: ProductCardView): boolean =>
  * discount ("%30", the reader hears "%30 indirim"), then "Tükendi" or "Az
  * kaldı" (a stock bucket, never a number); each as the shop shows it.
  */
-export function CardBadges({ product, t }: { product: ProductCardView; t: Translate }) {
+export function CardBadges({
+  product,
+  t,
+  inline = false,
+}: {
+  product: ProductCardView
+  t: Translate
+  /** In the photo's top row beside the details' pills (`CardMeta`), not placed on its own. */
+  inline?: boolean
+}) {
   const badges = badgesOf(product)
   const discount = badges.sale ? (product.price?.discount ?? null) : null
   const out = isOut(product)
-  // The details on the photo (`meta_place: over`) carry the stars themselves (`CardMeta`)
-  const meta = metaOnPhoto(product)
-  const rating = ratingBadged(product) && !meta ? product.rating : null
+  // The details on the photo (`meta_place: over`) and the glass card's panel carry the stars themselves
+  const own = metaOnPhoto(product) || glassCard(product)
+  const rating = ratingBadged(product) && !own ? product.rating : null
   const badge = product.badge ?? null
   return (
-    <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
+    <ul
+      className={
+        inline
+          ? "flex min-w-0 flex-wrap gap-1 text-xs font-extrabold"
+          : "absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold"
+      }
+    >
       {/* The shop's badge first, the stars' pill beside it: the row wraps, they never overlap */}
       {badge && (
         <li
@@ -103,7 +118,7 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
         </li>
       )}
       {/* A compact card with its words over the photo: the stars' count and the length join the pill */}
-      {product.look?.compact && textOver(product) && !meta ? (
+      {product.look?.compact && textOver(product) && !metaOnPhoto(product) ? (
         <CompactPill product={product} />
       ) : (
         rating && (

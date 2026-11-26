@@ -1,5 +1,6 @@
 import { CalendarDays } from "lucide-react"
 import type { ProductCardView, Translate } from "@qticaret/ui"
+import { CardBadges } from "./card-parts"
 import { DurationWords, RatingWords, durationOf } from "./card-pill"
 
 const PILL =
@@ -46,27 +47,27 @@ export function CardMeta({
       </li>
     ) : null,
   ].filter((pill) => pill !== null)
-  if (!rating && dated.length === 0) {
-    return null
-  }
-  const list = "gf-card-meta pointer-events-none absolute flex gap-1"
-  return foot ? (
+  const list = "gf-card-meta pointer-events-none flex gap-1"
+  const top = foot ? (rating ? [rating] : []) : rating ? [rating, ...dated] : dated
+  // The shop's badges and the stars share the photo's top row: on a narrow
+  // card (a phone's two columns) the stars wrap under the badges, at the right
+  return (
     <>
-      {rating && <ul className={`${list} top-2 right-2`}>{rating}</ul>}
-      {dated.length > 0 && (
+      <div className="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1">
+        <CardBadges product={product} t={t} inline />
+        {top.length > 0 && (
+          <ul className={`${list} ms-auto max-w-full flex-col items-end`}>{top}</ul>
+        )}
+      </div>
+      {foot && dated.length > 0 && (
         <ul
-          className={`${list} bottom-2 left-2 flex-wrap ${add ? "right-14" : "right-2"}`}
+          className={`${list} absolute bottom-2 left-2 flex-wrap ${add ? "right-14" : "right-2"}`}
           data-foot=""
         >
           {dated}
         </ul>
       )}
     </>
-  ) : (
-    <ul className={`${list} top-2 right-2 max-w-[70%] flex-col items-end`}>
-      {rating}
-      {dated}
-    </ul>
   )
 }
 

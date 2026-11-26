@@ -13,7 +13,7 @@ import { siteIcons } from "@/lib/seo/icons"
 import { TurnstileProvider } from "@qticaret/ui/hooks/use-turnstile"
 import { siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
-import { t } from "@/lib/i18n"
+import { t, withCountWord } from "@/lib/i18n"
 import { layoutPreviewToken } from "@/lib/views/layout"
 import { POPUP_SETUP, popupsOn } from "@/lib/views/popups"
 import { quickViewAddress } from "@/lib/views/quick-view"
@@ -117,7 +117,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           <theme.Layout
             shop={shop}
-            t={t}
+            t={withCountWord(settings.listing_page?.count_word)}
             saveCookies={saveCookieChoice}
             subscribe={subscribeNewsletter}
             searchSuggest={SUGGEST_PATH}

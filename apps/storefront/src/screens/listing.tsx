@@ -8,7 +8,7 @@ import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { visitorAmounts } from "@/lib/analytics/tags"
 import { currentWholesale } from "@/lib/account/wholesale"
-import { t } from "@/lib/i18n"
+import { t, withCountWord } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   allCategories,
@@ -325,7 +325,7 @@ export async function ListingContent({
       />
       <JsonLd blocks={jsonLd} />
       <theme.ListingPage
-        t={t}
+        t={withCountWord(shape.count_word)}
         subscribe={subscribeNewsletter}
         quickAdd={addToCart}
         view={{

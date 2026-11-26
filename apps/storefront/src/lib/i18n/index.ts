@@ -19,3 +19,16 @@ export const t: Translate = (key, values) => {
       })
     : text
 }
+
+/**
+ * The words with a product count in the shop's own word (`listing_page.
+ * count_word`, "4 tur" for "4 ürün"): category tiles, the menu's counts
+ * and every other "{count} ürün"; the plain words while it writes none.
+ */
+export function withCountWord(word: string | null | undefined): Translate {
+  if (!word) {
+    return t
+  }
+  return (key, values) =>
+    key === "listing.count" ? t("listing.count_word", { ...values, word }) : t(key, values)
+}

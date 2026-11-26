@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { BookingNext, BookingPrice } from "./card-booking"
 import { CardMeta } from "./card-meta"
-import { CardBadges, isOut, metaOnPhoto, quickAddWords, ratingBadged } from "./card-parts"
+import { CardBadges, isOut, metaOnPhoto, quickAddWords } from "./card-parts"
 import { DurationWords, RatingWords, durationOf } from "./card-pill"
 import { CardPhoto } from "./CardPhoto"
 import { CardQuickView } from "./card-quick-view"
@@ -39,8 +39,11 @@ export function GlassCard({
     <article className="group gf-card gf-card-glass @container relative h-full">
       <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
         <CardPhoto product={product} sizes={sizes} priority={priority} />
-        <CardBadges product={product} t={t} />
-        {meta && <CardMeta product={product} t={t} foot={false} />}
+        {meta ? (
+          <CardMeta product={product} t={t} foot={false} />
+        ) : (
+          <CardBadges product={product} t={t} />
+        )}
         <div
           className="gf-card-glass-panel absolute right-2 bottom-2 left-2 flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-media)*0.75)] px-3 py-2.5 data-add:right-14"
           data-add={add ? "" : undefined}
@@ -87,7 +90,8 @@ export function GlassCard({
 /** The stars with their count and the length on one line, the departure under them, in the panel. */
 function PanelRows({ product, t }: { product: ProductCardView; t: Translate }) {
   const duration = durationOf(product)
-  const rated = !!product.rating && !ratingBadged(product)
+  // The panel always carries the stars: the shop's stars' pill is for the other cards
+  const rated = !!product.rating
   return (
     <>
       {(rated || duration) && (

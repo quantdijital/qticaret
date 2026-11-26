@@ -6,6 +6,7 @@ import { categoryImages } from "@/lib/store-api/extras"
 import { allBrands, allCategories, pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { brandGroups } from "@/lib/views/brands"
 import { categoryIndex } from "@/lib/views/category-index"
+import { shopWords } from "@/lib/views/theme-settings"
 import { theme } from "@/theme"
 
 export const CATEGORIES_PATH = "/kategoriler"
@@ -56,7 +57,7 @@ export async function CategoriesScreen() {
     <>
       <JsonLd blocks={jsonLd} />
       <theme.CategoriesPage
-        t={t}
+        t={await shopWords()}
         view={{
           title,
           breadcrumbs: trail.breadcrumbs,

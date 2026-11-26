@@ -64,6 +64,17 @@ describe("the theme panel's tour card settings", () => {
     expect(onChange).toHaveBeenLastCalledWith(withCard({ show_rating: true, arrow: true }))
   })
 
+  it("hides the stars' pill while a standard card's details are on the photo or it is glass", () => {
+    const pill = "Puanı görselde rozet olarak göster"
+    draw(withCard({ show_rating: true, meta_place: "over" }))
+    expect(screen.queryByLabelText(pill)).toBeNull()
+    draw(withCard({ show_rating: true, style: "glass" }))
+    expect(screen.queryByLabelText(pill)).toBeNull()
+    // Another card in use still draws the pill
+    draw(withCard({ show_rating: true, style: "glass" }), [], new Set(["standard", "framed"]))
+    expect(screen.getByLabelText(pill)).toBeInTheDocument()
+  })
+
   it("leaves the words' place and the arrow out where no card is standard", () => {
     draw(withCard({ text_position: "over" }), [], new Set(["framed"]))
     expect(screen.queryByText("Yazının yeri")).toBeNull()

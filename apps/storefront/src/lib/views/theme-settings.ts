@@ -1,5 +1,6 @@
 import "server-only"
 import { cache } from "react"
+import { withCountWord } from "@/lib/i18n"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { handNoteOf } from "@qticaret/types/hand-note"
 import { handFace } from "./accent"
@@ -18,6 +19,11 @@ export const currentTheme = cache(async () => {
   const [layout, answer] = await Promise.all([currentLayout(), storefrontSettings()])
   return themeSettings(...themeSourceOf(layout, answer))
 })
+
+/** The words for this request, a product count in the shop's own word (`withCountWord`). */
+export const shopWords = cache(async () =>
+  withCountWord((await currentTheme()).listing_page?.count_word)
+)
 
 /**
  * Whether a section's hand note is drawn in the shop's accent face: the
