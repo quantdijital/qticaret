@@ -141,6 +141,8 @@ export function BrandBlock({
    */
   block?: {
     logo: ImageView | null
+    /** `large`: a step taller, so a logo's own small line reads. */
+    logoSize?: "medium" | "large"
     profiles: readonly SocialLinkView[]
     address: string | null
     headingId: string
@@ -151,6 +153,7 @@ export function BrandBlock({
   const { contact } = shop
   const logo = block ? block.logo : shop.footerBar?.logo
   const headingId = block?.headingId ?? "footer-brand"
+  const large = block?.logoSize === "large"
   return (
     <section
       aria-labelledby={headingId}
@@ -160,8 +163,11 @@ export function BrandBlock({
         <h2 id={headingId} className="flex min-h-11 items-center">
           <ResponsiveImage
             image={logo}
-            sizes="224px"
-            className="h-10 w-auto max-w-56 object-contain object-left"
+            sizes={large ? "320px" : "224px"}
+            className={cn(
+              "w-auto object-contain object-left",
+              large ? "h-14 max-w-80" : "h-10 max-w-56"
+            )}
           />
         </h2>
       ) : (

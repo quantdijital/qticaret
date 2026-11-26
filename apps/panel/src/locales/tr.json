@@ -10733,7 +10733,8 @@
           "hint": "Adresler Mağaza ayarlarındaki sosyal hesaplarınızdan gelir.",
           "text": "Yazıyla",
           "icons": "Simgeyle",
-          "hidden": "Gizli"
+          "hidden": "Gizli",
+          "bare": "Yalın simge"
         },
         "payment_badges": {
           "label": "Ödeme rozetleri",
@@ -10793,7 +10794,8 @@
           "term": "payment marks",
           "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
           "card": "Kart içinde",
-          "plain": "Yalın"
+          "plain": "Yalın",
+          "muted": "Gri, sessiz"
         },
         "news_place": {
           "label": "E-bülten yeri",
@@ -10819,7 +10821,14 @@
           "term": "payment badges",
           "hint": "Sayfanın en altındaki sabit satırda ödeme yöntemlerinin logoları görünür. Liste yukarıdaki \"Ödeme logoları\" seçiminden gelir."
         },
-        "freeRowsNote": "Satırları ve blokları soldaki sayfa listesinde, Alt bilgi altında düzenleyin. Yasal şerit ve alt satır her zaman en altta durur."
+        "freeRowsNote": "Satırları ve blokları soldaki sayfa listesinde, Alt bilgi altında düzenleyin. Yasal şerit ve alt satır her zaman en altta durur.",
+        "legal_place": {
+          "label": "Yasal metinlerin yeri",
+          "term": "legal links",
+          "hint": "Alt satırda: yasal metinler ve çerez tercihleri telif satırının yanında, ayrı şerit olmadan.",
+          "strip": "Ayrı şerit",
+          "bottom_line": "Alt satırda"
+        }
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
@@ -11362,6 +11371,18 @@
             "all": "Hepsi",
             "mobile": "Telefon",
             "desktop": "Geniş ekran"
+          },
+          "style": {
+            "label": "Yazı biçimi",
+            "term": "text style",
+            "plain": "Düz",
+            "hand": "El yazısı"
+          },
+          "logo_size": {
+            "label": "Logo boyu",
+            "term": "logo size",
+            "medium": "Orta",
+            "large": "Büyük"
           }
         },
         "source": {

@@ -1,3 +1,4 @@
+import { cn } from "@qticaret/ui/lib/utils"
 import { BlockTitle, blockHeadingId, blockMark } from "./shared"
 import type { BlockProps } from "./shared"
 
@@ -18,7 +19,13 @@ export function TextBlock({ block, editor }: BlockProps<"text">) {
         </BlockTitle>
       )}
       <div
-        className="gf-foot-prose"
+        className={cn(
+          "gf-foot-prose",
+          // The shop's hand face, as the hero's note (`HandNote`): a size up, a little tilted
+          block.style === "hand" &&
+            "w-fit -rotate-3 font-(family-name:--font-accent) text-2xl leading-tight font-normal lg:text-3xl"
+        )}
+        data-style={block.style === "hand" ? "hand" : undefined}
         // adr/0019, adr/0070 §2: the only source is the backend's `renderDoc(footerDoc)`, the
         // footer's narrowed allow-listed document drawn on the server, every text and address
         // escaped there. Not `content/Prose`: its article type (`gf-prose`) is not the footer's.

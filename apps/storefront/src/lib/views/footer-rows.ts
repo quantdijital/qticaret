@@ -1,6 +1,7 @@
 import type { StoreFooterBlock, StoreFooterRows, StoreMenu } from "@qticaret/types"
 import {
   FOOTER_IMAGE_WIDTHS,
+  FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
   FOOTER_ROW_DEFAULTS,
   FOOTER_ROW_LAYOUTS,
@@ -8,6 +9,7 @@ import {
   FOOTER_ROWS_DEFAULTS,
   FOOTER_ROWS_LIMITS,
   FOOTER_ROWS_SETTINGS,
+  FOOTER_TEXT_STYLES,
   FOOTER_TRUST_LAYOUTS,
   FOOTER_TRUST_LIMIT,
   footerRowColumns,
@@ -76,6 +78,11 @@ export function freeRowsOf(bar: Partial<StoreFooterRows> | null | undefined): Fo
       bar?.badge_style,
       FOOTER_ROWS_DEFAULTS.badge_style
     ),
+    legalPlace: pick(
+      FOOTER_ROWS_SETTINGS.legal_place,
+      bar?.legal_place,
+      FOOTER_ROWS_DEFAULTS.legal_place
+    ),
     bottomBadges: on(bar?.bottom_badges, FOOTER_ROWS_DEFAULTS.bottom_badges),
   }
 }
@@ -108,7 +115,8 @@ function bodyOf(
   switch (block.type) {
     case "text": {
       const html = typeof block.html === "string" ? block.html : ""
-      return html.length > 0 ? { type: "text", title, html } : null
+      const style = pick(FOOTER_TEXT_STYLES, block.style, "plain")
+      return html.length > 0 ? { type: "text", title, html, style } : null
     }
     case "menu": {
       const menu = Number.isInteger(block.slot) ? footerMenuAt(parts.menus, block.slot) : undefined
@@ -126,6 +134,7 @@ function bodyOf(
       return {
         type: "brand",
         logo: on(block.logo, true) ? logo : null,
+        logoSize: pick(FOOTER_LOGO_SIZES, block.logo_size, "medium"),
         name: parts.name,
         about: words(block.about)?.slice(0, FOOTER_ROWS_LIMITS.about) ?? null,
         social: on(block.social, false) ? [...parts.social] : [],

@@ -99,30 +99,35 @@ function Row({
  * choices, the identity lines the law asks for beside the ETBİS code. Not
  * a block: drawn on every page.
  */
-function LegalStrip({ shop, t }: { shop: ShopView; t: Translate }) {
-  const label = t("footer.legal")
+function LegalLinks({ shop, t, className }: { shop: ShopView; t: Translate; className?: string }) {
   // The cookie choices close the legal texts' row (owner 2026-11-26: not beside the ways to
-  // pay): the strip stands on every page, with or without a legal text
+  // pay): they stand on every page, with or without a legal text
+  return (
+    <nav aria-label={t("footer.legal")} className={cn("min-w-0", className)}>
+      <ul className="flex flex-wrap gap-x-5">
+        {shop.legalLinks.map((each) => {
+          const link = legalLabel(each, t)
+          return (
+            <li key={link.path}>
+              <a href={link.path} title={link.title} className={LEGAL_LINK}>
+                {link.label}
+              </a>
+            </li>
+          )
+        })}
+        <li>
+          <CookiePreferencesLink label={t("cookies.preferences")} className={LEGAL_LINK} />
+        </li>
+      </ul>
+    </nav>
+  )
+}
+
+function LegalStrip({ shop, t }: { shop: ShopView; t: Translate }) {
   return (
     <div data-footer-legal="" className="border-t border-rule">
       <Container className="flex flex-col gap-4 py-6 lg:flex-row lg:items-start lg:justify-between lg:gap-(--gap-columns)">
-        <nav aria-label={label} className="min-w-0 lg:max-w-[60%]">
-          <ul className="flex flex-wrap gap-x-5">
-            {shop.legalLinks.map((each) => {
-              const link = legalLabel(each, t)
-              return (
-                <li key={link.path}>
-                  <a href={link.path} title={link.title} className={LEGAL_LINK}>
-                    {link.label}
-                  </a>
-                </li>
-              )
-            })}
-            <li>
-              <CookiePreferencesLink label={t("cookies.preferences")} className={LEGAL_LINK} />
-            </li>
-          </ul>
-        </nav>
+        <LegalLinks shop={shop} t={t} className="lg:max-w-[60%]" />
         {hasIdentity(shop) && <FooterIdentity shop={shop} t={t} />}
       </Container>
     </div>
@@ -153,6 +158,7 @@ export function FooterRows({
 }) {
   const editor = shop.editor === true
   const dark = free.ground === "stage"
+  const line = free.legalPlace === "bottom_line"
   const drawn = subscribe && shop.newsletter?.joined ? footerNewsletterVariant(shop) : null
   const band = drawn === "split" || drawn === "image_card" || drawn === "strip" ? drawn : null
   return (
@@ -162,6 +168,7 @@ export function FooterRows({
       data-variant="free_rows"
       data-ground={free.ground}
       data-badges={free.badgeStyle}
+      data-legal={free.legalPlace}
       className={cn("gf-footer-rows mt-(--footer-gap)")}
     >
       {subscribe && band && (
@@ -184,8 +191,25 @@ export function FooterRows({
         />
       ))}
       <div className={cn("gf-foot-fixed", dark && "gf-stage")}>
-        <LegalStrip shop={shop} t={t} />
-        <BottomLine shop={shop} t={t} marks={free.bottomBadges} />
+        {line ? (
+          // One quiet line (`legal_place: bottom_line`): the year, the legal texts and the
+          // cookie choices beside it; the identity lines the law asks for stay, over it
+          hasIdentity(shop) && (
+            <div data-footer-legal="" className="border-t border-rule">
+              <Container className="py-5">
+                <FooterIdentity shop={shop} t={t} />
+              </Container>
+            </div>
+          )
+        ) : (
+          <LegalStrip shop={shop} t={t} />
+        )}
+        <BottomLine
+          shop={shop}
+          t={t}
+          marks={free.bottomBadges}
+          legal={line ? <LegalLinks shop={shop} t={t} /> : undefined}
+        />
       </div>
     </footer>
   )

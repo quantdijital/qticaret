@@ -1,6 +1,8 @@
 import {
   FOOTER_IMAGE_WIDTHS,
+  FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
+  FOOTER_TEXT_STYLES,
   FOOTER_TRUST_LAYOUTS,
   SECTION_DEVICES,
 } from "@qticaret/types"
@@ -17,7 +19,7 @@ import type { BlockField } from "./footer-rows-fields"
  * A block's settings in a section's three tabs (adr/0065 Ek, adr/0070
  * §7): its words and what it shows under "İçerik" (open), how it is drawn
  * under "Stil" (the newsletter's variant, a picture's width, the badges'
- * line, a menu folding on a phone), whether and on which screens it shows
+ * line, a text's hand face, the logo's size, a menu folding on a phone), whether and on which screens it shows
  * under "Gelişmiş". Each group stands where `panel-groups.ts` says.
  */
 export function BlockForm({
@@ -67,6 +69,20 @@ export function BlockForm({
             : steps("layout", FOOTER_TRUST_LAYOUTS, block.layout, (layout) => {
                 onChange({ ...block, layout })
               })}
+        </NamedGroup>
+      ) : null}
+      {block.type === "text" ? (
+        <NamedGroup name="appearance">
+          {steps("style", FOOTER_TEXT_STYLES, block.style, (style) => {
+            onChange({ ...block, style })
+          })}
+        </NamedGroup>
+      ) : null}
+      {block.type === "brand" ? (
+        <NamedGroup name="appearance">
+          {steps("logo_size", FOOTER_LOGO_SIZES, block.logo_size, (logo_size) => {
+            onChange({ ...block, logo_size })
+          })}
         </NamedGroup>
       ) : null}
       {block.type === "menu" ? (

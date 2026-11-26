@@ -27,9 +27,25 @@ const SHOWN = { visible: true, device: "all" } as const
 /** Each type's block as "Blok ekle" adds it. */
 export function newBlock<T extends FooterBlockType>(type: T, id: string): FooterBlockOf<T> {
   const blocks: { [K in FooterBlockType]: FooterBlockOf<K> } = {
-    text: { id, ...SHOWN, type: "text", title: null, body: { type: "doc", content: [] } },
+    text: {
+      id,
+      ...SHOWN,
+      type: "text",
+      title: null,
+      body: { type: "doc", content: [] },
+      style: "plain",
+    },
     menu: { id, ...SHOWN, type: "menu", slot: 1, title: null, collapse_phone: true },
-    brand: { id, ...SHOWN, type: "brand", logo: true, about: null, social: false, address: false },
+    brand: {
+      id,
+      ...SHOWN,
+      type: "brand",
+      logo: true,
+      logo_size: "medium",
+      about: null,
+      social: false,
+      address: false,
+    },
     newsletter: {
       id,
       ...SHOWN,
