@@ -54,6 +54,8 @@ function Newsletter({
         privacyPath={shop.privacyPath}
         words={newsletterWords(t, news.text)}
         marks={Boolean(news.mark)}
+        // The column is narrow: the field over its button when it would cut the example address
+        className={column ? "gf-join-box" : ""}
       />
     </section>
   )
@@ -66,9 +68,9 @@ function Newsletter({
  * newsletter box beside the shop's phone, WhatsApp and e-mail; then the
  * brand block (logo, the shop's own line, address, profiles, the law's
  * identity lines with the ETBİS code) beside the link columns (the footer
- * menus and the legal texts; closed rows on a phone); then one bottom line
- * with the year, the ways to pay by their own marks and the cookie
- * choices. Each part only when the shop has something for it.
+ * menus and the legal texts with the cookie choices; closed rows on a
+ * phone); then one bottom line with the year and the ways to pay by their
+ * own marks. Each part only when the shop has something for it.
  */
 export function FooterColumns({
   shop,
