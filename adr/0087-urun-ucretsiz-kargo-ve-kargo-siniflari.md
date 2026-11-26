@@ -153,3 +153,11 @@ Sahip bütün sorularda önerilen cevabı kabul etti:
 7. Ürün sayfası ek ücreti **açıkça yazar** ("Bu ürün için kargoya {tutar} eklenir.").
 
 **Uygulama sırası:** bugünkü açık (eşiğin desi tablosu ve Geliver'de uygulanmaması; akış ve JSON-LD'nin eşiği yok sayması) ilk ve küçük PR olarak kapatılır: `lib/shipping/quote.ts` (`shippingQuote`), `setCalculatedShippingPricingContext` kancası (`listShippingOptionsForCartWithPricingWorkflow` ve tek seçenek fiyatı için `calculateShippingOptionsPricesWorkflow`; ikincisinin sepet alanlarında `item_total` yoktur, kanca onu kendisi okur), Aras/Yurtiçi/Geliver sağlayıcıları, ödeme sonundaki "kargo bayatladı" denetiminin ücretsiz hesaplanan yöntemleri de yeniden fiyatlaması, `shippingRateOf` ve `shippingCost`. Ardından §Sonuçlar'daki sıra.
+
+## Ek (2026-11-26): panelde sadeleşme, "Kargo ücreti" tek soru
+
+Sahip (#450 sonrası): "Kargo sınıflarına gerek var mı? O kilitli satır ne işe yarıyor anlamadım. Basit bir ekranda tümü ücretsiz / X üstü ücretsiz / sabit ücret olur." Hesap (§2, `shippingQuote`) ve veri (§1) **değişmez**; yalnız panelin sorusu değişir (docs/06):
+
+- **Ayarlar > Kargo > Seçenekler ve ücretler** tek soruyla başlar: "Tüm siparişlerde kargo ücretsiz" / "Belli tutarın üstünde ücretsiz" / "Sabit ücret" / "Kargo firmasının ücreti". Cevap saklanana yazılır: mağazanın **ana seçeneğinin** ücreti (sabit tutar `data.amount`, ya da tablo/teklif) ve `promotions.free_shipping_threshold`. Ana seçenek `shipping.primary_option_id`'dir (platform ayarı, migration yok; yoksa en ucuz sabit ücretli seçenek). "Ücretsiz" eşiği 0 yapmaz, ana seçeneğin tutarını 0 yapar ve eşiği kaldırır: eşik bütün seçeneklere uygulanır (§2.5) ve vitrin "X TL üzeri" der. Tek cevaba sığmayan veri "Özel" görünür ve liste düzenler. Ödemede fiyat yine sunucudadır; istemci tutar göndermez, yalnız mağaza sahibinin ayarını kaydeder.
+- Diğer seçenekler "Ek kargo seçenekleri" altında katlanır; ayrı eşik kartı kalkar.
+- **Kargo sınıfları** kartı Gelişmiş'e iner; hazır "Ücretsiz kargo" sınıfı orada kilitli satır olarak çizilmez. Ürünün Kargo sekmesinde §4'teki sınıf seçimi yerine **"Bu ürünün kargosu ücretsiz"** anahtarı gelir (açık = `free`); küçük sınıf seçimi yalnız mağaza kendi sınıfını tanımladıysa ve anahtar kapalıyken görünür.

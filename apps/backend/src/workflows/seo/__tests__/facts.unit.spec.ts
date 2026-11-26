@@ -138,6 +138,7 @@ describe("productFacts", () => {
       default_parcel: null,
       packing_slip_prices: false,
       shipping_classes: [],
+      primary_option_id: null,
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -196,6 +197,7 @@ describe("productFacts", () => {
       default_parcel: { weight: 5_000, length: 30, width: 20, height: 10 },
       packing_slip_prices: false,
       shipping_classes: [],
+      primary_option_id: null,
     }
     const shipping = {
       settings,

@@ -103,6 +103,35 @@ medusaIntegrationTestRunner({
       expect(gone).toBeUndefined()
     })
 
+    it("keeps the option the shipping fee choice prices, and only an option's id", async () => {
+      const created = await send<{ id: string }>("post", "/admin/shipping-setup/options", {
+        name: "Standart Kargo",
+        carrier: "manual",
+        pricing: { type: "flat", amount: 0 },
+      })
+      const kept = await send<{ values: { primary_option_id: string | null } }>(
+        "post",
+        "/admin/platform-settings/shipping",
+        { primary_option_id: created.data.id }
+      )
+      const odd = await send("post", "/admin/platform-settings/shipping", {
+        primary_option_id: "'; drop table shipping_option; --",
+      })
+      const cleared = await send<{ values: { primary_option_id: string | null } }>(
+        "post",
+        "/admin/platform-settings/shipping",
+        { primary_option_id: null }
+      )
+
+      expect(kept.data.values.primary_option_id).toBe(created.data.id)
+      expect(odd.status).toBe(400)
+      expect(cleared.data.values.primary_option_id).toBeNull()
+      expect((await options()).find(({ id }) => id === created.data.id)).toMatchObject({
+        pricing: "flat",
+        amount: "0.00",
+      })
+    })
+
     it("adds an option at the shop's only warehouse when none was picked as the default", async () => {
       const container = getContainer()
       const query = container.resolve(ContainerRegistrationKeys.QUERY)

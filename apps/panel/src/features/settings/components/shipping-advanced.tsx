@@ -7,13 +7,15 @@ import { shopShippingOptionsQuery } from "@/features/settings/api/shipping-optio
 import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
 import { DeliveryCard } from "@/features/settings/components/delivery-card"
 import { LabelSizeCard } from "@/features/settings/components/label-size-card"
+import { ShippingClassesCard } from "@/features/settings/components/shipping-classes-card"
 import { RatesCard } from "@/features/settings/components/shipping-rules-cards"
 import { advancedSummaries } from "@/features/settings/shipping-summaries"
 
 /**
  * Settings > Shipping > "Gelişmiş" (the owner, 2026-11-26: fewer things on
  * screen): what a shop sets once, if ever, folded to a line each with its
- * defaults already in. The price table opens by itself while an option is
+ * defaults already in; the shipping classes last (most shops need none).
+ * The price table opens by itself while an option is
  * priced by it and it has no rows (a warning, not a stop).
  */
 export function ShippingAdvanced({ saved }: { saved: ShippingSettings }) {
@@ -58,6 +60,11 @@ export function ShippingAdvanced({ saved }: { saved: ShippingSettings }) {
           key={`labels-${JSON.stringify(saved)}`}
           saved={saved}
           collapse={fold("labels", summary.label)}
+        />
+        <ShippingClassesCard
+          key={`classes-${JSON.stringify(saved.shipping_classes ?? [])}`}
+          saved={saved}
+          collapse={fold("classes", summary.classes)}
         />
       </FieldHints>
     </section>
