@@ -61,8 +61,13 @@ export interface SecuritySettings {
 }
 
 /** Stock rules (F3.8): the shop's default low-stock threshold. */
+/** T1: what listings do with sold-out products (the server's closed list). */
+export type OutOfStockListing = "show" | "hide"
+
 export interface InventorySettings {
   low_stock_threshold: number
+  /** Absent from an older backend: `show`. */
+  out_of_stock_listing?: OutOfStockListing
 }
 
 /** Card payments (F5 V6, V10); `max_installment` 0 is the provider's most. */

@@ -26,6 +26,13 @@ describe("the category counts statement (adr/0049 Ek 2026-11-14 §10 karar 7b)",
     expect(params).toEqual([JSON.stringify(subtrees)])
   })
 
+  it("counts only products in stock while the shop hides sold-out ones (T1)", () => {
+    expect(categoryCountsStatement(subtrees, null).sql).not.toContain("in_stock")
+    const { sql, params } = categoryCountsStatement(subtrees, ["sc_1"], true)
+    expect(sql).toContain("d.published AND d.in_stock")
+    expect(placeholders(sql)).toBe(params.length)
+  })
+
   it("reads the rows by category id, a count the driver gave as text a number", () => {
     expect(
       categoryCountsOf([
