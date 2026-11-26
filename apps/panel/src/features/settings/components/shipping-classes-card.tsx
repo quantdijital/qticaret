@@ -6,7 +6,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
@@ -87,6 +87,7 @@ export function ShippingClassesCard({
   }
 
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         shipping_classes: next.rows.map((row) => ({
@@ -97,7 +98,7 @@ export function ShippingClassesCard({
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           setAsking(null)
           void client.invalidateQueries({ queryKey: SHIPPING_CLASS_USAGE_KEY })
           toast.success(t("settings.saved"))

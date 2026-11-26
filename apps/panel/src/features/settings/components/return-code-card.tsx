@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
@@ -63,6 +63,7 @@ function CodeForm({ saved, target }: { saved: ContractedReturnCodes; target: Tar
   })
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     // One field of the section's map: the server keeps the others as stored
     const patch =
       target === "other"
@@ -72,7 +73,7 @@ function CodeForm({ saved, target }: { saved: ContractedReturnCodes; target: Tar
       { contracted_return: patch as unknown as ContractedReturnCodes },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values.contracted_return ?? EMPTY, target), FULL_RESET)
+          settle(valuesOf(result.values.contracted_return ?? EMPTY, target))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

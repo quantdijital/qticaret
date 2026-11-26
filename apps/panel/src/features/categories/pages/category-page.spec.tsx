@@ -67,7 +67,11 @@ describe("CategoryPage", () => {
   beforeEach(() => {
     params.id = "sef"
     navigate.mockReset()
-    admin.productCategory.update.mockReset().mockResolvedValue({})
+    admin.productCategory.update
+      .mockReset()
+      .mockImplementation((id: string, input: object) =>
+        Promise.resolve({ product_category: { ...category(id, "", null), ...input } })
+      )
     admin.productCategory.delete.mockReset().mockResolvedValue({})
     admin.productCategory.list.mockReset().mockResolvedValue({
       product_categories: [
