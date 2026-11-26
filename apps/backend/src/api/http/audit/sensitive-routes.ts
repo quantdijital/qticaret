@@ -12,6 +12,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   // 2026-11-06: the team's note may name the customer; the carts left behind name
   // people who did not buy, with their e-mail and phone
   ["/admin/customers/:id/note", "customer", false],
+  // CU1: customers' order totals carry the city their orders went to
+  ["/admin/customer-stats", "customer", true],
   ["/admin/abandoned-carts", "cart", true],
   ["/admin/abandoned-carts/:id", "cart", false],
   // F9.6: addresses no message goes to (masked, still the shoppers')

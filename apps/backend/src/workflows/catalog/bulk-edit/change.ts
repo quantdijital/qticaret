@@ -4,8 +4,9 @@ import { z } from "@medusajs/framework/zod"
  * One change applied to many products at once (F3.10): the base TRY price,
  * stock at the default warehouse, the status, a category, the SEO texts
  * given back to the shop's templates, the images' missing alt texts, or
- * the variants' unit cost (F11.4), or an add-on template (adr/0052 Ek
- * 2026-11-23).
+ * the variants' unit cost (F11.4), an add-on template (adr/0052 Ek
+ * 2026-11-23), the brand, a tag, selling past stock, or the variants' sale
+ * price (adr/0086), as WooCommerce's bulk edit has them.
  */
 
 /** Products one run takes; the panel selects at most this many. */
@@ -104,6 +105,53 @@ const addonTemplate = z
   })
   .strict()
 
+/** The brand set on each product, or taken off with null. */
+const brand = z.object({ action: z.literal("brand"), brand_id: id.nullable() }).strict()
+
+/** A tag by its name, letter case aside: `add` makes it when the shop has none. */
+export const MAX_TAG_LENGTH = 100
+const tag = z
+  .object({
+    action: z.literal("tag"),
+    mode: z.enum(["add", "remove"]),
+    value: z.string().trim().min(1).max(MAX_TAG_LENGTH),
+  })
+  .strict()
+
+/** Selling past stock on or off, for the variants whose stock is tracked. */
+const backorder = z.object({ action: z.literal("backorder"), allow: z.boolean() }).strict()
+
+// A share off the regular price: a sale is at most 99% off, as the product page's
+const MAX_SALE_PERCENT = 99
+const moment = z.iso.datetime({ offset: true }).nullable().default(null)
+
+/**
+ * Each variant's sale price (adr/0086): a `percent` or an `amount` off its
+ * own regular price, worked out on the server, with optional days; or the
+ * sales `clear`ed.
+ */
+const sale = z
+  .object({
+    action: z.literal("sale"),
+    mode: z.enum(["percent", "amount", "clear"]),
+    value: amount.optional(),
+    starts_at: moment,
+    ends_at: moment,
+  })
+  .strict()
+  .refine(({ mode, value, starts_at, ends_at }) =>
+    mode === "clear"
+      ? value === undefined && starts_at === null && ends_at === null
+      : mode === "percent"
+        ? value !== undefined && value > 0 && value <= MAX_SALE_PERCENT
+        : value !== undefined && value > 0 && value <= MAX_AMOUNT
+  )
+  .refine(
+    ({ starts_at, ends_at }) =>
+      starts_at === null || ends_at === null || new Date(ends_at) > new Date(starts_at),
+    { message: "variant_sale.dates_order" }
+  )
+
 export const BulkChange = z.union([
   price,
   stock,
@@ -113,6 +161,10 @@ export const BulkChange = z.union([
   altText,
   cost,
   addonTemplate,
+  brand,
+  tag,
+  backorder,
+  sale,
 ])
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]

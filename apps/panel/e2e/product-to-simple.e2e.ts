@@ -24,15 +24,21 @@ const FIELDS =
 
 async function stored(page: Page, id: string): Promise<Stored> {
   const answer = await page.request.get(`/admin/products/${id}?fields=${FIELDS}`)
-  expect(answer.ok()).toBe(true)
+  expect(answer.ok(), `GET product ${String(answer.status())}: ${await answer.text()}`).toBe(true)
   return ((await answer.json()) as { product: Stored }).product
 }
 
-/** A draft of two colours, priced: never shown in the storefront. */
+/**
+ * A draft of two colours, priced: never shown in the storefront. Its name
+ * and address are this run's own: another e2e may make a "Deri Cüzdan"
+ * first, and a deleted product still holds its address.
+ */
 async function makeProduct(page: Page): Promise<string> {
+  const run = `${String(Date.now())}-${String(Math.floor(Math.random() * 1e6))}`
   const answer = await page.request.post("/admin/products", {
     data: {
-      title: "Deri Cüzdan",
+      title: `Deri Cüzdan ${run}`,
+      handle: `e2e-deri-cuzdan-${run}`,
       status: "draft",
       options: [{ title: "Renk", values: ["Taba", "Siyah"] }],
       variants: [
@@ -47,7 +53,11 @@ async function makeProduct(page: Page): Promise<string> {
       })),
     },
   })
-  expect(answer.ok()).toBe(true)
+  // The refusal itself in the report, not only "false"
+  expect(
+    answer.ok(),
+    `POST /admin/products ${String(answer.status())}: ${await answer.text()}`
+  ).toBe(true)
   return ((await answer.json()) as { product: { id: string } }).product.id
 }
 
