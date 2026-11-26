@@ -20,7 +20,24 @@
     "actions": "İşlemler",
     "delete": "Sil",
     "more": "Diğer işlemler",
-    "previous": "Önceki"
+    "previous": "Önceki",
+    "placeholder": {
+      "imageAlt": "Örn. Kahverengi deri cüzdan, önden görünüm",
+      "firstName": "Örn. Ayşe",
+      "lastName": "Örn. Yılmaz",
+      "email": "ornek@alanadi.com",
+      "phone": "0532 123 45 67",
+      "company": "Örn. Yılmaz Ticaret Ltd. Şti.",
+      "price": "0,00",
+      "sku": "ORN-001",
+      "ean": "8691234567890",
+      "neighborhood": "Örn. Caferağa Mah.",
+      "addressLine": "Örn. Moda Cad. No: 12 D: 3",
+      "postalCode": "34710",
+      "fullName": "Örn. Ayşe Yılmaz",
+      "taxOffice": "Örn. Kadıköy",
+      "taxNumber": "10 haneli vergi numarası"
+    }
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -4998,6 +5015,18 @@
       "hintSurcharge": "Bu ürün sepetteyse siparişin kargosuna {{amount}} eklenir.",
       "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor.",
       "freeSwitch": "Bu ürünün kargosu ücretsiz"
+    },
+    "placeholders": {
+      "addonGroup": "Örn. Kişiselleştirme",
+      "tag": "Örn. yeni-sezon",
+      "addonLabel": "Örn. İsim yazdırma",
+      "addonHelp": "Örn. En çok 12 harf",
+      "addonChoice": "Örn. Hediye paketi",
+      "badge": "Örn. Sınırlı",
+      "faqQuestion": "Örn. Kargo ne kadar sürer?",
+      "faqAnswer": "Örn. Siparişiniz 1–3 iş gününde kargoya verilir.",
+      "title": "Örn. Deri cüzdan",
+      "mpn": "Örn. AB-1234"
     }
   },
   "orders": {
@@ -5993,6 +6022,16 @@
       "utmMedium": "Kampanya ortamı",
       "utmCampaign": "Kampanya adı",
       "referrer": "Yönlendiren site"
+    },
+    "placeholders": {
+      "cancelReturn": "Örn. Müşteri vazgeçti, ürünü tutacak.",
+      "chargebackReference": "Örn. CB-2026-001234",
+      "chargebackNote": "Örn. Kargo teslim belgesi gönderildi.",
+      "invoiceNumber": "Örn. ABC2026000000123",
+      "ettn": "00000000-0000-0000-0000-000000000000",
+      "returnNote": "Örn. Müşteri telefonla bildirdi.",
+      "refundNote": "Örn. Kargo ücreti de iade edildi.",
+      "rejectReason": "Örn. Ürün kullanılmış, etiketi sökülmüş."
     }
   },
   "customers": {
@@ -6444,7 +6483,12 @@
       "eraseText": "Kayıtlar kalıcı silinir; geri alınamaz. Sipariş, tutarı ve satırlarıyla muhasebe için kalır. Silme kayda geçer.",
       "eraseConfirm": "Kalıcı sil",
       "erased_one": "{{count}} kayıt silindi.",
-      "erased_other": "{{count}} kayıt silindi."
+      "erased_other": "{{count}} kayıt silindi.",
+      "placeholders": {
+        "first_name": "Örn. Ayşe",
+        "last_name": "Örn. Yılmaz",
+        "document_no": "Örn. 12345678901"
+      }
     },
     "columnOptions": "Sütunlar",
     "stats": {
@@ -6462,6 +6506,12 @@
       "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Müşteri dosyası hazırlanamadı."
+    },
+    "placeholders": {
+      "addressName": "Örn. Ev",
+      "note": "Örn. Hediye paketi tercih ediyor.",
+      "group": "Örn. Sadık müşteriler",
+      "segment": "Örn. Son 90 günde alışveriş yapanlar"
     }
   },
   "categories": {
@@ -6524,7 +6574,10 @@
       "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
       "saved": "Kategori görseli kaydedildi."
     },
-    "countOf": "{{name}}: {{count}} ürün"
+    "countOf": "{{name}}: {{count}} ürün",
+    "placeholders": {
+      "name": "Örn. Cüzdanlar"
+    }
   },
   "inventory": {
     "description": "Satılabilir stok; önce azalan ve tükenen ürünler",
@@ -6786,7 +6839,10 @@
       "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
       "saved": "Kampanya ayarları kaydedildi."
     },
-    "limited": "En yeni {{total}} kampanya gösteriliyor."
+    "limited": "En yeni {{total}} kampanya gösteriliyor.",
+    "placeholders": {
+      "code": "KASIM20"
+    }
   },
   "reports": {
     "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si, tahsilatı, stoğu ve vitrindeki aramalar",
@@ -7936,6 +7992,9 @@
           "hint": "Değişen sayfaları Bing ve Yandex'e anında bildirmek için açın."
         }
       }
+    },
+    "placeholders": {
+      "description": "Örn. El yapımı deri cüzdanlar; ücretsiz kargo ve 14 gün iade."
     }
   },
   "attributes": {
@@ -8167,7 +8226,15 @@
     "newValue": "Yeni değer ekle",
     "newValueName": "{{label}} için yeni değer",
     "addValue": "Ekle",
-    "valueAdded": "{{value}} eklendi."
+    "valueAdded": "{{value}} eklendi.",
+    "placeholders": {
+      "value": "Örn. Paslanmaz çelik",
+      "optionTitle": "Örn. Beden",
+      "textUnit": "Örn. HRC",
+      "unit": "Örn. cm",
+      "groupName": "Örn. Ölçüler",
+      "description": "Örn. Giyim ürünlerinin ortak özellikleri"
+    }
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
@@ -8206,7 +8273,11 @@
     "fieldHint": "Ürün sayfasında ve arama sonucu başlığında görünür.",
     "pick": "Marka seçin",
     "noneFound": "Marka bulunamadı.",
-    "noLogo": "Logo yok"
+    "noLogo": "Logo yok",
+    "placeholders": {
+      "name": "Örn. Kuzey Deri",
+      "handle": "kuzey-deri"
+    }
   },
   "collections": {
     "description": "Koleksiyonlar ürünleri bir tema altında toplar; her birinin kendi sayfası, görseli ve ürünleri olur.",
@@ -8269,6 +8340,10 @@
     "gate": {
       "off": "Koleksiyonlar bu mağazada kapalı. Koleksiyonlarınız silinmedi; açınca burada yeniden yönetilir.",
       "turnOn": "Özelliklere git"
+    },
+    "placeholders": {
+      "name": "Örn. Yaz koleksiyonu",
+      "handle": "yaz-koleksiyonu"
     }
   },
   "address": {
@@ -8905,6 +8980,10 @@
       "done_other": "{{count}} fiyat yazıldı.",
       "skipped_one": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı.",
       "skipped_other": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı."
+    },
+    "placeholders": {
+      "title": "Örn. Yaz indirimi",
+      "description": "Örn. Haziran sonuna kadar geçerli fiyatlar"
     }
   },
   "giftCards": {
@@ -8962,7 +9041,11 @@
       "used": "Kullanıldı",
       "expired": "Süresi doldu"
     },
-    "limited": "Bu görünüm en yeni 5.000 karta bakar; daha eskiler listede görünmüyor."
+    "limited": "Bu görünüm en yeni 5.000 karta bakar; daha eskiler listede görünmüyor.",
+    "placeholders": {
+      "closeReason": "Örn. Sipariş iade edildi",
+      "note": "Örn. Doğum günü hediyesi, Ayşe Yılmaz"
+    }
   },
   "storeCredit": {
     "title": "Mağaza kredisi",
@@ -13356,6 +13439,10 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Not",
       "noNote": "Not yok."
+    },
+    "placeholders": {
+      "discountReason": "Örn. Sadık müşteri",
+      "note": "Örn. Telefonla sipariş, kargoyu cuma istiyor."
     }
   },
   "media": {
@@ -13509,6 +13596,9 @@
       "deleted_other": "{{formatted}} görsel silindi.",
       "kept_one": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı.",
       "kept_other": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı."
+    },
+    "placeholders": {
+      "filename": "Örn. deri-cuzdan-on"
     }
   },
   "confirmEmail": {
@@ -13967,6 +14057,9 @@
       "hint": "Şifreyi toptancıya iletin; ilk girişte değiştirmesini önerin. Açık oturumları kapanır. Bu şifre bir daha gösterilmez.",
       "save": "Şifreyi kaydet",
       "saved": "Yeni şifre kaydedildi; toptancının açık oturumları kapandı."
+    },
+    "placeholders": {
+      "tier": "Örn. Toptan A"
     }
   },
   "ai": {

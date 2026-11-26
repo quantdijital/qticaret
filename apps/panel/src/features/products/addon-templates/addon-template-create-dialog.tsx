@@ -71,6 +71,7 @@ export function AddonTemplateCreateDialog({ onClose }: { onClose: () => void }) 
           required
         >
           <Input
+            placeholder={t("products.placeholders.addonGroup")}
             id="addon-template-new-name"
             value={name}
             maxLength={ADDON_LIMITS.label}

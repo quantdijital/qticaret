@@ -102,13 +102,24 @@ function ChargebackFields({
         htmlFor="chargeback-reference"
         hint={t(`${C}.referenceHint`)}
       >
-        <Input id="chargeback-reference" maxLength={100} {...register("reference")} />
+        <Input
+          placeholder={t("orders.placeholders.chargebackReference")}
+          id="chargeback-reference"
+          maxLength={100}
+          {...register("reference")}
+        />
       </Field>
       <Field label={t(`${C}.due`)} htmlFor="chargeback-due">
         <Input id="chargeback-due" type="date" className="w-48" {...register("due")} />
       </Field>
       <Field label={t(`${C}.note`)} htmlFor="chargeback-note">
-        <Textarea id="chargeback-note" rows={3} maxLength={1000} {...register("note")} />
+        <Textarea
+          placeholder={t("orders.placeholders.chargebackNote")}
+          id="chargeback-note"
+          rows={3}
+          maxLength={1000}
+          {...register("note")}
+        />
       </Field>
     </DialogBody>
   )

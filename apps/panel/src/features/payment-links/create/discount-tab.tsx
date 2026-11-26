@@ -109,7 +109,12 @@ export function DiscountTab() {
             className="sm:col-span-2"
             required
           >
-            <Input id="link-discount-reason" maxLength={200} {...register("discountReason")} />
+            <Input
+              placeholder={t("paymentLinks.placeholders.discountReason")}
+              id="link-discount-reason"
+              maxLength={200}
+              {...register("discountReason")}
+            />
           </Field>
         </div>
       ) : (

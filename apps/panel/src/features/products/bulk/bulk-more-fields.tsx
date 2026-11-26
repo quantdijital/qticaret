@@ -159,6 +159,7 @@ export function BulkTagFields({ form, onChange, error }: FieldsProps) {
         error={error ? t(error) : undefined}
       >
         <Input
+          placeholder={t("products.placeholders.tag")}
           id="bulk-tag"
           autoComplete="off"
           maxLength={100}

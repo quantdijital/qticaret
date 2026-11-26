@@ -66,6 +66,7 @@ export function GroupList() {
               <li key={field.fieldKey} className="flex items-start gap-2">
                 <RowCell error={error} errorId={`${id}-error`} className="flex-1">
                   <Input
+                    placeholder={t("attributes.placeholders.groupName")}
                     id={id}
                     aria-label={t(`${G}.nameOf`, { number })}
                     aria-invalid={Boolean(error)}

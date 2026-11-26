@@ -60,7 +60,12 @@ export function DeliveryTab() {
               error={fieldError(errors.recipient_first)}
               required
             >
-              <Input id="link-address-first" maxLength={60} {...register("recipient_first")} />
+              <Input
+                placeholder={t("common.placeholder.firstName")}
+                id="link-address-first"
+                maxLength={60}
+                {...register("recipient_first")}
+              />
             </Field>
             <Field
               label={t(`${D}.lastName`)}
@@ -68,7 +73,12 @@ export function DeliveryTab() {
               error={fieldError(errors.recipient_last)}
               required
             >
-              <Input id="link-address-last" maxLength={60} {...register("recipient_last")} />
+              <Input
+                placeholder={t("common.placeholder.lastName")}
+                id="link-address-last"
+                maxLength={60}
+                {...register("recipient_last")}
+              />
             </Field>
           </div>
           <TrAddressFields

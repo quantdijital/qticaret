@@ -155,6 +155,7 @@ export function UsageCard({ datesLocked = false }: { datesLocked?: boolean }) {
           error={error("code")}
         >
           <Input
+            placeholder={t("promotions.placeholders.code")}
             id="promotion-code"
             spellCheck={false}
             autoComplete="off"

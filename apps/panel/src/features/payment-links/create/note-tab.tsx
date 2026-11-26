@@ -43,7 +43,13 @@ export function NoteTab() {
           hint={t(`${N}.noteHint`)}
           error={fieldError(errors.note)}
         >
-          <Textarea id="link-note" rows={3} maxLength={1000} {...register("note")} />
+          <Textarea
+            placeholder={t("paymentLinks.placeholders.note")}
+            id="link-note"
+            rows={3}
+            maxLength={1000}
+            {...register("note")}
+          />
         </Field>
       </div>
     </SectionCard>

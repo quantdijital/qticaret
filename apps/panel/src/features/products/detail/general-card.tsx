@@ -82,7 +82,12 @@ export function GeneralCard({
         error={message(errors.title?.message)}
       >
         <div className="flex items-start gap-1.5">
-          <Input id="detail-title" className="min-w-0 flex-1" {...form.register("title")} />
+          <Input
+            placeholder={t("products.placeholders.title")}
+            id="detail-title"
+            className="min-w-0 flex-1"
+            {...form.register("title")}
+          />
           {/* A clearer name from the product's saved facts; "Kullan" fills the field, Save writes it */}
           <AiButton
             task="product_title"

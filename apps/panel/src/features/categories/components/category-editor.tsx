@@ -106,6 +106,7 @@ export function CategoryEditor({ categories, category, onDeleted }: CategoryEdit
         error={errors.name ? t("categories.nameRequired") : undefined}
       >
         <Input
+          placeholder={t("categories.placeholders.name")}
           id="category-name"
           {...form.register("name", { validate: (text) => text.trim().length >= 2 })}
         />
