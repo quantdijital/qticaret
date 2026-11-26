@@ -55,6 +55,8 @@ medusaIntegrationTestRunner({
           type: "percentage",
           target_type: "shipping_methods",
           allocation: "each",
+          // Medusa asks a cap of an `each` promotion: one shipping method
+          max_quantity: 1,
           value: 100,
         },
       })
@@ -154,6 +156,8 @@ medusaIntegrationTestRunner({
           type: "percentage",
           target_type: "shipping_methods",
           allocation: "each",
+          // Medusa asks a cap of an `each` promotion: one shipping method
+          max_quantity: 1,
           value: 100,
         },
       })
