@@ -18,6 +18,7 @@ import { assertConsented } from "../legal/consent"
 import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
 import { assertAddonLinesCurrent } from "../addons/checkout"
 import { assertBookingLinesCurrent } from "../booking/cart/checkout"
+import { assertCartWithinLimits } from "../checkout/purchase-limit"
 import {
   assertLinkCartCompletes,
   claimLinkForCart,
@@ -106,6 +107,8 @@ completeCartWorkflow.hooks.validate(
     await assertAddonLinesCurrent(container, cart.id)
     // Dated lines: the hold live and theirs, its places the lines', every price current (adr/0076 §5)
     await assertBookingLinesCurrent(container, cart.id)
+    // S5: no product past its most per order, whatever way its lines came
+    await assertCartWithinLimits(container, cart.id)
     // A payment link's cart: the link still open, this its latest cart, its lines and code as made (adr/0051 §5)
     const linkId = await assertLinkCartCompletes(container, cart.id)
     // A wholesaler's cart: no code, its minimum, and every cart at its customer's prices now,

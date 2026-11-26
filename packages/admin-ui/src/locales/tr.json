@@ -40,6 +40,9 @@
     "label": "Sayfanın kaydı",
     "saved": "Kaydedildi"
   },
+  "headerMenu": {
+    "more": "Diğer işlemler"
+  },
   "infoTip": {
     "label": "Bilgi: {{name}}"
   },

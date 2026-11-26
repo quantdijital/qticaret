@@ -140,7 +140,10 @@ export function FilterBar({
   return (
     <div className={cn("flex flex-col gap-2", className)} data-filter-bar="">
       <div className="flex flex-wrap items-center gap-2">
-        {search ? <div className="min-w-0 flex-1 sm:max-w-80">{search}</div> : null}
+        {/* The search never shrinks below a readable width (the owner 2026-11-26: the
+            products' search squeezed to one word beside its sort and view buttons): the
+            list's controls take the next line first */}
+        {search ? <div className="min-w-0 flex-[1_1_12rem] sm:max-w-80">{search}</div> : null}
         {asSheet ? (
           <>
             {trigger}

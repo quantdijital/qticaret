@@ -33,6 +33,7 @@ interface ProductRow {
     summary_doc?: unknown
     booking_mode?: string | null
     badge?: string | null
+    max_quantity?: number | null
   } | null
 }
 
@@ -109,6 +110,8 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     booking_mode: extension?.booking_mode ?? "none",
     // The product's own card badge; null, none
     badge: extension?.badge ?? null,
+    // S5: the most of it one order may hold; null, no limit
+    max_quantity: extension?.max_quantity ?? null,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

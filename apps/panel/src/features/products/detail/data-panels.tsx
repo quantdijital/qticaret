@@ -10,6 +10,7 @@ import { AddonsCard } from "./addons-card"
 import { CatalogPanel } from "./catalog-panel"
 import { ParcelPanel } from "./parcel-panel"
 import { PriceHistoryCard } from "./price-history-card"
+import { PurchaseLimitCard } from "./purchase-limit-card"
 import { PRODUCT_SECTIONS } from "./sections"
 import { PricingPanel, StockPanel } from "./simple-panels"
 import type { SimpleVariant } from "./use-simple-variant"
@@ -85,11 +86,17 @@ function VariantOptionsLine({
   )
 }
 
-/** The Gelişmiş tab: add-ons (while the shop uses them or the product has some) and the price history. */
+/**
+ * The Gelişmiş tab: the most per order (S5), add-ons (while the shop uses
+ * them or the product has some) and the price history.
+ */
 function AdvancedPanel({ productId }: { productId: string }) {
   const addons = useAddonsShown(productId) === true
   return (
     <div className="flex min-w-0 flex-col divide-y">
+      <Pad>
+        <PurchaseLimitCard productId={productId} />
+      </Pad>
       {addons ? (
         <Inset id={PRODUCT_SECTIONS.addons}>
           <AddonsCard productId={productId} />

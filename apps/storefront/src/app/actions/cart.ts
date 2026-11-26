@@ -33,6 +33,9 @@ const AddToCart = z.object({
   quantity: z.coerce.number().int().min(1).max(99),
 })
 
+/** The backend's refusal of more of a product than one order may hold (S5). */
+const MAX_QUANTITY = "cart.max_quantity"
+
 /** The messages a theme can show for a failed add; anything else is `cart.add_failed`. */
 function messageFor(error: unknown): string {
   if (!isStoreApiError(error)) {
@@ -49,6 +52,10 @@ function messageFor(error: unknown): string {
   // More units than are for sale: said so, not "not for sale"
   if (isInsufficientStock(error)) {
     return INSUFFICIENT_STOCK
+  }
+  // More of the product than one order may hold (S5)
+  if (error.messageKey === MAX_QUANTITY) {
+    return MAX_QUANTITY
   }
   return error.status === 400 || error.status === 404
     ? "cart.variant_unavailable"
@@ -112,7 +119,7 @@ export async function changeCartLine(form: FormData): Promise<void> {
     // payment link's cart keeps its lines as they are (adr/0051)
     const key = isStoreApiError(error) ? error.messageKey : null
     const shown =
-      key === "addons.max_quantity"
+      key === "addons.max_quantity" || key === MAX_QUANTITY
         ? key
         : (linkCartRefusal(error) ??
           (messageFor(error) === "errors.too_many_requests"

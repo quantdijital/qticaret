@@ -20,6 +20,7 @@ vi.mock("@/features/auth/api/staff", () => ({
 }))
 vi.mock("@/features/payment-links/components/order-buttons", () => ({
   PaymentLinkButtons: () => null,
+  PaymentLinksMenuItem: () => null,
 }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/orders">{children}</a>,

@@ -4850,6 +4850,13 @@
         "bodyTooLong": "Açıklama en çok 2.000 karakter olabilir.",
         "tooMany": "Program en çok 30 adım olabilir."
       }
+    },
+    "purchaseLimit": {
+      "title": "Satın alma sınırı",
+      "label": "En çok satın alma adedi",
+      "hint": "Bir siparişte bu üründen (bütün varyantları birlikte) en çok kaç adet alınabileceği. Boş bırakılırsa sınır yok; 1 yazılırsa tek tek satılır.",
+      "none": "Sınır yok",
+      "invalid": "1 ile {{max}} arasında bir tam sayı yazın ya da boş bırakın."
     }
   },
   "orders": {

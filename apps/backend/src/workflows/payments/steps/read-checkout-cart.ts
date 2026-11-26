@@ -3,6 +3,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { checkoutProblem } from "../../../lib/checkout"
 import { ConflictError, ValidationError } from "../../../lib/errors"
 import { assertAgeDeclared } from "../../legal/age"
+import { assertCartWithinLimits } from "../../checkout/purchase-limit"
 import { assertConsented } from "../../legal/consent"
 import { assertGiftLinesReady } from "../../gift-cards/cart-gifts"
 import { prepareBookingPayment } from "../../booking/cart/checkout"
@@ -116,6 +117,8 @@ export const readCheckoutCartStep = createStep(
     // No payment is taken for a cart whose contracts were not accepted (adr/0041 §2)
     await assertConsented(container, cart.id)
     await assertAgeDeclared(container, cart.id)
+    // S5: no money is taken for a cart past a product's most per order (completion refuses it too)
+    await assertCartWithinLimits(container, cart.id)
     // A gift line names its recipient and is not paid with credit (adr/0025 Ek 2026-11-03)
     await assertGiftLinesReady(container, cart.id, input.provider_id)
     // Dated lines: the hold trimmed to them, pushed for the payment's return, checked (adr/0076 §5)

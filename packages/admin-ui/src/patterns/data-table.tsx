@@ -14,7 +14,16 @@ export interface Column<T> {
   align?: "left" | "right"
   /** Hidden below a width, e.g. "hidden md:table-cell". */
   className?: string
+  /**
+   * The record's name column: it takes the room the others leave (at
+   * least 12rem) and its long text is cut short (`truncate` inside it)
+   * instead of widening the table past its card.
+   */
+  fill?: boolean
 }
+
+// `max-w-0` lets a cell shrink below its text; `w-full` gives it what the others leave
+const FILL = "w-full min-w-48 max-w-0"
 
 /** Rows picked for a bulk action; they stay picked across pages. */
 export interface RowSelection<T> {
@@ -139,6 +148,7 @@ export function DataTable<T>({
                   "h-10 text-xs font-medium text-muted-foreground",
                   align(column),
                   pad(index),
+                  column.fill && FILL,
                   column.className
                 )}
               >
@@ -153,7 +163,10 @@ export function DataTable<T>({
                 <TableRow key={row}>
                   {selection ? <TableCell className={boxCell} /> : null}
                   {columns.map((column, index) => (
-                    <TableCell key={column.key} className={cn(pad(index), column.className)}>
+                    <TableCell
+                      key={column.key}
+                      className={cn(pad(index), column.fill && FILL, column.className)}
+                    >
                       <Skeleton className="h-5 w-full max-w-40" />
                     </TableCell>
                   ))}
@@ -180,7 +193,12 @@ export function DataTable<T>({
                   {columns.map((column, index) => (
                     <TableCell
                       key={column.key}
-                      className={cn(align(column), pad(index), column.className)}
+                      className={cn(
+                        align(column),
+                        pad(index),
+                        column.fill && FILL,
+                        column.className
+                      )}
                     >
                       {column.cell(row)}
                     </TableCell>

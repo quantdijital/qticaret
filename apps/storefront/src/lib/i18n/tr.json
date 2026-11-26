@@ -47,6 +47,8 @@
   "cart.variant_unavailable": "Bu seçenek şu an satışta değil.",
   "cart.quantity_invalid": "Adet 1 ile 99 arasında olmalı.",
   "cart.insufficient_stock": "Bu üründen stokta istediğiniz kadar yok.",
+  "cart.max_quantity": "Bu üründen bir siparişte daha fazla alınamaz.",
+  "product.max_quantity": "Bu üründen bir siparişte en çok {max} adet alınabilir.",
   "cart.insufficient_stock_count": "Bu üründen stokta yalnız {count} adet var.",
   "errors.too_many_requests": "Çok fazla deneme yapıldı. Biraz sonra tekrar deneyin.",
   "listing.subcategories": "Alt kategoriler",
