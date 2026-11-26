@@ -100,6 +100,7 @@ async function flatEstimate(
     .getSection("promotions")) as unknown as PromotionSettings
   const quoted = await shippingQuote({
     lines: [],
+    basis: "order",
     context: {
       threshold: thresholdKurus(promotions.free_shipping_threshold),
       item_total: kurus(itemTotal),

@@ -1558,6 +1558,29 @@
         "options": "Seçenekler ve ücretler",
         "returns": "İade",
         "locations": "Depolar ve stok"
+      },
+      "classes": {
+        "title": "Kargo sınıfları",
+        "description": "Ürüne verilen sınıf kargo ücretini değiştirir. Sepette birden çok sınıf varsa en yüksek ek ücret siparişe bir kez eklenir.",
+        "name": "Sınıf adı",
+        "nameOf": "{{number}}. sınıfın adı",
+        "surcharge": "Ek ücret",
+        "surchargeOf": "{{number}}. sınıfın ek ücreti",
+        "products_one": "{{count}} ürün",
+        "products_other": "{{count}} ürün",
+        "noProducts": "Ürün yok",
+        "freeRow": "Ücretsiz kargo",
+        "freeHint": "Kargo ücretine eklenmez",
+        "locked": "Hazır sınıf: adı değişmez, silinmez.",
+        "add": "Sınıf ekle",
+        "remove": "{{name}} sınıfını sil",
+        "removeUsed_one": "{{count}} ürün Standart'a döner.",
+        "removeUsed_other": "{{count}} ürün Standart'a döner.",
+        "removeConfirm": "Sil",
+        "keep": "Vazgeç",
+        "nameInvalid": "Sınıfa bir ad verin (en çok 60 karakter).",
+        "surchargeInvalid": "Ek ücreti 0 ile 100.000 TL arasında girin.",
+        "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır."
       }
     },
     "integrations": {
@@ -4892,6 +4915,15 @@
       "hint": "Bir siparişte bu üründen (bütün varyantları birlikte) en çok kaç adet alınabileceği. Boş bırakılırsa sınır yok; 1 yazılırsa tek tek satılır.",
       "none": "Sınır yok",
       "invalid": "1 ile {{max}} arasında bir tam sayı yazın ya da boş bırakın."
+    },
+    "shippingClass": {
+      "label": "Kargo sınıfı",
+      "standard": "Standart",
+      "free": "Ücretsiz kargo",
+      "hintStandard": "Kargo ücreti seçilen kargo seçeneğine göre hesaplanır.",
+      "hintFree": "Ücretsiz kargolu ürün kargo ücretine eklenmez; sepette yalnız bu tür ürünler varsa kargo ücretsizdir.",
+      "hintSurcharge": "Bu ürün sepetteyse siparişin kargosuna {{amount}} eklenir.",
+      "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor."
     }
   },
   "orders": {

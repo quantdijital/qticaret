@@ -12,6 +12,7 @@ import {
   useDeleteShippingOption,
 } from "@/features/settings/api/shipping-options"
 import type { ShopShippingOption } from "@/features/settings/api/shipping-options"
+import { shippingClassUsageQuery } from "@/features/settings/api/shipping-classes"
 import { ShippingOptionDialog } from "@/features/settings/components/shipping-option-dialog"
 import { errorText } from "@/lib/errors"
 import { formatMoney } from "@qticaret/admin-ui/lib/format"
@@ -38,6 +39,8 @@ export function ShippingOptionsCard() {
   const remove = useDeleteShippingOption()
   const [editing, setEditing] = useState<ShopShippingOption | "new" | null>(null)
   const [removing, setRemoving] = useState<ShopShippingOption | null>(null)
+  // adr/0087 §4: a class or a free-shipping product changes every option's price
+  const classesInUse = Object.keys(useQuery(shippingClassUsageQuery()).data ?? {}).length > 0
   return (
     <SectionCard
       title={t(`${S}.title`)}
@@ -104,6 +107,11 @@ export function ShippingOptionsCard() {
           ))}
         </ul>
       )}
+      {classesInUse ? (
+        <p className="border-t px-5 py-3 text-[13px] text-muted-foreground">
+          {t("settings.shipping.classes.optionsNote")}
+        </p>
+      ) : null}
       {editing ? (
         <ShippingOptionDialog
           key={editing === "new" ? "new" : editing.id}

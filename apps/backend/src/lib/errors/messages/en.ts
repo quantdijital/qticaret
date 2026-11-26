@@ -457,6 +457,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.setup_incomplete":
     "The shop has several warehouses and none is the default (or none at all); choose the default warehouse under Settings > Locations.",
   "shipping.manual_flat_only": "An option the shop ships itself can only have a flat price.",
+  "shipping.class_unknown":
+    "This shipping class no longer exists; pick one under Settings > Shipping, or Standard.",
+  "shipping.class_key_taken": "Two shipping classes use the same key.",
   "shipping.amount_invalid": "Enter the amount with at most two decimals.",
   "returns.unknown": "Return request not found.",
   "returns.status_invalid": "The return request is not in a state for this.",

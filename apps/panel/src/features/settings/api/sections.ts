@@ -119,7 +119,19 @@ export interface ShippingSettings {
   default_parcel: { weight: number; length: number; width: number; height: number } | null
   /** Whether packing slips print the lines' prices and the order's totals; off by default. */
   packing_slip_prices: boolean
+  /** The shop's own shipping classes (adr/0087); absent from an older backend: none. */
+  shipping_classes?: ShippingClass[]
 }
+
+/** A shop's shipping class (adr/0087 §1): its key on products, its name, its surcharge in kuruş. */
+export interface ShippingClass {
+  key: string
+  name: string
+  surcharge: number
+}
+
+/** The built-in class: the product ships free; never renamed, never removed. */
+export const FREE_SHIPPING_CLASS = "free"
 
 /** The platform's default parcel in grams and cm (the backend's `PLATFORM_PARCEL`, adr/0054). */
 export const PLATFORM_PARCEL = { weight_g: 1000, length_cm: 30, width_cm: 20, height_cm: 10 }

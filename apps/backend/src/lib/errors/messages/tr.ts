@@ -469,6 +469,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.manual_flat_only":
     "Mağazanın kendi gönderdiği seçenek yalnızca sabit ücretle fiyatlanabilir.",
   "shipping.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
+  "shipping.class_unknown":
+    "Bu kargo sınıfı artık yok; Ayarlar > Kargo'daki sınıflardan birini ya da Standart'ı seçin.",
+  "shipping.class_key_taken": "İki kargo sınıfı aynı anahtarı kullanıyor.",
   "returns.unknown": "İade talebi bulunamadı.",
   "returns.status_invalid": "İade talebi bu işlem için uygun durumda değil.",
   "returns.items_invalid":

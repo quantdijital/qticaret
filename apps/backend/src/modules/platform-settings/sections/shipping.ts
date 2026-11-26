@@ -40,7 +40,24 @@ export interface ShippingSettings {
    * totals; off by default: a slip in a gift's box says no price.
    */
   packing_slip_prices: boolean
+  /**
+   * The shop's own shipping classes (adr/0087 §1): a product in one adds
+   * its surcharge to the order's shipping, the highest once. The built-in
+   * "Ücretsiz kargo" (`free`) is not among them. At most 20.
+   */
+  shipping_classes: ShippingClass[]
 }
+
+export interface ShippingClass {
+  /** Its key on products: lower-case letters, digits and dashes, never `free`. */
+  key: string
+  name: string
+  /** Kuruş, KDV in, added once per order: 0–100.000 TL. */
+  surcharge: number
+}
+
+/** The built-in class every shop has (adr/0087 §1): never renamed, never removed. */
+export const FREE_SHIPPING_CLASS = "free"
 
 export interface DefaultParcel {
   weight: number
@@ -96,6 +113,20 @@ export const shippingSection = defineSection<ShippingSettings>(
       .strict()
       .nullable(),
     packing_slip_prices: z.boolean(),
+    shipping_classes: z
+      .array(
+        z
+          .object({
+            key: z
+              .string()
+              .regex(/^[a-z0-9][a-z0-9-]{0,39}$/)
+              .refine((key) => key !== FREE_SHIPPING_CLASS),
+            name: z.string().trim().min(1).max(60),
+            surcharge: z.number().int().min(0).max(100_000_00),
+          })
+          .strict()
+      )
+      .max(20),
   },
   {
     handling_days_min: 1,
@@ -109,6 +140,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     label_custom: { width_mm: 100, height_mm: 150 },
     default_parcel: null,
     packing_slip_prices: false,
+    shipping_classes: [],
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {
@@ -117,6 +149,17 @@ export const shippingSection = defineSection<ShippingSettings>(
     if (values.transit_days_min > values.transit_days_max) {
       ctx.addIssue({ code: "custom", path: ["transit_days_max"], message: "shipping.days_order" })
     }
+    // A class's key names it on products: one class per key
+    const keys = values.shipping_classes.map((each) => each.key)
+    keys.forEach((key, index) => {
+      if (keys.indexOf(key) !== index) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["shipping_classes", index, "key"],
+          message: "shipping.class_key_taken",
+        })
+      }
+    })
     // Bands rise in desi, each up to a tenth: a parcel falls in exactly one
     values.rate_table.forEach((row, index) => {
       const previous = values.rate_table[index - 1]

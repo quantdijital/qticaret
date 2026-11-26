@@ -34,6 +34,7 @@ interface ProductRow {
     booking_mode?: string | null
     badge?: string | null
     max_quantity?: number | null
+    shipping_class?: string | null
   } | null
 }
 
@@ -112,6 +113,8 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     badge: extension?.badge ?? null,
     // S5: the most of it one order may hold; null, no limit
     max_quantity: extension?.max_quantity ?? null,
+    // adr/0087 §1: `free`, a shop class's key, or null (Standard)
+    shipping_class: extension?.shipping_class ?? null,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,
