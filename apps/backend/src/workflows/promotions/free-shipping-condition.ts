@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../lib/errors"
 import type { MedusaAmount } from "../../lib/money"
 import {
@@ -71,7 +72,7 @@ export async function freeShippingCodeRefusalOf(
   }
   const promotions = await container
     .resolve(Modules.PROMOTION)
-    .listPromotions({ code: [...codes] }, { relations: ["application_method"] })
+    .listPromotions({ code: [...codes], status: ["active"] }, { relations: ["application_method"] })
   if (!promotions.some((promotion) => lowersShipping(promotion.application_method))) {
     return null
   }
@@ -119,3 +120,16 @@ export async function assertFreeShippingConditionHolds(
     throw new ValidationError("cart.shipping_changed", { field: "shipping_methods" })
   }
 }
+
+/**
+ * The same hold as the payment starts, under the cart's lock: shipping a
+ * campaign lowered against the condition is refused before any money is
+ * taken (security review 2026-11-26, L2), not only at the completion.
+ */
+export const assertFreeShippingConditionStep = createStep(
+  "free-shipping-assert-condition",
+  async (input: { cart_id: string }, { container }) => {
+    await assertFreeShippingConditionHolds(container, input.cart_id)
+    return new StepResponse(null)
+  }
+)
