@@ -51,7 +51,11 @@ export function DefinitionFields({ index }: { index: number }) {
         <div className="grid gap-4 sm:grid-cols-2">
           {type === "number" ? (
             <Field label={t(`${A}.unit`)} htmlFor={`${base}-unit`} hint={t(`${A}.unitHint`)}>
-              <Input id={`${base}-unit`} {...register(`${base}.unit`)} />
+              <Input
+                placeholder={t("attributes.placeholders.unit")}
+                id={`${base}-unit`}
+                {...register(`${base}.unit`)}
+              />
             </Field>
           ) : null}
           <DefinitionGroupField index={index} />

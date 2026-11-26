@@ -69,6 +69,7 @@ function CloseForm({ card, onDone }: { card: GiftCard; onDone: () => void }) {
           hint={t(`${C}.reasonHint`)}
         >
           <Input
+            placeholder={t("giftCards.placeholders.closeReason")}
             id="gift-card-close-reason"
             maxLength={REASON_MAX}
             value={reason}

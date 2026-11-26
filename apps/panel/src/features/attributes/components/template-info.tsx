@@ -67,6 +67,7 @@ export function TemplateInfo({
             hint={t(`${A}.descriptionHint`)}
           >
             <Textarea
+              placeholder={t("attributes.placeholders.description")}
               id="template-description"
               className="min-h-[var(--control-height)]"
               {...register("description")}

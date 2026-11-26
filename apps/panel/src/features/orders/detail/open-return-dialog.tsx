@@ -263,6 +263,7 @@ export function OpenReturnDialog({
             <div className="flex flex-col gap-2">
               <Label htmlFor="return-note">{t(`${O}.note`)}</Label>
               <Textarea
+                placeholder={t("orders.placeholders.returnNote")}
                 id="return-note"
                 maxLength={1000}
                 value={note}

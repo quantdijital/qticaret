@@ -108,6 +108,7 @@ export function NewWholesalerDialog({
                 className="sm:col-span-2"
               >
                 <Input
+                  placeholder={t("common.placeholder.email")}
                   id="wholesale-email"
                   type="email"
                   autoComplete="off"
@@ -121,6 +122,7 @@ export function NewWholesalerDialog({
                 required
               >
                 <Input
+                  placeholder={t("common.placeholder.fullName")}
                   id="wholesale-contact"
                   autoComplete="off"
                   {...form.register("contact_name")}
@@ -132,6 +134,7 @@ export function NewWholesalerDialog({
                 error={message(errors.company_name?.message)}
               >
                 <Input
+                  placeholder={t("common.placeholder.company")}
                   id="wholesale-company"
                   autoComplete="off"
                   {...form.register("company_name")}
@@ -143,6 +146,7 @@ export function NewWholesalerDialog({
                 error={message(errors.tax_office?.message)}
               >
                 <Input
+                  placeholder={t("common.placeholder.taxOffice")}
                   id="wholesale-tax-office"
                   autoComplete="off"
                   {...form.register("tax_office")}
@@ -155,6 +159,7 @@ export function NewWholesalerDialog({
                 error={message(errors.tax_id?.message)}
               >
                 <Input
+                  placeholder={t("common.placeholder.taxNumber")}
                   id="wholesale-tax-id"
                   inputMode="numeric"
                   autoComplete="off"

@@ -165,6 +165,7 @@ export function RefundDialog({ order, money, open, onOpenChange }: RefundDialogP
           )}
           <Field label={t(`${R}.note`)} htmlFor="refund-note" hint={t(`${R}.noteHint`)}>
             <Textarea
+              placeholder={t("orders.placeholders.refundNote")}
               id="refund-note"
               rows={2}
               maxLength={500}

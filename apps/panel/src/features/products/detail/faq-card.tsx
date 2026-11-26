@@ -47,6 +47,7 @@ function FaqItemEditor({
             {t("products.faq.question")}
           </Label>
           <Input
+            placeholder={t("products.placeholders.faqQuestion")}
             id={`${id}-q`}
             value={item.question}
             maxLength={FAQ_LIMITS.question}
@@ -61,6 +62,7 @@ function FaqItemEditor({
             {t("products.faq.answer")}
           </Label>
           <Textarea
+            placeholder={t("products.placeholders.faqAnswer")}
             id={`${id}-a`}
             rows={2}
             value={item.answer}
