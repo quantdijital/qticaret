@@ -220,12 +220,13 @@ class SearchIndexModuleService extends MedusaService({ SearchSynonym }) {
   async categoryCounts(
     subtrees: readonly { id: string; ids: readonly string[] }[],
     channels: readonly string[] | null,
+    inStockOnly: boolean,
     @MedusaContext() context: Context = {}
   ): Promise<Record<string, number>> {
     if (subtrees.length === 0) {
       return {}
     }
-    const { sql, params } = categoryCountsStatement(subtrees, channels)
+    const { sql, params } = categoryCountsStatement(subtrees, channels, inStockOnly)
     const rows = (await run(context).execute(sql, params)) as { id: string; count: number }[]
     return categoryCountsOf(rows)
   }

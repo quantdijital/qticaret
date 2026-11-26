@@ -3249,6 +3249,18 @@
       "title": "Maintenance mode",
       "description": "Close the storefront for a while: shoppers see a short maintenance page instead of the shop. A change goes live as soon as it is saved.",
       "dark": "Shop in maintenance"
+    },
+    "outOfStock": {
+      "title": "Out-of-stock products",
+      "description": "Whether products none of whose variants can be sold now show in category, campaign and shop listings and in site search. A product whose stock is not tracked always counts as in stock.",
+      "choices": {
+        "show": "Show",
+        "hide": "Hide from listings"
+      },
+      "hints": {
+        "show": "A sold-out product stays in listings, its card saying it is sold out. Default.",
+        "hide": "A sold-out product leaves listings, search and category counts. Its page still opens by its address and stays in the sitemap; it comes back to listings by itself when stock arrives."
+      }
     }
   },
   "status": {

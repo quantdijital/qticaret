@@ -3249,6 +3249,18 @@
       "title": "Bakım modu",
       "description": "Vitrini geçici olarak kapatın: alıcılar mağaza yerine kısa bir bakım sayfası görür. Değişiklik kaydedildiği anda vitrine geçer.",
       "dark": "Mağaza bakımda"
+    },
+    "outOfStock": {
+      "title": "Stokta olmayan ürünler",
+      "description": "Hiçbir varyantı şu an satılamayan ürünlerin kategori, kampanya ve mağaza listelerinde ve sitede aramada görünüp görünmeyeceği. Stok takibi kapalı ürün her zaman stokta sayılır.",
+      "choices": {
+        "show": "Göster",
+        "hide": "Listelerde gizle"
+      },
+      "hints": {
+        "show": "Tükenen ürün listelerde kalır, kartında tükendiği yazar. Varsayılan.",
+        "hide": "Tükenen ürün listelerden, aramadan ve kategori sayılarından çıkar. Ürün sayfası adresiyle açılmaya ve site haritasında kalmaya devam eder; stok gelince listelere kendiliğinden döner."
+      }
     }
   },
   "status": {
