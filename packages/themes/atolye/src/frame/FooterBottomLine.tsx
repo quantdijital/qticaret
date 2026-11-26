@@ -22,10 +22,13 @@ export function BottomLine({
   shop,
   t,
   marks = true,
+  center = false,
 }: {
   shop: ShopView
   t: Translate
   marks?: boolean
+  /** The words in the middle between two rules, no rule above (`bottom_align: center`). */
+  center?: boolean
 }) {
   const year = new Date().getFullYear()
   const badges = shop.footerBar?.paymentBadges ?? []
@@ -34,8 +37,8 @@ export function BottomLine({
   // The floating button does the same job: the line's link stays only where it does not show
   const floating = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
-    <div className="border-t border-rule">
-      <Container className="gf-foot-line py-4 lg:py-5">
+    <div className={center ? undefined : "border-t border-rule"}>
+      <Container className="gf-foot-line py-4 lg:py-5" data-align={center ? "center" : undefined}>
         <p className="gf-foot-copy text-xs text-text-3">
           {t("footer.copyright", { year, name: shop.companyTitle ?? shop.name })}
         </p>

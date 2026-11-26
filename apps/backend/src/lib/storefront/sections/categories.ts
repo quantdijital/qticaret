@@ -67,9 +67,14 @@ export const CATEGORY_PANELS_DEFAULTS = {
 export const CATEGORY_ICONS_SETTINGS = {
   disc: ["tint", "well", "line"],
   phone: ["scroll", "wrap"],
+  row_style: ["stacked", "strip"],
 } as const
 
-export const CATEGORY_ICONS_DEFAULTS = { disc: "tint", phone: "scroll" } as const
+export const CATEGORY_ICONS_DEFAULTS = {
+  disc: "tint",
+  phone: "scroll",
+  row_style: "stacked",
+} as const
 
 type Lists = Readonly<Record<string, readonly (string | number)[]>>
 
@@ -184,6 +189,12 @@ const icons = z
     variant: z.literal("icons"),
     disc: iconsStep("disc"),
     phone: iconsStep("phone"),
+    row_style: iconsStep("row_style"),
+    /**
+     * The categories by handle, in order (a preset's: it cannot know a
+     * shop's ids), read while no id is named. Absent until written.
+     */
+    category_handles: z.array(categoryHandle).max(LAYOUT_LIMITS.items).optional(),
     category_icons: z
       .record(recordId, sectionIcon)
       .refine((picked) => Object.keys(picked).length <= LAYOUT_LIMITS.items, VARIANT_ERROR)

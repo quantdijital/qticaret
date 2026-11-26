@@ -930,6 +930,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.filename_invalid": "Write a file name of 1–200 characters, without special characters.",
   "media.files_not_removed":
     "The image's files could not be deleted just now; the image stays in the library. Try again shortly.",
+  "media.id_duplicate": "The same picture is listed twice.",
+  "media.id_invalid": "The picture id is not valid.",
   "media.import_address_refused":
     "An image cannot be fetched from this address. Enter a public https address.",
   "media.import_unreachable":

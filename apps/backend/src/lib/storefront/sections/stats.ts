@@ -21,6 +21,8 @@ export const STATS_SETTINGS = {
   dividers: ["on", "off"],
   // Each figure's icon over its value (adr/0077 §10 Ek); off, the strip as it came
   icons: ["off", "on"],
+  arrangement: ["stacked", "row"],
+  social: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof STATS_SETTINGS
@@ -29,6 +31,8 @@ type Step<S extends Setting> = (typeof STATS_SETTINGS)[S][number]
 export const STATS_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   dividers: "on",
   icons: "off",
+  arrangement: "stacked",
+  social: "off",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -62,6 +66,8 @@ export const stats = z
       .max(STATS_LIMITS.items.max),
     dividers: setting("dividers"),
     icons: setting("icons"),
+    arrangement: setting("arrangement"),
+    social: setting("social"),
   })
   .strict()
 

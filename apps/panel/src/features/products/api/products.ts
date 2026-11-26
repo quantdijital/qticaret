@@ -23,6 +23,7 @@ const LIST_FIELDS = [
   "categories.id",
   "categories.name",
   "variants.id",
+  "variants.sku",
   "variants.manage_inventory",
   "variants.prices.amount",
   "variants.prices.currency_code",
@@ -45,6 +46,8 @@ export interface ProductFilters {
 
 export interface ProductListParams extends ProductFilters {
   page: number
+  /** Products a page shows (the list's screen options); PAGE_SIZE when absent. */
+  pageSize?: number | undefined
 }
 
 // The list's orders as the server names them
@@ -89,11 +92,11 @@ export const productBoard = (filters: ProductFilters, offset: number, limit: num
   })
 
 /** A page: the board's ids, then those products with what a row shows, in the board's order. */
-export const productsQuery = ({ page, ...filters }: ProductListParams) =>
+export const productsQuery = ({ page, pageSize = PAGE_SIZE, ...filters }: ProductListParams) =>
   queryOptions({
-    queryKey: ["products", "list", { ...filters, page }],
+    queryKey: ["products", "list", { ...filters, page, pageSize }],
     queryFn: async () => {
-      const board = await productBoard(filters, page * PAGE_SIZE, PAGE_SIZE)
+      const board = await productBoard(filters, page * pageSize, pageSize)
       if (board.ids.length === 0) {
         return { products: [], count: board.count, limited: board.limited }
       }

@@ -14,6 +14,7 @@ function Place({ use }: { use: MediaUse }) {
   switch (use.kind) {
     case "product":
     case "product_description":
+    case "booking":
       return (
         <Link to="/products/$id" params={{ id }} className={LINK}>
           {name}

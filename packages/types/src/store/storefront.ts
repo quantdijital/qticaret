@@ -5,6 +5,7 @@
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
 import type { AccentFont } from "./hand-note.js"
+import type { ListingPageSettings } from "./listing-page.js"
 import type { ListingTextSettings } from "./listing-text.js"
 import type { SearchFormSettings } from "./search-form.js"
 import type { CardVariant } from "./section-variants.js"
@@ -186,6 +187,11 @@ export interface StoreThemeSettings extends StyleKit {
    */
   listing_text?: ListingTextSettings
   /**
+   * How a listing page lays out its products and its trail (`listing-page.ts`).
+   * Absent from a backend before it: `LISTING_PAGE_DEFAULTS` (`listingPageOf`).
+   */
+  listing_page?: ListingPageSettings
+  /**
    * The search box's fields (adr/0077 §1, `search-form.ts`). Absent from
    * a backend before it: `SEARCH_FORM_DEFAULTS` (`searchFormOf`).
    */
@@ -263,8 +269,11 @@ export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
  * Where a standard card's words stand (adr/0077 Ek "tur kartı"): `below`
  * the photo (today's card, the default), `over` it, on a dark fade at its
  * foot, the price at the right. The framed and compact cards keep theirs.
+ * `over_split` (adr/0077 Ek 2026-11-25, a destination card): over the photo,
+ * the name and the product's subtitle at the left, a short price in the
+ * accent colour at the right, no rows under them.
  */
-export const CARD_TEXT_POSITIONS = ["below", "over"] as const
+export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 export type CardTextPosition = (typeof CARD_TEXT_POSITIONS)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */

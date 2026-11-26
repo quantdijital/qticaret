@@ -67,6 +67,7 @@ medusaIntegrationTestRunner({
         sticky: true,
         menu_images: "submenus",
         search_style: "field",
+        tool_labels: "show",
         ...ALWAYS,
       })
       expect(opened.draft.footer[0]).toMatchObject({ type: "footer_bar", variant: "ledger" })
@@ -83,6 +84,7 @@ medusaIntegrationTestRunner({
           sticky: true,
           menu_images: "submenus",
           search_style: "field",
+          tool_labels: "show",
         },
         footer_bar: { id: "mainfooter", type: "footer_bar", variant: "ledger" },
         product_main: { id: "mainproduct", type: "product_main", variant: "standard" },
@@ -142,6 +144,7 @@ medusaIntegrationTestRunner({
           sticky: false,
           menu_images: "all",
           search_style: "icon",
+          tool_labels: "show",
           ...ALWAYS,
         },
       ])
@@ -155,6 +158,7 @@ medusaIntegrationTestRunner({
         sticky: false,
         menu_images: "all",
         search_style: "icon",
+        tool_labels: "show",
       })
       expect(after.product.map((section) => section.type)).toEqual(["help"])
       expect(after.main["product_main"]).toMatchObject({ look: { width: "narrow" } })

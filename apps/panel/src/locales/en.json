@@ -253,6 +253,26 @@
       "legalIdentity": {
         "label": "Legal identity incomplete",
         "hint": "Required details missing"
+      },
+      "openReturns": {
+        "label": "Returns to decide",
+        "hint": "Requests to approve or reject"
+      },
+      "unreadContact": {
+        "label": "Unanswered messages",
+        "hint": "New messages from the contact form"
+      },
+      "pendingReviews": {
+        "label": "Reviews to approve",
+        "hint": "Checked before they show in the store"
+      },
+      "pendingQuestions": {
+        "label": "Questions to approve",
+        "hint": "Questions and the answers they got"
+      },
+      "outOfStock": {
+        "label": "Sold out",
+        "hint": "Variants with no sellable stock left"
       }
     },
     "recent": {
@@ -3325,7 +3345,8 @@
       "category": "Category",
       "updated": "Last change",
       "price": "Price",
-      "actions": "Actions"
+      "actions": "Actions",
+      "sku": "Stock code (SKU)"
     },
     "errors": {
       "title": "The product name needs at least 2 characters.",
@@ -4061,6 +4082,19 @@
       "selectAll_one": "Select the {{formatted}} matching product",
       "selectAll_other": "Select all {{formatted}} matching products",
       "clear": "Clear selection",
+      "delete": {
+        "action": "Delete",
+        "working": "Deleting… {{done}}/{{total}}",
+        "title_one": "Delete {{formatted}} product?",
+        "title_other": "Delete {{formatted}} products?",
+        "description": "The products are deleted with their variants and stock records. This cannot be undone. Products that cannot be deleted are skipped with the reason.",
+        "confirm_one": "Delete {{formatted}} product",
+        "confirm_other": "Delete {{formatted}} products",
+        "done_one": "{{formatted}} product deleted.",
+        "done_other": "{{formatted}} products deleted.",
+        "skipped_one": "{{formatted}} product could not be deleted; it stays selected.",
+        "skipped_other": "{{formatted}} products could not be deleted; they stay selected."
+      },
       "edit": "Bulk edit",
       "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
       "scope_one": "Applied to the {{formatted}} product picked. Each product is checked as its own save would be; before applying you see how many will change and which are left out.",
@@ -4407,8 +4441,23 @@
         "digital": "Digital product: no shipping",
         "service": "Service: no shipping"
       },
-      "variableLocked_one": "This product has {{count}} variant.",
-      "variableLocked_other": "This product has {{count}} variants; reduce them to one to make it a simple product.",
+      "toSimple": {
+        "title": "Make it a simple product?",
+        "several_one": "As a simple product only the variant you pick stays; the other {{count}} variant is deleted. Orders keep their records.",
+        "several_other": "As a simple product only the variant you pick stays; the other {{count}} variants are deleted. Orders keep their records.",
+        "keep": "Variant to keep",
+        "noPrice": "No price",
+        "untracked": "Stock not tracked",
+        "stock_one": "Stock: {{formatted}}",
+        "stock_other": "Stock: {{formatted}}",
+        "stockWarning_one": "{{count}} variant to delete holds stock ({{units}} in all); that stock goes too.",
+        "stockWarning_other": "{{count}} variants to delete hold stock ({{units}} in all); that stock goes too.",
+        "options": "The options ({{options}}) are removed; price, stock and codes are kept.",
+        "cancel": "Cancel",
+        "switch": "Make it simple",
+        "deleteAndSwitch_one": "Delete {{count}} variant and make it simple",
+        "deleteAndSwitch_other": "Delete {{count}} variants and make it simple"
+      },
       "tabs": {
         "pricing": "General",
         "stock": "Inventory",
@@ -4531,6 +4580,13 @@
       }
     },
     "rowActions": "Actions for {{title}}",
+    "listOptions": {
+      "label": "View",
+      "perPage": "Per page",
+      "pageSize_one": "{{count}} product",
+      "pageSize_other": "{{count}} products",
+      "columns": "Columns"
+    },
     "duplicate": {
       "action": "Duplicate",
       "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
@@ -5238,12 +5294,35 @@
     },
     "address": {
       "edit": "Edit",
-      "title": "Delivery address of #{{number}}",
-      "description": "The delivery address can change until the order is packed.",
+      "title": {
+        "shipping": "Delivery address",
+        "billing": "Billing address"
+      },
+      "hint": {
+        "shipping": "The delivery address can change until the order is packed.",
+        "billing": "The billing address can change until the invoice is issued."
+      },
+      "saved": {
+        "shipping": "Delivery address updated.",
+        "billing": "Billing address updated."
+      },
+      "editOf": {
+        "shipping": "Edit the delivery address",
+        "billing": "Edit the billing address"
+      },
       "firstName": "First name",
       "lastName": "Last name",
       "nameRequired": "First and last name are required.",
-      "saved": "Delivery address updated."
+      "company": "Company name",
+      "sameAsDelivery": "Same as the delivery address.",
+      "invoiced": "The invoice is issued; the billing address no longer changes.",
+      "email": "E-mail",
+      "emailHint": "The order's messages go to this address from now on. The e-mail on the customer's account stays.",
+      "emailRequired": "E-mail is required.",
+      "emailInvalid": "Enter a valid e-mail address.",
+      "emailSaved": "E-mail updated.",
+      "editEmail": "Edit the e-mail",
+      "noEmail": "No e-mail."
     },
     "filters": {
       "payment": "Payment",
@@ -5277,7 +5356,12 @@
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
-      "days": "Order date"
+      "days": "Order date",
+      "customer": "Customer",
+      "customerOrders": "This customer's other orders",
+      "anyCustomer": "Search by name or e-mail",
+      "noCustomer": "No customer found.",
+      "customerUnknown": "Customer not found"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",
@@ -5740,7 +5824,8 @@
       "tabs": {
         "label": "Customer records",
         "orders": "Orders"
-      }
+      },
+      "allOrders": "All their orders"
     },
     "consents": {
       "title": "Message consent",
@@ -9713,6 +9798,20 @@
           "hint": "Where the picture meets the panel.",
           "straight": "Straight",
           "curved": "Curved"
+        },
+        "button_tone": {
+          "label": "Button colour",
+          "term": "button colour",
+          "hint": "The first button in the main colour or the accent colour.",
+          "primary": "Main",
+          "accent": "Accent"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small flower spray in the accent colour at the panel's lower right (wide screens).",
+          "none": "None",
+          "flower": "Flower"
         }
       },
       "products": {
@@ -10069,6 +10168,24 @@
               "lively": "Lively"
             },
             "hint": "Calm is the theme's own short transitions. Lively zooms a product card's photo slightly and lifts the card while pointed at, eases sections and products in as the page scrolls, fades images in as they load and presses buttons down a little. A visitor who asks for less motion sees none of it."
+          },
+          "page_width": {
+            "label": "Page width",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standard",
+              "narrow": "Narrow"
+            },
+            "hint": "The column the content sits in. Standard is 1440 px, Narrow 1344 px: a tighter, easier column for a showcase."
+          },
+          "accent_ink": {
+            "label": "Words on the accent",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Automatic",
+              "light": "Always white"
+            },
+            "hint": "Automatic sets the words on the accent colour (a button, a pill) white or dark, whichever reads better. Always white keeps bold white words on a bright accent such as orange: the colour should give at least 3:1 against white."
           }
         },
         "card": "Product card",
@@ -10132,7 +10249,8 @@
           "text_positionHint": "Over the photo: the name and price stand on a dark fade at the photo's foot. Standard cards only.",
           "textPositions": {
             "below": "Under the photo",
-            "over": "Over the photo"
+            "over": "Over the photo",
+            "over_split": "Over the photo, price at the right"
           },
           "rating_badge": "Show the rating as a badge on the photo",
           "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
@@ -10204,6 +10322,27 @@
             "hint": "A long text shows its first lines, the rest opens with a button. The whole text stays in the page; search engines read all of it."
           },
           "words": "description text category brand collection read more fold"
+        },
+        "listingPageTitle": "Listing page",
+        "listingPageHint": "How products are laid out on the all products, category and brand pages. Every default is today's page.",
+        "listingPage": {
+          "default_view": {
+            "label": "Default view",
+            "hint": "How products are laid out when a visitor opens the page. Grid: cards side by side. List: one product per row, picture on the left, price on the right.",
+            "steps": {
+              "grid": "Grid",
+              "list": "List"
+            }
+          },
+          "view_switch": {
+            "label": "Let visitors switch the view",
+            "hint": "Grid/list buttons appear beside the sort. The choice stays in the address (?gorunum=liste) and can be shared; search engines still see one page."
+          },
+          "breadcrumb_current": {
+            "label": "Page's own name in the breadcrumb",
+            "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
+          },
+          "words": "list grid view row breadcrumb trail category page all products"
         },
         "searchFormTitle": "Search box",
         "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",
@@ -10763,6 +10902,13 @@
           "submenus": "In submenus",
           "off": "None"
         },
+        "tool_labels": {
+          "label": "Icon words",
+          "term": "tool labels",
+          "show": "With words",
+          "hide": "Icons only",
+          "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
+        },
         "tools_style": {
           "label": "Icons on the right",
           "term": "icons",
@@ -10930,6 +11076,25 @@
           "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
           "card": "On cards",
           "plain": "Plain"
+        },
+        "news_place": {
+          "label": "Newsletter place",
+          "term": "newsletter place",
+          "brand": "Under the brand",
+          "column": "Last column"
+        },
+        "brand_contact": {
+          "label": "Contact in the brand column",
+          "term": "brand contact",
+          "hint": "Hidden: no address, phone or e-mail in the brand column; the Contact page stays.",
+          "show": "Show",
+          "hide": "Hide"
+        },
+        "bottom_align": {
+          "label": "Bottom line",
+          "term": "bottom line",
+          "spread": "Spread",
+          "center": "Centred"
         },
         "bottom_badges": {
           "label": "Payment logos in the bottom line",
@@ -11577,6 +11742,18 @@
           "label": "Show icons",
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
+        },
+        "arrangement": {
+          "label": "Arrangement",
+          "term": "arrangement",
+          "hint": "Row: the icon at the left, the figure and its label beside it, one tight row.",
+          "stacked": "Stacked",
+          "row": "Row"
+        },
+        "social": {
+          "label": "Show social profiles",
+          "term": "social",
+          "hint": "At the row's end, \"Follow us\" and the social profiles from the store details. Only in the Row arrangement."
         }
       },
       "steps": {
@@ -11634,7 +11811,28 @@
         "intro": "Intro",
         "link": "Button",
         "linkTerm": "button",
-        "linkHint": "Left empty, the button leads to every post."
+        "linkHint": "Left empty, the button leads to every post.",
+        "panel_tone": {
+          "label": "Panel tone",
+          "term": "panel tone",
+          "hint": "The panel on the section's ground, or a light tint of your main colour over it.",
+          "ground": "Ground",
+          "tint": "Light tint"
+        },
+        "ornament": {
+          "label": "Ornament",
+          "term": "ornament",
+          "hint": "A small leaf sprig at the panel's lower right corner (wide screens).",
+          "none": "None",
+          "leaves": "Leaves"
+        },
+        "cover_ratio": {
+          "label": "Cover ratio",
+          "term": "cover ratio",
+          "hint": "The shape of the post cards' cover pictures.",
+          "standard": "16:10",
+          "wide": "Wide (2:1)"
+        }
       },
       "heroFull": {
         "accent": {
@@ -11805,6 +12003,13 @@
           "hint": "Categories that do not fit a narrow screen slide sideways or wrap onto a new row.",
           "scroll": "Slide sideways",
           "wrap": "Wrap"
+        },
+        "row_style": {
+          "label": "Arrangement",
+          "term": "row style",
+          "hint": "Stacked shows the name under the icon and the section heading. Strip sets the categories in one row across the page with the name beside the icon; the heading stays for screen readers only.",
+          "stacked": "Stacked, with heading",
+          "strip": "Strip"
         }
       },
       "icons": {
@@ -12970,7 +13175,8 @@
         "collection": "Collection picture",
         "popup": "Pop-up",
         "storefront_design": "Saved look",
-        "favicon": "Site icon"
+        "favicon": "Site icon",
+        "booking": "Tour programme"
       },
       "seoTypes": {
         "product": "product page",
@@ -12985,6 +13191,33 @@
       },
       "etbisQrLink": "The shop's ETBİS QR code",
       "faviconLink": "The shop's site icon"
+    },
+    "views": {
+      "label": "Views",
+      "all": "All",
+      "unused": "Unused",
+      "missing_alt": "Missing alt text",
+      "empty": {
+        "unused": "No unused pictures; each one is used by a product, page, setting or the storefront.",
+        "missing_alt": "No pictures without alt text."
+      }
+    },
+    "cleanup": {
+      "hint": "No product, page, setting, campaign or storefront uses these pictures. Click to pick the ones to delete.",
+      "hintReadOnly": "No product, page, setting, campaign or storefront uses these pictures.",
+      "selected_one": "{{formatted}} picture picked",
+      "selected_other": "{{formatted}} pictures picked",
+      "selectPage": "Pick all on this page",
+      "clear": "Clear selection",
+      "delete": "Delete permanently",
+      "confirmTitle_one": "Delete {{formatted}} picture permanently?",
+      "confirmTitle_other": "Delete {{formatted}} pictures permanently?",
+      "confirmText": "The pictures are deleted with their files and cannot be brought back. Each is checked again first; one that has come into use meanwhile is kept.",
+      "confirm": "Delete",
+      "deleted_one": "{{formatted}} picture deleted.",
+      "deleted_other": "{{formatted}} pictures deleted.",
+      "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
+      "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
     }
   },
   "confirmEmail": {

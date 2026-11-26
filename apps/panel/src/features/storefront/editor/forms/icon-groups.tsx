@@ -55,6 +55,7 @@ export function IconGroups({
           [
             ["disc", "disc"],
             ["phone", "icons_phone"],
+            ["row_style", "icons_row_style"],
           ] as const
         ).map(([name, field]) => (
           <StepChoice<string>

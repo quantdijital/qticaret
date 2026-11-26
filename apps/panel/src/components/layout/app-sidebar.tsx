@@ -17,6 +17,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@qticaret/admin-ui/ui/sidebar"
+import { pendingBadges, pendingQuery } from "@/features/dashboard/api/pending"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -87,9 +88,14 @@ export function AppSidebar({
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   // One item lit: Storefront settings, not Settings too, on its page
   const active = itemFor(pathname)?.key
-  // Orders waiting for the shop: the one number worth showing in the menu
+  // What waits under an item: orders to ship, reviews and questions to approve, contact
+  // messages not yet handled, sold-out stock (docs/06 "Dashboard")
   const { data: tasks } = useQuery(tasksQuery())
-  const badges: Record<string, number | undefined> = { orders: tasks?.to_ship }
+  const { data: pending } = useQuery(pendingQuery())
+  const badges: Record<string, number | undefined> = {
+    ...pendingBadges(pending),
+    orders: tasks?.to_ship,
+  }
   // An item behind a flag or a capability shows once both are known and allow it
   const allowed = useNavAccess()
   const groups = NAV_GROUPS.map((group) => ({

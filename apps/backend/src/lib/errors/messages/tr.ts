@@ -937,6 +937,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.filename_invalid": "Dosya adını 1–200 karakter arasında, özel karakter kullanmadan yazın.",
   "media.files_not_removed":
     "Görselin dosyaları şu an silinemedi; görsel kütüphanede kaldı. Biraz sonra yeniden deneyin.",
+  "media.id_duplicate": "Aynı görsel listede iki kez geçiyor.",
+  "media.id_invalid": "Görsel kimliği geçerli değil.",
   "media.import_address_refused":
     "Bu adresten görsel alınamaz. Herkese açık bir https adresi girin.",
   "media.import_unreachable":

@@ -33,6 +33,7 @@ import {
 import { programView } from "./program"
 import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
+import { socialLinks } from "./frame"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { collageView, statsView, stepsView } from "./points"
@@ -204,8 +205,11 @@ async function sectionView(
       return marqueeView(section, t)
     case "strip_gallery":
       return stripGalleryView(section, t)
-    case "stats":
-      return statsView(section, t)
+    case "stats": {
+      // The shop's profiles only while the strip shows them
+      const profiles = section.social === "on" ? socialLinks((await legalIdentity()).same_as) : []
+      return statsView(section, t, profiles)
+    }
     case "photo_collage":
       return collageView(section, t)
     case "steps":

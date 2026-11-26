@@ -1,4 +1,10 @@
-import { BANNER_SETTINGS, BANNER_SETTING_NAMES, BANNER_SPLIT_EDGES } from "@qticaret/types"
+import {
+  BANNER_SETTINGS,
+  BANNER_SETTING_NAMES,
+  BANNER_SPLIT_BUTTON_TONES,
+  BANNER_SPLIT_EDGES,
+  BANNER_SPLIT_ORNAMENTS,
+} from "@qticaret/types"
 import type { BannerSetting, BannerVariant } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
@@ -45,6 +51,10 @@ export const bannerSettingId = (sectionId: string, setting: BannerSetting) =>
 /** The split's edge ("Geçiş"), in "Diziliş" beside the height. */
 export const bannerEdgeId = (sectionId: string) => `${sectionId}-banner-edge`
 
+/** The split's button colour and flower ("Düğme rengi", "Süs"), beside its edge. */
+export const bannerSplitLookId = (sectionId: string, key: "button_tone" | "ornament") =>
+  `${sectionId}-banner-${key.replace("_", "-")}`
+
 const B = "storefront.editor.banner"
 
 /**
@@ -71,6 +81,19 @@ export function bannerFields(section: BannerSection): RegistryField[] {
       options: BANNER_SPLIT_EDGES.map((edge) => `${B}.edge.${edge}`),
       target: bannerEdgeId(section.id),
     })
+    for (const [key, steps] of [
+      ["button_tone", BANNER_SPLIT_BUTTON_TONES],
+      ["ornament", BANNER_SPLIT_ORNAMENTS],
+    ] as const) {
+      fields.push({
+        key: `banner.${key}`,
+        group: "layout",
+        label: `${B}.${key}.label`,
+        term: `${B}.${key}.term`,
+        options: steps.map((step) => `${B}.${key}.${step}`),
+        target: bannerSplitLookId(section.id, key),
+      })
+    }
   }
   return fields
 }

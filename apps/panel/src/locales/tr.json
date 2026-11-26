@@ -253,6 +253,26 @@
       "legalIdentity": {
         "label": "Mağaza künyesi eksik",
         "hint": "Yasanın istediği eksik alanlar"
+      },
+      "openReturns": {
+        "label": "Karar bekleyen iadeler",
+        "hint": "Onaylanacak ya da reddedilecek talepler"
+      },
+      "unreadContact": {
+        "label": "Yanıtlanmayan mesajlar",
+        "hint": "İletişim formundan gelen yeni mesajlar"
+      },
+      "pendingReviews": {
+        "label": "Onay bekleyen yorumlar",
+        "hint": "Vitrinde görünmeden önce bakılacak"
+      },
+      "pendingQuestions": {
+        "label": "Onay bekleyen sorular",
+        "hint": "Sorular ve gelen yanıtlar"
+      },
+      "outOfStock": {
+        "label": "Tükenen ürünler",
+        "hint": "Satılabilir stoku kalmayan varyantlar"
       }
     },
     "recent": {
@@ -3325,7 +3345,8 @@
       "category": "Kategori",
       "updated": "Son değişiklik",
       "price": "Fiyat",
-      "actions": "İşlemler"
+      "actions": "İşlemler",
+      "sku": "Stok kodu (SKU)"
     },
     "errors": {
       "title": "Ürün adı en az 2 karakter olmalı.",
@@ -4061,6 +4082,19 @@
       "selectAll_one": "Eşleşen {{formatted}} ürünün hepsini seç",
       "selectAll_other": "Eşleşen {{formatted}} ürünün hepsini seç",
       "clear": "Seçimi kaldır",
+      "delete": {
+        "action": "Sil",
+        "working": "Siliniyor… {{done}}/{{total}}",
+        "title_one": "{{formatted}} ürün silinsin mi?",
+        "title_other": "{{formatted}} ürün silinsin mi?",
+        "description": "Ürünler, varyantları ve stok kayıtlarıyla birlikte silinir. Bu işlem geri alınamaz. Silinemeyen ürünler atlanır, nedeni yazılır.",
+        "confirm_one": "{{formatted}} ürünü sil",
+        "confirm_other": "{{formatted}} ürünü sil",
+        "done_one": "{{formatted}} ürün silindi.",
+        "done_other": "{{formatted}} ürün silindi.",
+        "skipped_one": "{{formatted}} ürün silinemedi; seçili bırakıldı.",
+        "skipped_other": "{{formatted}} ürün silinemedi; seçili bırakıldı."
+      },
       "edit": "Toplu düzenle",
       "tooMany": "Bir seferde en fazla {{max}} ürün düzenlenebilir; aramayı ya da görünümü daraltın.",
       "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uygulamadan önce kaç ürünün değişeceği ve atlanacaklar gösterilir.",
@@ -4407,8 +4441,23 @@
         "digital": "Dijital ürün: kargo yok",
         "service": "Hizmet: kargo yok"
       },
-      "variableLocked_one": "Bu ürünün {{count}} varyantı var.",
-      "variableLocked_other": "Bu ürünün {{count}} varyantı var; basit ürüne dönmek için önce varyantları bire indirin.",
+      "toSimple": {
+        "title": "Basit ürüne geçilsin mi?",
+        "several_one": "Basit ürüne geçince yalnız seçtiğiniz varyant kalır; diğer {{count}} varyant silinir. Siparişlerdeki kayıtlar etkilenmez.",
+        "several_other": "Basit ürüne geçince yalnız seçtiğiniz varyant kalır; diğer {{count}} varyant silinir. Siparişlerdeki kayıtlar etkilenmez.",
+        "keep": "Kalacak varyant",
+        "noPrice": "Fiyat yok",
+        "untracked": "Stok takibi yok",
+        "stock_one": "Stok: {{formatted}}",
+        "stock_other": "Stok: {{formatted}}",
+        "stockWarning_one": "Silinecek {{count}} varyantın stoğu var (toplam {{units}} adet); bu stok da silinir.",
+        "stockWarning_other": "Silinecek {{count}} varyantın stoğu var (toplam {{units}} adet); bu stok da silinir.",
+        "options": "Seçenekler ({{options}}) kaldırılır; fiyat, stok ve kodlar korunur.",
+        "cancel": "Vazgeç",
+        "switch": "Basit ürüne geç",
+        "deleteAndSwitch_one": "{{count}} varyantı sil ve basit ürüne geç",
+        "deleteAndSwitch_other": "{{count}} varyantı sil ve basit ürüne geç"
+      },
       "tabs": {
         "pricing": "Genel",
         "stock": "Stok",
@@ -4531,6 +4580,13 @@
       }
     },
     "rowActions": "{{title}} işlemleri",
+    "listOptions": {
+      "label": "Görünüm",
+      "perPage": "Sayfa başına",
+      "pageSize_one": "{{count}} ürün",
+      "pageSize_other": "{{count}} ürün",
+      "columns": "Sütunlar"
+    },
     "duplicate": {
       "action": "Kopyala",
       "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
@@ -5238,12 +5294,35 @@
     },
     "address": {
       "edit": "Düzenle",
-      "title": "#{{number}} teslimat adresi",
-      "description": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+      "title": {
+        "shipping": "Teslimat adresi",
+        "billing": "Fatura adresi"
+      },
+      "hint": {
+        "shipping": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+        "billing": "Fatura kesilene kadar fatura adresi değiştirilebilir."
+      },
+      "saved": {
+        "shipping": "Teslimat adresi güncellendi.",
+        "billing": "Fatura adresi güncellendi."
+      },
+      "editOf": {
+        "shipping": "Teslimat adresini düzenle",
+        "billing": "Fatura adresini düzenle"
+      },
       "firstName": "Ad",
       "lastName": "Soyad",
       "nameRequired": "Ad ve soyad gerekli.",
-      "saved": "Teslimat adresi güncellendi."
+      "company": "Firma adı",
+      "sameAsDelivery": "Teslimat adresiyle aynı.",
+      "invoiced": "Fatura kesildi; fatura adresi artık değişmez.",
+      "email": "E-posta",
+      "emailHint": "Siparişin iletileri bundan sonra bu adrese gider. Müşterinin hesabındaki e-posta değişmez.",
+      "emailRequired": "E-posta gerekli.",
+      "emailInvalid": "Geçerli bir e-posta adresi yazın.",
+      "emailSaved": "E-posta güncellendi.",
+      "editEmail": "E-postayı düzenle",
+      "noEmail": "E-posta yok."
     },
     "filters": {
       "payment": "Ödeme",
@@ -5277,7 +5356,12 @@
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
-      "days": "Sipariş tarihi"
+      "days": "Sipariş tarihi",
+      "customer": "Müşteri",
+      "customerOrders": "Bu müşterinin diğer siparişleri",
+      "anyCustomer": "Ad ya da e-posta ile arayın",
+      "noCustomer": "Müşteri bulunamadı.",
+      "customerUnknown": "Bulunamayan müşteri"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",
@@ -5740,7 +5824,8 @@
       "tabs": {
         "label": "Müşterinin kayıtları",
         "orders": "Siparişler"
-      }
+      },
+      "allOrders": "Tüm siparişleri"
     },
     "consents": {
       "title": "İleti izinleri",
@@ -9713,6 +9798,20 @@
           "hint": "Görselin panele değdiği kenar.",
           "straight": "Düz",
           "curved": "Yuvarlak"
+        },
+        "button_tone": {
+          "label": "Düğme rengi",
+          "term": "button colour",
+          "hint": "İlk düğme ana renkte ya da vurgu renginde.",
+          "primary": "Ana",
+          "accent": "Vurgu"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ altında vurgu renginde küçük bir çiçek demeti (geniş ekranda).",
+          "none": "Yok",
+          "flower": "Çiçek"
         }
       },
       "products": {
@@ -10069,6 +10168,24 @@
               "lively": "Canlı"
             },
             "hint": "Sakin, temanın kendi kısa geçişleridir. Canlı'da ürün kartının fotoğrafı üzerine gelince hafifçe büyür ve kart yükselir, bölümler ve ürünler sayfa kaydıkça yumuşakça belirir, görseller yüklenince süzülerek gelir, düğmeler basılınca hafifçe çöker. Hareketi azaltmayı seçmiş ziyaretçide hiçbiri oynamaz."
+          },
+          "page_width": {
+            "label": "Sayfa genişliği",
+            "term": "page_width",
+            "steps": {
+              "standard": "Standart",
+              "narrow": "Dar"
+            },
+            "hint": "İçeriğin sığdığı sütun. Standart 1440 px, Dar 1344 px: vitrin rahat okunan, daha toplu bir sütunda durur."
+          },
+          "accent_ink": {
+            "label": "Vurgu üstündeki yazı",
+            "term": "accent_ink",
+            "steps": {
+              "auto": "Otomatik",
+              "light": "Hep beyaz"
+            },
+            "hint": "Otomatik'te vurgu renginin üstündeki yazı (düğme, etiket) hangisi daha iyi okunuyorsa beyaz ya da koyudur. Hep beyaz, parlak bir turuncu gibi açık vurgularda beyaz kalın yazı ister: renk beyazla en az 3:1 vermeli."
           }
         },
         "card": "Ürün kartı",
@@ -10132,7 +10249,8 @@
           "text_positionHint": "Görsel üstünde: ürün adı ve fiyat fotoğrafın altındaki koyu geçişin üstünde durur. Yalnız standart kartta geçer.",
           "textPositions": {
             "below": "Görselin altında",
-            "over": "Görselin üstünde"
+            "over": "Görselin üstünde",
+            "over_split": "Görselin üstünde, fiyat sağda"
           },
           "rating_badge": "Puanı görselde rozet olarak göster",
           "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
@@ -10204,6 +10322,27 @@
             "hint": "Uzun metnin ilk satırları görünür, gerisi düğmeyle açılır. Metnin tamamı sayfada kalır; arama motorları hepsini okur."
           },
           "words": "açıklama metin yazı kategori marka koleksiyon devamını oku katla"
+        },
+        "listingPageTitle": "Liste sayfası",
+        "listingPageHint": "Tüm ürünler, kategori ve marka sayfalarında ürünlerin dizilişi. Bütün varsayılanlar bugünkü sayfadır.",
+        "listingPage": {
+          "default_view": {
+            "label": "Varsayılan görünüm",
+            "hint": "Ziyaretçi sayfayı ilk açtığında ürünler nasıl dizilir. Izgara: yan yana kartlar (grid). Liste: her satırda bir ürün; solda görsel, sağda fiyat.",
+            "steps": {
+              "grid": "Izgara",
+              "list": "Liste"
+            }
+          },
+          "view_switch": {
+            "label": "Ziyaretçi görünümü değiştirebilsin",
+            "hint": "Sıralamanın yanında ızgara/liste düğmeleri çıkar. Seçim adreste kalır (?gorunum=liste), paylaşılabilir; arama motorları yine tek sayfa görür."
+          },
+          "breadcrumb_current": {
+            "label": "Yol izinde sayfanın kendi adı",
+            "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
+          },
+          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler"
         },
         "searchFormTitle": "Arama kutusu",
         "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",
@@ -10763,6 +10902,13 @@
           "submenus": "Alt menülerde",
           "off": "Yok"
         },
+        "tool_labels": {
+          "label": "Simge yazıları",
+          "term": "tool labels",
+          "show": "Yazılı",
+          "hide": "Yalnız simge",
+          "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
+        },
         "tools_style": {
           "label": "Sağdaki simgeler",
           "term": "icons",
@@ -10930,6 +11076,25 @@
           "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
           "card": "Kart içinde",
           "plain": "Yalın"
+        },
+        "news_place": {
+          "label": "E-bülten yeri",
+          "term": "newsletter place",
+          "brand": "Marka altında",
+          "column": "Son sütun"
+        },
+        "brand_contact": {
+          "label": "Marka sütununda iletişim",
+          "term": "brand contact",
+          "hint": "Gizlerseniz adres, telefon ve e-posta marka sütununda görünmez; İletişim sayfası yerinde kalır.",
+          "show": "Göster",
+          "hide": "Gizle"
+        },
+        "bottom_align": {
+          "label": "Alt satır",
+          "term": "bottom line",
+          "spread": "Yayık",
+          "center": "Ortalı"
         },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
@@ -11577,6 +11742,18 @@
           "label": "İkon göster",
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
+        },
+        "arrangement": {
+          "label": "Dizilim",
+          "term": "arrangement",
+          "hint": "Satır: ikon solda, rakam ve etiketi yanında, tek sıkı satır.",
+          "stacked": "Alt alta",
+          "row": "Satır"
+        },
+        "social": {
+          "label": "Sosyal hesapları göster",
+          "term": "social",
+          "hint": "Satırın sonunda \"Bizi izleyin\" ve mağaza bilgilerindeki sosyal hesaplar. Yalnız Satır dizilimde görünür."
         }
       },
       "steps": {
@@ -11634,7 +11811,28 @@
         "intro": "Giriş",
         "link": "Düğme",
         "linkTerm": "button",
-        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür."
+        "linkHint": "Boş bırakırsanız düğme tüm yazılara götürür.",
+        "panel_tone": {
+          "label": "Panel tonu",
+          "term": "panel tone",
+          "hint": "Panel bölümün zemininde ya da üstünde ana renginizin açık bir tonuyla.",
+          "ground": "Zemin",
+          "tint": "Açık ton"
+        },
+        "ornament": {
+          "label": "Süs",
+          "term": "ornament",
+          "hint": "Panelin sağ alt köşesinde küçük bir yaprak dalı (geniş ekranda).",
+          "none": "Yok",
+          "leaves": "Yaprak"
+        },
+        "cover_ratio": {
+          "label": "Kapak oranı",
+          "term": "cover ratio",
+          "hint": "Yazı kartlarındaki kapak görselinin biçimi.",
+          "standard": "16:10",
+          "wide": "Geniş (2:1)"
+        }
       },
       "heroFull": {
         "accent": {
@@ -11805,6 +12003,13 @@
           "hint": "Dar ekranda sığmayan kategoriler yana kayar ya da alt satıra iner.",
           "scroll": "Yana kaydır",
           "wrap": "Alt satıra geç"
+        },
+        "row_style": {
+          "label": "Dizilim",
+          "term": "row style",
+          "hint": "Alt alta, başlıklı'da ad ikonun altında ve bölüm başlığı görünür. Şerit'te kategoriler sayfa boyunca tek sırada durur, ad ikonun yanındadır; başlık yalnız ekran okuyucuya kalır.",
+          "stacked": "Alt alta, başlıklı",
+          "strip": "Şerit"
         }
       },
       "icons": {
@@ -12970,7 +13175,8 @@
         "collection": "Koleksiyon görseli",
         "popup": "Pop-up",
         "storefront_design": "Kayıtlı görünüm",
-        "favicon": "Site simgesi"
+        "favicon": "Site simgesi",
+        "booking": "Tur programı"
       },
       "seoTypes": {
         "product": "ürün sayfası",
@@ -12985,6 +13191,33 @@
       },
       "etbisQrLink": "Mağazanın ETBİS karekodu",
       "faviconLink": "Mağazanın site simgesi"
+    },
+    "views": {
+      "label": "Görünümler",
+      "all": "Tümü",
+      "unused": "Kullanılmayan",
+      "missing_alt": "Alt metni eksik",
+      "empty": {
+        "unused": "Kullanılmayan görsel yok; her görsel bir ürün, sayfa, ayar ya da vitrinde kullanılıyor.",
+        "missing_alt": "Alt metni eksik görsel yok."
+      }
+    },
+    "cleanup": {
+      "hint": "Bu görselleri hiçbir ürün, sayfa, ayar, kampanya ya da vitrin kullanmıyor. Silmek için tıklayıp seçin.",
+      "hintReadOnly": "Bu görselleri hiçbir ürün, sayfa, ayar, kampanya ya da vitrin kullanmıyor.",
+      "selected_one": "{{formatted}} görsel seçildi",
+      "selected_other": "{{formatted}} görsel seçildi",
+      "selectPage": "Bu sayfadakilerin hepsini seç",
+      "clear": "Seçimi kaldır",
+      "delete": "Kalıcı olarak sil",
+      "confirmTitle_one": "{{formatted}} görsel kalıcı olarak silinsin mi?",
+      "confirmTitle_other": "{{formatted}} görsel kalıcı olarak silinsin mi?",
+      "confirmText": "Görseller dosyalarıyla birlikte silinir ve geri alınamaz. Silmeden önce her biri yeniden denetlenir; bu arada bir yerde kullanılmaya başlanan görsel silinmez.",
+      "confirm": "Sil",
+      "deleted_one": "{{formatted}} görsel silindi.",
+      "deleted_other": "{{formatted}} görsel silindi.",
+      "kept_one": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı.",
+      "kept_other": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı."
     }
   },
   "confirmEmail": {

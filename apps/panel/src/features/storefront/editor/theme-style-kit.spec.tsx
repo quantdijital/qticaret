@@ -60,6 +60,7 @@ describe("the style kit in the theme panel", () => {
     expect(THEME_FIELDS.filter((f) => f.group === "spacing").map((f) => f.key)).toEqual([
       "section_spacing",
       "density",
+      "page_width",
     ])
     expect(THEME_FIELDS.filter((f) => f.group === "surfaces").map((f) => f.key)).toEqual([
       "surface_style",
@@ -79,6 +80,7 @@ describe("the style kit in the theme panel", () => {
       "card",
       "framed",
       "listingText",
+      "listingPage",
       "searchForm",
     ])
   })
