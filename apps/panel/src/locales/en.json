@@ -1447,7 +1447,20 @@
         "noneNote": "No shipping option yet; pick one and save to make it.",
         "defaultName": "Standard shipping",
         "replacedKept": "The old option stays as an extra while orders still to ship use it; remove it once they have shipped.",
-        "notConnected": "Your {{carrier}} account is not connected; connect it on the Carriers tab. Until then this option may not be priced at checkout."
+        "notConnected": "Your {{carrier}} account is not connected; connect it on the Carriers tab. Until then this option may not be priced at checkout.",
+        "condition": {
+          "label": "Condition",
+          "options": {
+            "amount": "Amount",
+            "amount_or_coupon": "Amount or a free shipping coupon",
+            "amount_and_coupon": "Amount and a free shipping coupon"
+          },
+          "hints": {
+            "amount": "Shipping is free only once the basket reaches this amount. Free shipping coupons and automatic free shipping campaigns do not lower it.",
+            "amount_or_coupon": "Shipping is free once the basket reaches this amount, or with a free shipping coupon.",
+            "amount_and_coupon": "Shipping is free when the basket reaches this amount and a free shipping coupon is used. Below the amount the coupon is refused."
+          }
+        }
       },
       "rules": {
         "deliveryTitle": "Delivery time",
@@ -6763,6 +6776,12 @@
       "freeShippingSummary": "Free shipping from: {{value}}",
       "freeShippingOff": "Off",
       "freeShippingEdit": "Change in shipping settings",
+      "freeShippingCoupon": "Free shipping coupons: {{value}}",
+      "freeShippingCouponValues": {
+        "any": "valid at any amount",
+        "off": "do not lower shipping (amount only)",
+        "from": "valid from {{amount}}"
+      },
       "combineCodes": "More than one code in a cart",
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."

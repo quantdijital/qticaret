@@ -1,3 +1,4 @@
+import type { FreeShippingCondition } from "@/features/settings/api/sections"
 import type {
   NewShippingOption,
   ShopShippingOption,
@@ -16,6 +17,8 @@ import type {
  * - flat: the main option's flat fee, no threshold;
  * - carrier: the main option priced by the shop's desi table or Geliver's
  *   quote, a threshold optional;
+ * - with a threshold, its condition ("Koşul"): the total alone, the total
+ *   or a free shipping coupon, or both (`promotions.free_shipping_condition`);
  * - custom: stored data one answer cannot say (a free main option while a
  *   threshold still frees the other, paid ones): the list edits it.
  */
@@ -38,6 +41,8 @@ export interface FeeChoice {
   fee: number | null
   threshold: number | null
   carrier: CarrierPricing
+  /** What the threshold needs beside the total; kept as stored when no threshold is set. */
+  condition: FreeShippingCondition
 }
 
 export interface FeeState {
@@ -91,11 +96,18 @@ export function detectFee(
   options: readonly ShopShippingOption[],
   savedId: string | null | undefined,
   threshold: number | null,
-  firstCarrier: CarrierPricing = "aras-table"
+  firstCarrier: CarrierPricing = "aras-table",
+  condition: FreeShippingCondition = "amount_or_coupon"
 ): FeeState {
   const primary = primaryOf(options, savedId)
   const extras = options.filter((option) => option !== primary)
-  const start: FeeChoice = { mode: "threshold", fee: null, threshold, carrier: firstCarrier }
+  const start: FeeChoice = {
+    mode: "threshold",
+    fee: null,
+    threshold,
+    carrier: firstCarrier,
+    condition,
+  }
   if (!primary) {
     return { mode: "none", primary, extras, choice: start }
   }
@@ -150,6 +162,8 @@ export interface FeePlan {
   option: FeeOptionStep
   /** `promotions.free_shipping_threshold` to store. */
   threshold: number | null
+  /** `promotions.free_shipping_condition` to store; null with no threshold (left as it is). */
+  condition: FreeShippingCondition | null
 }
 
 type FlatCarrier = "manual" | "aras" | "yurtici"
@@ -182,9 +196,10 @@ export function planFee(
   const name = primary?.name ?? defaults.name
   const threshold =
     choice.mode === "threshold" || choice.mode === "carrier" ? choice.threshold : null
+  const condition = threshold === null ? null : choice.condition
   if (choice.mode === "carrier") {
     if (primary && carrierPricingOf(primary) === choice.carrier) {
-      return { option: { kind: "keep", id: primary.id }, threshold }
+      return { option: { kind: "keep", id: primary.id }, threshold, condition }
     }
     return {
       option: {
@@ -193,6 +208,7 @@ export function planFee(
         replaces: primary?.id ?? null,
       },
       threshold,
+      condition,
     }
   }
   const amount = choice.mode === "free" ? 0 : (choice.fee ?? 0)
@@ -203,6 +219,7 @@ export function planFee(
           ? { kind: "keep", id: primary.id }
           : { kind: "update", id: primary.id, amount },
       threshold,
+      condition,
     }
   }
   const carrier =
@@ -216,5 +233,6 @@ export function planFee(
       replaces: primary?.id ?? null,
     },
     threshold,
+    condition,
   }
 }

@@ -4,6 +4,7 @@ import { deepestCategory } from "../../lib/catalog"
 import { feedItemsOf } from "../../lib/feeds"
 import type { FeedItem, FeedPlace, FeedShop } from "../../lib/feeds"
 import { storedSummaryText } from "../../lib/catalog/summary"
+import { standaloneThreshold } from "../../lib/promotions/free-shipping"
 import { productText } from "../../lib/seo/product-text"
 import { sameDayCutoffHour } from "../../lib/shipping/same-day"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -184,7 +185,7 @@ export async function feedShopOf(
       url: brand.storefrontUrl,
       handlingDays: { min: shipping.handling_days_min, max: shipping.handling_days_max },
       flatShipping: flat.length > 0 ? Math.min(...flat) : null,
-      freeShippingFrom: promotions.free_shipping_threshold,
+      freeShippingFrom: standaloneThreshold(promotions),
       // Kargo's hour, else the one set under the feed rules before it moved
       sameDayCutoffHour: sameDayCutoffHour(shipping, marketing),
     },

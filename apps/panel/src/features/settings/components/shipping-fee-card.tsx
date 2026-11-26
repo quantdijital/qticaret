@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
+import type { FreeShippingCondition } from "@/features/settings/api/sections"
 import { useSaveShippingFee } from "@/features/settings/api/shipping-fee"
+import { FreeShippingConditionField } from "@/features/settings/components/free-shipping-condition-field"
 import { CARRIER_PRICINGS, FEE_MODES, feeErrors, planFee } from "@/features/settings/shipping-fee"
 import type { CarrierPricing, FeeChoice, FeeMode, FeeState } from "@/features/settings/shipping-fee"
 import { errorText } from "@/lib/errors"
@@ -86,6 +88,7 @@ export function ShippingFeeCard({
   const [fee, setFee] = useState(textOf(stored.fee))
   const [threshold, setThreshold] = useState(textOf(stored.threshold))
   const [carrier, setCarrier] = useState<CarrierPricing>(stored.carrier)
+  const [condition, setCondition] = useState<FreeShippingCondition>(stored.condition)
   const [tried, setTried] = useState(false)
   const choice: FeeChoice | null = mode
     ? {
@@ -93,6 +96,7 @@ export function ShippingFeeCard({
         fee: parseMoneyInput(fee),
         threshold: threshold.trim() === "" ? null : parseMoneyInput(threshold),
         carrier,
+        condition,
       }
     : null
   const errors = choice && tried ? feeErrors(choice) : []
@@ -100,12 +104,14 @@ export function ShippingFeeCard({
     mode !== (known ? stored.mode : null) ||
     fee !== textOf(stored.fee) ||
     threshold !== textOf(stored.threshold) ||
-    carrier !== stored.carrier
+    carrier !== stored.carrier ||
+    condition !== stored.condition
   const reset = () => {
     setMode(known ? stored.mode : null)
     setFee(textOf(stored.fee))
     setThreshold(textOf(stored.threshold))
     setCarrier(stored.carrier)
+    setCondition(stored.condition)
     setTried(false)
   }
   const submit = () => {
@@ -182,6 +188,13 @@ export function ShippingFeeCard({
                   error={t(`${S}.feeInvalid`)}
                   onChange={setFee}
                 />
+                <div className="sm:col-span-2">
+                  <FreeShippingConditionField
+                    id="shipping-fee-condition"
+                    value={condition}
+                    onChange={setCondition}
+                  />
+                </div>
               </div>
             ) : null}
             {mode === each && each === "flat" ? (
@@ -231,6 +244,13 @@ export function ShippingFeeCard({
                     onChange={setThreshold}
                   />
                 </div>
+                {threshold.trim() !== "" ? (
+                  <FreeShippingConditionField
+                    id="shipping-fee-carrier-condition"
+                    value={condition}
+                    onChange={setCondition}
+                  />
+                ) : null}
                 {unconnected ? (
                   <p className="text-[13px] text-warning-text">
                     {t(`${S}.notConnected`, {

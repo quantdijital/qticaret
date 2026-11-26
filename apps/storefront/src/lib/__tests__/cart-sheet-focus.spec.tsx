@@ -32,6 +32,26 @@ afterEach(() => {
   host.remove()
 })
 
+/**
+ * Escape on the sheet, then wait until it is gone and the focus has
+ * landed: Radix closes and gives the focus back on timers and frames of
+ * its own, so a fixed pause loses the race on a busy CI runner.
+ */
+async function closeWithEscape(dialog: HTMLElement | null, focused: () => boolean) {
+  await act(async () => {
+    dialog?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+    await Promise.resolve()
+  })
+  for (let tries = 0; tries < 100; tries += 1) {
+    if (document.querySelector("[role=dialog]") === null && focused()) {
+      return
+    }
+    await act(async () => {
+      await new Promise((done) => setTimeout(done, 10))
+    })
+  }
+}
+
 const WORDS = {
   label: "Sepet, 0 ürün",
   short: "Sepet",
@@ -64,10 +84,7 @@ describe("the header's cart drawer", () => {
     })
     const dialog = document.querySelector<HTMLElement>("[role=dialog]")
     expect(dialog).not.toBeNull()
-    await act(async () => {
-      dialog?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
-      await new Promise((done) => setTimeout(done, 20))
-    })
+    await closeWithEscape(dialog, () => document.activeElement === link)
     expect(document.querySelector("[role=dialog]")).toBeNull()
     expect(document.activeElement).toBe(link)
   })
@@ -93,10 +110,7 @@ describe("the header's cart drawer", () => {
     })
     const dialog = document.querySelector<HTMLElement>("[role=dialog]")
     expect(dialog).not.toBeNull()
-    await act(async () => {
-      dialog?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
-      await new Promise((done) => setTimeout(done, 20))
-    })
+    await closeWithEscape(dialog, () => document.activeElement === add)
     expect(document.querySelector("[role=dialog]")).toBeNull()
     expect(document.activeElement).toBe(add)
     add.remove()

@@ -75,6 +75,10 @@ describe("ShippingFeeSection: the fee as one question", () => {
     expect(chosen).toBeChecked()
     expect(screen.getByLabelText(/^Ücretsiz kargo sınırı/)).toHaveValue("1.500,00")
     expect(screen.getByLabelText(/^Sınırın altında kargo ücreti/)).toHaveValue("90,00")
+    // A shop that never chose a condition: the total or a coupon, as it worked before
+    expect(screen.getByTestId("free-shipping-condition")).toHaveTextContent(
+      "Tutar ya da ücretsiz kargo kuponu"
+    )
     expect(screen.getByTestId("shipping-fee-primary")).toHaveTextContent("Standart Kargo")
     // The extras: Hızlı Kargo only, folded to its line
     expect(screen.getByText("Hızlı Kargo · ₺150,00")).toBeInTheDocument()

@@ -113,7 +113,11 @@ medusaIntegrationTestRunner({
         { shipping_classes: [], rate_table: [], primary_option_id: null },
         null
       )
-      await settings.saveSection("promotions", { free_shipping_threshold: null }, null)
+      await settings.saveSection(
+        "promotions",
+        { free_shipping_threshold: null, free_shipping_condition: "amount_or_coupon" },
+        null
+      )
     })
 
     it("prices the main flat option without an address, ignoring anything sent", async () => {
@@ -132,6 +136,18 @@ medusaIntegrationTestRunner({
       expect(below.data.shipping_estimate).toEqual({ status: "priced", amount: 90 })
       const at = await estimateOf(await cartOf(2))
       expect(at.data.shipping_estimate).toEqual({ status: "free", amount: null })
+    })
+
+    it("is never free by the total alone when the shop asks for a coupon too", async () => {
+      // "Tutar ve kupon": a free shipping campaign frees it at checkout, never the total
+      await post("/admin/platform-settings/promotions", {
+        free_shipping_threshold: 240,
+        free_shipping_condition: "amount_and_coupon",
+      })
+      expect((await estimateOf(await cartOf(3))).data.shipping_estimate).toEqual({
+        status: "priced",
+        amount: 90,
+      })
     })
 
     it("adds a class's surcharge, and a free-shipping product's basket is free", async () => {
