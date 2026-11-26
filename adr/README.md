@@ -92,3 +92,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0084 | [Tarih aralığı kipi: konaklama ve kiralama](0084-tarih-araligi-kipi.md) | — |
 | 0085 | [Yapay zekâ platform kredisi: üst panelde ağ geçidi, kredi defteri, paket hakkı ve yükleme](0085-yapay-zeka-platform-kredisi.md) | — |
 | 0086 | [Varyantın indirimli fiyatı (WooCommerce "İndirimli fiyat" ve "Zamanla")](0086-varyant-indirimli-fiyati.md) | — |
+| 0087 | [Üründe ücretsiz kargo ve kargo sınıfları](0087-urun-ucretsiz-kargo-ve-kargo-siniflari.md) | — |
