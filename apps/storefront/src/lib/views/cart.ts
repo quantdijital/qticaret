@@ -129,6 +129,7 @@ export function cartLinesOf(
  * free shipping still measured on the KDV-included amount, as the
  * backend's rule reads it. `checkoutBlocked`: why the cart cannot go to
  * the payment yet, as the cart page says it (`wholesaleCheckoutBlocked`).
+ * `shipping`: the server's estimate in words (`drawerShippingOf`).
  */
 export function miniCartOf(
   cart: Cart | null,
@@ -138,7 +139,8 @@ export function miniCartOf(
   pictures: ReadonlyMap<string, ImageView> = new Map(),
   vatExcluded = false,
   checkoutBlocked: CheckoutBlockedView | null = null,
-  freeProducts: ReadonlySet<string> = new Set()
+  freeProducts: ReadonlySet<string> = new Set(),
+  shipping: string | null = null
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
@@ -153,6 +155,8 @@ export function miniCartOf(
       ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, freeProducts))
       : null,
     ...(ships ? {} : { note: t("cart.drawer_note_unshipped") }),
+    // The server's figure for its main option: a row, and the note no longer says checkout prices it
+    ...(ships && shipping ? { shipping, note: t("cart.drawer_note_shipping_known") } : {}),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
     ...(checkoutBlocked ? { checkoutBlocked } : {}),

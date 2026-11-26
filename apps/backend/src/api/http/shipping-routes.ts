@@ -50,6 +50,12 @@ export const SHIPPING_ROUTES = [
       rateLimit(() => RATE_LIMIT_PROFILES.order_cancel, { identity: orderActor }),
     ],
   },
+  // The cart's shipping before an address: reads only, its own budget per shopper
+  {
+    matcher: "/store/carts/:id/shipping-estimate",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.shipping_estimate)],
+  },
   // F7.8: the shop's shipping options, staff only
   {
     matcher: "/admin/shipping-setup/options",

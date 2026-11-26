@@ -29,6 +29,8 @@ export interface CartSheetWords {
   browse: string
   continue: string
   subtotal: string
+  /** "Kargo": the row under the subtotal when the cart's shipping is known. */
+  shipping: string
   note: string
   viewCart: string
   checkout: string
@@ -139,6 +141,12 @@ export function CartSheetBody({
           <span className="font-semibold">{words.subtotal}</span>
           <span className="tabular text-lg font-extrabold">{cart.subtotal}</span>
         </p>
+        {cart.shipping && (
+          <p className="flex items-baseline justify-between gap-4 text-sm">
+            <span>{words.shipping}</span>
+            <span className="tabular font-semibold">{cart.shipping}</span>
+          </p>
+        )}
         <p className="text-xs text-text-3">{cart.taxNote ?? cart.note ?? words.note}</p>
         <CheckoutLink
           id={`${id}-odeme-engeli`}

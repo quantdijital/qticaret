@@ -1,46 +1,26 @@
 import "server-only"
-import { formatLira } from "@qticaret/ui"
 import type { CartPageView, Translate } from "@qticaret/ui"
 import type { StoreProduct } from "@qticaret/types"
 import type { Cart } from "@/lib/cart/cart"
-import { optionPrice, shippingOptions } from "@/lib/checkout/options"
-import type { ShippingOption } from "@/lib/checkout/options"
+import { cartShippingEstimate } from "@/lib/cart/shipping-estimate"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { listProducts, priceDisplays, storefrontLayout } from "@/lib/store-api/requests"
 import type { PriceDisplay } from "@qticaret/types"
 import { cartOfferText } from "./price"
 import { railCards } from "./section-data"
+import { shippingEstimateText } from "./shipping-estimate"
 import { isWholesaleDisplays } from "./wholesale-displays"
 
 /**
  * What the cart page shows beside its lines (adr/0046 Ek 2026-11-05):
- * shipping before an address, the shop's cart offers and products to add.
+ * shipping before an address (the shop's main option as the backend
+ * prices it, `shippingEstimateText`), the shop's cart offers and products
+ * to add.
  * Each is the backend's, priced there; a call that fails leaves its part out.
  */
 
 /** Products the cart offers to add: a row of four on a desktop. */
 export const UPSELL_COUNT = 4
-
-/**
- * The cheapest shipping the backend offers this cart now, in words:
- * "Ücretsiz", "85,00 TL", or "85,00 TL'den başlayan" when the options
- * differ. Null without a priced option.
- */
-export function cheapestShipping(options: readonly ShippingOption[], t: Translate): string | null {
-  const prices = options.flatMap((option) => {
-    const price = optionPrice(option)
-    return price === null || !Number.isFinite(price) ? [] : [price]
-  })
-  if (prices.length === 0) {
-    return null
-  }
-  const lowest = Math.min(...prices)
-  if (Math.round(lowest * 100) <= 0) {
-    return t("checkout.free")
-  }
-  const same = prices.every((price) => Math.round(price * 100) === Math.round(lowest * 100))
-  return same ? formatLira(lowest) : t("cart.shipping_from", { price: formatLira(lowest) })
-}
 
 /**
  * The shop's cart offers on the cart's variants, in words, each once; none
@@ -112,13 +92,13 @@ export async function cartExtras(
 ): Promise<Pick<CartPageView, "shipping" | "offers" | "upsell">> {
   const full = cart !== null && cart.items.length > 0
   const variants = (cart?.items ?? []).flatMap((line) => line.variant_id ?? [])
-  const [options, displays, upsell] = await Promise.all([
-    full ? quiet(shippingOptions(cart.id)) : null,
+  const [estimate, displays, upsell] = await Promise.all([
+    full ? cartShippingEstimate(cart.id) : null,
     variants.length > 0 ? quiet(priceDisplays(variants)) : null,
     quiet(upsellOf(cart, t)),
   ])
   return {
-    shipping: options ? cheapestShipping(options, t) : null,
+    shipping: shippingEstimateText(estimate, t),
     offers: displays ? offersOf(displays, t) : [],
     upsell: upsell ?? null,
   }

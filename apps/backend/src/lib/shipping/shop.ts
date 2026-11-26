@@ -96,6 +96,11 @@ export type CartLine = OrderItemRow & QuoteLine
 export const cartLinesOf = (context: { items?: readonly (CartLine | null)[] | null }): CartLine[] =>
   (context.items ?? []).filter((item): item is CartLine => item !== null)
 
+/** The lines' parcel by the shop's desi table: the base the table quote and the cart's estimate share. */
+export async function tableBaseOf(lines: readonly OrderItemRow[]): Promise<Kurus> {
+  return tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi)
+}
+
 /**
  * A cart's price by the shop's desi table (adr/0035), through the one
  * shipping quote (adr/0087 §2): the paid lines' parcel, free past the
@@ -106,7 +111,7 @@ export async function tableQuoteOf(context: { items?: readonly (CartLine | null)
     lines: cartLinesOf(context),
     context: quoteContextOf(context),
     basis: "parcel",
-    price: async (lines) => tablePriceOf((await parcelFor(parcelLinesOf(lines))).desi),
+    price: tableBaseOf,
   })
   return calculatedPriceOf(amount)
 }
