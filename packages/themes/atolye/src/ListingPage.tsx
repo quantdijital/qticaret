@@ -156,7 +156,9 @@ export function ListingPage({
               id={SHEET}
               title={t("listing.filters")}
               close={t("listing.close_filters")}
-              showResults={t("listing.show_results", { count: view.total })}
+              showResults={
+                view.showResultsLabel ?? t("listing.show_results", { count: view.total })
+              }
               results={RESULTS}
               clear={
                 view.clearPath ? { label: t("listing.clear_short"), path: view.clearPath } : null

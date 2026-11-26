@@ -10595,7 +10595,11 @@
             "label": "Yol izinde sayfanın kendi adı",
             "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
           },
-          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler"
+          "count_word": {
+            "label": "Ürün sayısında birim kelimesi",
+            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs."
+          },
+          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime"
         },
         "searchFormTitle": "Arama kutusu",
         "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",

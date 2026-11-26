@@ -2,6 +2,7 @@ import path from "node:path"
 import { layoutTheme, shownTheme, storedTheme } from "../../../lib/storefront/layout-theme"
 import { mergePatch } from "../sections/define"
 import { LISTING_PAGE, LISTING_PAGE_DEFAULTS, themeSection } from "../sections/theme"
+import { LISTING_COUNT_WORD_MAX } from "../sections/theme-listing-page"
 
 const CONTRACT_FILE = path.resolve(
   __dirname,
@@ -22,10 +23,12 @@ describe("theme section: the listing page", () => {
     expect(LISTING_PAGE.view_switch).toEqual(contract["LISTING_VIEW_SWITCHES"])
     expect(LISTING_PAGE.breadcrumb_current).toEqual(contract["LISTING_BREADCRUMB_CURRENTS"])
     expect(LISTING_PAGE_DEFAULTS).toEqual(contract["LISTING_PAGE_DEFAULTS"])
+    expect(LISTING_COUNT_WORD_MAX).toBe(contract["LISTING_COUNT_WORD_MAX"])
     expect(defaults.listing_page).toEqual({
       default_view: "grid",
       view_switch: "hide",
       breadcrumb_current: "show",
+      count_word: null,
     })
   })
 
@@ -33,7 +36,7 @@ describe("theme section: the listing page", () => {
     for (const default_view of LISTING_PAGE.default_view) {
       for (const view_switch of LISTING_PAGE.view_switch) {
         for (const breadcrumb_current of LISTING_PAGE.breadcrumb_current) {
-          const listing_page = { default_view, view_switch, breadcrumb_current }
+          const listing_page = { default_view, view_switch, breadcrumb_current, count_word: null }
           expect(full.safeParse({ ...defaults, listing_page }).success).toBe(true)
         }
       }
@@ -53,6 +56,18 @@ describe("theme section: the listing page", () => {
     expect(off({ view_switch: true })).toBe(false)
     expect(off({ breadcrumb_current: "none" })).toBe(false)
     expect(off({ columns: 4 })).toBe(false)
+  })
+
+  it("takes the count's word trimmed, refusing an empty or a long one", () => {
+    const word = (count_word: unknown) =>
+      full.safeParse({ ...defaults, listing_page: { ...LISTING_PAGE_DEFAULTS, count_word } })
+    const read = word("  tur ")
+    expect(read.success && read.data.listing_page.count_word).toBe("tur")
+    expect(word(null).success).toBe(true)
+    expect(word("x".repeat(LISTING_COUNT_WORD_MAX)).success).toBe(true)
+    expect(word("x".repeat(LISTING_COUNT_WORD_MAX + 1)).success).toBe(false)
+    expect(word("   ").success).toBe(false)
+    expect(word(3).success).toBe(false)
   })
 
   it("reads a design's theme and takes a design save without it at its defaults", () => {

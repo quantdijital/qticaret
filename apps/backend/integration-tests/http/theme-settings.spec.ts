@@ -29,7 +29,12 @@ interface Frame {
     page_width: string
     accent_ink: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
-    listing_page: { default_view: string; view_switch: string; breadcrumb_current: string }
+    listing_page: {
+      default_view: string
+      view_switch: string
+      breadcrumb_current: string
+      count_word: string | null
+    }
     search_form: Record<string, unknown>
   }
 }
@@ -49,7 +54,12 @@ const KIT = {
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */
 const LISTING_TEXT = { size: "md", align: "start", width: "narrow", collapse: true }
-const LISTING_PAGE = { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" }
+const LISTING_PAGE = {
+  default_view: "grid",
+  view_switch: "hide",
+  breadcrumb_current: "show",
+  count_word: null,
+}
 
 /** The search box's fields at their defaults (adr/0077 §1). */
 const SEARCH_FORM = {

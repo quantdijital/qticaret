@@ -44,6 +44,7 @@ import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
 import { categoryMainOf } from "@/lib/views/main-sections"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
 import {
+  countWordsOf,
   dateFilterView,
   datedChip,
   layoutOf,
@@ -344,7 +345,9 @@ export async function ListingContent({
           ...facets,
           // Dated products only: no "in stock" toggle; a search counts results, not products
           stock: stockForCards(facets.stock, cards),
-          ...(isSearch ? { countLabel: t("search.count", { count: answer.count }) } : {}),
+          ...(isSearch
+            ? { countLabel: t("search.count", { count: answer.count }) }
+            : countWordsOf(answer.count, shape, t)),
           // The grid or list (`listing_page`): absent while the shop draws today's page
           ...(shape.default_view === "list" || shape.view_switch === "show"
             ? { layout: layoutOf(shape, state) }

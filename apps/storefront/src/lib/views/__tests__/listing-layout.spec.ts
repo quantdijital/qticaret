@@ -3,7 +3,14 @@ import { LISTING_PAGE_DEFAULTS } from "@qticaret/types/listing-page"
 import type { ListingPageSettings } from "@qticaret/types/listing-page"
 import type { BreadcrumbView } from "@qticaret/ui"
 import { hrefOf, listingQueryOf, stateFromSearch, stateOf, viewAsked } from "../listing"
-import { dateFilterView, datedChip, layoutOf, trailOf, viewSwitchView } from "../listing-layout"
+import {
+  countWordsOf,
+  dateFilterView,
+  datedChip,
+  layoutOf,
+  trailOf,
+  viewSwitchView,
+} from "../listing-layout"
 
 const t = (key: string) => key
 const shop = (patch: Partial<ListingPageSettings> = {}): ListingPageSettings => ({
@@ -76,6 +83,22 @@ describe("the trail's last crumb", () => {
     expect(trailOf([here], hide)).toEqual([here])
     const linked: BreadcrumbView = { label: "Turlar", path: "/turlar" }
     expect(trailOf([home, linked], hide)).toEqual([home, linked])
+  })
+})
+
+describe("the count's word (count_word)", () => {
+  const said = (key: string, values?: Record<string, string | number>) =>
+    `${key}:${values?.["count"] ?? ""}:${values?.["word"] ?? ""}`
+
+  it("says nothing of its own while the shop writes no word (today's ürün)", () => {
+    expect(countWordsOf(24, shop(), said)).toEqual({})
+  })
+
+  it("counts in the shop's word, the filter sheet's button too", () => {
+    expect(countWordsOf(24, shop({ count_word: "tur" }), said)).toEqual({
+      countLabel: "listing.count_word:24:tur",
+      showResultsLabel: "listing.show_results_word:24:tur",
+    })
   })
 })
 
