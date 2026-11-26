@@ -155,13 +155,13 @@ describe("the theme's listing page", () => {
   })
 
   it("leaves no room under the grid of a one-page list, and keeps the pages' room on a longer one", () => {
-    expect(page()).toMatch(/<div class="pt-4"><nav aria-label="Sayfalar"/)
+    expect(page()).toMatch(/<div class="pt-4 lg:pt-6"><nav aria-label="Sayfalar"/)
     const single = page({
       total: 3,
       pagination: { page: 1, pages: 1, previous: null, next: null, pagePath: {} },
     })
     expect(single).toContain('href="/urun/a"')
-    expect(single).not.toContain('<div class="pt-4">')
+    expect(single).not.toContain('<div class="pt-4 lg:pt-6">')
     expect(single).not.toContain('aria-label="Sayfalar"')
   })
 

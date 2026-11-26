@@ -71,6 +71,32 @@ export function PointsGroups({
               onChange({ ...section, icons: on ? "on" : "off" })
             }}
           />
+          {/* One tight row, the icon at the left; the shop's profiles at its end */}
+          <StepChoice<string>
+            id={FIELD_IDS.content(section.id, "stats_arrangement")}
+            label={t("storefront.editor.stats.arrangement.label")}
+            term={t("storefront.editor.stats.arrangement.term")}
+            hint={t("storefront.editor.stats.arrangement.hint")}
+            steps={STATS_SETTINGS.arrangement}
+            value={statsSettingsOf(section).arrangement}
+            fallback={STATS_DEFAULTS.arrangement}
+            nameOf={(step) => t(`storefront.editor.stats.arrangement.${step}`)}
+            onChange={(step) => {
+              onChange({ ...section, arrangement: step as StatsSection["arrangement"] })
+            }}
+          />
+          {statsSettingsOf(section).arrangement === "row" && (
+            <SwitchRow
+              id={FIELD_IDS.content(section.id, "stats_social")}
+              label={t("storefront.editor.stats.social.label")}
+              term={t("storefront.editor.stats.social.term")}
+              hint={t("storefront.editor.stats.social.hint")}
+              checked={statsSettingsOf(section).social === "on"}
+              onChange={(on) => {
+                onChange({ ...section, social: on ? "on" : "off" })
+              }}
+            />
+          )}
         </>
       ) : (
         STEPS_FIELDS.map(([name, field]) => (

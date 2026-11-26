@@ -24,6 +24,8 @@ export const STATS_SETTINGS = {
   // Each figure's icon over its value (adr/0077 §10 Ek); off, the strip as it came
   icons: ["off", "on"],
   item_style: ["figure", "feature"],
+  arrangement: ["stacked", "row"],
+  social: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof STATS_SETTINGS
@@ -33,6 +35,8 @@ export const STATS_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   dividers: "on",
   icons: "off",
   item_style: "figure",
+  arrangement: "stacked",
+  social: "off",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -70,6 +74,8 @@ export const stats = z
     // Absent until written: a strip saved before them prints as it did
     eyebrow: shopText(STATS_LIMITS.eyebrow).nullable().optional(),
     note: handNote.optional(),
+    arrangement: setting("arrangement"),
+    social: setting("social"),
   })
   .strict()
 

@@ -19,6 +19,7 @@ import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/vali
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
 import { AdminGetPriceHistory } from "./products/[id]/price-history/validators"
+import { AdminPostSalePrices } from "./products/[id]/sale-prices/validators"
 import { AdminGetStockBoard } from "./stock-board/validators"
 
 const NO_QUERY_READS = [
@@ -26,11 +27,13 @@ const NO_QUERY_READS = [
   "/admin/api-access",
   "/admin/openapi.json",
   "/admin/dashboard/tasks",
+  "/admin/dashboard/pending",
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
   "/admin/order-board/:id",
   "/admin/orders/:id/money",
   "/admin/price-lists/:id/lines",
+  "/admin/products/:id/sale-prices",
   "/admin/seo/setup",
   "/admin/staff/me",
 ]
@@ -177,6 +180,12 @@ export const PANEL_ROUTES = [
     matcher: "/admin/products/:id/price-history",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetPriceHistory, {})],
+  },
+  // adr/0086: a variant's sale price, checked and worked out on the server
+  {
+    matcher: "/admin/products/:id/sale-prices",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostSalePrices)],
   },
   {
     matcher: "/admin/price-lists/:id/discount",

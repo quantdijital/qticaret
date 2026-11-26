@@ -29,6 +29,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       sticky: false,
       menuImages: "submenus",
       searchStyle: "field",
+      toolLabels: "show",
     })
   })
 
@@ -74,6 +75,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       sticky: false,
       menuImages: "submenus",
       searchStyle: "field",
+      toolLabels: "show",
     })
     expect(headerBarOf(undefined, { header: { layout: "left", sticky: true } })).toMatchObject({
       variant: "standard",

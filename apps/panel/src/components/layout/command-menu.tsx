@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import {
   BadgePercent,
+  CornerDownRight,
   FolderPlus,
   LogOut,
   PackageMinus,
@@ -10,7 +11,7 @@ import {
   Truck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   CommandDialog,
@@ -29,6 +30,7 @@ import { ScreenResults } from "@/features/panel-map/screen-results"
 import { SearchResults } from "@/features/search/search-results"
 import { useRecordSearch } from "@/features/search/use-record-search"
 import { ALL_NAV_ITEMS } from "./navigation"
+import { usePageCommandList } from "./page-commands"
 import { useNavAccess } from "./use-nav-access"
 
 // The jobs people start most, a keystroke away (docs/06 §5): screens of the panel's map
@@ -67,6 +69,10 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const records = useRecordSearch(search)
   const typed = search.trim()
   const typing = typed !== ""
+  // The page on screen's own places ("Alana git" on a product): first, they are why ⌘K was pressed there
+  const here = usePageCommandList()
+  // A place picked on the page moves the focus itself, once the menu has closed
+  const after = useRef<(() => void) | null>(null)
   // Closed, it forgets what was typed: a new opening starts empty
   const change = (next: boolean) => {
     if (!next) {
@@ -111,6 +117,14 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
       className="top-0 bottom-auto rounded-t-none rounded-b-lg border-t-0 border-b sm:top-[12vh] sm:max-w-xl sm:translate-y-0"
       title={t("command.title")}
       description={t("command.description")}
+      onCloseAutoFocus={(event) => {
+        const action = after.current
+        if (action) {
+          after.current = null
+          event.preventDefault()
+          action()
+        }
+      }}
     >
       <CommandInput
         placeholder={t("command.placeholder")}
@@ -119,6 +133,24 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
       />
       <CommandList>
         <CommandEmpty>{t("command.empty")}</CommandEmpty>
+        {here ? (
+          <CommandGroup heading={here.heading}>
+            {here.items.map((item) => (
+              <CommandItem
+                key={item.key}
+                value={`${item.label} ${item.key}`}
+                keywords={[...(item.keywords ?? [])]}
+                onSelect={() => {
+                  after.current = item.run
+                  change(false)
+                }}
+              >
+                <CornerDownRight />
+                {item.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        ) : null}
         {/* Typed words find the screens, the menu's pages and settings tabs among them */}
         <ScreenResults
           search={search}

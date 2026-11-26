@@ -120,6 +120,8 @@ export function BrandBlock({
   t,
   about,
   withContact,
+  bare = false,
+  className,
   block,
   children,
 }: {
@@ -127,6 +129,10 @@ export function BrandBlock({
   t: Translate
   about: string | null
   withContact: boolean
+  /** Only the logo, the line and the profiles: no address, phone or e-mail (`brand_contact: hide`). */
+  bare?: boolean
+  /** Overrides the block's width on the brand columns' grid. */
+  className?: string | undefined
   /**
    * Drawn as the free rows footer's block (adr/0070): its own logo (null:
    * the name) and profiles, its heading's id, the address only when the
@@ -148,7 +154,7 @@ export function BrandBlock({
   return (
     <section
       aria-labelledby={headingId}
-      className={cn("flex flex-col gap-5", !block && "lg:col-span-4")}
+      className={cn("flex flex-col gap-5", !block && "lg:col-span-4", className)}
     >
       {logo ? (
         <h2 id={headingId} className="flex min-h-11 items-center">
@@ -179,7 +185,7 @@ export function BrandBlock({
           </li>
         </ul>
       )}
-      {!block && (
+      {!block && !bare && (
         <ul className="flex flex-col text-sm">
           {contact.address && (
             <li className="flex items-start gap-3 py-2 text-text-2">

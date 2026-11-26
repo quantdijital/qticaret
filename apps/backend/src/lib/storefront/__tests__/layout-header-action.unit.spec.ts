@@ -66,6 +66,7 @@ describe("the header's action button on every variant", () => {
       sticky: true,
       menu_images: "submenus",
       search_style: "field",
+      tool_labels: "show",
       highlight_link: placed,
     })
     expect(mainSectionsOf(doc).header_bar.highlight_link).toBeNull()

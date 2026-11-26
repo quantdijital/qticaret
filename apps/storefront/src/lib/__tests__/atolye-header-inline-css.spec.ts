@@ -22,6 +22,13 @@ describe("the one-row header's stylesheet", () => {
     }
   })
 
+  it("hides the tools' words on their own mark, reaching the round tools only", () => {
+    expect(css).toContain(
+      '.gf-head[data-variant="inline"][data-tool-words="hidden"] .gf-tool > span[aria-hidden="true"]'
+    )
+    expect(css).not.toContain('[data-tools="icons"]')
+  })
+
   it("marks the page's link in the accent colour", () => {
     expect(css).toContain("color: var(--highlight)")
   })

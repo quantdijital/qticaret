@@ -74,7 +74,7 @@ describe("the theme panel's tour card settings", () => {
   it("finds them in the settings search by their words, a dated card's only with the flag", () => {
     const keys = (query: string, flags: readonly string[] = []) =>
       searchTheme(query, THEME, standard, t, new Set(flags)).map((hit) => hit.field.key)
-    expect(keys("üstünde")).toEqual(["product_card.text_position"])
+    expect(keys("üstünde")).toContain("product_card.text_position")
     expect(keys("kişi başı")).not.toContain("product_card.per_person")
     expect(keys("tur süresi")).not.toContain("product_card.duration_row")
     expect(keys("kişi başı", ["catalog.booking"])).toContain("product_card.per_person")

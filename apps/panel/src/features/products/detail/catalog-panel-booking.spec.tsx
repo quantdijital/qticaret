@@ -5,7 +5,7 @@ import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
-import { CatalogCard } from "./catalog-card"
+import { CatalogPanel } from "./catalog-panel"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -52,19 +52,18 @@ function setup(catalog: Partial<ProductCatalog>, flags: Record<string, boolean>)
   })
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <CatalogCard productId="prod_1" />
+      <CatalogPanel productId="prod_1" />
     </QueryClientProvider>
   )
 }
 
-async function openDialog() {
-  await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+function openDialog() {
+  return screen.findByRole("form", { name: "Katalog bilgileri" })
 }
 
 const ON = { "catalog.non_physical": true, "catalog.booking": true }
 
-describe("CatalogCard: dated sale", () => {
+describe("CatalogPanel: dated sale", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })

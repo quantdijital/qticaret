@@ -1,37 +1,33 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
-import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
+import { DirtyRegistryProvider } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SaveBar } from "@qticaret/admin-ui/patterns/save-bar"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
-import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { useCan } from "@/features/auth/api/staff"
 import { EditorLayout } from "@/features/content/components/editor-layout"
 import { productQuery } from "@/features/products/api/products"
+import type { ProductDetail } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
-import { ProductDescriptionCard } from "@/features/products/detail/description-card"
-import { GeneralCard } from "@/features/products/detail/general-card"
-import { MediaCard } from "@/features/products/detail/media-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
-import { ProductSections, ProductSideCards } from "@/features/products/detail/product-sections"
-import { PRODUCT_TARGETS } from "@/features/products/detail/sections"
-import { ProductShortDescriptionCard } from "@/features/products/detail/short-description-card"
-import { SummaryCard } from "@/features/products/detail/summary-card"
-import { VariantsCard } from "@/features/products/detail/variants-card"
-import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
+import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
+import { usePartDraws } from "@/features/products/detail/use-part-draws"
+import { useDataCard } from "@/features/products/detail/use-data-card"
+import { usePartAttention, usePartMarks } from "@/features/products/detail/use-product-findings"
+import { LayoutSheet } from "@/features/products/layout/layout-sheet"
+import { PartNav } from "@/features/products/layout/part-nav"
+import type { PartKey } from "@/features/products/layout/parts"
+import { HiddenLine, PartSlot } from "@/features/products/layout/part-slot"
+import { useGoToCommands } from "@/features/products/layout/use-go-to-commands"
+import { usePageLayout } from "@/features/products/layout/use-page-layout"
+import { useSideBySide } from "@/features/products/layout/use-side-by-side"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/products/$id")
-
-/** A main card's anchor: the advisor's "go to field" lands on it, its top in sight. */
-function Anchor({ id, children }: { id: string; children: ReactNode }) {
-  return (
-    <div id={id} className="flex min-w-0 scroll-mt-20 flex-col">
-      {children}
-    </div>
-  )
-}
 
 function DetailSkeleton() {
   return (
@@ -49,12 +45,15 @@ function DetailSkeleton() {
 }
 
 /**
- * One product (docs/06 "Ürün sayfası"): what is edited most first (its
- * name and address, its variants, each opening in a dialog, its pictures,
- * its description), its search appearance and seldom-edited parts folded
- * under them to a line each; beside them, following the scroll, its
- * facts, the SEO advisor and short cards for categories, catalog details
- * and the parcel, each edited in a dialog. Every card saves on its own.
+ * One product (docs/06 "Ürün sayfası"; WooCommerce's layout): what is
+ * edited most first (its name and address, its pictures, its description),
+ * the "Ürün verileri" card with its type and tabs (price, stock, parcel,
+ * attributes, variants, catalog, add-ons and price history), its search
+ * appearance folded to a line; beside them, a narrow column following the
+ * scroll with its facts, the SEO advisor and its categories, edited in
+ * place. Every form saves on its own and on the one save bar. The
+ * shop lays the page out for its team ("Sayfayı düzenle"): each column's
+ * order and the parts it hides.
  */
 export function ProductDetailPage() {
   const { t } = useTranslation()
@@ -79,50 +78,101 @@ export function ProductDetailPage() {
       </div>
     )
   }
+  return <ProductPage product={product} back={back} />
+}
+
+function ProductPage({
+  product,
+  back,
+}: {
+  product: ProductDetail
+  back: { to: string; label: string }
+}) {
+  const attention = usePartAttention(product)
+  const draws = usePartDraws(product.id)
+  const data = useDataCard(product)
+  const page = usePageLayout(attention, draws, { simple: data.simple, open: data.open })
+  const marks = usePartMarks(product)
+  const wide = useSideBySide()
+  // The layout is the shop's: whoever may change its settings arranges it
+  const canArrange = useCan("settings")
+  const slot = (key: PartKey) => {
+    const why = page.shownWhy(key)
+    return why === "off" ? undefined : why
+  }
+  useGoToCommands({
+    layout: page.layout,
+    draws,
+    goToKey: page.goToKey,
+    goTo: page.goTo,
+    simple: data.simple,
+  })
+  const shown = (keys: readonly PartKey[]) => keys.filter((key) => slot(key) !== undefined)
+  // Side by side, the bar heads the main column and names its parts; narrower, the whole page's
+  const nav = (
+    <PartNav
+      parts={wide ? shown(page.layout.main) : shown([...page.layout.main, ...page.layout.side])}
+      marks={marks}
+      wide={wide}
+      onGo={page.goToKey}
+    />
+  )
+  // The folded parts the shop has start open ("Gelişmiş"), by their remembered names
+  const open = new Set<string>(page.layout.open.map((key) => `product.${key}`))
   return (
-    <div className="flex flex-col gap-[var(--grid-gap)]">
-      <PageHeader
-        title={product.title}
-        badge={<ProductStatusBadge status={product.status} />}
-        back={back}
-        action={<ProductActions product={product} />}
-      />
-      <EditorLayout
-        main={
-          <>
-            <Anchor id="product-general">
-              <GeneralCard product={product} />
-            </Anchor>
-            <Anchor id="product-variants">
-              <VariantsCard product={product} />
-            </Anchor>
-            <Anchor id="product-media">
-              <MediaCard product={product} />
-            </Anchor>
-            <Anchor id="product-description">
-              <ProductDescriptionCard product={product} />
-            </Anchor>
-            {/* ADR-0055 Ek 2026-11-06: under the long description, as WordPress has it */}
-            <Anchor id="product-short-description">
-              <ProductShortDescriptionCard product={product} />
-            </Anchor>
-            <ProductSections product={product} />
-          </>
-        }
-        side={
-          <>
-            <SummaryCard product={product} />
-            <AdvisorCard
-              kind="product"
-              id={product.id}
-              version={product.updated_at}
-              targets={PRODUCT_TARGETS}
-              onTarget={revealSection}
-            />
-            <ProductSideCards product={product} />
-          </>
-        }
-      />
-    </div>
+    <DirtyRegistryProvider>
+      <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
+        <div className="flex flex-col gap-[var(--grid-gap)]">
+          <PageHeader
+            title={product.title}
+            badge={<ProductStatusBadge status={product.status} />}
+            back={back}
+            action={
+              <ProductActions
+                product={product}
+                onCustomize={
+                  canArrange
+                    ? () => {
+                        page.setDraft(page.saved)
+                      }
+                    : undefined
+                }
+              />
+            }
+          />
+          {wide ? null : nav}
+          <EditorLayout
+            main={
+              <>
+                {wide ? nav : null}
+                {page.layout.main.map((key) => {
+                  const why = slot(key)
+                  return why === undefined ? null : (
+                    <PartSlot key={key} part={key} why={why}>
+                      <MainPartView
+                        part={key}
+                        product={product}
+                        data={{ state: data, slot, draws, marks }}
+                      />
+                    </PartSlot>
+                  )
+                })}
+                <HiddenLine parts={page.away} onShow={page.showAll} />
+              </>
+            }
+            side={page.layout.side.map((key) => {
+              const why = slot(key)
+              return why === undefined ? null : (
+                <PartSlot key={key} part={key} why={why}>
+                  <SidePartView part={key} product={product} onTarget={page.goTo} />
+                </PartSlot>
+              )
+            })}
+          />
+          <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
+          <SaveBar />
+        </div>
+      </SectionDefaults>
+    </DirtyRegistryProvider>
   )
 }

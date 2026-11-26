@@ -10,6 +10,7 @@ import { stepNumber, stepsSettingsOf } from "@qticaret/types/section-steps"
 import type {
   PhotoCollageSectionView,
   StatsSectionView,
+  SocialLinkView,
   StepsSectionView,
   Translate,
 } from "@qticaret/ui"
@@ -24,6 +25,7 @@ import { layoutImage, layoutLink } from "./layout"
 export function statsView(
   section: StoreStatsSection,
   t: Translate,
+  profiles: readonly SocialLinkView[] = [],
   /** The hand note in the shop's accent face (`noteInHand`); absent: not. */
   hand = false
 ): StatsSectionView | null {
@@ -45,6 +47,10 @@ export function statsView(
         ...settings,
         ...(section.eyebrow ? { eyebrow: section.eyebrow } : {}),
         ...(note ? { note } : {}),
+        // The profiles at the row's end only while the shop asks and has one
+        ...(settings.social === "on" && profiles.length > 0
+          ? { follow: { title: t("home.stats_follow"), profiles: [...profiles] } }
+          : {}),
       }
     : null
 }

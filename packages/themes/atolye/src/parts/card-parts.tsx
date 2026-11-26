@@ -88,7 +88,13 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
         </li>
       )}
       {rating && (
-        <li className="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
+        <li
+          className={
+            product.look?.split
+              ? "gf-card-pill-dark flex items-center gap-1 rounded-pill px-2 py-1"
+              : "flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text"
+          }
+        >
           <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
           <span aria-hidden="true" className="tabular">
             {rating.average}

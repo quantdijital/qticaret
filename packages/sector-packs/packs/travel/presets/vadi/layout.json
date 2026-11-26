@@ -9,7 +9,8 @@
       "variant": "inline",
       "sticky": true,
       "menu_images": "off",
-      "search_style": "icon"
+      "search_style": "icon",
+      "tool_labels": "hide"
     }
   ],
   "home": [
@@ -24,7 +25,12 @@
       "heading": "Doğayı keşfet.",
       "title_accent": "Kendi rotanı bul.",
       "text": "Nefes kesen yerler, unutulmaz deneyimler; hepsi küçük gruplar için özenle hazırlandı.",
-      "links": [{ "$href": "/magaza", "label": "Turları keşfet" }],
+      "links": [
+        {
+          "$href": "/magaza",
+          "label": "Turları keşfet"
+        }
+      ],
       "image": {
         "$image": "images/kapak-braies.webp",
         "alt": "Çam ormanlarıyla çevrili turkuaz bir dağ gölü ve arkasında yükselen kayalık zirveler"
@@ -50,14 +56,19 @@
       "ends_at": null,
       "variant": "carousel",
       "title": "Popüler rotalar",
-      "source": { "kind": "best_sellers" },
+      "source": {
+        "kind": "best_sellers"
+      },
       "limit": 12,
-      "more": { "$href": "/magaza", "label": "Tüm turlar" },
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm rotalar"
+      },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
         "mobile": "peek",
-        "arrows": "always",
+        "arrows": "hidden",
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
@@ -82,7 +93,7 @@
         "align": "center",
         "width": null
       },
-      "title": "Tur türleri",
+      "title": "Gezi türleri",
       "category_ids": [],
       "show_count": false,
       "more": null,
@@ -90,11 +101,15 @@
       "phone": "scroll",
       "category_icons": {},
       "category_icons_by_handle": {
-        "yurt-ici-turlar": "map_pin",
-        "yurt-disi-turlar": "plane",
-        "gemi-turlari": "compass",
-        "etkinlik-ve-atolyeler": "calendar"
-      }
+        "macera": "mountain",
+        "plaj": "palm",
+        "doga": "leaf",
+        "kultur": "landmark",
+        "balayi": "heart",
+        "aile": "users"
+      },
+      "row_style": "strip",
+      "category_handles": ["macera", "plaj", "doga", "kultur", "balayi", "aile"]
     },
     {
       "id": "geziyazilari",
@@ -107,7 +122,13 @@
       "limit": 2,
       "eyebrow": "Gezi yazıları",
       "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
-      "link": { "$href": "/blog", "label": "Tüm yazılar" }
+      "panel_tone": "tint",
+      "ornament": "leaves",
+      "cover_ratio": "wide",
+      "link": {
+        "$href": "/blog",
+        "label": "Tüm yazılar"
+      }
     },
     {
       "id": "sezonbandi",
@@ -124,8 +145,10 @@
         "align": null,
         "width": null
       },
-      "eyebrow": "Erken rezervasyon",
+      "eyebrow": "Özel fırsat",
       "edge": "curved",
+      "button_tone": "accent",
+      "ornament": "flower",
       "slides": [
         {
           "image": {
@@ -135,13 +158,16 @@
           "mobile_image": null,
           "heading": "Yaz yaylalarına şimdiden yer ayırtın",
           "text": "Karadeniz ve Doğu Karadeniz yayla turlarında ilk kalkışların yerleri sınırlı.",
-          "link": { "$href": "/magaza", "label": "Kalkışları gör" },
+          "link": {
+            "$href": "/magaza",
+            "label": "Kalkışları gör"
+          },
           "second_link": null,
           "tone": "light"
         }
       ],
       "width": "boxed",
-      "height": "medium",
+      "height": "low",
       "text_position": "middle_left",
       "overlay": "none",
       "button_style": "solid"
@@ -162,13 +188,35 @@
       },
       "title": null,
       "items": [
-        { "value": "120+", "label": "Rota", "text": null, "icon": "map_pin" },
-        { "value": "8.000+", "label": "Mutlu gezgin", "text": null, "icon": "users" },
-        { "value": "4,8", "label": "Ortalama puan", "text": null, "icon": "star" },
-        { "value": "15", "label": "Yıllık deneyim", "text": null, "icon": "calendar" }
+        {
+          "value": "120+",
+          "label": "Rota",
+          "text": null,
+          "icon": "map_pin"
+        },
+        {
+          "value": "8.000+",
+          "label": "Mutlu gezgin",
+          "text": null,
+          "icon": "users"
+        },
+        {
+          "value": "4,8",
+          "label": "Ortalama puan",
+          "text": null,
+          "icon": "star"
+        },
+        {
+          "value": "15",
+          "label": "Yıllık deneyim",
+          "text": null,
+          "icon": "calendar"
+        }
       ],
       "dividers": "off",
-      "icons": "on"
+      "icons": "on",
+      "arrangement": "row",
+      "social": "on"
     }
   ],
   "footer": [
@@ -188,7 +236,10 @@
       "top_strip": false,
       "about": "Doğaya açılan rotalarda küçük gruplarla turlar. Programlar, dahil olanlar ve kalkış tarihleri her turun sayfasında.",
       "ground": "well",
-      "badge_style": "card"
+      "badge_style": "card",
+      "news_place": "column",
+      "brand_contact": "hide",
+      "bottom_align": "center"
     },
     {
       "id": "vadibulten",
@@ -197,7 +248,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "standard",
-      "title": "Yeni rotalardan ilk siz haberdar olun",
+      "title": "E-bülten",
       "text": null,
       "description": "Yeni rotalar ve erken rezervasyon dönemleri e-postanızda."
     }
@@ -229,7 +280,9 @@
       "ends_at": null,
       "variant": "grid",
       "title": "Bunlara da göz atın",
-      "source": { "kind": "same_category" },
+      "source": {
+        "kind": "same_category"
+      },
       "limit": 4,
       "card_variant": null,
       "columns": 4,

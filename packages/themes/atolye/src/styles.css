@@ -49,6 +49,7 @@
 @import "./thin.css";
 @import "./density.css";
 @import "./announcement.css";
+@import "./kit-steps.css";
 @import "./marquee.css";
 @import "./marquee-options.css";
 @import "./card.css";
@@ -57,6 +58,8 @@
 @import "./catalog-fit.css";
 @import "./hero-full.css";
 @import "./search-boxed.css";
+@import "./search-fields.css";
+@import "./hover.css";
 @import "./collage.css";
 @import "./panels.css";
 @import "./surface.css";

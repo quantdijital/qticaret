@@ -10,6 +10,13 @@ const PREFIX = "qt.panel.section"
  */
 export const SectionOwner = createContext<() => string | undefined>(() => undefined)
 
+/**
+ * How the page around would have a section start, by its remembered name
+ * (the shop's layout opening its folded parts, "Gelişmiş"); undefined
+ * leaves the section's own default. A person's own choice still wins.
+ */
+export const SectionDefaults = createContext<(name: string) => boolean | undefined>(() => undefined)
+
 const keyOf = (user: string, name: string) => `${PREFIX}:${user}:${name}`
 
 /** The person's last choice for a section, or none; storage may refuse (private mode, blocked). */
@@ -28,6 +35,34 @@ function writeSectionOpen(user: string, name: string, open: boolean): void {
   } catch {
     // Not remembered: the section opens as it would the first time
   }
+}
+
+/**
+ * A person's last choice among a few (a card's open tab), remembered per
+ * user in this browser beside the sections' (`name`: "product.dataTab");
+ * the fallback until they chose, or when storage refuses.
+ */
+export function useRememberedChoice<T extends string>(
+  name: string,
+  fallback: T
+): [string, (next: T) => void] {
+  const user = useContext(SectionOwner)() ?? "anyone"
+  const [value, setValue] = useState<string>(() => {
+    try {
+      return window.localStorage.getItem(keyOf(user, name)) ?? fallback
+    } catch {
+      return fallback
+    }
+  })
+  const choose = (next: T) => {
+    setValue(next)
+    try {
+      window.localStorage.setItem(keyOf(user, name), next)
+    } catch {
+      // Not remembered: the next visit starts on the fallback
+    }
+  }
+  return [value, choose]
 }
 
 // The sections on the page by their element id: a jump to a field inside a closed one opens it first
@@ -101,12 +136,21 @@ interface SectionOpenOptions {
 export function useSectionOpen({ id, name, attention, defaultOpen }: SectionOpenOptions) {
   // The signed-in person, as the app already loaded them; none in a test
   const user = useContext(SectionOwner)() ?? "anyone"
-  const [open, setOpen] = useState(() => attention || (readSectionOpen(user, name) ?? defaultOpen))
+  const preferred = useContext(SectionDefaults)(name) ?? defaultOpen
+  const [open, setOpen] = useState(() => attention || (readSectionOpen(user, name) ?? preferred))
   const [needed, setNeeded] = useState(attention)
   if (attention !== needed) {
     setNeeded(attention)
     if (attention) {
       setOpen(true)
+    }
+  }
+  // The page's default changed (its layout loaded, or a preset is tried): followed until the person chose
+  const [wanted, setWanted] = useState(preferred)
+  if (preferred !== wanted) {
+    setWanted(preferred)
+    if (readSectionOpen(user, name) === null) {
+      setOpen(attention || preferred)
     }
   }
   useEffect(() => {

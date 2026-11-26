@@ -3,6 +3,7 @@ import type { ListingPageView, SortOptionView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { SheetOpener } from "./FilterSheet"
 import { Menu } from "./Menu"
+import { ViewSwitch } from "./ViewSwitch"
 
 /** The sort as a small menu of links (never indexed: nofollow), the current one ticked. */
 function Sort({
@@ -79,16 +80,23 @@ export function Toolbar({
   const current = view.sort.find((option) => option.current) ?? view.sort[0] ?? null
   const sort = current !== null && view.total > 1 ? current : null
   const on = view.active.length
+  // The grid/list switch: only while the shop offers it; without it the bar is as it was
+  const swap = view.viewSwitch ?? null
   return (
     <div className="flex flex-col gap-4 max-lg:contents">
-      <div className="max-lg:contents lg:flex lg:items-center lg:justify-between">
+      <div
+        className={cn(
+          "max-lg:contents lg:flex lg:min-h-11 lg:items-center lg:justify-between",
+          swap && "lg:gap-2"
+        )}
+      >
         <h2
           id={results}
           className="max-w-none scroll-mt-40 text-md font-semibold tracking-normal text-text-2"
         >
           {view.countLabel ?? t("listing.count", { count: view.total })}
         </h2>
-        {(sheet !== null || sort !== null) && (
+        {(sheet !== null || sort !== null || swap !== null) && (
           // The column's 24 px gap less the margins: 12 px under the count, 16 px to
           // the chips and 24 px to the grid, as before; its own fill hides the cards
           // that scroll under it
@@ -96,7 +104,8 @@ export function Toolbar({
             data-gf-stick=""
             className={cn(
               "gf-listbar -mx-(--gutter) -mt-5 grid grid-cols-[repeat(2,minmax(0,1fr))] gap-2 bg-paper px-(--gutter) py-2 data-js-stuck:shadow-[0_1px_0_var(--color-rule)] lg:contents",
-              on > 0 ? "-mb-4" : "-mb-2"
+              on > 0 ? "-mb-4" : "-mb-2",
+              swap && "grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
             )}
           >
             {sheet && (
@@ -119,7 +128,13 @@ export function Toolbar({
                 options={view.sort}
                 current={sort}
                 t={t}
-                className={sheet ? "" : "col-span-2 justify-self-start"}
+                className={cn(sheet ? "" : "col-span-2 justify-self-start", swap && "lg:ml-auto")}
+              />
+            )}
+            {swap && (
+              <ViewSwitch
+                view={swap}
+                className={cn("justify-self-end", sort ? "" : "col-start-3 lg:ml-auto")}
               />
             )}
           </div>

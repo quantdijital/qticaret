@@ -31,6 +31,18 @@ export const STYLE_KIT = {
    * content scrolls in, images fading in and a pressed button; `calm` today's.
    */
   motion: ["calm", "lively"],
+  /**
+   * S8 (adr/0067 Ek 2026-11-25): the page's content column, theme-wide;
+   * `standard` today's 1440 px, `narrow` 1344 px (a showcase's tighter
+   * measure, as Shopify themes' page width).
+   */
+  page_width: ["standard", "narrow"],
+  /**
+   * S9 (adr/0067 Ek 2026-11-25): the words on the accent colour (a button,
+   * a pill); `auto` today's (white or ink, whichever reads more), `light`
+   * always white, for a bright accent that holds white bold words at 3:1.
+   */
+  accent_ink: ["auto", "light"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -50,6 +62,8 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKit> = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 /** The attribute a step off the default is marked with on the theme's root element. */

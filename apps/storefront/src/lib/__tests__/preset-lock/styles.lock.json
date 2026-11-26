@@ -18,7 +18,7 @@
       "file": "buy.css"
     },
     {
-      "sha256": "af138dbdc6dc7e1ebc4a8705fad6da20bbcb93e192184130247dd5965e2dc8db",
+      "sha256": "ae6163f2da35fc7c0f985ef2f5430c32346a9d9e70b779df03a520ef9bf548f0",
       "file": "card-over.css"
     },
     {
@@ -50,7 +50,7 @@
       "file": "density.css"
     },
     {
-      "sha256": "27260cb8665d305ee70a9febcebc7c9db563b654f3a150815313c1be7ee85e0c",
+      "sha256": "f9c0bf7355b2f8a27dd269acbd1114f6c02ef17adec70603bcced07040ff96c6",
       "file": "footer-columns.css"
     },
     {
@@ -66,12 +66,20 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "316e8fc8209725a9daa3361369cd5e570fbb7757969e4ae91d4a5ac137633011",
+      "sha256": "f6bd41322804947ea20412facd0faead72e24871506074163b4685723f8c3b9b",
       "file": "header-inline.css"
     },
     {
-      "sha256": "8aa168b9e0f425293a510f90e66608580dd16c4d584e44b0ba2d0db25349c4ae",
+      "sha256": "3443bd86317cadf03bc96d097337943958625e519d2b765ed7c8b20a9d8d03a6",
       "file": "hero-full.css"
+    },
+    {
+      "sha256": "3beee3bcb91134bf5d5b699022315d5daa1d964ebced3f28f0f718d58794861b",
+      "file": "hover.css"
+    },
+    {
+      "sha256": "64528ad209dbb9f42bfea320dccf69e385044060045d6a7bb254a5162402e123",
+      "file": "kit-steps.css"
     },
     {
       "sha256": "d5a34f54e1df549be38dafb4b452a6fb021d71de6e4120c699cd14c9a6db5728",
@@ -126,6 +134,10 @@
       "file": "search-boxed.css"
     },
     {
+      "sha256": "145898ab80065ddb3e9fea61a2ba9c0a19009dc49c04286d908ccafe3e98d42a",
+      "file": "search-fields.css"
+    },
+    {
       "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
       "file": "search-toggle.css"
     },
@@ -146,7 +158,7 @@
       "file": "slider.css"
     },
     {
-      "sha256": "8c6684b33f5467b15eb23d34be2fabd4423afa05b56b25fd170dccef662308a9",
+      "sha256": "bfe03782d802406344c16479c9feacce59900df477c18dbc361c4065b0363dfc",
       "file": "split.css"
     },
     {
@@ -158,7 +170,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "8c8508813ee9a388fcbc0b2037d6ed53784371b4ccea587440ec5baeb66aefe3",
+      "sha256": "b0d227e75f09ce6365f3e291fd02601a78ed7384902d18ea16ec9a816bae472e",
       "file": "styles.css"
     },
     {

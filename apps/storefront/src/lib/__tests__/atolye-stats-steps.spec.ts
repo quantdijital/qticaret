@@ -184,4 +184,39 @@ describe("Atölye's figures strip and steps", () => {
     expect(html).not.toContain("md:grid-cols-2")
     expect(html).toContain(">1</span>")
   })
+
+  it("keeps the figures stacked without profiles by default, even with the shop's profiles at hand", () => {
+    const profiles = [
+      { label: "Instagram", href: "https://instagram.com/vadi", network: "instagram" as const },
+    ]
+    const view = statsView(strip(), t, profiles)
+    if (!view) {
+      throw new Error("no strip")
+    }
+    expect(view).toMatchObject({ arrangement: "stacked", social: "off" })
+    expect(view.follow).toBeUndefined()
+    const html = home([view])
+    expect(html).toContain("lg:grid-cols-3")
+    expect(html).not.toContain("Bizi izleyin")
+  })
+
+  it("sets the figures in one row with the shop's profiles at its end", () => {
+    const profiles = [
+      { label: "Instagram", href: "https://instagram.com/vadi", network: "instagram" as const },
+    ]
+    const view = statsView(strip({ arrangement: "row", social: "on" }), t, profiles)
+    if (!view) {
+      throw new Error("no strip")
+    }
+    expect(view.follow).toEqual({ title: "Bizi izleyin", profiles })
+    // On, but no profile to show: no empty line
+    expect(statsView(strip({ social: "on" }), t, [])?.follow).toBeUndefined()
+    const html = home([view])
+    expect(html).toContain("grid-cols-[auto_minmax(0,1fr)]")
+    expect(html).not.toContain("lg:grid-cols-3")
+    expect(html).toContain(">Bizi izleyin</p>")
+    expect(html).toContain('href="https://instagram.com/vadi"')
+    expect(html).toContain('aria-label="Instagram"')
+    expect(html).toContain('rel="noopener noreferrer me"')
+  })
 })

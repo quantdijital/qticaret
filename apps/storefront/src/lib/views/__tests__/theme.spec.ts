@@ -69,6 +69,7 @@ describe("themeSettings", () => {
       section_spacing: "compact",
       surface_style: "lined",
       listing_text: { size: "lg", align: "center", width: "wide", collapse: false },
+      listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
       search_form: {
         attribute_key: "gidilecek_yer",
         show_category: false,
@@ -88,6 +89,8 @@ describe("themeSettings", () => {
       media_ground: "page",
       density: "compact",
       motion: "lively",
+      page_width: "narrow",
+      accent_ink: "light",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -132,6 +135,8 @@ describe("themeSettings", () => {
       surface_style: "filled",
       // adr/0075 §6: the listing text's defaults
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      // A listing page as it was: a grid, no switch, the trail to the page itself
+      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {
         attribute_key: null,
@@ -155,6 +160,9 @@ describe("themeSettings", () => {
       density: "airy",
       // adr/0067 Ek 2026-11-18: today's motion
       motion: "calm",
+      // adr/0067 Ek 2026-11-25: the page width and the accent words as before
+      page_width: "standard",
+      accent_ink: "auto",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -380,6 +388,8 @@ describe("themeView", () => {
         media_ground: "well",
         density: "airy",
         motion: "calm",
+        page_width: "standard",
+        accent_ink: "auto",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")

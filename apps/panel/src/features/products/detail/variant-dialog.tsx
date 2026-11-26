@@ -109,6 +109,7 @@ export function VariantDialog({
       preorderOn={preorderOn}
       measures={product}
       ties={imageTies(product, variant.id)}
+      saleTarget={{ productId: product.id, variantId: variant.id }}
     />
   )
 }

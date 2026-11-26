@@ -248,6 +248,11 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               variant: section.variant,
               disc: section.disc,
               phone: section.phone,
+              // Printed only off the default, so a row before it prints as it did
+              ...(section.row_style !== "stacked" ? { row_style: section.row_style } : {}),
+              ...(section.category_handles && section.category_handles.length > 0
+                ? { category_handles: section.category_handles }
+                : {}),
               category_icons: Object.fromEntries(
                 Object.entries(section.category_icons).filter(([id]) =>
                   section.category_ids.includes(id)

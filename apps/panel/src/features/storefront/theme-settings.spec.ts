@@ -47,6 +47,7 @@ const SAVED: ThemeSettings = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+  listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
   search_form: {
     attribute_key: "bolge",
     show_category: true,
@@ -66,6 +67,8 @@ const SAVED: ThemeSettings = {
   media_ground: "well",
   density: "airy",
   motion: "calm",
+  page_width: "standard",
+  accent_ink: "auto",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -80,6 +83,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       section_spacing: "normal",
       surface_style: "filled",
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
       search_form: { ...SAVED.search_form },
       menu_style: "filled",
       shadow: "float",
@@ -87,6 +91,8 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       media_ground: "well",
       density: "airy",
       motion: "calm",
+      page_width: "standard",
+      accent_ink: "auto",
     })
   })
 })
@@ -127,6 +133,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       section_spacing: "normal",
       surface_style: "filled",
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
       search_form: {
         attribute_key: null,
         show_category: true,
@@ -146,6 +153,8 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       media_ground: "well",
       density: "airy",
       motion: "calm",
+      page_width: "standard",
+      accent_ink: "auto",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })

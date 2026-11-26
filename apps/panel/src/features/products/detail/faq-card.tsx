@@ -14,6 +14,7 @@ import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { FAQ_LIMITS, faqItemIssue } from "@/features/ai/faq"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
 import { errorText } from "@/lib/errors"
+import { PRODUCT_SECTIONS } from "./sections"
 import { useFaqAi } from "./use-faq-ai"
 import type { FaqAi, FaqDraftItem } from "./use-faq-ai"
 
@@ -197,6 +198,13 @@ export function FaqCard({ productId }: { productId: string }) {
     <SectionCard
       title={t("products.faq.title")}
       description={t("products.faq.description")}
+      // Folded with the page's other seldom parts; a draft being written keeps it open
+      collapse={{
+        id: PRODUCT_SECTIONS.faq,
+        name: "product.faq",
+        summary: t(ai.open ? "products.faq.summaryOpen" : "products.faq.summary"),
+        attention: ai.open,
+      }}
       action={
         <Button
           type="button"

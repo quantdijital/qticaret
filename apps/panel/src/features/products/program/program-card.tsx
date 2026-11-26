@@ -6,6 +6,7 @@ import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
@@ -64,6 +65,16 @@ export function ProgramEditor({ productId, program }: { productId: string; progr
     })
   })
   const dirty = form.formState.isDirty
+  // The product page's save bar saves it too
+  useDirtyEntry({
+    dirty,
+    saving: save.isPending,
+    submit: () => void submit(),
+    reset: () => {
+      setFailure(null)
+      form.reset(valuesOf(program), FULL_RESET)
+    },
+  })
   return (
     <FormProvider {...form}>
       <form

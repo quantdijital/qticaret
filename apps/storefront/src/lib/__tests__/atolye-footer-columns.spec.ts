@@ -107,6 +107,48 @@ describe("the brand columns footer", () => {
     expect(html.indexOf('id="footer-brand"')).toBeLessThan(html.indexOf('id="bulten"'))
   })
 
+  it("sets the newsletter as the row's last column, the brand block bare, the line centred", () => {
+    const html = withNewsletter(
+      shopFixture({
+        newsletter: {
+          title: "E-bülten",
+          text: "",
+          description: "Fırsatlardan ilk siz haberdar olun.",
+        },
+        footerBar: bar(
+          {},
+          {
+            topStrip: false,
+            about: null,
+            newsPlace: "column",
+            brandContact: "hide",
+            bottomAlign: "center",
+          }
+        ),
+      })
+    )
+    expect(html).not.toContain('href="tel:')
+    expect(html).not.toContain('href="mailto:')
+    expect(html).toContain("lg:col-span-3")
+    expect(html).toContain("lg:col-span-6")
+    expect(html).toMatch(/lg:border-l lg:border-rule[^"]*"><section aria-labelledby="bulten"/)
+    expect(html).toContain("Fırsatlardan ilk siz haberdar olun.")
+    expect(html.indexOf('id="footer-brand"')).toBeLessThan(html.indexOf('id="bulten"'))
+    expect(html).toContain('data-align="center"')
+  })
+
+  it("keeps the newsletter under the brand block, its contact and the spread line by default", () => {
+    const html = withNewsletter(
+      shopFixture({
+        newsletter: { title: "Bülten", text: "" },
+        footerBar: bar({}, { topStrip: false, about: null }),
+      })
+    )
+    expect(html).not.toContain('data-align="center"')
+    expect(html).not.toContain("lg:col-span-3")
+    expect(html).toContain('href="mailto:bilgi@example.com"')
+  })
+
   it("shows the providers' marks while the shop names none, the carriers beside them", () => {
     const html = footerOf(
       renderFrame(
@@ -170,6 +212,7 @@ describe("the brand columns footer", () => {
     expect(css).toContain('.gf-footer-cols[data-ground="stage"]')
     expect(css).toContain(".gf-pay")
     expect(css).toContain('.gf-pay [data-mark="amex"] img')
+    expect(css).toContain('.gf-foot-line[data-align="center"]')
   })
 
   it("keeps up to four link columns in one row, five and more as many as fit", () => {

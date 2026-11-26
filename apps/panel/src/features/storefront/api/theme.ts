@@ -6,10 +6,12 @@ import {
   CARD_SOLD_OUT_ROWS,
   CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
+  LISTING_PAGE_DEFAULTS,
   LISTING_TEXT_ALIGNS,
   LISTING_TEXT_DEFAULTS,
   LISTING_TEXT_SIZES,
   LISTING_TEXT_WIDTHS,
+  LISTING_VIEWS,
   RADIUS_STEPS,
   SEARCH_FORM_CATEGORY_STYLES,
   SEARCH_FORM_DEFAULTS,
@@ -18,7 +20,13 @@ import {
   STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
 } from "@qticaret/types"
-import type { AccentFont, ListingTextSettings, SearchFormSettings, StyleKit } from "@qticaret/types"
+import type {
+  AccentFont,
+  ListingPageSettings,
+  ListingTextSettings,
+  SearchFormSettings,
+  StyleKit,
+} from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -104,6 +112,8 @@ export { STYLE_KIT }
  * one folds is a switch.
  */
 export { LISTING_TEXT_ALIGNS, LISTING_TEXT_SIZES, LISTING_TEXT_WIDTHS }
+/** A listing page's products as a grid or a list (its default; the switch and trail are switches). */
+export { LISTING_VIEWS }
 /** The search box's categories as a drop-down or as tabs (adr/0077 §1). */
 export { SEARCH_FORM_CATEGORY_STYLES }
 
@@ -159,6 +169,8 @@ export interface ThemeSettings extends StyleKit {
   surface_style: (typeof SURFACE_STYLES)[number]
   /** The listing pages' text at their foot (adr/0075 §6); the server fills a missing group. */
   listing_text: ListingTextSettings
+  /** A listing page's grid or list, the shopper's switch and its trail; the server fills a missing group. */
+  listing_page: ListingPageSettings
   /** The search box's fields (adr/0077 §1); the server fills a missing group. */
   search_form: SearchFormSettings
 }
@@ -216,6 +228,7 @@ export const GRAFIT_THEME: ThemeChoices = {
   section_spacing: "normal",
   surface_style: "filled",
   listing_text: { ...LISTING_TEXT_DEFAULTS },
+  listing_page: { ...LISTING_PAGE_DEFAULTS },
   search_form: { ...SEARCH_FORM_DEFAULTS },
   ...STYLE_KIT_DEFAULTS,
 }

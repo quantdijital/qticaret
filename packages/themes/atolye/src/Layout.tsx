@@ -19,6 +19,7 @@ import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
 import { layerMarks, rootMarks } from "./frame/root-marks"
 import { Marquee } from "./sections/Marquee"
+import { PointerCue } from "./frame/PointerCue"
 import { PopupHost } from "./frame/PopupHost"
 import { popupWords } from "./frame/popup-words"
 import { QuickViewHost } from "./frame/QuickViewHost"
@@ -189,6 +190,7 @@ export function Layout({
         {consent}
         <ScrollCue />
         <ImageCue />
+        <PointerCue />
       </LayerMarks>
     </div>
   )

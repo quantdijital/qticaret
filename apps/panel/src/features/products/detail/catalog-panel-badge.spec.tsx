@@ -5,7 +5,7 @@ import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
-import { CatalogCard } from "./catalog-card"
+import { CatalogPanel } from "./catalog-panel"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -55,17 +55,16 @@ function answer(manual: boolean, catalog: Partial<ProductCatalog> = {}) {
 function renderCard() {
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <CatalogCard productId="prod_1" />
+      <CatalogPanel productId="prod_1" />
     </QueryClientProvider>
   )
 }
 
-async function openDialog() {
-  await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
-  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+function openDialog() {
+  return screen.findByRole("form", { name: "Katalog bilgileri" })
 }
 
-describe("CatalogCard: the product's own badge", () => {
+describe("CatalogPanel: the product's own badge", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })
@@ -118,10 +117,10 @@ describe("CatalogCard: the product's own badge", () => {
     )
   })
 
-  it("says a saved badge on the card and clears it with an empty field", async () => {
+  it("shows a saved badge in its field and clears it with an empty field", async () => {
     answer(false, { badge: "Erken rezervasyon" })
     renderCard()
-    expect(await screen.findByText("Erken rezervasyon")).toBeInTheDocument()
+    expect(await screen.findByLabelText("Ürün rozeti")).toHaveValue("Erken rezervasyon")
     await openDialog()
     await userEvent.clear(await screen.findByLabelText("Ürün rozeti"))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))

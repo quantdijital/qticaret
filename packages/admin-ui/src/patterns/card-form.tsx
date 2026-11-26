@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { ADMIN_UI_NS } from "../i18n"
 import { CollapsibleSection } from "./collapsible-section"
 import type { CollapseOptions } from "./collapsible-section"
+import { useDirtyEntry } from "./dirty-registry"
 import { SectionCard } from "./section-card"
 import { Button } from "../ui/button"
 import { cn } from "../lib/utils"
@@ -54,6 +55,8 @@ export function CardForm({
   children,
 }: CardFormProps) {
   const { t } = useTranslation(ADMIN_UI_NS)
+  // On a page with one save bar, its changes are saved or let go there too
+  useDirtyEntry({ dirty, saving, submit: onSubmit, reset: onReset })
   const form = (
     <form
       noValidate

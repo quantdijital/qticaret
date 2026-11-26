@@ -29,6 +29,7 @@ import { reviewViews } from "./review-cards"
 import { programView } from "./program"
 import { relatedView } from "./related"
 import { richTextView } from "./rich-text"
+import { socialLinks } from "./frame"
 import { needsFlags, withFeatures } from "./section-features"
 import { shelfView } from "./shelf"
 import { collageView, statsView, stepsView } from "./points"
@@ -204,9 +205,13 @@ async function sectionView(
       return marqueeView(section, t)
     case "strip_gallery":
       return stripGalleryView(section, t)
-    case "stats":
+    case "stats": {
+      // The shop's profiles only while the strip shows them
+      const profiles = section.social === "on" ? socialLinks((await legalIdentity()).same_as) : []
       // The hand note's face is read only for a strip that has a note
-      return statsView(section, t, section.note ? await noteInHand(section.note) : false)
+      const hand = section.note ? await noteInHand(section.note) : false
+      return statsView(section, t, profiles, hand)
+    }
     case "photo_collage":
       return collageView(section, t)
     case "steps":

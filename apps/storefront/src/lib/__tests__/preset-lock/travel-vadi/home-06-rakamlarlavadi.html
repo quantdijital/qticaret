@@ -2,94 +2,168 @@
 <div class="group/look gf-look" data-align="center" data-qs="rakamlarlavadi">
   <section aria-label="Rakamlarla" class="gf-section">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
-      <dl
-        class="grid grid-cols-2 gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-4"
-      >
-        <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
-        >
-          <dt class="order-2 text-md font-semibold text-text">
-            Rota
-          </dt>
-          <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
-          >
-            120+
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-map-pin size-8 shrink-0 lg:size-9"
-              aria-hidden="true"
-            />
-          </dd>
+      <div class="flex flex-wrap items-center justify-between gap-x-(--gap-columns) gap-y-6">
+        <dl class="flex flex-wrap items-center gap-x-10 gap-y-5 lg:gap-x-14">
+          <div class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3">
+            <dt class="order-2 col-start-2 text-xs font-medium text-text-2">
+              Rota
+            </dt>
+            <dd
+              class="tabular order-1 col-start-2 text-[1.625rem] leading-none font-extrabold tracking-(--tracking-display)"
+            >
+              120+
+            </dd>
+            <dd aria-hidden="true" class="order-0 row-span-2 text-text">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-map-pin size-8 shrink-0 lg:size-9"
+                aria-hidden="true"
+              />
+            </dd>
+          </div>
+          <div class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3">
+            <dt class="order-2 col-start-2 text-xs font-medium text-text-2">
+              Mutlu gezgin
+            </dt>
+            <dd
+              class="tabular order-1 col-start-2 text-[1.625rem] leading-none font-extrabold tracking-(--tracking-display)"
+            >
+              8.000+
+            </dd>
+            <dd aria-hidden="true" class="order-0 row-span-2 text-text">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-users size-8 shrink-0 lg:size-9"
+                aria-hidden="true"
+              />
+            </dd>
+          </div>
+          <div class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3">
+            <dt class="order-2 col-start-2 text-xs font-medium text-text-2">
+              Ortalama puan
+            </dt>
+            <dd
+              class="tabular order-1 col-start-2 text-[1.625rem] leading-none font-extrabold tracking-(--tracking-display)"
+            >
+              4,8
+            </dd>
+            <dd aria-hidden="true" class="order-0 row-span-2 text-text">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-star size-8 shrink-0 lg:size-9"
+                aria-hidden="true"
+              />
+            </dd>
+          </div>
+          <div class="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3">
+            <dt class="order-2 col-start-2 text-xs font-medium text-text-2">
+              Yıllık deneyim
+            </dt>
+            <dd
+              class="tabular order-1 col-start-2 text-[1.625rem] leading-none font-extrabold tracking-(--tracking-display)"
+            >
+              15
+            </dd>
+            <dd aria-hidden="true" class="order-0 row-span-2 text-text">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-calendar-days size-8 shrink-0 lg:size-9"
+                aria-hidden="true"
+              />
+            </dd>
+          </div>
+        </dl>
+        <div class="flex flex-col gap-2 lg:border-l lg:border-rule lg:pl-(--gap-columns)">
+          <p id="bolum-rakamlarlavadi-izle" class="text-xs font-semibold text-text-2">
+            Bizi izleyin
+          </p>
+          <ul aria-labelledby="bolum-rakamlarlavadi-izle" class="flex flex-wrap gap-2">
+            <li>
+              <a
+                href="https://www.instagram.com/ornek"
+                rel="noopener noreferrer me"
+                target="_blank"
+                aria-label="Instagram"
+                class="inline-flex size-8 items-center justify-center rounded-pill bg-text text-paper no-underline transition-colors hover:bg-text-2"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                  class="size-5 shrink-0"
+                >
+                  <rect
+                    x="3.5"
+                    y="3.5"
+                    width="17"
+                    height="17"
+                    rx="5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                  </rect>
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3.75"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                  </circle>
+                  <circle cx="17" cy="7" r="1" fill="currentColor">
+                  </circle>
+                </svg>
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.youtube.com/@ornek"
+                rel="noopener noreferrer me"
+                target="_blank"
+                aria-label="YouTube"
+                class="inline-flex size-8 items-center justify-center rounded-pill bg-text text-paper no-underline transition-colors hover:bg-text-2"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  focusable="false"
+                  class="size-5 shrink-0"
+                >
+                  <rect
+                    x="2.5"
+                    y="5.5"
+                    width="19"
+                    height="13"
+                    rx="4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                  </rect>
+                  <path d="M10.25 9.25v5.5L15 12z" fill="currentColor">
+                  </path>
+                </svg>
+              </a>
+            </li>
+          </ul>
         </div>
-        <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
-        >
-          <dt class="order-2 text-md font-semibold text-text">
-            Mutlu gezgin
-          </dt>
-          <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
-          >
-            8.000+
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-users size-8 shrink-0 lg:size-9"
-              aria-hidden="true"
-            />
-          </dd>
-        </div>
-        <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
-        >
-          <dt class="order-2 text-md font-semibold text-text">
-            Ortalama puan
-          </dt>
-          <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
-          >
-            4,8
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-star size-8 shrink-0 lg:size-9"
-              aria-hidden="true"
-            />
-          </dd>
-        </div>
-        <div
-          class="flex min-w-0 flex-col gap-2 group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center"
-        >
-          <dt class="order-2 text-md font-semibold text-text">
-            Yıllık deneyim
-          </dt>
-          <dd
-            class="tabular order-1 text-[clamp(2.25rem,1.8vw+1.6rem,3.5rem)] leading-none font-extrabold tracking-(--tracking-display) break-words"
-          >
-            15
-          </dd>
-          <dd aria-hidden="true" class="order-0 text-signal in-[.gf-stage]:text-signal-on-stage">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-calendar-days size-8 shrink-0 lg:size-9"
-              aria-hidden="true"
-            />
-          </dd>
-        </div>
-      </dl>
+      </div>
     </div>
   </section>
 </div>

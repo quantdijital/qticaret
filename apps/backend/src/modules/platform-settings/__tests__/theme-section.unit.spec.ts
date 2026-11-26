@@ -72,6 +72,8 @@ describe("theme section", () => {
       surface_style: "filled",
       // adr/0075: a listing page's own text at its foot, normal size, a reading measure, folded
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
+      // A listing page: a grid, no switch, the trail to the page itself (today's page)
+      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {
         attribute_key: null,
@@ -95,6 +97,9 @@ describe("theme section", () => {
       density: "airy",
       // adr/0067 Ek 2026-11-18: today's motion
       motion: "calm",
+      // adr/0067 Ek 2026-11-25: the page width and the accent words as before
+      page_width: "standard",
+      accent_ink: "auto",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -315,6 +320,8 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       ...STYLE_KIT_DEFAULTS,
       // and before the listing text (adr/0075): its defaults
       listing_text: LISTING_TEXT_DEFAULTS,
+      // and before the listing page: today's page
+      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
       // and before the search form (adr/0077): its defaults
       search_form: SEARCH_FORM_DEFAULTS,
     })
@@ -322,6 +329,7 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       ...stored,
       ...STYLE_KIT_DEFAULTS,
       listing_text: { ...LISTING_TEXT_DEFAULTS, size: "lg" },
+      listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
       search_form: { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" },
       section_spacing: "compact",
       surface_style: "lined",

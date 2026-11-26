@@ -1,0 +1,122 @@
+/*
+ * The search box's fields under a pointer (parts/SearchForm.tsx, its
+ * cells a `label` with its icon as a direct child; owner 2026-11-26):
+ *
+ * - A click leaves no frame: the field's ring shows only while the focus
+ *   came from the keyboard (`:focus-visible`), never after a mouse click.
+ *   A clicked drop-down matches `:focus-visible` in Chromium, so a press
+ *   also marks `<html>` until the next Tab (`frame/PointerCue`).
+ * - Under a pointer a field's ground darkens a little over 200 ms, its
+ *   corners the inner radius, so they sit with the white box's own.
+ *   Boxed fields (`search-boxed.css`) darken their own box instead.
+ * - Once the bar is one row (768 px; a dated bar 1024 px) every hairline
+ *   between two fields is the one between the place and the dates: a
+ *   straight, full-height 1 px rule. A field's own left border bent along
+ *   its rounded corners; it is a straight line on its edge now. Boxed,
+ *   the boxes stand apart and the same rule stands in the middle of the gap
+ *   (before, only the dates' group drew one).
+ *
+ * Unlayered, as the cells' own utility classes it answers. The header's
+ * search has no such cell (its label is a hidden one) and is untouched.
+ */
+form[role="search"] label:has(> svg) {
+  position: relative;
+  isolation: isolate;
+}
+form[role="search"] label:has(> svg):focus-within:not(:has(:focus-visible)),
+html[data-js-pointer] form[role="search"] label:has(> svg):focus-within {
+  outline: none;
+}
+
+/* The ground under a pointer: a layer under the field's icon and control */
+form[role="search"]:not([data-fields="boxed"]) label:has(> svg)::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0.25rem;
+  border-radius: var(--radius-inner);
+  background-color: transparent;
+  content: "";
+  pointer-events: none;
+  transition: background-color 200ms ease;
+}
+[data-fields="boxed"] label:has(> svg)::before {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+@media (hover: hover) {
+  form[role="search"]:not([data-fields="boxed"]) label:has(> svg):hover::after {
+    background-color: color-mix(in oklab, var(--color-text) 6%, transparent);
+  }
+  [data-fields="boxed"] label:has(> svg):hover::before {
+    border-color: var(--color-edge);
+    background-color: color-mix(in oklab, var(--color-paper-2), var(--color-text) 5%);
+  }
+}
+
+/* The bar as one row: every hairline the same straight rule */
+@media (width >= 48rem) {
+  form[role="search"]:not([data-fields="boxed"], :has([role="group"])) label:has(> svg) {
+    border-left-width: 0;
+  }
+  form[role="search"]:not([data-fields="boxed"], :has([role="group"]))
+    label:has(> svg):not(:first-child)::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 1px;
+    background-color: var(--color-rule);
+    content: "";
+  }
+}
+@media (width >= 64rem) {
+  form[role="search"]:not([data-fields="boxed"]) label:has(> svg) {
+    border-left-width: 0;
+  }
+  form[role="search"]:not([data-fields="boxed"]) label:has(> svg):not(:first-child)::before {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 1px;
+    background-color: var(--color-rule);
+    content: "";
+  }
+
+  /* Boxed: the rule in the middle of the 1 rem gap, before every box but the row's first */
+  [data-fields="boxed"] [role="group"] {
+    border-left-width: 0;
+  }
+  [data-fields="boxed"]
+    > div:last-child
+    > div:first-child
+    > label:has(> svg):not(:first-child)::after,
+  [data-fields="boxed"] [role="group"] > label:has(> svg):not(:first-child)::after,
+  [data-fields="boxed"] [role="group"]:not(:first-child) > label:has(> svg):first-child::after {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(-0.5rem - 0.5px);
+    width: 1px;
+    background-color: var(--color-rule);
+    content: "";
+  }
+}
+
+/*
+ * A blended opening (`image_side: blend`) with the search box in its
+ * words' column: from 1024 px the trust box under it takes the search
+ * box's own width and left edge (HeroFull's `box`, 86 %), so the two
+ * edges line up, and from 1280 px its badges sit a step closer, so each
+ * badge's title and line stay on one line. An opening without that
+ * search box keeps its centred trust box.
+ */
+@media (width >= 64rem) {
+  .gf-cover[data-side="blend"]:has(.gf-cover-body form[role="search"]) .gf-cover-foot > ul {
+    width: 86%;
+    margin-inline: 0;
+  }
+}
+@media (width >= 80rem) {
+  .gf-cover[data-side="blend"]:has(.gf-cover-body form[role="search"]) .gf-cover-foot > ul > li {
+    padding-inline: 1rem;
+  }
+}
