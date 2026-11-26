@@ -11,6 +11,7 @@ import {
   oneCodePerCart,
   sentCodes,
 } from "../validation/promotion-codes"
+import { refuseFreeShippingCodes } from "./free-shipping-codes"
 import { rateLimit } from "./rate-limit"
 import { refuseRestrictedCodes } from "./restricted-codes"
 import { refuseWholesaleCodes } from "./wholesale-codes"
@@ -37,7 +38,8 @@ const couponTries = rateLimit(couponProfile, {
 export const PROMOTION_ROUTES = [
   { matcher: "/admin/promotions", middlewares: [normalizePromotionCode] },
   // ADR-0068 §6: a wholesaler's cart takes no code, told before the one-code rule;
-  // K1/K2: a code for some customers only, told why to the others
+  // K1/K2: a code for some customers only, told why to the others; a free shipping
+  // code the shop's condition does not take now, told why (Kargo ücreti, "Koşul")
   {
     matcher: "/store/carts",
     middlewares: [
@@ -45,6 +47,7 @@ export const PROMOTION_ROUTES = [
       normalizePromoCodes,
       refuseWholesaleCodes,
       refuseRestrictedCodes,
+      refuseFreeShippingCodes,
       oneCodePerCart,
     ],
   },

@@ -39,9 +39,10 @@ function SwitchRow({
 
 /**
  * Shop-wide promotion rules (F4.4, ADR-0024): whether a cart may carry
- * more than one code. Free shipping from a basket total (F4.5) is edited
- * under Settings > Shipping (the owner, 2026-11-26); here it is a line
- * that says where it stands and links there.
+ * more than one code. Free shipping from a basket total (F4.5) and what a
+ * free shipping coupon needs beside it are edited under Settings >
+ * Shipping (the owner, 2026-11-26); here they are lines that say where
+ * they stand and link there.
  */
 export function PromotionSettingsCard() {
   const { t } = useTranslation()
@@ -49,6 +50,16 @@ export function PromotionSettingsCard() {
   const save = useSaveSection<PromotionSettings>("promotions")
   const stored = section.data?.values
   const threshold = stored?.free_shipping_threshold ?? null
+  const condition = stored?.free_shipping_condition ?? "amount_or_coupon"
+  // What a free shipping coupon does under the shop's condition (Kargo ücreti, "Koşul")
+  const coupon =
+    threshold === null || condition === "amount_or_coupon"
+      ? t("promotions.settings.freeShippingCouponValues.any")
+      : condition === "amount"
+        ? t("promotions.settings.freeShippingCouponValues.off")
+        : t("promotions.settings.freeShippingCouponValues.from", {
+            amount: formatMoney(threshold, "try"),
+          })
   return (
     <SectionCard title={t("promotions.settings.title")} description={t("promotions.settings.hint")}>
       {!stored ? (
@@ -56,13 +67,18 @@ export function PromotionSettingsCard() {
       ) : (
         <div className="flex flex-col gap-5">
           <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
-            <span data-testid="free-shipping-summary">
-              {t("promotions.settings.freeShippingSummary", {
-                value:
-                  threshold === null
-                    ? t("promotions.settings.freeShippingOff")
-                    : formatMoney(threshold, "try"),
-              })}
+            <span className="flex flex-col gap-1">
+              <span data-testid="free-shipping-summary">
+                {t("promotions.settings.freeShippingSummary", {
+                  value:
+                    threshold === null
+                      ? t("promotions.settings.freeShippingOff")
+                      : formatMoney(threshold, "try"),
+                })}
+              </span>
+              <span data-testid="free-shipping-coupon-summary">
+                {t("promotions.settings.freeShippingCoupon", { value: coupon })}
+              </span>
             </span>
             <Link
               to="/settings/shipping"

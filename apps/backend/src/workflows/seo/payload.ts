@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { priceSentence, resolveSeoPayload, shippingSentence } from "../../lib/seo/resolve"
 import { deepestCategory } from "../../lib/catalog"
+import { standaloneThreshold } from "../../lib/promotions/free-shipping"
 import { storedSummaryText } from "../../lib/catalog/summary"
 import { productText, shortDescription } from "../../lib/seo/product-text"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
@@ -92,7 +93,7 @@ export async function shippingFactsOf(container: MedusaContainer): Promise<Shipp
     settings: shipping,
     units: { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit },
     table_offered: options.some((option) => option.pricing === "table" && option.in_store),
-    free_shipping_threshold: promotions.free_shipping_threshold,
+    free_shipping_threshold: standaloneThreshold(promotions),
   }
 }
 

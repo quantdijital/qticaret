@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
 import { fromMedusaAmount, kurus, toMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
+import { standaloneThreshold } from "../../lib/promotions/free-shipping"
 import { shippingQuote, thresholdKurus } from "../../lib/shipping/quote"
 import { flatAmountOf } from "../../lib/shipping/shop"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -102,7 +103,7 @@ async function flatEstimate(
     lines: [],
     basis: "order",
     context: {
-      threshold: thresholdKurus(promotions.free_shipping_threshold),
+      threshold: thresholdKurus(standaloneThreshold(promotions)),
       item_total: kurus(itemTotal),
     },
     price: () => amount,

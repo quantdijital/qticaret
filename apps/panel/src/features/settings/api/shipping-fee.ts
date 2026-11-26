@@ -37,7 +37,11 @@ export function useSaveShippingFee() {
       }
       await sdk.client.fetch(`${SETTINGS_URL}/promotions`, {
         method: "POST",
-        body: { free_shipping_threshold: plan.threshold },
+        body: {
+          free_shipping_threshold: plan.threshold,
+          // With no threshold the condition means nothing and is left as it is
+          ...(plan.condition === null ? {} : { free_shipping_condition: plan.condition }),
+        },
       })
       await sdk.client.fetch(`${SETTINGS_URL}/shipping`, {
         method: "POST",

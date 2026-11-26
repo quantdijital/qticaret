@@ -184,7 +184,17 @@ export interface PromotionSettings {
   combine_codes: boolean
   /** Lira, KDV in, after discounts; null: no free shipping by basket total. */
   free_shipping_threshold: number | null
+  /** What the threshold needs beside the total ("Koşul"); read only while one is set. */
+  free_shipping_condition: FreeShippingCondition
 }
+
+/**
+ * What frees shipping beside the basket total (WooCommerce's "Free
+ * shipping requires"): the total alone, the total or a free shipping
+ * coupon, or both. The server holds it at checkout.
+ */
+export const FREE_SHIPPING_CONDITIONS = ["amount", "amount_or_coupon", "amount_and_coupon"] as const
+export type FreeShippingCondition = (typeof FREE_SHIPPING_CONDITIONS)[number]
 
 type UrlStyle = "prefixed" | "flat"
 

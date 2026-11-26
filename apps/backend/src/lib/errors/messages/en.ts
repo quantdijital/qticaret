@@ -1174,6 +1174,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "promotions.customer_group_only":
     "This code is for certain customers only; it is not valid for your account.",
   "promotions.first_order_only": "This code can be used on a first order only.",
+  "promotions.free_shipping_code_below_total":
+    "A free shipping code applies once the basket reaches the free shipping total.",
+  "promotions.free_shipping_code_off":
+    "This shop frees shipping by the basket total only; this code cannot be used.",
   "promotions.audience_invalid": "Who may use the code is not valid.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",

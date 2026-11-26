@@ -1447,7 +1447,20 @@
         "noneNote": "Henüz kargo seçeneği yok; bir seçim yapıp kaydedince oluşur.",
         "defaultName": "Standart kargo",
         "replacedKept": "Eski seçenek gönderilmemiş siparişlerde kullanıldığı için ek seçenek olarak kaldı; siparişler gönderilince silebilirsiniz.",
-        "notConnected": "{{carrier}} hesabınız bağlı değil; Kargo firmaları sekmesinden bağlayın. Bağlanana kadar bu seçenek ödeme adımında fiyatlanamayabilir."
+        "notConnected": "{{carrier}} hesabınız bağlı değil; Kargo firmaları sekmesinden bağlayın. Bağlanana kadar bu seçenek ödeme adımında fiyatlanamayabilir.",
+        "condition": {
+          "label": "Koşul",
+          "options": {
+            "amount": "Tutar",
+            "amount_or_coupon": "Tutar ya da ücretsiz kargo kuponu",
+            "amount_and_coupon": "Tutar ve ücretsiz kargo kuponu"
+          },
+          "hints": {
+            "amount": "Kargo yalnız sepet bu tutara ulaşınca ücretsiz. Kampanyalardaki ücretsiz kargo kuponları ve otomatik ücretsiz kargo kampanyaları kargoyu düşürmez.",
+            "amount_or_coupon": "Sepet bu tutara ulaşınca ya da müşteri ücretsiz kargo kuponu kullanınca kargo ücretsiz.",
+            "amount_and_coupon": "Kargo, sepet bu tutara ulaştığında ve müşteri ücretsiz kargo kuponu kullandığında ücretsiz. Sınırın altında kupon kabul edilmez."
+          }
+        }
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
@@ -6747,6 +6760,12 @@
       "freeShippingSummary": "Kargo bedava eşiği: {{value}}",
       "freeShippingOff": "Kapalı",
       "freeShippingEdit": "Kargo ayarlarında değiştir",
+      "freeShippingCoupon": "Ücretsiz kargo kuponları: {{value}}",
+      "freeShippingCouponValues": {
+        "any": "her tutarda geçerli",
+        "off": "kargoyu düşürmez (yalnız tutar)",
+        "from": "{{amount}} ve üzeri sepette geçerli"
+      },
       "combineCodes": "Bir sepette birden fazla kod",
       "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
       "saved": "Kampanya ayarları kaydedildi."

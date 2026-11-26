@@ -22,6 +22,7 @@ const choice = (over: Partial<FeeChoice>): FeeChoice => ({
   fee: null,
   threshold: null,
   carrier: "aras-table",
+  condition: "amount_or_coupon",
   ...over,
 })
 
@@ -98,19 +99,25 @@ describe("planFee", () => {
     expect(planFee(state, choice({ mode: "free" }), DEFAULTS)).toEqual({
       option: { kind: "update", id: "so_2", amount: 0 },
       threshold: null,
+      condition: null,
     })
   })
 
   it("keeps the fee and stores the threshold for free above an amount", () => {
     expect(
       planFee(state, choice({ mode: "threshold", fee: 90, threshold: 1500 }), DEFAULTS)
-    ).toEqual({ option: { kind: "keep", id: "so_2" }, threshold: 1500 })
+    ).toEqual({
+      option: { kind: "keep", id: "so_2" },
+      threshold: 1500,
+      condition: "amount_or_coupon",
+    })
   })
 
   it("reprices a flat fee and clears the threshold", () => {
     expect(planFee(state, choice({ mode: "flat", fee: 75, threshold: 1500 }), DEFAULTS)).toEqual({
       option: { kind: "update", id: "so_2", amount: 75 },
       threshold: null,
+      condition: null,
     })
   })
 
@@ -128,13 +135,18 @@ describe("planFee", () => {
         replaces: "so_2",
       },
       threshold: null,
+      condition: null,
     })
   })
 
   it("keeps a carrier main option of the same source, and replaces it with a flat one", () => {
     expect(
       planFee({ primary: table }, choice({ mode: "carrier", threshold: 900 }), DEFAULTS)
-    ).toEqual({ option: { kind: "keep", id: "so_3" }, threshold: 900 })
+    ).toEqual({
+      option: { kind: "keep", id: "so_3" },
+      threshold: 900,
+      condition: "amount_or_coupon",
+    })
     expect(planFee({ primary: table }, choice({ mode: "flat", fee: 60 }), DEFAULTS)).toEqual({
       option: {
         kind: "create",
@@ -142,7 +154,23 @@ describe("planFee", () => {
         replaces: "so_3",
       },
       threshold: null,
+      condition: null,
     })
+  })
+
+  it("stores the condition with a threshold, and leaves it alone without one", () => {
+    const and = choice({
+      mode: "threshold",
+      fee: 90,
+      threshold: 1500,
+      condition: "amount_and_coupon",
+    })
+    expect(planFee(state, and, DEFAULTS).condition).toBe("amount_and_coupon")
+    expect(planFee(state, { ...and, mode: "flat" }, DEFAULTS).condition).toBeNull()
+    expect(
+      planFee(state, choice({ mode: "carrier", threshold: null, condition: "amount" }), DEFAULTS)
+        .condition
+    ).toBeNull()
   })
 
   it("makes the first option when the shop has none", () => {

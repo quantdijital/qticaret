@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
+import { standaloneThreshold } from "../../lib/promotions/free-shipping"
 import { displayTrPhone } from "../../lib/tr/phone"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
@@ -30,7 +31,7 @@ export async function shopInfoValues(container: Container): Promise<ShopInfoValu
     legalIdentity(container),
     settings.getSection("promotions") as Promise<unknown> as Promise<PromotionSettings>,
   ])
-  const threshold = promotions.free_shipping_threshold
+  const threshold = standaloneThreshold(promotions)
   return {
     mağaza_adı: legal.mağaza_adı,
     telefon: identity.contact_phone ? displayTrPhone(identity.contact_phone) : null,
