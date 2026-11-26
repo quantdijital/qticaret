@@ -75,8 +75,17 @@ export const TOUR_CARD_META = {
   },
   "product_card.rating_badge": tourSwitch(
     "rating_badge",
+    // A standard card with its details on the photo or a glass panel carries the stars itself
     (theme, variants) =>
-      theme.product_card.show_rating && [...variants].some((variant) => variant !== "compact")
+      theme.product_card.show_rating &&
+      [...variants].some(
+        (variant) =>
+          variant !== "compact" &&
+          !(
+            variant === "standard" &&
+            (theme.product_card.meta_place === "over" || theme.product_card.style === "glass")
+          )
+      )
   ),
   "product_card.arrow": tourSwitch(
     "arrow",

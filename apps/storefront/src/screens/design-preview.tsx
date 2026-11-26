@@ -5,6 +5,7 @@ import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { resolvePath } from "@/lib/store-api/requests"
 import { homeSections } from "@/lib/views/home"
+import { shopWords } from "@/lib/views/theme-settings"
 import { draftContentPage } from "@/lib/views/page-sections"
 import type { PreviewPage } from "@/lib/views/preview"
 import { theme } from "@/theme"
@@ -16,10 +17,11 @@ import { queryOf, ShopScreen } from "./shop"
 
 /** The draft's home page, said to be a preview. */
 async function DraftHome({ layout }: { layout: StoreLayout }) {
-  const sections = await homeSections(layout.home, t)
+  const words = await shopWords()
+  const sections = await homeSections(layout.home, words)
   return (
     <theme.HomePage
-      t={t}
+      t={words}
       view={{ sections, notice: t("preview.design_notice") }}
       subscribe={subscribeNewsletter}
       // As live and as the draft's other pages: a one-variant card says "Sepete ekle" (Z-02)

@@ -46,13 +46,6 @@ const listing = (products: ProductCardView[]): ListingPageView => ({
   clearPath: null,
 })
 
-/** The card with no dated field at all (a product that is no tour). */
-const withoutDates = (product: ProductCardView): ProductCardView => {
-  const bare = { ...product }
-  delete bare.booking
-  return bare
-}
-
 const cardOf = (product: ProductCardView) =>
   (renderToStaticMarkup(
     createElement(atolyeTheme.ListingPage, { t, view: listing([product]) })
@@ -86,7 +79,9 @@ describe("Atölye's card: the details on the photo", () => {
   })
 
   it("draws no pill for what the product lacks", () => {
-    const markup = cardOf(withoutDates(card({ rating: null, look: look({ metaOver: true }) })))
+    const bare = card({ rating: null, look: look({ metaOver: true }) })
+    delete bare.booking
+    const markup = cardOf(bare)
     expect(markup).not.toContain("gf-card-glass-pill")
     expect(wordsOf(markup)).toContain("1.750,00 TL")
   })
@@ -109,5 +104,29 @@ describe("Atölye's card: the glass panel", () => {
     expect(markup).toContain("5 gün • 4 gece")
     expect(markup).toContain("12 Ara")
     expect(markup).toContain("(12)")
+  })
+
+  it("keeps the stars in the panel when the shop asked for the stars' pill", () => {
+    const markup = cardOf(card({ look: look({ glass: true, ratingBadge: true }) }))
+    expect(markup.split("(12)")).toHaveLength(2)
+    expect(markup).not.toContain("bg-field px-2 py-1 text-text")
+  })
+})
+
+describe("Atölye's card: the badges beside the details on the photo", () => {
+  it("puts the badge and the stars in one wrapping row, the stars at its end", () => {
+    for (const glass of [false, true]) {
+      const markup = cardOf(
+        card({
+          badge: { kind: "best_seller", text: "Çok satan" },
+          price: { current: "1.750,00 TL", before: "2.500,00 TL", from: true, discount: 30 },
+          look: look({ metaOver: true, glass }),
+        })
+      )
+      const row = /<div class="[^"]*justify-between[^"]*">[\s\S]*?<\/div>/.exec(markup)
+      expect(row?.[0]).toContain("Çok satan")
+      expect(row?.[0]).toContain("4,8")
+      expect(row?.[0]).toContain("ms-auto")
+    }
   })
 })

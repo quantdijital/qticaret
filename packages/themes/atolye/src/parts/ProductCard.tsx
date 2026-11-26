@@ -104,8 +104,11 @@ export function ProductCard({
     >
       <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
         <CardPhoto product={product} sizes={sizes} priority={priority} />
-        <CardBadges product={product} t={t} />
-        {metaOnPhoto(product) && <CardMeta product={product} t={t} foot add={!!add} />}
+        {metaOnPhoto(product) ? (
+          <CardMeta product={product} t={t} foot add={!!add} />
+        ) : (
+          <CardBadges product={product} t={t} />
+        )}
         <CardQuickView product={product} t={t} />
         {add && quickAdd && (
           <QuickAdd

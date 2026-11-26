@@ -72,8 +72,11 @@ export function OverCard({
             )}
           </div>
         )}
-        <CardBadges product={product} t={t} />
-        {meta && <CardMeta product={product} t={t} foot={false} />}
+        {meta ? (
+          <CardMeta product={product} t={t} foot={false} />
+        ) : (
+          <CardBadges product={product} t={t} />
+        )}
         <CardQuickView product={product} t={t} />
         {add && quickAdd && (
           <QuickAdd
