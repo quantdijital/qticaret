@@ -69,6 +69,7 @@ export function Buy({
   signedIn,
   summary,
   whatsapp,
+  maxQuantity = null,
   words,
 }: {
   productId: string
@@ -92,6 +93,8 @@ export function Buy({
   signedIn: boolean
   summary: ReactNode
   whatsapp: ReactNode
+  /** The most of the product one order may hold (S5); null: none. */
+  maxQuantity?: number | null | undefined
   words: BuyWords
 }) {
   const first = variants.find((each) => each.id === selectedVariantId) ?? variants[0] ?? null
@@ -135,7 +138,9 @@ export function Buy({
   const price = variant?.price ?? null
   const fields = addons?.fields ?? []
   const limit = picksLimit(fields, picks)
-  const units = Math.min(quantity, limit ?? 99)
+  // The add-ons' limit per line and the product's most per order (S5): the lower holds
+  const most = Math.min(limit ?? 99, maxQuantity ?? 99)
+  const units = Math.min(quantity, most)
   const extra = picksKurus(fields, picks)
   // Shown only: the server prices the line once it is added (CLAUDE.md rule 5)
   const total =
@@ -229,7 +234,7 @@ export function Buy({
           <Quantity
             form={FORM}
             name="quantity"
-            max={limit ?? 99}
+            max={most}
             words={words}
             onValueChange={setQuantity}
           />
@@ -250,6 +255,12 @@ export function Buy({
             words={favorite.words}
           />
         </div>
+        {/* S5: at the product's most per order the count stops, and says why */}
+        {maxQuantity !== null && quantity >= maxQuantity && (
+          <p className="text-xs text-text-2">
+            {words.maxQuantity.replace("{max}", String(maxQuantity))}
+          </p>
+        )}
         <p role="status" aria-live="polite" className="text-sm empty:hidden">
           {!stale && state.ok && (
             <span className="flex flex-wrap items-center gap-x-2 font-semibold text-ok">

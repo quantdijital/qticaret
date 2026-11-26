@@ -54,6 +54,8 @@ export interface SetProductCatalogInput {
   booking_mode?: BookingMode | undefined
   /** Its own card badge, checked and cut (`lib/catalog/badge`); null clears it. */
   badge?: string | null | undefined
+  /** The most of it one order may hold (S5); null: no limit. */
+  max_quantity?: number | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -79,6 +81,7 @@ export interface ExtensionFields {
   summary_doc: SummaryDoc | null
   booking_mode: BookingMode
   badge: string | null
+  max_quantity: number | null
 }
 
 export interface ProductCatalogPlan {
@@ -135,6 +138,7 @@ const EXTENSION_KEYS = [
   "summary_doc",
   "booking_mode",
   "badge",
+  "max_quantity",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {

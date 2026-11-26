@@ -12,6 +12,7 @@ const CART_ERRORS = [
   "cart.variant_unavailable",
   "cart.quantity_invalid",
   "cart.insufficient_stock",
+  "cart.max_quantity",
   "errors.too_many_requests",
   "cart.payment_link_locked",
   "gift_card.recipient_email_invalid",
@@ -59,6 +60,8 @@ export const buyWords = (t: Translate, percents: readonly number[]) => ({
   ) as Record<number, string>,
   bar: t("product.buy_bar"),
   notify: t("product.alert_submit"),
+  // S5: "{max}" is put in by the buy column
+  maxQuantity: t("product.max_quantity"),
 })
 
 export type BuyWords = ReturnType<typeof buyWords>

@@ -123,6 +123,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.tag_unknown": "There is no tag with this name.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.insufficient_stock": "There are not as many of this item in stock as you asked for.",
+  "cart.max_quantity": "At most {limit} of {title} can be bought in one order.",
   "cart.out_of_stock":
     "This item just sold out: {{name}}. Remove it from your cart or lower its quantity.",
   "cart.shipping_changed":
