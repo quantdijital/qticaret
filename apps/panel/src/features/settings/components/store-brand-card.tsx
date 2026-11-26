@@ -152,6 +152,7 @@ export function StoreBrandCard({
         error={errors.name ? t(`${B}.nameRequired`) : undefined}
       >
         <Input
+          placeholder={t("settings.placeholders.storeName")}
           id="store-name"
           {...form.register("name", { validate: (text) => text.trim().length > 0 })}
         />

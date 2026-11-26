@@ -70,6 +70,7 @@ export function StaffAlertsCard() {
               {t(`${A}.emails`)}
             </label>
             <Textarea
+              placeholder={t("settings.placeholders.staffEmails")}
               id="staff-emails"
               rows={3}
               aria-describedby="staff-emails-hint"

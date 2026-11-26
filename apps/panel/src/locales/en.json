@@ -2815,7 +2815,8 @@
         "publishedHint": "The published text. Change it and save to open a new draft version; the text in force stays until you publish.",
         "titleLabel": "Title",
         "body": "The text's body",
-        "saved": "Draft saved."
+        "saved": "Draft saved.",
+        "titlePlaceholder": "e.g. Distance Sales Agreement"
       },
       "tokens": {
         "title": "Tokens",
@@ -3359,6 +3360,39 @@
         "show": "A sold-out product stays in listings, its card saying it is sold out. Default.",
         "hide": "A sold-out product leaves listings, search and category counts. Its page still opens by its address and stays in the sitemap; it comes back to listings by itself when stock arrives."
       }
+    },
+    "placeholders": {
+      "apiKeyName": "e.g. Warehouse software",
+      "brandColor": "#1F5EFF",
+      "bankName": "e.g. Ziraat Bankası",
+      "iban": "TR00 0000 0000 0000 0000 0000 00",
+      "blockReason": "e.g. Repeated bogus orders",
+      "ga4": "G-ABC123XYZ",
+      "merchantId": "123456789",
+      "mersis": "16-digit MERSİS number",
+      "taxOrId": "10 or 11 digits",
+      "kep": "company@hs01.kep.tr",
+      "etbis": "Your ETBİS registration number",
+      "documentName": "e.g. TÜRSAB licence no",
+      "documentNumber": "e.g. 12345",
+      "location": "e.g. Main warehouse",
+      "pixelId": "123456789012345",
+      "testEventCode": "TEST12345",
+      "shopifyClientId": "e.g. 1a2b3c4d5e6f…",
+      "smsHeader": "e.g. SHOPNAME",
+      "iysCode": "e.g. 123456",
+      "parasutCompany": "e.g. 123456",
+      "parasutCode": "The code Paraşüt shows",
+      "paytrMerchant": "e.g. 123456",
+      "senderLocal": "orders",
+      "robots": "User-agent: *",
+      "smtpPort": "587",
+      "fromName": "e.g. Kuzey Deri",
+      "smtpRate": "60",
+      "staffEmails": "name@example.com, store@example.com",
+      "storeName": "e.g. Kuzey Deri",
+      "storeAddress": "e.g. Caferağa Mah. Moda Cad. No: 12, Kadıköy / İstanbul",
+      "vatName": "e.g. VAT 10%"
     }
   },
   "status": {
@@ -8866,6 +8900,16 @@
         "category": "Category",
         "product": "Product"
       }
+    },
+    "placeholders": {
+      "jobTitle": "e.g. Designer",
+      "bio": "e.g. Has written about craft and design for ten years.",
+      "title": "e.g. 5 tips for leather care",
+      "handle": "5-tips-for-leather-care",
+      "excerpt": "e.g. Five easy ways to keep leather looking new for years.",
+      "landingTitle": "e.g. November deals",
+      "landingHandle": "november-deals",
+      "term": "e.g. Care guide"
     }
   },
   "priceLists": {
@@ -12660,6 +12704,15 @@
       "search": "Search titles",
       "empty": "No pages yet. Open the first one; you write it in the theme editor.",
       "full": "At most {{max}} pages can have their own layout; a new page's text cannot be added as a section, only shown."
+    },
+    "placeholders": {
+      "maintenance": "e.g. We're doing a short update and will be back soon.",
+      "menuTitle": "e.g. Company",
+      "footerAbout": "e.g. Handmade leather goods; free returns within 14 days.",
+      "pageTitle": "e.g. About us",
+      "designName": "e.g. Winter look",
+      "search_placeholder": "e.g. Search products or brands",
+      "strip_note": "e.g. Free shipping over 750 TL"
     }
   },
   "bulkMessages": {
@@ -12983,6 +13036,12 @@
         "title": "Suggest SMS text",
         "description": "AI writes three short texts from the message's name and its current text; each fits one SMS with the shop's name and the opt-out line. No recipient list is sent; nothing changes until you save."
       }
+    },
+    "placeholders": {
+      "name": "e.g. November sale announcement",
+      "sms": "e.g. Our November sale has started: 20% off everything.",
+      "subject": "e.g. Our November sale has started",
+      "preheader": "e.g. 20% off everything until Sunday night"
     }
   },
   "popups": {
@@ -13185,6 +13244,13 @@
       "title": "Summary",
       "created": "Created",
       "updated": "Last changed"
+    },
+    "placeholders": {
+      "name": "e.g. November newsletter prompt",
+      "title": "e.g. 10% off your first order",
+      "body": "e.g. Join our newsletter and hear about offers first.",
+      "submitLabel": "Sign up",
+      "buttonLabel": "e.g. Start shopping"
     }
   },
   "paymentLinks": {

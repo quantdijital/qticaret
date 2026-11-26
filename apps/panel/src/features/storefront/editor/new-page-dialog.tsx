@@ -90,6 +90,7 @@ export function NewPageDialog({
           <DialogBody>
             <Field label={t("content.fields.title")} htmlFor="new-page-title" required>
               <Input
+                placeholder={t("storefront.placeholders.pageTitle")}
                 id="new-page-title"
                 value={title}
                 autoFocus

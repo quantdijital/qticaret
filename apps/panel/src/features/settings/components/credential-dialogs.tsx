@@ -183,6 +183,7 @@ export function EmailDialog({ current, onClose }: DialogProps & { current: strin
           required
         >
           <Input
+            placeholder={t("common.placeholder.email")}
             id="email-new"
             type="email"
             autoComplete="email"

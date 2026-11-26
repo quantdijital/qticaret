@@ -87,6 +87,7 @@ export function ReauthHost() {
                 )}
               </Label>
               <Input
+                // placeholder-exempt: a password or a one-time code has no example
                 id="reauth-secret"
                 autoFocus
                 value={secret}

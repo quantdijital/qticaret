@@ -280,6 +280,7 @@ Bölüm panelinin gövdesi `SettingsLayout`'tur (`features/storefront/editor/set
 - [ ] §3 kara listesinden hiçbir öğe yok.
 - [ ] Sayfa başlığı deseni; tek birincil eylem.
 - [ ] Üç durum tasarlandı ve testli.
+- [ ] Her metin alanında (`Input`, `Textarea`) örnek değer ya da biçim gösteren placeholder var (`ornek@alanadi.com`, `0532 123 45 67`); etiketi tekrar etmez, etiketin yerini almaz. Tekrarlayanlar `common.placeholder.*`'da. Örneği olmayan alan (şifre, tek kullanımlık kod) etiketinin içinde `// placeholder-exempt: neden` yazar.
 - [ ] Metinler `locales/tr.json`'da (ortak bileşeninki `packages/admin-ui/src/locales`, `admin-ui` ad alanı); sözlüğe uygun; ünlem yok.
 - [ ] Klavye ve axe testi geçti.
 - [ ] Mobil genişlikte (375 px) çalışıyor.
@@ -287,4 +288,4 @@ Bölüm panelinin gövdesi `SettingsLayout`'tur (`features/storefront/editor/set
 - [ ] Açık ve koyu modda, keskin ve yuvarlak köşede bakıldı.
 - [ ] Diyalog içeriği kadar; sabit boy yalnız `pane="fixed"` ile (§2). Metnin yanındaki ikon ilk satıra hizalı (`h-lh`), uyarının düğmeleri `AlertAction`'da.
 
-Testle korunanlar (F12 Y12): sabit renk, hex ve px köşe yasağı, TR/EN anahtar eşleşmesi ve Türkçe metinde ünlem yok (panelde `src/theme/house-rules.spec.ts`, ortak pakette `packages/admin-ui/src/house-rules.spec.ts`; bilinçli istisnalar gerekçesiyle listede). Geliştirmede bulunmayan çeviri anahtarı konsola yazılır, e2e koruyucusu bunu hata sayar. Bütün ekranlar açık ve koyu modda axe'tan (`e2e/a11y.e2e.ts`), 375 px'te taşma denetiminden (`e2e/phone.e2e.ts`, listelerin ilk kaydı dahil) ve denge ölçümünden (`e2e/layout.e2e.ts`) geçer; ekran listesi `e2e/support/screens.ts`. Tailwind'in gölge ölçeği (`shadow-xs` ile `shadow-xl` arası) tema gölgelerine bağlıdır (`--shadow-card`, `--shadow-overlay`). Yana kayan tablo kutusu yalnızca kaydığında klavyeyle odaklanır.
+Testle korunanlar (F12 Y12): sabit renk, hex ve px köşe yasağı, TR/EN anahtar eşleşmesi ve Türkçe metinde ünlem yok, her metin alanında placeholder (gizli, işaret, dosya, renk, tarih, saat, şifre alanları ve salt okunur alanlar hariç) (panelde `src/theme/house-rules.spec.ts`, ortak pakette `packages/admin-ui/src/house-rules.spec.ts`; bilinçli istisnalar gerekçesiyle listede). Geliştirmede bulunmayan çeviri anahtarı konsola yazılır, e2e koruyucusu bunu hata sayar. Bütün ekranlar açık ve koyu modda axe'tan (`e2e/a11y.e2e.ts`), 375 px'te taşma denetiminden (`e2e/phone.e2e.ts`, listelerin ilk kaydı dahil) ve denge ölçümünden (`e2e/layout.e2e.ts`) geçer; ekran listesi `e2e/support/screens.ts`. Tailwind'in gölge ölçeği (`shadow-xs` ile `shadow-xl` arası) tema gölgelerine bağlıdır (`--shadow-card`, `--shadow-overlay`). Yana kayan tablo kutusu yalnızca kaydığında klavyeyle odaklanır.

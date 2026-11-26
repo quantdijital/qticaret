@@ -52,6 +52,10 @@ export function TemplateField({
         ref={input}
         id={id}
         value={value}
+        placeholder={tokens
+          .slice(0, 2)
+          .map((token) => `{${token}}`)
+          .join(" | ")}
         spellCheck={false}
         className="font-mono text-[13px]"
         onChange={(event) => {
