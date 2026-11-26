@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { connectedCardProviders } from "../../lib/payments/card-providers"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { arasCredentialsOf } from "../../lib/shipping/aras/credentials"
+import { isSuspended } from "../../lib/integrations/suspended"
 import { dhlEcomCredentialsOf } from "../../lib/shipping/dhlecommerce/credentials"
 import { suratCredentialsOf } from "../../lib/shipping/surat/credentials"
 import { yurticiCredentialsOf } from "../../lib/shipping/yurtici/credentials"
@@ -63,6 +64,7 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
     ...(yurticiCredentialsOf(yurtici) ? (["yurtici"] as const) : []),
     ...(dhlEcomCredentialsOf(dhlecommerce) ? (["dhlecommerce"] as const) : []),
     ...(suratCredentialsOf(surat) ? (["surat"] as const) : []),
-  ]
+    // A carrier suspended on this server ships nothing (`lib/integrations/suspended.ts`)
+  ].filter((carrier) => !isSuspended(carrier))
   return { payments, carriers }
 }

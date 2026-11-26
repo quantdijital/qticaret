@@ -3,6 +3,10 @@ const { MetadataStorage } = require("@medusajs/framework/mikro-orm/core")
 
 MetadataStorage.clear()
 
+// Suspended carriers (lib/integrations/suspended.ts) stay tested: every test
+// run turns them on; a spec that checks the suspension turns one off itself
+process.env.CARRIER_DHLECOMMERCE_ENABLED ??= "true"
+
 // HTTP suites sign many accounts up from 127.0.0.1: per-IP rate limits grow
 // a hundred times under NODE_ENV=test only; per-identity limits stay as they
 // are (lib/security/rate-limit/profiles.ts). Unit tests see the real limits.

@@ -16,6 +16,7 @@ import {
 import type { FreeShippingCondition } from "@/features/settings/api/sections"
 import { useSaveShippingFee } from "@/features/settings/api/shipping-fee"
 import { FreeShippingConditionField } from "@/features/settings/components/free-shipping-condition-field"
+import { useCarrierShown } from "@/features/settings/api/carriers"
 import { CARRIER_PRICINGS, FEE_MODES, feeErrors, planFee } from "@/features/settings/shipping-fee"
 import type { CarrierPricing, FeeChoice, FeeMode, FeeState } from "@/features/settings/shipping-fee"
 import { errorText } from "@/lib/errors"
@@ -87,6 +88,7 @@ export function ShippingFeeCard({
   const [mode, setMode] = useState<FeeMode | null>(known ? stored.mode : null)
   const [fee, setFee] = useState(textOf(stored.fee))
   const [threshold, setThreshold] = useState(textOf(stored.threshold))
+  const shown = useCarrierShown()
   const [carrier, setCarrier] = useState<CarrierPricing>(stored.carrier)
   const [condition, setCondition] = useState<FreeShippingCondition>(stored.condition)
   const [tried, setTried] = useState(false)
@@ -226,11 +228,13 @@ export function ShippingFeeCard({
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {CARRIER_PRICINGS.map((source) => (
-                          <SelectItem key={source} value={source}>
-                            {t(`${S}.sources.${source}`)}
-                          </SelectItem>
-                        ))}
+                        {CARRIER_PRICINGS.filter((source) => shown(source.split("-")[0] ?? "")).map(
+                          (source) => (
+                            <SelectItem key={source} value={source}>
+                              {t(`${S}.sources.${source}`)}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </Field>

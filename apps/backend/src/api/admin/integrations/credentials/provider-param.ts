@@ -1,5 +1,6 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
+import { isSuspended } from "../../../../lib/integrations/suspended"
 import { isCredentialProvider } from "../../../../modules/integration-credentials/providers"
 import type { CredentialProviderName } from "../../../../modules/integration-credentials/providers"
 
@@ -17,10 +18,14 @@ const CONSENT_ONLY: readonly string[] = ["google"]
  */
 const KEPT_ELSEWHERE: readonly string[] = ["birfatura"]
 
-/** Whether the accounts page lists the provider. */
-export const listedHere = (provider: string): boolean => !KEPT_ELSEWHERE.includes(provider)
+/**
+ * Whether the accounts page lists the provider: not one kept elsewhere,
+ * nor a carrier suspended on this server (`lib/integrations/suspended.ts`).
+ */
+export const listedHere = (provider: string): boolean =>
+  !KEPT_ELSEWHERE.includes(provider) && !isSuspended(provider)
 
-/** The provider in the path; one the shop cannot connect here is 404. */
+/** The provider in the path; one the shop cannot connect here (or a suspended one) is 404. */
 export function providerParam(req: MedusaRequest): CredentialProviderName {
   const provider = req.params["provider"] ?? ""
   if (!isCredentialProvider(provider) || CONSENT_ONLY.includes(provider) || !listedHere(provider)) {

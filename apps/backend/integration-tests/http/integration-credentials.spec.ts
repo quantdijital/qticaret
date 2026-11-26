@@ -97,7 +97,12 @@ medusaIntegrationTestRunner({
         expect.objectContaining({
           provider: "dhlecommerce",
           state: "not_configured",
-          secrets: { customer_number: false, password: false },
+          secrets: {
+            customer_number: false,
+            password: false,
+            client_id: false,
+            client_secret: false,
+          },
         }),
         expect.objectContaining({
           provider: "surat",

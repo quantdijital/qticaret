@@ -166,3 +166,8 @@ MNG Kargo artık DHL eCommerce Türkiye; kullanıcıya görünen her yerde "DHL 
 ## Ek 2026-11-26 (3): Sürat Kargo kodlandı
 
 Dördüncü taşıyıcı (`surat_surat`, `CarrierName` `surat`), DHL eCommerce'in bağladığı her yere bağlandı (Kargoya ver, etiket, takip, iptal, kapıda ödeme, anlaşmalı iade kodu — seçim sırası Aras → Yurtiçi → DHL eCommerce → Sürat —, taşıyıcı süzgeçleri, faturadaki taşıyıcı, dışa aktarım, ortak sözleşme test paketi). Farklar `docs/entegrasyonlar/surat.md` "Uygulama (2026-11-26)"da: Sürat'ın test ortamı yok (hesapta test modu yok, geliştirmede sahte Sürat); iki kimlik çifti (gönderi için kullanıcı adı/şifre, takip/etiket/silme için isteğe bağlı cari kodu/web şifresi); açma ve silme yanıtı serbest metin olduğundan **bilinen başarı cümlelerinin izin listesi** (bilinmeyen her yanıt başarısızlık sayılır, açılmış olabilecek gönderi silinir); etiket Sürat'ın PDF'i (barkod yetkisi varsa), yoksa ortak etiketimiz (`lib/shipping/label`, barkod = bizim `OzelKargoTakipNo`); şube aldıktan sonra iptal `GonderiGeriCek` ile geri getirme isteğidir, gönderi siparişte kalır.
+
+## Ek 2026-11-26 (4): DHL eCommerce askıda
+
+Sahip kararıyla (2026-11-26) DHL eCommerce kodu ve testleriyle platformda durur, ama `CARRIER_DHLECOMMERCE_ENABLED=true` verilmedikçe hiçbir mağazaya görünmez ve kullanılamaz (adr/0027 Ek 2026-11-26 (2); `lib/integrations/suspended.ts`). Seçim sırası (Aras → Yurtiçi → DHL eCommerce → Sürat) askıdaki taşıyıcıyı atlar.
+

@@ -1,4 +1,5 @@
 import type { ContractedReturnCodes } from "../../modules/platform-settings/sections"
+import { isSuspended } from "../integrations/suspended"
 import { CARRIER_NAMES, carrierNameOf } from "./carriers"
 import type { CarrierName } from "./carriers"
 import {
@@ -29,6 +30,8 @@ const PROVIDER_OF: Readonly<Record<CarrierName, string>> = {
  * (Settings > Shipping's "Kargo ücreti") when it has one, else the first
  * with a code, Aras, then Yurtiçi, then DHL eCommerce, then Sürat. Any of them takes a
  * parcel at any of its branches whichever way the order left, so one shop-wide pick does.
+ * A carrier suspended on this server (`lib/integrations/suspended.ts`) is
+ * passed over: its code, entered before, is not shown.
  * Null: no code entered for the way the shop ships; the shopper is told
  * the shop will be in touch, as before.
  */
@@ -43,9 +46,11 @@ export function contractedReturnOf(input: {
       ? { carrier: codes.other_carrier, code: codes.other_code }
       : null
   }
-  const order: CarrierName[] = input.primaryCarrier
-    ? [input.primaryCarrier, ...CARRIER_NAMES.filter((each) => each !== input.primaryCarrier)]
-    : [...CARRIER_NAMES]
+  const order: CarrierName[] = (
+    input.primaryCarrier
+      ? [input.primaryCarrier, ...CARRIER_NAMES.filter((each) => each !== input.primaryCarrier)]
+      : [...CARRIER_NAMES]
+  ).filter((each) => !isSuspended(each))
   const carrier = order.find((each) => codes[each])
   const code = carrier ? codes[carrier] : null
   return carrier && code ? { carrier: carrierNameOf(PROVIDER_OF[carrier]) ?? carrier, code } : null
