@@ -114,7 +114,7 @@ function RemoveButton({
       <Button
         type="button"
         size="sm"
-        variant="ghost"
+        variant="cancel"
         onClick={() => {
           setAsking(false)
         }}
@@ -282,7 +282,7 @@ export function ShippingOptionEditor({
             }}
           />
         ) : null}
-        <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={onDone}>
+        <Button type="button" size="sm" variant="cancel" disabled={busy} onClick={onDone}>
           {t("common.cancel")}
         </Button>
         <Button type="submit" size="sm" disabled={busy}>
