@@ -189,6 +189,7 @@ export const footerStartRows = (): FooterRow[] => {
               whatsapp: true,
               email: true,
               hours: true,
+              icon_style: "boxed",
             },
           ],
         },

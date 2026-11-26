@@ -3,6 +3,7 @@ import {
   HEADER_SEARCH_STYLES,
   HEADER_TOOL_LABELS,
   MARQUEE_SETTINGS,
+  NEWSLETTER_TONES,
 } from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type {
@@ -20,7 +21,7 @@ import { cardFooterFields } from "./card-field-ids"
 import type { FooterPart } from "../footer-rows/footer-rows-fields"
 import { bannerFields, bannerSettingId } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
-import { isFooterBand } from "./newsletter-band"
+import { isFooterBand, isNewsletterBand } from "./newsletter-band"
 import {
   HEADER_CATALOG_STEPS,
   headerCatalogOffers,
@@ -265,6 +266,17 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The content's counts and switches (docs/tema/bilesen-denetimi O2)
   fields.push(...contentFields(section))
+  // A band's ground tone, under "Stil", on a page or in the footer
+  if (isNewsletterBand(section)) {
+    fields.push({
+      key: "news_tone",
+      group: "appearance",
+      label: "storefront.editor.newsletter.tone",
+      term: "storefront.editor.newsletter.toneTerm",
+      options: NEWSLETTER_TONES.map((tone) => `storefront.editor.newsletter.tones.${tone}`),
+      target: CONTENT_IDS.content(id, "news_tone"),
+    })
+  }
   // The footer box's band on the footer's ground, under "Stil" (adr/0070 §4 Ek)
   if (isFooterBand(section, group)) {
     fields.push({

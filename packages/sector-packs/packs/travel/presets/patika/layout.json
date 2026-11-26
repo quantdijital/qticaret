@@ -335,7 +335,8 @@
                   "phone": true,
                   "whatsapp": false,
                   "email": true,
-                  "hours": false
+                  "hours": false,
+                  "icon_style": "inline"
                 }
               ]
             },
@@ -392,7 +393,8 @@
       "variant": "strip",
       "title": "Yol notları e-postanızda",
       "text": null,
-      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar."
+      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
+      "tone": "tint"
     }
   ],
   "product": [

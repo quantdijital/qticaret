@@ -1,5 +1,6 @@
 import type { StoreFooterBlock, StoreFooterRows, StoreMenu } from "@qticaret/types"
 import {
+  FOOTER_CONTACT_ICON_STYLES,
   FOOTER_IMAGE_WIDTHS,
   FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
@@ -159,6 +160,7 @@ function bodyOf(
         whatsappHref: on(block.whatsapp, true) ? contact.whatsappHref : null,
         email: on(block.email, true) ? contact.email : null,
         hours: on(block.hours, true) ? contact.hours : [],
+        iconStyle: pick(FOOTER_CONTACT_ICON_STYLES, block.icon_style, "boxed"),
       }
       const any = [body.address, body.phone, body.whatsappHref, body.email].some(Boolean)
       return any || body.hours.length > 0 ? body : null

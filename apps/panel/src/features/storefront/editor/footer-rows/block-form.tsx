@@ -1,4 +1,5 @@
 import {
+  FOOTER_CONTACT_ICON_STYLES,
   FOOTER_IMAGE_WIDTHS,
   FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
@@ -82,6 +83,13 @@ export function BlockForm({
         <NamedGroup name="appearance">
           {steps("logo_size", FOOTER_LOGO_SIZES, block.logo_size, (logo_size) => {
             onChange({ ...block, logo_size })
+          })}
+        </NamedGroup>
+      ) : null}
+      {block.type === "contact" ? (
+        <NamedGroup name="appearance">
+          {steps("icon_style", FOOTER_CONTACT_ICON_STYLES, block.icon_style, (icon_style) => {
+            onChange({ ...block, icon_style })
           })}
         </NamedGroup>
       ) : null}

@@ -19,6 +19,12 @@ import type { SectionVariant, VariantBranch } from "./variants"
  */
 export const NEWSLETTER_LIMITS = { description: 240, note: 80 } as const
 
+/** The boxed bands' ground: the theme's pane, or a wash of the shop's main colour. Mirrors `@qticaret/types`. */
+export const NEWSLETTER_TONES = ["plain", "tint"] as const
+
+/** Absent: `plain`, so a box saved before it reads and prints as it did. */
+const tone = { tone: z.enum(NEWSLETTER_TONES).optional() }
+
 const words = {
   type: z.literal("newsletter"),
   title,
@@ -36,11 +42,17 @@ function branches<F extends z.ZodRawShape>(fields: F) {
   const common = { ...fields, ...words }
   return {
     standard: z.object({ ...common, variant: defaultVariant("newsletter") }).strict(),
-    split: z.object({ ...common, variant: z.literal("split"), ...promise }).strict(),
+    split: z.object({ ...common, variant: z.literal("split"), ...promise, ...tone }).strict(),
     image_card: z
-      .object({ ...common, variant: z.literal("image_card"), ...promise, image: optional(image) })
+      .object({
+        ...common,
+        variant: z.literal("image_card"),
+        ...promise,
+        image: optional(image),
+        ...tone,
+      })
       .strict(),
-    strip: z.object({ ...common, variant: z.literal("strip") }).strict(),
+    strip: z.object({ ...common, variant: z.literal("strip"), ...tone }).strict(),
     in_footer: z.object({ ...common, variant: z.literal("in_footer") }).strict(),
   }
 }
@@ -134,5 +146,7 @@ export function printedNewsletter<I>(
       : {}),
     // The footer's band on the footer's ground (adr/0070 §4 Ek), only when set
     ...("joined" in section && section.joined === true ? { joined: true } : {}),
+    // The boxed bands' wash of the main colour, only when set
+    ...("tone" in section && section.tone === "tint" ? { tone: "tint" as const } : {}),
   }
 }

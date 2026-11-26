@@ -46,6 +46,13 @@
       border-inline-end-width: 1px;
     }
   }
+  /*
+   * A boxed band's `tint` ground: a light wash of the shop's main colour
+   * over the page, no rule (the field stays the field's own white)
+   */
+  .gf-news-tint {
+    background-color: color-mix(in oklab, var(--color-signal) 8%, var(--color-paper));
+  }
   /* The strip's small form: a step lower */
   .gf-news-small .gf-join > .gf-field,
   .gf-news-small .gf-join > .gf-btn {

@@ -110,6 +110,26 @@ describe("the free rows footer's schema (adr/0070 §2)", () => {
     })
   })
 
+  it("draws the contact block's signs boxed by default, small in the line on `inline`", () => {
+    const contact = (more: Record<string, unknown>) =>
+      doc([
+        {
+          id: "rowone01",
+          layout: "1",
+          columns: [{ blocks: [{ id: "blockaa1", type: "contact", ...more }] }],
+        },
+      ])
+    const signs = (more: Record<string, unknown>) =>
+      (
+        layoutDocument.parse(contact(more)).footer[0] as never as {
+          rows: { columns: { blocks: { icon_style?: string }[] }[] }[]
+        }
+      ).rows[0]?.columns[0]?.blocks[0]?.icon_style
+    expect(signs({})).toBe("boxed")
+    expect(signs({ icon_style: "inline" })).toBe("inline")
+    expect(layoutDocument.safeParse(contact({ icon_style: "round" })).success).toBe(false)
+  })
+
   it("holds the rows to one to six", () => {
     expect(issues(doc([]))).toEqual([key("footer_rows_limit")])
     const seven = Array.from({ length: L.rows + 1 }, () => row([[]]))

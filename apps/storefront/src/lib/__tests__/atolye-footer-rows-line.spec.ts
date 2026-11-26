@@ -45,7 +45,20 @@ const BLOCKS: FooterBlockView[] = [
   { ...at(2), type: "text", title: null, html: "<p>Keşfet<br>Yola çık</p>", style: "hand" },
 ]
 
-const row = (): FooterRowView => ({
+const contact = (iconStyle: "boxed" | "inline"): FooterBlockView => ({
+  ...at(3),
+  type: "contact",
+  title: null,
+  address: null,
+  phone: "0532 000 00 00",
+  phoneHref: "tel:+905320000000",
+  whatsappHref: null,
+  email: "merhaba@anadolurotalari.example",
+  hours: [],
+  iconStyle,
+})
+
+const row = (icons: "boxed" | "inline" = "boxed"): FooterRowView => ({
   id: "satir00001",
   layout: "2-1-1-1-1",
   ground: "inherit",
@@ -57,18 +70,22 @@ const row = (): FooterRowView => ({
     { blocks: BLOCKS.slice(0, 1) },
     { blocks: BLOCKS.slice(1, 2) },
     { blocks: [] },
-    { blocks: [] },
+    { blocks: [contact(icons)] },
     { blocks: BLOCKS.slice(2) },
   ],
 })
 
-const draw = (free: FooterRowsView, over: Partial<ShopView> = {}) => {
+const draw = (
+  free: FooterRowsView,
+  over: Partial<ShopView> = {},
+  icons: "boxed" | "inline" = "boxed"
+) => {
   const shop = shopFixture({
     footerBar: {
       id: "mainfooter",
       variant: "free_rows",
       freeRows: free,
-      rows: [row()],
+      rows: [row(icons)],
       social: "bare",
     },
     ...over,
@@ -104,6 +121,21 @@ describe("the free rows footer's later steps", () => {
       /class="gf-foot-prose[^"]*font-\(family-name:--font-accent\)[^"]*" data-style="hand"/
     )
     expect(html).not.toContain("border border-rule bg-field no-underline")
+  })
+
+  it("keeps the contact's round signs by default and draws them small in the line on `inline`", () => {
+    const boxed = draw(FREE)
+    expect(boxed).toContain('class="gf-reach-sign"')
+    expect(boxed).not.toContain('data-icons="inline"')
+    const inline = draw(FREE, {}, "inline")
+    expect(inline).toContain('data-icons="inline"')
+    expect(inline).not.toContain('class="gf-reach-sign"')
+    // The kind read out only, the address in the line
+    expect(inline).toContain('<span class="sr-only">Telefon: </span>')
+    // A narrow column breaks the e-mail after its @, never mid-word
+    for (const html of [boxed, inline]) {
+      expect(html).toContain("merhaba@<wbr/>anadolurotalari.example")
+    }
   })
 
   it("keeps its grid and quiet marks in the theme's stylesheet", () => {

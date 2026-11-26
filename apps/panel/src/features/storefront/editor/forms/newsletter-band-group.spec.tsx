@@ -55,3 +55,30 @@ describe("the footer box's joined band", () => {
     expect(switchVariant(joined, "standard")).not.toHaveProperty("joined")
   })
 })
+
+/** A band's ground: the theme's pane, or the wash of the shop's main colour, on a page or in the footer. */
+describe("the newsletter band's ground tone", () => {
+  it("steps to the main colour's tint under Stil, plain as the field's absence", async () => {
+    const user = userEvent.setup()
+    const { changes } = renderPanel(band(), "footer")
+    await user.click(screen.getByRole("tab", { name: /^Stil/ }))
+    await openGroup(user, "Yazı ve zemin")
+    await user.click(screen.getByRole("radio", { name: /Ana renk tonu/ }))
+    expect(changes.at(-1)).toMatchObject({ variant: "split", tone: "tint" })
+  })
+
+  it("is offered on a band, on a page too, and dropped when the box leaves the bands", () => {
+    const page = switchVariant(
+      newHomeSection("newsletter", "ebultenkutu") as NewsletterSection,
+      "strip"
+    )
+    expect(search("kutu zemini", page, "home")).toContain("news_tone")
+    expect(search("kutu zemini", band(), "footer")).toContain("news_tone")
+    expect(search("kutu zemini", newFooterNewsletter("altbulten1"), "footer")).not.toContain(
+      "news_tone"
+    )
+    expect(switchVariant({ ...band(), tone: "tint" as const }, "standard")).not.toHaveProperty(
+      "tone"
+    )
+  })
+})

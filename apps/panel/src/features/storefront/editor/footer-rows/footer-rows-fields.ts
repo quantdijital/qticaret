@@ -1,4 +1,5 @@
 import {
+  FOOTER_CONTACT_ICON_STYLES,
   FOOTER_IMAGE_WIDTHS,
   FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
@@ -54,7 +55,7 @@ export const BLOCK_FIELDS = {
   menu: ["slot", "title", "collapse_phone"],
   brand: ["logo", "about", "address", "social", "logo_size"],
   newsletter: ["title", "description", "text", "variant"],
-  contact: ["title", "address", "phone", "whatsapp", "email", "hours"],
+  contact: ["title", "address", "phone", "whatsapp", "email", "hours", "icon_style"],
   social: ["title"],
   payments: ["title", "carriers"],
   image: ["image", "link", "width"],
@@ -75,6 +76,7 @@ const STYLE_GROUPS: Partial<Record<BlockField, FieldGroupName>> = {
   layout: "appearance",
   style: "appearance",
   logo_size: "appearance",
+  icon_style: "appearance",
   collapse_phone: "phone",
   visible: "visibility",
   device: "visibility",
@@ -107,6 +109,7 @@ function blockOptions(field: BlockField): readonly string[] {
     layout: FOOTER_TRUST_LAYOUTS,
     style: FOOTER_TEXT_STYLES,
     logo_size: FOOTER_LOGO_SIZES,
+    icon_style: FOOTER_CONTACT_ICON_STYLES,
     device: SECTION_DEVICES,
   }
   return (steps[field] ?? []).map((step) => `${FR}.fields.${field}.${step}`)

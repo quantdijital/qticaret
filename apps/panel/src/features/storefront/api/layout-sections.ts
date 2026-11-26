@@ -22,6 +22,7 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  NewsletterTone,
   NewsletterVariant,
   PageTextSwitch,
   PostsVariant,
@@ -331,6 +332,8 @@ export interface NewsletterFields {
    * above the footer. A page's box never has it.
    */
   joined?: boolean
+  /** The boxed bands' ground (`split`, `image_card`, `strip`); absent: `plain`. */
+  tone?: NewsletterTone
 }
 
 export interface NewsletterSection extends BodySectionBase, NewsletterFields {

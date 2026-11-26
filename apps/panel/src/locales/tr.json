@@ -9654,7 +9654,14 @@
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
         "joined": "Alt bilgiyle birleşik",
         "joinedTerm": "footer band",
-        "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer."
+        "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer.",
+        "tone": "Kutu zemini",
+        "toneTerm": "box tone",
+        "toneHint": "Bant kutu olarak çizildiğinde zemini: temanın kutu rengi ya da mağaza ana renginin çok açık tonu. Alt bilgiyle birleşik bant alt bilginin zeminini kullanır.",
+        "tones": {
+          "plain": "Düz",
+          "tint": "Ana renk tonu"
+        }
       },
       "announcement": {
         "line": "{{number}}. duyuru",
@@ -11383,6 +11390,12 @@
             "term": "logo size",
             "medium": "Orta",
             "large": "Büyük"
+          },
+          "icon_style": {
+            "label": "Simgeler",
+            "term": "icon style",
+            "boxed": "Yuvarlak kutulu",
+            "inline": "Satır içi, küçük"
           }
         },
         "source": {

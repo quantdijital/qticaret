@@ -6,7 +6,8 @@ import type { BlockProps } from "./shared"
 /**
  * How the shop is reached (adr/0048: its store details, never typed in
  * here): the address, the phone, WhatsApp and e-mail as the brand
- * columns' strip draws them (a round sign each), then the hours, days
+ * columns' strip draws them (a round sign each; `inline`: a small one in
+ * the line, as the address), then the hours, days
  * with the same hours together. Only the ones the block keeps and the
  * shop filled in.
  */
@@ -25,7 +26,7 @@ export function ContactBlock({ block, shop, t, editor }: BlockProps<"contact">) 
           <span className="max-w-[36ch]">{block.address}</span>
         </p>
       )}
-      <ReachList shop={shop} t={t} contact={block} />
+      <ReachList shop={shop} t={t} contact={block} iconStyle={block.iconStyle} />
       {block.hours.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold text-text">{t("contact.info_hours")}</p>

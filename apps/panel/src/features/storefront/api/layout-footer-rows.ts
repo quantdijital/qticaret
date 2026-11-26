@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/react"
 import type {
   FooterBlockType,
+  FooterContactIconStyle,
   FooterImageWidth,
   FooterLogoSize,
   FooterNewsletterVariant,
@@ -73,6 +74,8 @@ export interface FooterContactBlock extends FooterBlockBase {
   whatsapp: boolean
   email: boolean
   hours: boolean
+  /** `inline`: small signs in the line; `boxed`: round boxes, the kind small above. */
+  icon_style: FooterContactIconStyle
 }
 
 export interface FooterSocialBlock extends FooterBlockBase {

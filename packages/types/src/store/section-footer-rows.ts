@@ -145,6 +145,9 @@ export const FOOTER_TRUST_LAYOUTS = ["list", "inline"] as const
 export const FOOTER_TEXT_STYLES = ["plain", "hand"] as const
 /** The brand block's logo: the footer's usual height, or a step taller (`large`). */
 export const FOOTER_LOGO_SIZES = ["medium", "large"] as const
+/** The contact block's signs: in round boxes beside a small kind (`boxed`), or small in the line (`inline`). */
+export const FOOTER_CONTACT_ICON_STYLES = ["boxed", "inline"] as const
+export type FooterContactIconStyle = (typeof FOOTER_CONTACT_ICON_STYLES)[number]
 export type FooterTextStyle = (typeof FOOTER_TEXT_STYLES)[number]
 export type FooterLogoSize = (typeof FOOTER_LOGO_SIZES)[number]
 export type FooterTrustLayout = (typeof FOOTER_TRUST_LAYOUTS)[number]
@@ -223,6 +226,7 @@ export const FOOTER_ROWS_START = [
             whatsapp: true,
             email: true,
             hours: true,
+            icon_style: "boxed",
           },
         ],
       },
@@ -284,6 +288,7 @@ export type StoreFooterBlock = StoreFooterBlockBase &
         whatsapp: boolean
         email: boolean
         hours: boolean
+        icon_style: FooterContactIconStyle
       }
     | { type: "social"; title: string | null }
     | { type: "payments"; title: string | null; carriers: boolean }

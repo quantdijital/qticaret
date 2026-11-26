@@ -89,6 +89,7 @@ function printedBlock<L>(block: FooterBlock, tools: FooterRowTools<L>) {
         whatsapp: block.whatsapp,
         email: block.email,
         hours: block.hours,
+        icon_style: block.icon_style,
       }
     case "social":
       return { type: block.type, title: block.title }
