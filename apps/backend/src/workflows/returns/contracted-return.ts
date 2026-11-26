@@ -34,7 +34,7 @@ async function primaryCarrierOf(
 /**
  * The shop's contracted return code now (adr/0031 Ek 2026-11-26), read
  * from its settings (cached) by `contractedReturnOf`'s rule. The main
- * option is looked up only when both our carriers have a code.
+ * option is looked up only when more than one of our carriers has a code.
  */
 export async function readContractedReturn(container: Container): Promise<ContractedReturn | null> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
@@ -46,7 +46,7 @@ export async function readContractedReturn(container: Container): Promise<Contra
   const codes = returns.contracted_return
   const birfatura = birfaturaShipsWith(shipping, invoicing)
   const primaryCarrier =
-    !birfatura && codes.aras && codes.yurtici
+    !birfatura && [codes.aras, codes.yurtici, codes.dhlecommerce].filter(Boolean).length > 1
       ? await primaryCarrierOf(container, shipping.primary_option_id)
       : null
   return contractedReturnOf({ codes, birfatura, primaryCarrier })

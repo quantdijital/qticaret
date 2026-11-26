@@ -1,9 +1,10 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PDFDocument } from "pdf-lib"
-import { startFakeAras, startFakeYurtici } from "@qticaret/testing"
+import { startFakeAras, startFakeDhlEcom, startFakeYurtici } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { MM } from "../../src/lib/pdf"
+import { DHL_ECOMMERCE_DEV_APP } from "../../src/lib/shipping/dhlecommerce"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
@@ -25,7 +26,7 @@ type Post = <T>(path: string, body: unknown) => Promise<HttpResponse<T & { messa
 
 /** One carrier as the contract drives it: its fake service and how to read it. */
 interface CarrierUnderTest {
-  name: "aras" | "yurtici"
+  name: "aras" | "yurtici" | "dhlecommerce"
   env: string
   start: () => Promise<string>
   stop: () => Promise<void>
@@ -96,6 +97,35 @@ function yurtici(): CarrierUnderTest {
   }
 }
 
+function dhlEcom(): CarrierUnderTest {
+  let fake: Awaited<ReturnType<typeof startFakeDhlEcom>>
+  return {
+    name: "dhlecommerce",
+    // No app keys set: with a fake, the backend's development app (the fake's)
+    env: "DHL_ECOMMERCE_BASE_URL",
+    start: async () => {
+      fake = await startFakeDhlEcom({ ...DHL_ECOMMERCE_DEV_APP })
+      return fake.url
+    },
+    stop: () => fake.close(),
+    connect: (post) =>
+      post("/admin/integrations/credentials/dhlecommerce", {
+        settings: { test_mode: true },
+        secrets: { customer_number: fake.account.customerNumber, password: fake.account.password },
+      }),
+    pricing: { type: "table" },
+    reset: () => {
+      fake.orders.clear()
+    },
+    open: () => [...fake.orders.values()].filter((each) => !each.canceled).length,
+    // The order is open; its barcode is refused
+    failAfterOpening: () => {
+      fake.queue("createbarcode", "30099")
+    },
+    secrets: () => [fake.account.customerNumber, fake.account.password],
+  }
+}
+
 interface FulfillmentRow {
   id: string
   shipped_at: Date | null
@@ -115,7 +145,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    describe.each([aras(), yurtici()])("carrier contract: $name", (carrier) => {
+    describe.each([aras(), yurtici(), dhlEcom()])("carrier contract: $name", (carrier) => {
       let shop: StockShop
       let admin: { headers: Record<string, string> }
       let optionId: string

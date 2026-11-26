@@ -28,7 +28,7 @@ import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "aras", "yurtici", "pickup"] as const
+const CARRIERS = ["manual", "aras", "yurtici", "dhlecommerce", "pickup"] as const
 const PRICINGS = ["flat", "table"] as const
 export type OptionCarrier = (typeof CARRIERS)[number]
 type Pricing = (typeof PRICINGS)[number]
@@ -38,6 +38,7 @@ const PRICINGS_OF: Readonly<Record<OptionCarrier, readonly Pricing[]>> = {
   manual: ["flat"],
   aras: ["flat", "table"],
   yurtici: ["flat", "table"],
+  dhlecommerce: ["flat", "table"],
   pickup: ["flat"],
 }
 

@@ -929,6 +929,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document; test and live accounts differ.",
   "yurtici.cod_account_missing":
     "Shipping an order paid at the door with Yurtiçi Kargo needs the cash on delivery account. Enter it under Settings > Shipping > Yurtiçi Kargo.",
+  "dhlecommerce.unavailable":
+    "DHL eCommerce cannot be connected on this server yet; contact platform support.",
+  "dhlecommerce.merchant_invalid":
+    "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
+  "dhlecommerce.secret_invalid":
+    "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with (not the temporary one e-mailed to you); test and live accounts differ.",
+  "dhlecommerce.email_missing":
+    "DHL eCommerce asks for the receiver's e-mail and the order has none. Add the customer's e-mail to the order and try again.",
+  "dhlecommerce.place_unknown":
+    "DHL eCommerce does not know the province or district of the delivery address. Correct them on the order's address and try again.",
+  "dhlecommerce.branch_pending":
+    'DHL eCommerce has not yet found the receiver\'s branch; nothing was shipped. Press "Ship" again in a few minutes.',
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":

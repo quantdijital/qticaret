@@ -158,3 +158,8 @@ Geliver projeden tamamen çıkarıldı (ADR-0031 ek). Taşıyıcı kaydında art
 ## Ek 2026-11-26: MNG, Sürat, PTT sıraya alındı
 
 Sahip, mevcut işten sonra MNG (DHL eCommerce Türkiye), Sürat ve PTT Kargo'nun da aynı kayda doğrudan taşıyıcı olarak eklenmesini onayladı; sıra MNG → Sürat → PTT. Araştırma: `docs/entegrasyonlar/dhlecommerce.md` (eski adı `mng.md`), `surat.md`, `ptt.md` (Aras özeti `aras.md`). Kodlamadan önce sahibe sorulacak kararlar o dosyalarda: MNG uygulama anahtarlarının yeri, PTT'de yalnız barkod aralığıyla çalışma, etiketi basmayan taşıyıcılarda kendi etiketimiz.
+
+## Ek 2026-11-26 (2): DHL eCommerce kodlandı
+
+MNG Kargo artık DHL eCommerce Türkiye; kullanıcıya görünen her yerde "DHL eCommerce" (sahip, 2026-11-26). Aynı kayda üçüncü taşıyıcı olarak eklendi (`dhlecommerce_dhlecommerce`, `CarrierName` `dhlecommerce`): Kargoya ver, etiket, takip, iptal, kapıda ödeme, anlaşmalı iade kodu, taşıyıcı süzgeçleri, faturadaki taşıyıcı ve ortak sözleşme test paketi (`carrier-contract.spec.ts`) onu da kapsar. Farkları ve sahibin kararları `docs/entegrasyonlar/dhlecommerce.md` "Uygulama (2026-11-26)"da: uygulama anahtarları platformun (adr/0027 Ek 2026-11-26), REST/JSON (SOAP değil; HTTP istemcisine `jsonFault`), üç aşamalı açılış yalnız "Kargoya ver"de, etiket bizim PDF'imiz ve artık **ortak** (`lib/shipping/label`; Yurtiçi de buradan çizilir, Sürat/PTT de kullanacak), DHL'in ZPL'i özel depoda yanında. §8'deki iade başına kod (DHL'in `createReturnOrder`'ı) hâlâ kapsam dışı.
+

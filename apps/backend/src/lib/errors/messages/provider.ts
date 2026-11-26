@@ -8,6 +8,7 @@ import type { MessageLocale } from "./index"
 
 const PROVIDER_NAMES: Readonly<Record<string, string>> = {
   aras: "Aras Kargo",
+  dhlecommerce: "DHL eCommerce",
   google: "Google",
   iyzico: "iyzico",
   meta: "Meta",

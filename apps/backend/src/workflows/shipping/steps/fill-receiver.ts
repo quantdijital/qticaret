@@ -8,6 +8,7 @@ import { placeFactsOf } from "../place-facts"
 
 interface OrderRow {
   display_id?: number | null
+  email?: string | null
   shipping_address?: AddressRow | null
   billing_address?: AddressRow | null
   customer?: Person | null
@@ -31,7 +32,9 @@ const ADDRESS_FIELDS = [
  * addendum): the delivery address with what the order already knows put
  * in its gaps (`lib/shipping/fill`): the billing address's or the
  * account's name and phone, the postcode and plate code from the address
- * data. The order's own address is not changed. Reads only.
+ * data. The order's own address is not changed. With it, the order's
+ * e-mail, for the one carrier that refuses a receiver without one (DHL
+ * eCommerce); the others never get it. Reads only.
  */
 export const fillReceiverStep = createStep(
   "shipping-fill-receiver",
@@ -40,6 +43,7 @@ export const fillReceiverStep = createStep(
       entity: "order",
       fields: [
         "display_id",
+        "email",
         ...ADDRESS_FIELDS.map((field) => `shipping_address.${field}`),
         ...ADDRESS_FIELDS.map((field) => `billing_address.${field}`),
         "customer.first_name",
@@ -65,6 +69,9 @@ export const fillReceiverStep = createStep(
         fields: receiver.filled,
       })
     }
-    return new StepResponse<FilledAddress>(receiver)
+    return new StepResponse<FilledAddress & { email: string | null }>({
+      ...receiver,
+      email: order.email?.trim() ? order.email.trim() : null,
+    })
   }
 )

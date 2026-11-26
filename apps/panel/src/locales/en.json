@@ -33,6 +33,7 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
+      "dhlecommerce": "DHL eCommerce",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1335,6 +1336,7 @@
       "connect": "Connect",
       "carriersTitle": "Shipping services",
       "carriersDescription": "Shipments, labels and tracking go through these services.",
+      "carrierUnavailable": "Cannot be connected on this server yet; contact platform support.",
       "carriers": {
         "aras": {
           "name": "Aras Kargo",
@@ -1343,6 +1345,10 @@
         "yurtici": {
           "name": "Yurtiçi Kargo",
           "description": "Parcels and tracking on the shop's own Yurtiçi Kargo contract; the panel draws the parcel label. The details are in Yurtiçi's web service document."
+        },
+        "dhlecommerce": {
+          "name": "DHL eCommerce",
+          "description": "Shipping and tracking on the shop's own DHL eCommerce contract; the panel prepares the parcel label. The details are in your DHL eCommerce contract and the Online Şube."
         }
       },
       "options": {
@@ -1357,7 +1363,8 @@
           "manual": "I ship it myself",
           "pickup": "Pickup from the shop",
           "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo"
+          "yurtici": "Yurtiçi Kargo",
+          "dhlecommerce": "DHL eCommerce"
         },
         "pricing": "Price",
         "pricings": {
@@ -1404,7 +1411,8 @@
         "source": "Priced by",
         "sources": {
           "aras-table": "Aras Kargo: my price table (desi)",
-          "yurtici-table": "Yurtiçi Kargo: my price table (desi)"
+          "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
+          "dhlecommerce-table": "DHL eCommerce: my price table (desi)"
         },
         "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
         "tableLink": "Fill in the price table",
@@ -1541,6 +1549,27 @@
         },
         "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave.",
         "keysHint": "Enter Yurtiçi's “Gönderici Ödemeli” (sender pays) user. Yurtiçi allows one tracking query per minute; shipment statuses update at that pace."
+      },
+      "dhlecommerce": {
+        "keys": {
+          "title": "Customer details",
+          "description": "The customer number DHL eCommerce gave with the contract and your Online Şube password. Test and live accounts differ."
+        },
+        "customerNumber": "Customer number",
+        "password": "Password",
+        "keysHint": "The password is the permanent one you sign in to the Online Şube with, not the temporary one DHL e-mailed. If you change your Online Şube password, update it here too.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels go to DHL eCommerce's test system; no courier comes."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels open on the real DHL eCommerce account. Test and live details differ, so they are asked again.",
+        "unavailable": "DHL eCommerce cannot be connected on this server yet; nothing can be saved. Contact platform support.",
+        "checks": {
+          "merchant_invalid": "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
+          "secret_invalid": "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with; test and live accounts differ."
+        },
+        "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one."
       },
       "returns": {
         "title": "Return terms",
@@ -1689,6 +1718,7 @@
         "cash_on_delivery": "Cash on delivery",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
@@ -1703,6 +1733,7 @@
         "cash_on_delivery": "Cash or card at the door; no provider",
         "aras": "The shop's own carrier contract",
         "yurtici": "The shop's own carrier contract",
+        "dhlecommerce": "The shop's own carrier contract",
         "netgsm": "SMS and the consent registry (İYS)",
         "meta": "Measuring ad conversions",
         "ga4": "Measuring sales",
@@ -5539,6 +5570,7 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",

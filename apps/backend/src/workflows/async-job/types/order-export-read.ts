@@ -65,7 +65,11 @@ type Fulfillment = {
 
 type FullRow = ExportOrderRow & DeliveryOrder & { fulfillments?: Fulfillment[] | null }
 
-const CARRIER_TITLES = { aras: "Aras Kargo", yurtici: "Yurtiçi Kargo" } as const
+const CARRIER_TITLES = {
+  aras: "Aras Kargo",
+  yurtici: "Yurtiçi Kargo",
+  dhlecommerce: "DHL eCommerce",
+} as const
 
 /** The order's latest standing parcel: who carries it and its label's number. */
 function parcelOf(order: FullRow) {

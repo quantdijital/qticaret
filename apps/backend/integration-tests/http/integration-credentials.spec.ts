@@ -95,6 +95,11 @@ medusaIntegrationTestRunner({
           secrets: { username: false, password: false, cod_username: false, cod_password: false },
         }),
         expect.objectContaining({
+          provider: "dhlecommerce",
+          state: "not_configured",
+          secrets: { customer_number: false, password: false },
+        }),
+        expect.objectContaining({
           provider: "netgsm",
           state: "not_configured",
           secrets: { usercode: false, password: false },

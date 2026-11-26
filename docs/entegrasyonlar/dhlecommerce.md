@@ -1,6 +1,6 @@
 # DHL eCommerce Türkiye (eski MNG Kargo) Fulfillment Provider
 
-> Durum: **kodlanıyor** (2026-11-26): istemci, ortak etiket ve sahte servis PR 1'de; sağlayıcı ve panel PR 2'de. Kullanıcıya görünen her yerde ad **"DHL eCommerce"**; "MNG Kargo" yazılmaz (sahip, 2026-11-26). İç ad `dhlecommerce`; API alan adları hâlâ `mngkargo.com.tr`.
+> Durum: **kodlandı** (2026-11-26; PR #464 istemci + ortak etiket + sahte, PR 2 sağlayıcı + panel). Gerçek hesapla doğrulanmadı: aşağıdaki "Uygulama (2026-11-26)" ve "Doğrulanacaklar". Kullanıcıya görünen her yerde ad **"DHL eCommerce"**; "MNG Kargo" yazılmaz (sahip, 2026-11-26). İç ad `dhlecommerce` (sağlayıcı `dhlecommerce_dhlecommerce`); API alan adları hâlâ `mngkargo.com.tr`.
 >
 > İlk durum (2026-11-26): **araştırma, kod yok**. Sahip MNG, Sürat ve PTT'yi doğrudan taşıyıcı olarak sıraya aldı (ADR-0035 Ek 2026-11-26; sıra MNG → Sürat → PTT). Bu belge kodlayıcının arama yapmadan başlaması içindir; gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
 >
@@ -233,3 +233,27 @@ Seçenekler:
 - [ ] Desi hesabınız (genelde en × boy × yükseklik / 3000) ve sözleşmedeki desi/kg fiyat tablonuz (sitedeki kargo ücreti tablosu için).
 - [ ] İade için anlaşmalı **iade kodunuz** varsa o kod.
 - [ ] (Uygulama anahtarları mağazada kalırsa) apizone'da açtığınız uygulamanın **Client ID** ve **Client Secret** bilgisi; biz yönlendiririz.
+
+## Uygulama (2026-11-26)
+
+Sahip kararları (2026-11-26) ve koddaki karşılıkları:
+
+- **Uygulama anahtarları platformun** (adr/0027 Ek 2026-11-26): `DHL_ECOMMERCE_CLIENT_ID`, `DHL_ECOMMERCE_CLIENT_SECRET` sunucu ortamında; mağaza panelden yalnız müşteri numarası ve şifre girer (`integration-credentials` `dhlecommerce`, ikisi de mühürlü). Anahtar yoksa panel "bu sunucuda henüz açılmadı" der, sunucu kaydı reddeder (`dhlecommerce.unavailable`), Entegrasyonlar sayfası satırı göstermez.
+- **`createRecipient` yalnız "Kargoya ver"de** (KVKK veri azaltma): `createRecipient → createOrder → createbarcode` art arda (`modules/fulfillment-dhlecommerce/ship.ts`). `createOrder` 3002 → açılmış sayılır; yanıt gelmezse `cancelorder`; `createbarcode` her hatada `cancelorder`; 20001'de 5 + 10 sn bekleyip yeniden dener (sahte adresle 50 + 100 ms), hâlâ 20001 ise sipariş geri çekilir ve personele `dhlecommerce.branch_pending` ("birkaç dakika sonra Kargoya ver'e yeniden basın") döner. Yeniden basışta yeni `referenceId` ile baştan açılır.
+- **Etiket bizim PDF'imiz** (`lib/shipping/label`, Sürat/PTT de kullanacak; Yurtiçi de buradan çizilir): DHL'in `barcode` değeri Code 128 B, altında gönderi no (`shipmentId`), gönderici (mağazanın yasal unvanı, adresi, telefonu: zaten herkese açık künye; `shopSender`), alıcı, sipariş no, desi/kg, parça, kapıda tahsilat. Dış dönüştürücü yok (Labelary yok). DHL'in ZPL etiketi özel depoya ayrı dosya olarak yazılır (`label_zpl_file_id`), panel PDF'i basar; KVKK silmesi ikisini de siler. Yeni paket yok (`pdf-lib` + `code128.ts`).
+- **Bireysel alıcının vergi/TC no'su:** e-Arşiv taslağının kuralı (`ANONYMOUS_TCKN` = `11111111111`, `lib/invoicing/types.ts`), vergi dairesi `SAHIS`, **her alıcıya**. Kurumsal müşterinin gerçek VKN'si de taşıyıcıya açılmaz: kargo teslimi için gerekmez, mühürlü vergi no'yu açmak üçüncü tarafa veri aktarmak olur. MNG'nin bunu kabul ettiği doğrulanacak.
+- **E-posta:** DHL boş e-postayı reddettiği için siparişin e-postası yalnız DHL'e gider (`qt_ship.email`, `fill-receiver`); Aras/Yurtiçi'ye gitmez. Sipariş e-postasız ise `dhlecommerce.email_missing`.
+- **İade kodu:** iade başına API (`createReturnOrder`) yapılmadı; sabit anlaşmalı iade kodu kartı DHL sayfasında da var (`returns.contracted_return.dhlecommerce`), sıralamada Aras → Yurtiçi → DHL.
+- **JWT:** müşteri no + şifre + adres özetiyle süreç belleğinde 7 saat; 401'de (`http_401`/`error_401`) bir kez yenilenir. Instance-per-tenant olduğu için Redis'e gerek yok.
+- **İl/ilçe:** CBS Info listeleri adres başına bir gün süreç belleğinde; ad karşılaştırması Türkçe harf ve plaka eki normalize edilerek (`places.ts`). Eşleşmeyen il/ilçe DHL'e gitmeden `dhlecommerce.place_unknown` (alanla).
+- **Desi/kg:** parça listesi tam sayı istediği için hacim/3000 ve kg ayrı ayrı yukarı yuvarlanır (en az 1). Ölçüsüz kolide mağazanın varsayılan paketi gider (adr/0054); DHL şubede ölçer.
+- **Hata gövdesi:** HTTP istemcisine `jsonFault` eklendi: `{error:{code,description}}` 500 altında da `error_<kod>` ve maskeli cümle; ağ geçidinin abonelik reddi `subscription_missing` (mağazanın hatası sayılmaz, hesap kontrolü "doğrulanamadı" der).
+- **Takip:** `getshipmentstatus/{referenceId}`; 1→created, 2/3/6→in_transit, 4→out_for_delivery, 5→delivered, 7→returned, 8 ve bilinmeyen → değişmez. Bağlantı yanıttaki `trackingUrl` yalnız https ve `dhlecommerce.com.tr`/`mngkargo.com.tr` ise; yoksa `https://www.dhlecommerce.com.tr/gonderitakip` (sayfa numarayı adreste almıyor, 2026-11-26'da bakıldı; gönderi no yanında gösterilir).
+- **Vitrin:** `marks.dhlecommerce` = "DHL eCommerce" ve takip sayfası (`carrier-pages.ts`); logo eklenmedi (marka dosyası Oğuzhan'ın alanı, `public/marks/`).
+- **Sahte:** `packages/testing/src/dhlecommerce` (ağ geçidi anahtarı/aboneliği, JWT süresi, 3002/20001/26056, kabul sonrası iptal reddi, takip sayfası), `pnpm dev:dhlecommerce` (port 9110, geliştirme uygulaması `DHL_ECOMMERCE_DEV_APP`).
+
+### Gerçek hesap ve uygulama kaydıyla yapılacaklar
+
+- apizone'da platform uygulamasını açmak, altı ürüne abone olmak, anahtarları sunucu ortamına yazmak; canlıda `entegrasyon@mngkargo.com.tr`'ye uygulama adı + mağaza müşteri no + instance çıkış IP'si (F16).
+- Test müşteri bilgileriyle: `createRecipient` gövdesinin `{recipient}` sarmalı, 20001'in gerçekte ne kadar sürdüğü, anonim TCKN'nin kabulü, `desi`/`kg` tam sayı kuralı, `packagingType` 3, kapıda ödeme alanları, JWT reddinin biçimi (401 mi, hangi kod), yanlış şifrenin dönüşü, durum kodları ve iptalin görünüşü, `cancelshipment` gün kuralı, takip bağlantısının biçimi.
+- Kendi PDF etiketimizin (Code 128 B, DHL `barcode` değeri) şubede okutulması.

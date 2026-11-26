@@ -4,6 +4,7 @@ import { estimateShipping, primaryOptionOf } from "../../lib/shipping/estimate"
 import type { EstimatePricer, ShippingEstimate } from "../../lib/shipping/estimate"
 import {
   ARAS_FULFILLMENT_PROVIDER_ID,
+  DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   SHOP_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
@@ -55,6 +56,8 @@ export function pricerOf(option: OptionRow | null): EstimatePricer<CartLine> | n
       return id === "aras-flat" ? flat(data) : TABLE
     case YURTICI_FULFILLMENT_PROVIDER_ID:
       return id === "yurtici-flat" ? flat(data) : TABLE
+    case DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID:
+      return id === "dhlecommerce-flat" ? flat(data) : TABLE
     default:
       return null
   }

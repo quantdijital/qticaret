@@ -10,6 +10,8 @@ import type { LinkView, Translate } from "@qticaret/ui"
 const PAGES: Record<string, string> = {
   aras: "https://kargotakip.araskargo.com.tr/",
   yurtici: "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula",
+  // Formerly MNG Kargo; the page takes the 12-digit shipment number
+  dhlecommerce: "https://www.dhlecommerce.com.tr/gonderitakip",
 }
 
 export function carrierPages(keys: readonly string[] | undefined, t: Translate): LinkView[] {

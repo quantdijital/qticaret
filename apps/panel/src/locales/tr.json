@@ -33,6 +33,7 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
+      "dhlecommerce": "DHL eCommerce",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1335,6 +1336,7 @@
       "connect": "Bağla",
       "carriersTitle": "Kargo hizmetleri",
       "carriersDescription": "Gönderi oluşturma, etiket ve takip bu hizmetler üzerinden yapılır.",
+      "carrierUnavailable": "Bu sunucuda henüz bağlanamaz; platform desteğine yazın.",
       "carriers": {
         "aras": {
           "name": "Aras Kargo",
@@ -1343,6 +1345,10 @@
         "yurtici": {
           "name": "Yurtiçi Kargo",
           "description": "Mağazanın kendi Yurtiçi Kargo sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler Yurtiçi'nin verdiği web servis belgesinde."
+        },
+        "dhlecommerce": {
+          "name": "DHL eCommerce",
+          "description": "Mağazanın kendi DHL eCommerce sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler DHL eCommerce sözleşmenizde ve Online Şube'de."
         }
       },
       "options": {
@@ -1357,7 +1363,8 @@
           "manual": "Kendi gönderimim",
           "pickup": "Mağazadan teslim",
           "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo"
+          "yurtici": "Yurtiçi Kargo",
+          "dhlecommerce": "DHL eCommerce"
         },
         "pricing": "Ücret",
         "pricings": {
@@ -1404,7 +1411,8 @@
         "source": "Ücreti veren",
         "sources": {
           "aras-table": "Aras Kargo: ücret tablom (desi)",
-          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)"
+          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
+          "dhlecommerce-table": "DHL eCommerce: ücret tablom (desi)"
         },
         "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
         "tableLink": "Ücret tablosunu doldurun",
@@ -1541,6 +1549,27 @@
         },
         "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin.",
         "keysHint": "Yurtiçi'nin “Gönderici Ödemeli” kullanıcısını girin. Yurtiçi takip sorgusuna dakikada bir izin verir; gönderi durumları bu aralıkla güncellenir."
+      },
+      "dhlecommerce": {
+        "keys": {
+          "title": "Müşteri bilgileri",
+          "description": "DHL eCommerce'in sözleşmeyle verdiği müşteri numarası ve Online Şube şifresi. Test ve canlı hesap ayrıdır."
+        },
+        "customerNumber": "Müşteri numarası",
+        "password": "Şifre",
+        "keysHint": "Şifre, Online Şube'ye girdiğiniz kalıcı şifredir; DHL'in e-postayla gönderdiği geçici şifre değil. Online Şube şifrenizi değiştirirseniz burada da güncelleyin.",
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler DHL eCommerce'in test sistemine gider; gerçek kurye gelmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek DHL eCommerce hesabına açılır. Test ve canlı bilgileri ayrı olduğundan yeniden istenir.",
+        "unavailable": "DHL eCommerce bağlantısı bu sunucuda henüz açılmadı; bilgiler kaydedilemez. Platform desteğine yazın.",
+        "checks": {
+          "merchant_invalid": "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
+          "secret_invalid": "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın; test ve canlı hesap ayrıdır."
+        },
+        "rejected": "DHL eCommerce kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Online Şube şifreniz değiştiyse yenisini girin."
       },
       "returns": {
         "title": "İade koşulları",
@@ -1689,6 +1718,7 @@
         "cash_on_delivery": "Kapıda ödeme",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
@@ -1703,6 +1733,7 @@
         "cash_on_delivery": "Kapıda nakit ya da kartla ödeme; sağlayıcı yok",
         "aras": "Mağazanın kendi kargo sözleşmesi",
         "yurtici": "Mağazanın kendi kargo sözleşmesi",
+        "dhlecommerce": "Mağazanın kendi kargo sözleşmesi",
         "netgsm": "SMS ve İYS",
         "meta": "Reklam dönüşümlerinin ölçümü",
         "ga4": "Satışların ölçümü",
@@ -5539,6 +5570,7 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",

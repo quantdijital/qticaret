@@ -7,6 +7,7 @@ import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
+import { dhlEcomApi, dhlEcomCredentialsOf } from "../shipping/dhlecommerce"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
@@ -68,6 +69,12 @@ const CHECKERS = {
       (await api.checkLogin(credentials.cod, credentials.testMode, { signal })) !== "valid"
       ? "merchant_invalid"
       : "valid"
+  },
+  // A token for the customer number and password; the platform's app missing a subscription
+  // or keys of the other environment is no verdict on them (thrown: `failed`)
+  dhlecommerce: async (account, signal) => {
+    const credentials = dhlEcomCredentialsOf(account)
+    return credentials ? dhlEcomApi().checkLogin(credentials, { signal }) : "secret_invalid"
   },
   // `merchant_invalid`: the login works, the sender name is not on it
   netgsm: async (account, signal) => {
@@ -175,6 +182,10 @@ export const CHECK_FIELDS = {
   aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
   // The main login, or the door account's (see its checker)
   yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
+  dhlecommerce: {
+    merchant_invalid: "secrets.customer_number",
+    secret_invalid: "secrets.password",
+  },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
   meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },

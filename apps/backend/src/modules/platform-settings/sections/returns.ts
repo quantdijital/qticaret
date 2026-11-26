@@ -41,6 +41,7 @@ export interface ReturnsSettings {
 export interface ContractedReturnCodes {
   aras: string | null
   yurtici: string | null
+  dhlecommerce: string | null
   other_carrier: string | null
   other_code: string | null
 }
@@ -70,6 +71,7 @@ export const returnsSection = defineSection<ReturnsSettings>(
       .object({
         aras: returnCode,
         yurtici: returnCode,
+        dhlecommerce: returnCode,
         other_carrier: z
           .string()
           .trim()
@@ -85,7 +87,13 @@ export const returnsSection = defineSection<ReturnsSettings>(
     withdrawal_days: MIN_WITHDRAWAL_DAYS,
     return_shipping: "shop",
     package_travel: false,
-    contracted_return: { aras: null, yurtici: null, other_carrier: null, other_code: null },
+    contracted_return: {
+      aras: null,
+      yurtici: null,
+      dhlecommerce: null,
+      other_carrier: null,
+      other_code: null,
+    },
   },
   (values, ctx) => {
     // BirFatura's carrier is named by the shop: a code without its carrier tells the shopper nothing
