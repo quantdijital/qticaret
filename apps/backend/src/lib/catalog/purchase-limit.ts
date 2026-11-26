@@ -23,6 +23,8 @@ export interface LimitLine {
   /** The line's id; absent for a line being added. */
   id?: string | undefined
   variant_id: string
+  /** The product the cart line names, kept for a variant since gone. */
+  product_id?: string | undefined
   quantity: number
 }
 

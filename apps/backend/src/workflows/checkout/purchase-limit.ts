@@ -26,6 +26,7 @@ interface VariantRow {
 interface CartItemRow {
   id: string
   variant_id?: string | null
+  product_id?: string | null
   quantity?: unknown
 }
 
@@ -68,17 +69,62 @@ async function variantLimits(
   )
 }
 
+interface ProductRow {
+  id: string
+  title?: string | null
+  product_extension?: { max_quantity?: number | null } | null
+}
+
+/**
+ * Limits for lines whose variant the lookup did not find (deleted since it
+ * was added), by the product the cart line names: no line escapes the count.
+ */
+async function addProductLimits(
+  container: Container,
+  lines: readonly LimitLine[],
+  limits: Map<string, VariantLimit>
+): Promise<void> {
+  const orphans = lines.filter((line) => !limits.has(line.variant_id) && line.product_id)
+  const ids = [...new Set(orphans.map((line) => line.product_id ?? ""))]
+  if (ids.length === 0) {
+    return
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product",
+    fields: ["id", "title", "product_extension.max_quantity"],
+    filters: { id: ids },
+  })
+  const products = new Map((data as ProductRow[]).map((product) => [product.id, product]))
+  for (const line of orphans) {
+    const product = products.get(line.product_id ?? "")
+    if (product) {
+      limits.set(line.variant_id, {
+        product_id: product.id,
+        title: product.title ?? "",
+        limit: purchaseLimitOf(product.product_extension?.max_quantity),
+      })
+    }
+  }
+}
+
 /** The cart's lines with a variant, as stored now. */
 async function cartLines(container: Container, cartId: string): Promise<LimitLine[]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "cart",
-    fields: ["items.id", "items.variant_id", "items.quantity"],
+    fields: ["items.id", "items.variant_id", "items.product_id", "items.quantity"],
     filters: { id: cartId },
   })
   const items = (data[0] as { items?: (CartItemRow | null)[] | null } | undefined)?.items ?? []
   return items.flatMap((item) =>
     item?.variant_id
-      ? [{ id: item.id, variant_id: item.variant_id, quantity: Number(item.quantity ?? 0) }]
+      ? [
+          {
+            id: item.id,
+            variant_id: item.variant_id,
+            product_id: item.product_id ?? undefined,
+            quantity: Number(item.quantity ?? 0),
+          },
+        ]
       : []
   )
 }
@@ -89,6 +135,7 @@ async function assertLines(container: Container, lines: readonly LimitLine[]): P
     container,
     lines.map((line) => line.variant_id)
   )
+  await addProductLimits(container, lines, limits)
   const over = firstOverLimit(lines, limits)
   if (over) {
     throw new ValidationError(MAX_QUANTITY_REFUSAL, {
