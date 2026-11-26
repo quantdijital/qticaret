@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
 import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { beginSave } from "@qticaret/admin-ui/lib/forms"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { useCreatePopup, useUpdatePopup } from "@/features/popups/api/popups"
@@ -59,9 +59,10 @@ export function PopupForm({
   })
   const submit = form.handleSubmit(
     (values) => {
+      const settle = beginSave(form)
       save.mutate(requestOf(values, { create: existing === null }), {
         onSuccess: (saved) => {
-          form.reset(valuesOf(saved), FULL_RESET)
+          settle(valuesOf(saved))
           toast.success(t(existing ? `${F}.saved` : `${F}.created`))
           if (!existing) {
             void navigate({ to: "/popups/$id", params: { id: saved.id }, ignoreBlocker: true })

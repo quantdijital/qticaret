@@ -10,7 +10,7 @@ import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { isValidSlug } from "@/lib/slug"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 
@@ -52,11 +52,12 @@ export function GeneralCard({
   const message = (key: string | undefined) => (key ? t(key) : undefined)
 
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     update.mutate(
       { title: values.title.trim(), handle: values.handle.trim() },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.product), FULL_RESET)
+          settle(valuesOf(result.product))
           toast.success(t("products.detail.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

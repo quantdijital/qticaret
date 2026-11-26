@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
@@ -43,6 +43,7 @@ export function LinkedProductsCard({ productId }: { productId: string }) {
     return <Skeleton className="h-40 w-full rounded-lg" />
   }
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         upsell_product_ids: ids(values.upsells),
@@ -50,10 +51,7 @@ export function LinkedProductsCard({ productId }: { productId: string }) {
       },
       {
         onSuccess: (answer) => {
-          form.reset(
-            { upsells: answer.upsells ?? [], cross_sells: answer.cross_sells ?? [] },
-            FULL_RESET
-          )
+          settle({ upsells: answer.upsells ?? [], cross_sells: answer.cross_sells ?? [] })
           toast.success(t("products.detail.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

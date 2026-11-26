@@ -15,7 +15,7 @@ import type { ProductAddon } from "@/features/products/api/addons"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { featuresQuery, useFeatureState } from "@/features/settings/api/features"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { addonsFailureOf } from "./addon-failure"
 import type { AddonsFailure } from "./addon-failure"
 import { AddonCopyDialog } from "./addon-copy-dialog"
@@ -76,13 +76,14 @@ function AddonsForm({
 
   // The whole list, in its order; ids kept, new ones without (the server gives them)
   const send = (next: AddonValue[], fail: (failure: AddonsFailure) => void, done?: () => void) => {
+    const settle = beginSave(form)
     save.mutate(
       { addons: next.length === 0 ? null : next.map(inputOf) },
       {
         onSuccess: (stored) => {
           setFailure(null)
           setDialogFailure(null)
-          form.reset(valuesOf(stored.addons), FULL_RESET)
+          settle(valuesOf(stored.addons))
           done?.()
           toast.success(t("products.detail.saved"))
         },

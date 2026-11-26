@@ -21,7 +21,7 @@ import {
 } from "@/features/settings/api/einvoice"
 import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const E = "settings.einvoice.program"
 const TRIGGERS = ["shipped", "placed"] as const
@@ -70,19 +70,17 @@ export function EinvoiceProgramCard({
   // Numbers written back from outside are held to the web sales' series
   const numbered = provider === "external" || provider === "birfatura"
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     const series = next.series.trim().toUpperCase()
     save.mutate(
       { provider: next.provider, trigger: next.trigger, series: series === "" ? null : series },
       {
         onSuccess: (result) => {
-          form.reset(
-            {
-              provider: invoicingProviderOf(result.values.provider),
-              trigger: result.values.trigger,
-              series: result.values.series ?? "",
-            },
-            FULL_RESET
-          )
+          settle({
+            provider: invoicingProviderOf(result.values.provider),
+            trigger: result.values.trigger,
+            series: result.values.series ?? "",
+          })
           // Leaving BirFatura takes its cargo module with it (Settings > Shipping)
           void client.invalidateQueries({ queryKey: ["settings", "shipping"] })
           toast.success(t("settings.saved"))

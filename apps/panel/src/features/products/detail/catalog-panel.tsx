@@ -3,7 +3,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
@@ -72,6 +72,7 @@ function CatalogForm({
 
   // Only what changed is sent; the audit log shows those fields (F3.1)
   const send = (values: CatalogValues) => {
+    const settle = beginSave(form)
     const bookingMode = bookingModeOf(catalog, values)
     save.mutate(
       {
@@ -91,7 +92,7 @@ function CatalogForm({
       },
       {
         onSuccess: () => {
-          form.reset(values, FULL_RESET)
+          settle(values)
           toast.success(t("products.detail.saved"))
         },
         onError: (failure) => {

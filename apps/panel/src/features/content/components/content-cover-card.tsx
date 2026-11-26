@@ -10,7 +10,7 @@ import type { ContentDetail } from "@/features/content/api/content"
 import { NO_FINDINGS } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { FindingsNote } from "./findings-note"
 
 interface Values {
@@ -42,11 +42,12 @@ export function ContentCoverCard({
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const url = useWatch({ control: form.control, name: "image_url" })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     update.mutate(
       { image_url: values.image_url || null, image_alt: values.image_alt.trim() || null },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.entry), FULL_RESET)
+          settle(valuesOf(result.entry))
           toast.success(t("content.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

@@ -9,7 +9,7 @@ import { useUpdateBrand } from "@/features/brands/api/brands"
 import type { Brand } from "@/features/brands/api/brands"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 interface Values {
   name: string
@@ -31,6 +31,7 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
   const saved = valuesOf(brand)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     update.mutate(
       {
@@ -40,7 +41,7 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.brand), FULL_RESET)
+          settle(valuesOf(result.brand))
           toast.success(t("brands.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

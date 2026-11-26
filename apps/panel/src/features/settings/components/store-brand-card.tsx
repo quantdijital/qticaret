@@ -10,7 +10,7 @@ import { useSaveAppearance } from "@/features/settings/api/appearance"
 import { useRenameStore } from "@/features/settings/api/store"
 import { StoreFaviconField } from "@/features/settings/components/store-favicon-field"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const B = "settings.store.brand"
 
@@ -110,6 +110,7 @@ export function StoreBrandCard({
   }
 
   const submit = form.handleSubmit(async (next) => {
+    const settle = beginSave(form)
     try {
       const renamed = dirtyFields.name
         ? await rename.mutateAsync({ id: storeId, name: next.name.trim() })
@@ -126,7 +127,7 @@ export function StoreBrandCard({
         Object.keys(logos).length + Object.keys(icon).length > 0
           ? await saveImages.mutateAsync({ ...logos, ...icon })
           : null
-      form.reset(valuesOf(renamed?.store.name ?? name, images?.values ?? appearance), FULL_RESET)
+      settle(valuesOf(renamed?.store.name ?? name, images?.values ?? appearance))
       toast.success(t("settings.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))

@@ -9,7 +9,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { LegalSettings, StoreSettings } from "@/features/settings/api/sections"
 import { EtbisQrField } from "@/features/settings/components/etbis-qr-field"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const K = "settings.store.legal"
 
@@ -78,6 +78,7 @@ export function LegalIdentityCard({
   const gaps = identityGaps(saved, hasContact)
   // Each section is saved only when one of its own fields changed
   const submit = form.handleSubmit(async ({ etbis_qr_url, ...legal }) => {
+    const settle = beginSave(form)
     try {
       const identity = Object.keys(dirtyFields).some((name) => name !== "etbis_qr_url")
         ? await save.mutateAsync(legal)
@@ -85,10 +86,7 @@ export function LegalIdentityCard({
       const code = dirtyFields.etbis_qr_url
         ? await saveQr.mutateAsync({ etbis_qr_url: etbis_qr_url || null })
         : null
-      form.reset(
-        valuesOf(identity?.values ?? saved, code ? code.values.etbis_qr_url : qrUrl),
-        FULL_RESET
-      )
+      settle(valuesOf(identity?.values ?? saved, code ? code.values.etbis_qr_url : qrUrl))
       toast.success(t("settings.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))

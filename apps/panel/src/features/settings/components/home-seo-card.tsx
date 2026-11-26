@@ -12,7 +12,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { errorLine, optionalLineSchema } from "@/features/settings/storefront"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const H = "settings.seo.home"
 
@@ -53,11 +53,12 @@ export function HomeSeoCard({ saved, storeName }: { saved: SeoSettings; storeNam
   const titleError = errorLine(t, errors.title, TITLE_MAX)
   const descriptionError = errorLine(t, errors.description, DESCRIPTION_MAX)
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       { home: { title: next.title || null, description: next.description || null } },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

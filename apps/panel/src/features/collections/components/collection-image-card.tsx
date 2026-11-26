@@ -8,7 +8,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { useSetCollectionDetails } from "@/features/collections/api/collections"
 import type { Collection, CollectionImage } from "@/features/collections/api/collections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const I = "collections.image"
 // The media library's alt text limit (backend lib/media ALT_MAX)
@@ -37,12 +37,13 @@ export function CollectionImageCard({ collection }: { collection: Collection }) 
   const form = useForm<Values>({ values: initial, resetOptions: { keepDirtyValues: true } })
   const url = useWatch({ control: form.control, name: "url" })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const image = values.url ? { url: values.url, alt: values.alt.trim() || null } : null
     save.mutate(
       { image },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.collection.image), FULL_RESET)
+          settle(valuesOf(result.collection.image))
           toast.success(t(`${I}.saved`))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

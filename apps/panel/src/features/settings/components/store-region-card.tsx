@@ -16,7 +16,7 @@ import {
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
 // The zones a Turkish shop meets first; the browser knows the rest
@@ -142,9 +142,10 @@ export function RegionCard({ saved, className }: { saved: StoreSettings; classNa
   const zone = useWatch({ control: form.control, name: "timezone" })
 
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(next, {
       onSuccess: (result) => {
-        form.reset(unitsOf(result.values), FULL_RESET)
+        settle(unitsOf(result.values))
         toast.success(t("settings.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),

@@ -14,7 +14,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { BankTransferSettings } from "@/features/settings/api/sections"
 import { formatIban, isValidTrIban, normalizeIban } from "@/features/settings/iban"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const B = "settings.payments.bankTransfer"
 
@@ -156,11 +156,12 @@ function AccountCard({ saved }: { saved: BankTransferSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       { ...next, iban: normalizeIban(next.iban) },
       {
         onSuccess: (result) => {
-          form.reset(accountOf(result.values), FULL_RESET)
+          settle(accountOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
