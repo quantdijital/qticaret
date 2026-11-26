@@ -91,3 +91,14 @@ Paylaşılan container'dan erişim ilk kararda yalnızca sağlayıcı hesabını
 - **Kurtarma kaydı (`payment-recovery`), salt okunur:** iyzico sağlayıcısının yetkilendirmesi, iadeye yazılmış bir ödemeyi `error` sayar. Böylece bu ödeme sepet tamamlamayla siparişe dönüşmez.
 
 Bu iş parçaları bir workflow'a taşınamaz: parçalar, bir Medusa çağrısının (`refundPaymentWorkflow` → sağlayıcının `refundPayment`'i) içinde ve sırayla gönderiliyor. Her gönderimden önce kalıcı kayıt gerekiyor. PayTR iadeyi kendi referansıyla tekilleştirdiği için PayTR sağlayıcısı bu istisnaları kullanmaz.
+
+## Ek 2026-11-26: DHL eCommerce'te uygulama anahtarları platformun
+
+DHL eCommerce Türkiye (eski MNG Kargo) iki kimlik ister (`docs/entegrasyonlar/dhlecommerce.md`): API portalında açılan **uygulamanın** anahtarları (`X-IBM-Client-Id`, `X-IBM-Client-Secret`) entegre eden yazılımı tanır; mağazanın **müşteri numarası ve şifresi** sözleşmeyi. Sahip kararı (2026-11-26): uygulama anahtarları **platformundur**.
+
+- **Karar:** Quant, DHL'in portalında tek bir uygulama açar; anahtarlar sunucu ortamından okunur (`DHL_ECOMMERCE_CLIENT_ID`, `DHL_ECOMMERCE_CLIENT_SECRET`; `apps/backend/env.example`), loga, hata metnine ve panele girmez (HTTP istemcisinin `secrets`'i). Mağaza panelden yalnız müşteri numarası ve şifresini girer; bunlar diğer hesaplar gibi mühürlü saklanır.
+- **Bu kuralın istisnası, ilk değil:** Kural (§9) mağazanın kendi hesaplarınadır; uygulama anahtarı mağazanın değil platformun kimliğidir. Paraşüt'ün OAuth istemcisi (`PARASUT_CLIENT_*`, ADR-0034) ve Google'ınki aynı kalıptadır.
+- **Anahtarlar yoksa:** bu sunucuda DHL eCommerce bağlanamaz; panel kargo sayfası bunu söyler ve kaydetmeyi kapatır, sunucu hesabı kaydetmez (`dhlecommerce.unavailable`). Uygulama çökmez, başka taşıyıcılar etkilenmez.
+- **Geliştirme ve testler:** sahte DHL eCommerce adresi (`DHL_ECOMMERCE_BASE_URL`, yayında reddedilir) tanımlıyken ve anahtar verilmemişken sahtenin geliştirme uygulaması kullanılır.
+- **Canlıya geçiş:** DHL canlı aboneliği API başına elle onaylar ve çıkış IP'sini izin listesine alır. Her yeni mağazada `entegrasyon@mngkargo.com.tr`'ye uygulama adı, mağazanın müşteri numarası ve instance'ın çıkış IP'si yazılır (F16 işi; gerçek hesapla doğrulanacak).
+- **Sonuç:** Anahtar sızarsa tüm mağazaların DHL çağrıları aynı uygulamadan gider; anahtar döndürmek tek ortam değişkeni ve yeniden başlatmadır. JWT her mağazanın kendi hesabıyla alınır; bir mağazanın şifresi başkasının çağrısına karışmaz (önbellek anahtarı adres + müşteri no + şifre özeti).

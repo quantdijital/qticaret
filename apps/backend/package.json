@@ -14,6 +14,7 @@
     "dev:aras": "ts-node ../../packages/testing/src/dev/aras.ts",
     "dev:netgsm": "ts-node ../../packages/testing/src/dev/netgsm.ts",
     "dev:yurtici": "ts-node ../../packages/testing/src/dev/yurtici.ts",
+    "dev:dhlecommerce": "ts-node ../../packages/testing/src/dev/dhlecommerce.ts",
     "dev:google": "ts-node ../../packages/testing/src/dev/google.ts",
     "build": "medusa build && node ../../scripts/stamp-release.mjs",
     "start": "medusa start",

@@ -157,4 +157,4 @@ Geliver projeden tamamen çıkarıldı (ADR-0031 ek). Taşıyıcı kaydında art
 
 ## Ek 2026-11-26: MNG, Sürat, PTT sıraya alındı
 
-Sahip, mevcut işten sonra MNG (DHL eCommerce Türkiye), Sürat ve PTT Kargo'nun da aynı kayda doğrudan taşıyıcı olarak eklenmesini onayladı; sıra MNG → Sürat → PTT. Araştırma: `docs/entegrasyonlar/mng.md`, `surat.md`, `ptt.md` (Aras özeti `aras.md`). Kodlamadan önce sahibe sorulacak kararlar o dosyalarda: MNG uygulama anahtarlarının yeri, PTT'de yalnız barkod aralığıyla çalışma, etiketi basmayan taşıyıcılarda kendi etiketimiz.
+Sahip, mevcut işten sonra MNG (DHL eCommerce Türkiye), Sürat ve PTT Kargo'nun da aynı kayda doğrudan taşıyıcı olarak eklenmesini onayladı; sıra MNG → Sürat → PTT. Araştırma: `docs/entegrasyonlar/dhlecommerce.md` (eski adı `mng.md`), `surat.md`, `ptt.md` (Aras özeti `aras.md`). Kodlamadan önce sahibe sorulacak kararlar o dosyalarda: MNG uygulama anahtarlarının yeri, PTT'de yalnız barkod aralığıyla çalışma, etiketi basmayan taşıyıcılarda kendi etiketimiz.

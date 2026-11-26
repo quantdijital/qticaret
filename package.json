@@ -17,6 +17,7 @@
     "dev:aras": "pnpm --filter backend dev:aras",
     "dev:netgsm": "pnpm --filter backend dev:netgsm",
     "dev:yurtici": "pnpm --filter backend dev:yurtici",
+    "dev:dhlecommerce": "pnpm --filter backend dev:dhlecommerce",
     "dev:google": "pnpm --filter backend dev:google",
     "build": "turbo run build",
     "lint": "turbo run lint",

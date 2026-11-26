@@ -30,6 +30,18 @@ export {
 } from "./aras/fake-server"
 export type { FakeAras, FakeArasAccount, FakeArasOrder } from "./aras/fake-server"
 export {
+  TRACKING_STEPS as DHL_ECOMMERCE_TRACKING_STEPS,
+  fakeDhlEcomAccount,
+  fakeDhlEcomApp,
+  startFakeDhlEcom,
+} from "./dhlecommerce/fake-server"
+export type {
+  FakeDhlEcom,
+  FakeDhlEcomAccount,
+  FakeDhlEcomApp,
+  FakeDhlEcomOrder,
+} from "./dhlecommerce/fake-server"
+export {
   TRACKING_STEPS as YURTICI_TRACKING_STEPS,
   fakeYurticiAccounts,
   startFakeYurtici,

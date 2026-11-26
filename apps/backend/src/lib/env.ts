@@ -100,6 +100,12 @@ const envSchema = z.object({
   // A fake Aras or Yurtiçi on a developer's machine (adr/0035); refused when deployed
   ARAS_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   YURTICI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake DHL eCommerce on a developer's machine and in tests; refused when deployed
+  DHL_ECOMMERCE_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // The platform's one app at DHL eCommerce's API portal (adr/0027 Ek 2026-11-26): each shop
+  // connects its own customer number with it. Off until both are set; never logged
+  DHL_ECOMMERCE_CLIENT_ID: z.string().max(200).optional(),
+  DHL_ECOMMERCE_CLIENT_SECRET: z.string().max(200).optional(),
   // F9 (adr/0036): where e-mail leaves us. Unset sends none; Mailpit only on
   // a developer's machine, Resend once deployed
   EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).optional(),
@@ -366,6 +372,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "IYZICO_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
+    "DHL_ECOMMERCE_BASE_URL",
     "MAILPIT_URL",
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",

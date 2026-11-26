@@ -17,6 +17,7 @@ import {
   wasNotSent,
 } from "./request"
 import { IDEMPOTENT_METHODS, backoffDelay, parseRetryAfter, resolveRetryPolicy } from "./retry"
+import { jsonFaultOf } from "./json-fault"
 import { soapFaultOf } from "./soap-fault"
 import { ResponseTooLarge, TransportRefusal, callTransport, fetchTransport } from "./transport"
 import type { TransportResponse } from "./transport"
@@ -153,6 +154,16 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       // Its sentence too, made safe of the account's own values (`secrets`)
       return failure(fault.code !== "" && PROVIDER_CODE.test(code) ? code : "error_fault", false, {
         providerMessage: fault.text,
+        secrets: prepared.secrets,
+      })
+    }
+    const json =
+      options.jsonFault && !REJECTED_STATUSES.has(status) && !GATEWAY_STATUSES.has(status)
+        ? jsonFaultOf(response.text, options.jsonFault, PROVIDER_CODE)
+        : undefined
+    if (json !== undefined) {
+      return failure(`error_${json.code}`, false, {
+        providerMessage: json.text ?? undefined,
         secrets: prepared.secrets,
       })
     }
