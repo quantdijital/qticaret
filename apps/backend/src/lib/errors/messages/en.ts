@@ -781,7 +781,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.address_missing": "The order has no billing address.",
   "einvoice.tax_office_missing": "The corporate buyer has no tax office.",
   "einvoice.carrier_identity_missing":
-    "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
+    "The carrier's registered name and tax id are not entered (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.store_url_missing": "The shop has no storefront address.",
   // adr/0072: BirFatura's pull and write-back
   "einvoice.phone_missing":
@@ -791,9 +791,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.pdf_download_failed":
     "The invoice number was recorded but BirFatura's PDF could not be downloaded. Upload the PDF by hand.",
   "einvoice.parasut_unavailable": "Paraşüt cannot be connected on this server yet.",
-  "einvoice.parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
+  "einvoice.parasut_not_connected":
+    "No Paraşüt account is connected (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.parasut_disconnected":
-    "Paraşüt refused the connection; connect the account again (Settings > E-invoice).",
+    "Paraşüt refused the connection; connect the account again (Settings > Shipping and delivery > the carrier's page).",
   "einvoice.parasut_refresh_unknown":
     "Paraşüt's answer to a token refresh was lost; if it keeps failing, connect the account again.",
   "einvoice.parasut_code_refused":

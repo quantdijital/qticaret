@@ -1331,7 +1331,7 @@
     },
     "shipping": {
       "title": "Kargo ve teslimat",
-      "subtitle": "Siparişlerin nasıl gönderileceğini buradan yönetirsiniz. Her kargo hizmeti kendi sayfasında bağlanır.",
+      "subtitle": "Kargo firmaları, müşterinin seçtiği kargo seçenekleri, iade ve depolar.",
       "manage": "Yönet",
       "connect": "Bağla",
       "carriersTitle": "Kargo hizmetleri",
@@ -1375,13 +1375,10 @@
       },
       "options": {
         "title": "Kargo seçenekleri",
-        "description": "Müşteriler ödeme sırasında bunlardan birini seçer: kimin taşıdığı ve nasıl fiyatlandığıyla.",
+        "description": "Müşteri ödeme sırasında bunlardan birini seçer.",
         "add": "Seçenek ekle",
         "addTitle": "Yeni kargo seçeneği",
-        "editTitle": "Kargo seçeneğini düzenle",
-        "dialogDescription": "Müşterinin ödeme sayfasında gördüğü ad, kargoyu kimin taşıdığı ve ücret.",
         "name": "Ad",
-        "nameHint": "Ödeme sayfasında görünür, ör. \"Standart Kargo\".",
         "nameRequired": "Bir ad girin.",
         "carrier": "Taşıyan",
         "carriers": {
@@ -1398,21 +1395,22 @@
           "fastest": "Geliver: en hızlı teklif",
           "table": "Ücret tablosu (desi)"
         },
-        "amount": "Ücret (TL)",
-        "amountHint": "KDV dahil; 0 ücretsiz.",
+        "amount": "Tutar",
+        "amountHint": "KDV dahil; 0 yazarsanız ücretsiz.",
         "amountInvalid": "Tutarı en çok iki ondalıkla girin.",
         "free": "Ücretsiz",
-        "none": "Henüz kargo seçeneği yok; müşteriler sipariş veremez. Bir seçenek ekleyin.",
+        "none": "Henüz kargo seçeneği yok; müşteriler sipariş veremez.",
         "edit": "{{name}} seçeneğini düzenle",
         "remove": "{{name}} seçeneğini kaldır",
-        "removeTitle": "{{name}} kaldırılsın mı?",
         "removeDescription": "Müşteriler bu seçeneği artık görmez; verilmiş siparişler etkilenmez.",
         "removeConfirm": "Kaldır",
-        "removed": "Kargo seçeneği kaldırıldı."
+        "removed": "Kargo seçeneği kaldırıldı.",
+        "defaultName": "Standart kargo",
+        "keep": "Vazgeç"
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
-        "deliveryDescription": "Siparişin ne zaman kargoya verildiği, kaç günde ulaştığı ve hangi saate kadar aynı gün kargoya verildiği. Ürün sayfalarındaki Kargo ve Teslimat kartı, kargo cümlesi, arama motorlarına ve Akakçe'ye verilen teslim bilgisi buradan gelir.",
+        "deliveryDescription": "Ürün sayfasında, arama motorlarında ve Akakçe'de gösterilen teslim süresi.",
         "handling": "Kargoya verme",
         "handlingHint": "Sipariş gününden sonra iş günü.",
         "transit": "Taşıma",
@@ -1423,11 +1421,11 @@
         "daysInvalid": "Gün sayısını rakamla girin.",
         "daysOrder": "En az gün, en çok günden büyük olamaz.",
         "cutoff": "Aynı gün kargo saati",
-        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; ürün sayfalarındaki Kargo ve Teslimat kartında ve Akakçe'de gösterilir.",
+        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin.",
         "noCutoff": "Aynı gün kargo yok",
         "until": "{{hour}} öncesi siparişler",
         "ratesTitle": "Ücret tablosu",
-        "ratesDescription": "\"Ücret tablosu\" ile fiyatlanan seçeneklerde kolinin desisine göre alınan ücret (KDV dahil).",
+        "ratesDescription": "\"Ücret tablosu\" ile fiyatlanan seçeneklerde desiye göre ücret (KDV dahil).",
         "noRates": "Henüz satır yok.",
         "upTo": "En çok",
         "desi": "desi:",
@@ -1442,7 +1440,7 @@
       },
       "parcel": {
         "title": "Varsayılan paket",
-        "description": "Ölçüsü girilmemiş ürünler için; kargo firması gerçek paketi kendisi ölçer.",
+        "description": "Ölçüsü girilmemiş ürünlerin kargo ücreti bu pakete göre hesaplanır.",
         "weight": "Ağırlık",
         "length": "Uzunluk",
         "width": "Genişlik",
@@ -1453,7 +1451,7 @@
       },
       "labels": {
         "title": "Kargo etiketi",
-        "description": "Kargo etiketlerinin basılacağı kâğıt. Yurtiçi etiketini panel bu boyutta çizer; Aras ve Geliver'in kendi etiketi bu boyuta orantılı sığdırılır.",
+        "description": "Kargo etiketlerinin basılacağı kâğıt.",
         "format": "Etiket boyutu",
         "formatHint": "Termal etiket yazıcınızın rulosundaki etiket ölçüsünü seçin; normal yazıcı kullanıyorsanız A4'ü seçin.",
         "formats": {
@@ -1561,14 +1559,14 @@
       },
       "freeShipping": {
         "title": "Ücretsiz kargo eşiği",
-        "description": "Sepetteki ürünlerin toplamı (KDV dahil, indirimler düşüldükten sonra) bu tutara ulaşınca bütün kargo seçenekleri ücretsiz olur; ücretsiz kargolu ürünler de tutara sayılır.",
+        "description": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca bütün kargo seçenekleri ücretsiz olur.",
         "switch": "Belli bir tutardan sonra kargo bedava",
         "threshold": "En az sepet tutarı",
         "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin."
       },
       "classes": {
         "title": "Kargo sınıfları",
-        "description": "Ürüne verilen sınıf kargo ücretini değiştirir. Sepette birden çok sınıf varsa en yüksek ek ücret siparişe bir kez eklenir.",
+        "description": "Ürüne verilen sınıf kargo ücretine ek ücret ekler; sepette en yüksek olan bir kez eklenir.",
         "name": "Sınıf adı",
         "nameOf": "{{number}}. sınıfın adı",
         "surcharge": "Ek ücret",
@@ -1588,6 +1586,28 @@
         "nameInvalid": "Sınıfa bir ad verin (en çok 60 karakter).",
         "surchargeInvalid": "Ek ücreti 0 ile 100.000 TL arasında girin.",
         "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır."
+      },
+      "ownDeliveryInvoice": "Kendi gönderdiğiniz paketlerin faturasında mağazanızın unvanı ve VKN'si yazılır:",
+      "ownDeliveryLink": "Yasal bilgiler",
+      "advanced": {
+        "title": "Gelişmiş",
+        "handling": "Kargoya verme {{days}} gün",
+        "transit": "taşıma {{days}} gün",
+        "noSameDay": "aynı gün kargo yok",
+        "sameDay": "{{hour}} öncesi aynı gün",
+        "noRates": "Satır yok; yalnız \"Ücret tablosu\" ile fiyatlanan seçenekler kullanır.",
+        "rates_one": "{{count}} satır, {{desi}} desiye kadar",
+        "rates_other": "{{count}} satır, {{desi}} desiye kadar",
+        "ratesNeeded": "Ücret tablosuyla fiyatlanan bir seçenek var ama tablo boş.",
+        "platformParcel": "Platform paketi: 1 kg, 30 × 20 × 10 cm (2 desi)"
+      },
+      "invoiceIdentity": {
+        "title": "Faturadaki firma bilgisi",
+        "description": "e-Arşiv faturada paketi taşıyan firma olarak yazılır; firmanın size kestiği faturada bulunur.",
+        "titleLabel": "Unvan",
+        "taxId": "VKN",
+        "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
+        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
       }
     },
     "integrations": {
@@ -2165,7 +2185,7 @@
       "api": "Kendi sistemleriniz için API anahtarları",
       "security": "Hesabınız ve iki adımlı doğrulama, ekip üyeleri ve davetler, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
-      "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
+      "einvoice": "Fatura programı, kesim anı ve seri, KDV, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
       "subscription": "Paketiniz, limitler ve kullanım, ödeme durumu",
       "maintenance": "Vitrini geçici olarak kapatma, bakım sayfası ve atlatma bağlantısı"
@@ -2831,7 +2851,7 @@
     },
     "einvoice": {
       "title": "Fatura ve muhasebe",
-      "subtitle": "Faturayı kimin, ne zaman ve hangi seriyle keseceği; e-Arşiv'deki taşıyıcı bilgileri ve mali müşavire aylık paket.",
+      "subtitle": "Faturayı kimin, ne zaman ve hangi seriyle keseceği; KDV oranları ve mali müşavire aylık paket.",
       "program": {
         "title": "Fatura programı",
         "description": "Faturayı kesen program ve kesim anı. Yalnızca mağaza sahibi değiştirebilir.",
@@ -2943,26 +2963,13 @@
         "external": "Kendi programım: kendi programınızla ya da elle kesilir, numarası ve PDF'i buraya yazılır.",
         "manual": "Faturalarınızı elle kesiyorsanız (ör. Luca) \"Kendi programım\"ı seçin: her sipariş fatura kartında numarasını ve PDF'ini bekler."
       },
-      "carriers": {
-        "title": "Kargo firmalarının bilgileri",
-        "description": "e-Arşiv faturada paketi taşıyan firmanın unvanı ve VKN'si yazılır. Bunlar kargo firmasının size kestiği faturada bulunur.",
-        "names": {
-          "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo",
-          "geliver": "Geliver ile gönderilenler",
-          "manual": "Kendi gönderdiğiniz paketler"
-        },
-        "titleLabel": "Unvan",
-        "taxId": "VKN / TCKN",
-        "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
-        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
-      },
       "tabs": {
         "program": "Fatura programı",
-        "carriers": "Taşıyıcı bilgileri",
         "vat": "KDV oranları",
         "accounting": "Muhasebe"
-      }
+      },
+      "carriersMoved": "Faturada yazan kargo firması bilgileri her firmanın kendi sayfasında girilir.",
+      "carriersLink": "Kargo firmaları"
     },
     "vatRates": {
       "title": "KDV oranları",
@@ -5597,7 +5604,7 @@
         "einvoice_outcome_unknown": "Paraşüt'ün yanıtı alınamadı; fatura kesilmiş olabilir. Önce Paraşüt'e bakın, kesilmemişse yeniden deneyin.",
         "parasut_job_error": "Paraşüt faturayı kesmedi. Paraşüt'teki faturaya bakıp düzeltin, sonra yeniden deneyin.",
         "einvoice_document_missing": "Paraşüt e-belgeyi saatlerdir oluşturmadı. Paraşüt'e bakın.",
-        "einvoice_carrier_identity_missing": "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
+        "einvoice_carrier_identity_missing": "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
         "einvoice_parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
         "einvoice_parasut_disconnected": "Paraşüt bağlantısı koptu; yeniden bağlayın (Ayarlar > E-Fatura).",
         "einvoice_store_url_missing": "Mağazanın vitrin adresi girilmemiş (Ayarlar > SEO).",

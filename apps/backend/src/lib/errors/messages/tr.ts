@@ -790,7 +790,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.address_missing": "Siparişte fatura adresi yok.",
   "einvoice.tax_office_missing": "Kurumsal alıcının vergi dairesi yok.",
   "einvoice.carrier_identity_missing":
-    "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
+    "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.store_url_missing": "Mağazanın vitrin adresi yok.",
   // adr/0072: BirFatura's pull and write-back
   "einvoice.phone_missing":
@@ -800,9 +800,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.pdf_download_failed":
     "Fatura numarası kaydedildi ama BirFatura'nın PDF'i indirilemedi. PDF'i elle yükleyin.",
   "einvoice.parasut_unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı.",
-  "einvoice.parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
+  "einvoice.parasut_not_connected":
+    "Paraşüt hesabı bağlı değil (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.parasut_disconnected":
-    "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > E-Fatura).",
+    "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.parasut_refresh_unknown":
     "Paraşüt jeton yenilemesinin yanıtı alınamadı; sorun sürerse hesabı yeniden bağlayın.",
   "einvoice.parasut_code_refused":
@@ -817,7 +818,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.waived": "Bu satış için fatura kesilmez (yalnız hediye kartı satışı, avans).",
   "einvoice.pdf_present": "Bu faturanın PDF'i zaten kayıtlı.",
   "einvoice.birfatura_not_selected":
-    "BirFatura bağlantı anahtarı yalnız fatura programı BirFatura seçiliyken oluşturulur (Ayarlar > E-Fatura).",
+    "BirFatura bağlantı anahtarı yalnız fatura programı BirFatura seçiliyken oluşturulur (Ayarlar > Kargo ve teslimat > kargo firmasının sayfası).",
   "einvoice.cancelled": "Bu fatura iptal edildi.",
   "einvoice.already_issued": "Bu fatura başka bir numarayla kesilmiş.",
   "einvoice.number_taken": "Bu fatura numarası başka bir faturada kayıtlı.",

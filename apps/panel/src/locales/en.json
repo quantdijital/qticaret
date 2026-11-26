@@ -1331,7 +1331,7 @@
     },
     "shipping": {
       "title": "Shipping and delivery",
-      "subtitle": "How orders are shipped. Each shipping service is connected on its own page.",
+      "subtitle": "Carriers, the shipping options shoppers choose from, returns and warehouses.",
       "manage": "Manage",
       "connect": "Connect",
       "carriersTitle": "Shipping services",
@@ -1375,13 +1375,10 @@
       },
       "options": {
         "title": "Shipping options",
-        "description": "Shoppers pick one of these at checkout: who carries it and how it is priced.",
+        "description": "Shoppers choose one of these at checkout.",
         "add": "Add option",
         "addTitle": "New shipping option",
-        "editTitle": "Edit shipping option",
-        "dialogDescription": "The name shoppers see at checkout, who carries the parcel and the price.",
         "name": "Name",
-        "nameHint": "Shown at checkout, e.g. \"Standard shipping\".",
         "nameRequired": "Enter a name.",
         "carrier": "Carrier",
         "carriers": {
@@ -1398,21 +1395,22 @@
           "fastest": "Geliver: fastest offer",
           "table": "Price table (desi)"
         },
-        "amount": "Price (TL)",
-        "amountHint": "Tax included; 0 for free.",
+        "amount": "Amount",
+        "amountHint": "VAT included; 0 for free.",
         "amountInvalid": "Enter the amount with at most two decimals.",
         "free": "Free",
-        "none": "No shipping option yet; shoppers cannot order. Add one.",
+        "none": "No shipping option yet; shoppers cannot place an order.",
         "edit": "Edit {{name}}",
         "remove": "Remove {{name}}",
-        "removeTitle": "Remove {{name}}?",
-        "removeDescription": "Shoppers no longer see it; orders already placed keep theirs.",
+        "removeDescription": "Shoppers no longer see this option; orders already placed are not affected.",
         "removeConfirm": "Remove",
-        "removed": "Shipping option removed."
+        "removed": "Shipping option removed.",
+        "defaultName": "Standard shipping",
+        "keep": "Keep"
       },
       "rules": {
         "deliveryTitle": "Delivery time",
-        "deliveryDescription": "When an order ships, how many days it takes and until what hour it ships the same day. The Shipping and Delivery card on product pages, their shipping sentence and the delivery details given to search engines and Akakçe come from here.",
+        "deliveryDescription": "The delivery time shown on product pages, to search engines and on Akakçe.",
         "handling": "Shipping out",
         "handlingHint": "Working days after the order.",
         "transit": "In transit",
@@ -1423,11 +1421,11 @@
         "daysInvalid": "Enter the days as a number.",
         "daysOrder": "The fewest days cannot be more than the most.",
         "cutoff": "Same-day dispatch until",
-        "cutoffHint": "Pick it if orders placed before this hour leave the same day; the Shipping and Delivery card on product pages and Akakçe show it.",
+        "cutoffHint": "Choose it if orders placed before this hour ship the same day.",
         "noCutoff": "No same-day dispatch",
         "until": "Orders before {{hour}}",
         "ratesTitle": "Price table",
-        "ratesDescription": "What options priced by the table charge by the parcel's desi (tax included).",
+        "ratesDescription": "The price by desi for options priced by \"Price table\" (VAT included).",
         "noRates": "No rows yet.",
         "upTo": "Up to",
         "desi": "desi:",
@@ -1442,7 +1440,7 @@
       },
       "parcel": {
         "title": "Default parcel",
-        "description": "For products without measures; the carrier measures the real parcel itself.",
+        "description": "Products without measures are priced for shipping as this parcel.",
         "weight": "Weight",
         "length": "Length",
         "width": "Width",
@@ -1453,7 +1451,7 @@
       },
       "labels": {
         "title": "Shipping label",
-        "description": "The paper parcels' labels print on. The panel draws Yurtiçi's label at this size; Aras's and Geliver's own labels are fitted to it.",
+        "description": "The paper shipping labels are printed on.",
         "format": "Label size",
         "formatHint": "Pick the label size on your label printer's roll; with an office printer, pick A4.",
         "formats": {
@@ -1561,14 +1559,14 @@
       },
       "freeShipping": {
         "title": "Free shipping threshold",
-        "description": "Once the basket's products (VAT in, after discounts) reach this total, every shipping option is free; products with free shipping count toward it.",
+        "description": "Once the basket total (VAT included, after discounts) reaches this amount, every shipping option is free.",
         "switch": "Free shipping from a basket total",
         "threshold": "Basket total",
         "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL."
       },
       "classes": {
         "title": "Shipping classes",
-        "description": "A product's class changes its shipping cost. With several classes in a basket, the highest surcharge is added to the order once.",
+        "description": "A product's class adds a surcharge to shipping; the highest in the basket is added once.",
         "name": "Class name",
         "nameOf": "Name of class {{number}}",
         "surcharge": "Surcharge",
@@ -1588,6 +1586,28 @@
         "nameInvalid": "Give the class a name (60 characters at most).",
         "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
         "optionsNote": "Free-shipping products and class surcharges apply to every delivery option."
+      },
+      "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
+      "ownDeliveryLink": "Legal details",
+      "advanced": {
+        "title": "Advanced",
+        "handling": "Ships in {{days}} days",
+        "transit": "transit {{days}} days",
+        "noSameDay": "no same-day shipping",
+        "sameDay": "same day before {{hour}}",
+        "noRates": "No rows; only options priced by \"Price table\" use it.",
+        "rates_one": "{{count}} row, up to {{desi}} desi",
+        "rates_other": "{{count}} rows, up to {{desi}} desi",
+        "ratesNeeded": "An option is priced by the price table, but the table is empty.",
+        "platformParcel": "The platform's parcel: 1 kg, 30 × 20 × 10 cm (2 desi)"
+      },
+      "invoiceIdentity": {
+        "title": "Carrier details on invoices",
+        "description": "Written on an e-Arşiv as the carrier of the parcel; found on the carrier's own invoice to you.",
+        "titleLabel": "Registered name",
+        "taxId": "Tax id",
+        "both": "Enter the name and the tax id together, or leave both empty.",
+        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
       }
     },
     "integrations": {
@@ -2165,7 +2185,7 @@
       "api": "API keys for your own systems",
       "security": "Your account and two-step verification, team members and invitations, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
-      "einvoice": "Invoicing program, timing and series, carrier details, accounting",
+      "einvoice": "Invoicing program, timing and series, VAT, accounting",
       "migration": "Catalog, customers and 301s from the old platform",
       "subscription": "Your package, limits and usage, payment status",
       "maintenance": "Closing the storefront for a while, the maintenance page and the bypass link"
@@ -2831,7 +2851,7 @@
     },
     "einvoice": {
       "title": "Invoices and accounting",
-      "subtitle": "Who issues the invoices, when and in which series; the carrier details on an e-Arşiv; and the accountant's monthly package.",
+      "subtitle": "Who issues the invoices, when and in which series; the VAT rates and the accountant's monthly package.",
       "program": {
         "title": "Invoicing program",
         "description": "The program that issues the invoices, and when. Only the owner can change it.",
@@ -2943,26 +2963,13 @@
         "external": "My own program: issued with your own program or by hand; the number and PDF are written here.",
         "manual": "If you issue invoices by hand (e.g. Luca), pick \"My own program\": each order's invoice card waits for its number and PDF."
       },
-      "carriers": {
-        "title": "Carriers' details",
-        "description": "An e-Arşiv names the carrier of the parcel by its registered name and tax id. Both are on the carrier's own invoice to you.",
-        "names": {
-          "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo",
-          "geliver": "Sent through Geliver",
-          "manual": "Parcels you send yourself"
-        },
-        "titleLabel": "Registered name",
-        "taxId": "Tax id",
-        "both": "Enter the name and the tax id together, or leave both empty.",
-        "taxIdInvalid": "A tax id has 10 digits (11 for a T.C. kimlik)."
-      },
       "tabs": {
         "program": "Invoicing program",
-        "carriers": "Carrier details",
         "vat": "VAT rates",
         "accounting": "Accounting"
-      }
+      },
+      "carriersMoved": "The carrier details invoices carry are entered on each carrier's own page.",
+      "carriersLink": "Carriers"
     },
     "vatRates": {
       "title": "VAT rates",
@@ -5597,7 +5604,7 @@
         "einvoice_outcome_unknown": "Paraşüt's answer was lost; the invoice may have been issued. Look at Paraşüt first; if it was not, try again.",
         "parasut_job_error": "Paraşüt did not issue the invoice. Look at it in Paraşüt and fix it, then try again.",
         "einvoice_document_missing": "Paraşüt has not made the e-document for hours. Look at Paraşüt.",
-        "einvoice_carrier_identity_missing": "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
+        "einvoice_carrier_identity_missing": "The carrier's registered name and tax id are not entered (Settings > Shipping and delivery > the carrier's page).",
         "einvoice_parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
         "einvoice_parasut_disconnected": "The Paraşüt connection is lost; connect again (Settings > E-invoice).",
         "einvoice_store_url_missing": "The shop's storefront address is not entered (Settings > SEO).",

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { useStoreUnits } from "@/features/products/use-units"
@@ -63,7 +64,14 @@ function desiOf(values: Values, units: Units): number | null {
  * product by it; the carrier measures the real parcel. Until the shop
  * saves its own, the platform's stands (1 kg, 30 × 20 × 10 cm, 2 desi).
  */
-export function DefaultParcelCard({ saved }: { saved: ShippingSettings }) {
+export function DefaultParcelCard({
+  saved,
+  collapse,
+}: {
+  saved: ShippingSettings
+  /** Folded under the page's "Gelişmiş" to a one-line summary. */
+  collapse?: CollapseOptions | undefined
+}) {
   const { t } = useTranslation()
   const units = useStoreUnits()
   const save = useSaveSection<ShippingSettings>("shipping")
@@ -99,6 +107,7 @@ export function DefaultParcelCard({ saved }: { saved: ShippingSettings }) {
   return (
     <CardForm
       title={t(`${P}.title`)}
+      collapse={collapse}
       description={t(`${P}.description`)}
       dirty={form.formState.isDirty}
       saving={save.isPending}

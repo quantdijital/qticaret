@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -10,13 +9,10 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
-import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
 import { FreeShippingCard } from "@/features/settings/components/free-shipping-card"
+import { ShippingAdvanced } from "@/features/settings/components/shipping-advanced"
 import { ShippingClassesCard } from "@/features/settings/components/shipping-classes-card"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
-import { DeliveryCard } from "@/features/settings/components/delivery-card"
-import { RatesCard } from "@/features/settings/components/shipping-rules-cards"
-import { LabelSizeCard } from "@/features/settings/components/label-size-card"
 import { BookingFlowCard } from "@/features/settings/components/booking-flow-card"
 import { ReturnsCard } from "@/features/settings/components/returns-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
@@ -27,7 +23,11 @@ import { errorText } from "@/lib/errors"
 
 const S = "settings.shipping"
 
-/** The carriers the shop ships with, each opening its own page where its account is connected. */
+/**
+ * The carriers the shop ships with, each opening its own page where its
+ * account is connected and the name its invoices carry is entered; the
+ * shop's own parcels carry its own (Settings > Store > legal identity).
+ */
 function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
   const { t } = useTranslation()
   return (
@@ -67,33 +67,36 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
           )
         })}
       </ul>
+      <p className="border-t px-5 py-3 text-[13px] text-muted-foreground">
+        {t(`${S}.ownDeliveryInvoice`)}{" "}
+        <Link
+          to="/settings/store"
+          search={{ part: "legal" }}
+          className="font-medium text-foreground underline"
+        >
+          {t(`${S}.ownDeliveryLink`)}
+        </Link>
+      </p>
     </SectionCard>
   )
 }
 
 /**
  * Settings > Shipping and delivery (F7, adr/0031; the owner, 2026-10-31:
- * one page for delivery, in tabs): the carriers and the size their labels
- * print at; the options shoppers choose from, the delivery days and price
- * table (F7.8), free shipping from a basket total (F4.5), the shipping
- * classes (adr/0087) and the default parcel of a product without measures
- * (adr/0054); the return rules (F13.4); the warehouses stock ships from.
- * The address data (il, ilçe, mahalle, köy) is the platform's, kept current
- * without the shop (adr/0008 Ek 2026-11-04): no tab here, and an old
- * `?part=addresses` link opens the first tab.
+ * one page for delivery, in tabs; 2026-11-26: as simple as WooCommerce's).
+ * The carriers, each on its own page with the name its invoices carry; the
+ * options shoppers choose from, the free shipping total (F4.5) and the
+ * shipping classes (adr/0087), then "Gelişmiş" folded: delivery days, the
+ * price table (F7.8), the default parcel (adr/0054), the label size; the
+ * return rules (F13.4); the warehouses stock ships from. The address data
+ * is the platform's (adr/0008 Ek 2026-11-04): an old `?part=addresses`
+ * link opens the first tab.
  */
 export function ShippingPage() {
   const { t } = useTranslation()
   const query = useQuery(providerAccountsQuery())
   const rules = useQuery(sectionQuery<ShippingSettings>("shipping"))
-  const ruleCards = (render: (saved: ShippingSettings) => ReactNode) =>
-    rules.data ? (
-      render(rules.data.values)
-    ) : rules.isError ? (
-      <ErrorState text={errorText(t, rules.error)} onRetry={() => void rules.refetch()} />
-    ) : (
-      <LoadingRows rows={2} />
-    )
+  const saved = rules.data?.values
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${S}.title`)} description={t(`${S}.subtitle`)} />
@@ -103,22 +106,12 @@ export function ShippingPage() {
           {
             key: "carriers",
             label: t(`${S}.tabs.carriers`),
-            content: (
-              <>
-                {query.isError ? (
-                  <ErrorState
-                    text={errorText(t, query.error)}
-                    onRetry={() => void query.refetch()}
-                  />
-                ) : !query.data ? (
-                  <LoadingRows rows={2} />
-                ) : (
-                  <CarriersCard accounts={query.data.accounts} />
-                )}
-                {ruleCards((saved) => (
-                  <LabelSizeCard key={`labels-${JSON.stringify(saved)}`} saved={saved} />
-                ))}
-              </>
+            content: query.isError ? (
+              <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+            ) : !query.data ? (
+              <LoadingRows rows={2} />
+            ) : (
+              <CarriersCard accounts={query.data.accounts} />
             ),
           },
           {
@@ -127,20 +120,23 @@ export function ShippingPage() {
             content: (
               <>
                 <ShippingOptionsCard />
-                {ruleCards((saved) => (
+                <FreeShippingCard />
+                {saved ? (
                   <>
-                    <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-                      <DeliveryCard key={JSON.stringify(saved)} saved={saved} />
-                      <RatesCard key={`rates-${JSON.stringify(saved)}`} saved={saved} />
-                    </div>
-                    <FreeShippingCard />
                     <ShippingClassesCard
                       key={`classes-${JSON.stringify(saved.shipping_classes ?? [])}`}
                       saved={saved}
                     />
-                    <DefaultParcelCard key={`parcel-${JSON.stringify(saved)}`} saved={saved} />
+                    <ShippingAdvanced saved={saved} />
                   </>
-                ))}
+                ) : rules.isError ? (
+                  <ErrorState
+                    text={errorText(t, rules.error)}
+                    onRetry={() => void rules.refetch()}
+                  />
+                ) : (
+                  <LoadingRows rows={2} />
+                )}
               </>
             ),
           },
