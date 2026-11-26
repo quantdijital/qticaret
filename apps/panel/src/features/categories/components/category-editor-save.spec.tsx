@@ -12,7 +12,8 @@ const admin = vi.hoisted(() => ({
 }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock }, admin } }))
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+const toastMock = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+vi.mock("sonner", () => ({ toast: toastMock }))
 
 // The server's copy: the tree reads it, a save answers and changes it
 let stored = {
@@ -30,6 +31,7 @@ let stored = {
 let answerSave: () => void = () => undefined
 
 beforeEach(() => {
+  toastMock.success.mockReset()
   stored = { ...stored, name: "Şef bıçakları", is_active: true }
   fetchMock.mockReset().mockResolvedValue({ values: { url_style: { category: "prefixed" } } })
   admin.productCategory.list
@@ -82,14 +84,20 @@ describe("CategoryEditor: an edit made while 'Kaydet' is on its way stays (adr/0
     await userEvent.type(name, " seti")
     answerSave()
 
+    // The save settles once the tree is read again (the mutation awaits it), then says so;
+    // the card's state shows on the render after that, not with the button's
     await waitFor(() => {
-      expect(admin.productCategory.list).toHaveBeenCalledTimes(2)
+      expect(toastMock.success).toHaveBeenCalledTimes(1)
     })
+    expect(admin.productCategory.list).toHaveBeenCalledTimes(2)
     await waitFor(() => {
-      expect(saveButton()).toBeEnabled()
+      expect(dirty()).toBe(true)
     })
-    expect(name).toHaveValue("Şef ve santoku seti")
+    // And it stays so: nothing that lands later (the tree's render) cleans it
+    await new Promise((settled) => setTimeout(settled, 50))
     expect(dirty()).toBe(true)
+    expect(name).toHaveValue("Şef ve santoku seti")
+    expect(saveButton()).toBeEnabled()
   })
 
   it("rests clean with what the server stored when nothing was typed meanwhile", async () => {
@@ -103,6 +111,9 @@ describe("CategoryEditor: an edit made while 'Kaydet' is on its way stays (adr/0
     })
     answerSave()
 
+    await waitFor(() => {
+      expect(toastMock.success).toHaveBeenCalledTimes(1)
+    })
     await waitFor(() => {
       expect(dirty()).toBe(false)
     })
