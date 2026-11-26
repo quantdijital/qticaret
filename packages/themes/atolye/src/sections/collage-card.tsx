@@ -20,12 +20,15 @@ export function CollageCard({
   sizes,
   priority,
   mosaic,
+  tall = false,
   marks,
 }: {
   item: PhotoCollageItemView
   sizes: string
   priority: boolean
   mosaic: boolean
+  /** The collage's `height: tall`: a portrait photograph (4:5) instead of a landscape one. */
+  tall?: boolean
   marks: { caption: Mark; subtitle: Mark }
 }) {
   const body = (
@@ -33,7 +36,13 @@ export function CollageCard({
       <span
         className={cn(
           "relative block overflow-hidden rounded-inner bg-media",
-          mosaic ? "aspect-[4/3] lg:aspect-auto lg:min-h-0 lg:flex-1" : "aspect-[4/3]"
+          mosaic
+            ? tall
+              ? "aspect-[4/5] lg:aspect-auto lg:min-h-0 lg:flex-1"
+              : "aspect-[4/3] lg:aspect-auto lg:min-h-0 lg:flex-1"
+            : tall
+              ? "aspect-[4/5]"
+              : "aspect-[4/3]"
         )}
       >
         <ResponsiveImage
@@ -59,7 +68,7 @@ export function CollageCard({
         {item.href && (
           <span
             aria-hidden="true"
-            className="grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
+            className="gf-route-arrow grid size-8 shrink-0 place-items-center rounded-full border border-rule text-text"
           >
             <ArrowRight className="size-4" strokeWidth={2} />
           </span>
@@ -67,7 +76,7 @@ export function CollageCard({
       </span>
     </>
   )
-  const card = "flex h-full flex-col rounded-media bg-paper p-2 shadow-float"
+  const card = "gf-route-card flex h-full flex-col rounded-media bg-paper p-2 shadow-float"
   return item.href ? (
     <a
       href={item.href}

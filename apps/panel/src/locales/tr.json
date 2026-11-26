@@ -12087,6 +12087,13 @@
           "hint": "Fotoğrafın üstünde ad etiketi ya da altında ad, alt yazı ve ok düğmesi olan beyaz kart.",
           "over": "Fotoğraf üstünde etiket",
           "below": "Beyaz kart"
+        },
+        "height": {
+          "label": "Fotoğraf yüksekliği",
+          "term": "height",
+          "hint": "Fotoğraflar yatay mı, yoksa daha uzun ve dikey mi durur.",
+          "standard": "Standart",
+          "tall": "Uzun"
         }
       },
       "program": {

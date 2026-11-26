@@ -23,7 +23,7 @@ export function Wordmark({
     <a
       href="/"
       aria-label={logo ? name : undefined}
-      className={cn("flex min-h-11 min-w-0 items-center rounded-inner", className)}
+      className={cn("gf-wordmark flex min-h-11 min-w-0 items-center rounded-inner", className)}
     >
       {logo ? (
         <ResponsiveImage

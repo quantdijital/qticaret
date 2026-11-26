@@ -12087,6 +12087,13 @@
           "hint": "A name plate on the photo, or a white card with the name, a small line and an arrow under it.",
           "over": "Plate on the photo",
           "below": "White card"
+        },
+        "height": {
+          "label": "Photo height",
+          "term": "height",
+          "hint": "Landscape photos, or taller portrait ones.",
+          "standard": "Standard",
+          "tall": "Tall"
         }
       },
       "program": {
