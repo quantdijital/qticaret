@@ -102,3 +102,7 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **Denetim kaydı:** promosyon özeti kuralları, hedef ve "al" kurallarını, dağıtımı ve adetleri, bütçenin niteliğini içerir; kural toplu uçları ve kampanyaya üye ekleme de kayda girer.
 - **Ücretsiz kargo:** tek workflow (`promotions-free-shipping-sync`); ayarlar workflow'u adım olarak çalıştırır, Medusa'nın güncellemesi sonraki hata durumunda fiyatları geri koyar.
 
+
+## Ek (2026-11-26): kargo bedava eşiği adr/0087'ye geçti
+
+Eşik artık fiyat kuralı değil hesaptır: bütün mağaza seçenekleri (sabit ücret, desi tablosu, Geliver) `lib/shipping/quote.ts`'teki `shippingQuote` ile fiyatlanır; sepet tutarı (`item_total`, KDV dahil, indirim sonrası) eşiği geçerse her seçenek 0 TL'dir. Sabit ücretli seçenekler hesaplanan seçeneğe çevrildi (tutar `data.amount`'ta; "Kendi gönderimim" `shop_shop` sağlayıcısında). `promotions-free-shipping-sync` iş akışı ve aboneliği kaldırıldı; tek seferlik geçiş eski eşik fiyatlarını da siler. Mağazadan teslim Medusa'nın düz fiyatında kalır. Kupon sepeti eşiğin altına indirirse "kargoyu yeniden seç" kuralı her seçenekte geçerlidir (`hasStaleShipping`).

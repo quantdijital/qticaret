@@ -12,7 +12,7 @@ import { parcelLinesOf } from "./geliver/mappers"
 import type { OrderItemRow } from "./geliver/mappers"
 import { defaultParcelOf, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
-import { toMedusaAmount } from "../money"
+import { kurus, toMedusaAmount } from "../money"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
 import { quoteContextOf, shippingQuote } from "./quote"
@@ -99,6 +99,34 @@ export async function tableQuoteOf(context: { items?: readonly (OrderItemRow | n
     price: async (lines) => tablePriceOf((await parcelFor([...lines])).desi),
   })
   return calculatedPriceOf(amount)
+}
+
+/**
+ * A flat-priced option's amount (adr/0087 §2): kept in its `data.amount`,
+ * kuruş, KDV in, written by our workflows only. Anything else is refused:
+ * an option without a price is never free by mistake.
+ */
+export function flatAmountOf(optionData: Record<string, unknown> | null | undefined): Kurus {
+  const amount = optionData?.["amount"]
+  if (typeof amount !== "number" || !Number.isSafeInteger(amount) || amount < 0) {
+    throw new ValidationError("shipping.option_invalid")
+  }
+  return kurus(amount)
+}
+
+/** A flat-priced option for a cart: its amount, through the one quote (free past the threshold). */
+export async function flatQuoteOf(
+  optionData: Record<string, unknown>,
+  context: { items?: readonly (OrderItemRow | null)[] | null }
+) {
+  const amount = flatAmountOf(optionData)
+  return calculatedPriceOf(
+    await shippingQuote({
+      lines: parcelLinesOf(context.items),
+      context: quoteContextOf(context),
+      price: () => amount,
+    })
+  )
 }
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"

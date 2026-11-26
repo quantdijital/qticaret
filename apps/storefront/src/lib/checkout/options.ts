@@ -1,6 +1,6 @@
 import "server-only"
 import { isStoreApiError } from "../store-api/errors"
-import { storeGet } from "../store-api/server"
+import { storeGet, storePost } from "../store-api/server"
 
 /**
  * What the backend offers this cart at checkout (D7): shipping options,
@@ -15,14 +15,52 @@ export interface ShippingOption {
   amount: number | null
   calculated_price?: { calculated_amount: number | null } | null
   type?: { label: string | null; description: string | null } | null
+  provider_id?: string | null
+  data?: Record<string, unknown> | null
 }
 
 export async function shippingOptions(cartId: string): Promise<ShippingOption[]> {
   const { shipping_options } = await storeGet<{ shipping_options: ShippingOption[] }>(
     "/store/shipping-options",
-    { cart_id: cartId }
+    { cart_id: cartId, fields: "+data" }
   )
-  return shipping_options
+  return Promise.all(shipping_options.map((option) => priced(option, cartId)))
+}
+
+/**
+ * Whether the shop prices the option itself (adr/0087): a flat amount or its
+ * desi table, worked out on the server without a call outside. Geliver's
+ * quote is asked only when it is chosen (a paid call per view otherwise).
+ */
+const pricedByShop = (option: ShippingOption): boolean => {
+  const id = option.data?.["id"]
+  return (
+    option.provider_id !== "geliver_geliver" || (typeof id === "string" && id.endsWith("-table"))
+  )
+}
+
+/**
+ * A calculated option with its price for the cart: Medusa's list leaves
+ * it out, so the backend works it out per option (adr/0087: the shop's own
+ * flat price is calculated too). One that cannot be priced now stays
+ * without a price, as before.
+ */
+async function priced(option: ShippingOption, cartId: string): Promise<ShippingOption> {
+  if (option.price_type !== "calculated" || option.calculated_price || !pricedByShop(option)) {
+    return option
+  }
+  try {
+    const { shipping_option } = await storePost<{ shipping_option: ShippingOption }>(
+      `/store/shipping-options/${encodeURIComponent(option.id)}/calculate`,
+      { cart_id: cartId, data: {} }
+    )
+    return { ...option, calculated_price: shipping_option.calculated_price ?? null }
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return option
+    }
+    throw error
+  }
 }
 
 /** An option's price for this cart, in lira; null when the carrier did not price it. */

@@ -2,6 +2,11 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
 import { fromMedusaAmount, kurus, toMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
+import { shippingQuote, thresholdKurus } from "../../lib/shipping/quote"
+import { flatAmountOf } from "../../lib/shipping/shop"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import type { PromotionSettings } from "../../modules/platform-settings/sections"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -25,6 +30,7 @@ export interface ShippingQuoteInput {
 
 interface OptionRow {
   price_type?: string | null
+  data?: Record<string, unknown> | null
   calculated_price?: { calculated_amount?: MedusaAmount | null } | null
 }
 
@@ -49,7 +55,7 @@ export async function quoteShipping(
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "shipping_option",
-    fields: ["id", "price_type", "calculated_price.calculated_amount"],
+    fields: ["id", "price_type", "data", "calculated_price.calculated_amount"],
     filters: { id: input.shipping_option_id },
     context: {
       calculated_price: QueryContext({
@@ -61,6 +67,9 @@ export async function quoteShipping(
     },
   })
   const option = data[0] as OptionRow | undefined
+  if (option?.price_type === "calculated" && option.data && "amount" in option.data) {
+    return flatEstimate(container, option.data, input.item_total)
+  }
   const amount = option?.price_type === "flat" ? option.calculated_price?.calculated_amount : null
   if (amount === null || amount === undefined) {
     return AT_CHECKOUT
@@ -69,4 +78,33 @@ export async function quoteShipping(
     shipping_total: fromMedusaAmount(amount, { allowRounding: true }),
     shipping_estimate: "priced",
   }
+}
+
+/**
+ * A flat amount we price ourselves (adr/0087 §2): the option's amount, free
+ * from the shop's basket threshold, as the checkout's quote charges it.
+ */
+async function flatEstimate(
+  container: Container,
+  data: Record<string, unknown>,
+  itemTotal: number
+): Promise<ShippingQuote> {
+  let amount: ReturnType<typeof flatAmountOf>
+  try {
+    amount = flatAmountOf(data)
+  } catch {
+    return AT_CHECKOUT
+  }
+  const promotions = (await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .getSection("promotions")) as unknown as PromotionSettings
+  const quoted = await shippingQuote({
+    lines: [],
+    context: {
+      threshold: thresholdKurus(promotions.free_shipping_threshold),
+      item_total: kurus(itemTotal),
+    },
+    price: () => amount,
+  })
+  return { shipping_total: quoted, shipping_estimate: "priced" }
 }
