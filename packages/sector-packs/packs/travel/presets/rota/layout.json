@@ -55,7 +55,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "En sevilen turlarımız",
+      "title": "*En sevilen* turlarımız",
       "source": {
         "kind": "best_sellers"
       },
@@ -66,7 +66,7 @@
       },
       "card_variant": null,
       "scroller": {
-        "desktop": "four",
+        "desktop": "five",
         "mobile": "peek",
         "arrows": "always",
         "arrow_style": "round",
@@ -75,7 +75,8 @@
         "autoplay": "off",
         "speed": "medium",
         "loop": "off",
-        "drag": "on"
+        "drag": "on",
+        "focus": "on"
       },
       "look": {
         "space_outer": null,
@@ -141,7 +142,7 @@
         "align": "center",
         "width": null
       },
-      "title": "Türkiye, sıradanın ötesinde",
+      "title": "Türkiye, *sıradanın ötesinde*",
       "category_ids": [
         {
           "$handle": "category:kultur-turlari"
@@ -166,7 +167,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Yolculuğunuz dört adımda",
+      "title": "Yolculuğunuz *dört adımda*",
       "intro": "Rotayı birlikte seçer, ayrıntıları biz düşünürüz. Size kalan, yola çıkmak.",
       "items": [
         {
@@ -188,7 +189,8 @@
       ],
       "link": null,
       "layout": "row",
-      "numbers": "padded"
+      "numbers": "padded",
+      "connector": "dotted"
     },
     {
       "id": "yaklasankalkislar",
@@ -196,7 +198,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Yaklaşan kalkışlar",
+      "title": "*Yaklaşan* kalkışlar",
       "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
       "source": {
         "kind": "all"
@@ -211,7 +213,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Gezginler ne diyor?",
+      "title": "Gezginler *ne diyor?*",
       "limit": 6,
       "scroller": {
         "desktop": "three",

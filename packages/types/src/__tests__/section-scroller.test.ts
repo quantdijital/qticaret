@@ -22,14 +22,15 @@ describe("the scroller kit (adr/0049 Ek 2026-11-15)", () => {
       "speed",
       "loop",
       "drag",
+      "focus",
       "play_button",
       "dot_style",
       "controls_place",
       "arrow_size",
       "controls_tone",
     ])
-    // A row draws the first ten; the rest are the slider's own controls
-    expect(ROW_SCROLLER).toEqual(SCROLLER_SETTING_NAMES.slice(0, 10))
+    // A row draws the first eleven; the rest are the slider's own controls
+    expect(ROW_SCROLLER).toEqual(SCROLLER_SETTING_NAMES.slice(0, 11))
     for (const name of SCROLLER_SETTING_NAMES) {
       expect(SCROLLER_SETTINGS[name]).toContain(SCROLLER_DEFAULTS[name])
     }

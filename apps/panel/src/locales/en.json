@@ -10430,6 +10430,15 @@
               "light": "Always white"
             },
             "hint": "Automatic sets the words on the accent colour (a button, a pill) white or dark, whichever reads better. Always white keeps bold white words on a bright accent such as orange: the colour should give at least 3:1 against white."
+          },
+          "section_title": {
+            "label": "Section heading",
+            "term": "section_title",
+            "steps": {
+              "plain": "Plain",
+              "serif_accent": "Large, italic accent"
+            },
+            "hint": "The home sections' headings. Plain is the theme's own. Large, italic accent sets them large and light; the words you put between asterisks (\"Our *favourite* tours\") come in the accent face's italic."
           }
         },
         "card": "Product card",
@@ -11650,6 +11659,13 @@
           "on": "On",
           "hint": "Scrolls by dragging with a mouse on a wide screen."
         },
+        "focus": {
+          "label": "Larger centre card",
+          "term": "center focus",
+          "off": "Off",
+          "on": "On",
+          "hint": "On a wide screen the card in the middle stands full size and the cards towards the edges shrink; scrolling moves the large one. Looks best with an odd number of cards (3 or 5)."
+        },
         "play_button": {
           "label": "Pause button",
           "term": "pause button",
@@ -12128,6 +12144,13 @@
           "hint": "How the number before each step is written.",
           "padded": "01, 02",
           "plain": "1, 2"
+        },
+        "connector": {
+          "label": "Connecting line",
+          "term": "connector",
+          "hint": "A dotted line from each number to the next when the steps stand side by side (on a wide screen). Not drawn one under another nor on a phone.",
+          "off": "None",
+          "dotted": "Dotted"
         }
       },
       "departures": {

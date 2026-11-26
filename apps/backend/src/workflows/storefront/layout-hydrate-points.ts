@@ -56,6 +56,8 @@ export function hydratePoints(section: StatsSection | StepsSection, at: PointsCo
     link: at.link(section.link),
     layout: section.layout,
     numbers: section.numbers,
+    // Printed only when chosen, so steps before it read as they did
+    ...(section.connector && section.connector !== "off" ? { connector: section.connector } : {}),
   }
 }
 

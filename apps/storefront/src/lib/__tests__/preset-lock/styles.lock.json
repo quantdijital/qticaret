@@ -154,6 +154,10 @@
       "file": "ranked.css"
     },
     {
+      "sha256": "ae2ec87a39603849d8da1e0cb1dae4cdbe93351ed6f16cf96444ffd9fe62aa08",
+      "file": "scroller-focus.css"
+    },
+    {
       "sha256": "8ed56f1bc8e843be161b5935ffc586dcf851bb7b30e7fac5bc1a2c0f84d3c15f",
       "file": "scroller.css"
     },
@@ -168,6 +172,10 @@
     {
       "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
       "file": "search-toggle.css"
+    },
+    {
+      "sha256": "4207c9ed4a66f8d998e098800d07f49978667ec27fe1b544b06eeb77ea8dca56",
+      "file": "section-title.css"
     },
     {
       "sha256": "3af39894ae6a98865164655826b237f9d35c30562afe1ccb01f4928bef5a42ea",
@@ -190,6 +198,10 @@
       "file": "split.css"
     },
     {
+      "sha256": "4129be3b940ae5cafb6ce17a0cbaaf9205e45fababc90f96bd9e11593596429a",
+      "file": "steps-connector.css"
+    },
+    {
       "sha256": "fd1224ca73b4aa0f421ed889d3a5ad8fffa2c402c231b68b7c49ab83b24dd2e9",
       "file": "strip-gallery.css"
     },
@@ -198,7 +210,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "534f13ee0deec760752968e945be87348c511500f2ba590324a60d074f1ede3d",
+      "sha256": "7f87cf38b1e191672a0832871897d2ce4ec5c89c519aa84771881e4c28ff4722",
       "file": "styles.css"
     },
     {
