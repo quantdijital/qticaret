@@ -384,6 +384,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: true,
       orderExport: true,
+      customerExport: true,
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
@@ -413,6 +414,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: false,
       orderExport: false,
+      customerExport: false,
       looks: false,
       wholesale: true,
     })
@@ -445,6 +447,7 @@ describe("staff roles", () => {
       legalTexts: false,
       vatRates: false,
       orderExport: false,
+      customerExport: false,
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
@@ -757,6 +760,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/order-board/deliver": true,
   // The order list as a file, every customer's details in it: the owner's alone
   "POST /admin/order-board/export": false,
+  "POST /admin/customer-export": false,
   "POST /admin/orders/:id/return-requests": true,
   "POST /admin/orders/:id/notes": true,
   "DELETE /admin/orders/:id/notes/:note_id": true,

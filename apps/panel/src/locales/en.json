@@ -6273,6 +6273,14 @@
       "average": "Average basket",
       "lastOrder": "Last order",
       "city": "City"
+    },
+    "export": {
+      "button": "Export",
+      "excel": "Download as Excel",
+      "csv": "Download CSV",
+      "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
+      "laterNoJobs": "The file is being prepared in the background.",
+      "failed": "The customer file could not be prepared."
     }
   },
   "categories": {
@@ -6675,7 +6683,8 @@
       "marketing": "Campaigns and sources",
       "finance": "Finance",
       "stock": "Stock",
-      "search": "Search"
+      "search": "Search",
+      "customers": "Customers"
     },
     "share": "Share",
     "sales": "Sales",
@@ -6912,6 +6921,35 @@
         "empty": "No search found nothing in this period."
       },
       "empty": "No one searched the storefront in this period."
+    },
+    "customers": {
+      "tiles": {
+        "label": "Customer summary",
+        "new": "New customers",
+        "newHint": "{{registered}} members, {{guest}} guests",
+        "buyers": "Customers who bought",
+        "buyersHint": "Customers who ordered in this period",
+        "returning": "Returning",
+        "returningHint_one": "{{count}} customer had bought before",
+        "returningHint_other": "{{count}} customers had bought before",
+        "spent": "Spend per customer",
+        "spentHint": "The average of those who bought in this period"
+      },
+      "chartTitle": "New customers",
+      "chartHint": "Customers who signed up or ordered for the first time, with the period before.",
+      "chartEmpty": "No new customers in this period.",
+      "chartTable": "New customers by period",
+      "current": "This period",
+      "previous": "Period before",
+      "topTitle": "Top spending customers",
+      "topHint": "The first 10 by what their orders in this period came to.",
+      "topEmpty": "No customer ordered in this period.",
+      "columns": {
+        "customer": "Customer",
+        "orders": "Orders",
+        "spent": "Spent"
+      },
+      "capped": "The period is large; the numbers cover the first records."
     }
   },
   "seo": {

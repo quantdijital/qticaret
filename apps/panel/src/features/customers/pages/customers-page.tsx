@@ -19,6 +19,7 @@ import {
 } from "@/features/customers/api/customers"
 import type { CustomerKind } from "@/features/customers/api/customers"
 import { ColumnOptions } from "@/features/customers/components/column-options"
+import { CustomerExportButton } from "@/features/customers/components/customer-export"
 import { useCustomerColumns } from "@/features/customers/components/customer-columns"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { STATS_COLUMNS, useHiddenColumns } from "@/features/customers/list-prefs"
@@ -103,7 +104,8 @@ export function CustomersPage() {
               setSearch({ q: text, page: 1 })
             }}
           />
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <CustomerExportButton q={q} kind={kind} />
             <ColumnOptions hidden={hidden} onChange={setHidden} />
           </div>
         </div>

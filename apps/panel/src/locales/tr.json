@@ -6273,6 +6273,14 @@
       "average": "Ortalama sepet",
       "lastOrder": "Son sipariş",
       "city": "Şehir"
+    },
+    "export": {
+      "button": "Dışa aktar",
+      "excel": "Excel olarak indir",
+      "csv": "CSV indir",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
+      "failed": "Müşteri dosyası hazırlanamadı."
     }
   },
   "categories": {
@@ -6675,7 +6683,8 @@
       "marketing": "Kampanya ve kaynak",
       "finance": "Finans",
       "stock": "Stok",
-      "search": "Arama"
+      "search": "Arama",
+      "customers": "Müşteriler"
     },
     "share": "Pay",
     "sales": "Satış",
@@ -6912,6 +6921,35 @@
         "empty": "Bu dönemde sonuçsuz arama yok."
       },
       "empty": "Bu dönemde vitrinde arama yapılmadı."
+    },
+    "customers": {
+      "tiles": {
+        "label": "Müşteri özeti",
+        "new": "Yeni müşteri",
+        "newHint": "{{registered}} üye, {{guest}} misafir",
+        "buyers": "Alışveriş yapan",
+        "buyersHint": "Bu dönemde sipariş veren müşteri",
+        "returning": "Tekrar gelen",
+        "returningHint_one": "{{count}} müşteri daha önce de almıştı",
+        "returningHint_other": "{{count}} müşteri daha önce de almıştı",
+        "spent": "Müşteri başına harcama",
+        "spentHint": "Alışveriş yapanların bu dönemdeki ortalaması"
+      },
+      "chartTitle": "Yeni müşteriler",
+      "chartHint": "Üye olan ya da ilk kez sipariş veren müşteriler, önceki dönemle birlikte.",
+      "chartEmpty": "Bu dönemde yeni müşteri yok.",
+      "chartTable": "Yeni müşteriler, döneme göre",
+      "current": "Bu dönem",
+      "previous": "Önceki dönem",
+      "topTitle": "En çok harcayan müşteriler",
+      "topHint": "Bu dönemdeki siparişlerinin toplamına göre ilk 10.",
+      "topEmpty": "Bu dönemde sipariş veren müşteri yok.",
+      "columns": {
+        "customer": "Müşteri",
+        "orders": "Sipariş",
+        "spent": "Harcama"
+      },
+      "capped": "Dönem çok büyük; sayılar ilk kayıtları kapsıyor."
     }
   },
   "seo": {

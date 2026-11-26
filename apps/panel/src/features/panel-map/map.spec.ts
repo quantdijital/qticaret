@@ -75,6 +75,7 @@ const CAPABILITIES = {
   vatRates: true,
   searchSynonyms: true,
   orderExport: true,
+  customerExport: true,
   customers: true,
   abandonedCarts: true,
   resendMessages: true,
