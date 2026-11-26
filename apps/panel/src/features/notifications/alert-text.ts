@@ -3,7 +3,6 @@ import {
   Calculator,
   FileWarning,
   Mail,
-  PackageMinus,
   Scale,
   ShieldAlert,
   Unlink,
@@ -16,6 +15,7 @@ import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { paymentIssueAlert } from "@/features/notifications/payment-issue-alert"
 import { returnRefundAlert } from "@/features/notifications/return-alert"
 import { stockShortAlert } from "@/features/notifications/stock-short-alert"
+import { lowStockAlert } from "@/features/notifications/low-stock-alert"
 import { orderAlert } from "@/features/notifications/order-alert"
 import { paymentLinkAlert } from "@/features/payment-links/components/link-alert"
 import { isConnectable } from "@/features/settings/payment-methods"
@@ -23,6 +23,9 @@ import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 const amount = (value: unknown): number => (typeof value === "number" ? value : 0)
+
+// An alert the panel does not word shows the server's text; a record id in it ("order_01…") never
+const withoutRecordIds = (value: string) => value.replace(/\b[a-z]+_[0-9A-Z]{20,}\b/g, "—")
 
 /** What an alert says and where it leads, worded here from its data (adr/0020). */
 export function useAlertText(data: Record<string, unknown>) {
@@ -32,21 +35,10 @@ export function useAlertText(data: Record<string, unknown>) {
     returnRefundAlert(t, data) ??
     stockShortAlert(t, data) ??
     paymentIssueAlert(t, data) ??
-    orderAlert(t, data)
+    orderAlert(t, data) ??
+    lowStockAlert(t, data)
   if (alert) {
     return alert
-  }
-  if (data["kind"] === "low_stock") {
-    return {
-      title: t("notifications.lowStock.title", { name: text(data["name"]) }),
-      description: t("notifications.lowStock.description", {
-        count: amount(data["available"]),
-        threshold: amount(data["threshold"]),
-      }),
-      Icon: PackageMinus,
-      tone: "bg-warning-soft text-warning-text",
-      link: { to: "/inventory" as const, search: { view: "low" }, params: {} },
-    }
   }
   if (data["kind"] === "provider_account") {
     const changes = Array.isArray(data["changes"]) ? data["changes"].map(text) : []
@@ -207,8 +199,8 @@ export function useAlertText(data: Record<string, unknown>) {
     }
   }
   return {
-    title: text(data["title"]),
-    description: text(data["description"]),
+    title: withoutRecordIds(text(data["title"])),
+    description: withoutRecordIds(text(data["description"])),
     Icon: Bell,
     tone: "bg-muted text-muted-foreground",
     link: null,

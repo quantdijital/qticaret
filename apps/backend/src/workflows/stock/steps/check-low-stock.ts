@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { notificationText } from "../../../lib/notifications/messages"
 import { alertStaff } from "../../messaging/staff"
-import { lowStockThresholds } from "../../../lib/stock"
+import { lowStockThresholds, stockItemLabel } from "../../../lib/stock"
 import { STOCK_LEDGER_MODULE } from "../../../modules/stock-ledger"
 import type StockLedgerModuleService from "../../../modules/stock-ledger/service"
 
@@ -11,21 +11,56 @@ interface ItemRow {
   id: string
   sku?: string | null
   title?: string | null
-  variants?: ({ title?: string | null; product?: { title?: string | null } | null } | null)[] | null
+  variants?:
+    | ({
+        id: string
+        title?: string | null
+        product?: { id: string; title?: string | null } | null
+      } | null)[]
+    | null
 }
 
-async function nameOf(container: MedusaContainer, id: string): Promise<string> {
+/** What the alert names and opens: the product and variant, never the item's id. */
+export interface StockSubject {
+  name: string
+  product_id: string | null
+  variant_id: string | null
+}
+
+/**
+ * The item's product and variant, for the alert's words and link. Null for
+ * an item deleted since (the nightly reconcile reads deleted levels too):
+ * a product taken off the shop is not "running low".
+ */
+async function subjectOf(container: MedusaContainer, id: string): Promise<StockSubject | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "inventory_item",
-    fields: ["id", "sku", "title", "variants.title", "variants.product.title"],
+    fields: [
+      "id",
+      "sku",
+      "title",
+      "variants.id",
+      "variants.title",
+      "variants.product.id",
+      "variants.product.title",
+    ],
     filters: { id },
   })
   const item = data[0] as ItemRow | undefined
-  const variant = item?.variants?.find(Boolean)
-  const product = variant?.product?.title
-  // The first non-empty: the product and variant, else the item's own title or SKU
-  const label = [product, variant?.title].filter(Boolean).join(" · ")
-  return [label, item?.title, item?.sku].find((each) => Boolean(each)) ?? id
+  if (!item) {
+    return null
+  }
+  const variant = item.variants?.find((each) => Boolean(each?.product)) ?? null
+  return {
+    name: stockItemLabel({
+      product: variant?.product?.title,
+      variant: variant?.title,
+      item: item.title,
+      sku: item.sku,
+    }),
+    product_id: variant?.product?.id ?? null,
+    variant_id: variant?.id ?? null,
+  }
 }
 
 async function sellableOf(container: MedusaContainer, id: string): Promise<number> {
@@ -37,6 +72,9 @@ async function sellableOf(container: MedusaContainer, id: string): Promise<numbe
     )
   return levels.reduce((sum, level) => sum + level.stocked_quantity - level.reserved_quantity, 0)
 }
+
+// The server's words for an item with no product, title or SKU
+const NAMELESS_ITEM = "bir ürün"
 
 /** The lock an item's watch is read and written under: one writer at a time makes it. */
 export const watchLock = (inventoryItemId: string) => `stock-low:${inventoryItemId}`
@@ -70,8 +108,12 @@ async function checkItem(
       if (!watch?.armed_at) {
         return null
       }
+      const subject = await subjectOf(container, id)
+      if (!subject) {
+        return null
+      }
+      const { name } = subject
       const arming = new Date(watch.armed_at).toISOString()
-      const name = await nameOf(container, id)
       await container.resolve(Modules.NOTIFICATION).createNotifications({
         to: "",
         channel: "feed",
@@ -82,15 +124,19 @@ async function checkItem(
         data: {
           kind: "low_stock",
           inventory_item_id: id,
-          name,
+          ...subject,
           available,
           threshold,
           // Medusa's own admin shows these as they are; the panel words the alert from the rest
-          ...notificationText("stock.low_stock", { name, available, threshold }),
+          ...notificationText("stock.low_stock", {
+            name: name || NAMELESS_ITEM,
+            available,
+            threshold,
+          }),
         },
       })
       await ledger.updateStockWatches({ id: watch.id, armed_at: null })
-      return { name, available, arming }
+      return { name: name || NAMELESS_ITEM, available, arming }
     },
     { timeout: 10 }
   )

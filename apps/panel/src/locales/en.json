@@ -8162,6 +8162,7 @@
     "empty": "No notifications yet.",
     "lowStock": {
       "title": "Running low: {{name}}",
+      "unnamed": "a product",
       "description_one": "{{count}} unit left (threshold {{threshold}}).",
       "description_other": "{{count}} units left (threshold {{threshold}})."
     },
@@ -8251,37 +8252,39 @@
       "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
     },
     "paymentIssue": {
+      "orderRef": "order #{{number}}",
+      "orderRefUnknown": "this order",
       "completion_stuck": {
         "title": "A {{provider}} payment cannot become an order",
-        "description": "No order opened for {{amount}} ({{reference}}, cart {{cart}}); it is still being tried and was not refunded. Check the stock and warehouse settings; if it cannot open, refund it in the provider's panel."
+        "description": "No order opened for {{amount}} ({{reference}}); it is still being tried and was not refunded. Check the stock and warehouse settings; if it cannot open, refund it in the provider's panel."
       },
       "refunded_before_order": {
         "title": "A refunded {{provider}} payment was not made an order",
-        "description": "{{amount}} ({{reference}}, cart {{cart}}) shows as refunded in the provider's panel; no order was opened."
+        "description": "{{amount}} ({{reference}}) shows as refunded in the provider's panel; no order was opened."
       },
       "shelf_restored": {
         "title": "A temporary stock raise was taken back",
-        "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
+        "description": "The stock raised for a cart was lowered again after the run stopped halfway. Check the stock counts."
       },
       "wholesale_price_check": {
         "title": "A wholesale cart's payment could not start",
-        "description": "Cart {{cart}} could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
+        "description": "The wholesale cart could not be brought to the wholesaler's prices of today; no payment was taken. Check the wholesale and retail prices of its products."
       },
       "payment_beside_order": {
         "title": "A second {{provider}} payment for a cart already ordered",
-        "description": "{{amount}} ({{reference}}, cart {{cart}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
+        "description": "{{amount}} ({{reference}}) was taken for a cart whose order another payment opened; it was not refunded automatically. Check whether the customer paid twice; if so, refund the extra in the provider's panel."
       },
       "refund_incomplete": {
         "title": "A {{provider}} refund was made, its record is incomplete",
-        "description": "The {{amount}} refund ({{reference}}) for order {{cart}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again."
+        "description": "The {{amount}} refund ({{reference}}) for {{order}} was, or may have been, made at {{provider}}, but its record could not be completed. It is checked automatically; if it is still incomplete in an hour, check {{provider}}'s panel. Do not make the same refund again."
       },
       "refund_unresolved": {
         "title": "A refund could not be confirmed for an hour",
-        "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for order {{cart}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
+        "description": "The record of the {{amount}} refund ({{reference}}, {{provider}}) for {{order}} could not be completed by the automatic check. Compare the refund on the order page with the payment provider's record; do not make the same refund again."
       },
       "cancel_refund_order_open": {
         "title": "A cancel's refund was made but the order is not canceled",
-        "description": "The {{amount}} cancel refund ({{reference}}, {{provider}}) for order {{cart}} was made, but the order is still open. Cancel the order; do not ship it."
+        "description": "The {{amount}} cancel refund ({{reference}}, {{provider}}) for {{order}} was made, but the order is still open. Cancel the order; do not ship it."
       }
     },
     "markAllRead": "Mark all read",
