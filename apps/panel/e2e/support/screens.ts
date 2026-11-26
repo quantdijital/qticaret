@@ -75,7 +75,7 @@ export const SETTINGS = [
   "/settings/shipping",
   "/settings/shipping/aras",
   "/settings/shipping/yurtici",
-  "/settings/shipping/dhlecommerce",
+  // DHL eCommerce is suspended (adr/0027 Ek 2026-11-26 "askı"): its page sends to the carrier list
   "/settings/shipping/surat",
   "/settings/shipping/ptt",
   "/settings/notifications",

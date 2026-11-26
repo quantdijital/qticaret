@@ -43,12 +43,16 @@ describe("DhlEcomSettings", () => {
     fetchMock.mockResolvedValue({ account: connected, check: "valid" })
   })
 
-  it("asks only for the shop's customer number and password, never app keys, and says DHL eCommerce", () => {
+  it("asks for the shop's customer number and password, its own app keys folded away, and says DHL eCommerce", () => {
     renderSettings(undefined)
 
     expect(field("dhlecommerce-customer-number")).toBeInTheDocument()
     expect(field("dhlecommerce-password")).toBeInTheDocument()
-    expect(screen.queryByText(/Client/i)).not.toBeInTheDocument()
+    expect(field("dhlecommerce-client-id")).not.toBeVisible()
+    expect(screen.getByRole("button", { name: "Kendi uygulama anahtarlarım var" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
     expect(screen.queryByText(/MNG/)).not.toBeInTheDocument()
     expect(screen.getByText(/geçici şifre değil/)).toBeInTheDocument()
   })
@@ -78,11 +82,58 @@ describe("DhlEcomSettings", () => {
     })
   })
 
-  it("says the server cannot connect DHL eCommerce and locks the form", () => {
+  it("sends the shop's own app keys when it opens their fields, both or neither", async () => {
+    renderSettings(undefined)
+    await userEvent.click(screen.getByRole("button", { name: "Kendi uygulama anahtarlarım var" }))
+    await userEvent.type(field("dhlecommerce-customer-number"), "123456789")
+    await userEvent.type(field("dhlecommerce-password"), "kalici-sifre")
+    await userEvent.type(field("dhlecommerce-client-id"), "magaza-uygulama")
+    await userEvent.click(saveButton())
+
+    expect(await screen.findAllByText(/Bu bilgiyi girin/)).toHaveLength(1)
+    expect(saves()).toHaveLength(0)
+
+    await userEvent.type(field("dhlecommerce-client-secret"), "magaza-uygulama-sirri")
+    await userEvent.click(saveButton())
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/integrations/credentials/dhlecommerce", {
+        method: "POST",
+        body: {
+          settings: { test_mode: true },
+          secrets: {
+            customer_number: "123456789",
+            password: "kalici-sifre",
+            client_id: "magaza-uygulama",
+            client_secret: "magaza-uygulama-sirri",
+          },
+        },
+      })
+    })
+  })
+
+  it("shows the stored own keys open, kept when left blank", () => {
+    renderSettings({
+      ...connected,
+      secrets: { ...connected.secrets, client_id: true, client_secret: true },
+    })
+
+    expect(field("dhlecommerce-client-id")).toBeVisible()
+    expect(field("dhlecommerce-client-id").placeholder).toBe("••••••••••••")
+  })
+
+  it("without the platform's app, says so and asks for the shop's own app keys", async () => {
     renderSettings(undefined, false)
 
-    expect(screen.getByText(/bu sunucuda henüz açılmadı/)).toBeInTheDocument()
-    expect(field("dhlecommerce-customer-number")).toBeDisabled()
-    expect(saveButton()).toBeDisabled()
+    expect(screen.getByText(/uygulama anahtarları bu sunucuda tanımlı değil/)).toBeInTheDocument()
+    expect(field("dhlecommerce-client-id")).toBeVisible()
+    expect(field("dhlecommerce-customer-number")).toBeEnabled()
+
+    await userEvent.type(field("dhlecommerce-customer-number"), "123456789")
+    await userEvent.type(field("dhlecommerce-password"), "kalici-sifre")
+    await userEvent.click(saveButton())
+
+    expect(await screen.findAllByText(/Bu bilgiyi girin/)).toHaveLength(2)
+    expect(saves()).toHaveLength(0)
   })
 })

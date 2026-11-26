@@ -202,7 +202,20 @@ describe("DHL eCommerce's accounts", () => {
         settings: { test_mode: true },
         secrets: { customer_number: "123", password: "p" },
       })
-    ).toEqual({ customerNumber: "123", password: "p", testMode: true })
+    ).toEqual({ customerNumber: "123", password: "p", testMode: true, app: null })
+    // The shop's own app keys, both or none
+    expect(
+      dhlEcomCredentialsOf({
+        settings: { test_mode: false },
+        secrets: { customer_number: "123", password: "p", client_id: "id", client_secret: "s" },
+      })?.app
+    ).toEqual({ clientId: "id", clientSecret: "s" })
+    expect(
+      dhlEcomCredentialsOf({
+        settings: {},
+        secrets: { customer_number: "123", password: "p", client_id: "id" },
+      })?.app
+    ).toBeNull()
     expect(dhlEcomCredentialsOf({ settings: {}, secrets: { customer_number: "123" } })).toBeNull()
     expect(dhlEcomAppOf({})).toBeNull()
     expect(

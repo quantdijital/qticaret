@@ -21,6 +21,7 @@ import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { ShippingManagerCard } from "@/features/settings/components/shipping-manager-card"
 import { LocationsPanel } from "@/features/settings/pages/locations-page"
 import { SHIPPING_CARRIERS } from "@/features/settings/shipping-carriers"
+import { useCarrierShown } from "@/features/settings/api/carriers"
 import { errorText } from "@/lib/errors"
 
 const S = "settings.shipping"
@@ -39,10 +40,11 @@ function CarriersCard({
   unavailable: readonly string[]
 }) {
   const { t } = useTranslation()
+  const shown = useCarrierShown()
   return (
     <SectionCard title={t(`${S}.carriersTitle`)} description={t(`${S}.carriersDescription`)} flush>
       <ul>
-        {SHIPPING_CARRIERS.map((carrier) => {
+        {SHIPPING_CARRIERS.filter(({ id }) => shown(id)).map((carrier) => {
           const account = accounts.find(({ provider }) => provider === carrier.id)
           const name = t(`${S}.carriers.${carrier.id}.name`)
           const nameId = `shipping-carrier-${carrier.id}`

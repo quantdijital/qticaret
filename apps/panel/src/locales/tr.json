@@ -1355,7 +1355,7 @@
       "connect": "Bağla",
       "carriersTitle": "Kargo hizmetleri",
       "carriersDescription": "Gönderi oluşturma, etiket ve takip bu hizmetler üzerinden yapılır.",
-      "carrierUnavailable": "Bu sunucuda henüz bağlanamaz; platform desteğine yazın.",
+      "carrierUnavailable": "Platformun uygulama anahtarları bu sunucuda yok; kendi uygulama anahtarlarınızla bağlanabilirsiniz.",
       "carriers": {
         "aras": {
           "name": "Aras Kargo",
@@ -1597,7 +1597,15 @@
         },
         "testMode": "Test modu",
         "testModeHint": "Kapatınca gönderiler gerçek DHL eCommerce hesabına açılır. Test ve canlı bilgileri ayrı olduğundan yeniden istenir.",
-        "unavailable": "DHL eCommerce bağlantısı bu sunucuda henüz açılmadı; bilgiler kaydedilemez. Platform desteğine yazın.",
+        "unavailable": "Platformun DHL eCommerce uygulama anahtarları bu sunucuda tanımlı değil. Bağlanmak için DHL'in API portalında kayıtlı kendi uygulamanızın anahtarlarını aşağıya girin ya da platform desteğine yazın.",
+        "app": {
+          "title": "Uygulama anahtarları",
+          "description": "Gönderiler varsayılan olarak platformun DHL eCommerce uygulamasıyla açılır. DHL'in API portalında kendi uygulamanız varsa onun anahtarları kullanılır.",
+          "toggle": "Kendi uygulama anahtarlarım var",
+          "clientId": "Client Id (X-IBM-Client-Id)",
+          "clientSecret": "Client Secret (X-IBM-Client-Secret)",
+          "hint": "DHL'in API portalında (apizone.mngkargo.com.tr) uygulamanızın sayfasında. Girdiğinizde platformun anahtarları yerine bunlar kullanılır. Test ve canlı ortamın anahtarları ayrıdır."
+        },
         "checks": {
           "merchant_invalid": "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
           "secret_invalid": "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın; test ve canlı hesap ayrıdır."

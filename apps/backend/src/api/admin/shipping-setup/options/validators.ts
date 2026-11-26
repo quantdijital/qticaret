@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { isSuspended } from "../../../../lib/integrations/suspended"
 import { liraAmount } from "../../../validation/lira"
 
 // A flat amount may be nothing: free shipping
@@ -9,7 +10,10 @@ const name = z.string().trim().min(1).max(80)
 export const AdminPostShippingOption = z
   .object({
     name,
-    carrier: z.enum(["manual", "aras", "yurtici", "dhlecommerce", "surat", "ptt", "pickup"]),
+    // A carrier suspended on this server takes no new option (`lib/integrations/suspended.ts`)
+    carrier: z
+      .enum(["manual", "aras", "yurtici", "dhlecommerce", "surat", "ptt", "pickup"])
+      .refine((carrier) => !isSuspended(carrier), "shipping.option_invalid"),
     pricing: z.discriminatedUnion("type", [
       z.object({ type: z.literal("flat"), amount }).strict(),
       z.object({ type: z.literal("table") }).strict(),

@@ -91,16 +91,18 @@ export const CREDENTIAL_PROVIDERS = {
   },
   // DHL eCommerce (formerly MNG Kargo): the shop's customer number and its "Online Şube"
   // password. The app keys are the platform's, from the server's environment (adr/0027 Ek
-  // 2026-11-26); test and live accounts differ: switching asks for both again
+  // 2026-11-26), unless the shop registered its own app at DHL's portal and writes its keys
+  // here (both or neither; the owner, 2026-11-26): then they are used in place of the
+  // platform's. Test and live accounts differ: switching asks for all of them again
   dhlecommerce: {
     settings: z.object({ test_mode: z.boolean() }).strict(),
-    secrets: ["customer_number", "password"],
+    secrets: ["customer_number", "password", "client_id", "client_secret"],
     secret: z
       .string()
       .trim()
       .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
     identity: ["test_mode"],
-    optional: [],
+    optional: ["client_id", "client_secret"],
   },
   // Sürat Kargo's web service (docs/entegrasyonlar/surat.md): the login that opens parcels,
   // and the cari kodu with its web password that tracks, labels and deletes them, when Sürat

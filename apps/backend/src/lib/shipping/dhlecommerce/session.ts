@@ -18,7 +18,7 @@ import type { DhlEcomPlace } from "./places"
 
 /**
  * How a call reaches DHL eCommerce (`./client`): the host of the account's
- * mode, the platform's app on every call, the shop's JWT on all but the
+ * mode, the shop's own app or else the platform's on every call, the shop's JWT on all but the
  * il/ilçe lists, kept seven of its eight hours per account (a hash of the
  * host, the customer number and the password: a changed password is
  * another key) and asked again once when refused.
@@ -37,6 +37,9 @@ export interface DhlEcomOptions extends Partial<Omit<HttpClientOptions, "provide
   branchWaitsMs?: readonly number[]
 }
 
+/** Where a call goes and with which app: the account's mode and its own app, if any. */
+export type Route = Pick<DhlEcomCredentials, "testMode" | "app">
+
 export interface Call {
   method: string
   path: RequestPath
@@ -46,9 +49,18 @@ export interface Call {
   signal?: AbortSignal | undefined
 }
 
+// The app is part of the key: a JWT one app got is not sent with another's keys
 const tokenKey = (base: string, credentials: DhlEcomCredentials): string =>
   createHash("sha256")
-    .update(`${base}\0${credentials.customerNumber}\0${credentials.password}`)
+    .update(
+      [
+        base,
+        credentials.app?.clientId ?? "",
+        credentials.app?.clientSecret ?? "",
+        credentials.customerNumber,
+        credentials.password,
+      ].join("\0")
+    )
     .digest("hex")
 
 // A refused JWT: the gateway's 401, or DHL's own (to confirm with a real account)
@@ -81,8 +93,9 @@ export function createDhlEcomSession(options: DhlEcomOptions = {}) {
     }
     return client
   }
-  const appOf = (): DhlEcomApp => {
-    const app = (appSource ?? (() => dhlEcomAppOf()))()
+  /** The shop's own app when it has one, else the platform's. */
+  const appOf = (own: DhlEcomApp | null): DhlEcomApp => {
+    const app = own ?? (appSource ?? (() => dhlEcomAppOf()))()
     if (!app) {
       throw new ValidationError("dhlecommerce.unavailable")
     }
@@ -90,8 +103,9 @@ export function createDhlEcomSession(options: DhlEcomOptions = {}) {
   }
 
   /** One call with the app's keys (and a JWT when given), its answer as sent. */
-  function send(testMode: boolean, call: Call, jwt: string | null, secrets: string[]) {
-    const app = appOf()
+  function send(route: Route, call: Call, jwt: string | null, secrets: string[]) {
+    const { testMode } = route
+    const app = appOf(route.app)
     return clientFor(testMode).request({
       method: call.method,
       path: call.path,
@@ -121,7 +135,7 @@ export function createDhlEcomSession(options: DhlEcomOptions = {}) {
       return kept.jwt
     }
     const body = await send(
-      credentials.testMode,
+      credentials,
       {
         method: "POST",
         path: `${API}/token`,
@@ -151,13 +165,13 @@ export function createDhlEcomSession(options: DhlEcomOptions = {}) {
     const secrets = [credentials.customerNumber, credentials.password]
     const jwt = await token(credentials, call.signal)
     try {
-      return await send(credentials.testMode, call, jwt, secrets)
+      return await send(credentials, call, jwt, secrets)
     } catch (error) {
       if (!tokenRefused(error)) {
         throw error
       }
       const again = await token(credentials, call.signal, true)
-      return send(credentials.testMode, call, again, secrets)
+      return send(credentials, call, again, secrets)
     }
   }
 

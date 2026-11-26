@@ -110,6 +110,9 @@ const envSchema = z.object({
   // connects its own customer number with it. Off until both are set; never logged
   DHL_ECOMMERCE_CLIENT_ID: z.string().max(200).optional(),
   DHL_ECOMMERCE_CLIENT_SECRET: z.string().max(200).optional(),
+  // DHL eCommerce is suspended (the owner, 2026-11-26; adr/0027 Ek 2026-11-26 "askı"): built
+  // and tested, but hidden and refused on this server until "true" (`lib/integrations/suspended.ts`)
+  CARRIER_DHLECOMMERCE_ENABLED: z.enum(["true", "false"]).optional(),
   // F9 (adr/0036): where e-mail leaves us. Unset sends none; Mailpit only on
   // a developer's machine, Resend once deployed
   EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).optional(),

@@ -10,6 +10,7 @@ import type {
 } from "@medusajs/framework/types"
 import { AbstractFulfillmentProviderService } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { isSuspended } from "../../lib/integrations/suspended"
 import { errorSummary, logger } from "../../lib/logging"
 import { shipInputOf } from "../../lib/shipping/carriers"
 import { dhlEcomApi, dhlEcomCredentialsOf, wholeUp } from "../../lib/shipping/dhlecommerce"
@@ -40,6 +41,9 @@ export const DHL_ECOMMERCE_OPTIONS = [
 
 const isDhlEcomOption = (id: unknown): boolean =>
   DHL_ECOMMERCE_OPTIONS.some((option) => option.id === id)
+
+/** Suspended on this server (`lib/integrations/suspended.ts`): no cart takes it, no parcel opens. */
+const suspended = (): boolean => isSuspended("dhlecommerce")
 
 const storedDhlEcomAccount = (): Promise<DhlEcomCredentials> =>
   storedCarrierAccount("dhlecommerce", dhlEcomCredentialsOf)
@@ -74,14 +78,15 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     return Promise.resolve(DHL_ECOMMERCE_OPTIONS.map((option) => ({ ...option })))
   }
 
+  // Suspended, Medusa's own option route makes none either
   override validateOption(data: Record<string, unknown>): Promise<boolean> {
-    return Promise.resolve(isDhlEcomOption(data["id"]))
+    return Promise.resolve(isDhlEcomOption(data["id"]) && !suspended())
   }
 
   override validateFulfillmentData(
     optionData: Record<string, unknown>
   ): Promise<Record<string, unknown>> {
-    if (!isDhlEcomOption(optionData["id"])) {
+    if (!isDhlEcomOption(optionData["id"]) || suspended()) {
       return Promise.reject(new ValidationError("shipping.option_invalid"))
     }
     return Promise.resolve({ option: optionData["id"] })
@@ -97,6 +102,9 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     _data: Record<string, unknown>,
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
+    if (suspended()) {
+      throw new ValidationError("shipping.option_invalid")
+    }
     return optionData["id"] === "dhlecommerce-flat"
       ? flatQuoteOf(optionData, context)
       : tableQuoteOf(context)
@@ -113,6 +121,9 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     if (!ship) {
       throw new ValidationError("shipping.use_ship_route")
     }
+    if (suspended()) {
+      throw new ValidationError("dhlecommerce.unavailable")
+    }
     const credentials = await storedDhlEcomAccount()
     // DHL refuses a receiver without an e-mail: the order's own, from our workflow; for an
     // order without one (made by hand), the shop's contact address (warn, don't block)
@@ -124,7 +135,7 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     // Il and ilçe are DHL's codes: both required
     const receiver = shipmentReceiverOf(ship.receiver ?? order?.shipping_address)
     const api = dhlEcomApi()
-    const places = await api.placeCodes(credentials.testMode, receiver.city, receiver.town)
+    const places = await api.placeCodes(credentials, receiver.city, receiver.town)
     const number = String(order?.display_id ?? order?.id ?? "")
     const input: DhlEcomShipmentInput = {
       referenceId: shipmentCode(),

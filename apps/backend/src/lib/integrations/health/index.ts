@@ -11,6 +11,7 @@ import { dhlEcomHealthCheck } from "./dhlecommerce-check"
 import { suratHealthCheck } from "./surat-check"
 import { pttHealthCheck } from "./ptt-check"
 import { registerProcessCache } from "../../cache/process-caches"
+import { isSuspended } from "../suspended"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
 export type {
@@ -41,6 +42,7 @@ export interface AccountSource {
  * services (Redis, the database) are operations' to watch, not the shop's.
  */
 export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthCheck[] {
+  // A suspended carrier is no shop's integration (`lib/integrations/suspended.ts`)
   return [
     paytrHealthCheck(() => accounts.read("paytr")),
     iyzicoHealthCheck(() => accounts.read("iyzico")),
@@ -50,7 +52,7 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
     suratHealthCheck(() => accounts.read("surat")),
     pttHealthCheck(() => accounts.read("ptt")),
     netgsmHealthCheck(() => accounts.read("netgsm")),
-  ]
+  ].filter((check) => !isSuspended(check.id))
 }
 
 let monitor: ReturnType<typeof createHealthMonitor> | undefined

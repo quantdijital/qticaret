@@ -8,14 +8,15 @@ import type { DhlEcomShipmentInput } from "./mappers"
 import { cityPathCode, findPlace, placeOf } from "./places"
 import type { DhlEcomPlace } from "./places"
 import { API, createDhlEcomSession } from "./session"
-import type { DhlEcomOptions } from "./session"
+import type { DhlEcomOptions, Route } from "./session"
 import type { DhlEcomDelivery } from "./status"
 
 /**
  * DHL eCommerce Türkiye's REST API (formerly MNG Kargo; its hosts are still
  * mngkargo.com.tr): docs/entegrasyonlar/dhlecommerce.md. Every call carries
- * the platform's app (`X-IBM-Client-Id`, `X-IBM-Client-Secret`, from the
- * server's environment) and, but for the il/ilçe lists, a JWT the shop's
+ * an app's keys (`X-IBM-Client-Id`, `X-IBM-Client-Secret`; the shop's own
+ * when it wrote them, else the platform's from the server's environment)
+ * and, but for the il/ilçe lists, a JWT the shop's
  * customer number and password get, kept seven of its eight hours per
  * account and asked again once when refused. Neither the app, the password
  * nor the JWT reaches a log (the HTTP client logs fixed fields only) or a
@@ -57,14 +58,14 @@ export function createDhlEcomApi(options: DhlEcomOptions = {}) {
   const branchWaitsMs = session.branchWaitsMs ?? BRANCH_WAITS_MS
 
   /** A CBS Info list (no JWT), kept a day per host. */
-  async function placeList(testMode: boolean, path: string): Promise<DhlEcomPlace[]> {
-    const key = `${baseOf(testMode)}${path}`
+  async function placeList(route: Route, path: string): Promise<DhlEcomPlace[]> {
+    const key = `${baseOf(route.testMode)}${path}`
     const kept = places.get(key)
     if (kept && kept.until > now()) {
       return kept.list
     }
     const body = await send(
-      testMode,
+      route,
       { method: "GET", path, idempotent: true, logPath: path.replace(/\/\d+$/, "/:code") },
       null,
       []
@@ -81,15 +82,15 @@ export function createDhlEcomApi(options: DhlEcomOptions = {}) {
    * DHL's codes for the receiver's il and ilçe; refused here, before DHL
    * is asked anything, when DHL lists no such place.
    */
-  async function placeCodes(testMode: boolean, city: string, town: string) {
-    const il = findPlace(await placeList(testMode, `${API}/cbsinfoapi/getcities`), city)
+  async function placeCodes(route: Route, city: string, town: string) {
+    const il = findPlace(await placeList(route, `${API}/cbsinfoapi/getcities`), city)
     if (!il) {
       throw new ValidationError("dhlecommerce.place_unknown", {
         field: "shipping_address.province",
       })
     }
     const path = `${API}/cbsinfoapi/getdistricts/${cityPathCode(il.code)}`
-    const ilce = findPlace(await placeList(testMode, path), town)
+    const ilce = findPlace(await placeList(route, path), town)
     if (!ilce) {
       throw new ValidationError("dhlecommerce.place_unknown", { field: "shipping_address.city" })
     }

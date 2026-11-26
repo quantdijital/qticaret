@@ -1355,7 +1355,7 @@
       "connect": "Connect",
       "carriersTitle": "Shipping services",
       "carriersDescription": "Shipments, labels and tracking go through these services.",
-      "carrierUnavailable": "Cannot be connected on this server yet; contact platform support.",
+      "carrierUnavailable": "The platform's app keys are not set on this server; you can connect with your own app keys.",
       "carriers": {
         "aras": {
           "name": "Aras Kargo",
@@ -1597,7 +1597,15 @@
         },
         "testMode": "Test mode",
         "testModeHint": "Turned off, parcels open on the real DHL eCommerce account. Test and live details differ, so they are asked again.",
-        "unavailable": "DHL eCommerce cannot be connected on this server yet; nothing can be saved. Contact platform support.",
+        "unavailable": "The platform's DHL eCommerce app keys are not set on this server. To connect, enter the keys of your own app registered at DHL's API portal below, or contact platform support.",
+        "app": {
+          "title": "App keys",
+          "description": "Shipments go out with the platform's DHL eCommerce app by default. If you have your own app at DHL's API portal, its keys are used instead.",
+          "toggle": "I have my own app keys",
+          "clientId": "Client Id (X-IBM-Client-Id)",
+          "clientSecret": "Client Secret (X-IBM-Client-Secret)",
+          "hint": "On your app's page at DHL's API portal (apizone.mngkargo.com.tr). Once entered, they are used in place of the platform's. Test and live keys differ."
+        },
         "checks": {
           "merchant_invalid": "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
           "secret_invalid": "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with; test and live accounts differ."

@@ -8,13 +8,15 @@ let fake: FakeDhlEcom
 let api: DhlEcomApi
 let account: DhlEcomCredentials
 const sleeps: number[] = []
+// The il/ilçe lists: the live host, the platform's app
+const PUBLIC = { testMode: false, app: null }
 
 const shipment = async (
   referenceId: string,
   cashOnDelivery: number | null = null,
   street = "Atatürk Cad. No: 5"
 ) => {
-  const places = await api.placeCodes(false, "İstanbul", "Kadıköy")
+  const places = await api.placeCodes(PUBLIC, "İstanbul", "Kadıköy")
   return {
     referenceId,
     orderNumber: "1042",
@@ -53,7 +55,7 @@ beforeEach(() => {
     },
     retry: { attempts: 1 },
   })
-  account = { ...fake.account, testMode: true }
+  account = { ...fake.account, testMode: true, app: null }
   sleeps.length = 0
   fake.requests.length = 0
 })
@@ -154,13 +156,28 @@ describe("DHL eCommerce's client against the fake (docs/entegrasyonlar/dhlecomme
   })
 
   it("refuses an il or ilçe DHL does not list, naming the field", async () => {
-    await expect(api.placeCodes(false, "Mars", "Kadıköy")).rejects.toMatchObject({
+    await expect(api.placeCodes(PUBLIC, "Mars", "Kadıköy")).rejects.toMatchObject({
       safeMessage: "dhlecommerce.place_unknown",
       field: "shipping_address.province",
     })
-    await expect(api.placeCodes(false, "İstanbul", "Atlantis")).rejects.toMatchObject({
+    await expect(api.placeCodes(PUBLIC, "İstanbul", "Atlantis")).rejects.toMatchObject({
       field: "shipping_address.city",
     })
+  })
+
+  it("calls with the shop's own app in place of the platform's, which then may be missing", async () => {
+    const without = createDhlEcomApi({ baseUrl: fake.url, app: () => null })
+    const wrongPlatform = createDhlEcomApi({
+      baseUrl: fake.url,
+      app: () => ({ clientId: "baska-uygulama", clientSecret: "baska-uygulama-sirri" }),
+      retry: { attempts: 1 },
+    })
+    const own = { ...account, app: { ...fake.app } }
+
+    expect(await without.checkLogin(own)).toBe("valid")
+    expect(await wrongPlatform.checkLogin(own)).toBe("valid")
+    // Without its own keys the account goes with the platform's app, which DHL refuses here
+    await expect(wrongPlatform.checkLogin(account)).resolves.not.toBe("valid")
   })
 
   it("checks the shop's login: a wrong password is the shop's, a missing subscription is not", async () => {

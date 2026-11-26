@@ -24,6 +24,7 @@ import type {
   NewShippingOption,
   ShopShippingOption,
 } from "@/features/settings/api/shipping-options"
+import { useCarrierShown } from "@/features/settings/api/carriers"
 import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
@@ -138,6 +139,7 @@ export function ShippingOptionEditor({
   onDone: () => void
 }) {
   const { t } = useTranslation()
+  const shown = useCarrierShown()
   const create = useCreateShippingOption()
   const update = useUpdateShippingOption()
   const remove = useDeleteShippingOption()
@@ -215,7 +217,7 @@ export function ShippingOptionEditor({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CARRIERS.map((each) => (
+                    {CARRIERS.filter((each) => shown(each)).map((each) => (
                       <SelectItem key={each} value={each}>
                         {t(`${S}.carriers.${each}`)}
                       </SelectItem>

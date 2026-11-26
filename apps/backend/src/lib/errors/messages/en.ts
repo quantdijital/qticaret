@@ -930,7 +930,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "yurtici.cod_account_missing":
     "Shipping an order paid at the door with Yurtiçi Kargo needs the cash on delivery account. Enter it under Settings > Shipping > Yurtiçi Kargo.",
   "dhlecommerce.unavailable":
-    "DHL eCommerce cannot be connected on this server yet; contact platform support.",
+    "The platform's DHL eCommerce app keys are not set on this server. Enter your own app keys or contact platform support.",
   "dhlecommerce.merchant_invalid":
     "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
   "dhlecommerce.secret_invalid":
