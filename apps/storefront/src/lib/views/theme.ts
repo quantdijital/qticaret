@@ -6,8 +6,10 @@ import type {
 } from "@qticaret/types"
 import {
   CARD_BUTTON_STYLES,
+  CARD_DENSITIES,
   CARD_QUICK_VIEW_TRIGGERS,
   CARD_NO_REVIEWS,
+  CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
   CARD_TEXT_POSITIONS,
   RADIUS_STEPS,
@@ -48,6 +50,8 @@ export const DEFAULT_THEME: StoreThemeSettings = {
     show_rating: false,
     variant: "standard",
     hover_image: true,
+    hover_cycle: false,
+    density: "regular",
     delivery_note: true,
     full_button: true,
     sale_badge: true,
@@ -156,7 +160,7 @@ const RADIUS_SCALE = {
 const BUTTON_RADIUS = { pill: null, rounded: "0.75rem", square: "0px" } as const
 
 /** The card picture's shape (`--card-ratio`); square is the theme's own (adr/0062 §9). */
-const CARD_RATIO = { "4:5": "4 / 5", "1:1": null, "3:4": "3 / 4" } as const
+const CARD_RATIO = { "4:5": "4 / 5", "1:1": null, "3:4": "3 / 4", "4:3": "4 / 3" } as const
 
 const oneOf = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
   (allowed as readonly unknown[]).includes(value) ? (value as T) : fallback
@@ -166,6 +170,7 @@ const flag = (value: unknown, fallback: boolean): boolean =>
 
 const CARD_FLAGS = [
   "hover_image",
+  "hover_cycle",
   "delivery_note",
   "full_button",
   "sale_badge",
@@ -243,7 +248,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     },
     radius: oneOf(at(raw, "radius"), RADIUS_STEPS, d.radius),
     product_card: {
-      ratio: oneOf(at(raw, "product_card", "ratio"), ["4:5", "1:1", "3:4"], d.product_card.ratio),
+      ratio: oneOf(at(raw, "product_card", "ratio"), CARD_RATIOS, d.product_card.ratio),
       show_brand: flag(at(raw, "product_card", "show_brand"), d.product_card.show_brand),
       show_rating: flag(at(raw, "product_card", "show_rating"), d.product_card.show_rating),
       variant: cardVariantOf(at(raw, "product_card", "variant")),
@@ -269,6 +274,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
         CARD_TEXT_POSITIONS,
         d.product_card.text_position
       ),
+      density: oneOf(at(raw, "product_card", "density"), CARD_DENSITIES, d.product_card.density),
     },
     header: {
       layout: oneOf(at(raw, "header", "layout"), ["centered", "left"], d.header.layout),

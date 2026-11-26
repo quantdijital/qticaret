@@ -80,4 +80,19 @@ describe("the theme panel's tour card settings", () => {
     expect(keys("kişi başı", ["catalog.booking"])).toContain("product_card.per_person")
     expect(keys("tur süresi", ["catalog.booking"])).toContain("product_card.duration_row")
   })
+
+  // sahip 2026-11-26: the compact rows and every photo in turn, today's card by default
+  it("offers the card's density on a standard card and the photos in turn beside the second", () => {
+    const onChange = draw()
+    expect(screen.getByText("Kart sıklığı")).toBeInTheDocument()
+    const cycle = screen.getByLabelText("Üstüne gelince bütün fotoğraflar sırayla")
+    expect(cycle).not.toBeChecked()
+    fireEvent.click(cycle)
+    expect(onChange).toHaveBeenLastCalledWith(withCard({ hover_cycle: true }))
+  })
+
+  it("hides the photos in turn while the second photo is off", () => {
+    draw(withCard({ hover_image: false }))
+    expect(screen.queryByLabelText("Üstüne gelince bütün fotoğraflar sırayla")).toBeNull()
+  })
 })

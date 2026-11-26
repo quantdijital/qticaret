@@ -49,7 +49,12 @@ export const ATOLYE_BUTTON_RADIUS = { pill: "999px", rounded: "0.75rem", square:
 export const ATOLYE_PILL = "999px"
 
 /** The card picture's shape (storefront `CARD_RATIO`; square is the theme's own `--card-ratio`). */
-export const ATOLYE_CARD_RATIO = { "4:5": "4 / 5", "1:1": "1 / 1", "3:4": "3 / 4" } as const
+export const ATOLYE_CARD_RATIO = {
+  "4:5": "4 / 5",
+  "1:1": "1 / 1",
+  "3:4": "3 / 4",
+  "4:3": "4 / 3",
+} as const
 
 /**
  * A heading's weight: the theme's `--display-weight`, and the one weight

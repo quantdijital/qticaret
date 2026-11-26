@@ -1,8 +1,10 @@
 import {
   ACCENT_FONTS,
   CARD_BUTTON_STYLES,
+  CARD_DENSITIES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
+  CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
   CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
@@ -65,7 +67,8 @@ export const BACKGROUNDS = [
 ] as const satisfies StorefrontBackground[]
 /** The corners, sharpest first (adr/0067 Ek 2026-11-16 added `crisp` and `gentle`): the contract's list. */
 export const RADII = RADIUS_STEPS
-export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
+/** The photo's shape and a standard card's rows (sahip 2026-11-26 added `4:3` and `compact`): the contract's lists. */
+export { CARD_DENSITIES, CARD_RATIOS }
 /** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
 export { CARD_VARIANTS }
 /**
@@ -147,6 +150,10 @@ export interface ThemeSettings extends StyleKit {
     variant: (typeof CARD_VARIANTS)[number]
     /** The product's second photo on hover, every card's (sahip 2026-11-18). */
     hover_image: boolean
+    /** While `hover_image` is on, every photo in turn under a resting mouse (sahip 2026-11-26). */
+    hover_cycle: boolean
+    /** A standard card's rows: today's or compact (sahip 2026-11-26). */
+    density: (typeof CARD_DENSITIES)[number]
     sold_out_row: (typeof CARD_SOLD_OUT_ROWS)[number]
     no_reviews: (typeof CARD_NO_REVIEWS)[number]
     button_style: (typeof CARD_BUTTON_STYLES)[number]
@@ -204,6 +211,8 @@ export const GRAFIT_THEME: ThemeChoices = {
     show_rating: false,
     variant: "standard",
     hover_image: true,
+    hover_cycle: false,
+    density: "regular",
     delivery_note: true,
     full_button: true,
     sale_badge: true,

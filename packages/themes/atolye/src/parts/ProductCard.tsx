@@ -2,6 +2,7 @@ import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CardArrow } from "./card-arrow"
+import { CompactWords } from "./card-compact"
 import { OverCard } from "./card-over"
 import { CardBadges, drawnCardVariant, isOut, quickAddWords, textOver } from "./card-parts"
 import { CardPhoto } from "./CardPhoto"
@@ -42,7 +43,8 @@ const SIZES = {
  * one sent as `compact` by `CompactCard` (Ek 2026-11-15). The shop's
  * tour look (adr/0077 Ek "tur kartı", `look`): the words over the photo
  * (`OverCard`), a decorative arrow at the price row's end; none of it
- * on today's card, whose markup is as it was.
+ * on today's card, whose markup is as it was. The compact rows
+ * (`density: compact`, sahip 2026-11-26) by `CompactWords`.
  */
 export function ProductCard({
   product,
@@ -76,7 +78,13 @@ export function ProductCard({
   const out = isOut(product)
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   return (
-    <article className="group gf-card @container relative flex h-full flex-col gap-3">
+    <article
+      className={
+        product.look?.compact
+          ? "group gf-card @container relative flex h-full flex-col gap-2"
+          : "group gf-card @container relative flex h-full flex-col gap-3"
+      }
+    >
       <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
         <CardPhoto product={product} sizes={sizes} priority={priority} />
         <CardBadges product={product} t={t} />
@@ -90,28 +98,39 @@ export function ProductCard({
           />
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1">
-        {product.brand && <p className="truncate text-xs text-text-3">{product.brand}</p>}
-        <h3 className="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md">
-          {/* Clamped on the link itself: its box ends with the two lines shown, over nothing else */}
-          <a
-            href={product.path}
-            className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
-          >
-            {product.title}
-          </a>
-        </h3>
-        <CardStars product={product} t={t} />
-        {product.look?.arrow ? (
-          <div className="mt-auto flex items-end justify-between gap-2 pt-1">
-            <CardPriceRow product={product} t={t} className="min-w-0" />
-            <CardArrow />
-          </div>
-        ) : (
-          <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
-        )}
-      </div>
+      {product.look?.compact ? (
+        <CompactWords product={product} t={t} />
+      ) : (
+        <TodayWords product={product} t={t} />
+      )}
     </article>
+  )
+}
+
+/** Today's rows under the photo: the brand, the name, the stars, the price at the card's foot. */
+function TodayWords({ product, t }: { product: ProductCardView; t: Translate }) {
+  return (
+    <div className="flex flex-1 flex-col gap-1">
+      {product.brand && <p className="truncate text-xs text-text-3">{product.brand}</p>}
+      <h3 className="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md">
+        {/* Clamped on the link itself: its box ends with the two lines shown, over nothing else */}
+        <a
+          href={product.path}
+          className="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-['']"
+        >
+          {product.title}
+        </a>
+      </h3>
+      <CardStars product={product} t={t} />
+      {product.look?.arrow ? (
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+          <CardPriceRow product={product} t={t} className="min-w-0" />
+          <CardArrow />
+        </div>
+      ) : (
+        <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
+      )}
+    </div>
   )
 }
 

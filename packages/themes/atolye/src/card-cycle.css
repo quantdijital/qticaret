@@ -1,0 +1,48 @@
+/*
+ * A card's photos after the second, in turn under a resting mouse
+ * (`hover_cycle`, sahip 2026-11-26; `parts/CardPhoto.tsx`,
+ * `frame/CardCycle.tsx`). Out of the layout (`display: none`, so the
+ * browser never fetches them with the page) until the script marks one:
+ * `data-next` puts the coming photo in the layout unseen, so it loads
+ * before its turn; `data-on` fades it in over the one before, as the
+ * second photo does (`card.css`), and never before its picture is
+ * decoded. A touch screen never shows them (its strip swipes the first
+ * two only), nor does a shopper who asks for less motion (the script
+ * does not run; nothing fades).
+ */
+@layer components {
+  .gf-card-slide--more {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gf-card-slide--more {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+    }
+    .gf-card-slide--more[data-next],
+    .gf-card-slide--more[data-on] {
+      display: block;
+    }
+    .gf-card-slide--more[data-on] {
+      opacity: 1;
+    }
+    html[data-js-img] .gf-card-slide--more[data-on]:not(:has(img[data-js-loaded])) {
+      opacity: 0;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .gf-card-slide--more {
+      transition:
+        opacity var(--dur-long) var(--ease-gentle),
+        display var(--dur-long) allow-discrete;
+    }
+    @starting-style {
+      .gf-card-slide--more[data-on] {
+        opacity: 0;
+      }
+    }
+  }
+}
