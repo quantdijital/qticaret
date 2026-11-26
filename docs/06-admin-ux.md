@@ -99,7 +99,7 @@ Kullanıcı (2026-11-05): "şu ürün düzenleme panelinde de biraz düzenle." �
 "Gönderim" yalnızca bir iletinin ya da verinin gönderilmesi için kullanılır; ürünün yola çıkışı "gönderi"dir.
 
 ## Yapılan ekranlar (2026-10-25)
-Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, tahsil et, iptal), Müşteriler (liste + detay, maskeli fatura bilgisi), Ürünler (liste, 5 adımlı sihirbaz, kart kart kaydeden detay, özellikler), Kategoriler (ağaç + düzenleyici), Stok (azalan/tükenen, satır içi raf adedi), Kampanyalar (yüzde/tutar/ücretsiz kargo, kod/otomatik, tarih, sınır), Raporlar (KPI, ürün performansı, gün gün satış, CSV), SEO (arama önizlemesi, katalog sağlığı), Ayarlar (Mağaza, Görünüm, SEO, Ürün özellikleri, Özellikler, İşler, Denetim kaydı). Komut menüsünde sık işler. Telefonda listeler sütun katlayarak sığar.
+Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, tahsil et, iptal), Müşteriler (liste + detay, maskeli fatura bilgisi), Ürünler (liste, 5 adımlı sihirbaz, kart kart kaydeden detay, özellikler), Kategoriler (ağaç + düzenleyici; her satırda ürün sayısı — kategori ve altındakiler, taslaklar dahil, `GET /admin/category-counts` — tıklanınca ürün listesi o kategoriye süzülür), Stok (azalan/tükenen, satır içi raf adedi), Kampanyalar (yüzde/tutar/ücretsiz kargo, kod/otomatik, tarih, sınır), Raporlar (KPI, ürün performansı, gün gün satış, CSV), SEO (arama önizlemesi, katalog sağlığı), Ayarlar (Mağaza, Görünüm, SEO, Ürün özellikleri, Özellikler, İşler, Denetim kaydı). Komut menüsünde sık işler. Telefonda listeler sütun katlayarak sığar.
 
 ## Planlanan ekranlar (panel hattı P1–P6 ve ilgili fazlar)
 | Ekran | Desen (docs/18 §7) | İçerik |

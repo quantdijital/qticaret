@@ -9,9 +9,10 @@ import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { useUpdateCategory } from "@/features/categories/api/categories"
+import { categoryCountsQuery, useUpdateCategory } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { categoryImagesQuery } from "@/features/categories/api/images"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import {
   ancestorHandles,
   ancestorNames,
@@ -50,6 +51,8 @@ export function CategoryTable({ categories, loading, query, empty }: CategoryTab
   const navigate = useNavigate()
   const pathOf = useCategoryPath()
   const images = useQuery(categoryImagesQuery())
+  // The page does not wait for it: the column fills in when it comes
+  const counts = useQuery(categoryCountsQuery())
   const update = useUpdateCategory()
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
   const all = categories ?? []
@@ -137,6 +140,32 @@ export function CategoryTable({ categories, loading, query, empty }: CategoryTab
               )}
             </div>
           </div>
+        )
+      },
+    },
+    {
+      // As WooCommerce's "Count": the product list filtered by it (and the ones below it)
+      key: "count",
+      header: t("categories.columns.count"),
+      align: "right",
+      className: "w-20",
+      cell: ({ category }) => {
+        const count = counts.data?.[category.id]
+        if (count === undefined) {
+          return <span className="text-muted-foreground">—</span>
+        }
+        return (
+          <Link
+            to="/products"
+            search={{ category: category.id }}
+            className="tabular-nums hover:underline"
+            aria-label={t("categories.countOf", { count, name: category.name })}
+            onClick={(event) => {
+              event.stopPropagation()
+            }}
+          >
+            {formatCount(count)}
+          </Link>
         )
       },
     },
