@@ -4,7 +4,11 @@
  * is the provider's key in `integration-credentials` and in the page's
  * address.
  */
-export const SHIPPING_CARRIERS = [{ id: "aras" }, { id: "yurtici" }] as const
+export const SHIPPING_CARRIERS = [
+  { id: "aras" },
+  { id: "yurtici" },
+  { id: "dhlecommerce" },
+] as const
 
 export type CarrierId = (typeof SHIPPING_CARRIERS)[number]["id"]
 

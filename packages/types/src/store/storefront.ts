@@ -353,7 +353,7 @@ export type StorePaymentMark =
   "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
 
 /** A carrier whose contract the shop connected. */
-export type StoreCarrierMark = "aras" | "yurtici"
+export type StoreCarrierMark = "aras" | "yurtici" | "dhlecommerce"
 
 /** The shop's legal identity and how it is reached (F13.9, adr/0048); what is missing is null. */
 export interface LegalIdentity {

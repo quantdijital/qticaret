@@ -50,6 +50,7 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
+      "dhlecommerce": "DHL eCommerce",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1352,6 +1353,7 @@
       "connect": "Connect",
       "carriersTitle": "Shipping services",
       "carriersDescription": "Shipments, labels and tracking go through these services.",
+      "carrierUnavailable": "Cannot be connected on this server yet; contact platform support.",
       "carriers": {
         "aras": {
           "name": "Aras Kargo",
@@ -1360,6 +1362,10 @@
         "yurtici": {
           "name": "Yurtiçi Kargo",
           "description": "Parcels and tracking on the shop's own Yurtiçi Kargo contract; the panel draws the parcel label. The details are in Yurtiçi's web service document."
+        },
+        "dhlecommerce": {
+          "name": "DHL eCommerce",
+          "description": "Shipping and tracking on the shop's own DHL eCommerce contract; the panel prepares the parcel label. The details are in your DHL eCommerce contract and the Online Şube."
         }
       },
       "options": {
@@ -1374,7 +1380,8 @@
           "manual": "I ship it myself",
           "pickup": "Pickup from the shop",
           "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo"
+          "yurtici": "Yurtiçi Kargo",
+          "dhlecommerce": "DHL eCommerce"
         },
         "pricing": "Price",
         "pricings": {
@@ -1394,7 +1401,8 @@
         "defaultName": "Standard shipping",
         "keep": "Keep",
         "allTitle": "Shipping options",
-        "noExtras": "No extra options"
+        "noExtras": "No extra options",
+        "namePlaceholder": "E.g. Standard shipping"
       },
       "fee": {
         "title": "Shipping fee",
@@ -1421,7 +1429,8 @@
         "source": "Priced by",
         "sources": {
           "aras-table": "Aras Kargo: my price table (desi)",
-          "yurtici-table": "Yurtiçi Kargo: my price table (desi)"
+          "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
+          "dhlecommerce-table": "DHL eCommerce: my price table (desi)"
         },
         "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
         "tableLink": "Fill in the price table",
@@ -1531,7 +1540,8 @@
           "merchant_invalid": "Aras Kargo did not accept this user name. Copy it again from Aras's integration document.",
           "secret_invalid": "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document."
         },
-        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave."
+        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave.",
+        "customerCodePlaceholder": "E.g. 1234567"
       },
       "yurtici": {
         "keys": {
@@ -1558,6 +1568,28 @@
         },
         "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave.",
         "keysHint": "Enter Yurtiçi's “Gönderici Ödemeli” (sender pays) user. Yurtiçi allows one tracking query per minute; shipment statuses update at that pace."
+      },
+      "dhlecommerce": {
+        "keys": {
+          "title": "Customer details",
+          "description": "The customer number DHL eCommerce gave with the contract and your Online Şube password. Test and live accounts differ."
+        },
+        "customerNumber": "Customer number",
+        "password": "Password",
+        "keysHint": "The password is the permanent one you sign in to the Online Şube with, not the temporary one DHL e-mailed. If you change your Online Şube password, update it here too.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels go to DHL eCommerce's test system; no courier comes."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels open on the real DHL eCommerce account. Test and live details differ, so they are asked again.",
+        "unavailable": "DHL eCommerce cannot be connected on this server yet; nothing can be saved. Contact platform support.",
+        "checks": {
+          "merchant_invalid": "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
+          "secret_invalid": "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with; test and live accounts differ."
+        },
+        "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one.",
+        "customerNumberPlaceholder": "E.g. 123456789"
       },
       "returns": {
         "title": "Return terms",
@@ -1613,7 +1645,8 @@
         "nameInvalid": "Give the class a name (60 characters at most).",
         "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
         "optionsNote": "Free-shipping products and class surcharges apply to every delivery option.",
-        "empty": "No classes yet. Most shops need none."
+        "empty": "No classes yet. Most shops need none.",
+        "namePlaceholder": "E.g. Large parcel"
       },
       "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
       "ownDeliveryLink": "Legal details",
@@ -1636,7 +1669,8 @@
         "titleLabel": "Registered name",
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
-        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
+        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11.",
+        "titlePlaceholder": "E.g. Example Cargo Transport Inc."
       },
       "manager": {
         "title": "Where do you manage shipping?",
@@ -1669,7 +1703,8 @@
         "carrierPlaceholder": "E.g. Aras Kargo",
         "both": "Enter the carrier's name and the code together, or leave both empty.",
         "invalid": "A code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
-        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch."
+        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch.",
+        "placeholder": "E.g. 4578912"
       }
     },
     "integrations": {
@@ -1706,6 +1741,7 @@
         "cash_on_delivery": "Cash on delivery",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
@@ -1720,6 +1756,7 @@
         "cash_on_delivery": "Cash or card at the door; no provider",
         "aras": "The shop's own carrier contract",
         "yurtici": "The shop's own carrier contract",
+        "dhlecommerce": "The shop's own carrier contract",
         "netgsm": "SMS and the consent registry (İYS)",
         "meta": "Measuring ad conversions",
         "ga4": "Measuring sales",
@@ -5602,6 +5639,7 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
         "own": "The shop's own delivery"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",

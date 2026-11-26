@@ -46,7 +46,8 @@ export function ShippingFeeSection({ saved }: { saved: ShippingSettings }) {
   }
   const threshold = promotions.data.values.free_shipping_threshold
   const condition = promotions.data.values.free_shipping_condition
-  const contract = first === "aras" || first === "yurtici" ? first : null
+  const contract =
+    first === "aras" || first === "yurtici" || first === "dhlecommerce" ? first : null
   const firstSource: CarrierPricing = `${contract ?? "aras"}-table`
   const state = detectFee(options.data, saved.primary_option_id, threshold, firstSource, condition)
   const flatCarrier = contract ?? "manual"

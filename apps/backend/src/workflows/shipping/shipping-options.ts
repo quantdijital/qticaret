@@ -18,6 +18,7 @@ import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import {
   ARAS_FULFILLMENT_PROVIDER_ID,
+  DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   MANUAL_FULFILLMENT_PROVIDER_ID,
   SHOP_FLAT_OPTION,
   SHOP_FULFILLMENT_PROVIDER_ID,
@@ -34,12 +35,13 @@ import {
 
 export type OptionPricing = { type: "flat"; amount: Kurus } | { type: "table" }
 
-export type OptionCarrier = "manual" | "aras" | "yurtici" | "pickup"
+export type OptionCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce" | "pickup"
 
 // The shop's own contracts (adr/0035): a flat price or the shop's table
 const CONTRACTS = {
   aras: ARAS_FULFILLMENT_PROVIDER_ID,
   yurtici: YURTICI_FULFILLMENT_PROVIDER_ID,
+  dhlecommerce: DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
 } as const
 
 const isContract = (carrier: OptionCarrier): carrier is keyof typeof CONTRACTS =>

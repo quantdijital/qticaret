@@ -1138,6 +1138,7 @@
   "marks.installments": "Taksit imkânı",
   "marks.aras": "Aras Kargo",
   "marks.yurtici": "Yurtiçi Kargo",
+  "marks.dhlecommerce": "DHL eCommerce",
   "price.cart_offer_percent": "Sepette %{percent} indirim",
   "price.cart_offer_percent_min": "{minimum} ve üzeri sepette %{percent} indirim",
   "price.cart_offer_amount": "Sepette {amount} indirim",

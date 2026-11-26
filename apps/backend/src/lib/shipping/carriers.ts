@@ -19,16 +19,19 @@ export const isOwnDelivery = (providerId: string | null | undefined): boolean =>
 /** The shop's own carrier contracts (adr/0035). */
 export const ARAS_FULFILLMENT_PROVIDER_ID = "aras_aras"
 export const YURTICI_FULFILLMENT_PROVIDER_ID = "yurtici_yurtici"
+/** DHL eCommerce Türkiye, formerly MNG Kargo (docs/entegrasyonlar/dhlecommerce.md). */
+export const DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID = "dhlecommerce_dhlecommerce"
 
 /** A carrier we open shipments with: the shop's own contract. */
-export type CarrierName = "aras" | "yurtici"
+export type CarrierName = "aras" | "yurtici" | "dhlecommerce"
 
 /** The carriers we open shipments with, as tracked parcels name them. */
-export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici"]
+export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici", "dhlecommerce"]
 
 const CARRIERS: Readonly<Record<string, CarrierName>> = {
   [ARAS_FULFILLMENT_PROVIDER_ID]: "aras",
   [YURTICI_FULFILLMENT_PROVIDER_ID]: "yurtici",
+  [DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID]: "dhlecommerce",
 }
 
 /** Providers that open shipments with a carrier: their parcels leave when the carrier picks them up. */
@@ -60,6 +63,9 @@ export function carrierNameOf(
       return "Aras Kargo"
     case "yurtici":
       return "Yurtiçi Kargo"
+    // Never "MNG Kargo": the brand is gone (the owner, 2026-11-26)
+    case "dhlecommerce":
+      return "DHL eCommerce"
     case null:
       return typeof named === "string" && named !== "" ? named : null
   }
@@ -68,7 +74,7 @@ export function carrierNameOf(
 /**
  * A fake carrier's own tracking page (`<base>/takip/<no>`), which the
  * fakes on a developer's machine serve: with a fake address set
- * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`; refused when deployed), a parcel's
+ * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`, `DHL_ECOMMERCE_BASE_URL`; refused when deployed), a parcel's
  * link opens the fake's page, as a live shop's opens the carrier's.
  */
 export const fakeTrackingUrl = (fakeBase: string, number: string): string =>
@@ -114,6 +120,8 @@ export const shipInput = z.object({
     .string()
     .regex(/^\d{2}$/)
     .nullish(),
+  /** The order's e-mail: only DHL eCommerce reads it, which refuses a receiver without one. */
+  email: z.email().max(254).nullish(),
 })
 
 export type ShipInput = z.infer<typeof shipInput>

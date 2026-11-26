@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { ArasAccount, YurticiAccount } from "@/features/settings/api/payments"
+import type { ArasAccount, DhlEcomAccount, YurticiAccount } from "@/features/settings/api/payments"
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
+import { DhlEcomSettings } from "@/features/settings/components/dhlecommerce-settings"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
 import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
@@ -45,6 +46,13 @@ export function ShippingCarrierPage() {
           key={accountKey(account)}
           account={account as ArasAccount | undefined}
           keyConfigured={query.data.key_configured}
+        />
+      ) : carrier === "dhlecommerce" ? (
+        <DhlEcomSettings
+          key={accountKey(account)}
+          account={account as DhlEcomAccount | undefined}
+          keyConfigured={query.data.key_configured}
+          available={!(query.data.unavailable ?? []).includes("dhlecommerce")}
         />
       ) : (
         <YurticiSettings

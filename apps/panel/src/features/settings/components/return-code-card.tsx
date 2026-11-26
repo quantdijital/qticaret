@@ -25,7 +25,7 @@ const base = z.object({ carrier: z.string().trim().max(60), code })
 type Values = z.infer<typeof base>
 
 /** Which code the card edits: one of our carriers', or BirFatura's carrier with its name. */
-type Target = "aras" | "yurtici" | "other"
+type Target = "aras" | "yurtici" | "dhlecommerce" | "other"
 
 // Our carrier is named by the page; BirFatura's is named with its code, both or neither
 const schemaOf = (target: Target) =>
@@ -39,6 +39,7 @@ const schemaOf = (target: Target) =>
 const EMPTY: ContractedReturnCodes = {
   aras: null,
   yurtici: null,
+  dhlecommerce: null,
   other_carrier: null,
   other_code: null,
 }
@@ -88,6 +89,7 @@ function CodeForm({ saved, target }: { saved: ContractedReturnCodes; target: Tar
         id={`return-code-${target}`}
         maxLength={40}
         autoComplete="off"
+        placeholder={t(`${C}.placeholder`)}
         {...form.register("code")}
       />
     </Field>
@@ -134,7 +136,7 @@ function CodeForm({ saved, target }: { saved: ContractedReturnCodes; target: Tar
 /**
  * "Anlaşmalı iade kodu" (adr/0031 Ek 2026-11-26): the one code a carrier
  * gives the shop under contract; the shopper says it at the branch and
- * pays nothing. On Aras's and Yurtiçi's pages for their own code; on the
+ * pays nothing. On each contract carrier's page for its own code; on the
  * carriers tab, while BirFatura manages the parcels, with its carrier's
  * name (`other`). Optional: without one an approved return says the shop
  * will be in touch, and the card says so (a warning, nothing blocked).

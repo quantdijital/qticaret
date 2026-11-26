@@ -1,4 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { assertProviderAvailable } from "../../../../../lib/integrations/available"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../../../../modules/integration-credentials/service"
 import { removeIntegrationCredentialsWorkflow } from "../../../../../workflows/integration-credentials/remove-credentials"
@@ -19,6 +20,8 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const provider = providerParam(req)
+  // No platform app on this server (DHL eCommerce): nothing to check the account with
+  assertProviderAvailable(provider)
   const service = serviceOf(req)
   const draft = await service.draft(provider, req.validatedBody)
   const { result } = await saveIntegrationCredentialsWorkflow(req.scope).run({

@@ -26,7 +26,7 @@ export type FeeMode = "free" | "threshold" | "flat" | "carrier"
 export const FEE_MODES: readonly FeeMode[] = ["free", "threshold", "flat", "carrier"]
 
 /** Where a carrier-priced main option's price comes from. */
-export const CARRIER_PRICINGS = ["aras-table", "yurtici-table"] as const
+export const CARRIER_PRICINGS = ["aras-table", "yurtici-table", "dhlecommerce-table"] as const
 export type CarrierPricing = (typeof CARRIER_PRICINGS)[number]
 
 /** One answer, in lira: the fee (below the threshold, or for every order) and the threshold. */
@@ -73,7 +73,12 @@ export function primaryOf(
 
 /** A carrier-priced option's source, or null for a flat one (or one the panel does not know). */
 export function carrierPricingOf(option: ShopShippingOption): CarrierPricing | null {
-  if ((option.carrier === "aras" || option.carrier === "yurtici") && option.pricing === "table") {
+  if (
+    (option.carrier === "aras" ||
+      option.carrier === "yurtici" ||
+      option.carrier === "dhlecommerce") &&
+    option.pricing === "table"
+  ) {
     return `${option.carrier}-table`
   }
   return null
@@ -158,11 +163,12 @@ export interface FeePlan {
   condition: FreeShippingCondition | null
 }
 
-type FlatCarrier = "manual" | "aras" | "yurtici"
-const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici"]
+type FlatCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce"
+const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici", "dhlecommerce"]
 
 function carrierBody(name: string, source: CarrierPricing): NewShippingOption {
-  const carrier = source === "aras-table" ? "aras" : "yurtici"
+  const carrier =
+    source === "aras-table" ? "aras" : source === "yurtici-table" ? "yurtici" : "dhlecommerce"
   return { name, carrier, pricing: { type: "table" } }
 }
 

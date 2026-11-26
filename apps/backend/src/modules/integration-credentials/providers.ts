@@ -89,6 +89,19 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["test_mode"],
     optional: ["cod_username", "cod_password"],
   },
+  // DHL eCommerce (formerly MNG Kargo): the shop's customer number and its "Online Şube"
+  // password. The app keys are the platform's, from the server's environment (adr/0027 Ek
+  // 2026-11-26); test and live accounts differ: switching asks for both again
+  dhlecommerce: {
+    settings: z.object({ test_mode: z.boolean() }).strict(),
+    secrets: ["customer_number", "password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["test_mode"],
+    optional: [],
+  },
   // Netgsm's SMS account (adr/0036): the shop's own, its sender name registered to its company
   netgsm: {
     settings: z

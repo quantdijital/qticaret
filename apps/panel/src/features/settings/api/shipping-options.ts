@@ -14,7 +14,7 @@ export interface ShopShippingOption {
   id: string
   name: string
   /** Null for an option the panel does not know (an old one). */
-  carrier: "manual" | "aras" | "yurtici" | "pickup" | null
+  carrier: "manual" | "aras" | "yurtici" | "dhlecommerce" | "pickup" | null
   pricing: "flat" | "table"
   amount: string | null
   in_store: boolean
@@ -23,7 +23,7 @@ export interface ShopShippingOption {
 /** What a new option is: who carries it and how it is priced (the server checks the pair). */
 export interface NewShippingOption {
   name: string
-  carrier: "manual" | "aras" | "yurtici" | "pickup"
+  carrier: "manual" | "aras" | "yurtici" | "dhlecommerce" | "pickup"
   pricing: { type: "flat"; amount: number } | { type: "table" }
 }
 

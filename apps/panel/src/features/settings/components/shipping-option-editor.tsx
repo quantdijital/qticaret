@@ -28,7 +28,7 @@ import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "aras", "yurtici", "pickup"] as const
+const CARRIERS = ["manual", "aras", "yurtici", "dhlecommerce", "pickup"] as const
 const PRICINGS = ["flat", "table"] as const
 export type OptionCarrier = (typeof CARRIERS)[number]
 type Pricing = (typeof PRICINGS)[number]
@@ -38,6 +38,7 @@ const PRICINGS_OF: Readonly<Record<OptionCarrier, readonly Pricing[]>> = {
   manual: ["flat"],
   aras: ["flat", "table"],
   yurtici: ["flat", "table"],
+  dhlecommerce: ["flat", "table"],
   pickup: ["flat"],
 }
 
@@ -188,7 +189,12 @@ export function ShippingOptionEditor({
           htmlFor={`shipping-option-name-${id}`}
           error={errors.name?.message ? t(errors.name.message) : undefined}
         >
-          <Input id={`shipping-option-name-${id}`} maxLength={80} {...form.register("name")} />
+          <Input
+            id={`shipping-option-name-${id}`}
+            maxLength={80}
+            placeholder={t(`${S}.namePlaceholder`)}
+            {...form.register("name")}
+          />
         </Field>
         {option ? null : (
           <Field label={t(`${S}.carrier`)} htmlFor="shipping-option-carrier">

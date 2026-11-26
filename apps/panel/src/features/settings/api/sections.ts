@@ -172,6 +172,7 @@ export interface ReturnsSettings {
 export interface ContractedReturnCodes {
   aras: string | null
   yurtici: string | null
+  dhlecommerce: string | null
   other_carrier: string | null
   other_code: string | null
 }

@@ -83,7 +83,12 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
           htmlFor={`carrier-${carrier}-title`}
           error={errors.title?.message ? t(errors.title.message) : undefined}
         >
-          <Input id={`carrier-${carrier}-title`} maxLength={200} {...form.register("title")} />
+          <Input
+            id={`carrier-${carrier}-title`}
+            maxLength={200}
+            placeholder={t(`${C}.titlePlaceholder`)}
+            {...form.register("title")}
+          />
         </Field>
         <Field
           label={t(`${C}.taxId`)}
@@ -94,6 +99,7 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
             id={`carrier-${carrier}-tax`}
             inputMode="numeric"
             maxLength={11}
+            placeholder={t("common.placeholder.taxNumber")}
             {...form.register("tax_id")}
           />
         </Field>

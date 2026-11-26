@@ -120,6 +120,7 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
                     cash_on_delivery: carrier.cash_on_delivery,
                     receiver: receiver?.address ?? null,
                     plate: receiver?.plate ?? null,
+                    email: receiver?.email ?? null,
                   },
                 },
               }

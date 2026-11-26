@@ -4,6 +4,7 @@ import { ValidationError } from "../../lib/errors"
 import type { CarrierName } from "../../lib/shipping/carriers"
 import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
 import { yurticiApi, yurticiCredentialsOf, yurticiStatusOf } from "../../lib/shipping/yurtici"
+import { dhlEcomApi, dhlEcomCredentialsOf, dhlEcomStatusOf } from "../../lib/shipping/dhlecommerce"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -57,6 +58,18 @@ const readYurtici: Reader = async (container, providerShipmentId) => {
   )
 }
 
+// By our reference: DHL lists the order under it from the start, its shipment number after
+const readDhlEcom: Reader = async (container, providerShipmentId) => {
+  const account = dhlEcomCredentialsOf(await credentials(container, "dhlecommerce"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return dhlEcomStatusOf(
+    await dhlEcomApi().status(account, providerShipmentId),
+    parseEnv().DHL_ECOMMERCE_BASE_URL
+  )
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
  * read at the call, the answer mapped to our statuses. With a fake Aras or
@@ -65,6 +78,7 @@ const readYurtici: Reader = async (container, providerShipmentId) => {
 const READERS: Record<CarrierName, Reader> = {
   aras: readAras,
   yurtici: readYurtici,
+  dhlecommerce: readDhlEcom,
 }
 
 export function carrierReader(provider: string): Reader {

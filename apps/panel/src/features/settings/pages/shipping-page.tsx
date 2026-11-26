@@ -30,7 +30,14 @@ const S = "settings.shipping"
  * account is connected and the name its invoices carry is entered; the
  * shop's own parcels carry its own (Settings > Store > legal identity).
  */
-function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
+function CarriersCard({
+  accounts,
+  unavailable,
+}: {
+  accounts: readonly ProviderAccount[]
+  /** Carriers this server cannot connect: the platform's app with them is not set. */
+  unavailable: readonly string[]
+}) {
   const { t } = useTranslation()
   return (
     <SectionCard title={t(`${S}.carriersTitle`)} description={t(`${S}.carriersDescription`)} flush>
@@ -40,6 +47,7 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
           const name = t(`${S}.carriers.${carrier.id}.name`)
           const nameId = `shipping-carrier-${carrier.id}`
           const stored = account !== undefined && account.state !== "not_configured"
+          const closed = unavailable.includes(carrier.id) && !stored
           return (
             <li
               key={carrier.id}
@@ -52,6 +60,11 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
                 <span className="text-[13px] text-muted-foreground">
                   {t(`${S}.carriers.${carrier.id}.description`)}
                 </span>
+                {closed ? (
+                  <span className="text-[13px] text-warning-text">
+                    {t(`${S}.carrierUnavailable`)}
+                  </span>
+                ) : null}
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-2">
                 <AccountBadges account={account} name={name} />
@@ -109,7 +122,10 @@ function CarriersTab({ saved }: { saved: ShippingSettings | undefined }) {
       <ShippingManagerCard saved={manager} connected={connected} />
       {/* BirFatura's carrier is not ours: its return code is named here (adr/0031 Ek 2026-11-26) */}
       {manager === "own" ? (
-        <CarriersCard accounts={accounts.data.accounts} />
+        <CarriersCard
+          accounts={accounts.data.accounts}
+          unavailable={accounts.data.unavailable ?? []}
+        />
       ) : (
         <ReturnCodeCard target="other" />
       )}

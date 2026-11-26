@@ -52,11 +52,15 @@ export type SmtpAccount = ProviderAccount<{
   from_name?: string
   rate_per_minute: number
 }>
+/** DHL eCommerce (formerly MNG Kargo) on the shop's own contract; the app keys are the platform's. */
+export type DhlEcomAccount = ProviderAccount<{ test_mode: boolean }>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 
 interface AccountsResponse {
   key_configured: boolean
+  /** Providers this server cannot connect: the platform's own app with them is not set. */
+  unavailable?: string[]
   accounts: ProviderAccount[]
 }
 

@@ -938,6 +938,20 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "yurtici.cod_account_missing":
     "Kapıda ödemeli siparişi Yurtiçi Kargo ile göndermek için tahsilatlı teslimat hesabı gerekir. Ayarlar > Kargo > Yurtiçi Kargo'dan girin.",
+  "dhlecommerce.unavailable":
+    "DHL eCommerce bağlantısı bu sunucuda henüz açılmadı; platform desteğine yazın.",
+  "dhlecommerce.merchant_invalid":
+    "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
+  "dhlecommerce.secret_invalid":
+    "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın (e-postayla gelen geçici şifre değil); test ve canlı hesap ayrıdır.",
+  "dhlecommerce.email_missing":
+    "DHL eCommerce alıcının e-posta adresini ister; siparişte e-posta yok ve mağazanın iletişim e-postası da girilmemiş. Siparişe müşterinin e-postasını ekleyin ya da Ayarlar > Mağaza'da iletişim e-postası girip yeniden deneyin.",
+  "dhlecommerce.withdraw_failed":
+    "DHL eCommerce'te gönderi açılmış olabilir ama geri çekilemedi. Yeniden kargoya vermeden önce Online Şube'de bu siparişin gönderisine bakın; varsa orada iptal edin.",
+  "dhlecommerce.place_unknown":
+    "DHL eCommerce teslimat adresindeki ili ya da ilçeyi tanımadı. Siparişin adresinde il ve ilçeyi düzeltip yeniden deneyin.",
+  "dhlecommerce.branch_pending":
+    'DHL eCommerce alıcının varış şubesini henüz belirlemedi; gönderi açılmadı. Birkaç dakika sonra "Kargoya ver"e yeniden basın.',
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":
