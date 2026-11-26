@@ -189,7 +189,7 @@ export function ShippingClassesCard({ saved }: { saved: ShippingSettings }) {
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
+                    variant="cancel"
                     onClick={() => {
                       setAsking(null)
                     }}
