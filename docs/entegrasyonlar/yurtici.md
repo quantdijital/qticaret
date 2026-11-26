@@ -159,3 +159,13 @@ Yurtiçi etiket ucu vermez: taşıma belgesini ve barkod etiketini şube, bizim 
 - "Teslim edilemedi" gibi teslim denemesi olayları ve "dağıtımda" olayının metni belgede yok; `failed` son durum olduğu için yanlış eşleşme kalıcı olur.
 - Barkod simgeleme (Code 128) belgede belirtilmiyor; şubede okutulması gerçek hesapla denenecek.
 - Alıcıya e-posta (`emailAddress`) ile Yurtiçi bildirimi istenirse aydınlatma metni kapsamı.
+
+## Başka bir entegrasyonla karşılaştırma (2026-11-26)
+
+Sahibin verdiği bir WooCommerce eklentisi (`kargo-entegrasyon` v0.1.0, yazarı ve lisansı belirsiz; yalnız veri olarak okundu, kod alınmadı) Yurtiçi'yi aynı üç işlemle ama bizden farklı ayarlarla kullanıyor; bizim seçimlerimiz belgeye dayandığı için değişiklik yok:
+
+- **Adresler:** eklenti canlıda `http://webservices.yurticikargo.com:8080/...`, testte `http://testwebservices.yurticikargo.com:9090/...` kullanıyor (şifre düz metin gider). Biz belgedeki `https://ws.yurticikargo.com` / `https://testws.yurticikargo.com` adreslerini kullanıyoruz.
+- **Boş sayısal alanlar:** eklenti `taxOfficeId`, `ttDocumentId`, `dcSelectedCredit`, `dcCreditRule` için `0` gönderiyor; belge örnekleri boş öğe gönderiyor (`dcCreditRule=0` "müşteri seçimi zorunlu" demek). Biz boş gönderiyoruz.
+- **Kapıda ödeme:** eklenti de tahsilatlı teslimat için ayrı kullanıcı alıyor (boşsa ana kullanıcıya düşüyor; biz açık hata veriyoruz), `ttDocumentId`'ye sipariş numarasının rakamlarını yazıyor, nakit/kart seçtiriyor.
+- **Takip:** eklenti `addHistoricalData=true` ile soruyor (olay listesi `invDocCargoVOArray`: `eventDate`, `eventTime`, `unitName`, `eventName`), takip no olarak `docId`'yi, teslim için `operationCode` 5'i ("doğrulanmalı" diye işaretli) kullanıyor. Biz durumu `operationStatus` harflerinden okuyoruz.
+- **Yedek takip sayfası:** eklentinin yedeği de bizimkiyle aynı (`yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=`); belgede yok.
