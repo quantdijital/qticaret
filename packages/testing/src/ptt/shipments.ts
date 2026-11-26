@@ -104,7 +104,7 @@ export function trackingRows(shipment: FakePttShipment, prefix: string): string 
 
 const measure = (value: string): string | null => {
   const number = Number(value)
-  return value !== "" && Number.isFinite(number) && number > 0 ? String(value) : null
+  return value !== "" && Number.isFinite(number) && number > 0 ? value : null
 }
 
 /** PTT's tracking page for the fake's parcels, by barcode. */
