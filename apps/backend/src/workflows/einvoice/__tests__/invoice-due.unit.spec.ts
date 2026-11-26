@@ -53,4 +53,15 @@ describe("when an order's invoice is due (adr/0034 §8, the accountant 2026-10-3
     expect(dueAt(stale, "placed")).toEqual([])
     expect(dueAt(paidByCards, "shipped")).toEqual(["shipped", "delivered"])
   })
+
+  it("hands the order to BirFatura before its parcel when BirFatura ships it (adr/0072 Ek 2026-11-26)", () => {
+    const viaBirfatura = (order: OrderRow, trigger: "placed" | "shipped") =>
+      MOMENTS.filter((moment) => invoiceDue(order, moment, { trigger }, true))
+    for (const trigger of ["placed", "shipped"] as const) {
+      // Never waits for a parcel BirFatura could not make without the order
+      expect(viaBirfatura(card, trigger)).toEqual(MOMENTS)
+      expect(viaBirfatura(transferWaiting, trigger)).toEqual([])
+      expect(viaBirfatura(cashAtTheDoor, trigger)).toEqual(MOMENTS)
+    }
+  })
 })

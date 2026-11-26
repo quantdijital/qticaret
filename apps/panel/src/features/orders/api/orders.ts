@@ -100,6 +100,12 @@ export interface OrderState {
   test_carrier: boolean
   /** The invoice provider holds the buyer: the billing address no longer changes. */
   billing_locked: boolean
+  /**
+   * BirFatura's cargo module makes the labels (adr/0072 Ek 2026-11-26): the
+   * order ships when its tracking comes back, or by hand with one typed in.
+   * Absent from an older backend: false.
+   */
+  birfatura_ships?: boolean
 }
 
 export const orderStateQuery = (id: string) =>

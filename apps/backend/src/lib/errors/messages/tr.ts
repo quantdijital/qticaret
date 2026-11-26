@@ -464,6 +464,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kapıda ödemeli sipariş kargo firmasıyla tek koli olarak gönderilir: kurye tutarın tamamını bir kolide tahsil eder.",
   "shipping.no_rate":
     "Bu koli mağazanın kargo ücret tablosunun dışında kalıyor; kargo ücreti hesaplanamıyor.",
+  "shipping.birfatura_not_connected":
+    "Kargoyu BirFatura'dan yönetmek için önce Ayarlar > E-Fatura'da BirFatura'yı seçip bağlantı şifresini oluşturun.",
   "shipping.days_order": "En az gün, en çok günden büyük olamaz.",
   "shipping.rate_table_order":
     "Ücret tablosunun desi sınırları artan sırada ve en fazla bir ondalıkla olmalı.",

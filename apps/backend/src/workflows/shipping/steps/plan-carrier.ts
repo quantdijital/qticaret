@@ -6,6 +6,7 @@ import type { MedusaAmount } from "../../../lib/money"
 import { COD_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
 import { carrierOf, isCarrierProvider } from "../../../lib/shipping/carriers"
 import type { CarrierName } from "../../../lib/shipping/carriers"
+import { birfaturaShips } from "../../../lib/shipping/manager"
 
 /** Who carries the order's parcel, from where, and what the courier collects. */
 export interface CarrierPlan {
@@ -44,7 +45,9 @@ interface OptionRow {
  * option and the warehouse behind it, and whether its courier collects a
  * cash-on-delivery payment (adr/0029). The courier collects the whole
  * payment with one parcel: an order paid at the door goes with a carrier
- * in one parcel only. Reads only.
+ * in one parcel only. While BirFatura manages the parcels, none of our
+ * carriers is asked: the parcel is the shop's own, its tracking typed in
+ * or written back by BirFatura. Reads only.
  */
 export const planCarrierStep = createStep(
   "shipping-plan-carrier",
@@ -88,7 +91,8 @@ export const planCarrierStep = createStep(
           !payment.captured_at &&
           !payment.canceled_at
       )
-    const carrier = carrierOf(option?.provider_id)
+    // BirFatura's cargo module makes the labels (adr/0072 Ek 2026-11-26): no carrier of ours opens one
+    const carrier = (await birfaturaShips(container)) ? null : carrierOf(option?.provider_id)
     const carried = (order.fulfillments ?? []).some(
       (fulfillment) =>
         fulfillment && !fulfillment.canceled_at && isCarrierProvider(fulfillment.provider_id)

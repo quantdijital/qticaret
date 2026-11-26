@@ -76,7 +76,7 @@ export class InvoiceBirfaturaService extends InvoiceCancelService {
   async birfaturaSale(orderId: string, sourceId: string) {
     const [row] = await this.listInvoices(
       { order_id: orderId, kind: "sale", source_id: sourceId, provider: "birfatura" },
-      { select: ["id", "status", "number", "reported_at", "pdf_file_id"], take: 1 }
+      { select: ["id", "status", "number", "reported_at", "pdf_file_id", "listed_at"], take: 1 }
     )
     return row ?? null
   }

@@ -55,7 +55,14 @@ export const BirfaturaOrdersBody = documentedOnly({
 })
 export type BirfaturaOrdersBodyType = z.infer<typeof BirfaturaOrdersBody>
 
-/** `POST /api/orderCargoUpdate`: taken and set aside (adr/0072 §6). */
+/**
+ * `POST /api/orderCargoUpdate` (adr/0072 §6, Ek 2026-11-26): set aside
+ * unless BirFatura's cargo module manages the shop's parcels. The number's
+ * own shape, the link's and the carrier name's are read where they are
+ * used (`readCargoTracking`): a link or a name we cannot show is left out,
+ * never a 400. `orderStatusId` is checked, not used (its meaning for this
+ * service is not in the document: doğrulanmadı).
+ */
 export const BirfaturaCargoBody = documentedOnly({
   orderId,
   orderStatusId: statusId,

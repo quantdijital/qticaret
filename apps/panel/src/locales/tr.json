@@ -1620,6 +1620,26 @@
         "taxId": "VKN",
         "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
         "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
+      },
+      "manager": {
+        "title": "Kargoyu nereden yönetiyorsun?",
+        "description": "Kargo etiketlerini nerede oluşturduğunu seç. Kargo ücretini müşteri yine Seçenekler sekmesindeki ayara göre öder.",
+        "options": {
+          "own": "Kendi anlaşmam (Aras / Yurtiçi)",
+          "birfatura": "BirFatura"
+        },
+        "hints": {
+          "own": "Etiketi panelden alırsın; kargo firması paketi alınca sipariş kargoya verilir.",
+          "birfatura": "Etiketi BirFatura panelinden oluşturursun; takip numarası buraya kendiliğinden gelir."
+        },
+        "notConnected": "BirFatura seçilebilmesi için önce E-Fatura ayarlarında BirFatura'yı seçip bağlantı şifresini oluşturman gerekiyor.",
+        "einvoiceLink": "E-Fatura ayarlarına git",
+        "birfatura": {
+          "labels": "Etiketler BirFatura'nın kargo modülünde oluşturulur; buradaki kargo firması bağlantıları kullanılmaz.",
+          "tracking": "BirFatura takip numarasını yazınca sipariş \"Kargoya verildi\" olur ve müşteriye kargo e-postası gider. İstersen siparişi panelden takip numarasıyla kendin de kargoya verebilirsin.",
+          "invoice": "BirFatura yalnız kendisine verilen siparişi kargolayabildiği için sipariş, ödemesi alınınca (kapıda ödemede hemen) BirFatura'ya verilir; faturanın ne zaman kesileceği BirFatura'daki ayarlarına bağlıdır.",
+          "price": "Ödemede kargo ücreti mağazanın kendi ücret ayarından hesaplanır; Seçenekler sekmesinde \"Kargo firmasının ücreti\" yerine ücretsiz, sabit ya da belli tutarın üstünde ücretsiz kargo seç."
+        }
       }
     },
     "integrations": {
@@ -2889,7 +2909,8 @@
         },
         "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir.",
         "series": "Web satış serisi",
-        "seriesHint": "Web satışlarının faturaları bu seriyle kesilir (ör. WEB); elle girilen numara bu seriyle başlamazsa kabul edilmez. Boş bırakılırsa her seri kabul edilir."
+        "seriesHint": "Web satışlarının faturaları bu seriyle kesilir (ör. WEB); elle girilen numara bu seriyle başlamazsa kabul edilmez. Boş bırakılırsa her seri kabul edilir.",
+        "triggerBirfaturaShips": "BirFatura kargoyu yönettiği için sipariş, ödemesi alınınca (kapıda ödemede hemen) BirFatura'ya verilir; kesim anını BirFatura'daki ayarların belirler. Değiştirmek için Ayarlar > Kargo'da \"Kendi anlaşmam\"ı seç."
       },
       "parasut": {
         "title": "Paraşüt bağlantısı",
@@ -5036,7 +5057,8 @@
       "trackingInvalid": "Firma adını ve 4–40 harf/rakamlık takip numarasını yazın.",
       "trackingUrlInvalid": "Takip bağlantısı bir web adresi olmalı (kargotakip.ornek.com/…).",
       "packedParcel": "Paketlenmiş koli",
-      "restTitle": "Koliye girmemiş ürünler (ayrı koliyle)"
+      "restTitle": "Koliye girmemiş ürünler (ayrı koliyle)",
+      "birfatura": "Kargo BirFatura'dan yönetiliyor: etiketi BirFatura panelinde oluştur; takip numarası gelince sipariş kendiliğinden kargoya verilir. Buradan kargoya verirsen takip numarasını aşağıya yaz."
     },
     "deliver": {
       "title": "Sipariş teslim edildi mi?",

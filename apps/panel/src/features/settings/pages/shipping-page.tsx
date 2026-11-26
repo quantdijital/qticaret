@@ -5,6 +5,8 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { birfaturaStatusQuery } from "@/features/settings/api/einvoice"
+import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -15,6 +17,7 @@ import { BookingFlowCard } from "@/features/settings/components/booking-flow-car
 import { ReturnsCard } from "@/features/settings/components/returns-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
+import { ShippingManagerCard } from "@/features/settings/components/shipping-manager-card"
 import { LocationsPanel } from "@/features/settings/pages/locations-page"
 import { SHIPPING_CARRIERS } from "@/features/settings/shipping-carriers"
 import { errorText } from "@/lib/errors"
@@ -80,6 +83,35 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
 }
 
 /**
+ * "Kargoyu nereden yönetiyorsun?" (adr/0072 Ek 2026-11-26), and the
+ * carriers while the shop ships with its own contracts. BirFatura counts
+ * as connected once it is the invoicing program with its password made.
+ */
+function CarriersTab({ saved }: { saved: ShippingSettings | undefined }) {
+  const { t } = useTranslation()
+  const accounts = useQuery(providerAccountsQuery())
+  const invoicing = useQuery(sectionQuery<InvoicingSettings>("invoicing"))
+  const onBirfatura = invoicing.data?.values.provider === "birfatura"
+  const birfatura = useQuery({ ...birfaturaStatusQuery(), enabled: onBirfatura })
+  const token = birfatura.data?.token
+  const connected = onBirfatura && Boolean(token) && token?.state !== "unreadable"
+  const manager = saved?.manager ?? "own"
+  const failed = accounts.isError ? accounts : invoicing.isError ? invoicing : null
+  if (failed) {
+    return <ErrorState text={errorText(t, failed.error)} onRetry={() => void failed.refetch()} />
+  }
+  if (!accounts.data || !saved || !invoicing.data) {
+    return <LoadingRows rows={2} />
+  }
+  return (
+    <div className="flex flex-col gap-6">
+      <ShippingManagerCard saved={manager} connected={connected} />
+      {manager === "own" ? <CarriersCard accounts={accounts.data.accounts} /> : null}
+    </div>
+  )
+}
+
+/**
  * Settings > Shipping and delivery (F7, adr/0031; the owner, 2026-10-31:
  * one page for delivery, in tabs; 2026-11-26: as simple as WooCommerce's,
  * the fee one question). The carriers, each on its own page with the name
@@ -93,7 +125,6 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
  */
 export function ShippingPage() {
   const { t } = useTranslation()
-  const query = useQuery(providerAccountsQuery())
   const rules = useQuery(sectionQuery<ShippingSettings>("shipping"))
   const saved = rules.data?.values
   return (
@@ -105,13 +136,7 @@ export function ShippingPage() {
           {
             key: "carriers",
             label: t(`${S}.tabs.carriers`),
-            content: query.isError ? (
-              <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-            ) : !query.data ? (
-              <LoadingRows rows={2} />
-            ) : (
-              <CarriersCard accounts={query.data.accounts} />
-            ),
+            content: <CarriersTab saved={saved} />,
           },
           {
             key: "options",

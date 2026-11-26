@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -11,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
-import { useSaveSection } from "@/features/settings/api/sections"
+import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
+import type { ShippingSettings } from "@/features/settings/api/sections"
 import {
   INVOICING_PROVIDERS,
   invoicingProviderOf,
@@ -32,7 +34,10 @@ type Values = Pick<InvoicingSettings, "provider" | "trigger"> & { series: string
  * them back, or none; when the parcel
  * leaves or once the order is placed and paid. The owner's to change.
  * Paraşüt is offered once the platform has opened it (docs/06 principle
- * 10); a shop already on it keeps seeing its choice.
+ * 10); a shop already on it keeps seeing its choice. While BirFatura's
+ * cargo module ships the parcels (Settings > Shipping) the moment is not
+ * the shop's to pick: the order goes to BirFatura once paid (adr/0072 Ek
+ * 2026-11-26), shown read only with why.
  */
 export function EinvoiceProgramCard({
   saved,
@@ -55,6 +60,13 @@ export function EinvoiceProgramCard({
   const form = useForm<Values>({ values, resetOptions: { keepDirtyValues: true } })
   const provider = useWatch({ control: form.control, name: "provider" })
   const trigger = useWatch({ control: form.control, name: "trigger" })
+  const client = useQueryClient()
+  const shipping = useQuery(sectionQuery<ShippingSettings>("shipping"))
+  // adr/0072 Ek 2026-11-26: BirFatura ships only what it pulled, so the order goes to it once paid
+  const birfaturaShips =
+    provider === "birfatura" &&
+    saved.provider === "birfatura" &&
+    shipping.data?.values.manager === "birfatura"
   // Numbers written back from outside are held to the web sales' series
   const numbered = provider === "external" || provider === "birfatura"
   const submit = form.handleSubmit((next) => {
@@ -71,6 +83,8 @@ export function EinvoiceProgramCard({
             },
             FULL_RESET
           )
+          // Leaving BirFatura takes its cargo module with it (Settings > Shipping)
+          void client.invalidateQueries({ queryKey: ["settings", "shipping"] })
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -116,7 +130,7 @@ export function EinvoiceProgramCard({
             control={form.control}
             name="trigger"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select value={field.value} onValueChange={field.onChange} disabled={birfaturaShips}>
                 <SelectTrigger id="einvoice-trigger" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -145,7 +159,9 @@ export function EinvoiceProgramCard({
       </div>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
         <li>{t(`${E}.hints.${provider}`)}</li>
-        <li>{t(`${E}.triggerHints.${trigger}`)}</li>
+        <li>
+          {birfaturaShips ? t(`${E}.triggerBirfaturaShips`) : t(`${E}.triggerHints.${trigger}`)}
+        </li>
         {numbered ? <li>{t(`${E}.seriesHint`)}</li> : null}
         <li>{t(`${E}.listed`)}</li>
       </ul>
