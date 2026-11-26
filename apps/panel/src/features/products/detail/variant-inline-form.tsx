@@ -42,7 +42,7 @@ interface VariantInlineFormProps {
  * Everything about one variant, open in its row (the owner, 2026-11-25:
  * "modal olmasın", WooCommerce's variations): price and stock, codes and
  * its own parcel, its pictures, one under another. "Kaydet" here, the
- * page's save bar or ⌘S save it; a refused field is told beside it and
+ * page's header save or ⌘S save it; a refused field is told beside it and
  * gets the caret. Prices are checked by the server as everywhere else.
  */
 export function VariantInlineForm({
@@ -68,7 +68,7 @@ export function VariantInlineForm({
     defaultValues: saved,
   })
   const save = useSaveVariant(product, locationId)
-  // Its sale price (adr/0086): saved with the row's "Kaydet", one entry on the save bar
+  // Its sale price (adr/0086): saved with the row's "Kaydet", one entry on the page's header save
   const salePrice = useVariantSale({ productId: product.id, variantId: variant.id }, false)
   const formDirty = form.formState.isDirty
   const dirty = formDirty || salePrice.dirty

@@ -29,7 +29,7 @@ vi.mock("@/lib/sdk", () => ({
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }))
 
-/** The page's save bar, as far as the card is concerned: its count and its "Kaydet". */
+/** The page's header save, as far as the card is concerned: its count and its "Kaydet". */
 function BarProbe() {
   const registry = useDirtyRegistry()
   return (
@@ -113,7 +113,7 @@ describe("the variants card", () => {
     expect(batchVariants).not.toHaveBeenCalled()
   })
 
-  it("joins the page's save bar: an edit counts there and the bar saves it", async () => {
+  it("joins the page's header save: an edit counts there and the bar saves it", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await row(/Renk: Sarı/))

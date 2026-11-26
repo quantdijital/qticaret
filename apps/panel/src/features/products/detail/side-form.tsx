@@ -38,7 +38,7 @@ export function SideForm({
   const { t } = useTranslation()
   const form = useRef<HTMLFormElement>(null)
   const { guard, confirm } = useDiscardGuard(dirty)
-  // The page's save bar saves it, or lets it go (asked there once for all), too
+  // The page's header save saves it, or lets it go (asked there once for all), too
   useDirtyEntry({ dirty, saving, submit: onSubmit, reset: onCancel })
   useEffect(() => {
     const first = form.current?.querySelector<HTMLElement>(

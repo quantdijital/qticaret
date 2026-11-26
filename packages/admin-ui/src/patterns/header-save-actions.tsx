@@ -12,14 +12,17 @@ const inDialog = (target: EventTarget | null): boolean =>
   target instanceof Element && target.closest("[role=dialog], [role=alertdialog]") !== null
 
 /**
- * The page's one save bar (docs/06 "Ürün sayfası"): while any card holds
- * unsaved changes, a bar held at the window's bottom says so, "Vazgeç"
- * lets all of them go (asked first) and "Kaydet" saves each through its
- * own save; the cards keep their own buttons too. ⌘S / Ctrl+S is
- * "Kaydet" on the page (never the browser's save), and leaving the page
- * with changes asks first.
+ * The page's one save, in its header (docs/06 "Ürün sayfası"; the owner
+ * 2026-11-26, WordPress's "Güncelle"): "Kaydet" is the header's primary
+ * button, always there and resting as "Kaydedildi" while nothing has
+ * changed. While any card holds unsaved changes, a quiet "n bölümde
+ * değişiklik" and "Vazgeç" (asked first) stand beside it; "Kaydet" saves
+ * each card through its own save, the cards keep their own buttons too.
+ * ⌘S / Ctrl+S is "Kaydet" on the page (never the browser's save), and
+ * leaving the page with changes asks first. Outside a page with a dirty
+ * registry it draws nothing.
  */
-export function SaveBar() {
+export function HeaderSaveActions() {
   const { t } = useTranslation(ADMIN_UI_NS)
   const registry = useDirtyRegistry()
   const [asking, setAsking] = useState(false)
@@ -50,46 +53,42 @@ export function SaveBar() {
   if (!registry) {
     return null
   }
+  const changed = dirty > 0
   return (
-    <>
-      <LeaveGuard when={dirty > 0 && !saving} />
-      {dirty > 0 || saving ? (
-        <div
-          role="region"
-          aria-label={t("saveBar.label")}
-          data-save-bar=""
-          className="sticky bottom-4 z-20 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border bg-card px-4 py-3 shadow-lg"
+    <div
+      role="group"
+      aria-label={t("headerSave.label")}
+      data-header-save=""
+      className="flex items-center gap-2"
+    >
+      {/* Read out as it changes; on a phone only read, the buttons need the row */}
+      <p aria-live="polite" className="text-xs text-muted-foreground max-sm:sr-only">
+        {changed ? t("headerSave.changes", { count: dirty }) : null}
+      </p>
+      {changed ? (
+        <Button
+          type="button"
+          variant="cancel"
+          disabled={saving}
+          onClick={() => {
+            setAsking(true)
+          }}
         >
-          <p className="text-sm font-medium" aria-live="polite">
-            {t("saveBar.text", { count: dirty })}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="cancel"
-              size="sm"
-              disabled={saving}
-              onClick={() => {
-                setAsking(true)
-              }}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              disabled={saving}
-              aria-keyshortcuts="Meta+S Control+S"
-              onClick={() => {
-                registry.submitAll()
-              }}
-            >
-              {saving ? <Loader2 className="animate-spin" /> : null}
-              {t("common.save")}
-            </Button>
-          </div>
-        </div>
+          {t("common.cancel")}
+        </Button>
       ) : null}
+      <Button
+        type="button"
+        disabled={!changed || saving}
+        aria-keyshortcuts="Meta+S Control+S"
+        onClick={() => {
+          registry.submitAll()
+        }}
+      >
+        {saving ? <Loader2 className="animate-spin" /> : null}
+        {changed || saving ? t("common.save") : t("headerSave.saved")}
+      </Button>
+      <LeaveGuard when={changed && !saving} />
       <ConfirmDialog
         open={asking}
         onOpenChange={setAsking}
@@ -102,6 +101,6 @@ export function SaveBar() {
           registry.resetAll()
         }}
       />
-    </>
+    </div>
   )
 }

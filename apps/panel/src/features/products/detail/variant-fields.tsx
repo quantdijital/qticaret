@@ -35,7 +35,7 @@ export type { SaleTarget } from "./use-variant-sale"
  * The regular price, the unit cost, the sale price of a saved variant
  * (adr/0086) and (several variants) the price for all of them. The sale
  * price is the host's (`saleOf`, saved with its form) or its own
- * (`saleTarget`, saved by its own button and the page's save bar).
+ * (`saleTarget`, saved by its own button and the page's header save).
  */
 export function PriceFields({
   form,
