@@ -140,7 +140,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Soru-Cevap moderasyonu | Sayfa | Bekleyen sorular/cevaplar, toplu onay (F10) |
 | Değişim ve sipariş düzenleme | Sayfa (F7) | Değişim talepleri, fark tutarı, sipariş düzenleme geçmişi |
 | Ters ibraz | Sayfa | Açık ibrazlar, belge paketi indir, durum (F6) |
-| Promosyonlar | Sayfa | Kupon/kampanya oluşturma, kullanım istatistiği, toplu kod üretimi (F4) |
+| Promosyonlar | Sayfa | Kupon/kampanya oluşturma, kullanım istatistiği, toplu kod üretimi (F4). "Kapsam ve koşullar" kartında en az sepet tutarı, müşteri başına kullanım ve **kimler kullanabilir** (2026-11-26, K1/K2): Herkes / Müşteri grupları (seçili gruplar; Medusa `customer.groups.id` kuralı) ve "İlk siparişe özel" anahtarı (`first_order` kuralı; daha önce iptal edilmemiş siparişi olan müşteri ya da e-posta kullanamaz). Önizleme satırları ("Seçili 2 müşteri grubuna özel", "Yalnızca ilk siparişte"). Vitrin kodu reddederken nedeni söyler (giriş yapın / hesabınız için geçerli değil / yalnızca ilk siparişte); ödeme sırasında aynı kural yeniden denetlenir |
 | Havale onayları | Sayfa | Ödeme bekleyen siparişler, onay/iptal, kalan süre (F6) |
 | İade talepleri | Sayfa | Talep listesi, onay/ret, depoya varış kontrolü (F7) |
 | Yorum moderasyonu | Sayfa | Onay bekleyen yorumlar, toplu onay/ret (F10); sekmeler Onay bekleyen / Onaylanan / Yanıtsız / Reddedilen. Onaylı yorumun metnine tıklayınca standart pencere: yorum, fotoğraflar, mağazanın yanıtı (düz metin, 1.000 karakter) "Yanıtla / Yanıtı güncelle / Yanıtı sil" (Google yorumu penceresi gibi); satırda "Yanıtlandı" rozeti ve yanıtın ilk satırı (adr/0037 Ek 2026-11-10) |

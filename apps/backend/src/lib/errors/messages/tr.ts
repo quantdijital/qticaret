@@ -1160,6 +1160,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "promotions.one_code":
     "Sepette tek bir indirim kodu kullanılabilir; önce eklediğiniz kodu çıkarın.",
   "promotions.wholesale_no_code": "Toptan siparişlerde indirim kodu kullanılamaz.",
+  "promotions.customer_group_login": "Bu kod üyelere özel; kullanmak için hesabınıza giriş yapın.",
+  "promotions.customer_group_only":
+    "Bu kod yalnızca belirli müşterilere özel; hesabınız için geçerli değil.",
+  "promotions.first_order_only": "Bu kod yalnızca ilk siparişte kullanılabilir.",
+  "promotions.audience_invalid": "Kodu kimlerin kullanabileceği geçerli değil.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
   "seo.entity_type_invalid": "Kayıt türü geçerli değil.",

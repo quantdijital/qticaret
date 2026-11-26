@@ -21,6 +21,13 @@ import {
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { WHOLESALE_NO_CODE } from "@/lib/views/cart-wholesale"
 
+/** The backend's refusals of a code not for this buyer (K1/K2), passed on as their keys. */
+const RESTRICTED_CODE_REFUSALS: ReadonlySet<string> = new Set([
+  "promotions.customer_group_login",
+  "promotions.customer_group_only",
+  "promotions.first_order_only",
+])
+
 const AddToCart = z.object({
   variant_id: z.string().regex(/^variant_[0-9A-Za-z]{10,64}$/),
   quantity: z.coerce.number().int().min(1).max(99),
@@ -148,9 +155,12 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
         // A wholesaler's cart takes no code (ADR-0068 §6): told as such
         (error.messageKey === WHOLESALE_NO_CODE
           ? WHOLESALE_NO_CODE
-          : error.status === 429
-            ? "errors.too_many_requests"
-            : "cart.promotion_invalid"),
+          : // A code for some customers or a first order only (K1/K2): told why
+            error.messageKey && RESTRICTED_CODE_REFUSALS.has(error.messageKey)
+            ? error.messageKey
+            : error.status === 429
+              ? "errors.too_many_requests"
+              : "cart.promotion_invalid"),
     }
   }
   revalidatePath("/", "layout")

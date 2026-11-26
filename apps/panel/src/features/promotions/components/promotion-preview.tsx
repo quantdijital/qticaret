@@ -27,6 +27,10 @@ export function PromotionPreview({ existing }: { existing: Promotion | null }) {
   const [buyCount, payCount] = useWatch<PromotionValues, ["buyCount", "payCount"]>({
     name: ["buyCount", "payCount"],
   })
+  const [audience, groups, firstOrder] = useWatch<
+    PromotionValues,
+    ["audience", "groups", "firstOrder"]
+  >({ name: ["audience", "groups", "firstOrder"] })
   const counts = buyGetCounts({ buyCount, payCount })
   const target = { scope, ids: scopeIds }
   const method =
@@ -52,6 +56,8 @@ export function PromotionPreview({ existing }: { existing: Promotion | null }) {
             count={scopeIds.length}
             minimum={parseMoneyInput(minimum)}
             perCustomer={Number(perCustomer) || null}
+            groups={audience === "groups" ? groups.length : 0}
+            firstOrder={firstOrder}
           />
         </div>
         {existing ? (
