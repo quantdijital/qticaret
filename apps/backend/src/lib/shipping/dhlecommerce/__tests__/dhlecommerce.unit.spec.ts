@@ -96,6 +96,8 @@ describe("DHL eCommerce's bodies (docs/entegrasyonlar/dhlecommerce.md)", () => {
 
   it("writes numbers as DHL takes them", () => {
     expect(dhlEcomPhone("05321234567")).toBe("5321234567")
+    expect(dhlEcomPhone("+90 532 123 45 67")).toBe("5321234567")
+    expect(dhlEcomPhone("5321234567")).toBe("5321234567")
     expect(wholeUp(0.4)).toBe(1)
     expect(wholeUp(2)).toBe(2)
     expect(wholeUp(2.01)).toBe(3)

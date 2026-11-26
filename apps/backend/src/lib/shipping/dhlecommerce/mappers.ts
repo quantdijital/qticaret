@@ -46,7 +46,8 @@ export const wholeUp = (value: number): number =>
   Math.max(1, Math.ceil(Number.isFinite(value) ? value - 1e-9 : 1))
 
 /** The receiver's mobile as DHL takes it: ten digits, no leading 0 or 90. */
-export const dhlEcomPhone = (phone: string): string => phone.replace(/\D/g, "").replace(/^0/, "")
+export const dhlEcomPhone = (phone: string): string =>
+  phone.replace(/\D/g, "").replace(/^(?:90|0)(?=\d{10}$)/, "")
 
 const codOf = (input: DhlEcomShipmentInput) => {
   const cod = input.cashOnDelivery !== null && input.cashOnDelivery > 0
