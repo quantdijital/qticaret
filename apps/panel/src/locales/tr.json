@@ -1797,7 +1797,8 @@
             "shipped": "Sipariş kargoda",
             "delivered": "Sipariş teslim edildi",
             "access_link": "Sipariş bağlantısı",
-            "invoiced": "Fatura kesildi"
+            "invoiced": "Fatura kesildi",
+            "note": "Siparişe not (müşteriye gönderilen)"
           },
           "return": {
             "requested": "İade talebi alındı",
@@ -5396,7 +5397,7 @@
     },
     "notes": {
       "title": "İç notlar",
-      "text": "Yalnızca ekip görür; müşteriye gösterilmez.",
+      "text": "Yalnızca ekip görür; müşteriye yalnızca \"Müşteriye gönder\" seçilen not e-postayla gider.",
       "empty": "Henüz not yok.",
       "new": "Yeni not",
       "placeholder": "Örneğin: müşteri aradı, paketin kapıya bırakılmasını istedi.",
@@ -5407,7 +5408,19 @@
       "removeText": "Not ekipten kaldırılır; kimin sildiği kayıtta kalır.",
       "removed": "Not silindi.",
       "unnamed": "Ekip üyesi",
-      "formerMember": "Ekipten ayrılan kişi"
+      "formerMember": "Ekipten ayrılan kişi",
+      "notify": "Müşteriye gönder",
+      "notifyHint": "Not, siparişin e-posta adresine mağazanın adıyla gönderilir ve iletişim geçmişinde görünür.",
+      "addAndSend": "Ekle ve gönder",
+      "sent": "Not eklendi ve müşteriye gönderildi.",
+      "notSent": {
+        "templateOff": "Not eklendi ama müşteriye gönderilmedi: bu ileti Ayarlar > Müşteri iletileri'nde kapalı.",
+        "noAddress": "Not eklendi ama müşteriye gönderilmedi: siparişte geçerli bir e-posta adresi yok.",
+        "failed": "Not eklendi; e-posta şu an gönderilemedi, yeniden denenecek.",
+        "other": "Not eklendi ama müşteriye gönderilmedi; nedeni iletişim geçmişinde."
+      },
+      "badgeSent": "Müşteriye gönderildi",
+      "badgeNotSent": "Gönderilemedi"
     },
     "contracts": {
       "title": "Sözleşme onayı",

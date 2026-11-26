@@ -27,7 +27,12 @@ describe("measureGrowth", () => {
   })
 
   it("takes quadratic work as not linear", () => {
-    const growth = measureGrowth(quadratic, 2_000, { rounds: 3 })
+    // Quadratic work reads as linear only when a busy machine slowed every small run
+    // (CI run 45710669339; it measures about 62 against 22.6 here): a few tries, not one
+    let growth = measureGrowth(quadratic, 2_000, { rounds: 3 })
+    for (let attempt = 1; attempt < 3 && growth.linear; attempt++) {
+      growth = measureGrowth(quadratic, 2_000, { rounds: 3 })
+    }
     expect(growth.largeMs).toBeGreaterThan(20)
     expect(growth).toMatchObject({ linear: false })
     expect(growth.ratio).toBeGreaterThan(growth.limit)
