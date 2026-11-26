@@ -140,6 +140,7 @@ export function ShippingClassesCard({
                   aria-label={t(`${S}.nameOf`, { number: index + 1 })}
                   aria-invalid={Boolean(errors.rows?.[index]?.name)}
                   maxLength={60}
+                  placeholder={t(`${S}.namePlaceholder`)}
                   className="min-w-0 flex-[1_1_12rem]"
                   {...form.register(`rows.${index}.name`)}
                 />

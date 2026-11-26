@@ -77,6 +77,7 @@ export function DhlEcomSettings({
             label={t(`${D}.customerNumber`)}
             name={name}
             kept={account?.secrets["customer_number"] === true && !required}
+            example={t(`${D}.customerNumberPlaceholder`)}
             error={message(errors.customer_number?.message)}
             registration={form.register("customer_number")}
           />

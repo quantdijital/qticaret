@@ -1401,7 +1401,8 @@
         "defaultName": "Standart kargo",
         "keep": "Vazgeç",
         "allTitle": "Kargo seçenekleri",
-        "noExtras": "Ek seçenek yok"
+        "noExtras": "Ek seçenek yok",
+        "namePlaceholder": "Örn. Standart kargo"
       },
       "fee": {
         "title": "Kargo ücreti",
@@ -1539,7 +1540,8 @@
           "merchant_invalid": "Aras Kargo bu kullanıcı adını kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın.",
           "secret_invalid": "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın."
         },
-        "rejected": "Aras Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Aras'ın verdiği güncel bilgileri girin."
+        "rejected": "Aras Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Aras'ın verdiği güncel bilgileri girin.",
+        "customerCodePlaceholder": "Örn. 1234567"
       },
       "yurtici": {
         "keys": {
@@ -1586,7 +1588,8 @@
           "merchant_invalid": "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
           "secret_invalid": "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın; test ve canlı hesap ayrıdır."
         },
-        "rejected": "DHL eCommerce kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Online Şube şifreniz değiştiyse yenisini girin."
+        "rejected": "DHL eCommerce kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Online Şube şifreniz değiştiyse yenisini girin.",
+        "customerNumberPlaceholder": "Örn. 123456789"
       },
       "returns": {
         "title": "İade koşulları",
@@ -1642,7 +1645,8 @@
         "nameInvalid": "Sınıfa bir ad verin (en çok 60 karakter).",
         "surchargeInvalid": "Ek ücreti 0 ile 100.000 TL arasında girin.",
         "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır.",
-        "empty": "Henüz sınıf yok. Çoğu mağazanın ihtiyacı olmaz."
+        "empty": "Henüz sınıf yok. Çoğu mağazanın ihtiyacı olmaz.",
+        "namePlaceholder": "Örn. Büyük koli"
       },
       "ownDeliveryInvoice": "Kendi gönderdiğiniz paketlerin faturasında mağazanızın unvanı ve VKN'si yazılır:",
       "ownDeliveryLink": "Yasal bilgiler",
@@ -1665,7 +1669,8 @@
         "titleLabel": "Unvan",
         "taxId": "VKN",
         "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
-        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
+        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur.",
+        "titlePlaceholder": "Örn. Örnek Kargo Taşımacılık A.Ş."
       },
       "manager": {
         "title": "Kargoyu nereden yönetiyorsun?",
@@ -1698,7 +1703,8 @@
         "carrierPlaceholder": "Örn. Aras Kargo",
         "both": "Firma adını ve kodu birlikte girin ya da ikisini de boş bırakın.",
         "invalid": "Kod en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
-        "missing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kod gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir."
+        "missing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kod gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir.",
+        "placeholder": "Örn. 4578912"
       }
     },
     "integrations": {

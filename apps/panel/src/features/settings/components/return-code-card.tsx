@@ -89,6 +89,7 @@ function CodeForm({ saved, target }: { saved: ContractedReturnCodes; target: Tar
         id={`return-code-${target}`}
         maxLength={40}
         autoComplete="off"
+        placeholder={t(`${C}.placeholder`)}
         {...form.register("code")}
       />
     </Field>

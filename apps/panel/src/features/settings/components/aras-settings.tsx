@@ -99,6 +99,7 @@ export function ArasSettings({
               <Input
                 id="aras-customer-code"
                 autoComplete="off"
+                placeholder={t(`${A}.customerCodePlaceholder`)}
                 maxLength={20}
                 {...form.register("customer_code")}
               />

@@ -86,15 +86,6 @@ const NO_EXAMPLE_TYPES = new Set([
   "range",
 ])
 
-// TODO after DHL PR: the carrier screens are being changed in the DHL eCommerce branch
-const EXAMPLES_LATER = new Set([
-  "features/settings/components/aras-settings.tsx",
-  "features/settings/components/carrier-invoice-card.tsx",
-  "features/settings/components/return-code-card.tsx",
-  "features/settings/components/shipping-classes-card.tsx",
-  "features/settings/components/shipping-option-editor.tsx",
-])
-
 /** Where a JSX opening tag that starts at `from` ends, past braces and quoted values. */
 function tagEnd(text: string, from: number): number {
   let depth = 0
@@ -120,7 +111,7 @@ function tagEnd(text: string, from: number): number {
 function fieldsWithoutExample(): string[] {
   return sources().flatMap((path) => {
     const file = relative(SRC, path)
-    if (EXAMPLES_LATER.has(file) || !file.endsWith(".tsx")) {
+    if (!file.endsWith(".tsx")) {
       return []
     }
     const text = readFileSync(path, "utf8")

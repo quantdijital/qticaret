@@ -1401,7 +1401,8 @@
         "defaultName": "Standard shipping",
         "keep": "Keep",
         "allTitle": "Shipping options",
-        "noExtras": "No extra options"
+        "noExtras": "No extra options",
+        "namePlaceholder": "E.g. Standard shipping"
       },
       "fee": {
         "title": "Shipping fee",
@@ -1539,7 +1540,8 @@
           "merchant_invalid": "Aras Kargo did not accept this user name. Copy it again from Aras's integration document.",
           "secret_invalid": "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document."
         },
-        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave."
+        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave.",
+        "customerCodePlaceholder": "E.g. 1234567"
       },
       "yurtici": {
         "keys": {
@@ -1586,7 +1588,8 @@
           "merchant_invalid": "DHL eCommerce did not accept this customer number. Copy it again from your contract or the Online Şube.",
           "secret_invalid": "DHL eCommerce did not accept this customer number and password. Enter the permanent password you sign in to the Online Şube with; test and live accounts differ."
         },
-        "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one."
+        "rejected": "DHL eCommerce no longer accepts the stored details; nothing can be shipped. If your Online Şube password changed, enter the new one.",
+        "customerNumberPlaceholder": "E.g. 123456789"
       },
       "returns": {
         "title": "Return terms",
@@ -1642,7 +1645,8 @@
         "nameInvalid": "Give the class a name (60 characters at most).",
         "surchargeInvalid": "Enter a surcharge between 0 and 100,000 TL.",
         "optionsNote": "Free-shipping products and class surcharges apply to every delivery option.",
-        "empty": "No classes yet. Most shops need none."
+        "empty": "No classes yet. Most shops need none.",
+        "namePlaceholder": "E.g. Large parcel"
       },
       "ownDeliveryInvoice": "Parcels you deliver yourself carry your shop's registered name and tax id on their invoice:",
       "ownDeliveryLink": "Legal details",
@@ -1665,7 +1669,8 @@
         "titleLabel": "Registered name",
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
-        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
+        "taxIdInvalid": "A tax id has 10 digits, a TCKN 11.",
+        "titlePlaceholder": "E.g. Example Cargo Transport Inc."
       },
       "manager": {
         "title": "Where do you manage shipping?",
@@ -1698,7 +1703,8 @@
         "carrierPlaceholder": "E.g. Aras Kargo",
         "both": "Enter the carrier's name and the code together, or leave both empty.",
         "invalid": "A code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
-        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch."
+        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch.",
+        "placeholder": "E.g. 4578912"
       }
     },
     "integrations": {

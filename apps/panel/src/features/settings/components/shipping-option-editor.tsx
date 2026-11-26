@@ -189,7 +189,12 @@ export function ShippingOptionEditor({
           htmlFor={`shipping-option-name-${id}`}
           error={errors.name?.message ? t(errors.name.message) : undefined}
         >
-          <Input id={`shipping-option-name-${id}`} maxLength={80} {...form.register("name")} />
+          <Input
+            id={`shipping-option-name-${id}`}
+            maxLength={80}
+            placeholder={t(`${S}.namePlaceholder`)}
+            {...form.register("name")}
+          />
         </Field>
         {option ? null : (
           <Field label={t(`${S}.carrier`)} htmlFor="shipping-option-carrier">
