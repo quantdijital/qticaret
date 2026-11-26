@@ -92,13 +92,18 @@ export const planCarrierStep = createStep(
           !payment.canceled_at
       )
     // BirFatura's cargo module makes the labels (adr/0072 Ek 2026-11-26): no carrier of ours opens one
-    const carrier = (await birfaturaShips(container)) ? null : carrierOf(option?.provider_id)
+    const viaBirfatura = await birfaturaShips(container)
+    const carrier = viaBirfatura ? null : carrierOf(option?.provider_id)
     const carried = (order.fulfillments ?? []).some(
       (fulfillment) =>
         fulfillment && !fulfillment.canceled_at && isCarrierProvider(fulfillment.provider_id)
     )
     // Money at stake: a second parcel would be collected again, a part alone would be under-collected
     if (carrier && cod && (input.partial || carried)) {
+      throw new ValidationError("shipping.cod_single_parcel")
+    }
+    // BirFatura's courier collects it too: a part alone would be under-collected (security review L2)
+    if (viaBirfatura && cod && input.partial) {
       throw new ValidationError("shipping.cod_single_parcel")
     }
     let locationId = option?.service_zone?.fulfillment_set?.location?.id ?? null

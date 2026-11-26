@@ -64,6 +64,7 @@ export const decideBirfaturaCargoStep = createStep(
         order,
         exchange: ref.exchange > 0,
         pulled: Boolean(sale?.listed_at),
+        invoiceCancelled: sale?.status === "cancelled" || Boolean(sale?.cancel_requested_at),
         tracking: input.tracking,
       })
     )

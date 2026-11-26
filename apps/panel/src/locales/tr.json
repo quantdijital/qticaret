@@ -1633,6 +1633,7 @@
           "birfatura": "Etiketi BirFatura panelinden oluşturursun; takip numarası buraya kendiliğinden gelir."
         },
         "notConnected": "BirFatura seçilebilmesi için önce E-Fatura ayarlarında BirFatura'yı seçip bağlantı şifresini oluşturman gerekiyor.",
+        "ownerOnly": "Bunu yalnız mağaza sahibi değiştirebilir.",
         "einvoiceLink": "E-Fatura ayarlarına git",
         "birfatura": {
           "labels": "Etiketler BirFatura'nın kargo modülünde oluşturulur; buradaki kargo firması bağlantıları kullanılmaz.",

@@ -12,6 +12,8 @@ import type PlatformSettingsModuleService from "../../../../modules/platform-set
 import type { SectionValues } from "../../../../modules/platform-settings/service"
 import { updatePlatformSettingsWorkflow } from "../../../../workflows/platform-settings/update-platform-settings"
 import { refuseCraftUnlessOwner } from "../../ai/craft-owner"
+import { staffRoleOf } from "../../../http/staff-guard"
+import type { ShippingSettings } from "../../../../modules/platform-settings/sections"
 
 function sectionParam(req: AuthenticatedMedusaRequest): SectionName {
   const section = req.params["section"] ?? ""
@@ -38,6 +40,24 @@ async function refuseStyleChange(req: AuthenticatedMedusaRequest<SectionValues>)
   )
   if (changed) {
     throw new ValidationError("seo.url_style_job_required", { field: "url_style" })
+  }
+}
+
+/**
+ * Who manages the parcels (adr/0072 Ek 2026-11-26) moves when invoices
+ * are due and turns our carriers' labels off: the owner's alone, as the
+ * invoicing program is, while the rest of the section stays the admin's
+ * too. Sending the stored value as it is stays allowed.
+ */
+async function refuseManagerUnlessOwner(req: AuthenticatedMedusaRequest<SectionValues>) {
+  const wanted = (req.validatedBody as Partial<ShippingSettings>).manager
+  if (wanted === undefined || (await staffRoleOf(req)) === "owner") {
+    return
+  }
+  const service = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const current = (await service.readSection("shipping")).values as unknown as ShippingSettings
+  if (wanted !== current.manager) {
+    throw new MedusaError(MedusaError.Types.FORBIDDEN, "shipping.manager_owner_only")
   }
 }
 
@@ -69,6 +89,9 @@ export async function POST(
   const section = sectionParam(req)
   if (section === "seo") {
     await refuseStyleChange(req)
+  }
+  if (section === "shipping") {
+    await refuseManagerUnlessOwner(req)
   }
   if (section === "ai_guidance") {
     await refuseCraftUnlessOwner(req, (req.validatedBody as { tasks?: unknown }).tasks)

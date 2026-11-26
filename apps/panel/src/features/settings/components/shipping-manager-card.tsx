@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
+import { useStaff } from "@/features/auth/api/staff"
 import { SHIPPING_MANAGERS, useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingManager, ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
@@ -27,6 +28,8 @@ export function ShippingManagerCard({
 }) {
   const { t } = useTranslation()
   const save = useSaveSection<ShippingSettings>("shipping")
+  // The owner's alone, as the invoicing program is (the server refuses anyone else)
+  const owner = useStaff()?.role === "owner"
   const [choice, setChoice] = useState<ShippingManager>(saved)
   const [base, setBase] = useState(saved)
   // A save elsewhere (the invoicing program left BirFatura) moves what is stored
@@ -57,6 +60,7 @@ export function ShippingManagerCard({
       <RadioGroup
         aria-label={t(`${M}.title`)}
         value={choice}
+        disabled={!owner}
         onValueChange={(next) => {
           setChoice(next as ShippingManager)
         }}
@@ -87,6 +91,7 @@ export function ShippingManagerCard({
           </div>
         ))}
       </RadioGroup>
+      {owner ? null : <p className="text-[13px] text-muted-foreground">{t(`${M}.ownerOnly`)}</p>}
       {choice === "birfatura" ? (
         <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
           <li>{t(`${M}.birfatura.labels`)}</li>

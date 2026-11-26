@@ -16,13 +16,38 @@ export interface CargoTracking {
 
 /** The number as the panel accepts one: letters, digits and dashes, 4–40, spaces taken out. */
 const NUMBER = /^[A-Za-z0-9-]{4,40}$/
-const URL_SHAPE = /^https:\/\/[^\s"'<>\\]+$/
+/** A carrier's name as it may be shown: letters, digits, spaces and `.&'()-`, 60 at most. */
+const CARRIER_NAME = /^[\p{L}\p{N} .&'()-]{1,60}$/u
+
+/**
+ * A tracking page we may link to from the shop's e-mail and pages: https,
+ * a named host (a dot in it), no credentials, nothing that breaks out of
+ * an attribute (security review 2026-11-26, L1). Null otherwise.
+ */
+function trackingLink(value: string): string | null {
+  if (value.length > 500 || !/^https:\/\/[^\s"'<>\\`{}|^]+$/.test(value)) {
+    return null
+  }
+  try {
+    const url = new URL(value)
+    return url.protocol === "https:" &&
+      url.username === "" &&
+      url.password === "" &&
+      url.hostname.includes(".") &&
+      !url.hostname.endsWith(".")
+      ? url.toString()
+      : null
+  } catch {
+    return null
+  }
+}
 
 /**
  * The tracking in BirFatura's words; null when the number is not one a
- * carrier gives (refused, never stored). A link that is not https, and a
- * carrier name with control characters or past 60 characters, are left
- * out: the parcel still goes (warn, don't block).
+ * carrier gives (refused, never stored). A link that is not a plain https
+ * page, and a carrier name with anything but letters, digits, spaces and
+ * `.&'()-` or past 60 characters, are left out: the parcel still goes
+ * (warn, don't block).
  */
 export function readCargoTracking(body: {
   cargoTrackingCode: string
@@ -36,9 +61,9 @@ export function readCargoTracking(body: {
   const url = body.cargoTrackingCodeUrl?.trim() ?? ""
   const carrier = body.cargoCompany?.trim() ?? ""
   return {
-    carrier: carrier.length <= 60 && isCleanText(carrier) ? carrier : "",
+    carrier: CARRIER_NAME.test(carrier) && isCleanText(carrier) ? carrier : "",
     number,
-    url: url.length <= 500 && URL_SHAPE.test(url) ? url : null,
+    url: url === "" ? null : trackingLink(url),
   }
 }
 
@@ -71,7 +96,8 @@ const sameNumber = (a: string | null | undefined, b: string): boolean =>
  *   refused (`unknown_order`);
  * - an exchange's sale (its own `OrderId`, adr/0072 §5): refused, its
  *   parcel is handed over from the panel (`exchange`);
- * - a canceled order: refused;
+ * - a canceled order, or one whose BirFatura invoice was cancelled or
+ *   asked to be: refused;
  * - the same number on a parcel of the order already: nothing to do, the
  *   same answer again (a replay sends no second e-mail);
  * - otherwise the order ships whole (all that is left) with this number.
@@ -81,6 +107,8 @@ export function decideCargo(facts: {
   exchange: boolean
   /** BirFatura pulled this order's sale invoice from us (`listed_at`). */
   pulled: boolean
+  /** That invoice was cancelled, or its cancel asked for (security review 2026-11-26, I4). */
+  invoiceCancelled?: boolean
   tracking: CargoTracking | null
 }): CargoDecision {
   const { order } = facts
@@ -103,7 +131,7 @@ export function decideCargo(facts: {
   if (known) {
     return { action: "already", order_id: order.id }
   }
-  if (order.status === "canceled" || order.canceled_at) {
+  if (order.status === "canceled" || order.canceled_at || facts.invoiceCancelled === true) {
     return { action: "refuse", reason: "canceled", order_id: order.id }
   }
   return { action: "ship", order_id: order.id }

@@ -8,9 +8,11 @@ import type { ShippingManager } from "@/features/settings/api/sections"
 import { ShippingManagerCard } from "./shipping-manager-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const staff = vi.hoisted(() => ({ role: "owner" }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("@/features/auth/api/staff", () => ({ useStaff: () => staff }))
 // The link to E-Fatura's settings, without the router around it
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/settings/einvoice">{children}</a>,
@@ -30,6 +32,7 @@ const birfatura = () => screen.getByRole("radio", { name: /^BirFatura/ })
 describe("ShippingManagerCard (adr/0072 Ek 2026-11-26)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    staff.role = "owner"
   })
 
   it("asks one question, the shop's own contract by default", () => {
@@ -62,5 +65,13 @@ describe("ShippingManagerCard (adr/0072 Ek 2026-11-26)", () => {
         expect.objectContaining({ method: "POST", body: { manager: "birfatura" } })
       )
     })
+  })
+
+  it("is the owner's to change alone", () => {
+    staff.role = "admin"
+    renderCard("own", true)
+
+    expect(birfatura()).toBeDisabled()
+    expect(screen.getByText("Bunu yalnız mağaza sahibi değiştirebilir.")).toBeInTheDocument()
   })
 })

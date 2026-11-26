@@ -39,6 +39,23 @@ describe("BirFatura's cargo write-back (adr/0072 Ek 2026-11-26)", () => {
         cargoCompany: null,
       })?.url
     ).toBeNull()
+    // Security review L1: a plain https page with a named host, never credentials in it
+    for (const link of [
+      "https://bank.example@evil.example/x",
+      "https://localhost/x",
+      "https://x.example/{a}",
+    ]) {
+      expect(
+        readCargoTracking({ cargoTrackingCode: "AT27NN805", cargoTrackingCodeUrl: link })?.url
+      ).toBeNull()
+    }
+    expect(
+      readCargoTracking({ cargoTrackingCode: "AT27NN805", cargoCompany: "<script>x</script>" })
+        ?.carrier
+    ).toBe("")
+    expect(
+      readCargoTracking({ cargoTrackingCode: "AT27NN805", cargoCompany: "Yurtiçi Kargo" })?.carrier
+    ).toBe("Yurtiçi Kargo")
     expect(readCargoTracking({ cargoTrackingCode: "<b>1</b>" })).toBeNull()
     expect(readCargoTracking({ cargoTrackingCode: "12" })).toBeNull()
   })
@@ -89,6 +106,15 @@ describe("BirFatura's cargo write-back (adr/0072 Ek 2026-11-26)", () => {
         order: order({ status: "canceled" }),
         exchange: false,
         pulled: true,
+        tracking,
+      })
+    ).toMatchObject({ action: "refuse", reason: "canceled" })
+    expect(
+      decideCargo({
+        order: order(),
+        exchange: false,
+        pulled: true,
+        invoiceCancelled: true,
         tracking,
       })
     ).toMatchObject({ action: "refuse", reason: "canceled" })

@@ -1633,6 +1633,7 @@
           "birfatura": "You make labels in BirFatura's panel; the tracking number comes back here by itself."
         },
         "notConnected": "To choose BirFatura, first pick BirFatura in the E-invoicing settings and make its connection password.",
+        "ownerOnly": "Only the store owner can change this.",
         "einvoiceLink": "Go to E-invoicing settings",
         "birfatura": {
           "labels": "Labels are made in BirFatura's cargo module; the carrier connections here are not used.",
