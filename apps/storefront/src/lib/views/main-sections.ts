@@ -9,6 +9,7 @@ import { lookOf } from "@qticaret/types/section-look"
 import {
   headerMenuImagesOf,
   headerSearchStyleOf,
+  headerSubmenuStyleOf,
   headerToolLabelsOf,
   headerToolsStyleOf,
   productImageRatioOf,
@@ -87,6 +88,10 @@ export function headerBarOf(
     toolLabels: headerToolLabelsOf(bar.tool_labels),
     // The one-row header's plain tools only once chosen: a bar without them is the view it was
     ...(headerToolsStyleOf(bar.tools_style) === "plain" ? { toolsStyle: "plain" as const } : {}),
+    // The wide panel only once chosen: a bar without it is the view it was (the list)
+    ...(headerSubmenuStyleOf(bar.submenu_style) === "mega"
+      ? { submenuStyle: "mega" as const }
+      : {}),
     ...(variant === "catalog" && parts
       ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
       : {}),

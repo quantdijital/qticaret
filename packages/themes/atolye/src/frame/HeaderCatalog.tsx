@@ -225,6 +225,7 @@ export function HeaderCatalog({
                 more={t("nav.more")}
                 tail={highlight}
                 pictures={pictures}
+                mega={shop.headerBar?.submenuStyle === "mega"}
                 links={barLinks}
                 linksLabel={t("nav.top_links")}
               />

@@ -22,7 +22,8 @@
       "ends_at": null,
       "variant": "inline",
       "sticky": true,
-      "menu_images": "off",
+      "menu_images": "submenus",
+      "submenu_style": "mega",
       "search_style": "icon",
       "highlight_link": {
         "$href": "/magaza",

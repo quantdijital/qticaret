@@ -7,6 +7,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderSubmenuStyle,
   HeaderToolLabels,
   HeaderToolsStyle,
   HeaderSearchWidth,
@@ -47,6 +48,13 @@ export interface HeaderBarView {
    * drops it down). Absent: `field`.
    */
   searchStyle?: HeaderSearchStyle
+  /**
+   * How a menu item's children open from 1024 px (adr/0049 Ek 2026-11-26):
+   * `list` the dropdown under the item (the drawing from before); `mega` a
+   * wide panel, each child a column with its picture and its own children.
+   * Absent: `list`.
+   */
+  submenuStyle?: HeaderSubmenuStyle
   /** The one-row header's tools with words (`show`) or as round icons only (`hide`). Absent: `show`. */
   toolLabels?: HeaderToolLabels
   /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */

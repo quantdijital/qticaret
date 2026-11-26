@@ -240,6 +240,7 @@ export function Header({
             words={menu}
             centered={centered}
             pictures={pictures}
+            mega={shop.headerBar?.submenuStyle === "mega"}
           />
         </Container>
       )}

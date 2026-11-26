@@ -27,7 +27,7 @@
 }
 
 @layer components {
-  [data-shadow="none"] :is(.gf-drop, .gf-suggest) {
+  [data-shadow="none"] :is(.gf-drop, .gf-mega, .gf-suggest) {
     box-shadow: none;
   }
   /* Before the script the sheet shows in place, drawn by its own outline (pages.css),

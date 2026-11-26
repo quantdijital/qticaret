@@ -72,6 +72,15 @@ export const HEADER_TOOLS_STYLES = ["round", "plain"] as const
 type ToolsStyle = (typeof HEADER_TOOLS_STYLES)[number]
 
 /**
+ * How a menu item's children open (adr/0049 Ek 2026-11-26): mirrors
+ * `@qticaret/types`' `HEADER_SUBMENU_STYLES` (a unit test keeps them
+ * equal); `list`, the dropdown as drawn before it, is the default.
+ */
+export const HEADER_SUBMENU_STYLES = ["list", "mega"] as const
+
+type SubmenuStyle = (typeof HEADER_SUBMENU_STYLES)[number]
+
+/**
  * The one-row header's tools with words or as round icons: mirrors
  * `@qticaret/types`' `HEADER_TOOL_LABELS` (a unit test keeps them equal);
  * `show`, as drawn before it, is the default.
@@ -96,6 +105,7 @@ const HEADER_STEPS: Readonly<Record<string, readonly unknown[]>> = {
   search_style: HEADER_SEARCH_STYLES,
   tool_labels: HEADER_TOOL_LABELS,
   tools_style: HEADER_TOOLS_STYLES,
+  submenu_style: HEADER_SUBMENU_STYLES,
   tools_place: HEADER_TOOLS_PLACES,
   top_links: HEADER_TOP_LINKS_PLACES,
   search_width: HEADER_SEARCH_WIDTHS,
@@ -171,6 +181,18 @@ const headerCommon = {
   tools_style: z
     .custom<ToolsStyle>(
       (value) => (HEADER_TOOLS_STYLES as readonly unknown[]).includes(value),
+      MAIN_ERROR
+    )
+    .optional(),
+  /**
+   * How a menu item's children open, whatever the variant: `list` (the
+   * dropdown under the item, as before it) or `mega` (a wide panel of
+   * columns). Absent reads `list`, so a bar saved before it prints as it
+   * was; a step off the list is dropped on reading a stored design.
+   */
+  submenu_style: z
+    .custom<SubmenuStyle>(
+      (value) => (HEADER_SUBMENU_STYLES as readonly unknown[]).includes(value),
       MAIN_ERROR
     )
     .optional(),

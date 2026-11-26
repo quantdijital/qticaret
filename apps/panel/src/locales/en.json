@@ -11132,6 +11132,13 @@
           "hide": "Icons only",
           "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
         },
+        "submenu_style": {
+          "label": "Submenu look",
+          "term": "submenu",
+          "hint": "Wide panel: hovering a menu item opens a page-wide panel; each child becomes a column with its picture and its own links, with the item's large picture card beside them. The phone menu stays the same.",
+          "list": "List",
+          "mega": "Wide panel"
+        },
         "tools_style": {
           "label": "Icons on the right",
           "term": "icons",

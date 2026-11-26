@@ -192,6 +192,7 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     // The search's look likewise; none: the box (`field`)
     ...(bar["search_style"] === undefined ? {} : { search_style: bar["search_style"] }),
     ...(bar["tools_style"] === undefined ? {} : { tools_style: bar["tools_style"] }),
+    ...(bar["submenu_style"] === undefined ? {} : { submenu_style: bar["submenu_style"] }),
     ...(bar["variant"] === "catalog"
       ? { catalog: Object.fromEntries(CATALOG_FIELDS.map((key) => [key, bar[key] ?? null])) }
       : {}),

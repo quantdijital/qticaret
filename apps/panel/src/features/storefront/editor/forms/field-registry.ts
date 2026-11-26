@@ -1,6 +1,7 @@
 import {
   HEADER_MENU_IMAGES,
   HEADER_SEARCH_STYLES,
+  HEADER_SUBMENU_STYLES,
   HEADER_TOOL_LABELS,
   MARQUEE_SETTINGS,
 } from "@qticaret/types"
@@ -126,6 +127,7 @@ export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, F
 export const HEADER_GROUPS = {
   search_style: "search",
   menu_images: "menu",
+  submenu_style: "menu",
   tool_labels: "icons",
   sticky: "look",
 } as const satisfies Readonly<Record<string, FieldGroupName>>
@@ -217,6 +219,7 @@ export const FIELD_IDS = {
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
+  submenuStyle: (sectionId: string) => `${sectionId}-submenu-style`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
   toolLabels: (sectionId: string) => `${sectionId}-tool-labels`,
   toolsStyle: (sectionId: string) => `${sectionId}-tools-style`,
@@ -318,6 +321,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     for (const [key, steps, target] of [
       ["search_style", HEADER_SEARCH_STYLES, FIELD_IDS.searchStyle(id)],
       ["menu_images", HEADER_MENU_IMAGES, FIELD_IDS.menuImages(id)],
+      ["submenu_style", HEADER_SUBMENU_STYLES, FIELD_IDS.submenuStyle(id)],
     ] as const) {
       fields.push({
         key,

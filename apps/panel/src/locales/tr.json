@@ -11132,6 +11132,13 @@
           "hide": "Yalnız simge",
           "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
         },
+        "submenu_style": {
+          "label": "Alt menü görünümü",
+          "term": "submenu",
+          "hint": "Geniş panel: menüde bir öğenin üstüne gelince sayfa genişliğinde bir panel açılır; her alt öğe resmi ve kendi bağlantılarıyla bir sütun olur, yanda öğenin büyük resimli kartı durur. Telefon menüsü değişmez.",
+          "list": "Liste",
+          "mega": "Geniş panel"
+        },
         "tools_style": {
           "label": "Sağdaki simgeler",
           "term": "icons",

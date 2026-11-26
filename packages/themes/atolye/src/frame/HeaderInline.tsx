@@ -98,6 +98,7 @@ export function HeaderInline({
               inRow
               current={current}
               pictures={pictures}
+              mega={shop.headerBar?.submenuStyle === "mega"}
             />
           )}
         </div>
