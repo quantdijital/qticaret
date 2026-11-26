@@ -11366,6 +11366,13 @@
           "spread": "Yayık",
           "center": "Ortalı"
         },
+        "wordmark": {
+          "label": "Dev marka adı",
+          "term": "wordmark",
+          "hint": "Alt satırın altında mağaza adı çok büyük ve soluk yazılır; alt kenar onu keser.",
+          "off": "Kapal\u0131",
+          "on": "A\u00e7\u0131k"
+        },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
           "term": "payment badges",

@@ -82,7 +82,7 @@ export function FooterColumnsContent({
   )
 }
 
-const COLUMNS_ONLY = ["news_place", "brand_contact", "bottom_align"] as const
+const COLUMNS_ONLY = ["news_place", "brand_contact", "bottom_align", "wordmark"] as const
 
 const isColumns = (
   section: FooterColumnsSection | FooterRowsSection
@@ -168,7 +168,9 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
               id={CARD_FIELD_IDS.footer(section.id, key)}
               label={t(`${F}.${key}.label`)}
               term={t(`${F}.${key}.term`)}
-              {...(key === "brand_contact" ? { hint: t(`${F}.${key}.hint`) } : {})}
+              {...(key === "brand_contact" || key === "wordmark"
+                ? { hint: t(`${F}.${key}.hint`) }
+                : {})}
               steps={FOOTER_COLUMNS_SETTINGS[key] as readonly string[]}
               value={own[key]}
               fallback={FOOTER_COLUMNS_DEFAULTS[key]}

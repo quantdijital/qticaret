@@ -54,16 +54,28 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
 
   it("brings the newsletter's column, the bare brand block and the centred line only off their defaults", () => {
     expect(
-      footerColumnsOf({ news_place: "column", brand_contact: "hide", bottom_align: "center" })
-    ).toMatchObject({ newsPlace: "column", brandContact: "hide", bottomAlign: "center" })
+      footerColumnsOf({
+        news_place: "column",
+        brand_contact: "hide",
+        bottom_align: "center",
+        wordmark: "on",
+      })
+    ).toMatchObject({
+      newsPlace: "column",
+      brandContact: "hide",
+      bottomAlign: "center",
+      wordmark: "on",
+    })
     const odd = footerColumnsOf({
       news_place: "aside" as never,
       brand_contact: "show",
       bottom_align: "spread",
+      wordmark: "huge" as never,
     })
     expect(odd).not.toHaveProperty("newsPlace")
     expect(odd).not.toHaveProperty("brandContact")
     expect(odd).not.toHaveProperty("bottomAlign")
+    expect(odd).not.toHaveProperty("wordmark")
   })
 
   it("keeps the ledger's ways to pay in words, with no settings of the variant", () => {

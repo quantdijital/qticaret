@@ -29,5 +29,6 @@ export function footerColumnsOf(
     ...(step("news_place", columns?.news_place) === "column" ? { newsPlace: "column" } : {}),
     ...(step("brand_contact", columns?.brand_contact) === "hide" ? { brandContact: "hide" } : {}),
     ...(step("bottom_align", columns?.bottom_align) === "center" ? { bottomAlign: "center" } : {}),
+    ...(step("wordmark", columns?.wordmark) === "on" ? { wordmark: "on" } : {}),
   }
 }

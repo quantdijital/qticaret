@@ -202,6 +202,25 @@
     background: #fff;
     color: var(--color-stage);
   }
+  /*
+   * `wordmark: on`: the shop's name under the bottom line, as wide as the
+   * container lets it, in the ground's text at a whisper, its foot cut by
+   * the footer's edge. Drawing only (aria-hidden), never selected.
+   */
+  .gf-footer-mark {
+    overflow: hidden;
+    height: clamp(3.5rem, 12vw, 11.5rem);
+    color: color-mix(in oklab, var(--color-text) 7%, transparent);
+    font-family: var(--font-heading);
+    font-size: clamp(5rem, 17vw, 16rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+  }
+
   /* Straight on a light ground: no card, the marks a little taller */
   .gf-footer-cols[data-badges="plain"]:not([data-ground="stage"]) .gf-pay > li[data-logo] {
     min-width: 0;

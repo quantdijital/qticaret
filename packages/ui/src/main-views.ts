@@ -168,6 +168,8 @@ export interface FooterColumnsView {
   brandContact?: "hide"
   /** The bottom line's words in the middle between two rules (absent: spread). */
   bottomAlign?: "center"
+  /** The shop's name very large and faint under the bottom line (absent: none). */
+  wordmark?: "on"
 }
 
 export interface BackToTopView {
