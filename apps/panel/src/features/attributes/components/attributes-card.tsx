@@ -34,6 +34,7 @@ import { isEmpty } from "@/features/attributes/empty"
 import { useAddOption } from "@/features/attributes/use-add-option"
 import { useAttributesAi } from "@/features/attributes/use-attributes-ai"
 import { AttributeFields } from "./attribute-fields"
+import { ATTRIBUTE_ROW } from "./attribute-input"
 import { AttributesAiButton } from "./attributes-ai"
 
 const NONE = "__none__"
@@ -158,59 +159,67 @@ function AttributesForm({
         setValues(saved.values)
       }}
     >
-      <Field label={t("attributes.template")} htmlFor="attributes-template">
-        {templates.data?.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {t("attributes.noTemplates")}{" "}
-            <Link to="/settings/attributes" className="underline">
-              {t("attributes.openSettings")}
-            </Link>
-          </p>
-        ) : (
-          <Select
-            value={templateId ?? NONE}
-            onValueChange={(next) => {
-              const id = next === NONE ? null : next
-              // The values were asked for the saved template: another one's same key is not theirs
-              if (id !== templateId && ai.open) {
-                ai.close()
-              }
-              setTemplateId(id)
-            }}
-          >
-            <SelectTrigger id="attributes-template" className="w-full sm:w-80">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>{t("attributes.noTemplate")}</SelectItem>
-              {(templates.data ?? []).map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  {item.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </Field>
-      {carry ? (
-        <AddonNotice
-          tone="warning"
-          features={false}
-          text={t(
-            carry.requiredHidden
-              ? "products.addonTemplates.carryRequiredHidden"
-              : "products.addonTemplates.carryHidden",
-            { count: carry.hidden }
+      {/* Its rows follow the tab's width: names on the left once there is room */}
+      <div className="@container/attrs flex flex-col gap-4">
+        <Field
+          label={t("attributes.template")}
+          htmlFor="attributes-template"
+          hint={t("attributes.templateHint")}
+          className={ATTRIBUTE_ROW}
+        >
+          {templates.data?.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {t("attributes.noTemplates")}{" "}
+              <Link to="/settings/attributes" className="underline">
+                {t("attributes.openSettings")}
+              </Link>
+            </p>
+          ) : (
+            <Select
+              value={templateId ?? NONE}
+              onValueChange={(next) => {
+                const id = next === NONE ? null : next
+                // The values were asked for the saved template: another one's same key is not theirs
+                if (id !== templateId && ai.open) {
+                  ai.close()
+                }
+                setTemplateId(id)
+              }}
+            >
+              <SelectTrigger id="attributes-template" className="w-full @lg/attrs:max-w-80">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>{t("attributes.noTemplate")}</SelectItem>
+                {(templates.data ?? []).map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
+        </Field>
+        {carry ? (
+          <AddonNotice
+            tone="warning"
+            features={false}
+            text={t(
+              carry.requiredHidden
+                ? "products.addonTemplates.carryRequiredHidden"
+                : "products.addonTemplates.carryHidden",
+              { count: carry.hidden }
+            )}
+          />
+        ) : null}
+        <AttributeFields
+          definitions={definitions}
+          values={values}
+          setValues={setValues}
+          ai={ai}
+          addOption={addOption}
         />
-      ) : null}
-      <AttributeFields
-        definitions={definitions}
-        values={values}
-        setValues={setValues}
-        ai={ai}
-        addOption={addOption}
-      />
+      </div>
       <ConfirmDialog
         open={confirmChange}
         onOpenChange={setConfirmChange}

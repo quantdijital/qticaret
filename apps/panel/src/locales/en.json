@@ -4470,7 +4470,10 @@
       },
       "pricesOnVariants": "Prices are entered on each variant.",
       "stockOnVariants": "Stock and codes are entered on each variant.",
-      "goVariants": "Go to variants"
+      "goVariants": "Go to variants",
+      "variantOptions": "Variant options",
+      "variantOptionsHint": "The options that tell the variants apart; their values are edited in the Variants tab.",
+      "editOnVariants": "Edit in variants"
     },
     "variant": {
       "title": "Edit variant",
@@ -4540,6 +4543,7 @@
         "none": "This product has no options. Add options such as colour or size to create its variants.",
         "add": "Add options",
         "edit": "Edit options",
+        "valuesLabel": "Values",
         "hint": "Type each option's values and press Enter. \"Create variants\" adds every missing combination; existing variants are never deleted or created twice.",
         "preview_one": "{{count}} variant will be created; you enter its price afterwards.",
         "preview_other": "{{count}} variants will be created; you enter their prices afterwards.",
@@ -7847,6 +7851,7 @@
     "deleted": "Attribute group deleted.",
     "productCard": "Attributes",
     "template": "Attribute group",
+    "templateHint": "Decides which attributes are asked; their values are filled in below.",
     "noTemplate": "None",
     "noTemplates": "No attribute groups yet.",
     "openSettings": "Create an attribute group",

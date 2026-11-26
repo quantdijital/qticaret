@@ -55,7 +55,10 @@ export function SectionCard({
             <p className="text-[13px] leading-5 text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        {action ? <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div> : null}
+        {/* Never wider than the card: on a phone its buttons wrap instead of running out */}
+        {action ? (
+          <div className="flex max-w-full shrink-0 flex-wrap items-center gap-2">{action}</div>
+        ) : null}
       </header>
       <div className={cn("flex min-w-0 flex-1 flex-col", flush ? "" : "px-5 pb-5")}>{children}</div>
     </section>

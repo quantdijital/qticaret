@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test"
 import { expect, pageHeading, test } from "./support/guard"
+import { scrollIssues } from "./support/scroll"
 
 /**
  * The product page's one save in its header (docs/06 "Ürün sayfası", the
@@ -132,6 +133,44 @@ test.describe("product page header save", () => {
     await page.getByRole("button", { name: "Değişiklikleri at" }).click()
     await expect(name).toHaveValue(before)
     await expect(saved(page)).toBeDisabled()
+    await guard.assertHealthy()
+  })
+
+  test("keeps the header uncramped: no overflow on a phone or a tablet, the rest in its menu", async ({
+    page,
+    guard,
+  }) => {
+    const first = (await products(page))[0]
+    test.skip(!first, "the demo shop has no product")
+    const header = page.locator("[data-page-header-sticky]")
+    for (const width of [390, 1024]) {
+      await page.setViewportSize({ width, height: 800 })
+      await openProduct(page, first?.id ?? "")
+      // A change shows "Vazgeç" beside "Kaydet": the fullest the header gets
+      const name = page.locator("#detail-title")
+      const before = await name.inputValue()
+      await name.fill(`${before} Pro`)
+      await expect(headerSave(page).getByRole("button", { name: "Vazgeç" })).toBeVisible()
+      const room = await header.evaluate((el) => ({
+        over: el.scrollWidth - el.clientWidth,
+        outside: Array.from(el.querySelectorAll("*")).filter(
+          (child) => child.getBoundingClientRect().right > window.innerWidth + 1
+        ).length,
+        page: document.documentElement.scrollWidth - window.innerWidth,
+      }))
+      expect(room).toEqual({ over: 0, outside: 0, page: 0 })
+      // The data card's tabs never scroll sideways either (a row of chips on a phone)
+      expect(await scrollIssues(page)).toEqual([])
+      // The storefront link is one named icon; publishing and the rest sit in the "…" menu
+      await expect(header.getByRole("button", { name: /^(Vitrinde gör|Önizle)$/ })).toBeVisible()
+      await header.getByRole("button", { name: "Diğer işlemler" }).click()
+      await expect(
+        page.getByRole("menuitem", { name: /^(Yayınla|Yayından kaldır)$/ })
+      ).toBeVisible()
+      await page.keyboard.press("Escape")
+      await name.fill(before)
+      await expect(saved(page)).toBeDisabled()
+    }
     await guard.assertHealthy()
   })
 

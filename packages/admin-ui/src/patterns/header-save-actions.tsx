@@ -61,8 +61,11 @@ export function HeaderSaveActions() {
       data-header-save=""
       className="flex items-center gap-2"
     >
-      {/* Read out as it changes; on a phone only read, the buttons need the row */}
-      <p aria-live="polite" className="text-xs text-muted-foreground max-sm:sr-only">
+      {/* Read out as it changes; shown only where the row has room, the buttons come first */}
+      <p
+        aria-live="polite"
+        className="text-xs whitespace-nowrap text-muted-foreground max-xl:sr-only"
+      >
         {changed ? t("headerSave.changes", { count: dirty }) : null}
       </p>
       {changed ? (

@@ -107,8 +107,8 @@ export function SingleVariantCard({ product }: { product: ProductDetail }) {
           form.reset(saved, FULL_RESET)
         }}
       >
-        {/* Side by side from `lg` up: the card runs the main column's width */}
-        <div className="grid gap-5 lg:grid-cols-2 lg:gap-8">
+        {/* Side by side only where the tab is wide: in a column each takes the full width */}
+        <div className="grid gap-5 [&>*+*]:border-t [&>*+*]:pt-5 @3xl/variants:grid-cols-2 @3xl/variants:gap-8 @3xl/variants:[&>*+*]:border-t-0 @3xl/variants:[&>*+*]:pt-0">
           <PriceFields
             form={form}
             idPrefix={ID}
