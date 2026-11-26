@@ -15,7 +15,7 @@ import { optional, text } from "../layout-fields"
  * package); a unit test keeps them equal.
  */
 export const FOOTER_BAR_SETTINGS = {
-  social: ["text", "icons", "hidden"],
+  social: ["text", "icons", "hidden", "bare"],
   back_to_top_side: ["right", "left"],
   back_to_top_shape: ["round", "square"],
 } as const

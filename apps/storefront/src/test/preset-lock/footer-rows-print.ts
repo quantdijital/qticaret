@@ -7,13 +7,51 @@ import type { Section } from "./preset-resolve"
  * footer-rows-print.ts): the variant's ground and marks, its rows, each
  * shown block with `at` (its place in the design, hidden ones counted)
  * and without `visible`. A picture comes as written (no library here); a
- * text block's document is the backend's HTML, which this fixture does not
- * draw: a preset with one fails here until it is written in.
+ * text block's document as the backend's `renderDoc` draws plain
+ * paragraphs and line breaks (`<p>`, `<br>`); a list or a mark, which this
+ * fixture does not draw, fails here until it is written in.
  */
 
 type Raw = Record<string, unknown>
 
 const list = (value: unknown): Raw[] => (Array.isArray(value) ? (value as Raw[]) : [])
+
+const ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+}
+
+const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (char) => ESCAPES[char] ?? char)
+
+/** A plain document's HTML: its paragraphs, their text and line breaks, as `renderDoc` writes them. */
+function plainHtml(id: unknown, body: unknown): string {
+  const fail = () => {
+    throw new Error(`preset lock: footer text block ${String(id)} is not a plain document`)
+  }
+  const doc = body as Raw
+  return list(doc["content"])
+    .map((paragraph) => {
+      if (paragraph["type"] !== "paragraph") {
+        fail()
+      }
+      const html = list(paragraph["content"])
+        .map((node) => {
+          if (node["type"] === "hardBreak") {
+            return "<br>"
+          }
+          if (node["type"] !== "text" || node["marks"] !== undefined) {
+            fail()
+          }
+          return escapeHtml(String(node["text"]))
+        })
+        .join("")
+      return html ? `<p>${html}</p>` : ""
+    })
+    .join("")
+}
 
 /** The keys the rows carry for the editor alone, or print apart (`id`, `device`). */
 const NOT_OWN = new Set(["id", "visible", "device"])
@@ -21,9 +59,8 @@ const NOT_OWN = new Set(["id", "visible", "device"])
 function printedBlock(block: Raw): Raw {
   const own = Object.fromEntries(Object.entries(block).filter(([key]) => !NOT_OWN.has(key)))
   if (own["type"] === "text") {
-    throw new Error(
-      `preset lock: footer text block ${String(block["id"])} is not printed by the fixture`
-    )
+    const { body, ...rest } = own
+    return { ...rest, html: plainHtml(block["id"], body), style: own["style"] ?? "plain" }
   }
   if (own["type"] === "image") {
     const image = own["image"] as Raw
@@ -52,6 +89,7 @@ export function footerRowsPrint(bar: Section): Raw {
   return {
     ground: bar["ground"] ?? FOOTER_ROWS_DEFAULTS.ground,
     badge_style: bar["badge_style"] ?? FOOTER_ROWS_DEFAULTS.badge_style,
+    legal_place: bar["legal_place"] ?? FOOTER_ROWS_DEFAULTS.legal_place,
     bottom_badges: bar["bottom_badges"] ?? FOOTER_ROWS_DEFAULTS.bottom_badges,
     rows,
   }

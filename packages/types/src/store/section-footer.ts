@@ -16,7 +16,7 @@ export const FOOTER_BAR_SETTINGS = {
    * The shop's profiles (its store details' social accounts, `same_as`):
    * written names as before, the networks' glyphs, or not shown.
    */
-  social: ["text", "icons", "hidden"],
+  social: ["text", "icons", "hidden", "bare"],
   /** Which corner the "back to top" button stands in. */
   back_to_top_side: ["right", "left"],
   /** Its face: round or square (the theme's radius). */

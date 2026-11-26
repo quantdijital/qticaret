@@ -50,7 +50,12 @@ export const plainRowTools = <L>(
 function printedBlock<L>(block: FooterBlock, tools: FooterRowTools<L>) {
   switch (block.type) {
     case "text":
-      return { type: block.type, title: block.title, html: renderDoc(tools.doc(block.body)) }
+      return {
+        type: block.type,
+        title: block.title,
+        html: renderDoc(tools.doc(block.body)),
+        style: block.style,
+      }
     case "menu":
       return {
         type: block.type,
@@ -62,6 +67,7 @@ function printedBlock<L>(block: FooterBlock, tools: FooterRowTools<L>) {
       return {
         type: block.type,
         logo: block.logo,
+        logo_size: block.logo_size,
         about: block.about,
         social: block.social,
         address: block.address,
@@ -130,6 +136,7 @@ export function footerRowsOf<L>(footer: FooterFreeRows, tools: FooterRowTools<L>
   return {
     ground: footer.ground,
     badge_style: footer.badge_style,
+    legal_place: footer.legal_place,
     bottom_badges: footer.bottom_badges,
     rows,
   }

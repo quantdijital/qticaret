@@ -11,7 +11,12 @@ import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
  * layout takes away. Field marks only in the theme editor's live preview.
  */
 
-const FREE: FooterRowsView = { ground: "well", badgeStyle: "card", bottomBadges: true }
+const FREE: FooterRowsView = {
+  ground: "well",
+  badgeStyle: "card",
+  legalPlace: "strip",
+  bottomBadges: true,
+}
 
 const IMAGE = {
   src: "https://cdn.example.com/rozet.webp",
@@ -28,6 +33,7 @@ const BLOCKS: FooterBlockView[] = [
     ...at(0),
     type: "brand",
     logo: null,
+    logoSize: "medium",
     name: "Örnek Atölye",
     about: "Kısa tanıtım.",
     social: [],
@@ -63,6 +69,7 @@ const BLOCKS: FooterBlockView[] = [
     type: "text",
     title: "Kargo",
     html: '<p>Aynı gün <a href="https://example.com/a" rel="noopener noreferrer">kargo</a>.</p>',
+    style: "plain",
   },
   {
     ...at(5),

@@ -11009,7 +11009,8 @@
           "hint": "The addresses come from your social accounts in Store settings.",
           "text": "As text",
           "icons": "As icons",
-          "hidden": "Hidden"
+          "hidden": "Hidden",
+          "bare": "Bare icons"
         },
         "payment_badges": {
           "label": "Payment badges",
@@ -11069,7 +11070,8 @@
           "term": "payment marks",
           "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
           "card": "On cards",
-          "plain": "Plain"
+          "plain": "Plain",
+          "muted": "Grey, quiet"
         },
         "news_place": {
           "label": "Newsletter place",
@@ -11095,7 +11097,14 @@
           "term": "payment badges",
           "hint": "The fixed line at the very bottom shows the payment methods' logos, from the \"Payment logos\" choice above."
         },
-        "freeRowsNote": "Edit the rows and blocks in the page list on the left, under Footer. The legal strip and the bottom line always stay at the bottom."
+        "freeRowsNote": "Edit the rows and blocks in the page list on the left, under Footer. The legal strip and the bottom line always stay at the bottom.",
+        "legal_place": {
+          "label": "Legal links' place",
+          "term": "legal links",
+          "hint": "In the bottom line: the legal texts and cookie choices beside the copyright, no strip of their own.",
+          "strip": "Own strip",
+          "bottom_line": "In the bottom line"
+        }
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
@@ -11638,6 +11647,18 @@
             "all": "All",
             "mobile": "Phone",
             "desktop": "Wide screen"
+          },
+          "style": {
+            "label": "Text style",
+            "term": "text style",
+            "plain": "Plain",
+            "hand": "Handwriting"
+          },
+          "logo_size": {
+            "label": "Logo size",
+            "term": "logo size",
+            "medium": "Medium",
+            "large": "Large"
           }
         },
         "source": {

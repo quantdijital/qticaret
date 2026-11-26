@@ -90,7 +90,7 @@ export function storedFooterRows(section: Record<string, unknown>): Record<strin
     if (value === undefined) {
       return false
     }
-    if (key === "ground" || key === "badge_style") {
+    if (key === "ground" || key === "badge_style" || key === "legal_place") {
       return !(FOOTER_ROWS_SETTINGS[key] as readonly unknown[]).includes(value)
     }
     return key === "bottom_badges" ? typeof value !== "boolean" : key === "rows"

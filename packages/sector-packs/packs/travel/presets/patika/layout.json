@@ -290,20 +290,127 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "brand_columns",
-      "social": "icons",
+      "variant": "free_rows",
+      "social": "bare",
       "payment_badges": ["visa", "mastercard", "troy", "bank_transfer"],
       "back_to_top": true,
       "back_to_top_side": "right",
       "back_to_top_shape": "round",
       "back_to_top_mobile": true,
-      "ground": "stage",
-      "badge_style": "plain",
-      "top_strip": false,
-      "about": "Kültür, doğa ve şehir turları: İstanbul'dan Kapadokya'ya, Ege'den Karadeniz'e. Program, konaklama ve dahil olanlar her turun sayfasında yazılı.",
-      "news_place": "column",
-      "brand_contact": "show",
-      "bottom_align": "spread"
+      "ground": "page",
+      "badge_style": "muted",
+      "legal_place": "bottom_line",
+      "bottom_badges": true,
+      "rows": [
+        {
+          "id": "patikarow1",
+          "ground": "inherit",
+          "space": "medium",
+          "align": "start",
+          "phone_columns": 1,
+          "divider": false,
+          "layout": "2-1-1-1-1",
+          "columns": [
+            {
+              "blocks": [
+                {
+                  "id": "patikabrand",
+                  "visible": true,
+                  "device": "all",
+                  "type": "brand",
+                  "logo": true,
+                  "logo_size": "large",
+                  "about": "Kültür, doğa ve şehir turları: İstanbul'dan Kapadokya'ya, Ege'den Karadeniz'e. Program, konaklama ve dahil olanlar her turun sayfasında yazılı.",
+                  "social": true,
+                  "address": false
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "patikamenu1",
+                  "visible": true,
+                  "device": "all",
+                  "type": "menu",
+                  "slot": 1,
+                  "title": null,
+                  "collapse_phone": true
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "patikamenu2",
+                  "visible": true,
+                  "device": "all",
+                  "type": "menu",
+                  "slot": 2,
+                  "title": null,
+                  "collapse_phone": true
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "patikailetisim",
+                  "visible": true,
+                  "device": "all",
+                  "type": "contact",
+                  "title": null,
+                  "address": true,
+                  "phone": true,
+                  "whatsapp": false,
+                  "email": true,
+                  "hours": false
+                }
+              ]
+            },
+            {
+              "blocks": [
+                {
+                  "id": "patikasoz",
+                  "visible": true,
+                  "device": "all",
+                  "type": "text",
+                  "title": null,
+                  "body": {
+                    "type": "doc",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Keşfet"
+                          },
+                          {
+                            "type": "hardBreak"
+                          },
+                          {
+                            "type": "text",
+                            "text": "Hayal et"
+                          },
+                          {
+                            "type": "hardBreak"
+                          },
+                          {
+                            "type": "text",
+                            "text": "Yola çık"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "style": "hand"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "patikabulten",
@@ -311,7 +418,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "standard",
+      "variant": "strip",
       "title": "Yol notları e-postanızda",
       "text": null,
       "description": "Yeni rotalar, açılan kalkışlar ve yoldan notlar."

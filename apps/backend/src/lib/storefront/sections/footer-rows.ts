@@ -31,6 +31,7 @@ export const FOOTER_ROW_LAYOUTS = [
   "1-1-2",
   "1-1-1-1",
   "2-1-1-1",
+  "2-1-1-1-1",
 ] as const
 
 export type FooterRowLayout = (typeof FOOTER_ROW_LAYOUTS)[number]
@@ -53,12 +54,14 @@ export const FOOTER_ROW_DEFAULTS = {
 
 export const FOOTER_ROWS_SETTINGS = {
   ground: ["well", "page", "stage"],
-  badge_style: ["card", "plain"],
+  badge_style: ["card", "plain", "muted"],
+  legal_place: ["strip", "bottom_line"],
 } as const
 
 export const FOOTER_ROWS_DEFAULTS = {
   ground: "well",
   badge_style: "card",
+  legal_place: "strip",
   bottom_badges: true,
 } as const
 
@@ -165,6 +168,7 @@ export const footerStartRows = (): FooterRow[] => {
               id: "footerbrand",
               type: "brand",
               logo: true,
+              logo_size: "medium",
               about: null,
               social: false,
               address: false,
@@ -214,6 +218,8 @@ const footerRows = z
 export const footerRowsFields = {
   ground: rowsStep("ground"),
   badge_style: rowsStep("badge_style"),
+  /** The legal texts: their own strip, or in the bottom line beside the year. */
+  legal_place: rowsStep("legal_place"),
   /** The ways to pay in the fixed bottom line. */
   bottom_badges: z.boolean().default(FOOTER_ROWS_DEFAULTS.bottom_badges),
   rows: footerRows,

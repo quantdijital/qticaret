@@ -153,11 +153,13 @@ describe("the accent face's reach", () => {
       entry.isDirectory() ? files(join(dir, entry.name)) : [join(dir, entry.name)]
     )
 
-  it("is read by the hand note alone: no other text in the theme can fetch the face", () => {
+  // The footer's text block in its hand style (adr/0070, `style: hand`) is the one other reader
+  it("is read by the hand note and the footer's hand text alone: no other text can fetch the face", () => {
     const readers = files(themeSource).filter((path) =>
       readFileSync(path, "utf8").includes("--font-accent")
     )
-    expect(readers.map((path) => path.slice(themeSource.length + 1))).toEqual([
+    expect(readers.map((path) => path.slice(themeSource.length + 1)).sort()).toEqual([
+      "frame/footer-blocks/TextBlock.tsx",
       "parts/HandNote.tsx",
     ])
   })

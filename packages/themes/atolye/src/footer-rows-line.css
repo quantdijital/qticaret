@@ -1,0 +1,52 @@
+/*
+ * The free rows footer's later steps (adr/0070, adr/0066: each a step, the
+ * earlier look its default): the five-column split, the quiet ways to pay
+ * and the legal texts in the bottom line.
+ */
+@layer components {
+  /*
+   * `2-1-1-1-1`: the wide column and four narrow ones (the last, say, a hand
+   * line); on a tablet the wide one over the whole width, as `2-1-1-1`.
+   */
+  @media (min-width: 48rem) and (max-width: 63.999rem) {
+    .gf-frow-grid[data-layout="2-1-1-1-1"] {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .gf-frow-grid[data-layout="2-1-1-1-1"] > .gf-fcol:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 64rem) {
+    .gf-frow-grid[data-layout="2-1-1-1-1"] {
+      grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  /* `muted`: the ways to pay straight on the ground, grey and quiet; on a dark part on their cards */
+  .gf-footer-rows[data-badges="muted"] .gf-pay > li[data-logo] {
+    min-width: 0;
+    padding-inline: 0.25rem;
+    border-color: transparent;
+    background: transparent;
+  }
+  .gf-footer-rows[data-badges="muted"] .gf-pay > li {
+    opacity: 0.6;
+    filter: grayscale(1);
+  }
+  .gf-footer-rows[data-badges="muted"]
+    :is(.gf-stage, .gf-frow[data-ground="primary"])
+    .gf-pay
+    > li[data-logo] {
+    min-width: 3.25rem;
+    padding-inline: 0.5rem;
+    border-color: color-mix(in oklab, var(--color-rule) 70%, transparent);
+    background: #fff;
+  }
+
+  /* `legal_place: bottom_line`: the year and the legal texts first, the marks and the tools at the end */
+  @media (min-width: 64rem) {
+    .gf-footer-rows[data-legal="bottom_line"] .gf-foot-line {
+      grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+  }
+}
