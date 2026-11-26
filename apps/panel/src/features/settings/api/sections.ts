@@ -123,7 +123,15 @@ export interface ShippingSettings {
   shipping_classes?: ShippingClass[]
   /** The option the "Kargo ücreti" answer prices; null or absent: the cheapest flat one. */
   primary_option_id?: string | null
+  /**
+   * Who manages the parcels (adr/0072 Ek 2026-11-26): the shop's own
+   * contracts, or BirFatura's cargo module; absent from an older backend: own.
+   */
+  manager?: ShippingManager
 }
+
+export const SHIPPING_MANAGERS = ["own", "birfatura"] as const
+export type ShippingManager = (typeof SHIPPING_MANAGERS)[number]
 
 /** A shop's shipping class (adr/0087 §1): its key on products, its name, its surcharge in kuruş. */
 export interface ShippingClass {

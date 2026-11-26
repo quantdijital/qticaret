@@ -198,6 +198,7 @@ export function OrderActions({
         items={toShip}
         rest={state.ship?.rest}
         packed={(state.ship?.fulfillment_id ?? null) !== null}
+        birfatura={state.birfatura_ships === true}
         open={dialog === "ship"}
         busy={ship.isPending}
         onOpenChange={close}

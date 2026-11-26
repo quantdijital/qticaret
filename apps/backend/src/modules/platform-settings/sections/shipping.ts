@@ -53,7 +53,19 @@ export interface ShippingSettings {
    * one. Only the panel reads it; checkout prices every option the same.
    */
   primary_option_id: string | null
+  /**
+   * Who manages the shop's parcels (the owner, 2026-11-26; adr/0072 Ek
+   * 2026-11-26): `own`, the shop's own contracts (Aras, Yurtiçi; adr/0035)
+   * or its own hands; `birfatura`, BirFatura's cargo module, whose labels
+   * are made in BirFatura's panel and whose tracking numbers come back
+   * through `orderCargoUpdate`. Picked only while BirFatura is the shop's
+   * connected invoicing program; leaving it puts `own` back.
+   */
+  manager: ShippingManager
 }
+
+export const SHIPPING_MANAGERS = ["own", "birfatura"] as const
+export type ShippingManager = (typeof SHIPPING_MANAGERS)[number]
 
 export interface ShippingClass {
   /** Its key on products: lower-case letters, digits and dashes, never `free`. */
@@ -138,6 +150,7 @@ export const shippingSection = defineSection<ShippingSettings>(
       .string()
       .regex(/^so_[A-Za-z0-9]{1,60}$/)
       .nullable(),
+    manager: z.enum(SHIPPING_MANAGERS),
   },
   {
     handling_days_min: 1,
@@ -153,6 +166,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     packing_slip_prices: false,
     shipping_classes: [],
     primary_option_id: null,
+    manager: "own",
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {

@@ -108,6 +108,7 @@ describe("a dated product's offers", () => {
       packing_slip_prices: false,
       shipping_classes: [],
       primary_option_id: null,
+      manager: "own",
     },
     units: { weight_unit: "g", dimension_unit: "cm" },
     table_offered: true,

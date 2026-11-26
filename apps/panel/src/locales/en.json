@@ -1620,6 +1620,27 @@
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
         "taxIdInvalid": "A tax id has 10 digits, a TCKN 11."
+      },
+      "manager": {
+        "title": "Where do you manage shipping?",
+        "description": "Choose where you make shipping labels. Customers still pay the shipping fee set on the Options tab.",
+        "options": {
+          "own": "My own contract (Aras / Yurtiçi)",
+          "birfatura": "BirFatura"
+        },
+        "hints": {
+          "own": "You get labels from the panel; the order is shipped when the carrier picks the parcel up.",
+          "birfatura": "You make labels in BirFatura's panel; the tracking number comes back here by itself."
+        },
+        "notConnected": "To choose BirFatura, first pick BirFatura in the E-invoicing settings and make its connection password.",
+        "ownerOnly": "Only the store owner can change this.",
+        "einvoiceLink": "Go to E-invoicing settings",
+        "birfatura": {
+          "labels": "Labels are made in BirFatura's cargo module; the carrier connections here are not used.",
+          "tracking": "When BirFatura writes the tracking number, the order becomes \"Shipped\" and the customer gets the shipping e-mail. You can still ship an order from the panel with a tracking number yourself.",
+          "invoice": "BirFatura can only ship orders it has received, so an order goes to BirFatura once paid (right away for cash on delivery); when the invoice is issued depends on your BirFatura settings.",
+          "price": "At checkout the shipping fee comes from the shop's own fee settings; on the Options tab choose free, flat or free above a total instead of \"The carrier's price\"."
+        }
       }
     },
     "integrations": {
@@ -2889,7 +2910,8 @@
         },
         "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell.",
         "series": "Web sales series",
-        "seriesHint": "Web sales are invoiced in this series (such as WEB); a number typed in that does not start with it is refused. Empty: any series is taken."
+        "seriesHint": "Web sales are invoiced in this series (such as WEB); a number typed in that does not start with it is refused. Empty: any series is taken.",
+        "triggerBirfaturaShips": "BirFatura manages shipping, so an order goes to BirFatura once paid (right away for cash on delivery); your BirFatura settings decide when the invoice is issued. To change this, choose \"My own contract\" in Settings > Shipping."
       },
       "parasut": {
         "title": "Paraşüt connection",
@@ -5036,7 +5058,8 @@
       "trackingInvalid": "Type the carrier and a 4–40 character tracking number.",
       "trackingUrlInvalid": "The tracking link must be a web address (tracking.example.com/…).",
       "packedParcel": "Packed parcel",
-      "restTitle": "Products in no parcel yet (in a parcel of their own)"
+      "restTitle": "Products in no parcel yet (in a parcel of their own)",
+      "birfatura": "Shipping is managed in BirFatura: make the label in BirFatura's panel; the order is shipped by itself when the tracking number comes back. If you ship it from here, enter the tracking number below."
     },
     "deliver": {
       "title": "Was the order delivered?",

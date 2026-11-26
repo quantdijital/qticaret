@@ -455,6 +455,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "An order paid at the door ships with a carrier as one parcel: the courier collects the whole amount with one parcel.",
   "shipping.no_rate":
     "This parcel is past the shop's shipping price table; shipping cannot be priced.",
+  "shipping.birfatura_not_connected":
+    "To manage shipping from BirFatura, first pick BirFatura in Settings > E-invoicing and make its connection password.",
+  "shipping.manager_owner_only": "Only the store owner can change where shipping is managed.",
   "shipping.days_order": "The fewest days cannot be more than the most.",
   "shipping.rate_table_order": "The price table's desi limits must rise, with at most one decimal.",
   "shipping.setup_incomplete":

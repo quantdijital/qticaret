@@ -139,6 +139,7 @@ describe("productFacts", () => {
       packing_slip_prices: false,
       shipping_classes: [],
       primary_option_id: null,
+      manager: "own" as const,
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -198,6 +199,7 @@ describe("productFacts", () => {
       packing_slip_prices: false,
       shipping_classes: [],
       primary_option_id: null,
+      manager: "own" as const,
     }
     const shipping = {
       settings,

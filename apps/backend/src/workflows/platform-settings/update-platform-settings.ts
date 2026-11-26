@@ -12,6 +12,7 @@ import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { brandImagesStep } from "./steps/brand-images"
 import { pageRolesStep } from "./steps/page-roles"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
+import { assertShippingManagerStep, resetShippingManagerStep } from "./steps/shipping-manager"
 import { shareImageMediaStep } from "./steps/share-image"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
 
@@ -36,6 +37,8 @@ export const updatePlatformSettingsWorkflow = createWorkflow(
   "platform-settings-update-section",
   (input: SaveSettingsSectionInput) => {
     // The storefront's page roles by id (adr/0073 Açık kararlar 3); other sections as sent
+    // adr/0072 Ek 2026-11-26: BirFatura manages the parcels only while it is connected
+    assertShippingManagerStep(input)
     const roled = pageRolesStep(input)
     const shareImage = shareImageMediaStep(input)
     const brand = brandImagesStep(input)
@@ -53,6 +56,8 @@ export const updatePlatformSettingsWorkflow = createWorkflow(
     when({ input, saved }, ({ input, saved }) =>
       leftBirfatura(input.section, saved.before, saved.after)
     ).then(() => {
+      // Its cargo module goes with it: the shop's own way of shipping is back
+      resetShippingManagerStep(transform({ input }, ({ input }) => ({ actor_id: input.actor_id })))
       removeIntegrationCredentialsWorkflow.runAsStep({
         input: transform({ input }, ({ input }) => ({
           provider: "birfatura" as const,
