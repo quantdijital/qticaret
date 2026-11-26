@@ -607,6 +607,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
   "stock_alerts.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Ürün sayfasından yeniden isteyebilirsiniz.",
+  "publish_schedule.not_draft": "Yalnız taslak ürün planlanabilir; bu ürün zaten yayında.",
+  "publish_schedule.past": "Yayın için şu andan sonraki bir zaman seçin.",
+  "publish_schedule.too_far": "Yayın en çok bir yıl sonrasına planlanabilir.",
+  "publish_schedule.failed":
+    "Planlanan yayın tamamlanamadı; ürünü elle yayınlayın ya da yeniden planlayın.",
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",

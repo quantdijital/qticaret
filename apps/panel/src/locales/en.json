@@ -3336,7 +3336,8 @@
     },
     "status": {
       "published": "Published",
-      "draft": "Draft"
+      "draft": "Draft",
+      "scheduled": "Scheduled · {{at}}"
     },
     "columns": {
       "product": "Product",
@@ -4849,6 +4850,28 @@
         "labelTooLong": "A label holds at most 40 characters.",
         "bodyTooLong": "A description holds at most 2,000 characters.",
         "tooMany": "A program holds at most 30 steps."
+      }
+    },
+    "schedule": {
+      "label": "Publish date",
+      "manual": "Published by hand",
+      "field": "Publish date and time",
+      "zone": "Türkiye time. The product goes live by itself at this time.",
+      "schedule": "Schedule",
+      "change": "Change",
+      "cancel": "Cancel schedule",
+      "plan": "Schedule",
+      "saved": "Publish scheduled.",
+      "cancelled": "Publish schedule cancelled.",
+      "problem": {
+        "required": "Choose a date and time.",
+        "past": "Choose a time later than now.",
+        "tooFar": "At most one year ahead."
+      },
+      "failed": "The publish planned for {{at}} did not happen: {{reason}} The product stayed a draft.",
+      "reason": {
+        "seo": "Its SEO score was too low to publish.",
+        "other": "Something went wrong while saving."
       }
     }
   },

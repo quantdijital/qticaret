@@ -13,6 +13,7 @@ import { EditorLayout } from "@/features/content/components/editor-layout"
 import { productQuery } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
+import { publishScheduleOf } from "@/features/products/publish-schedule"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
 import { usePartDraws } from "@/features/products/detail/use-part-draws"
@@ -126,7 +127,12 @@ function ProductPage({
         <div className="flex flex-col gap-[var(--grid-gap)]">
           <PageHeader
             title={product.title}
-            badge={<ProductStatusBadge status={product.status} />}
+            badge={
+              <ProductStatusBadge
+                status={product.status}
+                publishAt={publishScheduleOf(product).publish_at}
+              />
+            }
             back={back}
             sticky
             action={

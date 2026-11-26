@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { interestQuery } from "@/features/products/api/interest"
+import { PublishScheduleRow } from "@/features/products/detail/publish-schedule-row"
 import type { ProductDetail } from "@/features/products/api/products"
 import { availableStock, priceRange } from "@/features/products/product-math"
 import { formatCount, formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
@@ -24,7 +25,8 @@ function Row({ label, value, strong = false }: { label: string; value: string; s
  * The product at a glance, in the page's narrow column (docs/06 "Ürün
  * sayfası"): its price span and sellable stock, how many keep it and
  * wait for it (F10.4–F10.5, counts only, so the shop knows what to
- * restock first), and when it was added and last changed. The pictures
+ * restock first), when it was added and last changed, and a draft's planned
+ * publish (S2, `PublishScheduleRow`). The pictures
  * and the prices themselves are in the main column.
  */
 export function SummaryCard({ product }: { product: ProductDetail }) {
@@ -69,6 +71,7 @@ export function SummaryCard({ product }: { product: ProductDetail }) {
           <Row label={t("products.detail.created")} value={date(product.created_at)} />
           <Row label={t("products.columns.updated")} value={date(product.updated_at)} />
         </dl>
+        <PublishScheduleRow product={product} />
       </div>
     </SectionCard>
   )

@@ -597,6 +597,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
   "stock_alerts.link_invalid":
     "This link is invalid, expired or already used. You can ask again from the product page.",
+  "publish_schedule.not_draft": "Only a draft can be scheduled; this product is already live.",
+  "publish_schedule.past": "Choose a publish time later than now.",
+  "publish_schedule.too_far": "A publish can be scheduled up to one year ahead.",
+  "publish_schedule.failed":
+    "The scheduled publish could not be completed; publish the product by hand or schedule it again.",
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",

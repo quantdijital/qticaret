@@ -801,6 +801,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/products/:id/preview": false,
   // Whether a variant can sell out is the catalog's; the count on the shelf stays open
   "POST /admin/products/:id/stock-tracking": false,
+  // S2: when a product goes live is the catalog's, as publishing it is
+  "POST /admin/products/:id/publish-schedule": false,
+  "DELETE /admin/products/:id/publish-schedule": false,
   // adr/0086: a sale price is a price, like a price list's
   "POST /admin/products/:id/sale-prices": false,
   // adr/0069: a product's videos are written by those who write its images
