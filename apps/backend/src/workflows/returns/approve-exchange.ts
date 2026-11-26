@@ -17,10 +17,8 @@ import { RETURN_REQUEST_APPROVED } from "./events"
 import { returnsLockKey } from "../../lib/orders/locks"
 import { checkExchangeStep, exchangeSettledStep, exchangeStartStep } from "./steps/exchange"
 import {
-  openCarrierReturnStep,
   readReturnRequestStep,
   returnRequestOrderStep,
-  storeReturnLabelStep,
   updateReturnRequestStep,
 } from "./steps/return-request"
 import { acquireLocksStep } from "../locking/acquire-locks"
@@ -32,9 +30,8 @@ import { releaseLocksStep } from "../locking/release-locks"
  * new variants added at Medusa's price, a free outbound shipping with the
  * order's option (so their stock is reserved), confirmed. What the
  * shopper owes, which staff collected, is marked paid on Medusa's payment
- * collection; what the shop owes goes back when the parcel arrives. The
- * carrier's return and its label as for a return. A step that fails
- * undoes the ones before it; under the order's returns lock.
+ * collection; what the shop owes goes back when the parcel arrives. A
+ * step that fails undoes the ones before it; under the order's returns lock.
  */
 export const approveExchangeWorkflow = createWorkflow(
   "returns-approve-exchange",
@@ -106,15 +103,6 @@ export const approveExchangeWorkflow = createWorkflow(
         })
       )
     )
-    const carrier = openCarrierReturnStep(
-      transform({ request }, ({ request }) => ({
-        order_id: request.order_id,
-        items: request.items,
-      }))
-    )
-    const label = storeReturnLabelStep(
-      transform({ carrier }, ({ carrier }) => ({ source: carrier?.label_source ?? null }))
-    )
     when(
       "returns-exchange-collected",
       { settled },
@@ -129,25 +117,19 @@ export const approveExchangeWorkflow = createWorkflow(
       })
     })
     const approved = updateReturnRequestStep(
-      transform(
-        { input, exchangeId, settled, carrier, label },
-        ({ input, exchangeId, settled, carrier, label }) => ({
-          id: input.id,
-          from: "requested" as const,
-          changes: {
-            status: "approved",
-            decided_by: input.staff_id,
-            decided_at: new Date(),
-            decision_note: input.note ?? null,
-            exchange_id: exchangeId,
-            return_id: settled.return_id,
-            difference: settled.difference,
-            return_code: carrier?.code ?? null,
-            return_shipment_id: carrier?.shipment_id ?? null,
-            return_label_file_id: label,
-          },
-        })
-      )
+      transform({ input, exchangeId, settled }, ({ input, exchangeId, settled }) => ({
+        id: input.id,
+        from: "requested" as const,
+        changes: {
+          status: "approved",
+          decided_by: input.staff_id,
+          decided_at: new Date(),
+          decision_note: input.note ?? null,
+          exchange_id: exchangeId,
+          return_id: settled.return_id,
+          difference: settled.difference,
+        },
+      }))
     )
     emitEventStep({
       eventName: RETURN_REQUEST_APPROVED,

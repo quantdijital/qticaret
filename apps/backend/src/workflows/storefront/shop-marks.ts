@@ -19,7 +19,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 export type PaymentMark =
   "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
 
-/** The carriers whose contract the shop connected; an aggregator (Geliver) names none ahead. */
+/** The carriers whose contract the shop connected. */
 export type CarrierMark = "aras" | "yurtici"
 
 export interface ShopMarks {

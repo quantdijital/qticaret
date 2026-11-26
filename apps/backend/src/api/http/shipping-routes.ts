@@ -32,8 +32,7 @@ function refuseReservedAdditionalData(
 
 /**
  * F7 (adr/0031): our mark refused on Medusa's fulfillment routes; a
- * parcel's label, staff only (integration keys cannot fetch it);
- * Geliver's notifications, within the webhook budget.
+ * parcel's label, staff only (integration keys cannot fetch it).
  */
 export const SHIPPING_ROUTES = [
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
@@ -82,11 +81,6 @@ export const SHIPPING_ROUTES = [
     matcher: "/admin/shipping-setup/classes",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
-  },
-  {
-    matcher: "/hooks/geliver",
-    methods: ["POST" as const],
-    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
   },
   {
     matcher: "/admin/orders/:id/fulfillments/:fulfillment_id/label",

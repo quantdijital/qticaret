@@ -79,7 +79,7 @@ export async function orderShipments(
       const follow = byFulfillment.get(row.id)
       return {
         id: row.id,
-        carrier: carrierNameOf(row.provider_id, row.data, row.metadata),
+        carrier: carrierNameOf(row.provider_id, row.metadata),
         tracking_number: label?.tracking_number ?? follow?.tracking_number ?? null,
         tracking_url: trackingUrlOf(label?.tracking_url ?? follow?.tracking_url),
         shipped_at: iso(row.shipped_at),

@@ -4,13 +4,13 @@ import {
   listShippingOptionsForCartWithPricingWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { completeWithSystemPayment } from "../helpers/checkout"
-import { geliverShop } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierShop } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -27,14 +27,15 @@ interface PricedOption {
 
 /**
  * adr/0087 §2.5: "X TL üzeri kargo bedava" holds for every option, not
- * only flat-rate ones: the shop's desi table (Aras) and Geliver's quote
- * are free from the threshold too, worked out on the server.
+ * only flat-rate ones: a carrier's flat amount and the shop's desi table
+ * (Aras, Yurtiçi) are free from the threshold too, worked out on the
+ * server without asking the carrier.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let storefront: Storefront
     let tableOptionId: string
     let yurticiOptionId: string
@@ -43,16 +44,14 @@ medusaIntegrationTestRunner({
       settle(http.post<T & { message?: string }>(path, body, { headers: setup.admin.headers }))
     const store = <T>(path: string, body: unknown) =>
       settle(http.post<T & { message?: string }>(path, body, { headers: storefront.headers }))
-    const quotesAsked = () =>
-      fake.requests.filter((request) => request.path.includes("priceList")).length
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
@@ -60,7 +59,7 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       await loadTrAddressFixture(container)
       storefront = await createStorefront(container)
-      setup = await geliverShop(http, container, fake)
+      setup = await carrierShop(http, container, fake)
       // A 1 desi parcel costs 49.90 by the shop's table
       await post("/admin/platform-settings/shipping", {
         rate_table: [{ max_desi: 10, price: 4_990 }],
@@ -90,7 +89,7 @@ medusaIntegrationTestRunner({
     const threshold = (value: number | null) =>
       post("/admin/platform-settings/promotions", { free_shipping_threshold: value })
 
-    // The product costs 120 TL a unit (geliverProduct)
+    // The product costs 120 TL a unit (measuredProduct)
     const cartOf = async (quantity: number) =>
       (
         await createCartWorkflow(getContainer()).run({
@@ -114,21 +113,19 @@ medusaIntegrationTestRunner({
       return {
         table: amountOf(tableOptionId),
         yurtici: amountOf(yurticiOptionId),
-        geliver: amountOf(setup.optionId),
+        flat: amountOf(setup.optionId),
       }
     }
 
-    it("makes the desi table and Geliver free from the threshold, without asking Geliver", async () => {
+    it("makes the desi table and a carrier's flat amount free from the threshold, asking no carrier", async () => {
       expect((await threshold(200)).status).toBe(200)
 
       // 120 TL: under the threshold, each option at its own price
-      expect(await pricesOf(await cartOf(1))).toEqual({ table: 49.9, yurtici: 49.9, geliver: 60 })
-      expect(quotesAsked()).toBeGreaterThan(0)
+      expect(await pricesOf(await cartOf(1))).toEqual({ table: 49.9, yurtici: 49.9, flat: 60 })
 
-      // 240 TL: past it, free with every option, and Geliver is not asked
-      fake.requests.length = 0
-      expect(await pricesOf(await cartOf(2))).toEqual({ table: 0, yurtici: 0, geliver: 0 })
-      expect(quotesAsked()).toBe(0)
+      // 240 TL: past it, free with every option
+      expect(await pricesOf(await cartOf(2))).toEqual({ table: 0, yurtici: 0, flat: 0 })
+      expect(fake.requests).toHaveLength(0)
 
       // Medusa's single option price route holds it too
       const single = await store<{ shipping_option: { amount: number } }>(
@@ -141,8 +138,7 @@ medusaIntegrationTestRunner({
 
     it("charges every option with no threshold set", async () => {
       const prices = await pricesOf(await cartOf(3))
-      expect(prices).toMatchObject({ table: 49.9, yurtici: 49.9 })
-      expect(prices.geliver).toBeGreaterThan(0)
+      expect(prices).toEqual({ table: 49.9, yurtici: 49.9, flat: 60 })
     })
 
     it("takes nothing a shopper sends for the price", async () => {

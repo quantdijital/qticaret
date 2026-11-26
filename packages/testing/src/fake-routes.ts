@@ -1,4 +1,4 @@
-/** One request as a fake Geliver handler reads it. */
+/** One request as a fake server's handler reads it. */
 export interface FakeRequest {
   body: Record<string, unknown>
   query: URLSearchParams
@@ -15,17 +15,7 @@ export interface Reply {
 
 export type Handler = (request: FakeRequest) => Reply
 
-/** Geliver's envelope around a result; a list's page fields sit beside `data`. */
-export const ok = (data: unknown, extra: Record<string, unknown> = {}): Reply => ({
-  body: { result: true, data, ...extra },
-})
-
-export const failed = (status: number, code: string, message: string): Reply => ({
-  status,
-  body: { result: false, code, message },
-})
-
-/** `GET /shipments/:id` → a pattern matching `GET /shipments/abc`, its parts captured. */
+/** `GET /documents/:id` → a pattern matching `GET /documents/abc`, its parts captured. */
 export function matchRoute(
   routes: Readonly<Record<string, Handler>>,
   method: string,

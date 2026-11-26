@@ -33,7 +33,6 @@ const DECISIONS: Record<string, Decision> = {
   // The control plane's document: the only way a restriction is lifted
   "POST /hooks/control-plane/plan": "open",
   // Payment, shipping and mail providers' callbacks settle what already started (§5.5)
-  "POST /hooks/geliver": "open",
   "POST /hooks/iyzico/callback": "open",
   "POST /hooks/paytr": "open",
   "POST /hooks/resend": "open",

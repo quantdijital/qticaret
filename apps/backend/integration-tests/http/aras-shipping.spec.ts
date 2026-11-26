@@ -3,11 +3,13 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeAras } from "@qticaret/testing"
 import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
+import { SHIPMENT_TRACKING_MODULE } from "../../src/modules/shipment-tracking"
+import type ShipmentTrackingModuleService from "../../src/modules/shipment-tracking/service"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { orderShipments } from "../../src/workflows/shipping/order-shipments"
 import { createAdminUser } from "../helpers/admin"
-import { geliverProduct } from "../helpers/geliver"
+import { measuredProduct } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -95,7 +97,7 @@ medusaIntegrationTestRunner({
         pricing: { type: "flat", amount: 59.9 },
       })
       optionId = created.data.id
-      variantId = await geliverProduct(container, shop)
+      variantId = await measuredProduct(container, shop)
       fake.orders.clear()
       fake.requests.length = 0
     })
@@ -205,7 +207,7 @@ medusaIntegrationTestRunner({
 
       // 450 g in a 35 × 8 × 4 cm box: the weight's 0.5 desi
       expect(await ship()).toBe(200)
-      variantId = await geliverProduct(getContainer(), shop, false)
+      variantId = await measuredProduct(getContainer(), shop, false)
       // None of its own: the platform's 1 kg in 30 × 20 × 10 cm, 2 desi
       expect(await ship()).toBe(200)
       await post("/admin/platform-settings/shipping", {
@@ -256,6 +258,28 @@ medusaIntegrationTestRunner({
       } finally {
         fake.account.password = stored
       }
+    })
+
+    it("asks Aras about its parcels only: an old parcel of a carrier no longer offered stays as it was", async () => {
+      const tracking =
+        getContainer().resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
+      const old = await tracking.createTrackedShipments({
+        fulfillment_id: "ful_retired_1",
+        order_id: "order_retired_1",
+        provider: "retired",
+        provider_shipment_id: "retired-1",
+        tracking_number: "RT123",
+      })
+      const orderId = await order()
+      await post(`/admin/orders/${orderId}/ship`, { notify: false })
+
+      clock += 30 * MINUTE
+      await pollShipments(getContainer(), new Date(clock))
+      const [kept] = await tracking.listTrackedShipments({ id: old.id })
+      const [asked] = await tracking.listTrackedShipments({ order_id: orderId })
+
+      expect(kept).toMatchObject({ status: "created", checked_at: null, tracking_number: "RT123" })
+      expect(asked?.checked_at).not.toBeNull()
     })
   },
 })

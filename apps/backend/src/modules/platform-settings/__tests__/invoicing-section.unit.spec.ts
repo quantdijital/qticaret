@@ -1,5 +1,6 @@
 import { fakeVkn, seededRandom } from "@qticaret/testing"
 import { SECTIONS, mergePatch } from "../sections"
+import { parseStored } from "../sections/stored"
 
 const messages = (result: { success: boolean; error?: { issues: { message: string }[] } }) =>
   result.error?.issues.map((issue) => issue.message) ?? []
@@ -56,5 +57,12 @@ describe("invoicing section (F8, adr/0034 §1)", () => {
     expect(patch.safeParse({ carriers: { mng: { title: "Kargo", tax_id: vkn } } }).success).toBe(
       false
     )
+  })
+
+  it("drops a carrier no longer offered from a stored row and keeps the others", () => {
+    const aras = { title: "Örnek Kargo A.Ş.", tax_id: vkn }
+    const stored = { ...defaults, carriers: { aras, retired: { title: "Eski", tax_id: vkn } } }
+
+    expect(parseStored("invoicing", stored)["carriers"]).toEqual({ aras })
   })
 })

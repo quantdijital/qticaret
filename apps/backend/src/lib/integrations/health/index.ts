@@ -3,7 +3,6 @@ import type { CredentialProviderName } from "../../../modules/integration-creden
 import { createHealthMonitor } from "./health"
 import type { IntegrationHealthCheck } from "./health"
 import { arasHealthCheck } from "./aras-check"
-import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { netgsmHealthCheck } from "./netgsm-check"
@@ -20,7 +19,6 @@ export type {
   IntegrationHealthCheck,
 } from "./health"
 export { arasHealthCheck } from "./aras-check"
-export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
 export { netgsmHealthCheck } from "./netgsm-check"
@@ -40,7 +38,6 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
   return [
     paytrHealthCheck(() => accounts.read("paytr")),
     iyzicoHealthCheck(() => accounts.read("iyzico")),
-    geliverHealthCheck(() => accounts.read("geliver")),
     arasHealthCheck(() => accounts.read("aras")),
     yurticiHealthCheck(() => accounts.read("yurtici")),
     netgsmHealthCheck(() => accounts.read("netgsm")),

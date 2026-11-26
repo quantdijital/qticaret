@@ -29,8 +29,6 @@ export interface ProviderAccount<Settings = Record<string, unknown>> {
 
 export type PaytrAccount = ProviderAccount<{ merchant_id: string; test_mode: boolean }>
 export type IyzicoAccount = ProviderAccount<{ test_mode: boolean }>
-/** Geliver (F7, adr/0031): one API token; test shipments are a flag, not another account. */
-export type GeliverAccount = ProviderAccount<{ test_mode: boolean }>
 /** Aras Kargo on the shop's own contract (adr/0035). */
 export type ArasAccount = ProviderAccount<{
   test_mode: boolean

@@ -69,10 +69,11 @@ describe("shipping options, edited in their rows (F7.8)", () => {
     })
   })
 
-  it("starts a Geliver option on its cheapest quote, with no amount asked", async () => {
-    wrap(<ShippingOptionEditor carrier="geliver" onDone={vi.fn()} />)
+  it("starts a contract carrier's option on a flat price, its table one pick away", async () => {
+    wrap(<ShippingOptionEditor carrier="yurtici" onDone={vi.fn()} />)
 
-    expect(screen.queryByLabelText(/^Tutar/)).not.toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "Ücret" })).toHaveTextContent("Sabit ücret")
+    await userEvent.type(screen.getByLabelText(/^Tutar/), "79")
     await userEvent.click(screen.getByRole("button", { name: "Ek seçenek ekle" }))
 
     await waitFor(() => {
@@ -80,8 +81,8 @@ describe("shipping options, edited in their rows (F7.8)", () => {
         method: "POST",
         body: {
           name: "Standart kargo",
-          carrier: "geliver",
-          pricing: { type: "quote", choice: "cheapest" },
+          carrier: "yurtici",
+          pricing: { type: "flat", amount: 79 },
         },
       })
     })

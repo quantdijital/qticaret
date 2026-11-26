@@ -16,18 +16,17 @@ export const SHOP_FLAT_OPTION = "shop-flat"
 export const isOwnDelivery = (providerId: string | null | undefined): boolean =>
   providerId === MANUAL_FULFILLMENT_PROVIDER_ID || providerId === SHOP_FULFILLMENT_PROVIDER_ID
 
-/** Geliver as Medusa's fulfillment module names it: `<identifier>_<id>` from medusa-config. */
-export const GELIVER_FULFILLMENT_PROVIDER_ID = "geliver_geliver"
-
 /** The shop's own carrier contracts (adr/0035). */
 export const ARAS_FULFILLMENT_PROVIDER_ID = "aras_aras"
 export const YURTICI_FULFILLMENT_PROVIDER_ID = "yurtici_yurtici"
 
-/** A carrier we open shipments with: an aggregator (Geliver) or the shop's own contract. */
-export type CarrierName = "geliver" | "aras" | "yurtici"
+/** A carrier we open shipments with: the shop's own contract. */
+export type CarrierName = "aras" | "yurtici"
+
+/** The carriers we open shipments with, as tracked parcels name them. */
+export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici"]
 
 const CARRIERS: Readonly<Record<string, CarrierName>> = {
-  [GELIVER_FULFILLMENT_PROVIDER_ID]: "geliver",
   [ARAS_FULFILLMENT_PROVIDER_ID]: "aras",
   [YURTICI_FULFILLMENT_PROVIDER_ID]: "yurtici",
 }
@@ -38,20 +37,13 @@ export const CARRIER_PROVIDERS: readonly string[] = Object.keys(CARRIERS)
 export const isCarrierProvider = (providerId: string | null | undefined): boolean =>
   CARRIER_PROVIDERS.includes(providerId ?? "")
 
-/** The carrier behind a fulfillment provider; null for the shop's own parcels (manual). */
+/**
+ * The carrier behind a fulfillment provider; null for the shop's own
+ * parcels (manual) and for a provider no longer registered (an old
+ * parcel's, read only).
+ */
 export const carrierOf = (providerId: string | null | undefined): CarrierName | null =>
   CARRIERS[providerId ?? ""] ?? null
-
-// Geliver names the carrier it bought the label from by code
-const GELIVER_CARRIERS: Readonly<Record<string, string>> = {
-  ARAS: "Aras Kargo",
-  YURTICI: "Yurtiçi Kargo",
-  MNG: "MNG Kargo",
-  PTT: "PTT Kargo",
-  SURAT: "Sürat Kargo",
-  HEPSIJET: "HepsiJet",
-  KOLAYGELSIN: "Kolay Gelsin",
-}
 
 /**
  * The carrier a parcel went with, as a shopper reads it: an integration's,
@@ -60,7 +52,6 @@ const GELIVER_CARRIERS: Readonly<Record<string, string>> = {
  */
 export function carrierNameOf(
   providerId: string | null | undefined,
-  data: Record<string, unknown> | null | undefined,
   metadata?: Record<string, unknown> | null
 ): string | null {
   const named = metadata?.["qt_carrier_name"]
@@ -69,10 +60,6 @@ export function carrierNameOf(
       return "Aras Kargo"
     case "yurtici":
       return "Yurtiçi Kargo"
-    case "geliver": {
-      const code = data?.["provider_code"]
-      return typeof code === "string" ? (GELIVER_CARRIERS[code.toUpperCase()] ?? code) : null
-    }
     case null:
       return typeof named === "string" && named !== "" ? named : null
   }
@@ -115,11 +102,6 @@ const shipAddress = z.object({
 })
 
 export const shipInput = z.object({
-  /**
-   * Geliver's sender address for the warehouse; null: the account's default
-   * sender (Geliver's own), and for a contract carrier, which knows the shop.
-   */
-  sender_address_id: z.string().min(1).nullable(),
   /** Kuruş the courier collects at the door (adr/0029); null when paid already. */
   cash_on_delivery: z.number().int().positive().nullable(),
   /**

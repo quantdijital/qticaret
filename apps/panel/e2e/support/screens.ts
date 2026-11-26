@@ -73,7 +73,6 @@ export const SETTINGS = [
   "/settings/payments/bank_transfer",
   "/settings/payments/cash_on_delivery",
   "/settings/shipping",
-  "/settings/shipping/geliver",
   "/settings/shipping/aras",
   "/settings/shipping/yurtici",
   "/settings/notifications",

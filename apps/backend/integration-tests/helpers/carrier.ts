@@ -1,7 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { createShippingOptionsWorkflow } from "@medusajs/medusa/core-flows"
-import type { FakeGeliver } from "@qticaret/testing"
+import { Modules } from "@medusajs/framework/utils"
+import type { FakeAras } from "@qticaret/testing"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "./admin"
@@ -10,9 +9,15 @@ import { settle } from "./http"
 import { PAYTR_ADDRESS } from "./paytr"
 import { stockShop, stockedProduct } from "./stock"
 import type { StockShop } from "./stock"
+import { loadTrAddressFixture } from "./tr-address"
 
-/** A shop shipping with Geliver (F7, adr/0031): its account, a contact, a calculated option. */
-export interface GeliverShop {
+/**
+ * A shop shipping on its own Aras contract (adr/0035), the carrier the
+ * shipping, return and invoice tests ship with: its account connected
+ * against the fake, a contact, and an Aras option priced as asked (60 TL
+ * flat unless told).
+ */
+export interface CarrierShop {
   shop: StockShop
   admin: { headers: Record<string, string> }
   optionId: string
@@ -20,8 +25,10 @@ export interface GeliverShop {
   variantId: string
 }
 
+export type CarrierPricing = { type: "flat"; amount: number } | { type: "table" }
+
 /** A stocked product, with the measures a carrier prices by unless `measured` is false. */
-export async function geliverProduct(
+export async function measuredProduct(
   container: MedusaContainer,
   shop: StockShop,
   measured = true
@@ -41,58 +48,57 @@ export async function geliverProduct(
   return variantId
 }
 
-export async function geliverShop(
+/** Connects the shop's Aras account against the fake (test mode). */
+export const connectAras = (http: HttpClient, fake: FakeAras, headers: Record<string, string>) =>
+  settle(
+    http.post<{ message?: string }>(
+      "/admin/integrations/credentials/aras",
+      {
+        settings: { test_mode: true, customer_code: "123456", service_url: "" },
+        secrets: { username: fake.account.username, password: fake.account.password },
+      },
+      { headers }
+    )
+  )
+
+export async function carrierShop(
   http: HttpClient,
   container: MedusaContainer,
-  fake: FakeGeliver
-): Promise<GeliverShop> {
+  fake: FakeAras,
+  pricing: CarrierPricing = { type: "flat", amount: 60 }
+): Promise<CarrierShop> {
+  await loadTrAddressFixture(container)
   const shop = await stockShop(container)
   const admin = await createAdminUser(http, container)
-  await http.post(
-    "/admin/integrations/credentials/geliver",
-    { settings: { test_mode: true }, secrets: { api_token: fake.token } },
-    { headers: admin.headers }
-  )
+  await ensureLocationCarriers(container)
+  await connectAras(http, fake, admin.headers)
   await http.post(
     "/admin/platform-settings/store",
     { contact_email: "magaza@example.com" },
     { headers: admin.headers }
   )
-  await ensureLocationCarriers(container)
-  const { data: options } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "shipping_option",
-    fields: ["service_zone_id"],
-    filters: { id: shop.shippingOptionId },
-  })
-  const { result } = await createShippingOptionsWorkflow(container).run({
-    input: [
-      {
-        name: "Geliver",
-        price_type: "calculated",
-        provider_id: "geliver_geliver",
-        service_zone_id: (options[0] as { service_zone_id: string }).service_zone_id,
-        shipping_profile_id: shop.shippingProfileId,
-        data: { id: "geliver-cheapest" },
-        type: { label: "Geliver", description: "Geliver", code: "geliver" },
-        rules: [
-          { attribute: "enabled_in_store", operator: "eq", value: "true" },
-          { attribute: "is_return", operator: "eq", value: "false" },
-        ],
-      },
-    ],
-  })
+  const created = await settle(
+    http.post<{ id: string; message?: string }>(
+      "/admin/shipping-setup/options",
+      { name: "Aras Kargo", carrier: "aras", pricing },
+      { headers: admin.headers }
+    )
+  )
+  if (!created.data.id) {
+    throw new Error(`no Aras option: ${created.data.message ?? String(created.status)}`)
+  }
   return {
     shop,
     admin,
-    optionId: result[0]?.id ?? "",
-    variantId: await geliverProduct(container, shop),
+    optionId: created.data.id,
+    variantId: await measuredProduct(container, shop),
   }
 }
 
-/** An order of `variantId` (one unit, unless told), shipped with the Geliver option, paid with the system provider. */
-export const geliverOrder = (
+/** An order of `variantId` (one unit, unless told), shipped with the Aras option, paid with the system provider. */
+export const carrierOrder = (
   container: MedusaContainer,
-  setup: GeliverShop,
+  setup: CarrierShop,
   variantId = setup.variantId,
   quantity = 1
 ) =>
@@ -105,7 +111,7 @@ export const geliverOrder = (
   })
 
 /** "Kargoya ver" from the panel. */
-export const shipOrder = (http: HttpClient, setup: GeliverShop, orderId: string) =>
+export const shipOrder = (http: HttpClient, setup: CarrierShop, orderId: string) =>
   settle(
     http.post<{ order_id: string; carrier: string | null; message?: string }>(
       `/admin/orders/${orderId}/ship`,

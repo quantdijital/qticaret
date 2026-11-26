@@ -105,7 +105,6 @@ const NEVER_CLOSED = [
   "POST /auth/user/emailpass/register",
   "POST /hooks/paytr",
   "POST /hooks/iyzico/callback",
-  "POST /hooks/geliver",
   "POST /hooks/resend",
   "POST /hooks/control-plane/plan",
   "POST /unsubscribe",

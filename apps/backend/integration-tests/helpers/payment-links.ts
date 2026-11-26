@@ -112,8 +112,8 @@ export const nameStaff = (
 ) => container.resolve(Modules.USER).updateUsers({ id, first_name: firstName, last_name: lastName })
 
 /**
- * A carrier-priced (`calculated`) option in the seed's zone, as the
- * Geliver shop helper makes one: its price comes from the carrier for a cart.
+ * A parcel-priced (`calculated`) option in the seed's zone: Aras by the
+ * shop's desi table (adr/0035), priced for a cart's lines.
  */
 export async function carrierOption(container: MedusaContainer, shop: StockShop): Promise<string> {
   await ensureLocationCarriers(container)
@@ -125,13 +125,13 @@ export async function carrierOption(container: MedusaContainer, shop: StockShop)
   const { result } = await createShippingOptionsWorkflow(container).run({
     input: [
       {
-        name: "Geliver",
+        name: "Aras Kargo",
         price_type: "calculated",
-        provider_id: "geliver_geliver",
+        provider_id: "aras_aras",
         service_zone_id: (data[0] as { service_zone_id: string }).service_zone_id,
         shipping_profile_id: shop.shippingProfileId,
-        data: { id: "geliver-cheapest" },
-        type: { label: "Geliver", description: "Geliver", code: "geliver" },
+        data: { id: "aras-table" },
+        type: { label: "Aras Kargo", description: "Aras Kargo", code: "aras" },
         rules: [
           { attribute: "enabled_in_store", operator: "eq", value: "true" },
           { attribute: "is_return", operator: "eq", value: "false" },

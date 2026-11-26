@@ -358,24 +358,6 @@ describe("parseEnv", () => {
     ).toContain("IYZICO_BASE_URL: is allowed on development and test only")
   })
 
-  it("lets a fake Geliver address on a developer's machine only", () => {
-    const fake = { GELIVER_BASE_URL: "http://127.0.0.1:9103/api/v1" }
-
-    expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).GELIVER_BASE_URL).toBe(
-      fake.GELIVER_BASE_URL
-    )
-    expect(
-      errorOf({
-        ...validEnv,
-        ...s3Env,
-        ...fake,
-        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
-        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
-        NODE_ENV: "production",
-      })
-    ).toContain("GELIVER_BASE_URL: is allowed on development and test only")
-  })
-
   it("sends e-mail through Mailpit on a developer's machine only, and through Resend with its key", () => {
     const mailpit = {
       EMAIL_TRANSPORT: "mailpit",
@@ -484,7 +466,6 @@ describe("parseEnv", () => {
   it.each([
     "PAYTR_BASE_URL",
     "IYZICO_BASE_URL",
-    "GELIVER_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
     "RESEND_BASE_URL",

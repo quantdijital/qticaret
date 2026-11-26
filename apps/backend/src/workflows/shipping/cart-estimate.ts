@@ -4,7 +4,6 @@ import { estimateShipping, primaryOptionOf } from "../../lib/shipping/estimate"
 import type { EstimatePricer, ShippingEstimate } from "../../lib/shipping/estimate"
 import {
   ARAS_FULFILLMENT_PROVIDER_ID,
-  GELIVER_FULFILLMENT_PROVIDER_ID,
   SHOP_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
@@ -40,9 +39,8 @@ const TABLE: EstimatePricer<CartLine> = { basis: "parcel", price: tableBaseOf }
  * same keys its provider's `calculatePrice` chooses on (adr/0087 §2;
  * security review 2026-11-26: never a figure checkout would not charge):
  * our shop provider's flat amount; Aras and Yurtiçi their `-flat` amount,
- * else the shop's desi table; Geliver's `geliver-table` the table. Geliver's
- * quote and an option Medusa prices itself are the checkout's to say: no
- * carrier is called from a cart page.
+ * else the shop's desi table. An option Medusa prices itself is the
+ * checkout's to say: no carrier is called from a cart page.
  */
 export function pricerOf(option: OptionRow | null): EstimatePricer<CartLine> | null {
   if (option?.price_type !== "calculated") {
@@ -57,8 +55,6 @@ export function pricerOf(option: OptionRow | null): EstimatePricer<CartLine> | n
       return id === "aras-flat" ? flat(data) : TABLE
     case YURTICI_FULFILLMENT_PROVIDER_ID:
       return id === "yurtici-flat" ? flat(data) : TABLE
-    case GELIVER_FULFILLMENT_PROVIDER_ID:
-      return id === "geliver-table" ? TABLE : null
     default:
       return null
   }

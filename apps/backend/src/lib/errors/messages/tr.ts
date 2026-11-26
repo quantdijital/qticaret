@@ -551,20 +551,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Teslimat adresinde il ya da ilçe yok; kargo firması gönderiyi bunlarla yönlendiriyor. Sipariş sayfasından teslimat adresini tamamlayın.",
   "shipping.receiver_phone_missing":
     "Teslimat adresinde kuryenin arayabileceği bir telefon (alan koduyla 10 hane) yok; fatura adresinde ve müşteri hesabında da bulunamadı. Sipariş sayfasından teslimat adresine telefon ekleyin.",
-  "shipping.sender_address_incomplete":
-    "Deponun adresi kargo için eksik ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_location_missing":
-    "Gönderinin çıkacağı depo belirlenemedi ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan varsayılan depoyu seçin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
-  "shipping.sender_address_missing":
-    "Deponun açık adresi (mahalle, cadde, sokak, numara) girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_place_missing":
-    "Deponun Türkiye'deki il ya da ilçesi girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
-  "shipping.sender_postal_missing":
-    "Deponun posta kodu girilmemiş, adres verisinden de bulunamadı (mahalle seçili değil); Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan posta kodunu ya da mahalleyi girin.",
-  "shipping.sender_phone_missing":
-    "Deponun ve mağazanın telefonu girilmemiş; Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan deponun ya da Ayarlar > Mağaza'dan mağazanın telefonunu girin.",
-  "shipping.sender_contact_missing":
-    "Mağazanın iletişim e-postası girilmemiş (Geliver gönderici için istiyor) ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Mağaza'dan e-postayı ekleyin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
   "shipping.fulfillment_invalid": "Etiketi istenen gönderi geçerli değil.",
   "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
   "aras.merchant_invalid":
@@ -948,10 +934,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "yurtici.cod_account_missing":
     "Kapıda ödemeli siparişi Yurtiçi Kargo ile göndermek için tahsilatlı teslimat hesabı gerekir. Ayarlar > Kargo > Yurtiçi Kargo'dan girin.",
-  "geliver.merchant_invalid":
-    "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
-  "geliver.secret_invalid":
-    "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":
@@ -1421,7 +1403,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
   "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
   "orders.test_payment_not_shippable":
-    "Bu sipariş test modunda ödendi, gerçek para alınmadı: yalnızca test modundaki bir kargo firmasıyla (Aras, Yurtiçi, Geliver) gönderilebilir. Bu siparişin kargo seçeneği kendi gönderiminiz ya da canlı moddaki bir firma.",
+    "Bu sipariş test modunda ödendi, gerçek para alınmadı: yalnızca test modundaki bir kargo firmasıyla (Aras, Yurtiçi) gönderilebilir. Bu siparişin kargo seçeneği kendi gönderiminiz ya da canlı moddaki bir firma.",
   "paytr.refund_locked":
     "PayTR şu an bu ödemenin iadesini kabul etmiyor (hesap kesimi sürüyor); biraz sonra tekrar deneyin.",
   "paytr.refund_exceeds_payment": "İade tutarı ödemeden kalanı aşıyor.",

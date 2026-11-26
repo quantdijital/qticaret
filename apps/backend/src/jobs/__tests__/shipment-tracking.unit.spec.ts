@@ -1,6 +1,5 @@
 import type * as Job from "../shipment-tracking"
 
-jest.mock("../../workflows/returns/handover", () => ({ pollReturnHandovers: jest.fn() }))
 jest.mock("../../workflows/shipping/refresh-shipment", () => ({
   refreshShipmentWorkflow: jest.fn(),
 }))

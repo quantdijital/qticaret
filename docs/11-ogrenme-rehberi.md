@@ -10,7 +10,7 @@
 Birçok farklı mağazaya (müşteri = **tenant**) e-ticaret altyapısı sağlıyoruz. Her mağazaya kendi
 "dükkanı" kurulur: ayrı bir Medusa sunucusu ve ayrı veritabanı (**instance-per-tenant**). Mağaza sahibi
 ürünlerini **Admin panel**den yönetir, müşteriler ileride **Storefront** (vitrin sitesi) üzerinden alışveriş
-yapar. Ödeme (iyzico/PayTR), kargo (Geliver), e-fatura, SMS/e-posta gibi dış servisleri biz bağlarız ama
+yapar. Ödeme (iyzico/PayTR), kargo (Aras, Yurtiçi), e-fatura, SMS/e-posta gibi dış servisleri biz bağlarız ama
 hesaplar mağazanın kendisine aittir. Kod hiçbir sektöre özel değildir; bıçak satan da giyim satan da
 aynı kodu kullanır, farkı **ayarlar** (feature flag + attribute şablonu) belirler.
 
@@ -36,7 +36,7 @@ ama faturayı kiracı kendi adına ödüyor.
           └───┬───────────┬──────────────┬──────────────────────┘
               ▼           ▼              ▼
          PostgreSQL     Redis        S3 (SeaweedFS)      Dış servisler:
-         (kalıcı veri)  (kuyruk,     (görsel, PDF)       iyzico, PayTR, Geliver,
+         (kalıcı veri)  (kuyruk,     (görsel, PDF)       iyzico, PayTR, Aras/Yurtiçi,
                         cache, kilit)                    e-fatura, SMS, e-posta
 ```
 
@@ -118,7 +118,7 @@ yapı ileride **Control Plane** (F17) olacak.
 |---|---|---|
 | **Jest / Vitest** | Unit | Tek fonksiyon: tutar dönüşümü, imza hesabı, desi |
 | **Medusa test-utils** | Entegrasyon | `moduleIntegrationTestRunner` (modül + gerçek DB), `medusaIntegrationTestRunner` (HTTP isteğinden veritabanına tüm yol) |
-| **Mock sunucu / msw** | — | iyzico, Geliver vb.'nin sahtesi; testlerde gerçek servise asla gidilmez |
+| **Mock sunucu / msw** | — | iyzico, Aras vb.'nin sahtesi; testlerde gerçek servise asla gidilmez |
 | **Contract test** | Sözleşme | iyzico ve PayTR aynı test paketinden geçer → yer değiştirilebilir oldukları kanıtlanır |
 | **Playwright** | E2E | Gerçek tarayıcıda admin'i tıklayarak test |
 | **axe** | Erişilebilirlik | Kontrast, klavye, ekran okuyucu uyumu |
@@ -203,7 +203,7 @@ Yukarıdan aşağı çağrılır; aşağıdakiler yukarıyı bilmez.
 ### Kargo
 | Terim | Açıklama |
 |---|---|
-| **Geliver** | Birden çok kargo firmasını tek API'de toplayan aracı (aggregator) |
+| **Kargo aracısı (aggregator)** | Birden çok kargo firmasını tek API'de toplayan aracı (ör. Geliver; 2026-11-26 projeden kaldırıldı, doğrudan Aras/Yurtiçi kullanılır) |
 | **Desi** | Hacimsel ağırlık: (en × boy × yükseklik) / 3000. Ağırlıkla kıyaslanır, büyüğü ücretlendirilir |
 | **Etiket** | Kolinin üstüne yapıştırılan barkodlu PDF |
 | **Takip no / tracking** | Kargonun izlendiği numara |
@@ -304,9 +304,9 @@ Yukarıdan aşağı çağrılır; aşağıdakiler yukarıyı bilmez.
    → **idempotency** kontrolü → `cart complete` **workflow**'u çalışır → sipariş oluşur.
 4. Sistem `order.placed` **event**'ini yayınlar (Redis event bus).
 5. **Subscriber**'lar duyar: e-posta/SMS bildirim workflow'u (worker'da), yasal onay snapshot'ı siparişe bağlanır.
-6. Depo çalışanı Admin'den **Gönderi** oluşturur → **Geliver provider** etiket alır → PDF **S3**'e →
+6. Depo çalışanı Admin'den **Gönderi** oluşturur → **taşıyıcı provider'ı** (Aras/Yurtiçi) etiket alır → PDF **S3**'e →
    takip no kaydedilir. Bir adım patlarsa **compensation** gönderiyi iptal eder.
-7. Geliver **webhook** ile durum güncellemesi gönderir (gelmezse **job** ile polling) → müşteriye bildirim.
+7. **Job** taşıyıcıya periyodik sorgu atar (polling), durum güncellenir → müşteriye bildirim.
 8. Kargoya verilince **e-fatura workflow**'u: mükellef sorgusu → e-Fatura/e-Arşiv → entegratör →
    başarısızsa **retry**, sonunda **dead-letter** + admin uyarısı.
 9. Her adım **pino** ile loglanır (TCKN maskeli, anahtarlar redakte), **Sentry** hataları yakalar.
@@ -345,7 +345,7 @@ Yukarıdan aşağı çağrılır; aşağıdakiler yukarıyı bilmez.
 | "Bu fazın bitme şartı ne?" | `docs/03-yol-haritasi.md` → **KK** listesi | `/faz-baslat F#` |
 | "Bunu neden böyle yaptık?" | `adr/` | Yoksa yeni ADR yaz (`adr/0000-sablon.md`) |
 | Medusa API'si nasıl kullanılır? | Claude → Context7 / `medusa-researcher` ajanı | docs.medusajs.com, Medusa GitHub/Discord |
-| iyzico / PayTR / Geliver davranışı | `docs/entegrasyonlar/*.md` | Sağlayıcının resmi dokümanı, sandbox, teknik destek |
+| iyzico / PayTR / Aras / Yurtiçi davranışı | `docs/entegrasyonlar/*.md` | Sağlayıcının resmi dokümanı, sandbox, teknik destek |
 | Test kırıldı | Test çıktısının son satırları | `/test-yaz`, `test-writer` ajanı |
 | CI kırmızı | GitHub → Actions → hatalı adımın logu | Lokal'de aynı komutu çalıştır (`pnpm lint`/`typecheck`) |
 | Ödeme/kargo/fatura/auth kodu değişti | `/guvenlik-review` | `security-reviewer` ajanı (zorunlu) |
@@ -403,7 +403,7 @@ olarak yaz, sonra sor.
 | F4 | Fiyat ve promosyon | Fiyat listesi, fiyat geçmişi, kupon, kampanya kuralları, oransal indirim dağıtımı |
 | F5 | PayTR + iyzico + ortak ödeme altyapısı | Payment provider, HMAC, sunucudan sunucuya bildirim, callback + yanıt imzası, idempotency, uzlaştırma, kısmi ve kalem bazlı iade |
 | F6 | Havale + kapıda ödeme + yönlendirici | Contract test, yedek sağlayıcı, manuel onaylı ödeme, ters ibraz |
-| F7 | Geliver + iade yönetimi | Fulfillment provider, desi, webhook + polling, RMA |
+| F7 | Kargo (Aras, Yurtiçi; Geliver 2026-11-26 kaldırıldı) + iade yönetimi | Fulfillment provider, desi, webhook + polling, RMA |
 | F8 | E-fatura | Adapter deseni, retry, dead-letter |
 | F9 | Bildirimler | Notification provider, şablon, İYS, SPF/DKIM/DMARC |
 | F10 | Müşteri ve pazarlama | Auth provider, yorum moderasyonu, feed, Conversions API |

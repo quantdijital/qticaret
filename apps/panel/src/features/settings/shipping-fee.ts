@@ -15,8 +15,8 @@ import type {
  * - threshold: the main option's flat fee, free from a basket total
  *   (`promotions.free_shipping_threshold`, every option, adr/0087 §2.5);
  * - flat: the main option's flat fee, no threshold;
- * - carrier: the main option priced by the shop's desi table or Geliver's
- *   quote, a threshold optional;
+ * - carrier: the main option priced by the shop's desi table for its
+ *   contract carrier, a threshold optional;
  * - with a threshold, its condition ("Koşul"): the total alone, the total
  *   or a free shipping coupon, or both (`promotions.free_shipping_condition`);
  * - custom: stored data one answer cannot say (a free main option while a
@@ -26,13 +26,7 @@ export type FeeMode = "free" | "threshold" | "flat" | "carrier"
 export const FEE_MODES: readonly FeeMode[] = ["free", "threshold", "flat", "carrier"]
 
 /** Where a carrier-priced main option's price comes from. */
-export const CARRIER_PRICINGS = [
-  "aras-table",
-  "yurtici-table",
-  "geliver-cheapest",
-  "geliver-fastest",
-  "geliver-table",
-] as const
+export const CARRIER_PRICINGS = ["aras-table", "yurtici-table"] as const
 export type CarrierPricing = (typeof CARRIER_PRICINGS)[number]
 
 /** One answer, in lira: the fee (below the threshold, or for every order) and the threshold. */
@@ -77,14 +71,8 @@ export function primaryOf(
   return flats[0] ?? delivering[0] ?? null
 }
 
-/** A carrier-priced option's source, or null for a flat one. */
+/** A carrier-priced option's source, or null for a flat one (or one the panel does not know). */
 export function carrierPricingOf(option: ShopShippingOption): CarrierPricing | null {
-  if (option.pricing === "flat") {
-    return null
-  }
-  if (option.carrier === "geliver") {
-    return `geliver-${option.pricing}`
-  }
   if ((option.carrier === "aras" || option.carrier === "yurtici") && option.pricing === "table") {
     return `${option.carrier}-table`
   }
@@ -114,6 +102,10 @@ export function detectFee(
   const carrier = carrierPricingOf(primary)
   if (carrier) {
     return { mode: "carrier", primary, extras, choice: { ...start, mode: "carrier", carrier } }
+  }
+  if (primary.pricing !== "flat") {
+    // Priced by a carrier the panel no longer offers (an old option): the list edits it
+    return { mode: "custom", primary, extras: [...options], choice: start }
   }
   const fee = amountOf(primary)
   if (fee === 0) {
@@ -170,15 +162,8 @@ type FlatCarrier = "manual" | "aras" | "yurtici"
 const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici"]
 
 function carrierBody(name: string, source: CarrierPricing): NewShippingOption {
-  const [carrier, kind] = source.split("-") as ["aras" | "yurtici" | "geliver", string]
-  return {
-    name,
-    carrier,
-    pricing:
-      kind === "table"
-        ? { type: "table" }
-        : { type: "quote", choice: kind as "cheapest" | "fastest" },
-  }
+  const carrier = source === "aras-table" ? "aras" : "yurtici"
+  return { name, carrier, pricing: { type: "table" } }
 }
 
 /**

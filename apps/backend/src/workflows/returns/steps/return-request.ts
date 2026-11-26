@@ -1,18 +1,11 @@
-import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
-import { geliverApi, geliverCredentialsOf } from "../../../lib/shipping/geliver"
-import { downloadLabel } from "../../../lib/shipping/geliver/labels"
-import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
-import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 import type { ExchangeLine } from "../../../lib/orders/exchanges"
 import type { ReturnKind, ReturnStatus } from "../../../modules/return-requests/states"
-import { SHIPMENT_TRACKING_MODULE } from "../../../modules/shipment-tracking"
-import type ShipmentTrackingModuleService from "../../../modules/shipment-tracking/service"
 
 // Query may hand dates back as Date objects: compared by time, not by text
 const timeOf = (value: unknown): number =>
@@ -132,131 +125,6 @@ export const updateReturnRequestStep = createStep(
   async (previous, { container }) => {
     if (previous) {
       await requests(container).updateReturnRequests(previous)
-    }
-  }
-)
-
-const geliverAccount = async (container: Pick<MedusaContainer, "resolve">) =>
-  geliverCredentialsOf(
-    await container
-      .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-      .read("geliver")
-  )
-
-type Parcel = Awaited<ReturnType<ShipmentTrackingModuleService["listTrackedShipments"]>>[number]
-
-/**
- * The Geliver parcel the returned lines left in: the one that carried the
- * most of them, the latest on a tie (security review 2026-10-28: an order
- * in several parcels). Lines from two parcels come back on one label,
- * that of the parcel carrying most of them.
- */
-async function parcelOfLines(
-  container: Pick<MedusaContainer, "resolve">,
-  orderId: string,
-  lines: readonly { line_item_id: string; quantity: number }[]
-): Promise<Parcel | null> {
-  const parcels = await container
-    .resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
-    .listTrackedShipments(
-      { order_id: orderId, provider: "geliver", status: { $ne: "canceled" } },
-      { order: { created_at: "DESC" } }
-    )
-  if (parcels.length <= 1) {
-    return parcels[0] ?? null
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "fulfillment",
-    fields: ["id", "items.line_item_id", "items.quantity"],
-    filters: { id: parcels.map((parcel) => parcel.fulfillment_id) },
-  })
-  const wanted = new Map(lines.map((line) => [line.line_item_id, line.quantity]))
-  const carried = new Map(
-    (
-      data as {
-        id: string
-        items?: ({ line_item_id?: string | null; quantity?: unknown } | null)[] | null
-      }[]
-    ).map((fulfillment) => [
-      fulfillment.id,
-      (fulfillment.items ?? []).reduce(
-        (sum, item) =>
-          sum + Math.min(Number(item?.quantity) || 0, wanted.get(item?.line_item_id ?? "") ?? 0),
-        0
-      ),
-    ])
-  )
-  // Newest first already: a later parcel wins only by carrying more
-  return parcels.reduce((best, parcel) =>
-    (carried.get(parcel.fulfillment_id) ?? 0) > (carried.get(best.fulfillment_id) ?? 0)
-      ? parcel
-      : best
-  )
-}
-
-/**
- * The carrier's return for an order that went with Geliver (adr/0032): the
- * return of the parcel the lines left in opened and its label bought; its
- * code is what the shopper hands the parcel over with. Nothing for an
- * order the shop shipped itself. Undone by withdrawing the return at
- * Geliver.
- */
-export const openCarrierReturnStep = createStep(
-  "returns-open-carrier-return",
-  async (
-    input: { order_id: string; items: { line_item_id: string; quantity: number }[] },
-    { container }
-  ) => {
-    const parcel = await parcelOfLines(container, input.order_id, input.items)
-    if (!parcel) {
-      return new StepResponse(null, null as string | null)
-    }
-    const account = await geliverAccount(container)
-    if (!account) {
-      throw new ValidationError("shipping.carrier_not_connected")
-    }
-    const answer = await geliverApi().createReturn(account, parcel.provider_shipment_id)
-    const shipment = answer.shipment
-    if (!shipment) {
-      throw new ValidationError("returns.carrier_refused")
-    }
-    return new StepResponse(
-      {
-        shipment_id: shipment.id,
-        code: shipment.barcode ?? shipment.trackingNumber ?? null,
-        label_source: shipment.labelURL ?? null,
-      },
-      shipment.id
-    )
-  },
-  async (shipmentId, { container }) => {
-    const account = shipmentId ? await geliverAccount(container) : null
-    if (shipmentId && account) {
-      await geliverApi().cancelShipment(account, shipmentId)
-    }
-  }
-)
-
-/** The return label in private storage (it holds the shopper's address); undone by removing it. */
-export const storeReturnLabelStep = createStep(
-  "returns-store-label",
-  async (input: { source: string | null }, { container }) => {
-    if (!input.source) {
-      return new StepResponse(null, null as string | null)
-    }
-    const pdf = await downloadLabel(input.source)
-    const upload = await container.resolve(Modules.FILE).getUploadStream({
-      filename: `iade-etiket-${randomUUID()}.pdf`,
-      mimeType: "application/pdf",
-      access: "private",
-    })
-    upload.writeStream.end(pdf)
-    await upload.promise
-    return new StepResponse(upload.fileKey, upload.fileKey)
-  },
-  async (fileKey, { container }) => {
-    if (fileKey) {
-      await container.resolve(Modules.FILE).deleteFiles(fileKey)
     }
   }
 )

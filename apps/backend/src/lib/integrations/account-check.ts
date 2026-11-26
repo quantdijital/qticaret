@@ -5,7 +5,6 @@ import type { CredentialProviderName } from "../../modules/integration-credentia
 import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 import { arasApi, arasCredentialsOf } from "../shipping/aras"
-import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
@@ -50,10 +49,6 @@ const CHECKERS = {
   iyzico: async (account, signal) => {
     const credentials = iyzicoCredentialsOf(account)
     return credentials ? iyzicoApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
-  },
-  geliver: async (account, signal) => {
-    const credentials = geliverCredentialsOf(account)
-    return credentials ? geliverApi().checkCredentials(credentials, { signal }) : "secret_invalid"
   },
   aras: async (account, signal) => {
     const credentials = arasCredentialsOf(account)
@@ -176,8 +171,6 @@ export async function checkAccount(
 export const CHECK_FIELDS = {
   paytr: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.merchant_key" },
   iyzico: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.secret_key" },
-  // One token: whatever Geliver refuses is the token
-  geliver: { merchant_invalid: "secrets.api_token", secret_invalid: "secrets.api_token" },
   // A refused login is the user name or the password; the panel points at the password
   aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
   // The main login, or the door account's (see its checker)

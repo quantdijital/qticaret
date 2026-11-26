@@ -1,15 +1,13 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createInventoryLevelsWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
-import { SHIPMENT_TRACKING_MODULE } from "../../src/modules/shipment-tracking"
-import type ShipmentTrackingModuleService from "../../src/modules/shipment-tracking/service"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -36,8 +34,8 @@ interface Request {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let customer: TestCustomer
     let sizes: Record<Size, string>
     let clock = Date.now()
@@ -93,9 +91,9 @@ medusaIntegrationTestRunner({
       })
       return Object.fromEntries(rows.map((row) => [row.title, row.id])) as Record<Size, string>
     }
-    /** A shirt of `size` the customer bought, paid, shipped with Geliver and delivered. */
+    /** A shirt of `size` the customer bought, paid, shipped with Aras and delivered. */
     const delivered = async (size: Size) => {
-      const orderId = await geliverOrder(getContainer(), setup, sizes[size])
+      const orderId = await carrierOrder(getContainer(), setup, sizes[size])
       await getContainer()
         .resolve(Modules.ORDER)
         .updateOrders(orderId, { customer_id: customer.id })
@@ -160,18 +158,18 @@ medusaIntegrationTestRunner({
       ).data.return_requests[0]
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
       sizes = await shirt()
       customer = await registerCustomer(http, await createStorefront(getContainer()))
     })
@@ -196,7 +194,8 @@ medusaIntegrationTestRunner({
 
       expect(asked.data.return_request).toMatchObject({ kind: "exchange", difference: "0.00" })
       expect(approved.data.return_request).toMatchObject({ status: "approved" })
-      expect(approved.data.return_request.return_code).toEqual(expect.any(String))
+      // No carrier opens a return: the shopper sends the parcel back
+      expect(approved.data.return_request.return_code).toBeNull()
       // The new size is set aside at approval, sent only once the old one is back
       expect(set.reserved).toBe(before.L.reserved + 1)
       expect(early.data.message).toBe("returns.exchange_awaiting_return")
@@ -255,30 +254,6 @@ medusaIntegrationTestRunner({
         status: "refunded",
         refund_amount: "50.00",
       })
-    })
-
-    it("undoes Medusa's exchange when the carrier refuses the return, so it can be approved again", async () => {
-      const { orderId, lineId } = await delivered("M")
-      const before = await stockOf("L")
-      const asked = await swap(orderId, lineId, "L")
-      const id = asked.data.return_request.id
-      const [parcel] = await getContainer()
-        .resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
-        .listTrackedShipments({ order_id: orderId })
-      fake.queue(`POST /shipments/${parcel?.provider_shipment_id ?? ""}`, {
-        status: 400,
-        body: { result: false, code: "RETURN_NOT_ALLOWED" },
-      })
-
-      const refused = await staff(`/admin/return-requests/${id}/approve`)
-      const held = await stockOf("L")
-      const again = await staff<{ return_request: Request }>(`/admin/return-requests/${id}/approve`)
-
-      expect(refused.status).toBeGreaterThanOrEqual(400)
-      // Nothing set aside by the failed approval
-      expect(held.reserved).toBe(before.reserved)
-      expect(again.data.return_request).toMatchObject({ status: "approved" })
-      expect((await stockOf("L")).reserved).toBe(before.reserved + 1)
     })
 
     it("refuses another product's variant, the same size, and a swap naming no size", async () => {

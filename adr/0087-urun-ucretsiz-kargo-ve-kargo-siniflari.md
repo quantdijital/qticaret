@@ -161,3 +161,7 @@ Sahip (#450 sonrası): "Kargo sınıflarına gerek var mı? O kilitli satır ne 
 - **Ayarlar > Kargo > Seçenekler ve ücretler** tek soruyla başlar: "Tüm siparişlerde kargo ücretsiz" / "Belli tutarın üstünde ücretsiz" / "Sabit ücret" / "Kargo firmasının ücreti". Cevap saklanana yazılır: mağazanın **ana seçeneğinin** ücreti (sabit tutar `data.amount`, ya da tablo/teklif) ve `promotions.free_shipping_threshold`. Ana seçenek `shipping.primary_option_id`'dir (platform ayarı, migration yok; yoksa en ucuz sabit ücretli seçenek). "Ücretsiz" eşiği 0 yapmaz, ana seçeneğin tutarını 0 yapar ve eşiği kaldırır: eşik bütün seçeneklere uygulanır (§2.5) ve vitrin "X TL üzeri" der. Tek cevaba sığmayan veri "Özel" görünür ve liste düzenler. Ödemede fiyat yine sunucudadır; istemci tutar göndermez, yalnız mağaza sahibinin ayarını kaydeder.
 - Diğer seçenekler "Ek kargo seçenekleri" altında katlanır; ayrı eşik kartı kalkar.
 - **Kargo sınıfları** kartı Gelişmiş'e iner; hazır "Ücretsiz kargo" sınıfı orada kilitli satır olarak çizilmez. Ürünün Kargo sekmesinde §4'teki sınıf seçimi yerine **"Bu ürünün kargosu ücretsiz"** anahtarı gelir (açık = `free`); küçük sınıf seçimi yalnız mağaza kendi sınıfını tanımladıysa ve anahtar kapalıyken görünür.
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+Geliver projeden çıkarıldı (ADR-0031 ek); "Geliver en uygun / en hızlı" teklif türü de gitti. Yukarıdaki "Geliver" geçen yerler tarihseldir: seçenekler artık yalnız sabit ücretle (`shop_shop`, `-flat`) ya da Aras/Yurtiçi desi tablosuyla fiyatlanır.

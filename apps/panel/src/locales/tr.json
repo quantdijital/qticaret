@@ -33,7 +33,6 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
-      "geliver": "Geliver",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -1337,10 +1336,6 @@
       "carriersTitle": "Kargo hizmetleri",
       "carriersDescription": "Gönderi oluşturma, etiket ve takip bu hizmetler üzerinden yapılır.",
       "carriers": {
-        "geliver": {
-          "name": "Geliver",
-          "description": "Birden çok kargo firmasının teklifini tek hesaptan alır; etiket ve takip Geliver üzerinden."
-        },
         "aras": {
           "name": "Aras Kargo",
           "description": "Mağazanın kendi Aras Kargo sözleşmesiyle gönderi, etiket ve takip. Bilgiler Aras'ın verdiği entegrasyon belgesinde."
@@ -1349,29 +1344,6 @@
           "name": "Yurtiçi Kargo",
           "description": "Mağazanın kendi Yurtiçi Kargo sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler Yurtiçi'nin verdiği web servis belgesinde."
         }
-      },
-      "geliver": {
-        "keys": {
-          "title": "API anahtarı",
-          "description": "Geliver panelinizde API anahtarları sayfasından (app.geliver.io/apitokens) yeni bir anahtar oluşturup kopyalayın. Şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
-        },
-        "apiToken": "API anahtarı",
-        "notification": {
-          "title": "Takip bildirimleri",
-          "description": "Geliver gönderi durum değişikliklerini bu adrese bildirir; sipariş kargoya verildiğinde ve teslim edildiğinde kendiliğinden güncellenir. Bildirim gelmese de gönderiler yarım saatte bir sorgulanır.",
-          "where": "Geliver panelinin webhook ayarlarına TRACK_UPDATED olayı için yapıştırın."
-        },
-        "live": {
-          "title": "Test gönderileri ve canlıya geçiş",
-          "description": "Mağazanızı açmadan önce gönderi akışını Geliver'in test gönderileriyle deneyin."
-        },
-        "testMode": "Test gönderileri",
-        "testModeHint": "Açıkken oluşturulan gönderiler Geliver'de test olarak açılır: etiket satın alınmaz, kargo firmasına iletilmez. Aynı anahtar iki modda da çalışır.",
-        "checks": {
-          "merchant_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın.",
-          "secret_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın."
-        },
-        "rejected": "Geliver kayıtlı API anahtarını artık kabul etmiyor; gönderi oluşturulamaz. Geliver panelinden yeni bir anahtar alıp girin."
       },
       "options": {
         "title": "Ek kargo seçenekleri",
@@ -1383,7 +1355,6 @@
         "carrier": "Taşıyan",
         "carriers": {
           "manual": "Kendi gönderimim",
-          "geliver": "Geliver",
           "pickup": "Mağazadan teslim",
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo"
@@ -1391,8 +1362,6 @@
         "pricing": "Ücret",
         "pricings": {
           "flat": "Sabit ücret",
-          "cheapest": "Geliver: en uygun teklif",
-          "fastest": "Geliver: en hızlı teklif",
           "table": "Ücret tablosu (desi)"
         },
         "amount": "Tutar",
@@ -1423,7 +1392,7 @@
           "free": "Hiçbir siparişten kargo ücreti alınmaz.",
           "threshold": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca kargo ücretsiz; altında sabit ücret.",
           "flat": "Her siparişte aynı kargo ücreti.",
-          "carrier": "Ücret paketin desisine göre ücret tablonuzdan ya da Geliver teklifinden gelir."
+          "carrier": "Ücret paketin desisine göre ücret tablonuzdan gelir."
         },
         "threshold": "Ücretsiz kargo sınırı",
         "thresholdOptional": "Ücretsiz kargo sınırı (isteğe bağlı)",
@@ -1435,10 +1404,7 @@
         "source": "Ücreti veren",
         "sources": {
           "aras-table": "Aras Kargo: ücret tablom (desi)",
-          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
-          "geliver-cheapest": "Geliver: en uygun teklif",
-          "geliver-fastest": "Geliver: en hızlı teklif",
-          "geliver-table": "Geliver: ücret tablom (desi)"
+          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)"
         },
         "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
         "tableLink": "Ücret tablosunu doldurun",
@@ -1688,7 +1654,6 @@
         "iyzico": "iyzico",
         "bank_transfer": "Havale / EFT",
         "cash_on_delivery": "Kapıda ödeme",
-        "geliver": "Geliver",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
         "netgsm": "Netgsm",
@@ -1703,7 +1668,6 @@
         "iyzico": "Kartla ödeme",
         "bank_transfer": "Mağazanın banka hesabına havale; sağlayıcı yok",
         "cash_on_delivery": "Kapıda nakit ya da kartla ödeme; sağlayıcı yok",
-        "geliver": "Birden çok kargo firması tek hesapla",
         "aras": "Mağazanın kendi kargo sözleşmesi",
         "yurtici": "Mağazanın kendi kargo sözleşmesi",
         "netgsm": "SMS ve İYS",
@@ -5538,7 +5502,6 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
-        "geliver": "Geliver",
         "own": "Mağazanın kendi teslimatı"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",

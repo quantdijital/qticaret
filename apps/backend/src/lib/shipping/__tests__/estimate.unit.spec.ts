@@ -135,9 +135,8 @@ describe("the shop's main option", () => {
     expect(primaryOptionOf(options, null)?.id).toBe("cheap")
     expect(primaryOptionOf(options, "gone")?.id).toBe("cheap")
     expect(
-      primaryOptionOf([option({ id: "geliver", carrier: "geliver", pricing: "cheapest" })], null)
-        ?.id
-    ).toBe("geliver")
+      primaryOptionOf([option({ id: "aras", carrier: "aras", pricing: "table" })], null)?.id
+    ).toBe("aras")
     expect(primaryOptionOf([option({ carrier: "pickup" })], null)).toBeNull()
   })
 })
