@@ -3348,7 +3348,8 @@
     },
     "status": {
       "published": "Yayında",
-      "draft": "Taslak"
+      "draft": "Taslak",
+      "scheduled": "Planlı · {{at}}"
     },
     "columns": {
       "product": "Ürün",
@@ -4861,6 +4862,28 @@
         "labelTooLong": "Etiket en çok 40 karakter olabilir.",
         "bodyTooLong": "Açıklama en çok 2.000 karakter olabilir.",
         "tooMany": "Program en çok 30 adım olabilir."
+      }
+    },
+    "schedule": {
+      "label": "Yayın tarihi",
+      "manual": "Elle yayınlanır",
+      "field": "Yayın tarihi ve saati",
+      "zone": "Türkiye saatiyle. Ürün bu saatte kendiliğinden yayına alınır.",
+      "schedule": "Planla",
+      "change": "Değiştir",
+      "cancel": "Planı iptal et",
+      "plan": "Planla",
+      "saved": "Yayın planlandı.",
+      "cancelled": "Yayın planı iptal edildi.",
+      "problem": {
+        "required": "Tarih ve saat seçin.",
+        "past": "Şu andan sonraki bir zaman seçin.",
+        "tooFar": "En çok bir yıl sonrası seçilebilir."
+      },
+      "failed": "{{at}} için planlanan yayın yapılamadı: {{reason}} Ürün taslak kaldı.",
+      "reason": {
+        "seo": "SEO puanı yayın için yetersizdi.",
+        "other": "Kayıt sırasında bir sorun oluştu."
       }
     },
     "purchaseLimit": {

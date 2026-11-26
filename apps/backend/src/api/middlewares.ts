@@ -31,6 +31,7 @@ import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/prev
 import { AdminPostBulkEditPreview } from "./admin/catalog/bulk-edit/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostProductStockTracking } from "./admin/products/[id]/stock-tracking/validators"
+import { AdminPostProductPublishSchedule } from "./admin/products/[id]/publish-schedule/validators"
 import { VariantImagesInput } from "../lib/catalog/variant-images"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
@@ -342,6 +343,12 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/stock-tracking",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductStockTracking)],
+    },
+    // S2: a draft's planned publish set (POST) or cancelled (DELETE)
+    {
+      matcher: "/admin/products/:id/publish-schedule",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductPublishSchedule)],
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
     ...SEO_ROUTES,

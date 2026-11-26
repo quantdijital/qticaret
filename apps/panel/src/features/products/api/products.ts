@@ -18,6 +18,8 @@ const LIST_FIELDS = [
   "title",
   "handle",
   "status",
+  // A draft's planned publish (S2): the list's "Planlı" badge
+  "metadata",
   "thumbnail",
   "updated_at",
   "categories.id",
@@ -156,6 +158,8 @@ const DETAIL_FIELDS = [
   "subtitle",
   "handle",
   "status",
+  // A draft's planned publish (S2)
+  "metadata",
   "description",
   "thumbnail",
   "weight",
