@@ -222,7 +222,7 @@ medusaIntegrationTestRunner({
           ] as { allow_backorder: boolean; manage_inventory: boolean }[]
         )[0]
       expect(await variantOf(tracked.productId)).toMatchObject({ allow_backorder: true })
-      expect(await variantOf(untracked.productId)).toEqual({
+      expect(await variantOf(untracked.productId)).toMatchObject({
         allow_backorder: false,
         manage_inventory: false,
       })

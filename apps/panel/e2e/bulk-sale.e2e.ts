@@ -59,7 +59,8 @@ async function bulkSale(
   await expect(dialog.getByText("1 ürün değişecek.")).toBeVisible()
   await dialog.getByRole("button", { name: "1 ürüne uygula" }).click()
   await expect(dialog.getByText("1 ürün güncellendi.")).toBeVisible({ timeout: 30_000 })
-  await dialog.getByRole("button", { name: "Kapat" }).click()
+  // The footer's button; the corner's close button has the same name
+  await dialog.getByRole("button", { name: "Kapat" }).first().click()
   await expect(dialog).toBeHidden()
 }
 

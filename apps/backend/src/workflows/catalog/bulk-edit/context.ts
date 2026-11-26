@@ -25,11 +25,23 @@ async function tagNamed(container: MedusaContainer, value: string): Promise<stri
   if (exact) {
     return exact.id
   }
-  const tags = await service.listProductTags(
-    { q: value.trim() },
-    { take: TAG_LOOKUP, select: ["id", "value"] }
-  )
-  return tags.find((tag) => fold(tag.value) === fold(value))?.id ?? null
+  // The database folds letters its own way (KIŞ is not kış to ILIKE): each Turkish form is searched
+  const forms = new Set([
+    value.trim(),
+    value.trim().toLocaleLowerCase("tr"),
+    value.trim().toLocaleUpperCase("tr"),
+  ])
+  for (const form of forms) {
+    const tags = await service.listProductTags(
+      { q: form },
+      { take: TAG_LOOKUP, select: ["id", "value"] }
+    )
+    const found = tags.find((tag) => fold(tag.value) === fold(value))
+    if (found) {
+      return found.id
+    }
+  }
+  return null
 }
 
 // A tag change's tag: found, made for `add` when the run is real, refused for `remove` when unknown
