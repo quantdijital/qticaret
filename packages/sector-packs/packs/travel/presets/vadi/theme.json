@@ -42,6 +42,7 @@
     "category_style": "select",
     "placeholder": "Nereye gitmek istersiniz?"
   },
+  "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
   "menu_style": "underline",
   "shadow": "float",
   "media_ground": "well",

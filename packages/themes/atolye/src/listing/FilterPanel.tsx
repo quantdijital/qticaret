@@ -9,6 +9,7 @@ import type {
 } from "@qticaret/ui"
 import { formatWholeLira } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { DateFilter } from "./DateFilter"
 import { NumberInput } from "../parts/NumberInput"
 import { roundStep, stepCeiling } from "../parts/number-step"
 import { Swatch } from "../parts/Swatch"
@@ -240,6 +241,7 @@ export function FilterPanel({
   return (
     <div className="flex flex-col gap-2">
       {stock && <StockSwitch stock={stock} hash={hash} />}
+      {view.dates && <DateFilter dates={view.dates} hash={hash} />}
       {view.filters.map((group) => (
         <Group key={group.key} group={group} hash={hash} t={t} />
       ))}
@@ -250,4 +252,7 @@ export function FilterPanel({
 
 /** Whether the listing offers anything to narrow it by. */
 export const hasFilters = (view: ListingPageView) =>
-  view.filters.length > 0 || view.price !== null || (view.stock ?? null) !== null
+  view.filters.length > 0 ||
+  view.price !== null ||
+  (view.stock ?? null) !== null ||
+  (view.dates ?? null) !== null
