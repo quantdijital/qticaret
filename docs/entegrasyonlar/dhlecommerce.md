@@ -1,6 +1,8 @@
 # DHL eCommerce Türkiye (eski MNG Kargo) Fulfillment Provider
 
-> Durum: **kodlandı** (2026-11-26; PR #464 istemci + ortak etiket + sahte, PR 2 sağlayıcı + panel). Gerçek hesapla doğrulanmadı: aşağıdaki "Uygulama (2026-11-26)" ve "Doğrulanacaklar". Kullanıcıya görünen her yerde ad **"DHL eCommerce"**; "MNG Kargo" yazılmaz (sahip, 2026-11-26). İç ad `dhlecommerce` (sağlayıcı `dhlecommerce_dhlecommerce`); API alan adları hâlâ `mngkargo.com.tr`.
+> Durum: **askıda** (sahip, 2026-11-26: "DHL gizli kalsın, platformda altyapıda durabilir"). Kod ve testler yerinde; `CARRIER_DHLECOMMERCE_ENABLED=true` verilmedikçe mağazalara görünmez ve kullanılamaz (adr/0027 Ek 2026-11-26 (2), `lib/integrations/suspended.ts`). Mağaza isterse kendi uygulama anahtarlarını da girebilir (aynı ek).
+>
+> Önceki durum: **kodlandı** (2026-11-26; PR #464 istemci + ortak etiket + sahte, PR 2 sağlayıcı + panel). Gerçek hesapla doğrulanmadı: aşağıdaki "Uygulama (2026-11-26)" ve "Doğrulanacaklar". Kullanıcıya görünen her yerde ad **"DHL eCommerce"**; "MNG Kargo" yazılmaz (sahip, 2026-11-26). İç ad `dhlecommerce` (sağlayıcı `dhlecommerce_dhlecommerce`); API alan adları hâlâ `mngkargo.com.tr`.
 >
 > İlk durum (2026-11-26): **araştırma, kod yok**. Sahip MNG, Sürat ve PTT'yi doğrudan taşıyıcı olarak sıraya aldı (ADR-0035 Ek 2026-11-26; sıra MNG → Sürat → PTT). Bu belge kodlayıcının arama yapmadan başlaması içindir; gerçek hesapla doğrulanmamış her bilgi "doğrulanmadı" diye işaretli.
 >
@@ -257,3 +259,9 @@ Sahip kararları (2026-11-26) ve koddaki karşılıkları:
 - apizone'da platform uygulamasını açmak, altı ürüne abone olmak, anahtarları sunucu ortamına yazmak; canlıda `entegrasyon@mngkargo.com.tr`'ye uygulama adı + mağaza müşteri no + instance çıkış IP'si (F16).
 - Test müşteri bilgileriyle: `createRecipient` gövdesinin `{recipient}` sarmalı, 20001'in gerçekte ne kadar sürdüğü, anonim TCKN'nin kabulü, `desi`/`kg` tam sayı kuralı, `packagingType` 3, kapıda ödeme alanları, JWT reddinin biçimi (401 mi, hangi kod), yanlış şifrenin dönüşü, durum kodları ve iptalin görünüşü, `cancelshipment` gün kuralı, takip bağlantısının biçimi.
 - Kendi PDF etiketimizin (Code 128 B, DHL `barcode` değeri) şubede okutulması.
+
+## Askı ve mağazanın kendi uygulama anahtarları (2026-11-26)
+
+- **Askı:** `CARRIER_DHLECOMMERCE_ENABLED` (`true` açar; yoksa kapalı). Kapalıyken panelin hiçbir ekranı DHL'i göstermez, hesap uçları 404, yeni seçenek reddedilir, eski seçenekler ödemede listelenmez, sağlayıcı sepete ekleme/fiyat/gönderi açmayı reddeder. Ayrıntı adr/0027 Ek 2026-11-26 (2). Geliştirmede açmak için backend ortamına `CARRIER_DHLECOMMERCE_ENABLED=true` (ve sahte DHL için `pnpm dev:dhlecommerce`).
+- **Kendi uygulama anahtarları:** formda "Kendi uygulama anahtarlarım var" altında Client Id / Client Secret (`client_id`, `client_secret`; ikisi birlikte). Varsa platformunkinin yerine kullanılır; platformun anahtarları sunucuda yoksa bölüm açık gelir ve zorunludur. Test ve canlı ortamın anahtarları ayrıdır: mod değişince hepsi yeniden istenir.
+

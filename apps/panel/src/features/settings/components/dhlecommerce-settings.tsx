@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import { FormSection } from "@qticaret/admin-ui/patterns/form-section"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { DhlEcomAccount } from "@/features/settings/api/payments"
 import { useAccountActions } from "@/features/settings/account-actions"
@@ -17,6 +19,7 @@ import {
   dhlEcomFormValues,
   dhlEcomKeysRequired,
   dhlEcomSaveBody,
+  ownAppKept,
 } from "@/features/settings/dhlecommerce"
 import type { DhlEcomFormValues } from "@/features/settings/dhlecommerce"
 
@@ -26,9 +29,11 @@ const D = `${S}.dhlecommerce`
 /**
  * Settings > Shipping > DHL eCommerce (formerly MNG Kargo): the shop's
  * customer number and "Online Şube" password, then test mode until going
- * live. The app keys are the platform's (adr/0027 Ek 2026-11-26): on a
- * server without them the page says so and saves nothing. DHL checks the
- * details before anything is saved.
+ * live. The app keys are the platform's (adr/0027 Ek 2026-11-26) unless
+ * the shop has its own app at DHL's portal: "Kendi uygulama anahtarlarım
+ * var" opens their fields (the owner, 2026-11-26). On a server without the
+ * platform's keys they are open and needed. DHL checks the details before
+ * anything is saved.
  */
 export function DhlEcomSettings({
   account,
@@ -37,21 +42,25 @@ export function DhlEcomSettings({
 }: {
   account: DhlEcomAccount | undefined
   keyConfigured: boolean
-  /** The platform's app is set on this server. */
+  /** The platform's app is set on this server; without it the shop's own keys are needed. */
   available: boolean
 }) {
   const { t } = useTranslation()
   const name = t(`${S}.carriers.dhlecommerce.name`)
   const actions = useAccountActions("dhlecommerce", name, S)
   const form = useForm<DhlEcomFormValues>({
-    resolver: zodResolver(dhlEcomFormSchema(account)),
+    resolver: zodResolver(dhlEcomFormSchema(account, available)),
     defaultValues: dhlEcomFormValues(account),
   })
   const { errors, isDirty } = form.formState
   const state = account?.state ?? "not_configured"
-  const locked = !keyConfigured || !available || actions.busy
+  const locked = !keyConfigured || actions.busy
   const testMode = useWatch({ control: form.control, name: "test_mode" })
   const required = dhlEcomKeysRequired(account, testMode)
+  const appKept = ownAppKept(account, testMode)
+  // Open when the shop's keys are stored, and always where the platform has none
+  const [ownOpen, setOwnOpen] = useState(account?.secrets["client_id"] === true)
+  const ownShown = ownOpen || !available
   const message = (key: string | undefined) => (key ? t(key, { name }) : undefined)
 
   return (
@@ -92,6 +101,51 @@ export function DhlEcomSettings({
           <p className="text-[13px] text-muted-foreground sm:col-span-2">{t(`${D}.keysHint`)}</p>
         </fieldset>
       </FormSection>
+      <FormSection title={t(`${D}.app.title`)} description={t(`${D}.app.description`)}>
+        {available ? (
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-expanded={ownShown}
+              aria-controls="dhlecommerce-own-app"
+              onClick={() => {
+                setOwnOpen((open) => !open)
+              }}
+            >
+              {t(`${D}.app.toggle`)}
+            </Button>
+          </div>
+        ) : null}
+        {/* Secrets show no example value (SecretField): an app key's shape is DHL's, not ours */}
+        <fieldset
+          id="dhlecommerce-own-app"
+          hidden={!ownShown}
+          disabled={locked}
+          className="grid min-w-0 gap-5 sm:grid-cols-2"
+        >
+          <SecretField
+            id="dhlecommerce-client-id"
+            label={t(`${D}.app.clientId`)}
+            name={name}
+            kept={appKept}
+            optional={available}
+            error={message(errors.client_id?.message)}
+            registration={form.register("client_id")}
+          />
+          <SecretField
+            id="dhlecommerce-client-secret"
+            label={t(`${D}.app.clientSecret`)}
+            name={name}
+            kept={appKept}
+            optional={available}
+            error={message(errors.client_secret?.message)}
+            registration={form.register("client_secret")}
+          />
+          <p className="text-[13px] text-muted-foreground sm:col-span-2">{t(`${D}.app.hint`)}</p>
+        </fieldset>
+      </FormSection>
       <FormSection title={t(`${D}.live.title`)} description={t(`${D}.live.description`)}>
         <fieldset disabled={locked} className="flex min-w-0 items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -121,7 +175,7 @@ export function DhlEcomSettings({
         name={name}
         state={state}
         dirty={isDirty}
-        keyConfigured={keyConfigured && available}
+        keyConfigured={keyConfigured}
       />
     </form>
   )

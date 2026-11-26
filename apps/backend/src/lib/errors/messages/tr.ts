@@ -939,7 +939,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "yurtici.cod_account_missing":
     "Kapıda ödemeli siparişi Yurtiçi Kargo ile göndermek için tahsilatlı teslimat hesabı gerekir. Ayarlar > Kargo > Yurtiçi Kargo'dan girin.",
   "dhlecommerce.unavailable":
-    "DHL eCommerce bağlantısı bu sunucuda henüz açılmadı; platform desteğine yazın.",
+    "DHL eCommerce için platformun uygulama anahtarları bu sunucuda tanımlı değil. Kendi uygulama anahtarlarınızı girin ya da platform desteğine yazın.",
   "dhlecommerce.merchant_invalid":
     "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
   "dhlecommerce.secret_invalid":

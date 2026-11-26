@@ -4,14 +4,16 @@ import type { Env } from "../../env"
 /**
  * DHL eCommerce Türkiye (formerly MNG Kargo) keeps two identities apart
  * (docs/entegrasyonlar/dhlecommerce.md, adr/0027 Ek 2026-11-26):
- * - the platform's app at DHL's API portal (`X-IBM-Client-Id`,
- *   `X-IBM-Client-Secret`), registered once by us and read from the
- *   server's environment, never typed in by a shop;
+ * - the app at DHL's API portal (`X-IBM-Client-Id`, `X-IBM-Client-Secret`):
+ *   the platform's, registered once by us and read from the server's
+ *   environment; or the shop's own, when it registered one and wrote its
+ *   keys in the panel (the owner, 2026-11-26), sealed with the account and
+ *   used in place of the platform's;
  * - the shop's own contract: its customer number and its "Online Şube"
  *   password, written once in the panel and sealed (adr/0027).
  */
 
-/** The platform's app at DHL eCommerce's API portal. */
+/** An app at DHL eCommerce's API portal: the platform's, or the shop's own. */
 export interface DhlEcomApp {
   clientId: string
   clientSecret: string
@@ -22,6 +24,8 @@ export interface DhlEcomCredentials {
   customerNumber: string
   password: string
   testMode: boolean
+  /** The shop's own app, when it wrote its keys; null: the platform's. */
+  app: DhlEcomApp | null
 }
 
 /**
@@ -54,7 +58,8 @@ export function dhlEcomAppOf(
 
 /**
  * The account as the panel stored it (adr/0027): the customer number and
- * the password sealed, the mode in the clear. Null when either is missing.
+ * the password sealed, the mode in the clear, and the shop's own app keys
+ * when it wrote both. Null when the number or the password is missing.
  */
 export function dhlEcomCredentialsOf(
   account: { settings: Record<string, unknown>; secrets: Record<string, string> } | null
@@ -64,7 +69,14 @@ export function dhlEcomCredentialsOf(
   if (!customerNumber || !password) {
     return null
   }
-  return { customerNumber, password, testMode: account.settings["test_mode"] === true }
+  const clientId = account.secrets["client_id"]
+  const clientSecret = account.secrets["client_secret"]
+  return {
+    customerNumber,
+    password,
+    testMode: account.settings["test_mode"] === true,
+    app: clientId && clientSecret ? { clientId, clientSecret } : null,
+  }
 }
 
 /** Whether shops on this server can connect DHL eCommerce: the platform's app is set (or a fake's). */

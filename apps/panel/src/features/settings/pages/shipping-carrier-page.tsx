@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
-import { getRouteApi } from "@tanstack/react-router"
+import { Navigate, getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { useOfferedCarriers } from "@/features/settings/api/carriers"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type {
   ArasAccount,
@@ -35,6 +36,11 @@ export function ShippingCarrierPage() {
   const query = useQuery(providerAccountsQuery())
   const name = t(`${S}.carriers.${carrier}.name`)
   const account = query.data?.accounts.find((each) => each.provider === carrier)
+  const offered = useOfferedCarriers()
+  // A carrier suspended on this server opens the list, as an unknown one does
+  if (offered && !offered.includes(carrier)) {
+    return <Navigate to="/settings/shipping" replace />
+  }
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -45,7 +51,7 @@ export function ShippingCarrierPage() {
       />
       {query.isError ? (
         <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-      ) : !query.data ? (
+      ) : !query.data || !offered ? (
         <LoadingRows rows={4} />
       ) : carrier === "aras" ? (
         <ArasSettings

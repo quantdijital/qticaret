@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
+import { isSuspendedProvider } from "../../lib/integrations/suspended"
 import { carrierOf, isOwnDelivery } from "../../lib/shipping/carriers"
 import { flatAmountOf } from "../../lib/shipping/shop"
 
@@ -40,8 +41,9 @@ function storedAmount(data: Record<string, unknown> | null | undefined) {
 
 /**
  * The shop's options as the panel lists them: sending, not returns;
- * amounts as lira. An option of a provider we no longer ship with is
- * not listed.
+ * amounts as lira. An option of a provider we no longer ship with, or
+ * of a carrier suspended on this server (`lib/integrations/suspended.ts`),
+ * is not listed.
  */
 export async function shopShippingOptions(container: MedusaContainer) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
@@ -63,6 +65,7 @@ export async function shopShippingOptions(container: MedusaContainer) {
   return (data as unknown as OptionRow[])
     .filter((option) => !ruleIs(option, "is_return", "true"))
     .filter((option) => carrierOf(option.provider_id) !== null || isOwnDelivery(option.provider_id))
+    .filter((option) => !isSuspendedProvider(option.provider_id))
     .map((option) => {
       const carrier = carrierOf(option.provider_id)
       // The shop's own price, not the free one from a basket total (F4.5), which carries a rule

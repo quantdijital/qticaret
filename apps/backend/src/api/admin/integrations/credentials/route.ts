@@ -8,7 +8,8 @@ import { listedHere } from "./provider-param"
  * GET /admin/integrations/credentials: every provider the shop can connect
  * and its state (adr/0027). No secret, nor any part of one, is returned.
  * One kept on its own page (BirFatura's token) is not listed here.
- * `unavailable`: providers this server cannot connect (no platform app set).
+ * `unavailable`: providers this server has no platform app for: the shop
+ * connects them with its own app keys only. A suspended carrier is not listed.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const service = req.scope.resolve<IntegrationCredentialsModuleService>(
@@ -17,7 +18,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   const accounts = (await service.describeAll()).filter((account) => listedHere(account.provider))
   res.json({
     key_configured: service.isKeyConfigured(),
-    unavailable: unavailableProviders(),
+    unavailable: unavailableProviders().filter(listedHere),
     accounts,
   })
 }

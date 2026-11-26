@@ -20,9 +20,10 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const provider = providerParam(req)
-  // No platform app on this server (DHL eCommerce): nothing to check the account with
-  assertProviderAvailable(provider)
   const service = serviceOf(req)
+  // No platform app on this server (DHL eCommerce) and no app of the shop's own: nothing
+  // to check the account with
+  assertProviderAvailable(provider, await service.describe(provider), req.validatedBody)
   const draft = await service.draft(provider, req.validatedBody)
   const { result } = await saveIntegrationCredentialsWorkflow(req.scope).run({
     input: { draft, actor_id: req.auth_context.actor_id || null },

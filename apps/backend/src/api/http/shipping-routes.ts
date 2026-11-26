@@ -9,6 +9,7 @@ import {
 import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess, orderActor } from "./order-access"
 import { rateLimit } from "./rate-limit"
+import { hideSuspendedCarrierOptions } from "./suspended-carriers"
 
 /**
  * `additional_data` under `qt_` is our workflows' own (the `qt_ship` mark
@@ -54,6 +55,15 @@ export const SHIPPING_ROUTES = [
     matcher: "/store/carts/:id/shipping-estimate",
     methods: ["GET" as const],
     middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.shipping_estimate)],
+  },
+  // A suspended carrier's options are not offered at checkout. No `methods`: the
+  // middleware wraps GET answers only
+  { matcher: "/store/shipping-options", middlewares: [hideSuspendedCarrierOptions] },
+  // The carriers this server offers (a suspended one left out), staff only
+  {
+    matcher: "/admin/shipping-setup/carriers",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
   },
   // F7.8: the shop's shipping options, staff only
   {
