@@ -16,6 +16,7 @@ export const FAKE_PROVIDER_ADDRESSES = {
   YURTICI_BASE_URL: "Yurtiçi",
   DHL_ECOMMERCE_BASE_URL: "DHL eCommerce",
   SURAT_BASE_URL: "Sürat Kargo",
+  PTT_BASE_URL: "PTT Kargo",
   NETGSM_BASE_URL: "Netgsm",
   PARASUT_BASE_URL: "Paraşüt",
   BIRFATURA_BASE_URL: "BirFatura",

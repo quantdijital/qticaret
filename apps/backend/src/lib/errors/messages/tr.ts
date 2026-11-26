@@ -952,6 +952,31 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "DHL eCommerce teslimat adresindeki ili ya da ilçeyi tanımadı. Siparişin adresinde il ve ilçeyi düzeltip yeniden deneyin.",
   "dhlecommerce.branch_pending":
     'DHL eCommerce alıcının varış şubesini henüz belirlemedi; gönderi açılmadı. Birkaç dakika sonra "Kargoya ver"e yeniden basın.',
+  "ptt.customer_id_invalid":
+    "PTT'nin sözleşmeyle verdiği müşteri numarasını girin: 9 ya da 10 hane.",
+  "ptt.merchant_invalid":
+    "PTT Kargo bu müşteri numarasını kabul etmedi. Numarayı PTT Başmüdürlüğünün sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "ptt.secret_invalid":
+    "PTT Kargo bu müşteri numarasını ve web servis şifresini kabul etmedi. Bilgileri PTT Başmüdürlüğünün sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "ptt.receiver_name_short":
+    "PTT Kargo en az 5 karakterlik alıcı adı istiyor. Siparişin teslimat adresine alıcının adını ve soyadını yazın.",
+  "ptt.withdraw_failed":
+    "PTT Kargo'ya gönderi yüklenmiş olabilir ama silinemedi. Yeniden kargoya vermeden önce PTT şubenize bu siparişin barkodunu sorun; yüklüyse iptal ettirin.",
+  "ptt.already_accepted":
+    "Gönderi PTT şubesinde kabul edildiği için internetten silinemez. İptal için bir PTT şubesine başvurun; gönderi siparişte kalır, takip sürer.",
+  "ptt.barcode_range_missing":
+    "PTT barkod aralığı girilmemiş. PTT'nin verdiği aralığı Ayarlar > Kargo > PTT Kargo'ya ekleyin, sonra yeniden kargoya verin.",
+  "ptt.barcode_range_exhausted":
+    "PTT barkod aralığınız bitti; gönderi yüklenemiyor. PTT'den yeni aralık isteyin ve Ayarlar > Kargo > PTT Kargo'ya ekleyin.",
+  "ptt.barcode_range_invalid": "Aralığın iki ucunu da kontrol hanesi olmadan 12 hane olarak girin.",
+  "ptt.barcode_range_reversed": "Aralığın bitiş numarası başlangıçtan küçük olamaz.",
+  "ptt.barcode_range_too_large":
+    "Bir milyondan fazla numaralık aralık PTT'nin verdiği türden değil. İki numarayı da kontrol edin.",
+  "ptt.barcode_range_overlaps":
+    "Bu aralık daha önce girdiğiniz bir aralıkla çakışıyor. Her barkod bir kez kullanılır: PTT'nin verdiği yeni aralığı girin.",
+  "ptt.barcode_range_unknown": "Bu aralık artık listede yok.",
+  "ptt.barcode_range_in_use":
+    "Bu aralıktan barkod kullanıldı; aralık silinemez, numaraları bir daha verilmemeli.",
   "surat.merchant_invalid":
     "Sürat Kargo bu cari kodu ve web şifresini kabul etmedi. Bilgileri Sürat'ın sözleşmeyle verdiği belgeden yeniden kopyalayın.",
   "surat.secret_invalid":

@@ -7,7 +7,7 @@ export interface ShipResult {
   order_id: string
   ok: boolean
   /** The carrier asked for the label: the shop's own contract (adr/0035). */
-  carrier: "aras" | "yurtici" | "dhlecommerce" | "surat" | null
+  carrier: "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt" | null
   /** A carrier's parcel waiting for its pickup: its label to print. */
   fulfillment_id: string | null
   /** Why it was not shipped: its key, and the sentence to show. */

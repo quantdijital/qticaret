@@ -23,18 +23,27 @@ export const YURTICI_FULFILLMENT_PROVIDER_ID = "yurtici_yurtici"
 export const DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID = "dhlecommerce_dhlecommerce"
 /** Sürat Kargo (docs/entegrasyonlar/surat.md). */
 export const SURAT_FULFILLMENT_PROVIDER_ID = "surat_surat"
+/** PTT Kargo (docs/entegrasyonlar/ptt.md). */
+export const PTT_FULFILLMENT_PROVIDER_ID = "ptt_ptt"
 
 /** A carrier we open shipments with: the shop's own contract. */
-export type CarrierName = "aras" | "yurtici" | "dhlecommerce" | "surat"
+export type CarrierName = "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
 
 /** The carriers we open shipments with, as tracked parcels name them. */
-export const CARRIER_NAMES: readonly CarrierName[] = ["aras", "yurtici", "dhlecommerce", "surat"]
+export const CARRIER_NAMES: readonly CarrierName[] = [
+  "aras",
+  "yurtici",
+  "dhlecommerce",
+  "surat",
+  "ptt",
+]
 
 const CARRIERS: Readonly<Record<string, CarrierName>> = {
   [ARAS_FULFILLMENT_PROVIDER_ID]: "aras",
   [YURTICI_FULFILLMENT_PROVIDER_ID]: "yurtici",
   [DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID]: "dhlecommerce",
   [SURAT_FULFILLMENT_PROVIDER_ID]: "surat",
+  [PTT_FULFILLMENT_PROVIDER_ID]: "ptt",
 }
 
 /** Providers that open shipments with a carrier: their parcels leave when the carrier picks them up. */
@@ -71,6 +80,8 @@ export function carrierNameOf(
       return "DHL eCommerce"
     case "surat":
       return "Sürat Kargo"
+    case "ptt":
+      return "PTT Kargo"
     case null:
       return typeof named === "string" && named !== "" ? named : null
   }
@@ -79,7 +90,8 @@ export function carrierNameOf(
 /**
  * A fake carrier's own tracking page (`<base>/takip/<no>`), which the
  * fakes on a developer's machine serve: with a fake address set
- * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`, `DHL_ECOMMERCE_BASE_URL`, `SURAT_BASE_URL`; refused
+ * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`, `DHL_ECOMMERCE_BASE_URL`, `SURAT_BASE_URL`,
+ * `PTT_BASE_URL`; refused
  * when deployed), a parcel's
  * link opens the fake's page, as a live shop's opens the carrier's.
  */
@@ -128,6 +140,11 @@ export const shipInput = z.object({
     .nullish(),
   /** The order's e-mail: only DHL eCommerce reads it, which refuses a receiver without one. */
   email: z.email().max(254).nullish(),
+  /** A PTT parcel's barcode, taken from the shop's range by our workflow (13 digits). */
+  barcode: z
+    .string()
+    .regex(/^\d{13}$/)
+    .nullish(),
 })
 
 export type ShipInput = z.infer<typeof shipInput>

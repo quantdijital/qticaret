@@ -9,6 +9,7 @@ import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 import { dhlEcomApi, dhlEcomCredentialsOf } from "../shipping/dhlecommerce"
 import { suratApi, suratCredentialsOf } from "../shipping/surat"
+import { pttApi, pttCredentialsOf } from "../shipping/ptt"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
@@ -89,6 +90,12 @@ const CHECKERS = {
       return "valid"
     }
     return credentials.tracking === credentials.shipping ? "secret_invalid" : "merchant_invalid"
+  },
+  // A tracking query with the customer number and password; PTT's words for a wrong
+  // password are to confirm with a real account
+  ptt: async (account, signal) => {
+    const credentials = pttCredentialsOf(account)
+    return credentials ? pttApi().checkLogin(credentials, { signal }) : "secret_invalid"
   },
   // `merchant_invalid`: the login works, the sender name is not on it
   netgsm: async (account, signal) => {
@@ -201,6 +208,7 @@ export const CHECK_FIELDS = {
     secret_invalid: "secrets.password",
   },
   surat: { merchant_invalid: "secrets.web_password", secret_invalid: "secrets.password" },
+  ptt: { merchant_invalid: "settings.customer_id", secret_invalid: "secrets.password" },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
   meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },

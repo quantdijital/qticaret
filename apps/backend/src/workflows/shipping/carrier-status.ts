@@ -6,6 +6,7 @@ import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/ara
 import { yurticiApi, yurticiCredentialsOf, yurticiStatusOf } from "../../lib/shipping/yurtici"
 import { dhlEcomApi, dhlEcomCredentialsOf, dhlEcomStatusOf } from "../../lib/shipping/dhlecommerce"
 import { suratApi, suratCredentialsOf, suratStatusOf } from "../../lib/shipping/surat"
+import { pttApi, pttCredentialsOf, pttStatusOf } from "../../lib/shipping/ptt"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -83,6 +84,19 @@ const readSurat: Reader = async (container, providerShipmentId) => {
   )
 }
 
+// By the barcode: PTT lists nothing until a branch has accepted the parcel
+const readPtt: Reader = async (container, providerShipmentId) => {
+  const account = pttCredentialsOf(await credentials(container, "ptt"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return pttStatusOf(
+    await pttApi().track(account, providerShipmentId),
+    providerShipmentId,
+    parseEnv().PTT_BASE_URL
+  )
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
  * read at the call, the answer mapped to our statuses. With a fake Aras or
@@ -93,6 +107,7 @@ const READERS: Record<CarrierName, Reader> = {
   yurtici: readYurtici,
   dhlecommerce: readDhlEcom,
   surat: readSurat,
+  ptt: readPtt,
 }
 
 export function carrierReader(provider: string): Reader {

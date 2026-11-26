@@ -10,6 +10,7 @@ const PROVIDER_NAMES: Readonly<Record<string, string>> = {
   aras: "Aras Kargo",
   dhlecommerce: "DHL eCommerce",
   surat: "Sürat Kargo",
+  ptt: "PTT Kargo",
   google: "Google",
   iyzico: "iyzico",
   meta: "Meta",

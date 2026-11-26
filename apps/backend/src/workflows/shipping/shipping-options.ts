@@ -22,6 +22,7 @@ import {
   MANUAL_FULFILLMENT_PROVIDER_ID,
   SHOP_FLAT_OPTION,
   SHOP_FULFILLMENT_PROVIDER_ID,
+  PTT_FULFILLMENT_PROVIDER_ID,
   SURAT_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
@@ -36,7 +37,8 @@ import {
 
 export type OptionPricing = { type: "flat"; amount: Kurus } | { type: "table" }
 
-export type OptionCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat" | "pickup"
+export type OptionCarrier =
+  "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt" | "pickup"
 
 // The shop's own contracts (adr/0035): a flat price or the shop's table
 const CONTRACTS = {
@@ -44,6 +46,7 @@ const CONTRACTS = {
   yurtici: YURTICI_FULFILLMENT_PROVIDER_ID,
   dhlecommerce: DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   surat: SURAT_FULFILLMENT_PROVIDER_ID,
+  ptt: PTT_FULFILLMENT_PROVIDER_ID,
 } as const
 
 const isContract = (carrier: OptionCarrier): carrier is keyof typeof CONTRACTS =>

@@ -56,6 +56,8 @@ export type SmtpAccount = ProviderAccount<{
 export type DhlEcomAccount = ProviderAccount<{ test_mode: boolean }>
 /** Sürat Kargo on the shop's own contract: no test service, so no mode. */
 export type SuratAccount = ProviderAccount<Record<string, never>>
+/** PTT Kargo on the shop's own contract: its customer number in the clear, test mode. */
+export type PttAccount = ProviderAccount<{ customer_id: string; test_mode: boolean }>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 

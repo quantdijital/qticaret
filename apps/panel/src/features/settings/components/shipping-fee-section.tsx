@@ -47,7 +47,11 @@ export function ShippingFeeSection({ saved }: { saved: ShippingSettings }) {
   const threshold = promotions.data.values.free_shipping_threshold
   const condition = promotions.data.values.free_shipping_condition
   const contract =
-    first === "aras" || first === "yurtici" || first === "dhlecommerce" || first === "surat"
+    first === "aras" ||
+    first === "yurtici" ||
+    first === "dhlecommerce" ||
+    first === "surat" ||
+    first === "ptt"
       ? first
       : null
   const firstSource: CarrierPricing = `${contract ?? "aras"}-table`

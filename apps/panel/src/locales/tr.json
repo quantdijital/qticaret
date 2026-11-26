@@ -59,7 +59,8 @@
       "google": "Google",
       "meta": "Meta",
       "shopify": "Shopify",
-      "turkiyeapi": "TürkiyeAPI"
+      "turkiyeapi": "TürkiyeAPI",
+      "ptt": "PTT Kargo"
     }
   },
   "nav": {
@@ -1371,6 +1372,10 @@
         "surat": {
           "name": "Sürat Kargo",
           "description": "Mağazanın kendi Sürat Kargo sözleşmesiyle gönderi ve takip; Sürat etiket vermezse koli etiketini panel hazırlar. Bilgiler Sürat'ın sözleşmeyle verdiği web servis belgesinde."
+        },
+        "ptt": {
+          "name": "PTT Kargo",
+          "description": "Mağazanın kendi PTT Kargo sözleşmesiyle gönderi ve takip; her koli PTT'nin verdiği barkod aralığından numara alır, koli etiketini panel hazırlar."
         }
       },
       "options": {
@@ -1387,7 +1392,8 @@
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo",
           "dhlecommerce": "DHL eCommerce",
-          "surat": "Sürat Kargo"
+          "surat": "Sürat Kargo",
+          "ptt": "PTT Kargo"
         },
         "pricing": "Ücret",
         "pricings": {
@@ -1437,7 +1443,8 @@
           "aras-table": "Aras Kargo: ücret tablom (desi)",
           "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
           "dhlecommerce-table": "DHL eCommerce: ücret tablom (desi)",
-          "surat-table": "Sürat Kargo: ücret tablom (desi)"
+          "surat-table": "Sürat Kargo: ücret tablom (desi)",
+          "ptt-table": "PTT Kargo: ücret tablom (desi)"
         },
         "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
         "tableLink": "Ücret tablosunu doldurun",
@@ -1745,6 +1752,60 @@
         "invalid": "Kod en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
         "missing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kod gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir.",
         "placeholder": "Örn. 4578912"
+      },
+      "ptt": {
+        "keys": {
+          "title": "Web servis bilgileri",
+          "description": "PTT Başmüdürlüğünün sözleşmeyle verdiği müşteri numarası ve web servis şifresi. Test ve canlı hesap ayrı olabilir."
+        },
+        "customerId": "Müşteri numarası",
+        "customerIdPlaceholder": "Örn. 900123456",
+        "customerIdHint": "9 ya da 10 hane.",
+        "customerIdInvalid": "Müşteri numarası 9 ya da 10 haneden oluşur.",
+        "password": "Web servis şifresi",
+        "keysHint": "Kaydederken PTT'ye bu bilgilerle bir takip sorgusu yapılır ve doğrulanır.",
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler PTT'nin test sistemine yüklenir; şubede kabul edilmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek PTT hesabınıza yüklenir. Test ve canlı bilgileri ayrı olabileceğinden şifre yeniden istenir.",
+        "checks": {
+          "merchant_invalid": "PTT Kargo bu müşteri numarasını kabul etmedi. Numarayı PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın.",
+          "secret_invalid": "PTT Kargo bu müşteri numarası ve şifreyi kabul etmedi. Bilgileri PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın."
+        },
+        "rejected": "PTT Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi yüklenemez. PTT'nin verdiği güncel şifreyi girin.",
+        "ranges": {
+          "title": "Barkod aralığı",
+          "description": "PTT'nin size ayırdığı barkod numaraları. Her koli sıradaki numarayı alır; bir numara bir daha kullanılmaz.",
+          "empty": "Henüz barkod aralığı girilmedi. Aralık olmadan PTT'ye gönderi yüklenemez.",
+          "remaining": "Kalan barkod: {{left}}",
+          "low": "Barkodlarınız azalıyor: {{left}} kaldı. PTT'den yeni aralık isteyin ve aşağıya ekleyin.",
+          "exhausted": "Barkod aralığınız bitti; PTT'ye gönderi yüklenemez. PTT'den yeni aralık isteyin ve aşağıya ekleyin.",
+          "range": "{{first}} – {{last}}",
+          "usage": "{{used}} / {{size}} kullanıldı · {{remaining}} kaldı",
+          "first": "Başlangıç numarası",
+          "last": "Bitiş numarası",
+          "firstPlaceholder": "Örn. 275036569000",
+          "lastPlaceholder": "Örn. 275036569999",
+          "hint": "12 hane, kontrol hanesi olmadan.",
+          "add": "Aralığı ekle",
+          "added": "Aralık eklendi.",
+          "remove": "Sil",
+          "removeLabel": "{{range}} aralığını sil",
+          "removed": "Aralık silindi.",
+          "invalid": "12 haneli numara girin.",
+          "reversed": "Bitiş numarası başlangıçtan küçük olamaz."
+        },
+        "checklist": {
+          "title": "PTT'den istenecekler",
+          "description": "Bağlanmadan önce PTT Başmüdürlüğünden alın.",
+          "contract": "PTT Başmüdürlüğü ile imzalı kargo sözleşmesi.",
+          "privacy": "İmzalı 3. taraf gizlilik taahhütnamesi (Başmüdürlükten alınır).",
+          "account": "Müşteri numarası ve web servis şifresi.",
+          "range": "E-ticaret gönderileri için barkod aralığı (başlangıç ve bitiş, 12 hane). Bu aralığı başka bir programla paylaşmayın.",
+          "cod": "Kapıda ödeme alacaksanız sözleşmede ödeme şartlı gönderi (OS) ek hizmeti."
+        }
       }
     },
     "integrations": {
@@ -1788,7 +1849,8 @@
         "ga4": "Google Analytics 4",
         "resend": "E-posta (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Ürün akışları"
+        "feeds": "Ürün akışları",
+        "ptt": "PTT Kargo"
       },
       "purposes": {
         "paytr": "Kartla ödeme",
@@ -1804,7 +1866,8 @@
         "ga4": "Satışların ölçümü",
         "resend": "Sipariş ve hesap e-postaları",
         "google": "Arama sonuçları ve alışveriş ilanları",
-        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi"
+        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi",
+        "ptt": "Mağazanın kendi kargo sözleşmesi"
       },
       "states": {
         "connected": "Bağlı",
@@ -5683,7 +5746,8 @@
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
         "surat": "Sürat Kargo",
-        "own": "Mağazanın kendi teslimatı"
+        "own": "Mağazanın kendi teslimatı",
+        "ptt": "PTT Kargo"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
       "days": "Sipariş tarihi",

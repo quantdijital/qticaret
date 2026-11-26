@@ -470,6 +470,7 @@ describe("parseEnv", () => {
     "YURTICI_BASE_URL",
     "DHL_ECOMMERCE_BASE_URL",
     "SURAT_BASE_URL",
+    "PTT_BASE_URL",
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",
     "APPLE_AUTH_BASE_URL",

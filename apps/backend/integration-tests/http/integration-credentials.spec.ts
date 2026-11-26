@@ -110,6 +110,11 @@ medusaIntegrationTestRunner({
           secrets: { username: false, password: false, cari_code: false, web_password: false },
         }),
         expect.objectContaining({
+          provider: "ptt",
+          state: "not_configured",
+          secrets: { password: false },
+        }),
+        expect.objectContaining({
           provider: "netgsm",
           state: "not_configured",
           secrets: { usercode: false, password: false },

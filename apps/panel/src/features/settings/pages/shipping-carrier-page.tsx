@@ -8,6 +8,7 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type {
   ArasAccount,
   DhlEcomAccount,
+  PttAccount,
   SuratAccount,
   YurticiAccount,
 } from "@/features/settings/api/payments"
@@ -16,6 +17,9 @@ import { AccountBadges } from "@/features/settings/components/account-badges"
 import { DhlEcomSettings } from "@/features/settings/components/dhlecommerce-settings"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
 import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
+import { PttBarcodeCard } from "@/features/settings/components/ptt-barcode-card"
+import { PttChecklist } from "@/features/settings/components/ptt-checklist"
+import { PttSettings } from "@/features/settings/components/ptt-settings"
 import { SuratSettings } from "@/features/settings/components/surat-settings"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
@@ -72,6 +76,12 @@ export function ShippingCarrierPage() {
           account={account as SuratAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
+      ) : carrier === "ptt" ? (
+        <PttSettings
+          key={accountKey(account)}
+          account={account as PttAccount | undefined}
+          keyConfigured={query.data.key_configured}
+        />
       ) : (
         <YurticiSettings
           key={accountKey(account)}
@@ -79,6 +89,13 @@ export function ShippingCarrierPage() {
           keyConfigured={query.data.key_configured}
         />
       )}
+      {/* PTT: the barcode range no parcel goes without, and what to ask PTT for */}
+      {carrier === "ptt" && query.data ? (
+        <>
+          <PttBarcodeCard />
+          <PttChecklist />
+        </>
+      ) : null}
       {isCarrier(carrier) ? (
         <>
           <ReturnCodeCard target={carrier} />

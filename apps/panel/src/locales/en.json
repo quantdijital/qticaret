@@ -59,7 +59,8 @@
       "google": "Google",
       "meta": "Meta",
       "shopify": "Shopify",
-      "turkiyeapi": "TürkiyeAPI"
+      "turkiyeapi": "TürkiyeAPI",
+      "ptt": "PTT Kargo"
     }
   },
   "nav": {
@@ -1371,6 +1372,10 @@
         "surat": {
           "name": "Sürat Kargo",
           "description": "Shipping and tracking on the shop's own Sürat Kargo contract; when Sürat gives no label, the panel prepares the parcel label. The details are in the web service document Sürat gives with the contract."
+        },
+        "ptt": {
+          "name": "PTT Kargo",
+          "description": "Shipping and tracking on the shop's own PTT Kargo contract; each parcel takes a number from the barcode range PTT gave, and the panel prints the label."
         }
       },
       "options": {
@@ -1387,7 +1392,8 @@
           "aras": "Aras Kargo",
           "yurtici": "Yurtiçi Kargo",
           "dhlecommerce": "DHL eCommerce",
-          "surat": "Sürat Kargo"
+          "surat": "Sürat Kargo",
+          "ptt": "PTT Kargo"
         },
         "pricing": "Price",
         "pricings": {
@@ -1437,7 +1443,8 @@
           "aras-table": "Aras Kargo: my price table (desi)",
           "yurtici-table": "Yurtiçi Kargo: my price table (desi)",
           "dhlecommerce-table": "DHL eCommerce: my price table (desi)",
-          "surat-table": "Sürat Kargo: my price table (desi)"
+          "surat-table": "Sürat Kargo: my price table (desi)",
+          "ptt-table": "PTT Kargo: my price table (desi)"
         },
         "tableEmpty": "Your price table is still empty; this cannot be priced until it has rows.",
         "tableLink": "Fill in the price table",
@@ -1745,6 +1752,60 @@
         "invalid": "A code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
         "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch.",
         "placeholder": "E.g. 4578912"
+      },
+      "ptt": {
+        "keys": {
+          "title": "Web service details",
+          "description": "The customer number and web service password the PTT Başmüdürlük gave with your contract. Test and live accounts may differ."
+        },
+        "customerId": "Customer number",
+        "customerIdPlaceholder": "E.g. 900123456",
+        "customerIdHint": "9 or 10 digits.",
+        "customerIdInvalid": "The customer number has 9 or 10 digits.",
+        "password": "Web service password",
+        "keysHint": "When you save, PTT is asked a tracking query with these details to check them.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels are loaded on PTT's test system; no branch accepts them."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels are loaded on your real PTT account. Test and live details may differ, so the password is asked again.",
+        "checks": {
+          "merchant_invalid": "PTT Kargo did not accept this customer number. Copy it again from what the PTT Başmüdürlük gave you.",
+          "secret_invalid": "PTT Kargo did not accept this customer number and password. Copy them again from what the PTT Başmüdürlük gave you."
+        },
+        "rejected": "PTT Kargo no longer accepts the stored details; no parcel can be loaded. Enter the current password PTT gave you.",
+        "ranges": {
+          "title": "Barcode range",
+          "description": "The barcode numbers PTT set aside for you. Each parcel takes the next number; a number is never used again.",
+          "empty": "No barcode range entered yet. Without one no parcel can be loaded at PTT.",
+          "remaining": "Barcodes left: {{left}}",
+          "low": "Your barcodes are running low: {{left}} left. Ask PTT for a new range and add it below.",
+          "exhausted": "Your barcode range is used up; no parcel can be loaded at PTT. Ask PTT for a new range and add it below.",
+          "range": "{{first}} – {{last}}",
+          "usage": "{{used}} / {{size}} used · {{remaining}} left",
+          "first": "First number",
+          "last": "Last number",
+          "firstPlaceholder": "E.g. 275036569000",
+          "lastPlaceholder": "E.g. 275036569999",
+          "hint": "12 digits, without the check digit.",
+          "add": "Add range",
+          "added": "Range added.",
+          "remove": "Remove",
+          "removeLabel": "Remove the range {{range}}",
+          "removed": "Range removed.",
+          "invalid": "Enter a 12-digit number.",
+          "reversed": "The last number cannot be below the first."
+        },
+        "checklist": {
+          "title": "What to ask PTT for",
+          "description": "Get these from the PTT Başmüdürlük before connecting.",
+          "contract": "A signed carrier contract with the PTT Başmüdürlük.",
+          "privacy": "A signed third-party confidentiality undertaking (from the Başmüdürlük).",
+          "account": "Your customer number and web service password.",
+          "range": "A barcode range for e-commerce parcels (first and last number, 12 digits). Do not share it with another program.",
+          "cod": "If you take cash on delivery, the \"ödeme şartlı gönderi\" (OS) service in your contract."
+        }
       }
     },
     "integrations": {
@@ -1788,7 +1849,8 @@
         "ga4": "Google Analytics 4",
         "resend": "E-mail (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Product feeds"
+        "feeds": "Product feeds",
+        "ptt": "PTT Kargo"
       },
       "purposes": {
         "paytr": "Card payments",
@@ -1804,7 +1866,8 @@
         "ga4": "Measuring sales",
         "resend": "Order and account e-mails",
         "google": "Search results and shopping listings",
-        "feeds": "Product lists for Google, Meta, Akakçe and Cimri"
+        "feeds": "Product lists for Google, Meta, Akakçe and Cimri",
+        "ptt": "The shop's own carrier contract"
       },
       "states": {
         "connected": "Connected",
@@ -5683,7 +5746,8 @@
         "yurtici": "Yurtiçi Kargo",
         "dhlecommerce": "DHL eCommerce",
         "surat": "Sürat Kargo",
-        "own": "The shop's own delivery"
+        "own": "The shop's own delivery",
+        "ptt": "PTT Kargo"
       },
       "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
       "days": "Order date",

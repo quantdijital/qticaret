@@ -37,7 +37,7 @@ describe("suspended carriers (adr/0027 Ek 2026-11-26 askı)", () => {
   })
 
   it("leaves it out of the offered carriers and judges its provider", () => {
-    expect(offeredCarriers()).toEqual(["aras", "yurtici", "surat"])
+    expect(offeredCarriers()).toEqual(["aras", "yurtici", "surat", "ptt"])
     expect(isSuspended("dhlecommerce")).toBe(true)
     expect(isSuspended("aras")).toBe(false)
     expect(isSuspended("paytr")).toBe(false)
@@ -45,7 +45,7 @@ describe("suspended carriers (adr/0027 Ek 2026-11-26 askı)", () => {
     expect(isSuspendedProvider("manual_manual")).toBe(false)
 
     process.env["CARRIER_DHLECOMMERCE_ENABLED"] = "true"
-    expect(offeredCarriers()).toEqual(["aras", "yurtici", "dhlecommerce", "surat"])
+    expect(offeredCarriers()).toEqual(["aras", "yurtici", "dhlecommerce", "surat", "ptt"])
     expect(isSuspendedProvider("dhlecommerce_dhlecommerce")).toBe(false)
   })
 })

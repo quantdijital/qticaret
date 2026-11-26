@@ -31,6 +31,7 @@ export const CARRIER_PRICINGS = [
   "yurtici-table",
   "dhlecommerce-table",
   "surat-table",
+  "ptt-table",
 ] as const
 export type CarrierPricing = (typeof CARRIER_PRICINGS)[number]
 
@@ -82,7 +83,8 @@ export function carrierPricingOf(option: ShopShippingOption): CarrierPricing | n
     (option.carrier === "aras" ||
       option.carrier === "yurtici" ||
       option.carrier === "dhlecommerce" ||
-      option.carrier === "surat") &&
+      option.carrier === "surat" ||
+      option.carrier === "ptt") &&
     option.pricing === "table"
   ) {
     return `${option.carrier}-table`
@@ -169,14 +171,22 @@ export interface FeePlan {
   condition: FreeShippingCondition | null
 }
 
-type FlatCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat"
-const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici", "dhlecommerce", "surat"]
+type FlatCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
+const FLAT_CARRIERS: readonly string[] = [
+  "manual",
+  "aras",
+  "yurtici",
+  "dhlecommerce",
+  "surat",
+  "ptt",
+]
 
 const CARRIER_OF: Readonly<Record<CarrierPricing, NewShippingOption["carrier"]>> = {
   "aras-table": "aras",
   "yurtici-table": "yurtici",
   "dhlecommerce-table": "dhlecommerce",
   "surat-table": "surat",
+  "ptt-table": "ptt",
 }
 
 function carrierBody(name: string, source: CarrierPricing): NewShippingOption {

@@ -61,6 +61,7 @@ medusaIntegrationTestRunner({
         "aras",
         "yurtici",
         "surat",
+        "ptt",
         "netgsm",
         "meta",
         "ga4",

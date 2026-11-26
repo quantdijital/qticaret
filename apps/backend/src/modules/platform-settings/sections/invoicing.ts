@@ -19,7 +19,14 @@ export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
 export const INVOICING_TRIGGERS = ["shipped", "placed"] as const
 
 /** The carriers an e-Arşiv may name: ours (adr/0035) and the shop's own parcels. */
-export const INVOICE_CARRIERS = ["aras", "yurtici", "dhlecommerce", "surat", "manual"] as const
+export const INVOICE_CARRIERS = [
+  "aras",
+  "yurtici",
+  "dhlecommerce",
+  "surat",
+  "ptt",
+  "manual",
+] as const
 export type InvoiceCarrier = (typeof INVOICE_CARRIERS)[number]
 
 export interface CarrierIdentity {

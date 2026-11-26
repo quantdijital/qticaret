@@ -17,7 +17,14 @@ export function invoicingProviderOf(value: string): InvoicingProvider {
     : "none"
 }
 
-export const INVOICE_CARRIERS = ["aras", "yurtici", "dhlecommerce", "surat", "manual"] as const
+export const INVOICE_CARRIERS = [
+  "aras",
+  "yurtici",
+  "dhlecommerce",
+  "surat",
+  "ptt",
+  "manual",
+] as const
 export type InvoiceCarrier = (typeof INVOICE_CARRIERS)[number]
 
 /** The shop's `invoicing` settings section. */

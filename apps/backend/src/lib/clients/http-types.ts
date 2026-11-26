@@ -52,6 +52,11 @@ export interface HttpRequest<T> {
    * handed to `schema` as text, for the caller to read (adr/0035).
    */
   xml?: string
+  /**
+   * The XML body's content type, `text/xml; charset=utf-8` unless given
+   * (SOAP 1.2's `application/soap+xml`, with its action).
+   */
+  xmlType?: string
   /** The answer is handed to `schema` as text whatever was sent (a provider answering plain lines). */
   textAnswer?: boolean
   /** Marks a POST or PATCH as safe to repeat (it carries an idempotency key). */

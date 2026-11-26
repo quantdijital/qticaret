@@ -14,6 +14,8 @@ const PAGES: Record<string, string> = {
   dhlecommerce: "https://www.dhlecommerce.com.tr/gonderitakip",
   // Sürat's public tracking page (the owner's plugin; to confirm)
   surat: "https://suratkargo.com.tr/KargoTakip/",
+  // PTT's public tracking page; it takes the 13-digit barcode (to confirm)
+  ptt: "https://gonderitakip.ptt.gov.tr/",
 }
 
 export function carrierPages(keys: readonly string[] | undefined, t: Translate): LinkView[] {

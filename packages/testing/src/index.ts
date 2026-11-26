@@ -42,6 +42,12 @@ export type {
   FakeDhlEcomOrder,
 } from "./dhlecommerce/fake-server"
 export {
+  TRACKING_STEPS as PTT_TRACKING_STEPS,
+  fakePttAccount,
+  startFakePtt,
+} from "./ptt/fake-server"
+export type { FakePtt, FakePttAccount, FakePttShipment } from "./ptt/fake-server"
+export {
   TRACKING_STEPS as SURAT_TRACKING_STEPS,
   fakeSuratAccounts,
   startFakeSurat,

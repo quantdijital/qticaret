@@ -172,7 +172,7 @@ medusaIntegrationTestRunner({
             (error: unknown) => error
           )
 
-        expect(carriers.data.carriers).toEqual(["aras", "yurtici", "surat"])
+        expect(carriers.data.carriers).toEqual(["aras", "yurtici", "surat", "ptt"])
         expect(accounts.data.accounts.map(({ provider }) => provider)).not.toContain("dhlecommerce")
         expect(accounts.data.unavailable).not.toContain("dhlecommerce")
         expect(write.status).toBe(404)

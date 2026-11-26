@@ -12,7 +12,7 @@ export const AdminPostShippingOption = z
     name,
     // A carrier suspended on this server takes no new option (`lib/integrations/suspended.ts`)
     carrier: z
-      .enum(["manual", "aras", "yurtici", "dhlecommerce", "surat", "pickup"])
+      .enum(["manual", "aras", "yurtici", "dhlecommerce", "surat", "ptt", "pickup"])
       .refine((carrier) => !isSuspended(carrier), "shipping.option_invalid"),
     pricing: z.discriminatedUnion("type", [
       z.object({ type: z.literal("flat"), amount }).strict(),

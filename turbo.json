@@ -21,6 +21,7 @@
     "DHL_ECOMMERCE_*",
     "CARRIER_*",
     "SURAT_*",
+    "PTT_*",
     "PARASUT_*",
     "SHOPIFY_*",
     "DB_*",

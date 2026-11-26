@@ -18,7 +18,7 @@ export const offeredCarriersQuery = () =>
 
 // The carrier integrations the server may suspend; any other choice (the shop's own
 // delivery, pickup, "own", "other") is always shown
-const CARRIERS: readonly string[] = ["aras", "yurtici", "dhlecommerce", "surat"]
+const CARRIERS: readonly string[] = ["aras", "yurtici", "dhlecommerce", "surat", "ptt"]
 
 /**
  * Whether a choice naming a carrier is shown: a carrier once the server

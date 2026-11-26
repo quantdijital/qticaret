@@ -4,6 +4,7 @@ import { bankTransferSettings } from "../../lib/payments/settings"
 import { arasCredentialsOf } from "../../lib/shipping/aras/credentials"
 import { isSuspended } from "../../lib/integrations/suspended"
 import { dhlEcomCredentialsOf } from "../../lib/shipping/dhlecommerce/credentials"
+import { pttCredentialsOf } from "../../lib/shipping/ptt/credentials"
 import { suratCredentialsOf } from "../../lib/shipping/surat/credentials"
 import { yurticiCredentialsOf } from "../../lib/shipping/yurtici/credentials"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
@@ -23,7 +24,7 @@ export type PaymentMark =
   "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
 
 /** The carriers whose contract the shop connected. */
-export type CarrierMark = "aras" | "yurtici" | "dhlecommerce" | "surat"
+export type CarrierMark = "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
 
 export interface ShopMarks {
   payments: PaymentMark[]
@@ -42,7 +43,7 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
   const accounts = container.resolve<IntegrationCredentialsModuleService>(
     INTEGRATION_CREDENTIALS_MODULE
   )
-  const [cards, bank, codOn, cod, aras, yurtici, dhlecommerce, surat] = await Promise.all([
+  const [cards, bank, codOn, cod, aras, yurtici, dhlecommerce, surat, ptt] = await Promise.all([
     connectedCardProviders(container),
     bankTransferSettings(container),
     settings.isFeatureEnabled(CASH_ON_DELIVERY),
@@ -51,6 +52,7 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
     accounts.read("yurtici"),
     accounts.read("dhlecommerce"),
     accounts.read("surat"),
+    accounts.read("ptt"),
   ])
   const payments: PaymentMark[] = [
     ...(cards.length > 0 ? CARD_NETWORKS : []),
@@ -64,6 +66,7 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
     ...(yurticiCredentialsOf(yurtici) ? (["yurtici"] as const) : []),
     ...(dhlEcomCredentialsOf(dhlecommerce) ? (["dhlecommerce"] as const) : []),
     ...(suratCredentialsOf(surat) ? (["surat"] as const) : []),
+    ...(pttCredentialsOf(ptt) ? (["ptt"] as const) : []),
     // A carrier suspended on this server ships nothing (`lib/integrations/suspended.ts`)
   ].filter((carrier) => !isSuspended(carrier))
   return { payments, carriers }

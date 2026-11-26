@@ -75,10 +75,11 @@ export type FormValues = Readonly<Record<string, string>>
 export function contentTypeHeader(
   json: unknown,
   form?: FormValues,
-  xml?: string
+  xml?: string,
+  xmlType?: string
 ): Record<string, string> | undefined {
   if (xml !== undefined) {
-    return { "content-type": "text/xml; charset=utf-8" }
+    return { "content-type": xmlType ?? "text/xml; charset=utf-8" }
   }
   if (form !== undefined) {
     return { "content-type": "application/x-www-form-urlencoded" }

@@ -5,6 +5,7 @@ import type { CarrierName } from "./carriers"
 import {
   ARAS_FULFILLMENT_PROVIDER_ID,
   DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
+  PTT_FULFILLMENT_PROVIDER_ID,
   SURAT_FULFILLMENT_PROVIDER_ID,
   YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "./carriers"
@@ -20,6 +21,7 @@ const PROVIDER_OF: Readonly<Record<CarrierName, string>> = {
   yurtici: YURTICI_FULFILLMENT_PROVIDER_ID,
   dhlecommerce: DHL_ECOMMERCE_FULFILLMENT_PROVIDER_ID,
   surat: SURAT_FULFILLMENT_PROVIDER_ID,
+  ptt: PTT_FULFILLMENT_PROVIDER_ID,
 }
 
 /**
@@ -28,7 +30,7 @@ const PROVIDER_OF: Readonly<Record<CarrierName, string>> = {
  * carrier and code the shop named for it. Otherwise one of our carriers'
  * codes: that of the carrier behind the shop's main shipping option
  * (Settings > Shipping's "Kargo ücreti") when it has one, else the first
- * with a code, Aras, then Yurtiçi, then DHL eCommerce, then Sürat. Any of them takes a
+ * with a code, Aras, then Yurtiçi, then DHL eCommerce, then Sürat, then PTT. Any of them takes a
  * parcel at any of its branches whichever way the order left, so one shop-wide pick does.
  * A carrier suspended on this server (`lib/integrations/suspended.ts`) is
  * passed over: its code, entered before, is not shown.

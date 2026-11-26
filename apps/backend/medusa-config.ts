@@ -215,6 +215,7 @@ module.exports = defineConfig({
           { resolve: "./src/modules/fulfillment-yurtici", id: "yurtici" },
           { resolve: "./src/modules/fulfillment-dhlecommerce", id: "dhlecommerce" },
           { resolve: "./src/modules/fulfillment-surat", id: "surat" },
+          { resolve: "./src/modules/fulfillment-ptt", id: "ptt" },
           // adr/0087: the shop's own delivery at a flat price, priced by our quote
           { resolve: "./src/modules/fulfillment-shop", id: "shop" },
         ],
@@ -236,6 +237,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/migration" },
     // F15.6 (adr/0044): the shop's block list and the orders waiting for a person
     { resolve: "./src/modules/fraud-guard" },
+    // PTT Kargo's barcode ranges (docs/entegrasyonlar/ptt.md): each number handed out once
+    { resolve: "./src/modules/ptt-barcode" },
     // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
     { resolve: "./src/modules/api-key-scopes" },
     // F12.6 (adr/0040): each staff member's role, read on every admin request
