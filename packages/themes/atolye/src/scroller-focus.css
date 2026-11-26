@@ -1,0 +1,30 @@
+/*
+ * The scroller kit's `focus: on` (`parts/Scroller`, `data-focus="center"`):
+ * from 1024 px each card is drawn by where it stands in the row, full size
+ * in the middle and smaller toward either edge, so the middle card leads
+ * (Nepalora's tour slider). A scroll-driven animation on the card's place
+ * in the row (`view(inline)`): no script and nothing to measure; scrolling
+ * moves the large card. A browser without scroll timelines, a row that
+ * fits without scrolling and the default draw every card full size.
+ */
+@keyframes gf-scroller-focus {
+  0%,
+  100% {
+    scale: 0.8;
+    opacity: 0.85;
+  }
+  50% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+@media (min-width: 64rem) {
+  @supports (animation-timeline: view()) {
+    .gf-scroller[data-focus="center"] .gf-scroller-track > li {
+      animation: gf-scroller-focus linear both;
+      animation-timeline: view(inline);
+      transform-origin: center;
+    }
+  }
+}

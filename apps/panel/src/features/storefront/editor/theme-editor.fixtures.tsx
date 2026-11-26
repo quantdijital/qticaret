@@ -76,6 +76,7 @@ export const THEME: ThemeSettings = {
   motion: "calm",
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 export const DOC: LayoutDocument = {

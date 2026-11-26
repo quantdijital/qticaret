@@ -1,3 +1,4 @@
+import { TitleText } from "../parts/TitleText"
 import { fieldMark } from "@qticaret/ui"
 import type { LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -33,7 +34,7 @@ export function SectionHead({
       )}
     >
       <h2 id={id} {...fieldMark(marks, "title")}>
-        {title}
+        <TitleText text={title} />
       </h2>
       {more && (
         <a

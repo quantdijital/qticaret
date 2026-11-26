@@ -205,7 +205,7 @@ describe("the steps' panel", () => {
 })
 
 describe("the settings search and the preview's marks", () => {
-  it("finds the strip's switch and the steps' two settings in Diziliş", () => {
+  it("finds the strip's switch and the steps' three settings in Diziliş", () => {
     const strip = newHomeSection("stats", STATS)
     const steps = newHomeSection("steps", STEPS)
 
@@ -217,6 +217,7 @@ describe("the settings search and the preview's marks", () => {
     expect(contentFields(steps).map((each) => [each.key, each.group])).toEqual([
       ["steps_layout", "layout"],
       ["numbers", "layout"],
+      ["steps_connector", "layout"],
     ])
   })
 

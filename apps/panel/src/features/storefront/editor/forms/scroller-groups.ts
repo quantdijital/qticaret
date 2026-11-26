@@ -8,6 +8,7 @@ import type { ScrollerSetting, ScrollerSettings, SliderSetting } from "@qticaret
 export const SCROLLER_MAIN: readonly ScrollerSetting[] = [
   "desktop",
   "mobile",
+  "focus",
   "arrows",
   "arrow_style",
   "arrow_position",
@@ -74,6 +75,7 @@ export function scrollerOffers(settings: ScrollerSettings, setting: ScrollerSett
     case "autoplay":
     case "loop":
     case "drag":
+    case "focus":
       return true
   }
 }

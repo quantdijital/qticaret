@@ -10770,6 +10770,15 @@
               "light": "Hep beyaz"
             },
             "hint": "Otomatik'te vurgu renginin üstündeki yazı (düğme, etiket) hangisi daha iyi okunuyorsa beyaz ya da koyudur. Hep beyaz, parlak bir turuncu gibi açık vurgularda beyaz kalın yazı ister: renk beyazla en az 3:1 vermeli."
+          },
+          "section_title": {
+            "label": "Bölüm başlığı",
+            "term": "section_title",
+            "steps": {
+              "plain": "Standart",
+              "serif_accent": "Büyük, eğik vurgulu"
+            },
+            "hint": "Ana sayfa bölümlerinin başlıkları. Standart, temanın kendi başlığıdır. Büyük, eğik vurgulu'da başlık büyük ve ince yazılır; başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\") vurgu yazı tipinin eğik hâliyle gelir."
           }
         },
         "card": "Ürün kartı",
@@ -11990,6 +11999,13 @@
           "on": "Açık",
           "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
         },
+        "focus": {
+          "label": "Ortadaki kart büyük",
+          "term": "center focus",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Masaüstünde ortadaki kart tam boyda, kenarlara doğru kartlar küçülür; kaydırdıkça büyüyen kart değişir. Tek sayıda kart (3 ya da 5) ile en iyi görünür."
+        },
         "play_button": {
           "label": "Durdur düğmesi",
           "term": "pause button",
@@ -12468,6 +12484,13 @@
           "hint": "Adımların başındaki numaranın yazılışı.",
           "padded": "01, 02",
           "plain": "1, 2"
+        },
+        "connector": {
+          "label": "Bağlantı çizgisi",
+          "term": "connector",
+          "hint": "Yan yana adımlarda numaradan numaraya uzanan noktalı çizgi (geniş ekranda). Alt alta dizilişte ve telefonda çizilmez.",
+          "off": "Yok",
+          "dotted": "Noktalı"
         }
       },
       "departures": {

@@ -21,6 +21,7 @@ export const SCROLLER_SETTINGS = {
   speed: ["slow", "medium", "fast"],
   loop: ["off", "on"],
   drag: ["off", "on"],
+  focus: ["off", "on"],
   // The slider's own controls (the openings' sliders); a row does not draw them yet
   play_button: ["on", "off"],
   dot_style: ["dots", "lines", "count", "progress"],
@@ -44,6 +45,7 @@ export const SCROLLER_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   speed: "medium",
   loop: "off",
   drag: "off",
+  focus: "off",
   play_button: "on",
   dot_style: "dots",
   controls_place: "center",

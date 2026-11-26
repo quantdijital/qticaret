@@ -31,6 +31,7 @@
 @import "./listing-text.css";
 @import "./slider.css";
 @import "./scroller.css";
+@import "./scroller-focus.css";
 @import "./banner.css";
 @import "./split.css";
 @import "./strips.css";
@@ -75,6 +76,8 @@
 @import "./footer-rows-line.css";
 @import "./newsletter.css";
 @import "./motion.css";
+@import "./steps-connector.css";
+@import "./section-title.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

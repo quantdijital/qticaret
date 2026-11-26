@@ -28,6 +28,7 @@ interface Frame {
     motion: string
     page_width: string
     accent_ink: string
+    section_title: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
     listing_page: {
       default_view: string
@@ -50,6 +51,7 @@ const KIT = {
   // The page's width and the words on the accent, at today's (adr/0067 Ek 2026-11-25)
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */
