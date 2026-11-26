@@ -47,7 +47,8 @@ export async function POST(
       event: "birfatura.cargo_update_refused",
       birfatura_order_id: body.orderId,
       code,
-      err: errorSummary(error),
+      // The error's name only: a message from deeper down might quote what BirFatura sent
+      err_name: error instanceof Error ? error.name : null,
     })
   }
   await auditBirfatura(req, {
