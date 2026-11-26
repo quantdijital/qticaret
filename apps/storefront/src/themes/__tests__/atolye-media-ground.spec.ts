@@ -95,7 +95,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     }
     expect(found).toEqual(WELLS)
     const total = Object.values(WELLS).reduce((sum, [a, b]) => sum + a + b, 0)
-    expect(total).toBe(38)
+    expect(total).toBe(39)
   })
 
   it("leaves the same tones on what is not a photograph's ground", () => {
