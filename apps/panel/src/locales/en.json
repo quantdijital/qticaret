@@ -1421,12 +1421,11 @@
         },
         "modeHints": {
           "free": "No order pays for shipping.",
-          "threshold": "Free once the basket reaches the amount; a flat fee below it.",
+          "threshold": "Free once the basket total (VAT included, after discounts) reaches the amount; a flat fee below it.",
           "flat": "The same fee on every order.",
           "carrier": "Priced by the parcel's desi from your price table, or by Geliver's quote."
         },
         "threshold": "Free shipping from",
-        "thresholdHint": "Orders of this amount and above ship free (VAT included, after discounts).",
         "thresholdOptional": "Free shipping from (optional)",
         "thresholdOptionalHint": "Left empty, every order pays the carrier's price.",
         "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL.",
@@ -1447,7 +1446,8 @@
         "customNote": "Your shipping prices don't fit one of these; edit them in the list below, or pick one and save.",
         "noneNote": "No shipping option yet; pick one and save to make it.",
         "defaultName": "Standard shipping",
-        "replacedKept": "The old option stays as an extra while orders still to ship use it; remove it once they have shipped."
+        "replacedKept": "The old option stays as an extra while orders still to ship use it; remove it once they have shipped.",
+        "notConnected": "Your {{carrier}} account is not connected; connect it on the Carriers tab. Until then this option may not be priced at checkout."
       },
       "rules": {
         "deliveryTitle": "Delivery time",

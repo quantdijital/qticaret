@@ -3,8 +3,9 @@ import { expect, pageHeading, test } from "./support/guard"
 
 /**
  * Shipping classes (adr/0087 §4): one added in place under Settings >
- * Shipping, then given to a product on its "Kargo" tab and saved by the
- * page header's "Kaydet". The test makes its own draft product and
+ * Shipping > Gelişmiş, then given to a product on its "Kargo" tab and
+ * saved by the page header's "Kaydet"; the tab's "ships free" switch is
+ * the built-in free class (the owner, 2026-11-26). The test makes its own draft product and
  * deletes it; the shop's classes are put back as they were.
  */
 
@@ -64,8 +65,14 @@ test.describe("shipping classes", () => {
     const id = await makeProduct(page)
     try {
       await page.goto("/settings/shipping?part=options")
+      // Under "Gelişmiş", folded; the built-in free class is the product's switch, not a row
+      const advanced = page.getByRole("region", { name: "Gelişmiş" })
+      const fold = advanced.getByRole("button", { name: "Kargo sınıfları" })
+      if ((await fold.getAttribute("aria-expanded")) !== "true") {
+        await fold.click()
+      }
       const card = page.locator("form").filter({ has: page.getByTestId("shipping-classes") })
-      await expect(card.getByText("Ücretsiz kargo").first()).toBeVisible()
+      await expect(card.getByText("Ücretsiz kargo")).toHaveCount(0)
       await card.getByRole("button", { name: "Sınıf ekle" }).click()
       const number = before.length + 1
       await card.getByRole("textbox", { name: `${String(number)}. sınıfın adı` }).fill(CLASS_NAME)
@@ -88,8 +95,9 @@ test.describe("shipping classes", () => {
       const key = (await shopClasses(page)).find((each) => each.name === CLASS_NAME)?.key
       await expect.poll(() => productClass(page, id)).toBe(key)
 
-      await page.getByRole("combobox", { name: "Kargo sınıfı" }).click()
-      await page.getByRole("option", { name: "Ücretsiz kargo" }).click()
+      // The switch is the built-in free class; the class select steps aside
+      await page.getByRole("switch", { name: "Bu ürünün kargosu ücretsiz" }).click()
+      await expect(page.getByRole("combobox", { name: "Kargo sınıfı" })).toHaveCount(0)
       await headerSave(page).getByRole("button", { name: "Kaydet", exact: true }).click()
       await expect.poll(() => productClass(page, id)).toBe("free")
       await guard.assertHealthy()

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { PromotionSettings, ShippingSettings } from "@/features/settings/api/sections"
 import { shopShippingOptionsQuery } from "@/features/settings/api/shipping-options"
@@ -25,6 +26,10 @@ export function ShippingFeeSection({ saved }: { saved: ShippingSettings }) {
   const options = useQuery(shopShippingOptionsQuery())
   const promotions = useQuery(sectionQuery<PromotionSettings>("promotions"))
   const first = useFirstCarrier()
+  const accounts = useQuery(providerAccountsQuery()).data?.accounts ?? []
+  const connected = accounts
+    .filter((account) => account.state !== "not_configured")
+    .map((account) => account.provider)
   const box = useRef<HTMLDivElement>(null)
   const ready = options.data !== undefined && promotions.data !== undefined
   useEffect(() => {
@@ -54,6 +59,7 @@ export function ShippingFeeSection({ saved }: { saved: ShippingSettings }) {
           state={state}
           tableEmpty={saved.rate_table.length === 0}
           flatCarrier={flatCarrier}
+          connected={connected}
         />
       </div>
       <ShippingOptionsCard options={state.extras} custom={state.mode === "custom"} />

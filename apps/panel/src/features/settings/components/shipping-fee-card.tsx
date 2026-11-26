@@ -68,12 +68,15 @@ export function ShippingFeeCard({
   state,
   tableEmpty,
   flatCarrier,
+  connected,
 }: {
   state: FeeState
   /** The shop's desi table has no rows: a table-priced answer warns (it does not stop). */
   tableEmpty: boolean
   /** Who carries a new flat-priced main option: the first contract carrier connected, else the shop. */
   flatCarrier: "manual" | "aras" | "yurtici"
+  /** The carriers whose account is connected: a source of one that is not warns. */
+  connected: readonly string[]
 }) {
   const { t } = useTranslation()
   const save = useSaveShippingFee()
@@ -123,6 +126,8 @@ export function ShippingFeeCard({
   }
   const field = (name: "fee" | "threshold") => errors.includes(name)
   const tableChosen = mode === "carrier" && carrier.endsWith("-table")
+  const sourceCarrier = carrier.split("-")[0] ?? ""
+  const unconnected = mode === "carrier" && !connected.includes(sourceCarrier)
   return (
     <CardForm
       title={t(`${S}.title`)}
@@ -164,7 +169,6 @@ export function ShippingFeeCard({
                 <MoneyField
                   id="shipping-fee-threshold"
                   label={t(`${S}.threshold`)}
-                  hint={t(`${S}.thresholdHint`)}
                   value={threshold}
                   invalid={field("threshold")}
                   error={t(`${S}.thresholdInvalid`)}
@@ -227,6 +231,13 @@ export function ShippingFeeCard({
                     onChange={setThreshold}
                   />
                 </div>
+                {unconnected ? (
+                  <p className="text-[13px] text-warning-text">
+                    {t(`${S}.notConnected`, {
+                      carrier: t(`settings.shipping.options.carriers.${sourceCarrier}`),
+                    })}
+                  </p>
+                ) : null}
                 {tableChosen && tableEmpty ? (
                   <p className="text-[13px] text-warning-text">
                     {t(`${S}.tableEmpty`)}{" "}

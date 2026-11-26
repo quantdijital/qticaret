@@ -1421,12 +1421,11 @@
         },
         "modeHints": {
           "free": "Hiçbir siparişten kargo ücreti alınmaz.",
-          "threshold": "Sepet bu tutara ulaşınca kargo ücretsiz; altında sabit ücret.",
+          "threshold": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca kargo ücretsiz; altında sabit ücret.",
           "flat": "Her siparişte aynı kargo ücreti.",
           "carrier": "Ücret paketin desisine göre ücret tablonuzdan ya da Geliver teklifinden gelir."
         },
         "threshold": "Ücretsiz kargo sınırı",
-        "thresholdHint": "Bu tutar ve üstü siparişlerde kargo ücretsiz (KDV dahil, indirimlerden sonra).",
         "thresholdOptional": "Ücretsiz kargo sınırı (isteğe bağlı)",
         "thresholdOptionalHint": "Boş bırakırsanız her siparişte firmanın ücreti alınır.",
         "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin.",
@@ -1447,7 +1446,8 @@
         "customNote": "Kargo ücretleriniz bu seçeneklerden birine uymuyor; aşağıdaki listeden düzenleyebilir ya da bir seçim yapıp kaydedebilirsiniz.",
         "noneNote": "Henüz kargo seçeneği yok; bir seçim yapıp kaydedince oluşur.",
         "defaultName": "Standart kargo",
-        "replacedKept": "Eski seçenek gönderilmemiş siparişlerde kullanıldığı için ek seçenek olarak kaldı; siparişler gönderilince silebilirsiniz."
+        "replacedKept": "Eski seçenek gönderilmemiş siparişlerde kullanıldığı için ek seçenek olarak kaldı; siparişler gönderilince silebilirsiniz.",
+        "notConnected": "{{carrier}} hesabınız bağlı değil; Kargo firmaları sekmesinden bağlayın. Bağlanana kadar bu seçenek ödeme adımında fiyatlanamayabilir."
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
