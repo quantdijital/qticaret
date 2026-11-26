@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { useState } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
@@ -26,9 +27,11 @@ import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
 import { errorText } from "@/lib/errors"
 
 /**
- * Publish or take back, the page's one main action, with its page on the
- * storefront beside it (live, or a draft's preview); copying and deleting
- * sit in the menu, deleting behind a question (docs/06 §6). The server
+ * The product page's header actions (docs/06 "Ürün sayfası"): its page on
+ * the storefront (live, or a draft's preview), publish or take back, the
+ * page's save (`save`, the header's one primary button) and the menu;
+ * copying and deleting sit in the menu, deleting behind a question
+ * (docs/06 §6). On a phone the first two show their icon only. The server
  * holds the publish rules (the SEO gate; measures are optional,
  * adr/0054), so a refusal comes back as its sentence. "Sayfayı düzenle"
  * (`onCustomize`, for a role that may change the shop's settings) lays the
@@ -37,9 +40,12 @@ import { errorText } from "@/lib/errors"
 export function ProductActions({
   product,
   onCustomize,
+  save,
 }: {
   product: ProductDetail
   onCustomize?: (() => void) | undefined
+  /** The page's save (`HeaderSaveActions`), before the menu. */
+  save?: ReactNode
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -72,11 +78,7 @@ export function ProductActions({
   return (
     <>
       <StorefrontButton product={product} />
-      <Button
-        variant={published ? "outline" : "default"}
-        disabled={update.isPending}
-        onClick={toggle}
-      >
+      <Button variant="outline" disabled={update.isPending} onClick={toggle}>
         {update.isPending ? (
           <Loader2 className="animate-spin" />
         ) : published ? (
@@ -84,8 +86,11 @@ export function ProductActions({
         ) : (
           <Send />
         )}
-        {t(published ? "products.detail.unpublish" : "products.detail.publish")}
+        <span className="max-sm:sr-only">
+          {t(published ? "products.detail.unpublish" : "products.detail.publish")}
+        </span>
       </Button>
+      {save}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon" aria-label={t("products.detail.more")}>

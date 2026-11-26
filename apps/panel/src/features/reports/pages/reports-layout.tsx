@@ -13,6 +13,7 @@ const REPORT_TABS = [
   { to: "/reports/products", key: "products" },
   { to: "/reports/categories", key: "categories" },
   { to: "/reports/brands", key: "brands" },
+  { to: "/reports/customers", key: "customers" },
   { to: "/reports/marketing", key: "marketing" },
   { to: "/reports/daily", key: "daily" },
   { to: "/reports/finance", key: "finance" },
@@ -22,10 +23,11 @@ const REPORT_TABS = [
 
 /**
  * Reports (docs/06 §4, F11.1–F11.4): a preset period or a range of days,
- * reports as tabs (summary, products, categories, brands, promotions and
- * traffic sources, day by day, finance, stock); every
+ * reports as tabs (summary, products, categories, brands, customers,
+ * promotions and traffic sources, day by day, finance, stock); every
  * table as one Excel file, or a table as CSV, made on the server. The
- * range stays in the address as the tabs change. No personal data.
+ * range stays in the address as the tabs change. No personal data but the
+ * customers tab's top spenders (a recorded read).
  */
 export function ReportsLayout() {
   const { t } = useTranslation()
@@ -39,7 +41,9 @@ export function ReportsLayout() {
           ? ("stock" as const)
           : state.location.pathname.endsWith("/reports/search")
             ? ("search" as const)
-            : ("sales" as const),
+            : state.location.pathname.endsWith("/reports/customers")
+              ? ("customers" as const)
+              : ("sales" as const),
   })
   const tabs = REPORT_TABS.map((tab) => ({ to: tab.to, label: t(`reports.tabs.${tab.key}`) }))
   const path = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") })
@@ -54,8 +58,10 @@ export function ReportsLayout() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <ReportRangePicker />
-            {/* Searches have no file: their lists are the page */}
-            {kind === "search" ? null : <ReportExportButton report={kind} format="xlsx" />}
+            {/* Searches have no file: their lists are the page; customers' is the list's export */}
+            {kind === "search" || kind === "customers" ? null : (
+              <ReportExportButton report={kind} format="xlsx" />
+            )}
           </div>
         }
       />

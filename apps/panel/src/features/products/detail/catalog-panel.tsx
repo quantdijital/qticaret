@@ -156,7 +156,7 @@ function CatalogForm({
  * read (F3.1), whether the product is sold to adults only and is outside
  * the right of withdrawal (F13.4, F13.6), and whether it sells gift cards
  * (adr/0025 Ek 2026-11-03), always as their form; its save shows once
- * something changes, the page's save bar saves it too.
+ * something changes, the page's header save saves it too.
  */
 export function CatalogPanel({ productId }: { productId: string }) {
   const catalog = useQuery(productCatalogQuery(productId))

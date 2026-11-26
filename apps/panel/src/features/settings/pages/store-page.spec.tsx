@@ -145,7 +145,7 @@ describe("StorePage", () => {
     expect(facts).toHaveClass("mt-auto")
     expect(facts).toHaveTextContent("Kayıtlı ürünlerin değerleri çevrilmez.")
 
-    // A change shows the save bar under the facts; the form still fills the card
+    // A change shows the page's header save under the facts; the form still fills the card
     await userEvent.click(within(region).getByRole("radio", { name: "Kilogram (kg)" }))
     const saveButton = within(region).getByRole("button", { name: "Kaydet" })
     expect(saveButton).toBeVisible()

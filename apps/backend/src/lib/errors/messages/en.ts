@@ -1151,6 +1151,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Single-use codes can only be made from a standard promotion with a code.",
   "promotions.one_code": "A cart takes one discount code; remove the one you added first.",
   "promotions.wholesale_no_code": "Discount codes cannot be used on wholesale orders.",
+  "promotions.customer_group_login": "This code is for members; log in to your account to use it.",
+  "promotions.customer_group_only":
+    "This code is for certain customers only; it is not valid for your account.",
+  "promotions.first_order_only": "This code can be used on a first order only.",
+  "promotions.audience_invalid": "Who may use the code is not valid.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "The record ID is not valid.",

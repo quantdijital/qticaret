@@ -14,6 +14,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/customers/:id/note", "customer", false],
   // CU1: customers' order totals carry the city their orders went to
   ["/admin/customer-stats", "customer", true],
+  // R1: the top spenders by name
+  ["/admin/reports/customers", "customer", true],
   ["/admin/abandoned-carts", "cart", true],
   ["/admin/abandoned-carts/:id", "cart", false],
   // F9.6: addresses no message goes to (masked, still the shoppers')

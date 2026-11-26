@@ -1797,7 +1797,8 @@
             "shipped": "Sipariş kargoda",
             "delivered": "Sipariş teslim edildi",
             "access_link": "Sipariş bağlantısı",
-            "invoiced": "Fatura kesildi"
+            "invoiced": "Fatura kesildi",
+            "note": "Siparişe not (müşteriye gönderilen)"
           },
           "return": {
             "requested": "İade talebi alındı",
@@ -5399,7 +5400,7 @@
     },
     "notes": {
       "title": "İç notlar",
-      "text": "Yalnızca ekip görür; müşteriye gösterilmez.",
+      "text": "Yalnızca ekip görür; müşteriye yalnızca \"Müşteriye gönder\" seçilen not e-postayla gider.",
       "empty": "Henüz not yok.",
       "new": "Yeni not",
       "placeholder": "Örneğin: müşteri aradı, paketin kapıya bırakılmasını istedi.",
@@ -5410,7 +5411,19 @@
       "removeText": "Not ekipten kaldırılır; kimin sildiği kayıtta kalır.",
       "removed": "Not silindi.",
       "unnamed": "Ekip üyesi",
-      "formerMember": "Ekipten ayrılan kişi"
+      "formerMember": "Ekipten ayrılan kişi",
+      "notify": "Müşteriye gönder",
+      "notifyHint": "Not, siparişin e-posta adresine mağazanın adıyla gönderilir ve iletişim geçmişinde görünür.",
+      "addAndSend": "Ekle ve gönder",
+      "sent": "Not eklendi ve müşteriye gönderildi.",
+      "notSent": {
+        "templateOff": "Not eklendi ama müşteriye gönderilmedi: bu ileti Ayarlar > Müşteri iletileri'nde kapalı.",
+        "noAddress": "Not eklendi ama müşteriye gönderilmedi: siparişte geçerli bir e-posta adresi yok.",
+        "failed": "Not eklendi; e-posta şu an gönderilemedi, yeniden denenecek.",
+        "other": "Not eklendi ama müşteriye gönderilmedi; nedeni iletişim geçmişinde."
+      },
+      "badgeSent": "Müşteriye gönderildi",
+      "badgeNotSent": "Gönderilemedi"
     },
     "contracts": {
       "title": "Sözleşme onayı",
@@ -6277,6 +6290,14 @@
       "average": "Ortalama sepet",
       "lastOrder": "Son sipariş",
       "city": "Şehir"
+    },
+    "export": {
+      "button": "Dışa aktar",
+      "excel": "Excel olarak indir",
+      "csv": "CSV indir",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
+      "laterNoJobs": "Dosya arka planda hazırlanıyor.",
+      "failed": "Müşteri dosyası hazırlanamadı."
     }
   },
   "categories": {
@@ -6520,7 +6541,20 @@
       "buyCount": "Alınan adet",
       "payCount": "Ödenen adet",
       "buyWord": "al",
-      "payWord": "öde"
+      "payWord": "öde",
+      "audience": "Kimler kullanabilir",
+      "audienceHint": "Seçili gruplardaki müşteriler hesaplarına giriş yaptığında kullanabilir.",
+      "audiences": {
+        "everyone": "Herkes",
+        "groups": "Müşteri grupları"
+      },
+      "audienceGroups": "Müşteri grupları",
+      "noGroups": "Henüz müşteri grubu yok; Müşteriler › Gruplar'dan oluşturabilirsiniz.",
+      "firstOrder": "İlk siparişe özel",
+      "firstOrderHint": "Daha önce sipariş vermiş müşteriler kullanamaz; e-posta adresiyle de kontrol edilir.",
+      "previewGroups_one": "Seçili {{count}} müşteri grubuna özel",
+      "previewGroups_other": "Seçili {{count}} müşteri grubuna özel",
+      "previewFirstOrder": "Yalnızca ilk siparişte"
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
@@ -6532,7 +6566,8 @@
       "minimum": "Sıfırdan büyük bir tutar girin ya da boş bırakın.",
       "perCustomer": "Müşteri başına kullanım bir tam sayı olmalı.",
       "buyget": "Ödenen adet alınandan az olmalı; ikisi de 1 ile 99 arasında tam sayı (ör. 3 al 2 öde).",
-      "buygetScope": "X al Y öde için ürün, kategori ya da koleksiyon seçin."
+      "buygetScope": "X al Y öde için ürün, kategori ya da koleksiyon seçin.",
+      "groups": "En az bir müşteri grubu seçin ya da herkesi seçin."
     },
     "created": "Kampanya oluşturuldu.",
     "saved": "Kampanya kaydedildi.",
@@ -6665,7 +6700,8 @@
       "marketing": "Kampanya ve kaynak",
       "finance": "Finans",
       "stock": "Stok",
-      "search": "Arama"
+      "search": "Arama",
+      "customers": "Müşteriler"
     },
     "share": "Pay",
     "sales": "Satış",
@@ -6902,6 +6938,35 @@
         "empty": "Bu dönemde sonuçsuz arama yok."
       },
       "empty": "Bu dönemde vitrinde arama yapılmadı."
+    },
+    "customers": {
+      "tiles": {
+        "label": "Müşteri özeti",
+        "new": "Yeni müşteri",
+        "newHint": "{{registered}} üye, {{guest}} misafir",
+        "buyers": "Alışveriş yapan",
+        "buyersHint": "Bu dönemde sipariş veren müşteri",
+        "returning": "Tekrar gelen",
+        "returningHint_one": "{{count}} müşteri daha önce de almıştı",
+        "returningHint_other": "{{count}} müşteri daha önce de almıştı",
+        "spent": "Müşteri başına harcama",
+        "spentHint": "Alışveriş yapanların bu dönemdeki ortalaması"
+      },
+      "chartTitle": "Yeni müşteriler",
+      "chartHint": "Üye olan ya da ilk kez sipariş veren müşteriler, önceki dönemle birlikte.",
+      "chartEmpty": "Bu dönemde yeni müşteri yok.",
+      "chartTable": "Yeni müşteriler, döneme göre",
+      "current": "Bu dönem",
+      "previous": "Önceki dönem",
+      "topTitle": "En çok harcayan müşteriler",
+      "topHint": "Bu dönemdeki siparişlerinin toplamına göre ilk 10.",
+      "topEmpty": "Bu dönemde sipariş veren müşteri yok.",
+      "columns": {
+        "customer": "Müşteri",
+        "orders": "Sipariş",
+        "spent": "Harcama"
+      },
+      "capped": "Dönem çok büyük; sayılar ilk kayıtları kapsıyor."
     }
   },
   "seo": {

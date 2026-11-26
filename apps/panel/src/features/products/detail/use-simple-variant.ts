@@ -17,7 +17,7 @@ import type { VariantField, VariantValues } from "./variant-values"
  * A simple product's one variant as the "Ürün verileri" card edits it
  * (docs/06 "Ürün sayfası"): one form behind its Genel tab (price, cost)
  * and its Stok tab (stock, codes), saved together, once on the page's
- * save bar. Prices are checked by the server as from the variant's dialog.
+ * header save. Prices are checked by the server as from the variant's dialog.
  */
 export function useSimpleVariant(product: ProductDetail, on: boolean) {
   const { t } = useTranslation()
@@ -37,7 +37,7 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
       : {}),
   })
   const save = useSaveVariant(product, locationId)
-  // Its sale price (adr/0086), in the Genel tab: saved with the variant, one entry on the save bar
+  // Its sale price (adr/0086), in the Genel tab: saved with the variant, one entry on the page's header save
   const sale = useVariantSale(
     variant ? { productId: product.id, variantId: variant.id } : null,
     false
@@ -73,7 +73,7 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
     }
     sale.submit()
   }
-  // One entry for both tabs: the save bar saves the variant once
+  // One entry for both tabs: the page's header save saves the variant once
   useDirtyEntry({ dirty, saving, submit, reset })
   // A product that has just become simple (made so on the card): the form
   // gets its values on the next render, read as loading until then

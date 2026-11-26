@@ -109,6 +109,10 @@ const KNOWN = new Set([
   "cart.email_required",
   "payments.cart_changed",
   "promotions.one_code",
+  // A code no longer this buyer's at the checkout (K1/K2): the code comes off in the cart
+  "promotions.first_order_only",
+  "promotions.customer_group_only",
+  "promotions.customer_group_login",
   "errors.too_many_requests",
   "checkout.order_note_too_long",
   // A gift card line not ready to pay (adr/0025 Ek 2026-11-03)

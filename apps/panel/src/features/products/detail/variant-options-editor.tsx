@@ -76,7 +76,7 @@ function ValueChips({
  * saves the options and makes every combination the product has no
  * variant for, counted on the button first. Nothing is deleted: a value or
  * an option a variant stands for cannot be taken off here. Its changes join
- * the page's save bar.
+ * the page's header save.
  */
 export function VariantOptionsEditor({
   product,

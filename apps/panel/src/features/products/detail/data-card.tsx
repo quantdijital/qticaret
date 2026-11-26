@@ -57,7 +57,7 @@ const STEP: Partial<Record<string, number>> = {
  * digital product or a service), Özellikler, Varyantlar (a product with
  * variants), Katalog, Gelişmiş (add-ons, price history). Every panel stays
  * drawn while another is open, so an unsaved edit is kept and saved by
- * the page's save bar; a tab the shop hid is left out.
+ * the page's header save; a tab the shop hid is left out.
  */
 export function DataCard({
   product,

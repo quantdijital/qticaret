@@ -28,6 +28,7 @@ describe("job types", () => {
       "catalog.import",
       "content.link_rewrite",
       "customer.data_export",
+      "customer.export",
       "migration.invites",
       "migration.run",
       "migration.sitemap",
@@ -53,6 +54,18 @@ describe("job types", () => {
       resultTtlDays: 7,
     })
   })
+
+  it.each(["order.export", "customer.export"])(
+    "keeps the %s the owner's: queued by its own route, personal data",
+    (type) => {
+      expect(jobType(type)).toMatchObject({
+        internal: true,
+        ownerOnly: true,
+        containsPersonalData: true,
+        resultTtlDays: 7,
+      })
+    }
+  )
 
   it("keeps the order export the owner's: queued by its own route, personal data", () => {
     expect(jobType("order.export")).toMatchObject({

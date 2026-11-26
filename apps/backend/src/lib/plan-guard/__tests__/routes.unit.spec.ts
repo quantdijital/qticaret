@@ -151,6 +151,7 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/privacy-requests/:id/erase",
     "POST /admin/customers/:id/consents",
     "POST /admin/order-board/export",
+    "POST /admin/customer-export",
     "POST /admin/staff/me/profile",
     "POST /admin/staff/me/password",
     "POST /admin/alerts/read",

@@ -65,7 +65,7 @@ export function ProgramEditor({ productId, program }: { productId: string; progr
     })
   })
   const dirty = form.formState.isDirty
-  // The product page's save bar saves it too
+  // The product page's header save saves it too
   useDirtyEntry({
     dirty,
     saving: save.isPending,

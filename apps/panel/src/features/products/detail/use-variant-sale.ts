@@ -35,7 +35,7 @@ export interface VariantSale {
 
 /**
  * A variant's "İndirimli fiyat" as a draft beside its read (adr/0086).
- * `register`: the page's save bar knows it on its own; a host that saves
+ * `register`: the page's header save knows it on its own; a host that saves
  * it with its own form (a variant's row, a simple product's tabs) says no
  * and counts it in its own entry. With no target, an empty, idle draft.
  */

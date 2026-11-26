@@ -1797,7 +1797,8 @@
             "shipped": "Order shipped",
             "delivered": "Order delivered",
             "access_link": "Order link",
-            "invoiced": "Invoice issued"
+            "invoiced": "Invoice issued",
+            "note": "Order note (sent to the customer)"
           },
           "return": {
             "requested": "Return requested",
@@ -5399,7 +5400,7 @@
     },
     "notes": {
       "title": "Internal notes",
-      "text": "Only the team sees them; never shown to the customer.",
+      "text": "Only the team sees them; only a note marked \"Send to customer\" is e-mailed to the customer.",
       "empty": "No notes yet.",
       "new": "New note",
       "placeholder": "For example: the customer called and asked for the parcel to be left at the door.",
@@ -5410,7 +5411,19 @@
       "removeText": "The note is removed for the team; who removed it stays on record.",
       "removed": "Note removed.",
       "unnamed": "Team member",
-      "formerMember": "Former team member"
+      "formerMember": "Former team member",
+      "notify": "Send to customer",
+      "notifyHint": "The note is e-mailed to the order's address in the shop's name and shows in the message history.",
+      "addAndSend": "Add and send",
+      "sent": "Note added and sent to the customer.",
+      "notSent": {
+        "templateOff": "Note added but not sent: this message is turned off in Settings > Customer messages.",
+        "noAddress": "Note added but not sent: the order has no valid e-mail address.",
+        "failed": "Note added; the e-mail could not go now and will be tried again.",
+        "other": "Note added but not sent; the reason is in the message history."
+      },
+      "badgeSent": "Sent to customer",
+      "badgeNotSent": "Not sent"
     },
     "contracts": {
       "title": "Contract consent",
@@ -6277,6 +6290,14 @@
       "average": "Average basket",
       "lastOrder": "Last order",
       "city": "City"
+    },
+    "export": {
+      "button": "Export",
+      "excel": "Download as Excel",
+      "csv": "Download CSV",
+      "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
+      "laterNoJobs": "The file is being prepared in the background.",
+      "failed": "The customer file could not be prepared."
     }
   },
   "categories": {
@@ -6520,7 +6541,20 @@
       "buyCount": "Units taken",
       "payCount": "Units paid",
       "buyWord": "buy",
-      "payWord": "pay"
+      "payWord": "pay",
+      "audience": "Who can use it",
+      "audienceHint": "Customers in the chosen groups can use it once they log in to their account.",
+      "audiences": {
+        "everyone": "Everyone",
+        "groups": "Customer groups"
+      },
+      "audienceGroups": "Customer groups",
+      "noGroups": "No customer groups yet; create one under Customers › Groups.",
+      "firstOrder": "First order only",
+      "firstOrderHint": "Customers who ordered before cannot use it; their e-mail address is checked too.",
+      "previewGroups_one": "For {{count}} chosen customer group",
+      "previewGroups_other": "For {{count}} chosen customer groups",
+      "previewFirstOrder": "On a first order only"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
@@ -6532,7 +6566,8 @@
       "minimum": "Enter an amount above zero, or leave it empty.",
       "perCustomer": "Uses per customer must be a whole number.",
       "buyget": "Units paid must be fewer than units taken, both whole numbers from 1 to 99 (for example buy 3, pay 2).",
-      "buygetScope": "For buy X, pay Y choose products, categories or collections."
+      "buygetScope": "For buy X, pay Y choose products, categories or collections.",
+      "groups": "Choose at least one customer group, or everyone."
     },
     "created": "Promotion created.",
     "saved": "Promotion saved.",
@@ -6665,7 +6700,8 @@
       "marketing": "Campaigns and sources",
       "finance": "Finance",
       "stock": "Stock",
-      "search": "Search"
+      "search": "Search",
+      "customers": "Customers"
     },
     "share": "Share",
     "sales": "Sales",
@@ -6902,6 +6938,35 @@
         "empty": "No search found nothing in this period."
       },
       "empty": "No one searched the storefront in this period."
+    },
+    "customers": {
+      "tiles": {
+        "label": "Customer summary",
+        "new": "New customers",
+        "newHint": "{{registered}} members, {{guest}} guests",
+        "buyers": "Customers who bought",
+        "buyersHint": "Customers who ordered in this period",
+        "returning": "Returning",
+        "returningHint_one": "{{count}} customer had bought before",
+        "returningHint_other": "{{count}} customers had bought before",
+        "spent": "Spend per customer",
+        "spentHint": "The average of those who bought in this period"
+      },
+      "chartTitle": "New customers",
+      "chartHint": "Customers who signed up or ordered for the first time, with the period before.",
+      "chartEmpty": "No new customers in this period.",
+      "chartTable": "New customers by period",
+      "current": "This period",
+      "previous": "Period before",
+      "topTitle": "Top spending customers",
+      "topHint": "The first 10 by what their orders in this period came to.",
+      "topEmpty": "No customer ordered in this period.",
+      "columns": {
+        "customer": "Customer",
+        "orders": "Orders",
+        "spent": "Spent"
+      },
+      "capped": "The period is large; the numbers cover the first records."
     }
   },
   "seo": {

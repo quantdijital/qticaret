@@ -201,6 +201,8 @@ const CAPABILITY_PROBES = {
   vatRates: ["POST", "/admin/vat-rates"],
   // The order list as an Excel or CSV file, every customer's details in it: the owner's alone
   orderExport: ["POST", "/admin/order-board/export"],
+  // CU2: the customer list as an Excel or CSV file: the owner's alone
+  customerExport: ["POST", "/admin/customer-export"],
   // 2026-11-06: editing a customer, adding a guest, their addresses and the team's note on
   // them: owner, admin, operations
   customers: ["POST", "/admin/customers/:id"],
