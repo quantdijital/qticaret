@@ -19,7 +19,10 @@ const PRODUCT = {
   height: null,
 } as unknown as ProductDetail
 
-function answer(shippingClass: string | null, classes = [{ key: "bulky", name: "Büyük ürün", surcharge: 15_000 }]) {
+function answer(
+  shippingClass: string | null,
+  classes = [{ key: "bulky", name: "Büyük ürün", surcharge: 15_000 }]
+) {
   fetchMock.mockImplementation((url: string, init?: { body?: Record<string, unknown> }) => {
     if (url.includes("/catalog")) {
       return Promise.resolve({ shipping_class: shippingClass, ...init?.body })
