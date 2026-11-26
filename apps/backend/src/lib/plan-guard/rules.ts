@@ -22,6 +22,7 @@ export const PLAN_OPEN_JOBS: ReadonlySet<string> = new Set([
   "audit_log.export",
   "catalog.export",
   "customer.data_export",
+  "customer.export",
   "order.export",
   "report.export",
 ])
@@ -141,6 +142,7 @@ export const PLAN_OPEN: readonly Rule[] = [
   // Files of what the shop has
   ...open(POST, [
     "/admin/order-board/export",
+    "/admin/customer-export",
     "/admin/orders/export",
     "/admin/products/export",
     "/admin/inventory-items/export",
