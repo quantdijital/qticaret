@@ -10,6 +10,7 @@ import type {
 } from "@medusajs/framework/types"
 import { AbstractFulfillmentProviderService } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { errorSummary, logger } from "../../lib/logging"
 import { shipInputOf } from "../../lib/shipping/carriers"
 import { dhlEcomApi, dhlEcomCredentialsOf, wholeUp } from "../../lib/shipping/dhlecommerce"
 import type { DhlEcomCredentials, DhlEcomShipmentInput } from "../../lib/shipping/dhlecommerce"
@@ -153,7 +154,14 @@ class DhlEcomFulfillmentService extends AbstractFulfillmentProviderService {
     } catch (error) {
       // No label, no parcel: DHL's is taken back so nothing waits for a courier
       await withdrawDhlEcomParcel(api, credentials, input.referenceId, made.shipmentId).catch(
-        () => undefined
+        (cancel: unknown) => {
+          logger.warn({
+            event: "dhlecommerce.order_withdraw_failed",
+            dhlReferenceId: input.referenceId,
+            orderDisplayId: order?.display_id ?? null,
+            err: errorSummary(cancel),
+          })
+        }
       )
       throw error
     }

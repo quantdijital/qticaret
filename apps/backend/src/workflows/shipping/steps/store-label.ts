@@ -81,18 +81,29 @@ export const storeShipmentLabelStep = createStep(
     }
     const fileKey = await storePrivately(container, label.bytes, label.type, label.extension)
     const zpl = zplOf(data)
-    const zplKey = zpl ? await storePrivately(container, zpl, "text/plain", "zpl") : null
-    // The carrier's label leaves the fulfillment (Medusa merges `data`: set to null)
-    await fulfillments.updateFulfillment(input.fulfillment_id, {
-      data: {
-        ...data,
-        label_base64: null,
-        label_type: null,
-        label_zpl: null,
-        label_file_id: fileKey,
-        ...(zplKey ? { label_zpl_file_id: zplKey } : {}),
-      },
-    })
+    let zplKey: string | null = null
+    try {
+      zplKey = zpl ? await storePrivately(container, zpl, "text/plain", "zpl") : null
+      // The carrier's label leaves the fulfillment (Medusa merges `data`: set to null)
+      await fulfillments.updateFulfillment(input.fulfillment_id, {
+        data: {
+          ...data,
+          label_base64: null,
+          label_type: null,
+          label_zpl: null,
+          label_file_id: fileKey,
+          ...(zplKey ? { label_zpl_file_id: zplKey } : {}),
+        },
+      })
+    } catch (error) {
+      // A failing step is not compensated: the files it wrote would be left unreferenced,
+      // a person's address no erasure could reach (security review 2026-11-26)
+      await container
+        .resolve(Modules.FILE)
+        .deleteFiles(zplKey ? [fileKey, zplKey] : [fileKey])
+        .catch(() => undefined)
+      throw error
+    }
     return new StepResponse(
       { label_file_id: fileKey },
       {

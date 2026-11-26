@@ -16,29 +16,45 @@ import type {
  * 2. `createOrder`; a refusal opened nothing, an answer that never came
  *    may have: withdrawn;
  * 3. `createbarcode`, waiting a little while DHL still looks for the
- *    branch (20001); any failure withdraws the order, so nothing is left
- *    open at DHL; 20001 still unresolved tells staff to try again shortly.
+ *    branch (20001); any failure withdraws what DHL made (barcode, then
+ *    order), so nothing is left open at DHL; 20001 still unresolved tells
+ *    staff to try again shortly. A withdrawal DHL refuses tells staff to
+ *    check DHL first (`dhlecommerce.withdraw_failed`).
  */
 
 /** DHL answered and said no (its own code): nothing was opened. */
 const refusedOutright = (error: unknown): boolean =>
   isProviderError(error) && error.providerCode.startsWith("error_")
 
-/** Takes the order back at DHL after a later step failed; logged when DHL will not. */
+/**
+ * Takes the parcel back at DHL after a later step failed, whatever DHL
+ * made of it: asked first (a barcode may have been made though its answer
+ * never came), its barcode withdrawn when it has one, then its order.
+ * Nothing at DHL under the reference: nothing to take back. When DHL will
+ * not take it back, staff are told to look at DHL before shipping again,
+ * since a new try opens a second parcel (security review 2026-11-26).
+ */
 async function withdraw(
   api: DhlEcomApi,
   credentials: DhlEcomCredentials,
   referenceId: string,
   orderDisplayId: number | string | null
 ) {
-  await api.cancelOrder(credentials, referenceId).catch((cancel: unknown) => {
+  try {
+    const now = await api.status(credentials, referenceId)
+    if (!now.found) {
+      return
+    }
+    await withdrawDhlEcomParcel(api, credentials, referenceId, now.shipmentId)
+  } catch (cancel) {
     logger.warn({
       event: "dhlecommerce.order_withdraw_failed",
       dhlReferenceId: referenceId,
       orderDisplayId,
       err: errorSummary(cancel),
     })
-  })
+    throw new ValidationError("dhlecommerce.withdraw_failed", { cause: cancel })
+  }
 }
 
 export async function openDhlEcomParcel(

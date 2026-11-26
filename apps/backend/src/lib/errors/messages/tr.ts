@@ -946,6 +946,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın (e-postayla gelen geçici şifre değil); test ve canlı hesap ayrıdır.",
   "dhlecommerce.email_missing":
     "DHL eCommerce alıcının e-posta adresini ister; siparişte e-posta yok. Siparişe müşterinin e-postasını ekleyip yeniden deneyin.",
+  "dhlecommerce.withdraw_failed":
+    "DHL eCommerce'te gönderi açılmış olabilir ama geri çekilemedi. Yeniden kargoya vermeden önce Online Şube'de bu siparişin gönderisine bakın; varsa orada iptal edin.",
   "dhlecommerce.place_unknown":
     "DHL eCommerce teslimat adresindeki ili ya da ilçeyi tanımadı. Siparişin adresinde il ve ilçeyi düzeltip yeniden deneyin.",
   "dhlecommerce.branch_pending":
