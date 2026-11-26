@@ -113,8 +113,9 @@ export function IntegrationRow({ row, health, onTest, testing }: IntegrationRowP
             </span>
           ))}
         </div>
-        {/* A phone: the state on its line, the buttons below it sharing the width */}
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:shrink-0 sm:flex-row sm:items-center">
+        {/* The state, then the buttons at their own width (as Ödeme's and Kargo's rows; the
+            owner 2026-11-26: full-width buttons on a phone stood out), wrapping when they must */}
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
           <div className="flex items-center gap-2">
             {live && !down ? (
               <span className="text-xs text-muted-foreground tabular-nums">
@@ -131,7 +132,6 @@ export function IntegrationRow({ row, health, onTest, testing }: IntegrationRowP
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 sm:flex-none"
                   disabled={testing}
                   onClick={onTest}
                   aria-describedby={nameId}
@@ -141,7 +141,7 @@ export function IntegrationRow({ row, health, onTest, testing }: IntegrationRowP
                 </Button>
               ) : null}
               {link ? (
-                <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-none">
+                <Button asChild variant="outline" size="sm">
                   <Link {...link} aria-describedby={nameId}>
                     {t(`${I}.setUp`)}
                   </Link>
