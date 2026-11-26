@@ -63,6 +63,7 @@ const BLOCKS: FooterBlockView[] = [
     whatsappHref: null,
     email: "bilgi@example.com",
     hours: [{ days: "Pazartesi – Cuma", hours: "09:00 – 18:00" }],
+    iconStyle: "boxed",
   },
   {
     ...at(4),

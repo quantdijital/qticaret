@@ -1,5 +1,6 @@
 import type {
   FooterImageWidth,
+  FooterContactIconStyle,
   FooterLogoSize,
   FooterNewsletterVariant,
   FooterRowLayout,
@@ -100,6 +101,8 @@ export type FooterBlockView = FooterBlockViewBase &
         whatsappHref: string | null
         email: string | null
         hours: OpeningHoursView[]
+        /** `inline`: small signs in the line, no kind above; `boxed`: round boxes, the kind small above. */
+        iconStyle: FooterContactIconStyle
       }
     | { type: "social"; title: string | null; profiles: SocialLinkView[] }
     | { type: "payments"; title: string | null; payments: ShopMarkView[]; carriers: ShopMarkView[] }

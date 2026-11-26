@@ -10138,7 +10138,14 @@
         "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used.",
         "joined": "Joined to the footer",
         "joinedTerm": "footer band",
-        "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway."
+        "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway.",
+        "tone": "Box ground",
+        "toneTerm": "box tone",
+        "toneHint": "The band's ground when drawn as a box: the theme's box colour or a very light tone of the shop's main colour. A band joined to the footer takes the footer's ground.",
+        "tones": {
+          "plain": "Plain",
+          "tint": "Main colour tint"
+        }
       },
       "announcement": {
         "line": "Announcement {{number}}",
@@ -11940,6 +11947,12 @@
             "term": "logo size",
             "medium": "Medium",
             "large": "Large"
+          },
+          "icon_style": {
+            "label": "Icons",
+            "term": "icon style",
+            "boxed": "In round boxes",
+            "inline": "Small, in the line"
           }
         },
         "source": {

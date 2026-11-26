@@ -34,6 +34,22 @@ describe("the footer box's joined band", () => {
     expect(printedNewsletter(before.footer[0] as never, same, asIs)).not.toHaveProperty("joined")
   })
 
+  it("takes the bands' ground tone on a page and in the footer, printed only when tinted", () => {
+    for (const variant of ["split", "image_card", "strip"]) {
+      const doc = layoutDocument.parse({
+        footer: [box({ variant, tone: "tint" })],
+        home: [box({ id: "sayfabulten", variant, tone: "tint" })],
+      })
+      expect(printedNewsletter(doc.footer[0] as never, same, asIs)).toMatchObject({ tone: "tint" })
+      expect(printedNewsletter(doc.home[0] as never, same, asIs)).toMatchObject({ tone: "tint" })
+    }
+    const plain = layoutDocument.parse({ footer: [box({ variant: "strip", tone: "plain" })] })
+    expect(printedNewsletter(plain.footer[0] as never, same, asIs)).not.toHaveProperty("tone")
+    expect(parses({ footer: [box({ variant: "standard", tone: "tint" })] })).toBe(false)
+    expect(parses({ footer: [box({ variant: "in_footer", tone: "tint" })] })).toBe(false)
+    expect(parses({ home: [box({ variant: "strip", tone: "neon" })] })).toBe(false)
+  })
+
   it("refuses it where it means nothing: the footer's standard and column boxes, a page's box", () => {
     expect(parses({ footer: [box({ variant: "standard", joined: true })] })).toBe(false)
     expect(parses({ footer: [box({ variant: "in_footer", joined: true })] })).toBe(false)

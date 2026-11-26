@@ -23,7 +23,7 @@ export interface NewsletterBoxProps {
   subscribe: Subscribe
   /** The theme editor's live preview: the words carry their field marks. */
   marks: boolean
-  /** `page`: a box on the page's ground (`gf-pane`); `footer`: on the footer's own ground. */
+  /** `page`: a box on the page's ground (`gf-pane`, `tint`: `gf-news-tint`); `footer`: on the footer's own ground. */
   place: "page" | "footer"
   /** The editor's section mark (or none) for the region. */
   sectionMark?: { "data-qs"?: string }
@@ -82,6 +82,8 @@ export function NewsletterBox(props: NewsletterBoxProps) {
   const { look, title, headingId, formId, words, privacyPath, subscribe, marks, place } = props
   const variant = props.variant === "image_card" && !look.image ? "split" : props.variant
   const boxed = place === "page"
+  // The box's ground: the theme's pane, or the wash of the shop's main colour (`tone`)
+  const pane = look.tone === "tint" ? "rounded-tile gf-news-tint" : "rounded-tile gf-pane"
   const form = (className = "") => (
     <NewsletterForm
       id={formId}
@@ -113,7 +115,7 @@ export function NewsletterBox(props: NewsletterBoxProps) {
         {...region}
         className={cn(
           "flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-(--gap-columns)",
-          boxed ? "rounded-tile gf-pane px-5 py-4 sm:px-6" : "py-2"
+          boxed ? `${pane} px-5 py-4 sm:px-6` : "py-2"
         )}
       >
         <div className="flex min-w-0 flex-1 items-start gap-3 lg:items-center">
@@ -143,7 +145,7 @@ export function NewsletterBox(props: NewsletterBoxProps) {
         {...region}
         className={cn(
           "grid overflow-hidden lg:grid-cols-12",
-          boxed ? "rounded-tile gf-pane" : "gap-6 lg:gap-x-(--gap-columns)"
+          boxed ? pane : "gap-6 lg:gap-x-(--gap-columns)"
         )}
       >
         <div
@@ -177,7 +179,7 @@ export function NewsletterBox(props: NewsletterBoxProps) {
       {...region}
       className={cn(
         "grid gap-5 lg:grid-cols-12 lg:items-center lg:gap-x-(--gap-columns)",
-        boxed && "rounded-tile gf-pane p-6 sm:px-8 sm:py-7 lg:px-10"
+        boxed && `${pane} p-6 sm:px-8 sm:py-7 lg:px-10`
       )}
     >
       <div className="lg:col-span-6">

@@ -65,6 +65,7 @@ export function newBlock<T extends FooterBlockType>(type: T, id: string): Footer
       whatsapp: true,
       email: true,
       hours: true,
+      icon_style: "boxed",
     },
     social: { id, ...SHOWN, type: "social", title: null },
     payments: { id, ...SHOWN, type: "payments", title: null, carriers: false },

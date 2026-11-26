@@ -1,4 +1,4 @@
-import type { NewsletterVariant } from "@qticaret/types"
+import type { NewsletterTone, NewsletterVariant } from "@qticaret/types"
 import type { ImageView } from "./views"
 
 /**
@@ -16,4 +16,6 @@ export interface NewsletterLookView {
   note: string | null
   /** `image_card`: the picture; null: the card drawn as `split`. */
   image: ImageView | null
+  /** The boxed bands' ground: the theme's pane, or a wash of the shop's main colour (`tint`). */
+  tone: NewsletterTone
 }

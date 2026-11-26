@@ -69,6 +69,8 @@ export const FOOTER_TRUST_LAYOUTS = ["list", "inline"] as const
 export const FOOTER_TEXT_STYLES = ["plain", "hand"] as const
 /** The brand block's logo: the footer's usual height, or a step taller (`large`). */
 export const FOOTER_LOGO_SIZES = ["medium", "large"] as const
+/** The contact block's signs: in round boxes beside a small kind (`boxed`), or small in the line (`inline`). */
+export const FOOTER_CONTACT_ICON_STYLES = ["boxed", "inline"] as const
 export const FOOTER_TRUST_LIMIT = { min: 1, max: 4, default: 3 } as const
 export const FOOTER_APP_HOSTS = {
   app_store: "apps.apple.com",
@@ -176,6 +178,7 @@ const contactBlock = z
     whatsapp: z.boolean().default(true),
     email: z.boolean().default(true),
     hours: z.boolean().default(true),
+    icon_style: step(FOOTER_CONTACT_ICON_STYLES),
   })
   .strict()
 

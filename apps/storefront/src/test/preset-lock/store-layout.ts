@@ -116,6 +116,9 @@ function footerNewsletter(box: Section) {
     ...(variant !== "standard" && variant !== "in_footer" && box["joined"] === true
       ? { joined: true }
       : {}),
+    ...(variant !== "standard" && variant !== "in_footer" && box["tone"] === "tint"
+      ? { tone: "tint" }
+      : {}),
   }
 }
 

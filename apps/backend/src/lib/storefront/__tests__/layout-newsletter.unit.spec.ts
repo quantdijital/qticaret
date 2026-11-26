@@ -1,6 +1,11 @@
 import path from "node:path"
 import { layoutDocument, readStoredLayout } from "../layout"
-import { NEWSLETTER_LIMITS, newsletterImages, printedNewsletter } from "../sections/newsletter"
+import {
+  NEWSLETTER_LIMITS,
+  NEWSLETTER_TONES,
+  newsletterImages,
+  printedNewsletter,
+} from "../sections/newsletter"
 import { SECTION_VARIANTS } from "../sections/variants"
 
 // The contract's own files (`@qticaret/types`), through jest: the package is ESM for tsc here
@@ -123,5 +128,6 @@ describe("the newsletter box's variants (adr/0049 Ek 2026-11-17 e-bülten)", () 
       (contract("section-variants")["SECTION_VARIANTS"] as Record<string, unknown>)["newsletter"]
     )
     expect(NEWSLETTER_LIMITS).toEqual(contract("section-newsletter")["NEWSLETTER_LIMITS"])
+    expect(NEWSLETTER_TONES).toEqual(contract("section-newsletter")["NEWSLETTER_TONES"])
   })
 })

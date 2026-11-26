@@ -122,6 +122,7 @@ describe("the free rows footer's view (adr/0070)", () => {
       whatsappHref: null,
       email: "bilgi@example.com",
       hours: [],
+      iconStyle: "boxed",
     })
     const none = { ...PARTS.contact, email: null, phone: null, phoneHref: null, whatsappHref: null }
     expect(

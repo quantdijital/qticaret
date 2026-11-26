@@ -54,6 +54,7 @@ export type ContentField =
   | "strips_layout"
   | "show_note"
   | "joined"
+  | "news_tone"
   | "image_side"
   | "outline"
   | "questions"
