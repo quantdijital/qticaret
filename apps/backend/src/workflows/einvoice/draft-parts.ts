@@ -10,7 +10,11 @@ import type AuditLogModuleService from "../../modules/audit-log/service"
 import { BILLING_PROFILE_MODULE } from "../../modules/billing-profile"
 import type BillingProfileModuleService from "../../modules/billing-profile/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { CarrierIdentity, InvoicingSettings } from "../../modules/platform-settings/sections"
+import type {
+  CarrierIdentity,
+  InvoicingSettings,
+  LegalSettings,
+} from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { storefrontUrlOf } from "../messaging/brand"
 
@@ -48,7 +52,25 @@ export async function exchangesOf(container: Container, orderId: string) {
 }
 
 /**
- * The carriers as the shop named them, and the storefront's address: its
+ * The parcels the shop carries itself name the shop (the owner, 2026-11-26:
+ * nothing to type twice): its registered name and tax id from its legal
+ * identity, unless it entered another for them. Null while either is missing.
+ */
+export function ownDeliveryIdentity(
+  carriers: InvoicingSettings["carriers"],
+  legal: Pick<LegalSettings, "company_title" | "tax_number">
+): InvoicingSettings["carriers"] {
+  if (carriers.manual) {
+    return carriers
+  }
+  const title = legal.company_title?.trim()
+  const taxId = legal.tax_number?.trim()
+  return title && taxId ? { ...carriers, manual: { title, tax_id: taxId } } : carriers
+}
+
+/**
+ * The carriers as the shop named them (its own parcels its own name, by
+ * `ownDeliveryIdentity`), and the storefront's address: its
  * canonical host, else on a developer's machine the dev storefront, as a
  * message's links take it (`storefrontUrlOf`). Never a stand-in deployed:
  * a shop without a host gets `einvoice.store_url_missing`.
@@ -58,13 +80,17 @@ export async function settingsOf(
   env: Pick<Env, "NODE_ENV" | "STOREFRONT_ORIGIN"> = parseEnv()
 ) {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [invoicing, seo] = await Promise.all([
+  const [invoicing, seo, legal] = await Promise.all([
     settings.readSection("invoicing"),
     settings.readSection("seo"),
+    settings.readSection("legal"),
   ])
   const host = (seo.values as { canonical_host?: string | null }).canonical_host
   return {
-    carriers: (invoicing.values as unknown as InvoicingSettings).carriers,
+    carriers: ownDeliveryIdentity(
+      (invoicing.values as unknown as InvoicingSettings).carriers,
+      legal.values as unknown as LegalSettings
+    ),
     store_url: storefrontUrlOf(host, env),
   }
 }
@@ -111,7 +137,8 @@ type CarrierIdentities = InvoicingSettings["carriers"]
  *   checkout, dated the day the invoice is made (an invoice cut once the
  *   order is placed and paid, the default).
  * The carrier's name and tax id are the shop's, entered once (Settings >
- * E-Fatura); a carrier without them holds the invoice back. Null for an
+ * Shipping, the carrier's page; its own parcels its legal identity); a
+ * carrier without them holds the invoice back. Null for an
  * order with nothing to ship. Only a parcel with the invoice's lines in
  * it counts: an exchange's parcel is its own sale's.
  */

@@ -4,8 +4,10 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ShippingSettings } from "@/features/settings/api/sections"
+import type { ShopShippingOption } from "@/features/settings/api/shipping-options"
 import { RatesCard } from "./shipping-rules-cards"
-import { ShippingOptionDialog } from "./shipping-option-dialog"
+import { ShippingOptionEditor } from "./shipping-option-editor"
+import { ShippingOptionsCard } from "./shipping-options-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -32,26 +34,34 @@ const SHIPPING: ShippingSettings = {
   shipping_classes: [],
 }
 
-describe("shipping settings (F7.8)", () => {
+const FAST: ShopShippingOption = {
+  id: "so_fast",
+  name: "Hızlı Kargo",
+  carrier: "manual",
+  pricing: "flat",
+  amount: "150",
+  in_store: false,
+}
+
+describe("shipping options, edited in their rows (F7.8)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     fetchMock.mockResolvedValue({})
   })
 
-  it("adds a flat option the shop ships itself, in lira", async () => {
-    wrap(<ShippingOptionDialog open onOpenChange={vi.fn()} />)
+  it("adds a flat option the shop ships itself, its name already filled in", async () => {
+    wrap(<ShippingOptionEditor onDone={vi.fn()} />)
 
-    await userEvent.type(screen.getByLabelText(/^Ad/), "Standart Kargo")
-    await userEvent.click(screen.getByRole("combobox", { name: "Taşıyan" }))
-    await userEvent.click(screen.getByRole("option", { name: "Kendi gönderimim" }))
-    await userEvent.type(screen.getByLabelText(/Ücret \(TL\)/), "49,90")
+    expect(screen.getByLabelText(/^Ad/)).toHaveValue("Standart kargo")
+    expect(screen.queryByRole("combobox", { name: "Ücret" })).not.toBeInTheDocument()
+    await userEvent.type(screen.getByLabelText(/^Tutar/), "49,90")
     await userEvent.click(screen.getByRole("button", { name: "Seçenek ekle" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/shipping-setup/options", {
         method: "POST",
         body: {
-          name: "Standart Kargo",
+          name: "Standart kargo",
           carrier: "manual",
           pricing: { type: "flat", amount: 49.9 },
         },
@@ -59,20 +69,57 @@ describe("shipping settings (F7.8)", () => {
     })
   })
 
-  it("adds a Geliver option priced by the table, with no amount asked", async () => {
-    wrap(<ShippingOptionDialog open onOpenChange={vi.fn()} />)
+  it("starts a Geliver option on its cheapest quote, with no amount asked", async () => {
+    wrap(<ShippingOptionEditor carrier="geliver" onDone={vi.fn()} />)
 
-    await userEvent.type(screen.getByLabelText(/^Ad/), "Ekonomik")
-    await userEvent.click(screen.getByRole("combobox", { name: "Ücret" }))
-    await userEvent.click(screen.getByRole("option", { name: "Ücret tablosu (desi)" }))
-    expect(screen.queryByLabelText(/Ücret \(TL\)/)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^Tutar/)).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Seçenek ekle" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/shipping-setup/options", {
         method: "POST",
-        body: { name: "Ekonomik", carrier: "geliver", pricing: { type: "table" } },
+        body: {
+          name: "Standart kargo",
+          carrier: "geliver",
+          pricing: { type: "quote", choice: "cheapest" },
+        },
       })
+    })
+  })
+
+  it("opens a row in place, reprices it, and removes it after a second press", async () => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(url.endsWith("/options") ? { options: [FAST] } : {})
+    )
+    wrap(<ShippingOptionsCard />)
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Hızlı Kargo seçeneğini düzenle" })
+    )
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    const amount = screen.getByLabelText(/^Tutar/)
+    await userEvent.clear(amount)
+    await userEvent.type(amount, "120")
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/shipping-setup/options/so_fast", {
+        method: "POST",
+        body: { name: "Hızlı Kargo", amount: 120 },
+      })
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Hızlı Kargo seçeneğini düzenle" }))
+    await userEvent.click(screen.getByRole("button", { name: "Hızlı Kargo seçeneğini kaldır" }))
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/shipping-setup/options/so_fast",
+      expect.objectContaining({ method: "DELETE" })
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Kaldır" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/admin/shipping-setup/options/so_fast",
+        expect.objectContaining({ method: "DELETE" })
+      )
     })
   })
 

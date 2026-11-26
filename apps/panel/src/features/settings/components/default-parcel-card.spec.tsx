@@ -53,7 +53,7 @@ describe("DefaultParcelCard (adr/0054)", () => {
   it("shows the platform's parcel until the shop saves its own, and saves all four", async () => {
     renderCard(SAVED)
 
-    expect(screen.getByText(/kargo firması gerçek paketi kendisi ölçer/)).toBeInTheDocument()
+    expect(screen.getByText(/kargo ücreti bu pakete göre hesaplanır/)).toBeInTheDocument()
     expect(input("Ağırlık")).toHaveValue("1000")
     expect(input("Uzunluk")).toHaveValue("30")
     expect(screen.getByText(/2 desiden hesaplanır/)).toBeInTheDocument()
