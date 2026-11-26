@@ -46,6 +46,10 @@
     background: transparent;
     color: #fff;
   }
+  /* The plain tools stay without a ring */
+  &[data-tools="plain"] .gf-tool.gf-icon-btn {
+    border-color: transparent;
+  }
   & .gf-tool.gf-icon-btn:hover,
   & .gf-icon-btn:hover {
     background: rgb(255 255 255 / 0.14);

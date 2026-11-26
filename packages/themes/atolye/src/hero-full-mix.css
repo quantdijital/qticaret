@@ -18,6 +18,8 @@
 .gf-cover[data-title-mix="serif_accent"] .gf-cover-accent {
   font-family: var(--font-accent, var(--font-heading));
   font-style: italic;
+  /* The faces ship upright only: the theme turns synthesis off (`base.css`), the accent takes it back */
+  font-synthesis: style;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
