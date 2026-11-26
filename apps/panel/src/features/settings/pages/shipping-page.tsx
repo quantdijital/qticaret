@@ -15,6 +15,7 @@ import { ShippingAdvanced } from "@/features/settings/components/shipping-advanc
 import { ShippingFeeSection } from "@/features/settings/components/shipping-fee-section"
 import { BookingFlowCard } from "@/features/settings/components/booking-flow-card"
 import { ReturnsCard } from "@/features/settings/components/returns-card"
+import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { ShippingManagerCard } from "@/features/settings/components/shipping-manager-card"
@@ -106,7 +107,12 @@ function CarriersTab({ saved }: { saved: ShippingSettings | undefined }) {
   return (
     <div className="flex flex-col gap-6">
       <ShippingManagerCard saved={manager} connected={connected} />
-      {manager === "own" ? <CarriersCard accounts={accounts.data.accounts} /> : null}
+      {/* BirFatura's carrier is not ours: its return code is named here (adr/0031 Ek 2026-11-26) */}
+      {manager === "own" ? (
+        <CarriersCard accounts={accounts.data.accounts} />
+      ) : (
+        <ReturnCodeCard target="other" />
+      )}
     </div>
   )
 }

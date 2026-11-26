@@ -26,7 +26,10 @@ export const RETURN_TEXTS: Readonly<Record<string, string>> = {
     "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaşıp kontrol edildikten sonra ödemeniz iade edilir.",
   "return_approved.intro.exchange":
     "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaştığında yenileri yola çıkar.",
-  "return_approved.code_title": "Kargo kodu",
+  "return_approved.code_title": "İade kargosu",
+  // adr/0031 Ek 2026-11-26: the shop's one contracted return code, said at any branch
+  "return_approved.contracted":
+    "İade paketinizi {{carrier}} şubesine verin ve gönderirken '{{code}}' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz.",
   "return_approved.code": "Koliyi kargo şubesine teslim ederken bu kodu söyleyin: {{code}}",
   "return_approved.no_code":
     "Ürünleri nasıl göndereceğinizle ilgili mağaza sizinle iletişime geçecek.",

@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
+import { readContractedReturn } from "../../../workflows/returns/contracted-return"
 import { withWithdrawalMarks } from "../../../workflows/returns/request-items"
 import type { AdminGetReturnRequestsType } from "./validators"
 import { returnRequestView } from "./view"
@@ -11,6 +12,9 @@ import { returnRequestView } from "./view"
  * oldest waiting first, each with its order's number; refunds as lira;
  * an exchange's wanted variants by name (§6); each line marked when it is
  * outside the right of withdrawal, as `/admin/orders/:id/returnable` marks it.
+ * `contracted_return`: the shop's contracted return code now (adr/0031 Ek
+ * 2026-11-26), null when none is entered for the way it ships, so the
+ * queue can say so.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetReturnRequestsType>,
@@ -27,7 +31,7 @@ export async function GET(
   const swaps = (request: { exchange_items: unknown }) =>
     (request.exchange_items ?? []) as { line_item_id: string; variant_id: string }[]
   const variantIds = [...new Set(requests.flatMap(swaps).map((line) => line.variant_id))]
-  const [{ data: orders }, { data: variants }, marked] = await Promise.all([
+  const [{ data: orders }, { data: variants }, marked, contracted] = await Promise.all([
     query.graph({
       entity: "order",
       fields: ["id", "display_id"],
@@ -41,6 +45,7 @@ export async function GET(
         })
       : Promise.resolve({ data: [] as unknown[] }),
     withWithdrawalMarks(req.scope, requests),
+    readContractedReturn(req.scope),
   ])
   const titles = new Map(
     (variants as { id: string; title?: string | null }[]).map((variant) => [
@@ -56,13 +61,14 @@ export async function GET(
   )
   res.json({
     return_requests: marked.map((request) => ({
-      ...returnRequestView(request),
+      ...returnRequestView(request, contracted),
       exchange_items:
         request.kind === "exchange"
           ? swaps(request).map((line) => ({ ...line, title: titles.get(line.variant_id) ?? null }))
           : null,
       order_display_id: numbers.get(request.order_id) ?? null,
     })),
+    contracted_return: contracted,
     count,
     limit,
     offset,

@@ -6,7 +6,7 @@ import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/components/return-facts"
 import { Fact, QueueDialog } from "@/features/orders/components/queue-dialog"
 import { differenceText } from "@/features/orders/exchange-text"
-import { RETURN_TONE } from "@/features/orders/return-rules"
+import { RETURN_TONE, returnCodeText } from "@/features/orders/return-rules"
 import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const R = "orders.returns"
@@ -47,7 +47,7 @@ export function ReturnQueueDialog({
           <dl>
             <Fact label={t(`${R}.columns.reason`)}>{t(`${R}.reasons.${request.reason}`)}</Fact>
             <Fact label={t(`${R}.columns.date`)}>{formatDateTime(request.created_at)}</Fact>
-            <Fact label={t(`${R}.columns.code`)}>{request.return_code ?? "—"}</Fact>
+            <Fact label={t(`${R}.columns.code`)}>{returnCodeText(request) ?? "—"}</Fact>
             <Fact label={t(`${R}.columns.refund`)}>
               {request.refund_amount
                 ? formatMoney(request.refund_amount, "try")

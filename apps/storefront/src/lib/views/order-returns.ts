@@ -233,7 +233,7 @@ export function requestWordsOf(
   request: ReturnRequestRow,
   giftLines: ReadonlySet<string>,
   t: Translate
-): { kind: string; status: string; code: string | null } {
+): { kind: string; status: string; code: string | null; codeText?: string | null } {
   const items = request.items ?? []
   const gift = items.length > 0 && items.every((line) => giftLines.has(line.line_item_id))
   if (gift) {
@@ -256,6 +256,15 @@ export function requestWordsOf(
       request.status
     ),
     code: request.return_code,
+    // The shop's contracted code: where to hand the parcel in and that it costs nothing
+    ...(request.return_code && request.return_carrier
+      ? {
+          codeText: t("order.return_code_contracted", {
+            carrier: request.return_carrier,
+            code: request.return_code,
+          }),
+        }
+      : {}),
   }
 }
 

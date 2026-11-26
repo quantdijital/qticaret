@@ -14,6 +14,7 @@ import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/componen
 import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
+import { returnCodeText } from "@/features/orders/return-rules"
 import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { OpenReturnDialog } from "./open-return-dialog"
 import { useReturnOpenable } from "./use-return-openable"
@@ -111,8 +112,8 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
                 {[
                   t(`${R}.reasons.${row.reason}`),
                   formatDateTime(row.created_at),
-                  // A cancelled request's code was withdrawn at the carrier
-                  row.status === "canceled" ? null : row.return_code,
+                  // A cancelled request's code no longer takes a parcel
+                  returnCodeText(row),
                 ]
                   .filter(Boolean)
                   .join(" · ")}

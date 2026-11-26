@@ -1641,6 +1641,18 @@
           "invoice": "BirFatura can only ship orders it has received, so an order goes to BirFatura once paid (right away for cash on delivery); when the invoice is issued depends on your BirFatura settings.",
           "price": "At checkout the shipping fee comes from the shop's own fee settings; on the Options tab choose free, flat or free above a total instead of \"The carrier's price\"."
         }
+      },
+      "returnCode": {
+        "title": "Contracted return code",
+        "description": "The fixed return code the carrier gives a contracted shop. Shown to the customer on an approved return, by e-mail and on the order page.",
+        "descriptionOther": "The name of the carrier you use with BirFatura and the fixed return code it gave you. Shown to the customer on an approved return.",
+        "label": "Contracted return code",
+        "hint": "The customer says this code when handing the return parcel in at a branch; the fee is paid from your contract.",
+        "carrier": "Carrier",
+        "carrierPlaceholder": "E.g. Aras Kargo",
+        "both": "Enter the carrier's name and the code together, or leave both empty.",
+        "invalid": "A code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
+        "missing": "No contracted return code entered. Approved returns show the customer no code; they are told the shop will be in touch."
       }
     },
     "integrations": {
@@ -5443,7 +5455,9 @@
       "cancelReason": "Reason",
       "cancelReasonHint": "A note for the team; the customer does not see it.",
       "canceled": "Return request cancelled; the customer was emailed.",
-      "dialogTitle": "Request on order #{{number}}"
+      "dialogTitle": "Request on order #{{number}}",
+      "codeMissing": "No contracted return code entered. Approved returns show the customer no carrier code; they are told the shop will be in touch.",
+      "codeMissingLink": "Go to shipping settings"
     },
     "edit": {
       "title": "Edit order #{{number}}",

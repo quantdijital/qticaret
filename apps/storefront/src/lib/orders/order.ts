@@ -123,6 +123,12 @@ export interface ReturnRequestRow {
   kind: string
   status: string
   return_code: string | null
+  /**
+   * The carrier the code is said at ("Aras Kargo"): the shop's contracted
+   * return code (adr/0031 Ek 2026-11-26); absent or null for an old
+   * request's own code.
+   */
+  return_carrier?: string | null
   created_at: string
   /** The lines asked for: a gift card line's withdrawal reads apart, and counts its cards. */
   items?: { line_item_id: string; quantity: number }[] | null
