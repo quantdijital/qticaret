@@ -12,6 +12,7 @@ import { MAX_AMOUNT, MAX_COST } from "./change"
 import type { BulkChange } from "./change"
 import { planAddonTemplate } from "./plan-addon-template"
 import { altWrites } from "./plan-alt"
+import { planBackorder, planBrand, planSale, planTag } from "./plan-more"
 import { UNCHANGED, skipped, writing } from "./plan-result"
 import type { BulkDiff, BulkPlan, PlanContext } from "./plan-result"
 import { planStock } from "./plan-stock"
@@ -211,5 +212,13 @@ export function planBulkChange(
       return planCost(product, change)
     case "addon_template":
       return planAddonTemplate(product, change, context.addonTemplates ?? new Map())
+    case "brand":
+      return planBrand(product, change)
+    case "tag":
+      return planTag(product, change, context)
+    case "backorder":
+      return planBackorder(product, change)
+    case "sale":
+      return planSale(product, change, context)
   }
 }

@@ -1,19 +1,17 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { templateSourceOf } from "../../../lib/catalog/addons"
-import { ValidationError } from "../../../lib/errors"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { SheetCell } from "../../../lib/sheets"
-import { requireAddonsFlag } from "../../addon-templates/usage"
 import { publishGate } from "../../seo/advisor/publish-gate"
 import { writeErrorText } from "../write-error"
 import type { BulkAction, BulkChange, BulkEditInput } from "./change"
+import { planContext } from "./context"
 import { planBulkChange } from "./plan"
 import type { BulkDiff, BulkPlan, PlanContext } from "./plan"
 import { bulkProducts } from "./products"
 import type { BulkProduct } from "./products"
-import { bulkRow } from "./report"
+import { bulkRow, problemOf } from "./report"
+import type { BulkProblem } from "./report"
 import { runProducts } from "./scope"
 import type { RunProducts } from "./scope"
 import { writeBulkChange } from "./write"
@@ -27,6 +25,8 @@ export interface BulkEditSummary {
   unchanged: number
   skipped: number
   failed: number
+  /** The first products left out or failed, with why (the report has every one). */
+  problems: BulkProblem[]
 }
 
 export interface BulkEditHooks {
@@ -42,53 +42,8 @@ export interface BulkEditHooks {
 // sale or an edit made while the run goes on is what its plan starts from
 const PRODUCT_CHUNK = 20
 
-type Counts = Omit<BulkEditSummary, "action" | "products">
+type Counts = Omit<BulkEditSummary, "action" | "products" | "problems">
 type IsBlocked = ((id: string) => Promise<boolean>) | null
-
-// What the run needs of the shop: the change's category, the default warehouse
-async function planContext(container: MedusaContainer, change: BulkChange): Promise<PlanContext> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  if (change.action === "category") {
-    const { data } = await query.graph({
-      entity: "product_category",
-      fields: ["id"],
-      filters: { id: change.category_id },
-    })
-    if (data.length === 0) {
-      throw new ValidationError("bulk_edit.category_unknown", { field: "category_id" })
-    }
-  }
-  if (change.action === "addon_template") {
-    // Linking needs the shop's add-ons on: said once for the run, not per product
-    if (change.mode === "add") {
-      await requireAddonsFlag(container)
-    }
-    const { data } = await query.graph({
-      entity: "addon_template",
-      fields: ["id", "name", "addons"],
-    })
-    const templates = new Map(
-      (data as { id: string; name: string; addons?: unknown }[]).map((row) => [
-        row.id,
-        templateSourceOf(row),
-      ])
-    )
-    if (!templates.has(change.template_id)) {
-      throw new ValidationError("bulk_edit.addon_template_unknown", { field: "template_id" })
-    }
-    return { locationId: null, addonTemplates: templates }
-  }
-  if (change.action !== "stock") {
-    return { locationId: null }
-  }
-  const { data } = await query.graph({ entity: "store", fields: ["default_location_id"] })
-  const locationId = (data[0] as { default_location_id?: string | null } | undefined)
-    ?.default_location_id
-  if (!locationId) {
-    throw new ValidationError("bulk_edit.no_location")
-  }
-  return { locationId }
-}
 
 // One product: planned, held by the publish gate, or written
 async function applyOne(
@@ -142,6 +97,12 @@ async function applyAll(
   const counts: Counts = { changed: 0, unchanged: 0, skipped: 0, failed: 0 }
   const rows: SheetCell[][] = []
   const changed: string[] = []
+  const problems: BulkProblem[] = []
+  const note = (problem: BulkProblem | null) => {
+    if (problem) {
+      problems.push(problem)
+    }
+  }
   let done = 0
   for await (const chunk of products.chunks) {
     const found = new Map(
@@ -154,6 +115,7 @@ async function applyAll(
         counts.skipped += 1
         const missing = serverErrorMessage("bulk_edit.product_missing", "tr")
         rows.push(bulkRow({ handle: id, title: null }, "skipped", missing))
+        note(problemOf(problems, { handle: id, title: null }, "skipped", missing))
         continue
       }
       const plan = planBulkChange(product, change, context)
@@ -163,6 +125,7 @@ async function applyAll(
       })
       counts[outcome] += 1
       rows.push(bulkRow(product, outcome, message))
+      note(problemOf(problems, product, outcome, message))
       if (outcome === "changed" && plan.kind === "write") {
         changed.push(product.id)
         await auditWritten(hooks, product.id, plan.diff)
@@ -172,7 +135,7 @@ async function applyAll(
     // A scope's count is read as it starts: a product made meanwhile may pass it
     await hooks.progress(5 + Math.floor(Math.min(1, done / Math.max(1, products.total)) * 95))
   }
-  return { counts, rows, changed, done }
+  return { counts, rows, changed, done, problems }
 }
 
 /**
@@ -189,7 +152,7 @@ export async function runBulkEdit(
   hooks: BulkEditHooks
 ): Promise<{ summary: BulkEditSummary; rows: SheetCell[][] }> {
   const { change } = input
-  const context = await planContext(container, change)
+  const context = await planContext(container, change, true)
   const products = await runProducts(container, input, PRODUCT_CHUNK)
   const isBlocked =
     change.action === "status" && change.status === "published"
@@ -203,13 +166,19 @@ export async function runBulkEdit(
   })
   let finished: Record<string, unknown> = { interrupted: true }
   try {
-    const { counts, rows, changed, done } = await applyAll(container, change, products, hooks, {
-      ...context,
-      isBlocked,
-    })
+    const { counts, rows, changed, done, problems } = await applyAll(
+      container,
+      change,
+      products,
+      hooks,
+      {
+        ...context,
+        isBlocked,
+      }
+    )
     finished = { ...counts, product_ids: changed }
     return {
-      summary: { action: change.action, products: done, ...counts },
+      summary: { action: change.action, products: done, ...counts, problems },
       rows,
     }
   } finally {

@@ -4097,8 +4097,8 @@
       },
       "edit": "Toplu düzenle",
       "tooMany": "Bir seferde en fazla {{max}} ürün düzenlenebilir; aramayı ya da görünümü daraltın.",
-      "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
-      "scope_other": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
+      "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uygulamadan önce kaç ürünün değişeceği ve atlanacaklar gösterilir.",
+      "scope_other": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uygulamadan önce kaç ürünün değişeceği ve atlanacaklar gösterilir.",
       "apply_one": "{{formatted}} ürüne uygula",
       "apply_other": "{{formatted}} ürüne uygula",
       "working": "Ürünler güncelleniyor…",
@@ -4121,7 +4121,11 @@
         "seo_template": "SEO şablonunu uygula",
         "alt_text": "Eksik alt metinleri doldur",
         "cost": "Maliyeti değiştir",
-        "addon_template": "Ek seçenek grubu ekle / kaldır"
+        "addon_template": "Ek seçenek grubu ekle / kaldır",
+        "sale": "İndirimli fiyat",
+        "brand": "Markayı değiştir",
+        "tag": "Etiket ekle / kaldır",
+        "backorder": "Stok bitince satış"
       },
       "price": {
         "mode": "Fiyat değişikliği",
@@ -4192,7 +4196,11 @@
         "category": "Bir kategori seçin.",
         "seoFields": "En az bir alan seçin.",
         "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin.",
-        "addonTemplate": "Bir ek seçenek grubu seçin."
+        "addonTemplate": "Bir ek seçenek grubu seçin.",
+        "saleDates": "Bitiş günü başlangıçtan önce olamaz.",
+        "saleEnded": "Bitiş günü geçmiş; ileri bir gün seçin.",
+        "brand": "Bir marka seçin.",
+        "tag": "1–100 karakterlik bir etiket yazın."
       },
       "cost": {
         "mode": "Maliyet değişikliği",
@@ -4220,6 +4228,57 @@
           "remove": "Grup seçili ürünlerden kalkar; özellik grubundan gelenler kalır."
         },
         "none": "Henüz ek seçenek grubu yok."
+      },
+      "preview": "Önizle",
+      "problems": "Atlanan ürünler",
+      "willChange_one": "{{formatted}} ürün değişecek.",
+      "willChange_other": "{{formatted}} ürün değişecek.",
+      "willStay_one": "{{formatted}} ürün zaten böyle; dokunulmayacak.",
+      "willStay_other": "{{formatted}} ürün zaten böyle; dokunulmayacak.",
+      "willSkip_one": "{{formatted}} ürün atlanacak:",
+      "willSkip_other": "{{formatted}} ürün atlanacak:",
+      "sale": {
+        "mode": "İndirim",
+        "modes": {
+          "percent": "Yüzde indirim",
+          "amount": "Tutar indirimi",
+          "clear": "İndirimi kaldır"
+        },
+        "percent": "İndirim oranı (%)",
+        "amount": "İndirim tutarı (₺)",
+        "hint": "Her varyantın normal fiyatından düşülür; indirimli fiyat sunucuda hesaplanır.",
+        "starts": "Başlangıç",
+        "ends": "Bitiş",
+        "daysHint": "Boş bırakırsanız indirim hemen başlar ve siz kaldırana kadar sürer.",
+        "clearHint": "Seçili ürünlerin varyantlarındaki indirimli fiyat kaldırılır; normal fiyattan satılırlar."
+      },
+      "brand": {
+        "mode": "İşlem",
+        "modes": {
+          "set": "Marka ata",
+          "clear": "Markayı kaldır"
+        },
+        "hint": "Seçili ürünlerin markası bu olur.",
+        "clearHint": "Seçili ürünlerin markası kaldırılır."
+      },
+      "tag": {
+        "mode": "İşlem",
+        "modes": {
+          "add": "Ekle",
+          "remove": "Kaldır"
+        },
+        "hints": {
+          "add": "Etiket ürünlere eklenir; mağazada yoksa oluşturulur. Diğer etiketleri kalır.",
+          "remove": "Etiket ürünlerden kalkar; mağazadaki etiketin adını yazın."
+        }
+      },
+      "backorder": {
+        "label": "Stok bitince",
+        "options": {
+          "allow": "Satmaya devam et",
+          "deny": "Satışı durdur"
+        },
+        "hint": "Yalnızca stoğu takip edilen varyantlar değişir; stoğu takip edilmeyenler her zaman satılır."
       }
     },
     "priceHistory": {

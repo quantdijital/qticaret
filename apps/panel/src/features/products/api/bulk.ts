@@ -17,6 +17,10 @@ export type BulkAction =
   | "alt_text"
   | "cost"
   | "addon_template"
+  | "sale"
+  | "brand"
+  | "tag"
+  | "backorder"
 
 /** The change as the job takes it (`catalog.bulk_edit`). */
 export type BulkChange =
@@ -30,6 +34,30 @@ export type BulkChange =
   | { action: "cost"; mode: "set" | "percent" | "clear"; value?: number }
   /** adr/0052 Ek 2026-11-23: an add-on template linked to or unlinked from each product. */
   | { action: "addon_template"; mode: "add" | "remove"; template_id: string }
+  /**
+   * adr/0086: each variant's sale price, a share (`percent`) or an amount
+   * off its own regular price worked out on the server, or the sales cleared.
+   */
+  | {
+      action: "sale"
+      mode: "percent" | "amount" | "clear"
+      value?: number
+      starts_at?: string | null
+      ends_at?: string | null
+    }
+  /** The brand set, or taken off with null. */
+  | { action: "brand"; brand_id: string | null }
+  /** A tag by its name; `add` makes it when the shop has none. */
+  | { action: "tag"; mode: "add" | "remove"; value: string }
+  /** Selling past stock, for the variants whose stock is tracked. */
+  | { action: "backorder"; allow: boolean }
+
+/** A product left out or failed, with why (the server's Turkish). */
+export interface BulkProblem {
+  handle: string
+  title: string | null
+  message: string
+}
 
 export interface BulkSummary {
   action: BulkAction
@@ -38,7 +66,27 @@ export interface BulkSummary {
   unchanged: number
   skipped: number
   failed: number
+  /** The first products left out or failed (the report has every one). */
+  problems?: BulkProblem[]
 }
+
+/** What a change would do before it is applied: nothing written. */
+export interface BulkPreview {
+  products: number
+  changed: number
+  unchanged: number
+  skipped: number
+  problems: BulkProblem[]
+}
+
+/** `POST /admin/catalog/bulk-edit/preview`: the products planned as the job would, none written. */
+export const previewBulkEdit = async (productIds: string[], change: BulkChange) =>
+  (
+    await sdk.client.fetch<{ preview: BulkPreview }>("/admin/catalog/bulk-edit/preview", {
+      method: "POST",
+      body: { product_ids: productIds, change },
+    })
+  ).preview
 
 export const startBulkEdit = async (productIds: string[], change: BulkChange) =>
   (
