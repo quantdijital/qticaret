@@ -53,6 +53,33 @@ describe("a carrier's details on invoices, on its own page", () => {
     })
   })
 
+  it("keeps a carrier saved meanwhile elsewhere, reading the section again first", async () => {
+    wrap(<CarrierInvoiceCard carrier="aras" />)
+    await userEvent.type(await screen.findByLabelText("Unvan"), "Örnek Kargo A.Ş.")
+    await userEvent.type(screen.getByLabelText("VKN"), "1111111111")
+    // Another tab saved Yurtiçi's after this page loaded
+    const yurtici = { title: "Başka Kargo A.Ş.", tax_id: "2222222222" }
+    fetchMock.mockImplementation((_url: string, init?: { body?: object }) =>
+      Promise.resolve({
+        values: { ...INVOICING, carriers: { manual: MANUAL, yurtici }, ...init?.body },
+      })
+    )
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/invoicing", {
+        method: "POST",
+        body: {
+          carriers: {
+            manual: MANUAL,
+            yurtici,
+            aras: { title: "Örnek Kargo A.Ş.", tax_id: "1111111111" },
+          },
+        },
+      })
+    })
+  })
+
   it("asks for the tax id with the name, and refuses one of the wrong length", async () => {
     wrap(<CarrierInvoiceCard carrier="yurtici" />)
 

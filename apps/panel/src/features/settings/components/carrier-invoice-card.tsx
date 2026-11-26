@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -34,6 +34,7 @@ const valuesOf = (saved: InvoicingSettings, carrier: InvoiceCarrier): Values => 
 
 function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: InvoiceCarrier }) {
   const { t } = useTranslation()
+  const client = useQueryClient()
   const save = useSaveSection<InvoicingSettings>("invoicing")
   const values = valuesOf(saved, carrier)
   const form = useForm<Values>({
@@ -42,11 +43,14 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
     resetOptions: { keepDirtyValues: true },
   })
   const { errors } = form.formState
-  const submit = form.handleSubmit((next) => {
-    // The section keeps every carrier's in one map: the others go back as they are
-    const others = Object.fromEntries(
-      Object.entries(saved.carriers).filter(([key]) => key !== carrier)
-    )
+  const submit = form.handleSubmit(async (next) => {
+    // The section keeps every carrier's in one map, sent whole: the others go back as
+    // stored now, read again first, so one saved meanwhile elsewhere is not undone
+    const fresh = await client
+      .query({ ...sectionQuery<InvoicingSettings>("invoicing"), staleTime: 0 })
+      .then((answer) => answer.values.carriers)
+      .catch(() => saved.carriers)
+    const others = Object.fromEntries(Object.entries(fresh).filter(([key]) => key !== carrier))
     const carriers =
       next.title === ""
         ? others
