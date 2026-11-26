@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
@@ -22,9 +22,10 @@ function Form({ saved }: { saved: Values }) {
   const save = useSaveSection<InventorySettings>("inventory")
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(next, {
       onSuccess: () => {
-        form.reset(next, FULL_RESET)
+        settle(next)
         toast.success(t("settings.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),

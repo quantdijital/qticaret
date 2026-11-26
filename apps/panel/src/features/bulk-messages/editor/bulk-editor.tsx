@@ -18,7 +18,7 @@ import { LineTabs } from "@/features/bulk-messages/components/line-tabs"
 import { editorSchema, missingContent, requestOf, valuesOf } from "@/features/bulk-messages/form"
 import type { EditorValues } from "@/features/bulk-messages/form"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { AudienceSources } from "./audience-sources"
 import { AudienceSummary } from "./audience-summary"
 import { EmailContent } from "./email-content"
@@ -87,9 +87,10 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
     (preview.empty || (eligible === 0 && !preview.stale) ? t(`${E}.emptyAudience`) : null)
   const save = form.handleSubmit(
     (values) => {
+      const settle = beginSave(form)
       update.mutate(requestOf(values), {
         onSuccess: (saved) => {
-          form.reset(valuesOf(saved), FULL_RESET)
+          settle(valuesOf(saved))
           toast.success(t(`${E}.saved`))
         },
         onError: (failure) => {

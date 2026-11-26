@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
@@ -43,6 +43,7 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
     false
   )
   const submitForm = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     if (!variant || !saved) {
       return
     }
@@ -51,7 +52,7 @@ export function useSimpleVariant(product: ProductDetail, on: boolean) {
       { variant, values, saved, dirty },
       {
         onSuccess: () => {
-          form.reset(values, FULL_RESET)
+          settle(values)
           toast.success(t("products.variant.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

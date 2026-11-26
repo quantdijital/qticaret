@@ -8,7 +8,7 @@ import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { contactFormSchema, errorLine, useSaveStorefront } from "@/features/settings/storefront"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { HintedName } from "../forms/field-hint"
 import { rolePageId } from "../page-roles"
 import { useContentPages } from "../use-content-pages"
@@ -43,8 +43,9 @@ export function ContactFormFields({ saved }: { saved: StorefrontSettings }) {
   })
   const enabled = useWatch({ control: form.control, name: "enabled" })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save({ contact_page_id: next.enabled ? next.page : null }, (stored) => {
-      form.reset(valuesOf(stored, pages), FULL_RESET)
+      settle(valuesOf(stored, pages))
     })
   })
   const error = errorLine(t, form.formState.errors.page)

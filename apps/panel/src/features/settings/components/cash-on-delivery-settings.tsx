@@ -17,7 +17,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { CashOnDeliverySettings } from "@/features/settings/api/sections"
 import { shippingOptionNamesQuery } from "@/features/settings/api/shipping-options"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import {
   formatMoneyInput,
   parseDecimalInput,
@@ -159,9 +159,10 @@ function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(toSettings(next), {
       onSuccess: (result) => {
-        form.reset(toValues(result.values), FULL_RESET)
+        settle(toValues(result.values))
         toast.success(t("settings.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),

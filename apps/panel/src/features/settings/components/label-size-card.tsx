@@ -18,7 +18,7 @@ import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { LABEL_FORMATS, useSaveSection } from "@/features/settings/api/sections"
 import type { LabelFormat, ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const L = "settings.shipping.labels"
 
@@ -89,6 +89,7 @@ export function LabelSizeCard({
   // The preview's longer side is 112 px, the label's shape kept
   const scale = 112 / Math.max(page.width, page.height)
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         label_format: next.format,
@@ -97,7 +98,7 @@ export function LabelSizeCard({
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

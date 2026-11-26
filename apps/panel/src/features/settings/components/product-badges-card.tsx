@@ -5,7 +5,7 @@ import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
@@ -115,6 +115,7 @@ function Form({ saved }: { saved: ProductBadgeSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         ...next,
@@ -123,7 +124,7 @@ function Form({ saved }: { saved: ProductBadgeSettings }) {
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

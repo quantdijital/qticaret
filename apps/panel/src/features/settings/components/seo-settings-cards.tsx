@@ -20,7 +20,7 @@ import { TemplateField } from "@/features/settings/components/template-field"
 import { UrlStyleCard } from "@/features/settings/components/url-style-card"
 import { TEMPLATE_TOKENS } from "@/features/settings/seo-sample"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 // What search results show before cutting (docs/13 §3)
 const TITLE_LIMIT = 60
@@ -28,13 +28,14 @@ const DESCRIPTION_LIMIT = 155
 const ENTITIES = ["product", "category", "brand", "page", "post", "landing"] as const
 const PRESETS = ["ai_search_visible", "block_training", "none"] as const
 
-function useSave(form: Pick<UseFormReturn<SeoSettings>, "reset">) {
+function useSave(form: Pick<UseFormReturn<SeoSettings>, "getValues" | "reset" | "setValue">) {
   const { t } = useTranslation()
   const save = useSaveSection<SeoSettings>("seo")
   const run = (values: Partial<SeoSettings>) => {
+    const settle = beginSave(form)
     save.mutate(values, {
       onSuccess: (saved) => {
-        form.reset(saved.values, FULL_RESET)
+        settle(saved.values)
         toast.success(t("settings.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),

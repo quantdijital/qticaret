@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useStoreUnits } from "@/features/products/use-units"
 import { errorText } from "@/lib/errors"
@@ -105,13 +105,14 @@ export function VariantInlineForm({
     }
   }
   const submitForm = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const changed = form.formState.dirtyFields as Partial<Record<VariantField, boolean>>
     save.mutate(
       { variant, values, saved, dirty: changed },
       {
         onSuccess: () => {
           setSaved(values)
-          form.reset(values, FULL_RESET)
+          settle(values)
           toast.success(t("products.variant.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

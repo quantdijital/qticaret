@@ -8,7 +8,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { useUpdateLanding } from "@/features/content/api/landings"
 import type { LandingDetail } from "@/features/content/api/landings"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 interface Values {
   title: string
@@ -46,6 +46,7 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
   const saved = valuesOf(landing)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     update.mutate(
       {
@@ -54,7 +55,7 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.landing), FULL_RESET)
+          settle(valuesOf(result.landing))
           toast.success(t("content.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

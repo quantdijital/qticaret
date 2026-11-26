@@ -24,7 +24,7 @@ import type { SeoSettings } from "@/features/settings/api/sections"
 import { renderSample } from "@/features/settings/seo-sample"
 import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { DESCRIPTION_LIMIT, SEO_MAX, TITLE_LIMIT } from "./seo-limits"
 import { seoSummary } from "./seo-summary"
@@ -115,6 +115,7 @@ function SeoForm({
   })
 
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     const body: Partial<SeoMeta> = {
       ...(dirtyFields.seo_title ? { seo_title: next.seo_title.trim() || null } : {}),
@@ -136,7 +137,7 @@ function SeoForm({
     }
     save.mutate(body, {
       onSuccess: (result) => {
-        form.reset(next, FULL_RESET)
+        settle(next)
         setDuplicates(result.duplicates)
         toast.success(t("seo.card.saved"))
       },
