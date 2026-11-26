@@ -28,8 +28,13 @@ const kurus = (lira: number): number => Math.round(lira * 100)
 export function freeShippingOf(
   itemTotal: number,
   threshold: number | null,
-  t: Translate
+  t: Translate,
+  allFree = false
 ): FreeShippingView | null {
+  // adr/0087 §3: every product that travels ships free, whatever the total
+  if (allFree && itemTotal > 0) {
+    return { message: t("cart.free_shipping_products"), percent: 100, reached: true }
+  }
   if (threshold === null || threshold <= 0 || itemTotal <= 0) {
     return null
   }
@@ -42,6 +47,41 @@ export function freeShippingOf(
     percent: Math.floor((kurus(itemTotal) / kurus(threshold)) * 100),
     reached: false,
   }
+}
+
+/**
+ * Whether every line that travels is of a free-shipping product (adr/0087
+ * §3); false for a cart with none that travels.
+ */
+export function allShipFree(
+  lines: readonly { product_id?: string | null; requires_shipping?: boolean | null }[],
+  free: ReadonlySet<string>
+): boolean {
+  const shipped = lines.filter((line) => line.requires_shipping !== false)
+  return shipped.length > 0 && shipped.every((line) => free.has(line.product_id ?? ""))
+}
+
+/**
+ * In a mixed cart, "Ücretsiz kargo" under each free-shipping product's line
+ * (adr/0087 §3); none when the whole cart ships free (the meter says it).
+ */
+export function withShippingNotes(
+  views: CartLineView[],
+  cart: Cart | null,
+  free: ReadonlySet<string>,
+  t: Translate
+): CartLineView[] {
+  const items = cart?.items ?? []
+  if (free.size === 0 || allShipFree(items, free)) {
+    return views
+  }
+  const byLine = new Map(items.map((line) => [line.id, line]))
+  return views.map((view) => {
+    const item = byLine.get(view.id)
+    return item && item.requires_shipping !== false && free.has(item.product_id ?? "")
+      ? { ...view, shippingNote: t("cart.line_free_shipping") }
+      : view
+  })
 }
 
 /** Discounts in kuruş are compared rounded: no "−0,00 TL" from float noise. */
@@ -97,7 +137,8 @@ export function miniCartOf(
   paths: ReadonlyMap<string, string> = new Map(),
   pictures: ReadonlyMap<string, ImageView> = new Map(),
   vatExcluded = false,
-  checkoutBlocked: CheckoutBlockedView | null = null
+  checkoutBlocked: CheckoutBlockedView | null = null,
+  freeProducts: ReadonlySet<string> = new Set()
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
@@ -108,7 +149,9 @@ export function miniCartOf(
     lines: cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
     subtotal: formatLira(net ? net.net / 100 : cart.item_total),
     // Nothing to ship (adr/0076 §6): no free shipping meter, no word of shipping
-    freeShipping: ships ? freeShippingOf(cart.item_total, threshold, t) : null,
+    freeShipping: ships
+      ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, freeProducts))
+      : null,
     ...(ships ? {} : { note: t("cart.drawer_note_unshipped") }),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),

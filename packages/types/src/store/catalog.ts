@@ -303,6 +303,12 @@ export interface StoreProduct {
    */
   product_extension?: {
     is_gift_card?: boolean | null
+    /**
+     * How it ships (adr/0087 §3): `free` (the built-in "Ücretsiz kargo") or
+     * a shop class's key (`shipping_classes` of `/store/storefront`, its
+     * surcharge); null or absent: Standard. The backend prices it.
+     */
+    shipping_class?: string | null
     withdrawal_excluded?: boolean | null
     kind?: string | null
     /**

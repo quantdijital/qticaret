@@ -28,6 +28,7 @@ import { shopMarks } from "../../../workflows/storefront/shop-marks"
 import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
 import { varyOnPublishableKey } from "../../../lib/http/vary"
 import { turnstilePublic } from "../../../lib/security/turnstile/public"
+import { kurus, toMedusaAmount } from "../../../lib/money"
 
 /**
  * GET /store/storefront (F18 D3, docs/19 §4): the storefront's frame as the
@@ -141,6 +142,12 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     free_shipping_threshold: promotions.free_shipping_threshold,
     // The product page's "Kargo ve Teslimat" card says these (adr/0046 Ek 2026-11-06)
     delivery: storefrontDelivery(shipping, marketing),
+    // adr/0087 §3: the shop's own shipping classes, a surcharge in lira each; a product's
+    // `product_extension.shipping_class` names one (or `free`, the built-in class)
+    shipping_classes: shipping.shipping_classes.map((each) => ({
+      key: each.key,
+      surcharge: Number(toMedusaAmount(kurus(each.surcharge))),
+    })),
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
     // Dated products (adr/0076): the sections that need them drawn only while on (adr/0077 §8)
     // Collections (`catalog.collections`): their sections' products and links drawn only while on

@@ -95,11 +95,15 @@ export function priceSentence(amounts: readonly number[]): string {
  * The `kargo_cümlesi` token (docs/13 §3, F7.8): when an order leaves, in
  * working days ("1–2 iş gününde kargoda."); "Aynı gün kargoda." for none.
  */
-export function shippingSentence(handlingMin: number, handlingMax: number): string {
+export function shippingSentence(handlingMin: number, handlingMax: number, free = false): string {
+  // adr/0087 §5: a free-shipping product says so first
+  const lead = free ? "Ücretsiz kargo, " : ""
   if (handlingMax <= 0) {
-    return "Aynı gün kargoda."
+    return free ? "Ücretsiz kargo, aynı gün kargoda." : "Aynı gün kargoda."
   }
-  return handlingMin === handlingMax || handlingMin <= 0
-    ? `${String(handlingMax)} iş gününde kargoda.`
-    : `${String(handlingMin)}–${String(handlingMax)} iş gününde kargoda.`
+  const days =
+    handlingMin === handlingMax || handlingMin <= 0
+      ? `${String(handlingMax)} iş gününde kargoda.`
+      : `${String(handlingMin)}–${String(handlingMax)} iş gününde kargoda.`
+  return `${lead}${days}`
 }

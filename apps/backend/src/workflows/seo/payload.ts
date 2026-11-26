@@ -179,7 +179,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       marka: product.brand?.name ?? null,
       kargo_cümlesi: shippingSentence(
         shipping.settings.handling_days_min,
-        shipping.settings.handling_days_max
+        shipping.settings.handling_days_max,
+        facts.shippingClass?.free === true
       ),
     },
     overrides: product.seo_meta ?? null,

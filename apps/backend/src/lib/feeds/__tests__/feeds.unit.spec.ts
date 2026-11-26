@@ -157,3 +157,27 @@ describe("a feed's shipping cost (adr/0087 §5)", () => {
     expect(shippingCost(item(100, 49.9), SHOP)).toBe(49.9)
   })
 })
+
+describe("a feed's shipping cost by the product's class (adr/0087 §5)", () => {
+  const item = (
+    shippingRate: number | null,
+    shippingClass: { free: boolean; surcharge: number }
+  ) => {
+    const [first] = feedItemsOf(
+      facts([variant({ price: 100, shippingRate })], { shippingClass }),
+      URL
+    )
+    if (!first) {
+      throw new Error("no feed item")
+    }
+    return first
+  }
+  const shop = { ...SHOP, flatShipping: 39.9, freeShippingFrom: 500 }
+
+  it("is free for a free-shipping product, the flat rate and its surcharge otherwise", () => {
+    expect(shippingCost(item(null, { free: true, surcharge: 0 }), shop)).toBe(0)
+    expect(shippingCost(item(null, { free: false, surcharge: 150 }), shop)).toBe(189.9)
+    // The table's rate holds its class already
+    expect(shippingCost(item(199.9, { free: false, surcharge: 150 }), shop)).toBe(199.9)
+  })
+})
