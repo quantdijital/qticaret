@@ -42,6 +42,7 @@ export interface ContractedReturnCodes {
   aras: string | null
   yurtici: string | null
   dhlecommerce: string | null
+  surat: string | null
   other_carrier: string | null
   other_code: string | null
 }
@@ -72,6 +73,7 @@ export const returnsSection = defineSection<ReturnsSettings>(
         aras: returnCode,
         yurtici: returnCode,
         dhlecommerce: returnCode,
+        surat: returnCode,
         other_carrier: z
           .string()
           .trim()
@@ -91,6 +93,7 @@ export const returnsSection = defineSection<ReturnsSettings>(
       aras: null,
       yurtici: null,
       dhlecommerce: null,
+      surat: null,
       other_carrier: null,
       other_code: null,
     },

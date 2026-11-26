@@ -1,7 +1,12 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PDFDocument } from "pdf-lib"
-import { startFakeAras, startFakeDhlEcom, startFakeYurtici } from "@qticaret/testing"
+import {
+  startFakeAras,
+  startFakeDhlEcom,
+  startFakeSurat,
+  startFakeYurtici,
+} from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { MM } from "../../src/lib/pdf"
 import { DHL_ECOMMERCE_DEV_APP } from "../../src/lib/shipping/dhlecommerce"
@@ -26,7 +31,7 @@ type Post = <T>(path: string, body: unknown) => Promise<HttpResponse<T & { messa
 
 /** One carrier as the contract drives it: its fake service and how to read it. */
 interface CarrierUnderTest {
-  name: "aras" | "yurtici" | "dhlecommerce"
+  name: "aras" | "yurtici" | "dhlecommerce" | "surat"
   env: string
   start: () => Promise<string>
   stop: () => Promise<void>
@@ -126,6 +131,44 @@ function dhlEcom(): CarrierUnderTest {
   }
 }
 
+function surat(): CarrierUnderTest {
+  let fake: Awaited<ReturnType<typeof startFakeSurat>>
+  return {
+    name: "surat",
+    // Sürat has no test service: the fake stands in for the live one
+    env: "SURAT_BASE_URL",
+    start: async () => {
+      fake = await startFakeSurat()
+      return fake.url
+    },
+    stop: () => fake.close(),
+    connect: (post) =>
+      post("/admin/integrations/credentials/surat", {
+        settings: {},
+        secrets: {
+          ...fake.accounts.shipping,
+          cari_code: fake.accounts.tracking.cariCode,
+          web_password: fake.accounts.tracking.webPassword,
+        },
+      }),
+    pricing: { type: "table" },
+    reset: () => {
+      fake.shipments.clear()
+    },
+    open: () => [...fake.shipments.values()].filter((each) => !each.canceled).length,
+    // The parcel is opened; Sürat answers a sentence that is no known success
+    failAfterOpening: () => {
+      fake.queue("GonderiyiKargoyaGonderYeni", "open:Kayıt alındı")
+    },
+    secrets: () => [
+      fake.accounts.shipping.username,
+      fake.accounts.shipping.password,
+      fake.accounts.tracking.cariCode,
+      fake.accounts.tracking.webPassword,
+    ],
+  }
+}
+
 interface FulfillmentRow {
   id: string
   shipped_at: Date | null
@@ -145,7 +188,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    describe.each([aras(), yurtici(), dhlEcom()])("carrier contract: $name", (carrier) => {
+    describe.each([aras(), yurtici(), dhlEcom(), surat()])("carrier contract: $name", (carrier) => {
       let shop: StockShop
       let admin: { headers: Record<string, string> }
       let optionId: string

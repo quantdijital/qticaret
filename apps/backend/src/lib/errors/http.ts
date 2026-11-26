@@ -47,7 +47,7 @@ export interface HttpErrorOptions {
 /** A provider's failure on the admin API, `{ provider, provider_message? }` beside it. */
 export const PROVIDER_FAILED_MESSAGE = "provider.failed"
 
-// Our own provider names (`aras`, `yurtici`, `dhlecommerce`), never text from outside
+// Our own provider names (`aras`, `yurtici`, `dhlecommerce`, `surat`), never text from outside
 const PROVIDER_NAME = /^[a-z][a-z0-9_-]{0,31}$/
 
 export interface ProviderDetail {

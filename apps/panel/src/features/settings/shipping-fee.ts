@@ -26,7 +26,12 @@ export type FeeMode = "free" | "threshold" | "flat" | "carrier"
 export const FEE_MODES: readonly FeeMode[] = ["free", "threshold", "flat", "carrier"]
 
 /** Where a carrier-priced main option's price comes from. */
-export const CARRIER_PRICINGS = ["aras-table", "yurtici-table", "dhlecommerce-table"] as const
+export const CARRIER_PRICINGS = [
+  "aras-table",
+  "yurtici-table",
+  "dhlecommerce-table",
+  "surat-table",
+] as const
 export type CarrierPricing = (typeof CARRIER_PRICINGS)[number]
 
 /** One answer, in lira: the fee (below the threshold, or for every order) and the threshold. */
@@ -76,7 +81,8 @@ export function carrierPricingOf(option: ShopShippingOption): CarrierPricing | n
   if (
     (option.carrier === "aras" ||
       option.carrier === "yurtici" ||
-      option.carrier === "dhlecommerce") &&
+      option.carrier === "dhlecommerce" ||
+      option.carrier === "surat") &&
     option.pricing === "table"
   ) {
     return `${option.carrier}-table`
@@ -163,12 +169,18 @@ export interface FeePlan {
   condition: FreeShippingCondition | null
 }
 
-type FlatCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce"
-const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici", "dhlecommerce"]
+type FlatCarrier = "manual" | "aras" | "yurtici" | "dhlecommerce" | "surat"
+const FLAT_CARRIERS: readonly string[] = ["manual", "aras", "yurtici", "dhlecommerce", "surat"]
+
+const CARRIER_OF: Readonly<Record<CarrierPricing, NewShippingOption["carrier"]>> = {
+  "aras-table": "aras",
+  "yurtici-table": "yurtici",
+  "dhlecommerce-table": "dhlecommerce",
+  "surat-table": "surat",
+}
 
 function carrierBody(name: string, source: CarrierPricing): NewShippingOption {
-  const carrier =
-    source === "aras-table" ? "aras" : source === "yurtici-table" ? "yurtici" : "dhlecommerce"
+  const carrier = CARRIER_OF[source]
   return { name, carrier, pricing: { type: "table" } }
 }
 

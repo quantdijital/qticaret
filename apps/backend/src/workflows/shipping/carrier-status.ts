@@ -5,6 +5,7 @@ import type { CarrierName } from "../../lib/shipping/carriers"
 import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
 import { yurticiApi, yurticiCredentialsOf, yurticiStatusOf } from "../../lib/shipping/yurtici"
 import { dhlEcomApi, dhlEcomCredentialsOf, dhlEcomStatusOf } from "../../lib/shipping/dhlecommerce"
+import { suratApi, suratCredentialsOf, suratStatusOf } from "../../lib/shipping/surat"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -70,6 +71,18 @@ const readDhlEcom: Reader = async (container, providerShipmentId) => {
   )
 }
 
+// By our code (`WebSiparisKodu`): Sürat lists nothing until the branch has the parcel
+const readSurat: Reader = async (container, providerShipmentId) => {
+  const account = suratCredentialsOf(await credentials(container, "surat"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return suratStatusOf(
+    await suratApi().track(account, providerShipmentId),
+    parseEnv().SURAT_BASE_URL
+  )
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
  * read at the call, the answer mapped to our statuses. With a fake Aras or
@@ -79,6 +92,7 @@ const READERS: Record<CarrierName, Reader> = {
   aras: readAras,
   yurtici: readYurtici,
   dhlecommerce: readDhlEcom,
+  surat: readSurat,
 }
 
 export function carrierReader(provider: string): Reader {

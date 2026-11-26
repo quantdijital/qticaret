@@ -173,6 +173,7 @@ export interface ContractedReturnCodes {
   aras: string | null
   yurtici: string | null
   dhlecommerce: string | null
+  surat: string | null
   other_carrier: string | null
   other_code: string | null
 }

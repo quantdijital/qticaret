@@ -102,6 +102,21 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["test_mode"],
     optional: [],
   },
+  // Sürat Kargo's web service (docs/entegrasyonlar/surat.md): the login that opens parcels,
+  // and the cari kodu with its web password that tracks, labels and deletes them, when Sürat
+  // gave a second pair (both parts or neither; without it the first pair does all). Sürat has
+  // no test service: no mode. At least 3 characters: shorter values could not be masked in
+  // what Sürat quotes back (`providerText`)
+  surat: {
+    settings: z.object({}).strict(),
+    secrets: ["username", "password", "cari_code", "web_password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{3,128}$/, "integration_credentials.secret_invalid"),
+    identity: [],
+    optional: ["cari_code", "web_password"],
+  },
   // Netgsm's SMS account (adr/0036): the shop's own, its sender name registered to its company
   netgsm: {
     settings: z

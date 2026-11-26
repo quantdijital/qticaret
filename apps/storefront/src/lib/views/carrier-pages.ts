@@ -12,6 +12,8 @@ const PAGES: Record<string, string> = {
   yurtici: "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula",
   // Formerly MNG Kargo; the page takes the 12-digit shipment number
   dhlecommerce: "https://www.dhlecommerce.com.tr/gonderitakip",
+  // Sürat's public tracking page (the owner's plugin; to confirm)
+  surat: "https://suratkargo.com.tr/KargoTakip/",
 }
 
 export function carrierPages(keys: readonly string[] | undefined, t: Translate): LinkView[] {

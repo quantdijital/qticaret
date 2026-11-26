@@ -4,12 +4,18 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { ArasAccount, DhlEcomAccount, YurticiAccount } from "@/features/settings/api/payments"
+import type {
+  ArasAccount,
+  DhlEcomAccount,
+  SuratAccount,
+  YurticiAccount,
+} from "@/features/settings/api/payments"
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { DhlEcomSettings } from "@/features/settings/components/dhlecommerce-settings"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
 import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
+import { SuratSettings } from "@/features/settings/components/surat-settings"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
 import { isCarrier } from "@/features/settings/shipping-carriers"
@@ -53,6 +59,12 @@ export function ShippingCarrierPage() {
           account={account as DhlEcomAccount | undefined}
           keyConfigured={query.data.key_configured}
           available={!(query.data.unavailable ?? []).includes("dhlecommerce")}
+        />
+      ) : carrier === "surat" ? (
+        <SuratSettings
+          key={accountKey(account)}
+          account={account as SuratAccount | undefined}
+          keyConfigured={query.data.key_configured}
         />
       ) : (
         <YurticiSettings

@@ -86,6 +86,7 @@ Hangi ekran için hangisi başlatılır (her biri ayrı terminalde, backend'den 
 | Ayarlar > Ödeme > PayTR; vitrin kart ödemesi (`localhost:8000/odeme`); siparişte iade | `pnpm dev:paytr` | `PAYTR_BASE_URL=http://127.0.0.1:9102` |
 | Ayarlar > Kargo > Aras Kargo; kargoya verme, etiket, takip bağlantısı | `pnpm dev:aras` | `ARAS_BASE_URL=http://127.0.0.1:9104` |
 | Ayarlar > Kargo > Yurtiçi Kargo; kargoya verme, etiket, takip bağlantısı | `pnpm dev:yurtici` | `YURTICI_BASE_URL=http://127.0.0.1:9105` |
+| Ayarlar > Kargo > Sürat Kargo; kargoya verme, etiket, takip, iptal/geri çekme (Sürat'ın test ortamı yok; barkod yetkisi için `FAKE_SURAT_BARCODE=1`) | `pnpm dev:surat` | `SURAT_BASE_URL=http://127.0.0.1:9111` |
 | Ayarlar > SMS > Netgsm; sipariş ve kargo SMS'leri, toplu SMS | `pnpm dev:netgsm` | `NETGSM_BASE_URL=http://127.0.0.1:9106` |
 | Ayarlar > E-Fatura > Paraşüt; siparişteki fatura kartı | `pnpm dev:parasut` | `PARASUT_BASE_URL=http://127.0.0.1:9108`, `PARASUT_CLIENT_ID`, `PARASUT_CLIENT_SECRET` |
 | Ayarlar > Entegrasyonlar > Shopify; taşıma | `pnpm dev:shopify` | `SHOPIFY_BASE_URL=http://127.0.0.1:9107` |

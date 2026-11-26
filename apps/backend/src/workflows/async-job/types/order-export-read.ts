@@ -69,6 +69,7 @@ const CARRIER_TITLES = {
   aras: "Aras Kargo",
   yurtici: "Yurtiçi Kargo",
   dhlecommerce: "DHL eCommerce",
+  surat: "Sürat Kargo",
 } as const
 
 /** The order's latest standing parcel: who carries it and its label's number. */

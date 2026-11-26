@@ -42,6 +42,12 @@ export type {
   FakeDhlEcomOrder,
 } from "./dhlecommerce/fake-server"
 export {
+  TRACKING_STEPS as SURAT_TRACKING_STEPS,
+  fakeSuratAccounts,
+  startFakeSurat,
+} from "./surat/fake-server"
+export type { FakeSurat, FakeSuratAccounts, FakeSuratShipment } from "./surat/fake-server"
+export {
   TRACKING_STEPS as YURTICI_TRACKING_STEPS,
   fakeYurticiAccounts,
   startFakeYurtici,

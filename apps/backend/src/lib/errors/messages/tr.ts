@@ -952,6 +952,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "DHL eCommerce teslimat adresindeki ili ya da ilçeyi tanımadı. Siparişin adresinde il ve ilçeyi düzeltip yeniden deneyin.",
   "dhlecommerce.branch_pending":
     'DHL eCommerce alıcının varış şubesini henüz belirlemedi; gönderi açılmadı. Birkaç dakika sonra "Kargoya ver"e yeniden basın.',
+  "surat.merchant_invalid":
+    "Sürat Kargo bu cari kodu ve web şifresini kabul etmedi. Bilgileri Sürat'ın sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "surat.secret_invalid":
+    "Sürat Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Sürat'ın sözleşmeyle verdiği belgeden yeniden kopyalayın.",
+  "surat.withdraw_failed":
+    "Sürat Kargo'da gönderi açılmış olabilir ama silinemedi. Yeniden kargoya vermeden önce Sürat şubenize bu siparişin gönderisini sorun; açıksa iptal ettirin.",
+  "surat.withdraw_requested":
+    "Gönderi Sürat Kargo şubesine ulaştığı için silinemedi; Sürat'tan gönderiyi size geri getirmesi istendi. Gönderi siparişte kalır, takip dönüşünü izler.",
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":

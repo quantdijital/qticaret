@@ -214,6 +214,7 @@ module.exports = defineConfig({
           { resolve: "./src/modules/fulfillment-aras", id: "aras" },
           { resolve: "./src/modules/fulfillment-yurtici", id: "yurtici" },
           { resolve: "./src/modules/fulfillment-dhlecommerce", id: "dhlecommerce" },
+          { resolve: "./src/modules/fulfillment-surat", id: "surat" },
           // adr/0087: the shop's own delivery at a flat price, priced by our quote
           { resolve: "./src/modules/fulfillment-shop", id: "shop" },
         ],
