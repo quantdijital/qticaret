@@ -84,7 +84,12 @@ export function ContentCoverCard({
           htmlFor="content-cover-alt"
           hint={t("content.coverAltHint")}
         >
-          <Input id="content-cover-alt" maxLength={300} {...form.register("image_alt")} />
+          <Input
+            placeholder={t("common.placeholder.imageAlt")}
+            id="content-cover-alt"
+            maxLength={300}
+            {...form.register("image_alt")}
+          />
         </Field>
       </MediaField>
       <FindingsNote findings={findings} />

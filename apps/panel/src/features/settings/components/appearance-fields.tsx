@@ -101,6 +101,7 @@ export function BrandColorField({
                 className="size-9 shrink-0 cursor-pointer rounded-md border bg-transparent p-0.5"
               />
               <Input
+                placeholder={t("settings.placeholders.brandColor")}
                 id="brand-color"
                 value={field.value}
                 onChange={(event) => {

@@ -53,6 +53,7 @@ function LineField({
         }}
       >
         <Input
+          placeholder={t(`bulkMessages.placeholders.${name}`)}
           id={id}
           maxLength={max}
           className="pr-9"

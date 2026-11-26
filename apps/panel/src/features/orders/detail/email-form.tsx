@@ -68,7 +68,13 @@ export function EmailForm({
         error={error ? t(error) : undefined}
         required
       >
-        <Input id="order-email" type="email" autoComplete="off" {...form.register("email")} />
+        <Input
+          placeholder={t("common.placeholder.email")}
+          id="order-email"
+          type="email"
+          autoComplete="off"
+          {...form.register("email")}
+        />
       </Field>
       {failure ? (
         <p role="alert" className="text-sm text-destructive-text">

@@ -86,6 +86,7 @@ export function ApiKeyDialog({
           <div className="flex flex-col gap-5">
             <Field label={t(`${K}.name`)} htmlFor="api-key-title" hint={t(`${K}.nameHint`)}>
               <Input
+                placeholder={t("settings.placeholders.apiKeyName")}
                 id="api-key-title"
                 value={title}
                 maxLength={60}

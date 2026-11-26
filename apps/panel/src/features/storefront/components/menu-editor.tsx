@@ -141,6 +141,7 @@ export function MenuEditor({ menu, onDeleted }: { menu: Menu; onDeleted: () => v
           required
         >
           <Input
+            placeholder={t("storefront.placeholders.menuTitle")}
             id="menu-title"
             value={shown.title}
             maxLength={200}

@@ -83,6 +83,7 @@ function Words({ media, canEdit, onDirtyChange }: WordsProps) {
     >
       <Field label={t(`${D}.filename`)} htmlFor="media-filename" hint={t(`${D}.filenameHint`)}>
         <Input
+          placeholder={t("media.placeholders.filename")}
           id="media-filename"
           value={filename}
           maxLength={NAME_MAX}
@@ -95,6 +96,7 @@ function Words({ media, canEdit, onDirtyChange }: WordsProps) {
       <Field label={t(`${D}.alt`)} htmlFor="media-alt" hint={t(`${D}.altHint`)}>
         <div className="flex items-center gap-1.5">
           <Input
+            placeholder={t("common.placeholder.imageAlt")}
             id="media-alt"
             className="min-w-0 flex-1"
             value={alt}

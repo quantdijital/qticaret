@@ -58,12 +58,18 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
       }}
     >
       <Field label={t("brands.name")} htmlFor="brand-name" required>
-        <Input id="brand-name" maxLength={120} {...form.register("name")} />
+        <Input
+          placeholder={t("brands.placeholders.name")}
+          id="brand-name"
+          maxLength={120}
+          {...form.register("name")}
+        />
       </Field>
       <Field label={t("brands.handle")} htmlFor="brand-handle" hint={t("brands.handleHint")}>
         <div className="flex items-center rounded-md border">
           <span className="pl-3 font-mono text-[13px] text-muted-foreground">{prefix}</span>
           <Input
+            placeholder={t("brands.placeholders.handle")}
             id="brand-handle"
             spellCheck={false}
             className="border-0 pl-0 font-mono text-[13px] shadow-none"

@@ -72,7 +72,12 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
         }}
       >
         <Field label={t(`${I}.alt`)} htmlFor="category-image-alt" hint={t(`${I}.altHint`)}>
-          <Input id="category-image-alt" maxLength={ALT_MAX} {...form.register("alt")} />
+          <Input
+            placeholder={t("common.placeholder.imageAlt")}
+            id="category-image-alt"
+            maxLength={ALT_MAX}
+            {...form.register("alt")}
+          />
         </Field>
       </MediaField>
     </CardForm>

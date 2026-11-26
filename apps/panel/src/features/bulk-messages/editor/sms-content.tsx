@@ -116,6 +116,7 @@ export function SmsContent({
             }}
           >
             <Textarea
+              placeholder={t("bulkMessages.placeholders.sms")}
               id="bulk-sms"
               rows={5}
               maxLength={LIMITS.sms}

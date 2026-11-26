@@ -20,7 +20,24 @@
     "actions": "Actions",
     "delete": "Delete",
     "more": "More actions",
-    "previous": "Previous"
+    "previous": "Previous",
+    "placeholder": {
+      "imageAlt": "e.g. Brown leather wallet, front view",
+      "firstName": "e.g. Ayşe",
+      "lastName": "e.g. Yılmaz",
+      "email": "name@example.com",
+      "phone": "0532 123 45 67",
+      "company": "e.g. Yılmaz Ticaret Ltd. Şti.",
+      "price": "0.00",
+      "sku": "ABC-001",
+      "ean": "8691234567890",
+      "neighborhood": "e.g. Caferağa Mah.",
+      "addressLine": "e.g. Moda Cad. No: 12 D: 3",
+      "postalCode": "34710",
+      "fullName": "e.g. Ayşe Yılmaz",
+      "taxOffice": "e.g. Kadıköy",
+      "taxNumber": "10-digit tax number"
+    }
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -2829,7 +2846,8 @@
         "publishedHint": "The published text. Change it and save to open a new draft version; the text in force stays until you publish.",
         "titleLabel": "Title",
         "body": "The text's body",
-        "saved": "Draft saved."
+        "saved": "Draft saved.",
+        "titlePlaceholder": "e.g. Distance Sales Agreement"
       },
       "tokens": {
         "title": "Tokens",
@@ -3373,6 +3391,39 @@
         "show": "A sold-out product stays in listings, its card saying it is sold out. Default.",
         "hide": "A sold-out product leaves listings, search and category counts. Its page still opens by its address and stays in the sitemap; it comes back to listings by itself when stock arrives."
       }
+    },
+    "placeholders": {
+      "apiKeyName": "e.g. Warehouse software",
+      "brandColor": "#1F5EFF",
+      "bankName": "e.g. Ziraat Bankası",
+      "iban": "TR00 0000 0000 0000 0000 0000 00",
+      "blockReason": "e.g. Repeated bogus orders",
+      "ga4": "G-ABC123XYZ",
+      "merchantId": "123456789",
+      "mersis": "16-digit MERSİS number",
+      "taxOrId": "10 or 11 digits",
+      "kep": "company@hs01.kep.tr",
+      "etbis": "Your ETBİS registration number",
+      "documentName": "e.g. TÜRSAB licence no",
+      "documentNumber": "e.g. 12345",
+      "location": "e.g. Main warehouse",
+      "pixelId": "123456789012345",
+      "testEventCode": "TEST12345",
+      "shopifyClientId": "e.g. 1a2b3c4d5e6f…",
+      "smsHeader": "e.g. SHOPNAME",
+      "iysCode": "e.g. 123456",
+      "parasutCompany": "e.g. 123456",
+      "parasutCode": "The code Paraşüt shows",
+      "paytrMerchant": "e.g. 123456",
+      "senderLocal": "orders",
+      "robots": "User-agent: *",
+      "smtpPort": "587",
+      "fromName": "e.g. Kuzey Deri",
+      "smtpRate": "60",
+      "staffEmails": "name@example.com, store@example.com",
+      "storeName": "e.g. Kuzey Deri",
+      "storeAddress": "e.g. Caferağa Mah. Moda Cad. No: 12, Kadıköy / İstanbul",
+      "vatName": "e.g. VAT 10%"
     }
   },
   "status": {
@@ -5029,6 +5080,18 @@
       "hintSurcharge": "With this product in the basket, {{amount}} is added to the order's shipping.",
       "gone": "The class chosen no longer exists; the product counts as Standard.",
       "freeSwitch": "This product ships free"
+    },
+    "placeholders": {
+      "addonGroup": "e.g. Personalisation",
+      "tag": "e.g. new-season",
+      "addonLabel": "e.g. Name engraving",
+      "addonHelp": "e.g. Up to 12 letters",
+      "addonChoice": "e.g. Gift wrap",
+      "badge": "e.g. Limited",
+      "faqQuestion": "e.g. How long does delivery take?",
+      "faqAnswer": "e.g. Your order ships within 1–3 business days.",
+      "title": "e.g. Leather wallet",
+      "mpn": "e.g. AB-1234"
     }
   },
   "orders": {
@@ -6025,6 +6088,16 @@
       "utmMedium": "Campaign medium",
       "utmCampaign": "Campaign name",
       "referrer": "Referring site"
+    },
+    "placeholders": {
+      "cancelReturn": "e.g. The customer changed their mind and keeps the item.",
+      "chargebackReference": "e.g. CB-2026-001234",
+      "chargebackNote": "e.g. Proof of delivery sent.",
+      "invoiceNumber": "e.g. ABC2026000000123",
+      "ettn": "00000000-0000-0000-0000-000000000000",
+      "returnNote": "e.g. The customer called about it.",
+      "refundNote": "e.g. Shipping was refunded too.",
+      "rejectReason": "e.g. The item was used and its tag removed."
     }
   },
   "customers": {
@@ -6476,7 +6549,12 @@
       "eraseText": "The records are deleted for good; this cannot be undone. The order stays, with its amounts and lines, for the books. The deletion is recorded.",
       "eraseConfirm": "Delete for good",
       "erased_one": "{{count}} record deleted.",
-      "erased_other": "{{count}} records deleted."
+      "erased_other": "{{count}} records deleted.",
+      "placeholders": {
+        "first_name": "e.g. Ayşe",
+        "last_name": "e.g. Yılmaz",
+        "document_no": "e.g. 12345678901"
+      }
     },
     "columnOptions": "Columns",
     "stats": {
@@ -6494,6 +6572,12 @@
       "later": "The file is being prepared; download it from Settings > Audit log > Jobs when it is ready.",
       "laterNoJobs": "The file is being prepared in the background.",
       "failed": "The customer file could not be prepared."
+    },
+    "placeholders": {
+      "addressName": "e.g. Home",
+      "note": "e.g. Prefers gift wrapping.",
+      "group": "e.g. Loyal customers",
+      "segment": "e.g. Bought in the last 90 days"
     }
   },
   "categories": {
@@ -6556,7 +6640,10 @@
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."
     },
-    "countOf": "{{name}}: {{count}} products"
+    "countOf": "{{name}}: {{count}} products",
+    "placeholders": {
+      "name": "e.g. Wallets"
+    }
   },
   "inventory": {
     "description": "Sellable stock; low and sold-out items first",
@@ -6818,7 +6905,10 @@
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."
     },
-    "limited": "The newest {{total}} promotions are shown."
+    "limited": "The newest {{total}} promotions are shown.",
+    "placeholders": {
+      "code": "NOVEMBER20"
+    }
   },
   "reports": {
     "description": "The chosen period's sales, where they came from, their VAT, collections, stock and storefront searches",
@@ -7968,6 +8058,9 @@
           "hint": "Turn it on to tell Bing and Yandex about changed pages at once."
         }
       }
+    },
+    "placeholders": {
+      "description": "e.g. Handmade leather wallets; free shipping and 14-day returns."
     }
   },
   "attributes": {
@@ -8199,7 +8292,15 @@
     "newValue": "Add a new value",
     "newValueName": "New value for {{label}}",
     "addValue": "Add",
-    "valueAdded": "{{value}} added."
+    "valueAdded": "{{value}} added.",
+    "placeholders": {
+      "value": "e.g. Stainless steel",
+      "optionTitle": "e.g. Size",
+      "textUnit": "e.g. HRC",
+      "unit": "e.g. cm",
+      "groupName": "e.g. Dimensions",
+      "description": "e.g. Shared attributes of clothing"
+    }
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -8238,7 +8339,11 @@
     "fieldHint": "Shown on the product page and in the search result title.",
     "pick": "Choose a brand",
     "noneFound": "No brand found.",
-    "noLogo": "No logo"
+    "noLogo": "No logo",
+    "placeholders": {
+      "name": "e.g. Kuzey Deri",
+      "handle": "kuzey-deri"
+    }
   },
   "collections": {
     "description": "Collections gather products under a theme; each has its own page, picture and products.",
@@ -8301,6 +8406,10 @@
     "gate": {
       "off": "Collections are off in this shop. Your collections were not deleted; turn them on to manage them here again.",
       "turnOn": "Go to features"
+    },
+    "placeholders": {
+      "name": "e.g. Summer collection",
+      "handle": "summer-collection"
     }
   },
   "address": {
@@ -8823,6 +8932,16 @@
         "category": "Category",
         "product": "Product"
       }
+    },
+    "placeholders": {
+      "jobTitle": "e.g. Designer",
+      "bio": "e.g. Has written about craft and design for ten years.",
+      "title": "e.g. 5 tips for leather care",
+      "handle": "5-tips-for-leather-care",
+      "excerpt": "e.g. Five easy ways to keep leather looking new for years.",
+      "landingTitle": "e.g. November deals",
+      "landingHandle": "november-deals",
+      "term": "e.g. Care guide"
     }
   },
   "priceLists": {
@@ -8937,6 +9056,10 @@
       "done_other": "{{count}} prices written.",
       "skipped_one": "{{count}} variant has no price of its own and was left out.",
       "skipped_other": "{{count}} variants have no price of their own and were left out."
+    },
+    "placeholders": {
+      "title": "e.g. Summer sale",
+      "description": "e.g. Prices valid until the end of June"
     }
   },
   "giftCards": {
@@ -8994,7 +9117,11 @@
       "used": "Used",
       "expired": "Expired"
     },
-    "limited": "This view looks at the newest 5,000 cards; older ones are not listed."
+    "limited": "This view looks at the newest 5,000 cards; older ones are not listed.",
+    "placeholders": {
+      "closeReason": "e.g. The order was returned",
+      "note": "e.g. Birthday gift for Ayşe Yılmaz"
+    }
   },
   "storeCredit": {
     "title": "Store credit",
@@ -12609,6 +12736,15 @@
       "search": "Search titles",
       "empty": "No pages yet. Open the first one; you write it in the theme editor.",
       "full": "At most {{max}} pages can have their own layout; a new page's text cannot be added as a section, only shown."
+    },
+    "placeholders": {
+      "maintenance": "e.g. We're doing a short update and will be back soon.",
+      "menuTitle": "e.g. Company",
+      "footerAbout": "e.g. Handmade leather goods; free returns within 14 days.",
+      "pageTitle": "e.g. About us",
+      "designName": "e.g. Winter look",
+      "search_placeholder": "e.g. Search products or brands",
+      "strip_note": "e.g. Free shipping over 750 TL"
     }
   },
   "bulkMessages": {
@@ -12932,6 +13068,12 @@
         "title": "Suggest SMS text",
         "description": "AI writes three short texts from the message's name and its current text; each fits one SMS with the shop's name and the opt-out line. No recipient list is sent; nothing changes until you save."
       }
+    },
+    "placeholders": {
+      "name": "e.g. November sale announcement",
+      "sms": "e.g. Our November sale has started: 20% off everything.",
+      "subject": "e.g. Our November sale has started",
+      "preheader": "e.g. 20% off everything until Sunday night"
     }
   },
   "popups": {
@@ -13134,6 +13276,13 @@
       "title": "Summary",
       "created": "Created",
       "updated": "Last changed"
+    },
+    "placeholders": {
+      "name": "e.g. November newsletter prompt",
+      "title": "e.g. 10% off your first order",
+      "body": "e.g. Join our newsletter and hear about offers first.",
+      "submitLabel": "Sign up",
+      "buttonLabel": "e.g. Start shopping"
     }
   },
   "paymentLinks": {
@@ -13388,6 +13537,10 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Note",
       "noNote": "No note."
+    },
+    "placeholders": {
+      "discountReason": "e.g. Loyal customer",
+      "note": "e.g. Phone order, wants delivery on Friday."
     }
   },
   "media": {
@@ -13541,6 +13694,9 @@
       "deleted_other": "{{formatted}} pictures deleted.",
       "kept_one": "{{formatted}} picture was kept in the library: it is in use or could not be deleted.",
       "kept_other": "{{formatted}} pictures were kept in the library: in use or could not be deleted."
+    },
+    "placeholders": {
+      "filename": "e.g. leather-wallet-front"
     }
   },
   "confirmEmail": {
@@ -13999,6 +14155,9 @@
       "hint": "Pass the password on to the wholesaler; suggest they change it at first sign-in. Their open sessions end. This password is not shown again.",
       "save": "Save password",
       "saved": "New password saved; the wholesaler's open sessions were ended."
+    },
+    "placeholders": {
+      "tier": "e.g. Wholesale A"
     }
   },
   "ai": {

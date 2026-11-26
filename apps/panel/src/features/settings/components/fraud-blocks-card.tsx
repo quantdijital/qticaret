@@ -128,6 +128,7 @@ export function FraudBlocksCard({ className }: { className?: string }) {
             {t(`${C}.reason`)}
           </label>
           <Input
+            placeholder={t("settings.placeholders.blockReason")}
             id="fraud-block-reason"
             value={reason}
             maxLength={500}

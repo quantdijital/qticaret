@@ -76,7 +76,12 @@ export function CollectionImageCard({ collection }: { collection: Collection }) 
         }}
       >
         <Field label={t(`${I}.alt`)} htmlFor="collection-image-alt" hint={t(`${I}.altHint`)}>
-          <Input id="collection-image-alt" maxLength={ALT_MAX} {...form.register("alt")} />
+          <Input
+            placeholder={t("common.placeholder.imageAlt")}
+            id="collection-image-alt"
+            maxLength={ALT_MAX}
+            {...form.register("alt")}
+          />
         </Field>
       </MediaField>
     </CardForm>

@@ -93,7 +93,13 @@ export function TierDialog({
           error={message(errors.name?.message)}
           required
         >
-          <Input id="tier-name" autoComplete="off" maxLength={100} {...form.register("name")} />
+          <Input
+            placeholder={t("wholesale.placeholders.tier")}
+            id="tier-name"
+            autoComplete="off"
+            maxLength={100}
+            {...form.register("name")}
+          />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field

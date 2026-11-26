@@ -182,6 +182,7 @@ function CrawlersCard({ saved }: { saved: SeoSettings }) {
       </Field>
       <Field label="robots.txt" htmlFor="seo-robots" hint={t("settings.seo.robotsHint")}>
         <Textarea
+          placeholder={t("settings.placeholders.robots")}
           id="seo-robots"
           spellCheck={false}
           className="min-h-56 font-mono text-[13px]"

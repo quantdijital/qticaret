@@ -79,6 +79,7 @@ export function MfaSetupPage() {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="first-code">{t("security.setup.code")}</Label>
                 <Input
+                  // placeholder-exempt: a one-time code has no example
                   id="first-code"
                   inputMode="numeric"
                   autoComplete="one-time-code"

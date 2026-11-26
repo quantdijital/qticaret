@@ -72,6 +72,71 @@ function leaves(tree: Tree, prefix = ""): [string, string][] {
   })
 }
 
+// Fields that need no example: the browser draws them, or they hold no words
+const NO_EXAMPLE_TYPES = new Set([
+  "hidden",
+  "checkbox",
+  "radio",
+  "file",
+  "color",
+  "date",
+  "datetime-local",
+  "time",
+  "password",
+  "range",
+])
+
+// TODO after DHL PR: the carrier screens are being changed in the DHL eCommerce branch
+const EXAMPLES_LATER = new Set([
+  "features/settings/components/aras-settings.tsx",
+  "features/settings/components/carrier-invoice-card.tsx",
+  "features/settings/components/return-code-card.tsx",
+  "features/settings/components/shipping-classes-card.tsx",
+  "features/settings/components/shipping-option-editor.tsx",
+])
+
+/** Where a JSX opening tag that starts at `from` ends, past braces and quoted values. */
+function tagEnd(text: string, from: number): number {
+  let depth = 0
+  let quote: string | null = null
+  for (let at = from; at < text.length; at++) {
+    const char = text.charAt(at)
+    if (quote) {
+      quote = char === quote ? null : quote
+    } else if (depth === 0 && (char === '"' || char === "'")) {
+      quote = char
+    } else if (char === "{") {
+      depth++
+    } else if (char === "}") {
+      depth--
+    } else if (char === ">" && depth === 0 && text.charAt(at - 1) !== "=") {
+      return at
+    }
+  }
+  return text.length
+}
+
+/** Each text field (`<Input>`, `<Textarea>`) without an example, as `file:line`. */
+function fieldsWithoutExample(): string[] {
+  return sources().flatMap((path) => {
+    const file = relative(SRC, path)
+    if (EXAMPLES_LATER.has(file) || !file.endsWith(".tsx")) {
+      return []
+    }
+    const text = readFileSync(path, "utf8")
+    return [...text.matchAll(/<(?:Input|Textarea)\b/g)].flatMap((found) => {
+      const tag = text.slice(found.index, tagEnd(text, found.index) + 1)
+      const type = /\btype="([^"]+)"/.exec(tag)?.[1]
+      const exempt =
+        /\bplaceholder\b/.test(tag) ||
+        (type !== undefined && NO_EXAMPLE_TYPES.has(type)) ||
+        // Shows a value, takes none
+        /\breadOnly(?:\s|\/|>|=\{true\})/.test(tag)
+      return exempt ? [] : [`${file}:${text.slice(0, found.index).split("\n").length}`]
+    })
+  })
+}
+
 describe("the panel's house rules (docs/18 §9)", () => {
   it("takes colours and corners from the theme", () => {
     expect(breaches(PALETTE)).toEqual([])
@@ -85,6 +150,15 @@ describe("the panel's house rules (docs/18 §9)", () => {
     // (NumberField itself is @qticaret/admin-ui's)
     expect(breaches(/<Input\b[^>]*\btype="number"/g)).toEqual([])
     expect(breaches(/<input\b[^>]*\btype="number"/g)).toEqual([])
+  })
+
+  it("shows an example in every text field", () => {
+    // The owner, 2026-11-26: "paneldeki inputların büyük çoğunluğunda placeholder yok". The
+    // example is a value or a format (ornek@alanadi.com, 0532 123 45 67), never the label again.
+    // A field with nothing to show says why in a `// placeholder-exempt: …` line inside its tag
+    // (a password or a one-time code). The `placeholder` word inside the tag counts, so that
+    // comment does too.
+    expect(fieldsWithoutExample()).toEqual([])
   })
 
   it("opens a record in the standard dialog, never in a side sheet", () => {

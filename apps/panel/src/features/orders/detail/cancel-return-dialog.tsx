@@ -56,6 +56,7 @@ export function CancelReturnDialog({
           hint={t(`${R}.cancelReasonHint`)}
         >
           <Textarea
+            placeholder={t("orders.placeholders.cancelReturn")}
             id="return-cancel-reason"
             rows={3}
             maxLength={1000}

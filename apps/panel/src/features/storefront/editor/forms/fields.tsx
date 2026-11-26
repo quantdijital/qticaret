@@ -58,12 +58,12 @@ export function TextField({
     id,
     value: text,
     maxLength: max,
-    placeholder,
     "aria-invalid": Boolean(error),
     className: cn(tokens && "pr-9"),
   }
   const control = multiline ? (
     <Textarea
+      placeholder={placeholder}
       {...shared}
       rows={3}
       onChange={(event) => {
@@ -72,6 +72,7 @@ export function TextField({
     />
   ) : (
     <Input
+      placeholder={placeholder}
       {...shared}
       onChange={(event) => {
         set(event.target.value)

@@ -90,6 +90,7 @@ export function LoginPage() {
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">{t("login.email")}</Label>
             <Input
+              placeholder={t("common.placeholder.email")}
               id="email"
               type="email"
               autoComplete="username"

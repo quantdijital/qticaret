@@ -75,6 +75,7 @@ function NameForm({
     >
       <Field label={t(`${G}.save.name`)} htmlFor="design-name" hint={t(`${G}.save.nameHint`)}>
         <Input
+          placeholder={t("storefront.placeholders.designName")}
           id="design-name"
           value={name}
           maxLength={NAME_MAX}

@@ -151,6 +151,7 @@ export function SegmentDialog({
           <DialogBody>
             <Field label={t(`${S}.name`)} htmlFor="segment-name" error={errorOf("name")} required>
               <Input
+                placeholder={t("customers.placeholders.segment")}
                 id="segment-name"
                 autoFocus
                 maxLength={100}

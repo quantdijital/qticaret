@@ -81,6 +81,7 @@ export function ContentSummaryCard({
       >
         <div className="flex flex-col gap-1">
           <Textarea
+            placeholder={t("content.placeholders.excerpt")}
             id="content-excerpt"
             maxLength={EXCERPT_MAX}
             // Grows with the text, up to a few lines; longer scrolls inside

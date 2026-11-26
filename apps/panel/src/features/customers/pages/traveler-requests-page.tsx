@@ -54,6 +54,7 @@ export function TravelerRequestsPage() {
       <Input
         id={`traveler-${name}`}
         type={type}
+        placeholder={type === "date" ? undefined : t(`${R}.placeholders.${name}`)}
         autoComplete="off"
         spellCheck={false}
         aria-invalid={Boolean(errors[name])}

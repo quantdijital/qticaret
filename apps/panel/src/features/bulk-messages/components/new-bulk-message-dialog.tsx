@@ -93,6 +93,7 @@ export function NewBulkMessageDialog({
               required
             >
               <Input
+                placeholder={t("bulkMessages.placeholders.name")}
                 id="bulk-new-name"
                 value={name}
                 autoFocus

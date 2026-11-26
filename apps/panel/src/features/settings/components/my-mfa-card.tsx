@@ -58,6 +58,7 @@ function TurnOffDialog({
         <div className="flex flex-col gap-2">
           <Label htmlFor="current-code">{t("login.mfa.code")}</Label>
           <Input
+            // placeholder-exempt: a one-time code has no example
             id="current-code"
             inputMode="numeric"
             autoComplete="one-time-code"

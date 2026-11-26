@@ -83,6 +83,7 @@ export function NetgsmSettings({
             required
           >
             <Input
+              placeholder={t("settings.placeholders.smsHeader")}
               id="netgsm-msgheader"
               autoComplete="off"
               maxLength={11}
@@ -100,6 +101,7 @@ export function NetgsmSettings({
             error={message(errors.iysBrandCode?.message)}
           >
             <Input
+              placeholder={t("settings.placeholders.iysCode")}
               id="netgsm-iys-brand-code"
               autoComplete="off"
               inputMode="numeric"

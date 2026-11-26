@@ -155,7 +155,12 @@ export function CustomerAddressDialog({
             hint={t(`${A}.nameHint`)}
             error={message(errors.address_name?.message)}
           >
-            <Input id="customer-address-name" maxLength={60} {...form.register("address_name")} />
+            <Input
+              placeholder={t("customers.placeholders.addressName")}
+              id="customer-address-name"
+              maxLength={60}
+              {...form.register("address_name")}
+            />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
@@ -164,7 +169,11 @@ export function CustomerAddressDialog({
               error={message(errors.first_name?.message)}
               required
             >
-              <Input id="customer-address-first" {...form.register("first_name")} />
+              <Input
+                placeholder={t("common.placeholder.firstName")}
+                id="customer-address-first"
+                {...form.register("first_name")}
+              />
             </Field>
             <Field
               label={t(`${A}.lastName`)}
@@ -172,7 +181,11 @@ export function CustomerAddressDialog({
               error={message(errors.last_name?.message)}
               required
             >
-              <Input id="customer-address-last" {...form.register("last_name")} />
+              <Input
+                placeholder={t("common.placeholder.lastName")}
+                id="customer-address-last"
+                {...form.register("last_name")}
+              />
             </Field>
           </div>
           <TrAddressFields

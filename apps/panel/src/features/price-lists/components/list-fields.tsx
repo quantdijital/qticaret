@@ -38,14 +38,24 @@ export function DetailsCard() {
           error={error("title")}
           required
         >
-          <Input id="price-list-title" maxLength={100} {...register("title")} />
+          <Input
+            placeholder={t("priceLists.placeholders.title")}
+            id="price-list-title"
+            maxLength={100}
+            {...register("title")}
+          />
         </Field>
         <Field
           label={t("priceLists.form.description")}
           htmlFor="price-list-description"
           error={error("description")}
         >
-          <Textarea id="price-list-description" rows={2} {...register("description")} />
+          <Textarea
+            placeholder={t("priceLists.placeholders.description")}
+            id="price-list-description"
+            rows={2}
+            {...register("description")}
+          />
         </Field>
         <Field label={t("priceLists.form.type")}>
           <Controller

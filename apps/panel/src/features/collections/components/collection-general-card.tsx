@@ -78,6 +78,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
         error={errors.title ? t(`${C}.nameRequired`) : undefined}
       >
         <Input
+          placeholder={t("collections.placeholders.name")}
           id="collection-title"
           maxLength={200}
           {...form.register("title", { validate: (text) => text.trim().length > 0 })}
@@ -94,6 +95,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
             {COLLECTION_PATH_PREFIX}
           </span>
           <Input
+            placeholder={t("collections.placeholders.handle")}
             id="collection-handle"
             spellCheck={false}
             className="border-0 pl-0 font-mono text-[13px] shadow-none"

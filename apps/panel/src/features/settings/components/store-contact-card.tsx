@@ -128,6 +128,7 @@ export function StoreContactCard({
       <div className="grid gap-5 sm:grid-cols-2">
         <Field {...email.props}>
           <Input
+            placeholder={t("common.placeholder.email")}
             id="store-contact_email"
             type="email"
             autoComplete="off"
@@ -167,6 +168,7 @@ export function StoreContactCard({
       </div>
       <Field {...address.props}>
         <Textarea
+          placeholder={t("settings.placeholders.storeAddress")}
           id="store-address"
           rows={2}
           maxLength={MAX_ADDRESS_LENGTH}

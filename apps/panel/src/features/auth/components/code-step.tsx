@@ -47,6 +47,7 @@ export function CodeStep({
           {t(method === "totp" ? "login.mfa.code" : "login.mfa.recoveryCode")}
         </Label>
         <Input
+          // placeholder-exempt: a one-time code has no example
           id="code"
           autoFocus
           aria-describedby="code-hint"

@@ -55,6 +55,10 @@ async function productClass(page: Page, id: string): Promise<string | null> {
 }
 
 const headerSave = (page: Page) => page.getByRole("group", { name: "Sayfanın kaydı" })
+// The panel's own save ends after the server's: it refetches the product, then
+// resets the form to what it sent; a click before that reset is undone by it
+const saved = (page: Page) =>
+  headerSave(page).getByRole("button", { name: "Kaydedildi", exact: true })
 
 test.describe("shipping classes", () => {
   test("adds a class in place, gives it to a product, then puts both back", async ({
@@ -94,12 +98,14 @@ test.describe("shipping classes", () => {
       await headerSave(page).getByRole("button", { name: "Kaydet", exact: true }).click()
       const key = (await shopClasses(page)).find((each) => each.name === CLASS_NAME)?.key
       await expect.poll(() => productClass(page, id)).toBe(key)
+      await expect(saved(page)).toBeVisible()
 
       // The switch is the built-in free class; the class select steps aside
       await page.getByRole("switch", { name: "Bu ürünün kargosu ücretsiz" }).click()
       await expect(page.getByRole("combobox", { name: "Kargo sınıfı" })).toHaveCount(0)
       await headerSave(page).getByRole("button", { name: "Kaydet", exact: true }).click()
       await expect.poll(() => productClass(page, id)).toBe("free")
+      await expect(saved(page)).toBeVisible()
       await guard.assertHealthy()
     } finally {
       const gone = await page.request.delete(`/admin/products/${id}`)

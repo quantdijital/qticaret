@@ -78,6 +78,7 @@ export function NewCollectionDialog({
               required
             >
               <Input
+                placeholder={t("collections.placeholders.name")}
                 id="collection-new-title"
                 value={title}
                 autoFocus

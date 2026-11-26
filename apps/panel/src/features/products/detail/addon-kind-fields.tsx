@@ -137,6 +137,7 @@ export function ChoiceRows() {
             <li key={choice.fieldKey} className={CHOICE_GRID}>
               <RowCell error={labelError} errorId={`${id}-label-error`}>
                 <Input
+                  placeholder={t("products.placeholders.addonChoice")}
                   aria-label={t(`${A}.choiceLabelOf`, { number })}
                   aria-invalid={Boolean(labelError)}
                   aria-describedby={labelError ? `${id}-label-error` : undefined}

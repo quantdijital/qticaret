@@ -120,6 +120,7 @@ export function SeoTextFields({
             }}
           >
             <Textarea
+              placeholder={t("seo.placeholders.description")}
               id={`seo-description-${id}`}
               // Grows with the text, up to a few lines; longer scrolls inside
               className="max-h-60 min-h-20"

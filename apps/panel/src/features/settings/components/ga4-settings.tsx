@@ -62,7 +62,12 @@ export function Ga4Settings({
             error={message(errors.measurementId?.message)}
             required
           >
-            <Input id="ga4-measurement-id" autoComplete="off" {...form.register("measurementId")} />
+            <Input
+              placeholder={t("settings.placeholders.ga4")}
+              id="ga4-measurement-id"
+              autoComplete="off"
+              {...form.register("measurementId")}
+            />
           </Field>
           <SecretField
             id="ga4-api-secret"
