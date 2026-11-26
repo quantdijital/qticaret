@@ -69,7 +69,14 @@ export interface ReturnRequest {
   note: string | null
   items: ReturnRequestLine[]
   decision_note: string | null
+  /**
+   * What the shopper says at the carrier's branch: the shop's contracted
+   * return code while approved (adr/0031 Ek 2026-11-26), or an old
+   * request's own code; null when there is none to say.
+   */
   return_code: string | null
+  /** The carrier that code is with ("Aras Kargo"); null for an old request's own code. */
+  return_carrier?: string | null
   return_label_file_id: string | null
   received_items: ReturnLine[] | null
   damaged_items: ReturnLine[] | null
@@ -119,17 +126,19 @@ export const returnRequestsQuery = (filters: {
   queryOptions({
     queryKey: [...KEY, filters],
     queryFn: () =>
-      sdk.client.fetch<{ return_requests: ReturnRequest[]; count: number }>(
-        "/admin/return-requests",
-        {
-          query: {
-            ...(filters.status ? { status: filters.status } : {}),
-            ...(filters.order_id ? { order_id: filters.order_id } : {}),
-            limit: RETURN_PAGE_SIZE,
-            offset: (filters.page ?? 0) * RETURN_PAGE_SIZE,
-          },
-        }
-      ),
+      sdk.client.fetch<{
+        return_requests: ReturnRequest[]
+        count: number
+        /** The shop's contracted return code now; null: none entered for the way it ships. */
+        contracted_return?: { carrier: string; code: string } | null
+      }>("/admin/return-requests", {
+        query: {
+          ...(filters.status ? { status: filters.status } : {}),
+          ...(filters.order_id ? { order_id: filters.order_id } : {}),
+          limit: RETURN_PAGE_SIZE,
+          offset: (filters.page ?? 0) * RETURN_PAGE_SIZE,
+        },
+      }),
   })
 
 /** The order's lines by id, to name what is asked back; the metadata tells a gift card line. */

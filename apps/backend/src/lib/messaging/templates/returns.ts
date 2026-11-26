@@ -22,8 +22,14 @@ export interface ReturnVars {
   customerName: string
   kind: "return" | "exchange"
   items: ReturnLineVars[]
-  /** The carrier's code the shopper hands the parcel over with, once approved. */
+  /**
+   * The code the shopper says at the carrier's branch, once approved: the
+   * shop's contracted return code (adr/0031 Ek 2026-11-26), or an old
+   * request's carrier-made one.
+   */
   returnCode: string | null
+  /** The carrier that code is with ("Aras Kargo"); null for an old request's own code. */
+  returnCarrier?: string | null
   /** What was paid back, once refunded. */
   amount: string | null
   /** Units refused at receipt; none until the parcel is received. */
@@ -37,7 +43,8 @@ const SAMPLE: ReturnVars = {
   customerName: "Ayşe",
   kind: "return",
   items: [{ title: "Örnek ürün", detail: "Mavi / M", quantity: 1 }],
-  returnCode: "GLV12345678",
+  returnCode: "48213",
+  returnCarrier: "Aras Kargo",
   amount: "₺120,00",
   refused: [],
   taken: false,
@@ -119,16 +126,35 @@ export const returnRequested = template("return.requested", "return_requested", 
   lines(vars),
 ])
 
+/**
+ * How to send the parcel back: with the shop's contracted return code, the
+ * carrier's branch and the code to say, free of charge; with an old
+ * request's own code, the code; with none, that the shop will be in touch.
+ */
+export function returnCodeBlock(
+  vars: Pick<ReturnVars, "returnCode" | "returnCarrier">
+): EmailBlock {
+  if (!vars.returnCode) {
+    return { kind: "paragraph", text: messageText("return_approved.no_code") }
+  }
+  return {
+    kind: "details",
+    title: messageText("return_approved.code_title"),
+    lines: [
+      vars.returnCarrier
+        ? messageText("return_approved.contracted", {
+            carrier: vars.returnCarrier,
+            code: vars.returnCode,
+          })
+        : messageText("return_approved.code", { code: vars.returnCode }),
+    ],
+  }
+}
+
 /** "Talebiniz onaylandı": how to send the parcel back. */
 export const returnApproved = template("return.approved", "return_approved", true, (vars) => [
   lines(vars),
-  vars.returnCode
-    ? {
-        kind: "details",
-        title: messageText("return_approved.code_title"),
-        lines: [messageText("return_approved.code", { code: vars.returnCode })],
-      }
-    : { kind: "paragraph", text: messageText("return_approved.no_code") },
+  returnCodeBlock(vars),
 ])
 
 /**
@@ -150,7 +176,8 @@ export const returnRefunded = template("return.refunded", "return_refunded", fal
 
 /**
  * "Talebiniz iptal edildi": staff took an approval back before anything
- * came back (order #691). Nothing need be sent, the code no longer works,
+ * came back (order #691). The parcel is not to be sent (the contracted
+ * return code stays valid shop-wide, so it is not called invalid),
  * and a new request may be made within the period. Staff's reason is
  * the team's, never in it.
  */

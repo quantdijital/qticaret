@@ -568,6 +568,7 @@
   "order.doc_invoice": "Fatura {number} (PDF)",
   "order.returns": "İade ve değişim talepleri",
   "order.return_code": "iade kodu {code}",
+  "order.return_code_contracted": "İade paketinizi {carrier} şubesine verin ve gönderirken '{code}' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz.",
   "order.return_title": "İade ya da değişim talep et",
   "order.return_reason": "Neden",
   "order.return_note": "Açıklama (isteğe bağlı)",

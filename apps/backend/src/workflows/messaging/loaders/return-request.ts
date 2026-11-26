@@ -2,9 +2,11 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ReturnVars } from "../../../lib/messaging/templates"
 import { cameBack } from "../../../lib/orders/returns"
+import { requestReturnCode } from "../../../lib/shipping/contracted-return"
 import type { RefusedLine } from "../../../lib/orders/withdrawal-rules"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
+import { readContractedReturn } from "../../returns/contracted-return"
 import { messageAddonsOf } from "./line-addons"
 import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
@@ -71,13 +73,19 @@ export async function loadReturnMessage(
   // Units refused at receipt (adr/0032 Ek 2026-11-03); nothing until received
   const refused = (request.refused_items ?? []) as unknown as RefusedLine[]
   const received = request.received_items !== null || request.damaged_items !== null
+  // The code as the shopper reads it when the message goes (adr/0031 Ek 2026-11-26)
+  const code = requestReturnCode(
+    request,
+    request.status === "approved" ? await readContractedReturn(container) : null
+  )
   return {
     vars: {
       number: String(order.display_id),
       customerName: personName(order.shipping_address?.first_name) ?? GREETING,
       kind: request.kind,
       items: asked.map(lineOf),
-      returnCode: request.return_code,
+      returnCode: code.return_code,
+      returnCarrier: code.return_carrier,
       amount: request.refund_amount === null ? null : liraOfKurus(request.refund_amount),
       refused: refused.map((each) => ({ ...lineOf(each), reason: each.reason })),
       taken: received && cameBack(request).length > 0,

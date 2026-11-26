@@ -114,3 +114,30 @@ describe("the order page for a gift card line", () => {
     expect(forms(page(bare))[0]).toContain(t("order.cancel_text"))
   })
 })
+
+describe("the order page's return requests (adr/0031 Ek 2026-11-26)", () => {
+  it("prints the contracted return code's sentence in place of the bare code", () => {
+    const base = orderView(order([knifeLine]), null, false, t, {
+      token: null,
+      contracts: [],
+      returns: [
+        {
+          kind: "return",
+          status: "approved",
+          return_code: "AR-48213",
+          return_carrier: "Aras Kargo",
+          created_at: "2026-11-03T12:00:00.000Z",
+          items: [{ line_item_id: KNIFE, quantity: 1 }],
+        },
+      ],
+      returnable: null,
+      shipments: [],
+      invoice: null,
+      note: null,
+    })
+    const html = page(base)
+    expect(html).toContain("Aras Kargo şubesine verin")
+    expect(html).toContain("&#x27;AR-48213&#x27; anlaşmalı iade kodunu")
+    expect(html).not.toContain("iade kodu AR-48213")
+  })
+})

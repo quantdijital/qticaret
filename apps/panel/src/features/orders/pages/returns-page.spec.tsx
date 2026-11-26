@@ -228,4 +228,29 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
     expect(rowOf(1043).getByRole("button", { name: "İade talebi işlemleri" })).toBeInTheDocument()
     expect(rowOf(1046).queryByRole("button", { name: "İade talebi işlemleri" })).toBeNull()
   })
+
+  it("reads the contracted return code with its carrier, and warns without one (adr/0031 Ek 2026-11-26)", async () => {
+    fetchMock.mockResolvedValue({
+      return_requests: [
+        request({
+          status: "approved",
+          return_code: "AR-48213",
+          return_carrier: "Aras Kargo",
+        }),
+      ],
+      count: 1,
+      contracted_return: { carrier: "Aras Kargo", code: "AR-48213" },
+    })
+    const { unmount } = renderPage()
+
+    expect(await screen.findByText("Aras Kargo · AR-48213")).toBeInTheDocument()
+    expect(screen.queryByTestId("return-code-missing")).toBeNull()
+    unmount()
+
+    fetchMock.mockResolvedValue({ return_requests: [], count: 0, contracted_return: null })
+    renderPage()
+    expect(await screen.findByTestId("return-code-missing")).toHaveTextContent(
+      "Anlaşmalı iade kodu girilmedi"
+    )
+  })
 })

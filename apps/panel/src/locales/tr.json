@@ -1641,6 +1641,18 @@
           "invoice": "BirFatura yalnız kendisine verilen siparişi kargolayabildiği için sipariş, ödemesi alınınca (kapıda ödemede hemen) BirFatura'ya verilir; faturanın ne zaman kesileceği BirFatura'daki ayarlarına bağlıdır.",
           "price": "Ödemede kargo ücreti mağazanın kendi ücret ayarından hesaplanır; Seçenekler sekmesinde \"Kargo firmasının ücreti\" yerine ücretsiz, sabit ya da belli tutarın üstünde ücretsiz kargo seç."
         }
+      },
+      "returnCode": {
+        "title": "Anlaşmalı iade kodu",
+        "description": "Kargo firmasının anlaşmalı mağazaya verdiği sabit iade kodu. Onaylanan iadede müşteriye e-postada ve sipariş sayfasında gösterilir.",
+        "descriptionOther": "BirFatura ile çalıştığın kargo firmasının adı ve sana verdiği sabit iade kodu. Onaylanan iadede müşteriye gösterilir.",
+        "label": "Anlaşmalı iade kodu",
+        "hint": "Müşteri iade paketini şubeye verirken bu kodu söyler; ücret sizin anlaşmanızdan ödenir.",
+        "carrier": "Kargo firması",
+        "carrierPlaceholder": "Örn. Aras Kargo",
+        "both": "Firma adını ve kodu birlikte girin ya da ikisini de boş bırakın.",
+        "invalid": "Kod en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
+        "missing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kod gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir."
       }
     },
     "integrations": {
@@ -5313,7 +5325,7 @@
     },
     "returns": {
       "queue": "İade talepleri",
-      "queueDescription": "Müşterilerin iade talepleri; karar bekleyenler önce. Onaylanan iadede müşteri kargoya iade koduyla verir; ürün depoya ulaşınca teslim alın, para iadesi kendiliğinden yapılır.",
+      "queueDescription": "Müşterilerin iade talepleri; karar bekleyenler önce. Onaylanan iadede müşteri paketi anlaşmalı iade koduyla kargo şubesine verir; ürün depoya ulaşınca teslim alın, para iadesi kendiliğinden yapılır.",
       "columns": {
         "order": "Sipariş",
         "date": "Talep tarihi",
@@ -5443,7 +5455,9 @@
       "cancelReason": "İptal sebebi",
       "cancelReasonHint": "Ekip için not; müşteri görmez.",
       "canceled": "İade talebi iptal edildi; müşteriye e-posta gönderildi.",
-      "dialogTitle": "#{{number}} siparişinin talebi"
+      "dialogTitle": "#{{number}} siparişinin talebi",
+      "codeMissing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kargo kodu gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir.",
+      "codeMissingLink": "Kargo ayarlarına git"
     },
     "edit": {
       "title": "#{{number}} siparişini düzenle",

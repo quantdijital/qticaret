@@ -171,7 +171,7 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(seen)).not.toContain("vazgeçtiğini")
       const told = mails.find(({ template }) => template === "return.canceled")
       expect(told?.subject).toMatch(/^İade talebiniz iptal edildi \(#\d+\)$/)
-      expect(told?.text).toContain("geri göndermenize gerek yok")
+      expect(told?.text).toContain("Lütfen ürünleri kargoya vermeyin.")
       expect(told?.text).not.toContain("vazgeçtiğini")
     })
 

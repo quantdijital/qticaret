@@ -80,3 +80,13 @@ export const requestCancellable = (
   request.status === "approved" &&
   !request.handed_over_at &&
   !(request.kind === "exchange" && Number(request.difference ?? 0) > 0)
+
+/** The return code as staff read it to the shopper: "Aras Kargo · 1234567", or the code alone. */
+export const returnCodeText = (
+  request: Pick<ReturnRequest, "status" | "return_code" | "return_carrier">
+): string | null =>
+  request.status === "canceled" || !request.return_code
+    ? null
+    : request.return_carrier
+      ? `${request.return_carrier} · ${request.return_code}`
+      : request.return_code

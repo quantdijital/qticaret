@@ -161,7 +161,23 @@ export interface ReturnsSettings {
    * 30 days or more ahead keeps nothing; the refund comes within 14 days.
    */
   package_travel: boolean
+  /**
+   * The shop's contracted return codes (adr/0031 Ek 2026-11-26): one per
+   * carrier of ours, and BirFatura's carrier named with its code. Absent
+   * from an older backend. Each saved alone: the server merges the others.
+   */
+  contracted_return?: ContractedReturnCodes
 }
+
+export interface ContractedReturnCodes {
+  aras: string | null
+  yurtici: string | null
+  other_carrier: string | null
+  other_code: string | null
+}
+
+/** A code as the server takes it (`platform_settings.return_code_invalid`). */
+export const RETURN_CODE_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9 ./-]{0,38}[A-Za-z0-9])?$/
 
 export const MIN_WITHDRAWAL_DAYS = 14
 

@@ -1077,6 +1077,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
   "platform_settings.withdrawal_days_invalid":
     "The withdrawal period must be a whole number of days between 14 and 365; the law asks for at least 14.",
+  "platform_settings.return_code_invalid":
+    "A contracted return code is at most 40 characters: letters, digits, spaces, dots, dashes and slashes.",
+  "platform_settings.return_carrier_both": "Enter the return carrier's name and its code together.",
   "platform_settings.return_shipping_shop_only":
     "A withdrawal's return shipping cannot be charged to the customer (Distance Contracts Regulation art. 12); the shop pays it.",
   "platform_settings.hours_invalid":

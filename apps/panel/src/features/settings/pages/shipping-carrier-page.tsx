@@ -8,6 +8,7 @@ import type { ArasAccount, YurticiAccount } from "@/features/settings/api/paymen
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
+import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
 import { isCarrier } from "@/features/settings/shipping-carriers"
@@ -18,7 +19,8 @@ const S = "settings.shipping"
 
 /**
  * Settings > Shipping > one carrier: its state by the title, its settings
- * below, then the name and tax id its parcels' e-Arşiv invoices carry.
+ * below, the contracted return code returns are sent back with, then the
+ * name and tax id its parcels' e-Arşiv invoices carry.
  */
 export function ShippingCarrierPage() {
   const { t } = useTranslation()
@@ -51,7 +53,12 @@ export function ShippingCarrierPage() {
           keyConfigured={query.data.key_configured}
         />
       )}
-      {isCarrier(carrier) ? <CarrierInvoiceCard carrier={carrier} /> : null}
+      {isCarrier(carrier) ? (
+        <>
+          <ReturnCodeCard target={carrier} />
+          <CarrierInvoiceCard carrier={carrier} />
+        </>
+      ) : null}
     </div>
   )
 }

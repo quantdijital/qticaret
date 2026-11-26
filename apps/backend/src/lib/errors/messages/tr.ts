@@ -1088,6 +1088,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "ETBİS kayıt numarası harf, rakam ve tireden oluşur.",
   "platform_settings.withdrawal_days_invalid":
     "Cayma süresi 14 ile 365 gün arasında bir tam sayı olmalı; yasa en az 14 gün istiyor.",
+  "platform_settings.return_code_invalid":
+    "Anlaşmalı iade kodu en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
+  "platform_settings.return_carrier_both": "İade kargosu için firma adını ve kodu birlikte girin.",
   "platform_settings.return_shipping_shop_only":
     "Cayma iadesinde iade kargo ücreti müşteriden istenemez (Mesafeli Sözleşmeler Yönetmeliği md. 12); iade kargosunu mağaza öder.",
   "platform_settings.hours_invalid":
