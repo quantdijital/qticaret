@@ -160,9 +160,13 @@ medusaIntegrationTestRunner({
         cari_code: fake.accounts.tracking.cariCode,
         web_password: "yanlis-sifre",
       })
-      const halfCari = await connect({ cari_code: fake.accounts.tracking.cariCode })
-      // One pair only: the shipping login tracks too, and is checked so
       await settle(http.delete("/admin/integrations/credentials/surat", { headers: admin.headers }))
+      // Half the cari pair on a new account (a stored pair would stand in for the missing part)
+      const halfCari = await connect({
+        ...fake.accounts.shipping,
+        cari_code: fake.accounts.tracking.cariCode,
+      })
+      // One pair only: the shipping login tracks too, and is checked so
       const wrongMain = await connect({ ...fake.accounts.shipping, password: "yanlis-sifre" })
       const onePair = await connect({ ...fake.accounts.shipping })
       const { data } = await http.get<{ options: { id: string; carrier: string }[] }>(
