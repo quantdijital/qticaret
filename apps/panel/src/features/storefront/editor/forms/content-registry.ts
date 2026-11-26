@@ -65,6 +65,7 @@ export type ContentField =
   | "stats_social"
   | "steps_layout"
   | "numbers"
+  | "steps_connector"
   | "show_icons"
   | "stats_style"
   | "lift"
@@ -149,6 +150,7 @@ function stripGalleryFields(section: AnySection): RegistryField[] {
 export const STEPS_FIELDS = [
   ["layout", "steps_layout"],
   ["numbers", "numbers"],
+  ["connector", "steps_connector"],
 ] as const satisfies readonly (readonly [keyof typeof STEPS_SETTINGS, ContentField])[]
 
 /** The figures strip's switch and the steps' two steps, open in "Diziliş" (adr/0077 §10). */

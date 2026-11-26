@@ -43,6 +43,12 @@ export const STYLE_KIT = {
    * always white, for a bright accent that holds white bold words at 3:1.
    */
   accent_ink: ["auto", "light"],
+  /**
+   * S10 (adr/0067 Ek 2026-11-27): the home sections' headings; `plain`
+   * today's, `serif_accent` large and light with the words the shop put
+   * between asterisks in the accent face's italic (Rota's reference).
+   */
+  section_title: ["plain", "serif_accent"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -64,6 +70,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKit> = {
   motion: "calm",
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 /** The attribute a step off the default is marked with on the theme's root element. */

@@ -78,6 +78,7 @@ const SAVED: ThemeSettings = {
   motion: "calm",
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -107,6 +108,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       motion: "calm",
       page_width: "standard",
       accent_ink: "auto",
+      section_title: "plain",
     })
   })
 })
@@ -178,6 +180,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       motion: "calm",
       page_width: "standard",
       accent_ink: "auto",
+      section_title: "plain",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })

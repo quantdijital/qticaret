@@ -39,5 +39,6 @@
   },
   "menu_style": "plain",
   "density": "airy",
-  "motion": "lively"
+  "motion": "lively",
+  "section_title": "serif_accent"
 }

@@ -21,6 +21,7 @@ export const STEPS_LIMITS = {
 export const STEPS_SETTINGS = {
   layout: ["row", "column"],
   numbers: ["padded", "plain"],
+  connector: ["off", "dotted"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof STEPS_SETTINGS
@@ -29,6 +30,7 @@ type Step<S extends Setting> = (typeof STEPS_SETTINGS)[S][number]
 export const STEPS_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   layout: "row",
   numbers: "padded",
+  connector: "off",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -62,6 +64,13 @@ export const steps = z
     link: optional(storefrontLink),
     layout: setting("layout"),
     numbers: setting("numbers"),
+    // Kept only once chosen (a section saved before it reads as `off`, today's)
+    connector: z
+      .custom<Step<"connector">>(
+        (value) => (STEPS_SETTINGS.connector as readonly unknown[]).includes(value),
+        SETTING_ERROR
+      )
+      .optional(),
   })
   .strict()
 

@@ -1,0 +1,25 @@
+/*
+ * The steps' `connector: dotted` (adr/0077 §10 Ek, `Steps.tsx`): side by
+ * side from 1024 px, the hairline over each step gives way to a dotted
+ * line that runs from its number across the column gap toward the next
+ * step's number; the last step has none. A column, a phone and the
+ * default draw as before.
+ */
+@media (min-width: 1024px) {
+  [data-connector="dotted"] > li {
+    border-top-color: transparent;
+  }
+  [data-connector="dotted"] > li > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  [data-connector="dotted"] > li:not(:last-child) > span:first-child::after {
+    content: "";
+    flex: 1 1 auto;
+    min-width: 2rem;
+    margin-inline-end: calc(var(--gap-columns) * -0.5);
+    border-top: 2px dotted var(--color-text-3);
+    opacity: 0.6;
+  }
+}

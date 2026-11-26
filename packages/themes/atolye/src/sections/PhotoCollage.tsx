@@ -1,3 +1,4 @@
+import { TitleText } from "../parts/TitleText"
 import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { PhotoCollageItemView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -122,7 +123,7 @@ export function PhotoCollage({ section, first = false }: { section: Collage; fir
       )}
       {section.title && (
         <h2 id={id} {...fieldMark(section.editor, "title")}>
-          {section.title}
+          <TitleText text={section.title} />
         </h2>
       )}
       {section.intro && (

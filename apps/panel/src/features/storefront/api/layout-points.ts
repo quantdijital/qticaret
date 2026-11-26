@@ -47,7 +47,8 @@ export type StepsSection = BodySectionBase & {
   intro: string | null
   items: StepsItem[]
   link: LayoutLink | null
-} & StepsSettings
+} & Omit<StepsSettings, "connector"> &
+  Partial<Pick<StepsSettings, "connector">>
 
 /** One photograph of a collage: a library picture with its words, an optional caption and link. */
 export interface PhotoCollageItem {

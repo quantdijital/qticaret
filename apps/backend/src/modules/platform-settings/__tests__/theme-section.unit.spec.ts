@@ -109,6 +109,7 @@ describe("theme section", () => {
       // adr/0067 Ek 2026-11-25: the page width and the accent words as before
       page_width: "standard",
       accent_ink: "auto",
+      section_title: "plain",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)

@@ -19,6 +19,7 @@ describe("the style kit", () => {
       motion: ["calm", "lively"],
       page_width: ["standard", "narrow"],
       accent_ink: ["auto", "light"],
+      section_title: ["plain", "serif_accent"],
     })
     expect(STYLE_KIT_FIELDS).toEqual([
       "menu_style",
@@ -29,6 +30,7 @@ describe("the style kit", () => {
       "motion",
       "page_width",
       "accent_ink",
+      "section_title",
     ])
   })
 
@@ -50,6 +52,7 @@ describe("the style kit", () => {
       "data-motion",
       "data-page-width",
       "data-accent-ink",
+      "data-section-title",
     ])
   })
 
