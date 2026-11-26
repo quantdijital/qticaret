@@ -109,6 +109,7 @@ describe("a dated product's offers", () => {
     },
     units: { weight_unit: "g", dimension_unit: "cm" },
     table_offered: true,
+    free_shipping_threshold: null,
   }
   const returns = { withdrawal_days: 14 } as ReturnsSettings
 

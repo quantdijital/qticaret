@@ -1,6 +1,6 @@
 # ADR-0087: Üründe ücretsiz kargo ve kargo sınıfları
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (sahip, 2026-11-26: bütün sorularda önerilen cevap)
 - **Tarih:** 2026-11-26
 - **İlgili:** adr/0024 (kargo bedava eşiği, kampanyalar), adr/0031 (kargo altyapısı, desi), adr/0035 (Aras ve Yurtiçi, ücret tablosu), adr/0054 (varsayılan paket), adr/0072 (BirFatura), adr/0076 (kargosuz ürün), adr/0066 (yayımlanmış biçim sözleşmesi), docs/13 (JSON-LD `shippingDetails`), docs/06 (ürün sayfası "Kargo" sekmesi, Ayarlar > Kargo).
 - **Dayanak:** WooCommerce farkı S4 (2026-11-26 boşluk raporu): WooCommerce'te ürünün "Kargo sınıfı" vardır; ücretsiz ya da büyük/ağır ürün sınıfla ayrılır. Bizde ürün başına ücretsiz kargo yok.
@@ -139,3 +139,17 @@ Bütün mağaza seçeneklerinin ücreti tek saf işlevden gelir: `lib/shipping/q
 5. **"X TL üzeri kargo bedava" desi tablosu ve Geliver seçeneklerine de uygulansın mı?** (Bugün uygulanmıyor, vitrin yine de "ücretsiz" diyor.) Öneri: **Evet**, her seçeneğe.
 6. **Eşik hesabında ücretsiz ürünlerin tutarı sayılsın mı?** Öneri: **Evet**, sepetin bütün tutarı.
 7. **Ürün sayfası ek ücreti açıkça yazsın mı ("kargoya 150 TL eklenir")?** Öneri: **Evet**, sürpriz ücret şikâyeti ve mesafeli satış bilgilendirmesi için.
+
+## Sahibin cevapları (2026-11-26)
+
+Sahip bütün sorularda önerilen cevabı kabul etti:
+
+1. Karışık sepette ücretsiz ürünün desisi kargo ücretine **sayılmaz**; ücreti yalnız ücretli ürünler belirler.
+2. Sabit ücretli kargoda karışık sepet **tam sabit ücret** öder (ücret sipariş başınadır).
+3. Birden çok ek ücretli sınıf: **en yüksek ek ücret siparişe bir kez** eklenir.
+4. Mağazanın kendi sınıfları **şimdi** gelir; sınıf yalnız **ek ücret** taşır.
+5. "X TL üzeri kargo bedava" **her seçeneğe** uygulanır: desi tablosu ve Geliver dahil.
+6. Eşik hesabı ücretsiz ürünlerin tutarını da **sayar** (sepetin bütün tutarı).
+7. Ürün sayfası ek ücreti **açıkça yazar** ("Bu ürün için kargoya {tutar} eklenir.").
+
+**Uygulama sırası:** bugünkü açık (eşiğin desi tablosu ve Geliver'de uygulanmaması; akış ve JSON-LD'nin eşiği yok sayması) ilk ve küçük PR olarak kapatılır: `lib/shipping/quote.ts` (`shippingQuote`), `setCalculatedShippingPricingContext` kancası (`listShippingOptionsForCartWithPricingWorkflow` ve tek seçenek fiyatı için `calculateShippingOptionsPricesWorkflow`; ikincisinin sepet alanlarında `item_total` yoktur, kanca onu kendisi okur), Aras/Yurtiçi/Geliver sağlayıcıları, ödeme sonundaki "kargo bayatladı" denetiminin ücretsiz hesaplanan yöntemleri de yeniden fiyatlaması, `shippingRateOf` ve `shippingCost`. Ardından §Sonuçlar'daki sıra.

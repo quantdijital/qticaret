@@ -128,7 +128,7 @@ export interface FeedShop {
   handlingDays: { min: number; max: number }
   /** The cheapest flat-rate delivery shoppers can pick, gross TRY; null: none. */
   flatShipping: number | null
-  /** Flat-rate shipping is free from this basket total (Settings > Promotions); null: never. */
+  /** Every option ships free from this basket total (Settings > Promotions); null: never. */
   freeShippingFrom: number | null
   /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
   sameDayCutoffHour: number | null
@@ -137,18 +137,15 @@ export interface FeedShop {
 /**
  * What shipping one unit costs a shopper: the shop's desi table when it
  * prices the item, else its cheapest flat rate, free past the basket
- * total the shop set; null when neither says.
+ * total the shop set, whichever prices it (adr/0087 §5: the threshold
+ * holds for every option); null when neither says.
  */
 export function shippingCost(item: FeedItem, shop: FeedShop): number | null {
-  if (item.shippingRate !== null) {
-    return item.shippingRate
-  }
-  if (shop.flatShipping === null) {
+  const base = item.shippingRate ?? shop.flatShipping
+  if (base === null) {
     return null
   }
-  return shop.freeShippingFrom !== null && item.price >= shop.freeShippingFrom
-    ? 0
-    : shop.flatShipping
+  return shop.freeShippingFrom !== null && item.price >= shop.freeShippingFrom ? 0 : base
 }
 
 /** Whether the item is in a category the shop keeps out of a feed. */

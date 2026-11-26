@@ -18,7 +18,9 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
  * (`item_total gte`: KDV in, after discounts), beside each currency's own
  * price. That price is the platform's: amount 0, one `item_total gte`
  * rule. Other prices, with or without rules, stay as the shop set them.
- * Options priced by a carrier (calculated) are left to their provider.
+ * Options priced by a carrier (calculated) take the threshold in their
+ * provider, through the one shipping quote (`lib/shipping/quote.ts`,
+ * adr/0087 §2; the hook in `workflows/hooks/shipping-quote-context.ts`).
  */
 
 const RULE_ATTRIBUTE = "item_total"
