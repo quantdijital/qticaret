@@ -46,6 +46,13 @@ const listing = (products: ProductCardView[]): ListingPageView => ({
   clearPath: null,
 })
 
+/** The card with no dated field at all (a product that is no tour). */
+const withoutDates = (product: ProductCardView): ProductCardView => {
+  const bare = { ...product }
+  delete bare.booking
+  return bare
+}
+
 const cardOf = (product: ProductCardView) =>
   (renderToStaticMarkup(
     createElement(atolyeTheme.ListingPage, { t, view: listing([product]) })
@@ -79,9 +86,7 @@ describe("Atölye's card: the details on the photo", () => {
   })
 
   it("draws no pill for what the product lacks", () => {
-    const markup = cardOf(
-      card({ rating: null, booking: undefined, look: look({ metaOver: true }) })
-    )
+    const markup = cardOf(withoutDates(card({ rating: null, look: look({ metaOver: true }) })))
     expect(markup).not.toContain("gf-card-glass-pill")
     expect(wordsOf(markup)).toContain("1.750,00 TL")
   })
