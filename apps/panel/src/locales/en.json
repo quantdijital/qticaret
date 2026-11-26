@@ -1559,6 +1559,13 @@
         "returns": "Returns",
         "locations": "Warehouses and stock"
       },
+      "freeShipping": {
+        "title": "Free shipping threshold",
+        "description": "Once the basket's products (VAT in, after discounts) reach this total, every shipping option is free; products with free shipping count toward it.",
+        "switch": "Free shipping from a basket total",
+        "threshold": "Basket total",
+        "thresholdInvalid": "Enter an amount above 0, at most 10,000,000 TL."
+      },
       "classes": {
         "title": "Shipping classes",
         "description": "A product's class changes its shipping cost. With several classes in a basket, the highest surcharge is added to the order once.",
@@ -6697,9 +6704,9 @@
     "settings": {
       "title": "Promotion settings",
       "hint": "Rules for every promotion.",
-      "freeShipping": "Free shipping from a basket total",
-      "freeShippingHint": "Once the basket's products (VAT in, after discounts) reach this total, flat-rate shipping options cost nothing.",
-      "threshold": "Basket total",
+      "freeShippingSummary": "Free shipping from: {{value}}",
+      "freeShippingOff": "Off",
+      "freeShippingEdit": "Change in shipping settings",
       "combineCodes": "More than one code in a cart",
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."
