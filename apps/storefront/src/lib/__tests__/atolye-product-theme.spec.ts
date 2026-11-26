@@ -299,6 +299,18 @@ describe("the theme's product page", () => {
     expect(html).toContain('name="message"')
   })
 
+  it("stops the count at the product's most per order and says it at once for one (S5)", () => {
+    const quantity = (html: string) => /<input[^>]*name="quantity"[^>]*>/.exec(html)?.[0] ?? ""
+    expect(quantity(page())).toContain('max="99"')
+    const capped = page({ maxQuantity: 3 })
+    expect(quantity(capped)).toContain('max="3"')
+    // Below the cap no line yet
+    expect(capped).not.toContain("en çok 3 adet")
+    const single = page({ maxQuantity: 1 })
+    expect(quantity(single)).toContain('max="1"')
+    expect(single).toContain("Bu üründen bir siparişte en çok 1 adet alınabilir.")
+  })
+
   it("says the withdrawal note before the purchase and the delivery facts", () => {
     const html = page({ withdrawalNote: "Bu ürün için cayma hakkı bulunmaz." })
     expect(html).toContain("Bu ürün için cayma hakkı bulunmaz.")

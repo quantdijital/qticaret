@@ -86,9 +86,11 @@ export function PageHeader({
           : "gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
       )}
     >
-      {/* The title keeps room enough to be read: the actions wrap under it sooner */}
+      {/* The title keeps room enough to be read (the owner 2026-11-26: a report's title and
+          description squeezed into a narrow column beside its controls): when the two do not
+          fit side by side, the actions take their own line under it */}
       <div
-        className={cn("flex min-w-0 flex-col gap-1", sticky ? "lg:flex-1" : "sm:flex-[1_1_5.5rem]")}
+        className={cn("flex min-w-0 flex-col gap-1", sticky ? "lg:flex-1" : "sm:flex-[1_1_18rem]")}
       >
         <div className={cn("flex items-center gap-3", sticky ? "min-w-0" : "flex-wrap")}>
           {/* A title with no break in it (a customer known by e-mail only) wraps anywhere; held, it keeps one line */}

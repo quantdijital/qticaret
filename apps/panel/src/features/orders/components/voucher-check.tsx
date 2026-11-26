@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { CircleCheck, CircleX, TicketCheck } from "lucide-react"
 import { useState } from "react"
@@ -15,10 +14,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { useVoucherCheck } from "@/features/orders/api/vouchers"
 import type { VoucherCheck } from "@/features/orders/api/vouchers"
-import { BOOKING_FLAG } from "@/features/products/api/booking"
-import { useFeature } from "@/features/settings/api/features"
-import { sectionQuery } from "@/features/settings/api/sections"
-import type { BookingFlowSettings } from "@/features/settings/api/sections"
+import { useVouchersOn } from "@/features/orders/components/use-vouchers-on"
 import { errorText } from "@/lib/errors"
 
 const V = "orders.vouchers"
@@ -78,14 +74,9 @@ function CheckResult({ result }: { result: VoucherCheck }) {
  */
 export function VoucherCheckButton() {
   const { t } = useTranslation()
-  const on = useFeature(BOOKING_FLAG)
-  // Hidden only once the shop is known to run without vouchers
-  const flow = useQuery({ ...sectionQuery<BookingFlowSettings>("booking"), enabled: on })
-  const vouchers = flow.data?.values.voucher_enabled ?? true
+  const on = useVouchersOn()
   const [open, setOpen] = useState(false)
-  const [code, setCode] = useState("")
-  const check = useVoucherCheck()
-  if (!on || !vouchers) {
+  if (!on) {
     return null
   }
   return (
@@ -100,10 +91,28 @@ export function VoucherCheckButton() {
         <TicketCheck aria-hidden="true" />
         {t(`${V}.title`)}
       </Button>
+      <VoucherCheckDialog open={open} onOpenChange={setOpen} />
+    </>
+  )
+}
+
+/** The check itself, opened by the button above or by a menu's item (the orders' "…"). */
+export function VoucherCheckDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const { t } = useTranslation()
+  const [code, setCode] = useState("")
+  const check = useVoucherCheck()
+  return (
+    <>
       <Dialog
         open={open}
         onOpenChange={(next) => {
-          setOpen(next)
+          onOpenChange(next)
           if (!next) {
             setCode("")
             check.reset()

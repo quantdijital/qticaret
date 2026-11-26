@@ -39,6 +39,9 @@ export function useProductColumns(
     {
       key: "product",
       header: t("products.columns.product"),
+      // A long name is cut short (whole on hover) instead of pushing the other columns off the card
+      fill: true,
+      className: "min-w-40",
       cell: (product) => {
         const sku = listSku(product.variants)
         return (
@@ -48,6 +51,7 @@ export function useProductColumns(
               <Link
                 to="/products/$id"
                 params={{ id: product.id }}
+                title={product.title}
                 className="truncate font-medium hover:underline"
                 onClick={(event) => {
                   event.stopPropagation()

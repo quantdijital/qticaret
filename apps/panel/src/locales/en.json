@@ -4873,6 +4873,13 @@
         "seo": "Its SEO score was too low to publish.",
         "other": "Something went wrong while saving."
       }
+    },
+    "purchaseLimit": {
+      "title": "Purchase limit",
+      "label": "Maximum purchase quantity",
+      "hint": "The most of this product (all variants together) one order may hold. Empty means no limit; 1 sells it individually.",
+      "none": "No limit",
+      "invalid": "Write a whole number from 1 to {{max}}, or leave it empty."
     }
   },
   "orders": {

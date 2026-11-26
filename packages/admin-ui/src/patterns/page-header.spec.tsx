@@ -26,7 +26,7 @@ describe("PageHeader", () => {
 
     // The row wraps; the title keeps a floor of its own, the actions never outgrow the row
     expect(row).toHaveClass("sm:flex-wrap")
-    expect(titleBlock).toHaveClass("min-w-0", "sm:flex-[1_1_5.5rem]")
+    expect(titleBlock).toHaveClass("min-w-0", "sm:flex-[1_1_18rem]")
     expect(actions).toHaveClass("max-w-full", "flex-wrap")
   })
 

@@ -223,6 +223,8 @@ const PAGE_FIELDS = [
   "product_extension.kind",
   // A dated product's page asks its departures (adr/0076 §10)
   "product_extension.booking_mode",
+  // S5: the most of it one order may hold; the page's count stops there
+  "product_extension.max_quantity",
 ]
 
 export interface ProductQuery {
