@@ -138,6 +138,7 @@ describe("the theme's shared settings", () => {
       "Süslü parantez içinde tanınmayan bir bilgi var"
     )
     const marked = "Güven rozetleriDüzeltilecek alan var"
+    await user.click(screen.getByRole("button", { name: "Bölümlere dön" }))
     const home = within(within(tree).getByRole("list", { name: "Ana sayfa" }))
     expect(home.getByRole("button", { name: marked })).toBeVisible()
     // The product page's strip shows the same list, so the same mark

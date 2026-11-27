@@ -10103,6 +10103,7 @@
       },
       "panel": {
         "back": "Bölümlere dön",
+        "trail": "Konum",
         "visibility": "Görünürlük",
         "visible": "Vitrinde göster",
         "visibleHint": "Gizli bölüm vitrinde görünmez; ayarları saklanır.",
@@ -10112,7 +10113,6 @@
         "duplicate": "Çoğalt",
         "remove": "Bölümü kaldır",
         "placement": "Yeri",
-        "sections": "Bölümler",
         "content": "İçerik",
         "layout": "Diziliş",
         "scroll": "Kaydırma",
@@ -11084,10 +11084,6 @@
         "label": "Düzenleme ya da önizleme",
         "edit": "Düzenle",
         "preview": "Önizle"
-      },
-      "drawer": {
-        "title": "Sayfanın bölümleri",
-        "description": "Ayarlarını açmak için bir bölüm seçin."
       },
       "sidebar": {
         "hide": "Kenar çubuğunu gizle",

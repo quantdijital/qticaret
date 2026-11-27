@@ -10103,6 +10103,7 @@
       },
       "panel": {
         "back": "Back to sections",
+        "trail": "Location",
         "visibility": "Visibility",
         "visible": "Show on the storefront",
         "visibleHint": "A hidden section does not show; its settings are kept.",
@@ -10112,7 +10113,6 @@
         "duplicate": "Duplicate",
         "remove": "Remove section",
         "placement": "Position",
-        "sections": "Sections",
         "content": "Content",
         "layout": "Layout",
         "scroll": "Scrolling",
@@ -11084,10 +11084,6 @@
         "label": "Edit or preview",
         "edit": "Edit",
         "preview": "Preview"
-      },
-      "drawer": {
-        "title": "The page's sections",
-        "description": "Pick a section to open its settings."
       },
       "sidebar": {
         "hide": "Hide sidebar",
