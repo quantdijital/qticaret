@@ -1478,6 +1478,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The product an earlier run made is gone; its description was not refreshed.",
   "migration.description_refresh_empty":
     "The export has no description for this product; its description here was left as it is.",
+  "migration.export_busy":
+    "An export of the old addresses is already running for you; wait for it to finish.",
   "migration.refresh_wordpress_only":
     "A refresh-only run (descriptions, blog pictures) takes a WordPress export only.",
   "migration.post_gone": "The post an earlier run made is gone; its pictures were not added.",
