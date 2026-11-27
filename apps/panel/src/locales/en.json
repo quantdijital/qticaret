@@ -11653,6 +11653,13 @@
           "medium": "Medium",
           "fast": "Fast"
         },
+        "autoplay_step": {
+          "label": "Autoplay step",
+          "term": "slides to scroll",
+          "page": "Page by page",
+          "card": "Card by card",
+          "hint": "While it turns by itself, whether each move goes a whole page or a single card."
+        },
         "loop": {
           "label": "Loop",
           "term": "loop",

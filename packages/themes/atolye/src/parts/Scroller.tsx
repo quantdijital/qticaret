@@ -7,7 +7,7 @@ import type { ScrollerSettings } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useScrollerDrag } from "./scroller-drag"
 import { plainTitle } from "./TitleText"
-import { SCROLLER_INTERVAL, pageTarget, placeOf, stepTarget } from "./scroller-motion"
+import { SCROLLER_INTERVAL, cardStride, pageTarget, placeOf, stepTarget } from "./scroller-motion"
 import type { ScrollerPlace } from "./scroller-motion"
 
 /** The row's words, in the shopper's language (the server's `t`). */
@@ -100,20 +100,23 @@ export function Scroller({
   }
 
   const playing = autoplay && hydrated && !reduced && !stopped && !held && place.pages > 1
+  const byCard = settings.autoplay_step === "card"
   useEffect(() => {
     if (!playing) {
       return
     }
     const timer = window.setInterval(() => {
-      // Turning by itself always comes back to the start at the end
-      if (track.current) {
-        scrollTo(stepTarget(track.current, 1, true))
+      // Turning by itself always comes back to the start at the end; a page
+      // on, or one card when the shop asked for that (the arrows step a page)
+      const element = track.current
+      if (element) {
+        scrollTo(stepTarget(element, 1, true, byCard ? cardStride(element) : element.clientWidth))
       }
     }, SCROLLER_INTERVAL[settings.speed])
     return () => {
       window.clearInterval(timer)
     }
-  }, [playing, scrollTo, settings.speed])
+  }, [playing, scrollTo, settings.speed, byCard])
 
   useScrollerDrag(track, settings.drag === "on")
 

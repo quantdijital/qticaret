@@ -34,6 +34,11 @@ export const SCROLLER_SETTINGS = {
   autoplay: ["off", "on"],
   /** How long a page stays while it turns by itself. */
   speed: ["slow", "medium", "fast"],
+  /**
+   * How far it moves each time it turns by itself: a page (the width in
+   * view), or one card. The arrows always step a page.
+   */
+  autoplay_step: ["page", "card"],
   /** Past the last card is the first one again (the arrows never disable). */
   loop: ["off", "on"],
   /** A mouse may drag the row on a wide screen (touch always swipes). */
@@ -73,6 +78,7 @@ export const SCROLLER_DEFAULTS: { readonly [S in ScrollerSetting]: ScrollerStep<
   dots: "off",
   autoplay: "off",
   speed: "medium",
+  autoplay_step: "page",
   loop: "off",
   drag: "off",
   focus: "off",
@@ -96,6 +102,7 @@ export const ROW_SCROLLER = [
   "dots",
   "autoplay",
   "speed",
+  "autoplay_step",
   "loop",
   "drag",
   "focus",

@@ -11653,6 +11653,13 @@
           "medium": "Orta",
           "fast": "Hızlı"
         },
+        "autoplay_step": {
+          "label": "Kayma adımı",
+          "term": "slides to scroll",
+          "page": "Sayfa sayfa",
+          "card": "Kart kart",
+          "hint": "Kendiliğinden kayarken her seferinde bir sayfa mı yoksa tek kart mı ilerlesin."
+        },
         "loop": {
           "label": "Döngü",
           "term": "loop",
