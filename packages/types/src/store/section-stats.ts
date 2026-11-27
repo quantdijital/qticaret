@@ -19,6 +19,7 @@ import type { SectionIcon } from "./section-icons.js"
 export const STATS_LIMITS = {
   items: { min: 2, max: 6 },
   value: 16,
+  eyebrow: 60,
   label: 48,
   text: 120,
 } as const
@@ -31,6 +32,11 @@ export const STATS_SETTINGS = {
    * (`off`, the strip as it came); a figure with no icon picked draws none.
    */
   icons: ["off", "on"],
+  /**
+   * Each item: a large figure over its label (today's) or a feature, its
+   * icon on a light disc over its label in bold and one quiet line.
+   */
+  item_style: ["figure", "feature"],
   /** The figures stacked, each over its label (`stacked`), or one tight row: the icon at the left of its value and label (`row`). */
   arrangement: ["stacked", "row"],
   /** The shop's social profiles at the row's end under a "follow us" line (`on`) or none (`off`). */
@@ -44,6 +50,7 @@ export type StatsStep<S extends StatsSetting> = (typeof STATS_SETTINGS)[S][numbe
 export const STATS_DEFAULTS: { readonly [S in StatsSetting]: StatsStep<S> } = {
   dividers: "on",
   icons: "off",
+  item_style: "figure",
   arrangement: "stacked",
   social: "off",
 }
@@ -63,6 +70,7 @@ export function statsSettingsOf(section: Partial<Record<StatsSetting, unknown>>)
   return {
     dividers: stepOf("dividers", section.dividers),
     icons: stepOf("icons", section.icons),
+    item_style: stepOf("item_style", section.item_style),
     arrangement: stepOf("arrangement", section.arrangement),
     social: stepOf("social", section.social),
   }
@@ -87,4 +95,8 @@ export type StoreStatsSection = {
   /** None: no heading (the strip is named for screen readers by the storefront). */
   title: string | null
   items: StoreStatsItem[]
+  /** A small upper-case line over the heading; absent: none. */
+  eyebrow?: string | null
+  /** A short hand note beside the heading (`hand-note.ts`); absent: none. */
+  note?: string | null
 } & Partial<StatsSettings>

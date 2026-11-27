@@ -78,6 +78,7 @@ export const isFileName = (pathname: string): boolean =>
 const MARK_FILES = [
   "amex.svg",
   "aras.svg",
+  "havale.svg",
   "iyzico.svg",
   "mastercard.svg",
   "paytr.png",

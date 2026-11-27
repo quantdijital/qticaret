@@ -11,7 +11,12 @@ import { renderPage, shopFixture } from "@/test/theme-render"
  * footer's ground (`joined`), the brand block's address under its line.
  */
 
-const FREE: FooterRowsView = { ground: "well", badgeStyle: "card", bottomBadges: true }
+const FREE: FooterRowsView = {
+  ground: "well",
+  badgeStyle: "card",
+  legalPlace: "strip",
+  bottomBadges: true,
+}
 const ADDRESS = "Örnek Mah. 1. Sok. No: 1, Denizli"
 
 const brand = (address: string | null): FooterBlockView => ({
@@ -20,6 +25,7 @@ const brand = (address: string | null): FooterBlockView => ({
   device: "all",
   type: "brand",
   logo: null,
+  logoSize: "medium",
   name: "Örnek Atölye",
   about: "Kısa tanıtım.",
   social: [],

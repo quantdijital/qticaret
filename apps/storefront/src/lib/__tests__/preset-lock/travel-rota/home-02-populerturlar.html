@@ -1,16 +1,17 @@
 <!-- preset lock: travel-rota (docs/tema/bilesen-standardi.md §7) -->
-<div data-qs="populerturlar">
+<div class="group/look gf-look" data-align="center" data-qs="populerturlar">
   <div class="gf-section">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
       <section aria-labelledby="bolum-populerturlar" class="flex flex-col gap-(--head-gap-s)">
         <div
           role="region"
-          aria-label="Popüler turlar"
+          aria-label="En sevilen turlarımız"
           class="gf-scroller flex flex-col gap-(--head-gap-s)"
-          data-desktop="three"
+          data-desktop="five"
           data-mobile="peek"
           data-arrows="always"
           data-arrow-style="round"
+          data-focus="center"
         >
           <div class="gf-scroller-head flex items-end gap-4">
             <div class="min-w-0 flex-1">
@@ -18,7 +19,10 @@
                 class="flex items-baseline justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center"
               >
                 <h2 id="bolum-populerturlar">
-                  Popüler turlar
+                  <em class="gf-title-em">
+                    En sevilen
+                  </em>
+                  turlarımız
                 </h2>
                 <a href="/magaza" class="gf-link shrink-0 text-sm lg:text-md">
                   Tüm turlar
@@ -60,7 +64,7 @@
           <div class="relative">
             <ul id="«id»" class="gf-scroller-track" data-drag="">
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -75,7 +79,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/07-400.webp 400w, https://cdn.example.com/p/07-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/07.webp"
@@ -109,21 +113,6 @@
                       </i>
                     </span>
                     <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                      <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                        <svg
-                          width="24"
-                          height="24"
-                          stroke-width="1.5"
-                          class="lucide lucide-star size-3.5 fill-star text-star"
-                          aria-hidden="true"
-                        />
-                        <span aria-hidden="true" class="tabular">
-                          4,5
-                        </span>
-                        <span class="sr-only">
-                          5 üzerinden 4,5 (10 değerlendirme)
-                        </span>
-                      </li>
                     </ul>
                     <form
                       class="relative z-(--z-raised) contents"
@@ -165,18 +154,38 @@
                         Damascus Çakı
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                       >
                         1.500,00 TL
                       </span>
                     </p>
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span class="font-semibold text-text">
+                            4,5
+                          </span>
+                          (10)
+                        </span>
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (10 değerlendirme)
+                        </span>
+                      </span>
+                    </p>
                   </div>
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -191,7 +200,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/01.webp"
@@ -225,21 +234,6 @@
                       </i>
                     </span>
                     <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                      <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                        <svg
-                          width="24"
-                          height="24"
-                          stroke-width="1.5"
-                          class="lucide lucide-star size-3.5 fill-star text-star"
-                          aria-hidden="true"
-                        />
-                        <span aria-hidden="true" class="tabular">
-                          4,5
-                        </span>
-                        <span class="sr-only">
-                          5 üzerinden 4,5 (4 değerlendirme)
-                        </span>
-                      </li>
                     </ul>
                     <form
                       class="relative z-(--z-raised) contents"
@@ -281,18 +275,38 @@
                         Alageyik Şam Çeliği Av Bıçağı
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                       >
                         450,00 TL
                       </span>
                     </p>
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span class="font-semibold text-text">
+                            4,5
+                          </span>
+                          (4)
+                        </span>
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (4 değerlendirme)
+                        </span>
+                      </span>
+                    </p>
                   </div>
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -307,7 +321,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/05-400.webp 400w, https://cdn.example.com/p/05-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/05.webp"
@@ -341,21 +355,6 @@
                       </i>
                     </span>
                     <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                      <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                        <svg
-                          width="24"
-                          height="24"
-                          stroke-width="1.5"
-                          class="lucide lucide-star size-3.5 fill-star text-star"
-                          aria-hidden="true"
-                        />
-                        <span aria-hidden="true" class="tabular">
-                          4,5
-                        </span>
-                        <span class="sr-only">
-                          5 üzerinden 4,5 (8 değerlendirme)
-                        </span>
-                      </li>
                       <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
                         <span aria-hidden="true">
                           %16
@@ -405,7 +404,7 @@
                         Elmax Gravürlü Çakı
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
                       >
@@ -418,11 +417,31 @@
                         1.380,00 TL
                       </s>
                     </p>
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span class="font-semibold text-text">
+                            4,5
+                          </span>
+                          (8)
+                        </span>
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (8 değerlendirme)
+                        </span>
+                      </span>
+                    </p>
                   </div>
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -437,7 +456,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/03-400.webp 400w, https://cdn.example.com/p/03-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/03.webp"
@@ -471,21 +490,6 @@
                       </i>
                     </span>
                     <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                      <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                        <svg
-                          width="24"
-                          height="24"
-                          stroke-width="1.5"
-                          class="lucide lucide-star size-3.5 fill-star text-star"
-                          aria-hidden="true"
-                        />
-                        <span aria-hidden="true" class="tabular">
-                          4,5
-                        </span>
-                        <span class="sr-only">
-                          5 üzerinden 4,5 (6 değerlendirme)
-                        </span>
-                      </li>
                     </ul>
                     <form
                       class="relative z-(--z-raised) contents"
@@ -527,18 +531,38 @@
                         Şef Bıçağı 20 cm
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                       >
                         800,00 TL
                       </span>
                     </p>
+                    <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span class="font-semibold text-text">
+                            4,5
+                          </span>
+                          (6)
+                        </span>
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (6 değerlendirme)
+                        </span>
+                      </span>
+                    </p>
                   </div>
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -553,7 +577,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/08-400.webp 400w, https://cdn.example.com/p/08-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/08.webp"
@@ -636,7 +660,7 @@
                         Kemik Saplı Çakı
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
                       >
@@ -653,7 +677,7 @@
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -668,7 +692,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/02.webp"
@@ -751,7 +775,7 @@
                         N690 Katlanır Çakı
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
                       >
@@ -768,7 +792,7 @@
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -783,7 +807,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/04-400.webp 400w, https://cdn.example.com/p/04-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/04.webp"
@@ -861,7 +885,7 @@
                         Kamp Baltası
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                       >
@@ -872,7 +896,7 @@
                 </article>
               </li>
               <li>
-                <article class="group gf-card @container relative flex h-full flex-col gap-3">
+                <article class="group gf-card @container relative flex h-full flex-col gap-2">
                   <div
                     class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
@@ -887,7 +911,7 @@
                           <source
                             type="image/webp"
                             srcSet="https://cdn.example.com/p/06-400.webp 400w, https://cdn.example.com/p/06-800.webp 800w"
-                            sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 62vw"
+                            sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 62vw"
                           />
                           <img
                             src="https://cdn.example.com/p/06.webp"
@@ -937,7 +961,7 @@
                         Kasap Bıçağı Seti
                       </a>
                     </h3>
-                    <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                       <span
                         class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                       >

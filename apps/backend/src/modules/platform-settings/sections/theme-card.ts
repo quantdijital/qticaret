@@ -13,13 +13,17 @@ import { isPlainObject } from "./define"
 export const PRODUCT_CARD_VARIANTS = ["standard", "framed", "compact"] as const
 
 export interface ProductCardSettings {
-  ratio: "4:5" | "1:1" | "3:4"
+  ratio: (typeof CARD_RATIOS)[number]
   show_brand: boolean
   show_rating: boolean
   /** Everywhere's card; a product rail may draw its own (`card_variant`). */
   variant: (typeof PRODUCT_CARD_VARIANTS)[number]
   /** The second photo on hover, every card variant's (sahip 2026-11-18; the framed card's E5 before). */
   hover_image: boolean
+  /** While `hover_image` is on, every photo in turn under a resting mouse (sahip 2026-11-26). */
+  hover_cycle: boolean
+  /** A standard card's rows: today's `regular` or `compact` (sahip 2026-11-26). */
+  density: (typeof CARD_DENSITIES)[number]
   /**
    * The framed card's own (E5), read wherever a framed card is drawn: the
    * free shipping line, the add button across its foot.
@@ -54,6 +58,9 @@ export interface ProductCardSettings {
   arrow: boolean
   duration_row: boolean
   per_person: boolean
+  /** sahip 2026-11-26: a standard card's stars, length and departure on the photo; its frosted panel. */
+  meta_place: (typeof CARD_META_PLACES)[number]
+  style: (typeof CARD_STYLES)[number]
 }
 
 /**
@@ -68,6 +75,14 @@ export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
 export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
 /** A standard card's words (`CARD_TEXT_POSITIONS`): under the photo (today's) or over it. */
 export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
+/** A card photo's shape (`CARD_RATIOS`); `4:3` the short, wide one. */
+export const CARD_RATIOS = ["4:5", "1:1", "3:4", "4:3"] as const
+/** A standard card's rows (`CARD_DENSITIES`): today's first. */
+export const CARD_DENSITIES = ["regular", "compact"] as const
+/** A standard card's stars, length and departure (`CARD_META_PLACES`): in its rows (today's) or on the photo. */
+export const CARD_META_PLACES = ["below", "over"] as const
+/** A standard card's frame (`CARD_STYLES`): today's `plain` or the frosted `glass` panel. */
+export const CARD_STYLES = ["plain", "glass"] as const
 
 /**
  * The card's defaults, the Grafit look's (adr/0062 §2): today's card. A
@@ -79,6 +94,8 @@ export const PRODUCT_CARD_DEFAULTS: ProductCardSettings = {
   show_rating: false,
   variant: "standard",
   hover_image: true,
+  hover_cycle: false,
+  density: "regular",
   delivery_note: true,
   full_button: true,
   sale_badge: true,
@@ -97,6 +114,8 @@ export const PRODUCT_CARD_DEFAULTS: ProductCardSettings = {
   arrow: false,
   duration_row: false,
   per_person: false,
+  meta_place: "below",
+  style: "plain",
 }
 
 const CHOICE_ERROR = { error: "platform_settings.invalid" }
@@ -135,11 +154,13 @@ export function upgradeCard(card: unknown): unknown {
 /** The card's fields as the theme section checks them. */
 export const productCardSchema = z
   .object({
-    ratio: z.enum(["4:5", "1:1", "3:4"]),
+    ratio: z.enum(CARD_RATIOS),
     show_brand: z.boolean(),
     show_rating: z.boolean(),
     variant: z.enum(PRODUCT_CARD_VARIANTS),
     hover_image: z.boolean(),
+    hover_cycle: z.boolean(),
+    density: choice(CARD_DENSITIES),
     delivery_note: z.boolean(),
     full_button: z.boolean(),
     sale_badge: z.boolean(),
@@ -158,5 +179,7 @@ export const productCardSchema = z
     arrow: z.boolean(),
     duration_row: z.boolean(),
     per_person: z.boolean(),
+    meta_place: choice(CARD_META_PLACES),
+    style: choice(CARD_STYLES),
   })
   .strict()

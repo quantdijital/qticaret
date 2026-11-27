@@ -62,6 +62,27 @@ export function CollageForm({
           onChange({ ...section, intro }, "intro")
         }}
       />
+      <TextField
+        id={PREVIEW_IDS.text(section.id, "eyebrow")}
+        label={t(`${S}.eyebrow`)}
+        hint={t(`${S}.eyebrowHint`)}
+        value={section.eyebrow ?? null}
+        max={PHOTO_COLLAGE_LIMITS.eyebrow}
+        error={problem(problems["eyebrow"], PHOTO_COLLAGE_LIMITS.eyebrow)}
+        onChange={(eyebrow) => {
+          onChange({ ...section, eyebrow }, "eyebrow")
+        }}
+      />
+      <LinkField
+        id={PREVIEW_IDS.text(section.id, "more")}
+        label={t(`${S}.more`)}
+        hint={t(`${S}.moreHint`)}
+        link={section.more ?? null}
+        error={problem(problems["more"], L.label)}
+        onChange={(more) => {
+          onChange({ ...section, more }, "more")
+        }}
+      />
       <ol aria-label={t(`${S}.items`)} className="flex flex-col gap-3">
         {section.items.map((item, index) => {
           const number = index + 1
@@ -113,6 +134,19 @@ export function CollageForm({
                   setItem(index, { caption }, "caption")
                 }}
               />
+              {section.card === "below" && (
+                <TextField
+                  id={PREVIEW_IDS.text(section.id, `${at}.subtitle`)}
+                  label={t(`${S}.subtitle`, { number })}
+                  hint={t(`${S}.subtitleHint`)}
+                  value={item.subtitle ?? null}
+                  max={PHOTO_COLLAGE_LIMITS.subtitle}
+                  error={problem(problems[`${at}.subtitle`], PHOTO_COLLAGE_LIMITS.subtitle)}
+                  onChange={(subtitle) => {
+                    setItem(index, { subtitle }, "subtitle")
+                  }}
+                />
+              )}
               <LinkField
                 id={PREVIEW_IDS.text(section.id, `${at}.link`)}
                 label={t(`${S}.link`, { number })}

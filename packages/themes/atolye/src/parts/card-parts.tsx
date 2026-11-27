@@ -1,5 +1,6 @@
 import { Star } from "lucide-react"
 import type { CardRatingView, CardVariant, ProductCardView, Translate } from "@qticaret/ui"
+import { CompactPill } from "./card-pill"
 import type { QuickAddWords } from "./QuickAdd"
 import { Stars } from "./Stars"
 
@@ -53,6 +54,18 @@ export const textOver = (product: ProductCardView): boolean =>
   !!product.look?.over && drawnCardVariant(product) === "standard"
 
 /**
+ * Whether a standard card's stars, length and nearest departure stand as
+ * frosted pills on its photo (`meta_place: over`, sahip 2026-11-26) and
+ * leave its rows; other variants keep their rows.
+ */
+export const metaOnPhoto = (product: ProductCardView): boolean =>
+  !!product.look?.metaOver && drawnCardVariant(product) === "standard"
+
+/** Whether a standard card draws its frosted panel (`style: glass`, sahip 2026-11-26). */
+export const glassCard = (product: ProductCardView): boolean =>
+  !!product.look?.glass && drawnCardVariant(product) === "standard"
+
+/**
  * Whether the card's stars stand as a pill on its photo (adr/0077 Ek "tur
  * kartı"): the card has them, it has the pills on its photo (the compact
  * card keeps its row), and the shop asked for the pill or put the words
@@ -70,14 +83,31 @@ export const ratingBadged = (product: ProductCardView): boolean =>
  * discount ("%30", the reader hears "%30 indirim"), then "Tükendi" or "Az
  * kaldı" (a stock bucket, never a number); each as the shop shows it.
  */
-export function CardBadges({ product, t }: { product: ProductCardView; t: Translate }) {
+export function CardBadges({
+  product,
+  t,
+  inline = false,
+}: {
+  product: ProductCardView
+  t: Translate
+  /** In the photo's top row beside the details' pills (`CardMeta`), not placed on its own. */
+  inline?: boolean
+}) {
   const badges = badgesOf(product)
   const discount = badges.sale ? (product.price?.discount ?? null) : null
   const out = isOut(product)
-  const rating = ratingBadged(product) ? product.rating : null
+  // The details on the photo (`meta_place: over`) and the glass card's panel carry the stars themselves
+  const own = metaOnPhoto(product) || glassCard(product)
+  const rating = ratingBadged(product) && !own ? product.rating : null
   const badge = product.badge ?? null
   return (
-    <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
+    <ul
+      className={
+        inline
+          ? "flex min-w-0 flex-wrap gap-1 text-xs font-extrabold"
+          : "absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold"
+      }
+    >
       {/* The shop's badge first, the stars' pill beside it: the row wraps, they never overlap */}
       {badge && (
         <li
@@ -87,20 +117,25 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
           {badge.text}
         </li>
       )}
-      {rating && (
-        <li
-          className={
-            product.look?.split
-              ? "gf-card-pill-dark flex items-center gap-1 rounded-pill px-2 py-1"
-              : "flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text"
-          }
-        >
-          <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
-          <span aria-hidden="true" className="tabular">
-            {rating.average}
-          </span>
-          <span className="sr-only">{rating.label}</span>
-        </li>
+      {/* A compact card with its words over the photo: the stars' count and the length join the pill */}
+      {product.look?.compact && textOver(product) && !metaOnPhoto(product) ? (
+        <CompactPill product={product} />
+      ) : (
+        rating && (
+          <li
+            className={
+              product.look?.split
+                ? "gf-card-pill-dark flex items-center gap-1 rounded-pill px-2 py-1"
+                : "flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text"
+            }
+          >
+            <Star className="size-3.5 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+            <span aria-hidden="true" className="tabular">
+              {rating.average}
+            </span>
+            <span className="sr-only">{rating.label}</span>
+          </li>
+        )
       )}
       {discount !== null && (
         <li className="rounded-pill bg-deal px-2 py-1 text-deal-ink">

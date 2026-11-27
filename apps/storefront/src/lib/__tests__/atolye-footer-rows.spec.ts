@@ -11,7 +11,12 @@ import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
  * layout takes away. Field marks only in the theme editor's live preview.
  */
 
-const FREE: FooterRowsView = { ground: "well", badgeStyle: "card", bottomBadges: true }
+const FREE: FooterRowsView = {
+  ground: "well",
+  badgeStyle: "card",
+  legalPlace: "strip",
+  bottomBadges: true,
+}
 
 const IMAGE = {
   src: "https://cdn.example.com/rozet.webp",
@@ -28,6 +33,7 @@ const BLOCKS: FooterBlockView[] = [
     ...at(0),
     type: "brand",
     logo: null,
+    logoSize: "medium",
     name: "Örnek Atölye",
     about: "Kısa tanıtım.",
     social: [],
@@ -57,12 +63,14 @@ const BLOCKS: FooterBlockView[] = [
     whatsappHref: null,
     email: "bilgi@example.com",
     hours: [{ days: "Pazartesi – Cuma", hours: "09:00 – 18:00" }],
+    iconStyle: "boxed",
   },
   {
     ...at(4),
     type: "text",
     title: "Kargo",
     html: '<p>Aynı gün <a href="https://example.com/a" rel="noopener noreferrer">kargo</a>.</p>',
+    style: "plain",
   },
   {
     ...at(5),
@@ -291,12 +299,15 @@ describe("the free rows footer", () => {
     }
   })
 
-  it("draws no empty legal strip for a shop with neither a legal text nor an identity line", () => {
+  it("keeps the cookie choices in the legal strip for a shop with neither a legal text nor an identity line", () => {
     const bare = draw(
       shopWith([], { legalLinks: [], identityLines: [], companyTitle: null, etbisQr: null })
     )
-    expect(bare).not.toContain('data-footer-legal=""')
-    expect(bare).toContain('href="/cerez-tercihleri"')
+    const strip = bare.slice(bare.indexOf('data-footer-legal=""'))
+    expect(bare).toContain('data-footer-legal=""')
+    expect(strip).toContain('href="/cerez-tercihleri"')
+    // Not beside the ways to pay on the bottom line (owner 2026-11-26)
+    expect(bare).not.toContain('gf-foot-tools"><a href="/cerez-tercihleri"')
   })
 
   it("leaves the ways to pay out of the bottom line when the shop turns them off", () => {

@@ -97,6 +97,11 @@ describe("the newsletter box's variants on a page", () => {
     expect(html).toContain("gf-news-small")
     expect(html).toContain("lucide-mail")
     expect(html).not.toContain("Ayda birkaç")
+    // Today's pane by default; the main colour's wash on `tint`
+    expect(html).toContain("rounded-tile gf-pane")
+    const tint = home(box({ variant: "strip", ...LOOK, note: null, tone: "tint" }))
+    expect(tint).toContain("rounded-tile gf-news-tint")
+    expect(tint).not.toContain("gf-pane")
   })
 
   it("draws a footer column box sent to a page as today's", () => {

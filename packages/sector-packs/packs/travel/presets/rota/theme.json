@@ -2,18 +2,20 @@
   "settings_version": 2,
   "theme": "atolye",
   "colors": { "primary": "#1f5c4a", "accent": "#b4541f", "background": "warm" },
-  "typography": { "heading": "playfair", "body": "inter" },
+  "typography": { "heading": "inter", "body": "inter", "accent": "playfair" },
   "radius": "soft",
   "product_card": {
-    "ratio": "4:5",
+    "ratio": "4:3",
     "show_brand": false,
     "show_rating": true,
     "variant": "standard",
     "hover_image": true,
+    "hover_cycle": true,
+    "density": "compact",
     "delivery_note": false,
     "full_button": false,
     "no_reviews": "hide",
-    "rating_badge": true,
+    "rating_badge": false,
     "duration_row": true,
     "per_person": true
   },
@@ -29,8 +31,14 @@
     "category_style": "select",
     "placeholder": "Nereye gitmek istersiniz?"
   },
-  "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
+  "listing_page": {
+    "default_view": "grid",
+    "view_switch": "show",
+    "breadcrumb_current": "hide",
+    "count_word": "tur"
+  },
   "menu_style": "plain",
   "density": "airy",
-  "motion": "lively"
+  "motion": "lively",
+  "section_title": "serif_accent"
 }

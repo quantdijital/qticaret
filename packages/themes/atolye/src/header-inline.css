@@ -55,3 +55,11 @@
 .gf-head[data-variant="inline"][data-tools="plain"] .gf-menu-item[aria-current="page"] {
   color: var(--color-text);
 }
+/* The search's opener is a tool too (`SearchToggle`): plain as the others, no ring */
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-tool.gf-icon-btn {
+  border-color: transparent;
+  background: transparent;
+}
+.gf-head[data-variant="inline"][data-tools="plain"] .gf-tool.gf-icon-btn:hover {
+  background: var(--color-paper-2);
+}

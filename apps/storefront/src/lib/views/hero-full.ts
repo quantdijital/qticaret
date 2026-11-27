@@ -49,10 +49,13 @@ function heroVideo(section: StoreHeroFull): HeroVideoView | null {
 export function heroFullParts(section: StoreHeroFull, source: HeroFullSource): HeroFullView {
   const settings = heroFullSettingsOf(section)
   const accent = section.title_accent?.trim() ?? ""
+  const after = section.title_after?.trim() ?? ""
   const note = handNoteView(section.note, source.hand === true)
   return {
     settings,
     accent: accent === "" ? null : accent,
+    // The last line only when there is one: an opening without it is the view it was
+    ...(after === "" ? {} : { after }),
     search: settings.action === "button" ? null : source.search,
     trust: section.show_trust === true ? source.badges.slice(0, HERO_FULL_LIMITS.trust) : [],
     video: heroVideo(section),

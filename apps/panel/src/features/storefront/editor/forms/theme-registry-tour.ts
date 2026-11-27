@@ -1,4 +1,9 @@
-import { CARD_TEXT_POSITIONS } from "@/features/storefront/api/theme"
+import {
+  CARD_DENSITIES,
+  CARD_META_PLACES,
+  CARD_STYLES,
+  CARD_TEXT_POSITIONS,
+} from "@/features/storefront/api/theme"
 import type {
   DATED_CARD_SWITCHES,
   ThemeChoices,
@@ -44,10 +49,43 @@ export const TOUR_CARD_META = {
     keywords: KEYWORDS,
     shown: standardInUse,
   },
+  // sahip 2026-11-26: the price right under the name, the stars, count and length on one line
+  "product_card.density": {
+    group: "card",
+    label: `${C}.tourCard.density`,
+    options: CARD_DENSITIES.map((option) => `${C}.tourCard.densities.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
+  // sahip 2026-11-26: the stars, date and length as frosted pills on the photo
+  "product_card.meta_place": {
+    group: "card",
+    label: `${C}.tourCard.meta_place`,
+    options: CARD_META_PLACES.map((option) => `${C}.tourCard.metaPlaces.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
+  // sahip 2026-11-26: the name and price on a frosted panel floating on the photo
+  "product_card.style": {
+    group: "card",
+    label: `${C}.tourCard.style`,
+    options: CARD_STYLES.map((option) => `${C}.tourCard.styles.${option}`),
+    keywords: KEYWORDS,
+    shown: standardInUse,
+  },
   "product_card.rating_badge": tourSwitch(
     "rating_badge",
+    // A standard card with its details on the photo or a glass panel carries the stars itself
     (theme, variants) =>
-      theme.product_card.show_rating && [...variants].some((variant) => variant !== "compact")
+      theme.product_card.show_rating &&
+      [...variants].some(
+        (variant) =>
+          variant !== "compact" &&
+          !(
+            variant === "standard" &&
+            (theme.product_card.meta_place === "over" || theme.product_card.style === "glass")
+          )
+      )
   ),
   "product_card.arrow": tourSwitch(
     "arrow",

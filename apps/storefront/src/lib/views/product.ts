@@ -33,6 +33,8 @@ export interface CardOptions {
   variant?: CardVariant
   /** The second photo on hover, every variant's (`hover_image`, sahip 2026-11-18); none: off. */
   hoverImage?: boolean
+  /** With `hoverImage`: the photos after the second, in turn (`hover_cycle`, sahip 2026-11-26); none: off. */
+  hoverCycle?: boolean
   /** A framed card's own, from the theme setting; none: a framed card shows only today's. */
   framed?: FramedCardOptions
   /** Every card's pills and rows (adr/0049 Ek 2026-11-15); none: today's card. */
@@ -42,6 +44,9 @@ export interface CardOptions {
   /** The tour card's look (adr/0077 Ek "tur kartı"); none: today's card. */
   look?: CardLookView
 }
+
+/** The most photos a card cycles through on hover, its first included (sahip 2026-11-26). */
+const MOST_PHOTOS = 5
 
 // Without the shop's settings: the brand as ever, no stars (the setting's own default)
 const ALL_SHOWN: CardOptions = { showBrand: true, showRating: false }
@@ -68,6 +73,8 @@ export function productCard(
   const images = productImages(product)
   // The second photo only beside a first one (one photo: no swap)
   const second = options.hoverImage && images[0] ? (images[1] ?? null) : null
+  // The photos after it while the shop cycles them, five in all at most
+  const more = second && options.hoverCycle ? images.slice(2, MOST_PHOTOS) : []
   return {
     id: product.id,
     title: product.title,
@@ -77,6 +84,7 @@ export function productCard(
     ...(look?.split && product.subtitle ? { subtitle: product.subtitle } : {}),
     image: images[0] ?? null,
     ...(second ? { secondImage: second } : {}),
+    ...(more.length > 0 ? { morePhotos: more } : {}),
     price: cardPrice(variants, displays),
     available: variants.some(isAvailable),
     // Left out for today's card: its view is as it was; the compact card carries no extras

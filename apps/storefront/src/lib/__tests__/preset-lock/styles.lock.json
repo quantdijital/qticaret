@@ -2,6 +2,10 @@
   "note": "Digests of packages/themes/atolye/src/**/*.css; written by `pnpm lock:presets`",
   "files": [
     {
+      "sha256": "3b05ab7ba3aaae2c4aa215267d028db2267c18b8dfd46bcd676a6f9f1fc1bc6a",
+      "file": "announcement.css"
+    },
+    {
       "sha256": "91a544d342cfcd3421de78d95c2188ba9bb1715943fb5f84fd32fe389359edff",
       "file": "banner.css"
     },
@@ -12,6 +16,14 @@
     {
       "sha256": "a80b7d884f6a974eb063d8ac4d83ed5f0bf0b3e53a0de93ceb4a860a9cda0da8",
       "file": "buy.css"
+    },
+    {
+      "sha256": "87a1fd671e0c72b4efe97e4fe0a947040a074c3ff0be5166ea907ef2bd6aa1d0",
+      "file": "card-cycle.css"
+    },
+    {
+      "sha256": "389d67062330fa24a79ae190dc1fc0dae092361e9ba43fd0f87265466a00f42e",
+      "file": "card-glass.css"
     },
     {
       "sha256": "ae6163f2da35fc7c0f985ef2f5430c32346a9d9e70b779df03a520ef9bf548f0",
@@ -46,15 +58,19 @@
       "file": "density.css"
     },
     {
-      "sha256": "f9c0bf7355b2f8a27dd269acbd1114f6c02ef17adec70603bcced07040ff96c6",
+      "sha256": "48c6ed7a5dd8a955f62848ba7ec6ec5422f55552b1c25ceb2b8e17570634d1c7",
       "file": "footer-columns.css"
+    },
+    {
+      "sha256": "e719352e0bcc9c86fbef4160e9089014e029559f89e217596c3f64cdadf3d1c3",
+      "file": "footer-rows-line.css"
     },
     {
       "sha256": "f587d30d9f483cb30f37a1cac017abe44882e603abffa54fcfcfab29e1d039e8",
       "file": "footer-rows.css"
     },
     {
-      "sha256": "1ae828a3614c51bb74a4bbe6758284800e6330bea9c43964f2465c360ac65cd0",
+      "sha256": "e78f2ce686fd2e795ba05eca359e2dd84373e03729045260232a68145b9ce761",
       "file": "frame.css"
     },
     {
@@ -62,15 +78,27 @@
       "file": "header-catalog.css"
     },
     {
-      "sha256": "f6bd41322804947ea20412facd0faead72e24871506074163b4685723f8c3b9b",
+      "sha256": "7c46a2d7e281fc34384eec4cc6fef82dbea7d2e821841144265136ec0d3ddb6d",
       "file": "header-inline.css"
     },
     {
-      "sha256": "71272ebb86609034a61444c003d4f955b5387acb31915797fdfe3c0076586a29",
+      "sha256": "f6cb7816473d779f5813ae4a549e88bc94f657552d7a330fda95dc8aef8c7bf7",
+      "file": "header-over.css"
+    },
+    {
+      "sha256": "b07040b5991d71e1d8c3a05572ed988175fd6c2415f4bfaf5c6e1f829e39a292",
+      "file": "hero-full-mix.css"
+    },
+    {
+      "sha256": "2ccd8ed38ecd13a8bbd6b2a5261c9ff85e8195bcca2cd54e620c219365eead65",
+      "file": "hero-full-split.css"
+    },
+    {
+      "sha256": "3443bd86317cadf03bc96d097337943958625e519d2b765ed7c8b20a9d8d03a6",
       "file": "hero-full.css"
     },
     {
-      "sha256": "3beee3bcb91134bf5d5b699022315d5daa1d964ebced3f28f0f718d58794861b",
+      "sha256": "52df2668955762547834c2e44d3038a5662a1be52afad1bfd28712248c97066b",
       "file": "hover.css"
     },
     {
@@ -98,15 +126,19 @@
       "file": "media.css"
     },
     {
+      "sha256": "0247462e75feccb40867f6a7b96d1379cd2faae45141b4bba3cf4421726e1199",
+      "file": "mega.css"
+    },
+    {
       "sha256": "ff54ce28a1bbb8f52f0c64b01ca60e971a75852144c4f9571cc2507dc0b97c67",
       "file": "menu.css"
     },
     {
-      "sha256": "9bf7ca0d951c70a0958648a7bb89d58b7329a74f468dbf292628ea2d97524811",
+      "sha256": "878ffc7817016d533da82cbd3b7d2da8f3797b9874d2428027405ee8ac40bcd9",
       "file": "motion.css"
     },
     {
-      "sha256": "2b8b778046080d29b3bda31326038f157b91295837d8b567f0d52f3025c31550",
+      "sha256": "909a7de1a82fdf677bf5a68175cbb8e06a02f8470fe32934f3ab0b1b371770a5",
       "file": "newsletter.css"
     },
     {
@@ -120,6 +152,10 @@
     {
       "sha256": "a988f42bba5585770460c50878c40a621a5c83bb500994a875dc4472d9f0ef47",
       "file": "ranked.css"
+    },
+    {
+      "sha256": "ae2ec87a39603849d8da1e0cb1dae4cdbe93351ed6f16cf96444ffd9fe62aa08",
+      "file": "scroller-focus.css"
     },
     {
       "sha256": "8ed56f1bc8e843be161b5935ffc586dcf851bb7b30e7fac5bc1a2c0f84d3c15f",
@@ -138,7 +174,11 @@
       "file": "search-toggle.css"
     },
     {
-      "sha256": "c5b8abb98e34e8679c59eed0088d136c120617ceaff68d90548b46ce4638313a",
+      "sha256": "4207c9ed4a66f8d998e098800d07f49978667ec27fe1b544b06eeb77ea8dca56",
+      "file": "section-title.css"
+    },
+    {
+      "sha256": "3af39894ae6a98865164655826b237f9d35c30562afe1ccb01f4928bef5a42ea",
       "file": "shadow.css"
     },
     {
@@ -158,6 +198,10 @@
       "file": "split.css"
     },
     {
+      "sha256": "4129be3b940ae5cafb6ce17a0cbaaf9205e45fababc90f96bd9e11593596429a",
+      "file": "steps-connector.css"
+    },
+    {
       "sha256": "fd1224ca73b4aa0f421ed889d3a5ad8fffa2c402c231b68b7c49ab83b24dd2e9",
       "file": "strip-gallery.css"
     },
@@ -166,7 +210,7 @@
       "file": "strips.css"
     },
     {
-      "sha256": "cefc7e909627b93af948ad94c3d015f1b007738353859f1699f93ede60165dd4",
+      "sha256": "7f87cf38b1e191672a0832871897d2ce4ec5c89c519aa84771881e4c28ff4722",
       "file": "styles.css"
     },
     {
@@ -186,7 +230,7 @@
       "file": "thin.css"
     },
     {
-      "sha256": "e83dc0f868ba940621260120006f5288ec78689330e826d3ee56bc00fb006020",
+      "sha256": "0cdabb09ddae04e83f64f15ab1dc531dc59ae6015ff62a28e740f83315d246f7",
       "file": "tokens.css"
     },
     {

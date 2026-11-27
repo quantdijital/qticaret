@@ -1,6 +1,8 @@
 import "server-only"
 import { cache } from "react"
+import { t, withCountWord } from "@/lib/i18n"
 import { storefrontSettings } from "@/lib/store-api/requests"
+import { listingPageOf } from "@qticaret/types/listing-page"
 import { handNoteOf } from "@qticaret/types/hand-note"
 import { handFace } from "./accent"
 import { currentLayout } from "./layout"
@@ -18,6 +20,21 @@ export const currentTheme = cache(async () => {
   const [layout, answer] = await Promise.all([currentLayout(), storefrontSettings()])
   return themeSettings(...themeSourceOf(layout, answer))
 })
+
+/** The words for this request, a product count in the shop's own word (`withCountWord`). */
+export const shopWords = cache(async () =>
+  withCountWord((await currentTheme()).listing_page?.count_word)
+)
+
+/**
+ * The all-products page's title (`/magaza`): the shop's own
+ * (`listing_page.all_title`, "Tüm turlar"), else "Tüm ürünler". Its
+ * heading, trail, structured data and page title all read it.
+ */
+export const allProductsTitle = cache(
+  async () =>
+    listingPageOf((await currentTheme()).listing_page).all_title ?? t("listing.all_products")
+)
 
 /**
  * Whether a section's hand note is drawn in the shop's accent face: the
@@ -42,6 +59,8 @@ export async function cardOptions(): Promise<CardOptions> {
     variant: card.variant,
     // The second photo on hover, on every variant (sahip 2026-11-18)
     hoverImage: card.hover_image,
+    // Every photo in turn (sahip 2026-11-26), only beside the second
+    hoverCycle: card.hover_image && card.hover_cycle,
     // Every card's pills and rows (adr/0049 Ek 2026-11-15): the no-reviews row only where the stars are shown
     shown: {
       saleBadge: card.sale_badge,

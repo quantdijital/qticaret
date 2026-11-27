@@ -27,6 +27,12 @@ export const STEPS_SETTINGS = {
   layout: ["row", "column"],
   /** `padded`: "01", "02"; `plain`: "1", "2". */
   numbers: ["padded", "plain"],
+  /**
+   * `off`: today's steps, each under its own hairline; `dotted`: side by
+   * side, a dotted line runs from each number to the next (from 1024 px,
+   * `row` only; a column and a phone draw as `off`).
+   */
+  connector: ["off", "dotted"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StepsSetting = keyof typeof STEPS_SETTINGS
@@ -36,6 +42,7 @@ export type StepsStep<S extends StepsSetting> = (typeof STEPS_SETTINGS)[S][numbe
 export const STEPS_DEFAULTS: { readonly [S in StepsSetting]: StepsStep<S> } = {
   layout: "row",
   numbers: "padded",
+  connector: "off",
 }
 
 export const STEPS_SETTING_NAMES = Object.keys(STEPS_SETTINGS) as StepsSetting[]

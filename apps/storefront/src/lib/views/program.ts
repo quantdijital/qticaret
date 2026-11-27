@@ -3,8 +3,8 @@ import { cache } from "react"
 import type { StoreProductSection } from "@qticaret/types"
 import type { StoreProgram } from "@qticaret/types/section-program"
 import { programTagsOf } from "@qticaret/types/section-program"
-import { variantOf } from "@qticaret/types/section-variants"
-import type { HomeSectionView, ProgramStepView, Translate } from "@qticaret/ui"
+import { programPlaceOf, variantOf } from "@qticaret/types/section-variants"
+import type { HomeSectionView, ProgramSectionView, ProgramStepView, Translate } from "@qticaret/ui"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeGet } from "@/lib/store-api/server"
 import { imageView } from "./image"
@@ -70,5 +70,25 @@ export async function programView(
     title: section.title?.trim() ? section.title : t("product.program.title"),
     variant: variantOf("program", section.variant),
     steps: programSteps(program, t),
+    // A tab beside the description; absent: its own section (today's)
+    ...(programPlaceOf(section.place) === "tab" ? { place: "tab" as const } : {}),
   }
+}
+
+/**
+ * The product page's sections with the program the shop put among the
+ * description's tabs taken out (`program.place: tab`): it is drawn there,
+ * not again as a section. None so placed: the sections as they were.
+ */
+export function programTabOf(sections: HomeSectionView[]): {
+  sections: HomeSectionView[]
+  program: ProgramSectionView | null
+} {
+  const program = sections.find(
+    (section): section is ProgramSectionView =>
+      section.type === "program" && section.place === "tab"
+  )
+  return program
+    ? { sections: sections.filter((section) => section !== program), program }
+    : { sections, program: null }
 }

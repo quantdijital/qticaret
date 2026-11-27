@@ -122,6 +122,7 @@ describe("the free rows footer's view (adr/0070)", () => {
       whatsappHref: null,
       email: "bilgi@example.com",
       hours: [],
+      iconStyle: "boxed",
     })
     const none = { ...PARTS.contact, email: null, phone: null, phoneHref: null, whatsappHref: null }
     expect(
@@ -227,9 +228,20 @@ describe("the free rows footer's view (adr/0070)", () => {
     expect(freeRowsOf({ ground: "stage", badge_style: "plain", bottom_badges: false })).toEqual({
       ground: "stage",
       badgeStyle: "plain",
+      legalPlace: "strip",
       bottomBadges: false,
     })
-    expect(freeRowsOf(null)).toEqual({ ground: "well", badgeStyle: "card", bottomBadges: true })
+    expect(freeRowsOf({ badge_style: "muted", legal_place: "bottom_line" })).toMatchObject({
+      badgeStyle: "muted",
+      legalPlace: "bottom_line",
+    })
+    expect(freeRowsOf({ legal_place: "side" } as never).legalPlace).toBe("strip")
+    expect(freeRowsOf(null)).toEqual({
+      ground: "well",
+      badgeStyle: "card",
+      legalPlace: "strip",
+      bottomBadges: true,
+    })
   })
 
   it("prints the free rows on the footer bar only with the details to fill them", () => {
@@ -245,7 +257,12 @@ describe("the free rows footer's view (adr/0070)", () => {
     const { menus, contact, social, name, title, trustBadges, payments, carriers } = PARTS
     const parts = { menus, contact, social, name, title, trustBadges, payments, carriers }
     const bar = footerBarOf(main, t, null, parts)
-    expect(bar.freeRows).toEqual({ ground: "well", badgeStyle: "card", bottomBadges: true })
+    expect(bar.freeRows).toEqual({
+      ground: "well",
+      badgeStyle: "card",
+      legalPlace: "strip",
+      bottomBadges: true,
+    })
     // The footer's own ways to pay, by their marks, over the providers'
     expect(bar.rows?.[0]?.columns[0]?.blocks[0]).toMatchObject({
       payments: [{ key: "visa", label: "marks.visa", logo: { src: "/marks/visa.png" } }],

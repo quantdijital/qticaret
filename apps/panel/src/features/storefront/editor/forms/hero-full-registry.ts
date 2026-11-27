@@ -33,6 +33,8 @@ export const HERO_FULL_LAYOUT = [
   ["ornament", "ornament"],
   ["title_style", "title_style"],
   ["note_place", "note_place"],
+  ["title_mix", "title_mix"],
+  ["words_place", "words_place"],
 ] as const satisfies readonly (readonly [HeroFullSetting, ContentField])[]
 
 type FullSection = Extract<AnySection, { type: "hero"; variant: "full_image" }>
@@ -57,7 +59,8 @@ export function heroFullShows(section: FullSection, name: HeroFullSetting): bool
   if (name === "note_place") {
     return typeof section.note === "string" && section.note.trim() !== ""
   }
-  return name !== "scrim" || settings.image_side === "full"
+  // The veil and the split words only while the photograph is behind the words
+  return (name !== "scrim" && name !== "words_place") || settings.image_side === "full"
 }
 
 /** The full image opening's fields as the settings search finds them, as its form shows them. */

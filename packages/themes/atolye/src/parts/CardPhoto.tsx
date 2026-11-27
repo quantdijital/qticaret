@@ -11,11 +11,16 @@ import { cn } from "@qticaret/ui/lib/utils"
  * hidden from a screen reader, no tab stop). A small photo (`swipe` off:
  * the compact card's, a ranked place's) keeps the first on a touch screen.
  * The second loads lazily, never with the first paint; both fill the
- * well, so nothing shifts.
+ * well, so nothing shifts. The photos after the second, while the shop
+ * cycles them (`more`, sahip 2026-11-26), follow it in turn under a
+ * resting mouse (`frame/CardCycle.tsx`); out of the layout until just
+ * before their turn, so none is fetched sooner, and never on a touch
+ * screen.
  */
 function Photos({
   first,
   second,
+  more,
   path,
   sizes,
   priority,
@@ -23,6 +28,7 @@ function Photos({
 }: {
   first: ImageView
   second: ImageView
+  more: readonly ImageView[]
   path: string
   sizes: string
   priority: boolean
@@ -35,6 +41,7 @@ function Photos({
         tabIndex={-1}
         aria-hidden="true"
         className={cn("gf-card-slides", !swipe && "gf-card-slides--hover")}
+        data-cycle={more.length > 0 ? "" : undefined}
       >
         <span className="gf-card-slide">
           <ResponsiveImage
@@ -47,6 +54,11 @@ function Photos({
         <span className="gf-card-slide gf-card-slide--second">
           <ResponsiveImage image={second} sizes={sizes} className="h-full w-full object-cover" />
         </span>
+        {more.map((image, index) => (
+          <span key={`${image.src}-${String(index)}`} className="gf-card-slide gf-card-slide--more">
+            <ResponsiveImage image={image} sizes={sizes} className="h-full w-full object-cover" />
+          </span>
+        ))}
       </a>
       {swipe && (
         <span className="gf-card-dots" aria-hidden="true">
@@ -60,7 +72,8 @@ function Photos({
 
 /**
  * A card's photograph in its well: the two photos when the storefront
- * sends a second (`secondImage`), else the one; nothing without a photo.
+ * sends a second (`secondImage`), the rest after them when it sends those
+ * (`morePhotos`), else the one; nothing without a photo.
  */
 export function CardPhoto({
   product,
@@ -81,6 +94,7 @@ export function CardPhoto({
       <Photos
         first={product.image}
         second={product.secondImage}
+        more={product.morePhotos ?? []}
         path={product.path}
         sizes={sizes}
         priority={priority}

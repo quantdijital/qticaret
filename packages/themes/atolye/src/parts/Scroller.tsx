@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
 import type { ScrollerSettings } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useScrollerDrag } from "./scroller-drag"
+import { plainTitle } from "./TitleText"
 import { SCROLLER_INTERVAL, pageTarget, placeOf, stepTarget } from "./scroller-motion"
 import type { ScrollerPlace } from "./scroller-motion"
 
@@ -154,12 +155,13 @@ export function Scroller({
   return (
     <div
       role="region"
-      aria-label={words.label}
+      aria-label={plainTitle(words.label)}
       className="gf-scroller flex flex-col gap-(--head-gap-s)"
       data-desktop={settings.desktop}
       data-mobile={settings.mobile}
       data-arrows={settings.arrows}
       data-arrow-style={settings.arrow_style}
+      data-focus={settings.focus === "on" ? "center" : undefined}
       onMouseEnter={() => {
         setHeld(true)
       }}

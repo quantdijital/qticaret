@@ -14,8 +14,8 @@
       <div class="gf-cover-media overflow-hidden absolute inset-0 -z-10 bg-stage">
         <picture>
           <img
-            src="https://cdn.example.com/preset/travel/patika/images/kapak-gol-gezgin.webp"
-            alt="Sırt çantalı bir gezgin, ormanla çevrili gölün üstündeki kayada oturmuş manzaraya bakıyor"
+            src="https://cdn.example.com/preset/travel/patika/images/kapak-kapadokya-balon.webp"
+            alt="Kapadokya&#x27;da ufukta doğan güneş, peri bacalı vadiler üzerinde süzülen sıcak hava balonları"
             loading="eager"
             fetchPriority="high"
             decoding="sync"
@@ -24,38 +24,12 @@
         </picture>
       </div>
       <div
-        class="mx-auto w-full max-w-(--container) px-(--gutter) gf-cover-body flex flex-col gap-8 relative"
+        class="mx-auto w-full max-w-(--container) px-(--gutter) gf-cover-body flex flex-col gap-8"
       >
-        <div
-          class="gf-cover-note absolute top-(--cover-room) right-(--gutter) hidden w-56 lg:block xl:w-64"
-        >
-          <p
-            data-hand=""
-            class="block w-fit max-w-full text-balance font-(family-name:--font-accent) font-normal mx-auto -rotate-6 text-center text-3xl lg:text-3xl xl:text-4xl text-stage-text"
-          >
-            Anı biriktir, eşya değil
-          </p>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 120 14"
-            class="mx-auto mt-1 h-3 w-28 -rotate-6 text-signal-on-stage"
-            fill="none"
-            stroke="currentColor"
-            stroke-linecap="round"
-          >
-            <path d="M4 10C30 5 64 3 116 4" stroke-width="3.5">
-            </path>
-            <path d="M14 12C44 8 74 7 104 8" stroke-width="1.5" opacity="0.7">
-            </path>
-          </svg>
-        </div>
         <div class="flex flex-col gap-4 lg:gap-5 gf-stage max-w-3xl bg-transparent">
-          <p class="text-xs font-semibold tracking-[0.18em] uppercase text-stage-text-2">
-            Keşfet. Yaşa. Ait ol.
-          </p>
           <p
             data-hand=""
-            class="block w-fit max-w-full -rotate-2 text-balance font-(family-name:--font-accent) text-2xl font-normal lg:text-3xl text-stage-text lg:hidden"
+            class="block w-fit max-w-full -rotate-2 text-balance font-(family-name:--font-accent) text-2xl font-normal lg:text-3xl text-stage-text [text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_16px_rgb(0_0_0/0.6)]"
           >
             Anı biriktir, eşya değil
           </p>
@@ -167,80 +141,6 @@
         action="/arama"
         method="get"
       >
-        <fieldset class="flex flex-wrap gap-x-1 border-b border-rule px-2">
-          <legend class="sr-only">
-            Kategori
-          </legend>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" checked="" value=""/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Tümü
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="el-yapimi-caki"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              El Yapımı Çakılar
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="av-bicaklari"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Av Bıçakları
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="outdoor-ve-kamp"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Outdoor ve Kamp
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input
-              type="radio"
-              class="peer sr-only"
-              name="kategori"
-              value="mutfak-ve-sef-bicaklari"
-            />
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Mutfak ve Şef Bıçakları
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="mutfak-sef-serisi"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Mutfak &amp; Şef Serisi
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="kiliclar"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Kılıçlar
-            </span>
-          </label>
-          <label class="relative cursor-pointer">
-            <input type="radio" class="peer sr-only" name="kategori" value="ozel-koleksiyon"/>
-            <span
-              class="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text"
-            >
-              Özel Koleksiyon
-            </span>
-          </label>
-        </fieldset>
         <div class="flex flex-col gap-2 p-2 lg:flex-row lg:items-center">
           <div
             class="grid min-w-0 grid-cols-2 gap-2 lg:flex lg:flex-1 lg:flex-row lg:items-stretch lg:gap-0"

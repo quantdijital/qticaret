@@ -3,6 +3,8 @@ import {
   FOOTER_COLUMNS_DEFAULTS,
   FOOTER_COLUMNS_LIMITS,
   FOOTER_COLUMNS_SETTINGS,
+  FOOTER_ROWS_DEFAULTS,
+  FOOTER_ROWS_SETTINGS,
 } from "@qticaret/types"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import type { FooterColumnsSection, FooterRowsSection } from "@/features/storefront/api/layout"
@@ -81,7 +83,7 @@ export function FooterColumnsContent({
   )
 }
 
-const COLUMNS_ONLY = ["news_place", "brand_contact", "bottom_align"] as const
+const COLUMNS_ONLY = ["news_place", "brand_contact", "bottom_align", "wordmark"] as const
 
 const isColumns = (
   section: FooterColumnsSection | FooterRowsSection
@@ -105,9 +107,12 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
   const { t } = useTranslation()
   // The newsletter's place, the brand's contact and the bottom line: the brand columns' own
   const own = isColumns(section) ? section : null
+  // The free rows' own: a third way to pay (`muted`) and the legal texts' place
+  const rows = own ? null : (section as FooterRowsSection)
   const set =
     Number(section.ground !== FOOTER_COLUMNS_DEFAULTS.ground) +
     Number(section.badge_style !== FOOTER_COLUMNS_DEFAULTS.badge_style) +
+    Number(rows !== null && rows.legal_place !== FOOTER_ROWS_DEFAULTS.legal_place) +
     COLUMNS_ONLY.filter((key) => own && own[key] !== FOOTER_COLUMNS_DEFAULTS[key]).length
   return (
     <PanelGroup
@@ -134,7 +139,7 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
           label={t(`${F}.badge_style.label`)}
           term={t(`${F}.badge_style.term`)}
           hint={t(`${F}.badge_style.hint`)}
-          steps={FOOTER_COLUMNS_SETTINGS.badge_style}
+          steps={rows ? FOOTER_ROWS_SETTINGS.badge_style : FOOTER_COLUMNS_SETTINGS.badge_style}
           value={section.badge_style}
           fallback={FOOTER_COLUMNS_DEFAULTS.badge_style}
           nameOf={(step) => t(`${F}.badge_style.${step}`)}
@@ -142,6 +147,21 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
             onChange({ ...section, badge_style })
           }}
         />
+        {rows && (
+          <StepChoice
+            id={CARD_FIELD_IDS.footer(section.id, "legal_place")}
+            label={t(`${F}.legal_place.label`)}
+            term={t(`${F}.legal_place.term`)}
+            hint={t(`${F}.legal_place.hint`)}
+            steps={FOOTER_ROWS_SETTINGS.legal_place}
+            value={rows.legal_place}
+            fallback={FOOTER_ROWS_DEFAULTS.legal_place}
+            nameOf={(step) => t(`${F}.legal_place.${step}`)}
+            onChange={(legal_place) => {
+              onChange({ ...rows, legal_place } as S)
+            }}
+          />
+        )}
         {own &&
           COLUMNS_ONLY.map((key) => (
             <StepChoice
@@ -149,7 +169,9 @@ export function FooterStyleGroup<S extends FooterColumnsSection | FooterRowsSect
               id={CARD_FIELD_IDS.footer(section.id, key)}
               label={t(`${F}.${key}.label`)}
               term={t(`${F}.${key}.term`)}
-              {...(key === "brand_contact" ? { hint: t(`${F}.${key}.hint`) } : {})}
+              {...(key === "brand_contact" || key === "wordmark"
+                ? { hint: t(`${F}.${key}.hint`) }
+                : {})}
               steps={FOOTER_COLUMNS_SETTINGS[key] as readonly string[]}
               value={own[key]}
               fallback={FOOTER_COLUMNS_DEFAULTS[key]}

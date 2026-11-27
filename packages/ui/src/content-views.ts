@@ -5,6 +5,7 @@ import type {
   StoreFaqItem,
   RichTextImageSide,
   RichTextVariant,
+  ReviewsProductImage,
   ReviewsVariant,
   ScrollerSettings,
   SectionDevice,
@@ -150,7 +151,8 @@ export type HomeSectionView = {
       id: string
       type: "reviews"
       title: string
-      reviews: (ReviewView & { product: LinkView | null })[]
+      /** Each review's product; its picture only when `product_image` asks for one. */
+      reviews: (ReviewView & { product: ReviewedProductView | null })[]
       more: LinkView
       /** The newest customer photos on approved reviews (adr/0046 Ek 2026-11-04); none: no strip. */
       photos?: CustomerPhotoView[]
@@ -162,6 +164,8 @@ export type HomeSectionView = {
        */
       variant?: ReviewsVariant
       scroller?: ScrollerSettings
+      /** `carousel` only (adr/0077 §10 Ek): the product's picture on each card; absent: none. */
+      product_image?: ReviewsProductImage
     }
   | {
       id: string

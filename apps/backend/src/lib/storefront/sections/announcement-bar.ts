@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { base, shopText } from "../layout-fields"
+import { storefrontLink } from "../menus"
 
 /**
  * The announcement bar's settings (docs/tema/bilesen-denetimi (b) 6): how
@@ -17,6 +18,7 @@ export const ANNOUNCEMENT_SETTINGS = {
   hover_pause: ["on", "off"],
   align: ["auto", "left", "center", "right"],
   size: ["small", "medium", "large"],
+  tone: ["graphite", "primary"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -30,6 +32,7 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   hover_pause: "on",
   align: "auto",
   size: "medium",
+  tone: "graphite",
 }
 
 export const ANNOUNCEMENT_SETTING_NAMES = Object.keys(ANNOUNCEMENT_SETTINGS) as Setting[]
@@ -56,6 +59,9 @@ export const announcementBar = z
     hover_pause: setting("hover_pause"),
     align: setting("align"),
     size: setting("size"),
+    tone: setting("tone"),
+    // The small button beside the lines; absent until written, so a bar saved before it prints as it did
+    link: storefrontLink.nullable().optional(),
   })
   .strict()
 

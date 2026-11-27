@@ -10478,7 +10478,14 @@
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
         "joined": "Alt bilgiyle birleşik",
         "joinedTerm": "footer band",
-        "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer."
+        "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer.",
+        "tone": "Kutu zemini",
+        "toneTerm": "box tone",
+        "toneHint": "Bant kutu olarak çizildiğinde zemini: temanın kutu rengi ya da mağaza ana renginin çok açık tonu. Alt bilgiyle birleşik bant alt bilginin zeminini kullanır.",
+        "tones": {
+          "plain": "Düz",
+          "tint": "Ana renk tonu"
+        }
       },
       "announcement": {
         "line": "{{number}}. duyuru",
@@ -10531,6 +10538,17 @@
           "medium": "Orta",
           "large": "Büyük",
           "hint": "Şeridin yüksekliği ve yazı boyu birlikte: 32, 36 ya da 44 piksel."
+        },
+        "tone": {
+          "label": "Zemin rengi",
+          "term": "tone",
+          "graphite": "Koyu",
+          "primary": "Ana renk",
+          "hint": "Koyu, şeridin bugünkü grafit zeminidir; Ana renk, mağazanın ana rengini kullanır."
+        },
+        "link": {
+          "label": "Şerit düğmesi",
+          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez."
         }
       },
       "problems": {
@@ -10629,14 +10647,17 @@
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
         },
         "accentFont": "Vurgu yazı tipi",
-        "accentFontTerm": "el yazısı · font-family",
-        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle, el yazısı gibi görünür. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız not olan sayfada yüklenir.",
+        "accentFontTerm": "el yazısı · tırnaklı · font-family",
+        "accentFontHint": "Bölümlere yazdığınız kısa notlar (açılış ve bölünmüş bant) bu yazı tipiyle görünür; açılışta başlık karışımı seçiliyse başlığın vurgulu kısmı da bu yazı tipiyle eğik çizilir. Yok seçiliyse not metin yazı tipiyle italik çizilir. Yazı tipi yalnız kullanıldığı sayfada yüklenir.",
         "handwriting": "el yazısı",
         "accentFonts": {
           "none": "Yok",
           "caveat": "Caveat",
           "dancing-script": "Dancing Script",
-          "kalam": "Kalam"
+          "kalam": "Kalam",
+          "dm-serif": "DM Serif Display",
+          "fraunces": "Fraunces",
+          "playfair": "Playfair Display"
         },
         "shapes": "Şekiller",
         "radius": "Köşeler",
@@ -10749,6 +10770,15 @@
               "light": "Hep beyaz"
             },
             "hint": "Otomatik'te vurgu renginin üstündeki yazı (düğme, etiket) hangisi daha iyi okunuyorsa beyaz ya da koyudur. Hep beyaz, parlak bir turuncu gibi açık vurgularda beyaz kalın yazı ister: renk beyazla en az 3:1 vermeli."
+          },
+          "section_title": {
+            "label": "Bölüm başlığı",
+            "term": "section_title",
+            "steps": {
+              "plain": "Standart",
+              "serif_accent": "Büyük, eğik vurgulu"
+            },
+            "hint": "Ana sayfa bölümlerinin başlıkları. Standart, temanın kendi başlığıdır. Büyük, eğik vurgulu'da başlık büyük ve ince yazılır; başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\") vurgu yazı tipinin eğik hâliyle gelir."
           }
         },
         "card": "Ürün kartı",
@@ -10757,7 +10787,8 @@
         "ratios": {
           "4x5": "4:5 (dikey)",
           "1x1": "1:1 (kare)",
-          "3x4": "3:4 (uzun)"
+          "3x4": "3:4 (uzun)",
+          "4x3": "4:3 (yatay, kısa)"
         },
         "ratioHint": "Ürün kartlarındaki görselin biçimi. Grafit kare (1:1) çizer.",
         "show_brand": "Markayı göster",
@@ -10815,6 +10846,12 @@
             "over": "Görselin üstünde",
             "over_split": "Görselin üstünde, fiyat sağda"
           },
+          "density": "Kart sıklığı",
+          "densityHint": "Sık: fiyat ürün adının hemen altında; puan, yorum sayısı ve tur süresi tek satırda (yazı görselin üstündeyse görseldeki rozette). Yalnız standart kartta geçer.",
+          "densities": {
+            "regular": "Normal",
+            "compact": "Sık"
+          },
           "rating_badge": "Puanı görselde rozet olarak göster",
           "rating_badgeHint": "Yıldızlar ve ortalama, ad satırının altı yerine fotoğrafın sol üstünde küçük bir rozette görünür. Yorumu olmayan üründe rozet çıkmaz.",
           "arrow": "Kartın sağ altında ok göster",
@@ -10822,7 +10859,31 @@
           "duration_row": "Tur süresini göster",
           "duration_rowHint": "Tarihli üründe \"5 gün • 4 gece\" satırı. Süre, ürünün Tur bilgileri özelliklerindeki Süre alanından okunur; boşsa satır çıkmaz.",
           "per_person": "Fiyatın yanına \"kişi başı\" yaz",
-          "per_personHint": "Yalnız tarihli üründe görünür."
+          "per_personHint": "Yalnız tarihli üründe görünür.",
+          "meta_place": "Puan, tarih ve süre",
+          "meta_placeHint": "Görselin üstünde: yıldız ve yorum sayısı, en yakın kalkış tarihi ve tur süresi fotoğrafın köşelerinde buzlu cam rozetlerde durur; kartın altında yalnız ad ve fiyat kalır. Yalnız standart kartta geçer.",
+          "metaPlaces": {
+            "below": "Kartın altında",
+            "over": "Görselin üstünde (rozet)"
+          },
+          "style": "Kart stili",
+          "styleHint": "Cam panel: fotoğraf kartın tamamını kaplar; ad ve fiyat fotoğrafın altında yüzen buzlu cam bir panelde durur, üstüne gelince panel hafifçe kalkar ve \"İncele\" belirir. Yalnız standart kartta geçer.",
+          "styles": {
+            "plain": "Düz",
+            "glass": "Cam panel"
+          },
+          "presets": {
+            "title": "Hazır kart görünümü",
+            "hint": "Birini seçince ilgili ayarlar doldurulur; sonra her ayarı tek tek değiştirebilirsiniz.",
+            "custom": "Özel",
+            "customHint": "Ayarlar hazır görünümlerden hiçbirine tam uymuyor.",
+            "classic": "Klasik",
+            "classicHint": "Fotoğrafın altında ad, fiyat, puan, süre ve tarih satırları.",
+            "modern": "Modern",
+            "modernHint": "Puan, tarih ve süre görselin üstünde rozetlerde; altta yalnız ad ve fiyat. Ad ve fiyat da \"Yazının yeri\" ayarıyla görselin içine alınabilir.",
+            "glass": "Cam panel",
+            "glassHint": "Ad ve fiyat görselin üstünde yüzen buzlu cam panelde; rozetler köşelerde, üstüne gelince fotoğraflar sırayla geçer."
+          }
         },
         "cardVariant": "Kart biçimi",
         "cardVariants": {
@@ -10835,6 +10896,8 @@
         "framedHint": "Kart çerçeveli çizildiği her yerde geçer: genel biçimde ya da çerçeveli seçilmiş bir rafta.",
         "hover_image": "Üstüne gelince ikinci fotoğraf",
         "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda büyük kartlarda fotoğraflar yana kaydırılır. Bütün kart biçimlerinde geçer; tek fotoğraflı üründe etkisi yok.",
+        "hover_cycle": "Üstüne gelince bütün fotoğraflar sırayla",
+        "hover_cycleHint": "Fare kartın üstünde durdukça ürünün fotoğrafları (en çok 5) sırayla geçer. Telefonda ve hareketi azaltmak isteyen ziyaretçide geçmez; fotoğraflar sırası gelince yüklenir.",
         "delivery_note": "Ücretsiz kargo notu",
         "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
         "full_button": "Tam genişlik düğme",
@@ -10905,7 +10968,21 @@
             "label": "Yol izinde sayfanın kendi adı",
             "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
           },
-          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler"
+          "crumbs_place": {
+            "label": "Yol izi başlıkla aynı satırda",
+            "hint": "Geniş ekranda yol izi (breadcrumb) başlığın satırında sağda, küçük ve soluk durur. Kapalı: başlığın üstünde ayrı satırda. Telefonda hep üsttedir."
+          },
+          "count_word": {
+            "label": "Ürün sayısında birim kelimesi",
+            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs.",
+            "placeholder": "ör. tur"
+          },
+          "all_title": {
+            "label": "Tüm ürünler başlığı",
+            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar.",
+            "placeholder": "ör. Tüm turlar"
+          },
+          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime başlık"
         },
         "searchFormTitle": "Arama kutusu",
         "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",
@@ -10951,6 +11028,18 @@
           "boxed_fields": {
             "label": "Kutulu alanlar",
             "hint": "Her alanın adı üstte, kendisi açık gri bir kutuda; alanlar arasında boşluk olur. Kapalıyken alanlar ince çizgiyle ayrılır."
+          },
+          "tabs": {
+            "label": "Sekmelerdeki kategoriler",
+            "hint": "İşaretlediğiniz kategoriler bu sırayla sekme olur; her birine küçük bir ikon seçebilirsiniz. Hiçbiri işaretli değilse ana kategorilerin hepsi ikonsuz çıkar.",
+            "tabOf": "{{name}} sekmede",
+            "iconOf": "{{name}} ikonu",
+            "noIcon": "İkon yok",
+            "empty": "Henüz kategori yok."
+          },
+          "tab_all": {
+            "label": "\"Tümü\" sekmesi",
+            "hint": "Kapalıyken ilk sekme seçili açılır ve arama her zaman bir kategoride yapılır."
           }
         }
       },
@@ -11403,6 +11492,9 @@
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
         "stickyTerm": "sticky",
+        "overCover": "Kapak görselinin üstünde",
+        "overCoverHint": "Sayfa tam görselli bir kapakla açılıyorsa üst bilgi zeminsiz, açık renk yazıyla fotoğrafın üstünde durur; sayfa kaydırılınca kendi zeminine döner.",
+        "overCoverTerm": "transparent header",
         "search_placeholder": {
           "label": "Arama kutusundaki yazı",
           "term": "placeholder",
@@ -11471,6 +11563,13 @@
           "show": "Yazılı",
           "hide": "Yalnız simge",
           "hint": "Yalnız simge'de sağ üstteki araçlar (arama, favoriler, sepet, hesap) yazısız yuvarlak simgelerdir; ekran okuyucu yine adlarını okur."
+        },
+        "submenu_style": {
+          "label": "Alt menü görünümü",
+          "term": "submenu",
+          "hint": "Geniş panel: menüde bir öğenin üstüne gelince sayfa genişliğinde bir panel açılır; her alt öğe resmi ve kendi bağlantılarıyla bir sütun olur, yanda öğenin büyük resimli kartı durur. Telefon menüsü değişmez.",
+          "list": "Liste",
+          "mega": "Geniş panel"
         },
         "tools_style": {
           "label": "Sağdaki simgeler",
@@ -11578,7 +11677,8 @@
           "hint": "Adresler Mağaza ayarlarındaki sosyal hesaplarınızdan gelir.",
           "text": "Yazıyla",
           "icons": "Simgeyle",
-          "hidden": "Gizli"
+          "hidden": "Gizli",
+          "bare": "Yalın simge"
         },
         "payment_badges": {
           "label": "Ödeme rozetleri",
@@ -11638,7 +11738,8 @@
           "term": "payment marks",
           "hint": "Koyu zeminde logolar her zaman beyaz kartta durur; kart ağları logolarını açık zeminde ister.",
           "card": "Kart içinde",
-          "plain": "Yalın"
+          "plain": "Yalın",
+          "muted": "Gri, sessiz"
         },
         "news_place": {
           "label": "E-bülten yeri",
@@ -11659,12 +11760,26 @@
           "spread": "Yayık",
           "center": "Ortalı"
         },
+        "wordmark": {
+          "label": "Dev marka adı",
+          "term": "wordmark",
+          "hint": "Alt satırın altında mağaza adı çok büyük ve soluk yazılır; alt kenar onu keser.",
+          "off": "Kapal\u0131",
+          "on": "A\u00e7\u0131k"
+        },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
           "term": "payment badges",
           "hint": "Sayfanın en altındaki sabit satırda ödeme yöntemlerinin logoları görünür. Liste yukarıdaki \"Ödeme logoları\" seçiminden gelir."
         },
-        "freeRowsNote": "Satırları ve blokları soldaki sayfa listesinde, Alt bilgi altında düzenleyin. Yasal şerit ve alt satır her zaman en altta durur."
+        "freeRowsNote": "Satırları ve blokları soldaki sayfa listesinde, Alt bilgi altında düzenleyin. Yasal şerit ve alt satır her zaman en altta durur.",
+        "legal_place": {
+          "label": "Yasal metinlerin yeri",
+          "term": "legal links",
+          "hint": "Alt satırda: yasal metinler ve çerez tercihleri telif satırının yanında, ayrı şerit olmadan.",
+          "strip": "Ayrı şerit",
+          "bottom_line": "Alt satırda"
+        }
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
@@ -11893,6 +12008,13 @@
           "off": "Kapalı",
           "on": "Açık",
           "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
+        },
+        "focus": {
+          "label": "Ortadaki kart büyük",
+          "term": "center focus",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Masaüstünde ortadaki kart tam boyda, kenarlara doğru kartlar küçülür; kaydırdıkça büyüyen kart değişir. Tek sayıda kart (3 ya da 5) ile en iyi görünür."
         },
         "play_button": {
           "label": "Durdur düğmesi",
@@ -12207,6 +12329,24 @@
             "all": "Hepsi",
             "mobile": "Telefon",
             "desktop": "Geniş ekran"
+          },
+          "style": {
+            "label": "Yazı biçimi",
+            "term": "text style",
+            "plain": "Düz",
+            "hand": "El yazısı"
+          },
+          "logo_size": {
+            "label": "Logo boyu",
+            "term": "logo size",
+            "medium": "Orta",
+            "large": "Büyük"
+          },
+          "icon_style": {
+            "label": "Simgeler",
+            "term": "icon style",
+            "boxed": "Yuvarlak kutulu",
+            "inline": "Satır içi, küçük"
           }
         },
         "source": {
@@ -12306,6 +12446,17 @@
           "term": "icon",
           "hint": "Her rakamın üstünde seçtiğiniz ikon; ikon seçilmeyen rakam ikonsuz görünür."
         },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Neden bizimle). Boşsa çizilmez.",
+        "note": "El yazısı not",
+        "noteHint": "Başlığın sağında eğik, el yazısı kısa not; altında fırça çizgisi olur. Boşsa çizilmez.",
+        "item_style": {
+          "label": "Öge görünümü",
+          "term": "style",
+          "hint": "Büyük rakam ya da açık zeminli yuvarlak ikon, kalın başlık ve tek satır açıklama.",
+          "figure": "Büyük rakam",
+          "feature": "İkonlu madde"
+        },
         "arrangement": {
           "label": "Dizilim",
           "term": "arrangement",
@@ -12343,6 +12494,13 @@
           "hint": "Adımların başındaki numaranın yazılışı.",
           "padded": "01, 02",
           "plain": "1, 2"
+        },
+        "connector": {
+          "label": "Bağlantı çizgisi",
+          "term": "connector",
+          "hint": "Yan yana adımlarda numaradan numaraya uzanan noktalı çizgi (geniş ekranda). Alt alta dizilişte ve telefonda çizilmez.",
+          "off": "Yok",
+          "dotted": "Noktalı"
         }
       },
       "departures": {
@@ -12363,6 +12521,16 @@
           "hint": "Liste: tarih kutusu, tur adı, kalan yer ve fiyat satır satır. Kartlar: turun fotoğrafıyla.",
           "list": "Liste",
           "cards": "Kartlar"
+        }
+      },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Ürün görseli",
+          "term": "product_image",
+          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o).",
+          "none": "Yok",
+          "thumb": "Küçük",
+          "cover": "Kapak"
         }
       },
       "searchBox": {
@@ -12403,6 +12571,12 @@
           "term": "accent",
           "placeholder": "Örn. Kaçışını bul.",
           "hint": "Başlığın altında, ana renginizle yazılan ikinci satır. Boş bırakırsanız çizilmez."
+        },
+        "after": {
+          "label": "Son satır",
+          "term": "last line",
+          "placeholder": "Örn. Sıradanın ötesini keşfedin.",
+          "hint": "Vurgulu satırdan sonra, başlığın kendi rengiyle yazılan satır. Yazı karışımı açıkken vurgu ilk satırın sonunda, bu ikinci satırda durur. Boş bırakırsanız çizilmez."
         },
         "note": {
           "label": "Not",
@@ -12473,7 +12647,8 @@
           "hint": "Yazı her görselde okunsun diye görselin üstündeki koyu perde.",
           "light": "Hafif",
           "strong": "Güçlü",
-          "side": "Soldan geçiş"
+          "side": "Soldan geçiş",
+          "faint": "Çok hafif"
         },
         "edge": {
           "label": "Görselin kenarı",
@@ -12537,6 +12712,20 @@
           "hint": "Not başlığın üstünde ya da kapağın sağ üst köşesinde, altında fırça çizgisiyle (1024 px ve üstü; telefonda başlığın üstünde).",
           "heading": "Başlığın üstünde",
           "corner": "Sağ üst köşe"
+        },
+        "title_mix": {
+          "label": "Başlıkta yazı karışımı",
+          "term": "font mix",
+          "hint": "Başlığın ikinci kısmı aynı satırda, eğik bir tırnaklı yazı tipiyle yazılır; geri kalanı ince çizilir. Yazı tipini Tema ayarları › Yazı tipleri › Vurgu yazı tipi'nden seçersiniz.",
+          "none": "Tek yazı tipi",
+          "serif_accent": "Vurgu eğik tırnaklı"
+        },
+        "words_place": {
+          "label": "Yazı yerleşimi",
+          "term": "layout",
+          "hint": "Yazılar bir arada durur ya da başlık kapağın üstünde, metin ve düğme altında durur; görsel aradan görünür.",
+          "together": "Bir arada",
+          "split": "Başlık üstte, düğme altta"
         }
       },
       "trustCard": {
@@ -12631,10 +12820,32 @@
           "hint": "Dar ekranda fotoğraflar yana mı kayar, alt alta mı dizilir.",
           "scroll": "Yana kaydır",
           "stack": "Alt alta"
+        },
+        "eyebrow": "Üst satır",
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Popüler rotalar). Boşsa çizilmez.",
+        "more": "Tümünü gör bağlantısı",
+        "moreHint": "Başlığın sağında oklu bağlantı (ör. Tüm rotalar). Boşsa çizilmez.",
+        "subtitle": "{{number}}. fotoğrafın alt yazısı",
+        "subtitleHint": "Kartta adın altında küçük tek satır (ör. Dağ • Macera).",
+        "card": {
+          "label": "Kart görünümü",
+          "term": "card",
+          "hint": "Fotoğrafın üstünde ad etiketi ya da altında ad, alt yazı ve ok düğmesi olan beyaz kart.",
+          "over": "Fotoğraf üstünde etiket",
+          "below": "Beyaz kart"
+        },
+        "height": {
+          "label": "Fotoğraf yüksekliği",
+          "term": "height",
+          "hint": "Fotoğraflar yatay mı, yoksa daha uzun ve dikey mi durur.",
+          "standard": "Standart",
+          "tall": "Uzun"
         }
       },
       "program": {
-        "note": "Adımlar her ürünün kendi sayfasındaki Program kartından yazılır. Programı olmayan üründe bu bölüm görünmez."
+        "note": "Adımlar her ürünün kendi sayfasındaki Program kartından yazılır. Programı olmayan üründe bu bölüm görünmez.",
+        "inTabs": "Açıklama sekmelerinde göster",
+        "inTabsHint": "Açık: program ürün sayfasında Açıklama ve Ürün özellikleri ile yan yana son sekme olur, ayrı bölüm olarak çizilmez. Kapalı: açıklamanın altında kendi bölümü."
       },
       "productMain": {
         "image_ratio": {

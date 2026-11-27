@@ -5,6 +5,7 @@ import { SectionIcon } from "../parts/SectionIcon"
 import { StatsFollow } from "./StatsFollow"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
+import { StatsFeatures, StatsHead } from "./stats-parts"
 
 /** Figures a line from 1024 px: all of them, as the shop has two to six. */
 const WIDE: Readonly<Record<number, string>> = {
@@ -63,6 +64,9 @@ const PARTS = {
  * with the stage's own inks, centred the head and every figure centre.
  * `arrangement: row` sets them in one tight row, each icon at the left of
  * its value and label, the shop's profiles at the row's end (`follow`).
+ * `item_style: feature` draws each item as a feature instead (its icon on
+ * a light disc, the label in bold, one quiet line); the arrangement then
+ * does not apply.
  */
 export function Stats({ section }: { section: Of<"stats"> }) {
   const id = headingId(section.id)
@@ -120,9 +124,22 @@ export function Stats({ section }: { section: Of<"stats"> }) {
       {...(section.title ? { "aria-labelledby": id } : { "aria-label": section.label })}
       className="gf-section"
     >
-      <Container className="flex flex-col gap-(--head-gap)">
-        {section.title && <SectionHead id={id} title={section.title} marks={section.editor} />}
-        {row ? (
+      {/* The features set close: a smaller step from the head to the row */}
+      <Container
+        className={cn(
+          "flex flex-col",
+          section.item_style === "feature" ? "gap-(--head-gap-s)" : "gap-(--head-gap)"
+        )}
+      >
+        <StatsHead
+          section={section}
+          heading={
+            section.title && <SectionHead id={id} title={section.title} marks={section.editor} />
+          }
+        />
+        {section.item_style === "feature" ? (
+          <StatsFeatures section={section} />
+        ) : row ? (
           <div className="flex flex-wrap items-center justify-between gap-x-(--gap-columns) gap-y-6">
             {list}
             {section.follow && <StatsFollow id={`${id}-izle`} follow={section.follow} />}

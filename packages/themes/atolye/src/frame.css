@@ -34,6 +34,35 @@ html[data-js-scroll="down"]:not(
     animation-timeline: scroll(self);
   }
 }
+/* Its own scrollbar: no track, a slim rounded thumb that shows only while
+   the pointer or focus is in the column (owner 2026-11-27: the browser's bar,
+   and then a hairline always on, read as a border beside the filters) */
+.gf-scroll-fade {
+  scrollbar-gutter: stable;
+}
+.gf-scroll-fade::-webkit-scrollbar {
+  width: 6px;
+}
+.gf-scroll-fade::-webkit-scrollbar-track {
+  background: transparent;
+}
+.gf-scroll-fade::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: transparent;
+}
+.gf-scroll-fade:is(:hover, :focus-within)::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--color-text-3) 45%, transparent);
+}
+/* Where the scrollbar has no parts to style (Firefox): thin, shown the same way */
+@supports not selector(::-webkit-scrollbar) {
+  .gf-scroll-fade {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .gf-scroll-fade:is(:hover, :focus-within) {
+    scrollbar-color: color-mix(in oklab, var(--color-text-3) 45%, transparent) transparent;
+  }
+}
 @keyframes gf-scroll-fade {
   0%,
   98% {

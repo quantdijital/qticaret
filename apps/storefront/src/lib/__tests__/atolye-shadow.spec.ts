@@ -45,6 +45,8 @@ const BARE = [
   "sections/HeroTrust.tsx",
   // adr/0077 §10 Ek: the trust badges' floating card, no border of its own
   "sections/PromiseCard.tsx",
+  // adr/0077 §10: the photo collage's white route card (`card: below`), no border of its own
+  "sections/collage-card.tsx",
 ]
 
 const source = (file: string) => readFileSync(`${ATOLYE_SOURCE}${file}`, "utf8")
@@ -155,7 +157,7 @@ describe("shadow's none step in the stylesheet", () => {
 
   it("does the same for the dropdown, the suggestions and the filter sheet, in their layer", () => {
     const panels = stepFor(".gf-drop")
-    expect(panels?.selector).toBe(`${MARK} :is(.gf-drop, .gf-suggest)`)
+    expect(panels?.selector).toBe(`${MARK} :is(.gf-drop, .gf-mega, .gf-suggest)`)
     expect(panels?.layer).toBe("components")
     expect(panels?.body.trim()).toBe("box-shadow: none;")
     const sheet = stepFor(".gf-sheet")

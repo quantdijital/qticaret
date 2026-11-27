@@ -1,4 +1,8 @@
 <!-- preset lock: travel-rota (docs/tema/bilesen-standardi.md §7) -->
+<!-- not in the fixture shop: home.deneyimlerrota category:kultur-turlari -->
+<!-- not in the fixture shop: home.deneyimlerrota category:doga-ve-trekking -->
+<!-- not in the fixture shop: home.deneyimlerrota category:gemi-turlari -->
+<!-- section dropped: home.deneyimlerrota -->
 <meta property="og:type" content="product"/>
 <meta property="product:price:amount" content="1890.00"/>
 <meta property="product:price:currency" content="TRY"/>
@@ -610,6 +614,17 @@
         >
           Ürün özellikleri
         </button>
+        <button
+          type="button"
+          role="tab"
+          id="program-sekme"
+          aria-selected="false"
+          aria-controls="program"
+          tabindex="-1"
+          class="gf-info-tab"
+        >
+          Tur programı
+        </button>
       </div>
       <div class="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
         <div class="flex min-w-0 flex-col gap-6 lg:gap-8 lg:col-span-8">
@@ -682,6 +697,123 @@
                 </tr>
               </tbody>
             </table>
+          </section>
+          <section
+            id="program"
+            role="tabpanel"
+            aria-labelledby="program-sekme"
+            tabindex="0"
+            data-inactive=""
+            class="flex min-w-0 scroll-mt-40 flex-col gap-5"
+          >
+            <h2 id="urun-programi" class="gf-info-head text-section">
+              Tur programı
+            </h2>
+            <div class="w-full max-w-4xl">
+              <ol class="flex flex-col">
+                <li
+                  class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
+                  >
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
+                  >
+                  </span>
+                  <div class="flex min-w-0 flex-col gap-3">
+                    <h3 class="flex flex-col gap-0.5">
+                      <span class="text-sm font-semibold text-text-3">
+                        1. Gün
+                      </span>
+                      <span class="text-title font-semibold text-text">
+                        Varış ve tanışma
+                      </span>
+                    </h3>
+                    <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                      <div class="flex min-w-0 flex-col gap-3">
+                        <ul class="flex flex-wrap gap-2">
+                          <li
+                            class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              stroke-width="1.75"
+                              class="lucide lucide-moon size-4 shrink-0"
+                              aria-hidden="true"
+                            />
+                            Akşam yemeği
+                          </li>
+                          <li
+                            class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              stroke-width="1.75"
+                              class="lucide lucide-bed-double size-4 shrink-0"
+                              aria-hidden="true"
+                            />
+                            Konaklama
+                          </li>
+                        </ul>
+                        <div class="gf-prose gf-prose--small">
+                          <p>
+                            Buluşma noktasında karşılama, kısa tanışma ve ilk yürüyüş.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li
+                  class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
+                  >
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
+                  >
+                  </span>
+                  <div class="flex min-w-0 flex-col gap-3">
+                    <h3 class="flex flex-col gap-0.5">
+                      <span class="text-sm font-semibold text-text-3">
+                        2. Gün
+                      </span>
+                      <span class="text-title font-semibold text-text">
+                        Serbest gün
+                      </span>
+                    </h3>
+                    <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
+                      <div class="flex min-w-0 flex-col gap-3">
+                        <ul class="flex flex-wrap gap-2">
+                          <li
+                            class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
+                          >
+                            <svg
+                              width="24"
+                              height="24"
+                              stroke-width="1.75"
+                              class="lucide lucide-sun size-4 shrink-0"
+                              aria-hidden="true"
+                            />
+                            Serbest zaman
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
           </section>
         </div>
         <div class="min-w-0 lg:sticky lg:top-(--gf-stick-top) lg:col-span-4 lg:self-start">
@@ -1284,120 +1416,6 @@
     </div>
   </div>
 </div>
-<div data-qs="rotaprogram">
-  <section aria-labelledby="bolum-rotaprogram" class="gf-section">
-    <div class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-(--head-gap)">
-      <h2 id="bolum-rotaprogram">
-        Tur programı
-      </h2>
-      <div class="w-full max-w-4xl">
-        <ol class="flex flex-col">
-          <li
-            class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
-          >
-            <span
-              aria-hidden="true"
-              class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
-            >
-            </span>
-            <span
-              aria-hidden="true"
-              class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
-            >
-            </span>
-            <div class="flex min-w-0 flex-col gap-3">
-              <h3 class="flex flex-col gap-0.5">
-                <span class="text-sm font-semibold text-text-3">
-                  1. Gün
-                </span>
-                <span class="text-title font-semibold text-text">
-                  Varış ve tanışma
-                </span>
-              </h3>
-              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
-                <div class="flex min-w-0 flex-col gap-3">
-                  <ul class="flex flex-wrap gap-2">
-                    <li
-                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        stroke-width="1.75"
-                        class="lucide lucide-moon size-4 shrink-0"
-                        aria-hidden="true"
-                      />
-                      Akşam yemeği
-                    </li>
-                    <li
-                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        stroke-width="1.75"
-                        class="lucide lucide-bed-double size-4 shrink-0"
-                        aria-hidden="true"
-                      />
-                      Konaklama
-                    </li>
-                  </ul>
-                  <div class="gf-prose gf-prose--small">
-                    <p>
-                      Buluşma noktasında karşılama, kısa tanışma ve ilk yürüyüş.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-          <li
-            class="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
-          >
-            <span
-              aria-hidden="true"
-              class="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
-            >
-            </span>
-            <span
-              aria-hidden="true"
-              class="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
-            >
-            </span>
-            <div class="flex min-w-0 flex-col gap-3">
-              <h3 class="flex flex-col gap-0.5">
-                <span class="text-sm font-semibold text-text-3">
-                  2. Gün
-                </span>
-                <span class="text-title font-semibold text-text">
-                  Serbest gün
-                </span>
-              </h3>
-              <div class="grid gap-4 lg:grid-cols-[1fr_20rem] lg:gap-6">
-                <div class="flex min-w-0 flex-col gap-3">
-                  <ul class="flex flex-wrap gap-2">
-                    <li
-                      class="inline-flex items-center gap-1.5 rounded-full gf-pane px-3 py-1 text-sm text-text-2"
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        stroke-width="1.75"
-                        class="lucide lucide-sun size-4 shrink-0"
-                        aria-hidden="true"
-                      />
-                      Serbest zaman
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </div>
-  </section>
-</div>
 <div data-qs="rotabenzer">
   <div class="gf-section">
     <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
@@ -1414,7 +1432,7 @@
           class="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))] xl:grid-cols-[repeat(4,minmax(0,1fr))]"
         >
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-3">
+            <article class="group gf-card @container relative flex h-full flex-col gap-2">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -1508,7 +1526,7 @@
                     N690 Katlanır Çakı
                   </a>
                 </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                   <span
                     class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
                   >
@@ -1525,7 +1543,7 @@
             </article>
           </li>
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-3">
+            <article class="group gf-card @container relative flex h-full flex-col gap-2">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -1574,21 +1592,6 @@
                   </i>
                 </span>
                 <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="1.5"
-                      class="lucide lucide-star size-3.5 fill-star text-star"
-                      aria-hidden="true"
-                    />
-                    <span aria-hidden="true" class="tabular">
-                      4,5
-                    </span>
-                    <span class="sr-only">
-                      5 üzerinden 4,5 (6 değerlendirme)
-                    </span>
-                  </li>
                 </ul>
                 <form
                   class="relative z-(--z-raised) contents"
@@ -1626,18 +1629,38 @@
                     Şef Bıçağı 20 cm
                   </a>
                 </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                   <span
                     class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                   >
                     800,00 TL
                   </span>
                 </p>
+                <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                  <span class="flex items-center gap-1">
+                    <svg
+                      width="24"
+                      height="24"
+                      stroke-width="1.5"
+                      class="lucide lucide-star size-3.5 fill-star text-star"
+                      aria-hidden="true"
+                    />
+                    <span aria-hidden="true" class="tabular">
+                      <span class="font-semibold text-text">
+                        4,5
+                      </span>
+                      (6)
+                    </span>
+                    <span class="sr-only">
+                      5 üzerinden 4,5 (6 değerlendirme)
+                    </span>
+                  </span>
+                </p>
               </div>
             </article>
           </li>
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-3">
+            <article class="group gf-card @container relative flex h-full flex-col gap-2">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -1686,21 +1709,6 @@
                   </i>
                 </span>
                 <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="flex items-center gap-1 rounded-pill bg-field px-2 py-1 text-text">
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="1.5"
-                      class="lucide lucide-star size-3.5 fill-star text-star"
-                      aria-hidden="true"
-                    />
-                    <span aria-hidden="true" class="tabular">
-                      4,5
-                    </span>
-                    <span class="sr-only">
-                      5 üzerinden 4,5 (8 değerlendirme)
-                    </span>
-                  </li>
                   <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
                     <span aria-hidden="true">
                       %16
@@ -1746,7 +1754,7 @@
                     Elmax Gravürlü Çakı
                   </a>
                 </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                   <span
                     class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
                   >
@@ -1759,11 +1767,31 @@
                     1.380,00 TL
                   </s>
                 </p>
+                <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
+                  <span class="flex items-center gap-1">
+                    <svg
+                      width="24"
+                      height="24"
+                      stroke-width="1.5"
+                      class="lucide lucide-star size-3.5 fill-star text-star"
+                      aria-hidden="true"
+                    />
+                    <span aria-hidden="true" class="tabular">
+                      <span class="font-semibold text-text">
+                        4,5
+                      </span>
+                      (8)
+                    </span>
+                    <span class="sr-only">
+                      5 üzerinden 4,5 (8 değerlendirme)
+                    </span>
+                  </span>
+                </p>
               </div>
             </article>
           </li>
           <li class="min-w-0 md:hidden xl:block">
-            <article class="group gf-card @container relative flex h-full flex-col gap-3">
+            <article class="group gf-card @container relative flex h-full flex-col gap-2">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -1828,7 +1856,7 @@
                     Kasap Bıçağı Seti
                   </a>
                 </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 mt-auto pt-1">
+                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
                   <span
                     class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
                   >

@@ -16,6 +16,7 @@ export const STYLE_KIT = {
   motion: ["calm", "lively"],
   page_width: ["standard", "narrow"],
   accent_ink: ["auto", "light"],
+  section_title: ["plain", "serif_accent"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -35,6 +36,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKitSettings> = {
   motion: "calm",
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 /** The kit's fields for the theme section's schema: a step on its list only. */
@@ -47,6 +49,7 @@ export const styleKitSchema = {
   motion: z.enum(STYLE_KIT.motion),
   page_width: z.enum(STYLE_KIT.page_width),
   accent_ink: z.enum(STYLE_KIT.accent_ink),
+  section_title: z.enum(STYLE_KIT.section_title),
 }
 
 /**

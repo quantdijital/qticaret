@@ -15,7 +15,7 @@ import { optional, text } from "../layout-fields"
  * package); a unit test keeps them equal.
  */
 export const FOOTER_BAR_SETTINGS = {
-  social: ["text", "icons", "hidden"],
+  social: ["text", "icons", "hidden", "bare"],
   back_to_top_side: ["right", "left"],
   back_to_top_shape: ["round", "square"],
 } as const
@@ -93,6 +93,7 @@ export const FOOTER_COLUMNS_SETTINGS = {
   news_place: ["brand", "column"],
   brand_contact: ["show", "hide"],
   bottom_align: ["spread", "center"],
+  wordmark: ["off", "on"],
 } as const
 
 export const FOOTER_COLUMNS_LIMITS = { about: 240 } as const
@@ -105,10 +106,11 @@ export const FOOTER_COLUMNS_DEFAULTS = {
   news_place: "brand",
   brand_contact: "show",
   bottom_align: "spread",
+  wordmark: "off",
 } as const
 
 /** The settings printed only when the shop changed them, so a footer before them reads as it did. */
-const QUIET_COLUMNS = ["news_place", "brand_contact", "bottom_align"] as const
+const QUIET_COLUMNS = ["news_place", "brand_contact", "bottom_align", "wordmark"] as const
 
 type ColumnsSetting = keyof typeof FOOTER_COLUMNS_SETTINGS
 
@@ -129,6 +131,7 @@ export const footerColumnsFields = {
   news_place: columnsStep("news_place"),
   brand_contact: columnsStep("brand_contact"),
   bottom_align: columnsStep("bottom_align"),
+  wordmark: columnsStep("wordmark"),
 }
 
 type ColumnsStep<S extends ColumnsSetting> = (typeof FOOTER_COLUMNS_SETTINGS)[S][number]
@@ -141,6 +144,7 @@ export interface FooterColumnsSettings {
   news_place: ColumnsStep<"news_place">
   brand_contact: ColumnsStep<"brand_contact">
   bottom_align: ColumnsStep<"bottom_align">
+  wordmark: ColumnsStep<"wordmark">
 }
 
 /**

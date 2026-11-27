@@ -28,8 +28,16 @@ interface Frame {
     motion: string
     page_width: string
     accent_ink: string
+    section_title: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
-    listing_page: { default_view: string; view_switch: string; breadcrumb_current: string }
+    listing_page: {
+      default_view: string
+      view_switch: string
+      breadcrumb_current: string
+      crumbs_place: string
+      count_word: string | null
+      all_title: string | null
+    }
     search_form: Record<string, unknown>
   }
 }
@@ -45,11 +53,19 @@ const KIT = {
   // The page's width and the words on the accent, at today's (adr/0067 Ek 2026-11-25)
   page_width: "standard",
   accent_ink: "auto",
+  section_title: "plain",
 }
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */
 const LISTING_TEXT = { size: "md", align: "start", width: "narrow", collapse: true }
-const LISTING_PAGE = { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" }
+const LISTING_PAGE = {
+  default_view: "grid",
+  view_switch: "hide",
+  breadcrumb_current: "show",
+  crumbs_place: "above",
+  count_word: null,
+  all_title: null,
+}
 
 /** The search box's fields at their defaults (adr/0077 §1). */
 const SEARCH_FORM = {
@@ -61,6 +77,8 @@ const SEARCH_FORM = {
   date_words: false,
   boxed_fields: false,
   category_style: "select",
+  tabs: [],
+  tab_all: true,
   placeholder: null,
 }
 
@@ -68,6 +86,8 @@ const SEARCH_FORM = {
 const CARD = {
   variant: "standard",
   hover_image: true,
+  hover_cycle: false,
+  density: "regular",
   delivery_note: true,
   full_button: true,
   // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
@@ -89,6 +109,8 @@ const CARD = {
   arrow: false,
   duration_row: false,
   per_person: false,
+  meta_place: "below",
+  style: "plain",
 }
 
 /** F18 D11 (adr/0053): the shop picks its look from fixed lists; the storefront reads it. */

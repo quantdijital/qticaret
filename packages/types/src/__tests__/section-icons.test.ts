@@ -46,11 +46,20 @@ describe("the new variants and settings keep today's drawing by default", () => 
   })
 
   it("draws the figures without icons unless the shop turns them on", () => {
-    const base = { dividers: "on", icons: "off", arrangement: "stacked", social: "off" }
+    const base = {
+      dividers: "on",
+      icons: "off",
+      item_style: "figure",
+      arrangement: "stacked",
+      social: "off",
+    }
     expect(STATS_DEFAULTS).toEqual(base)
     expect(statsSettingsOf({ dividers: "off" })).toEqual({ ...base, dividers: "off" })
     expect(statsSettingsOf({ icons: "on" })).toEqual({ ...base, icons: "on" })
     expect(statsSettingsOf({ icons: "big" })).toEqual(STATS_DEFAULTS)
+    // The feature look is chosen, an unknown one reads as the figure
+    expect(statsSettingsOf({ item_style: "feature" }).item_style).toBe("feature")
+    expect(statsSettingsOf({ item_style: "card" }).item_style).toBe("figure")
   })
 
   it("keeps the figures stacked and without profiles unless the shop picks the row", () => {

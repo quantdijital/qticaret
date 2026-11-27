@@ -1,7 +1,9 @@
 import {
   FEATURED_PRODUCT_SETTINGS,
   PHOTO_COLLAGE_SETTINGS,
+  REVIEWS_PRODUCT_IMAGES,
   RICH_TEXT_IMAGE_SIDES,
+  STATS_SETTINGS,
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
@@ -52,6 +54,7 @@ export type ContentField =
   | "strips_layout"
   | "show_note"
   | "joined"
+  | "news_tone"
   | "image_side"
   | "outline"
   | "questions"
@@ -62,13 +65,18 @@ export type ContentField =
   | "stats_social"
   | "steps_layout"
   | "numbers"
+  | "steps_connector"
   | "show_icons"
+  | "stats_style"
   | "lift"
   | "disc"
   | "icons_phone"
   | "icons_row_style"
   | "collage_layout"
   | "collage_phone"
+  | "collage_card"
+  | "collage_height"
+  | "reviews_product_image"
   | "departures_layout"
   | "action"
   | "search_position"
@@ -86,6 +94,8 @@ export type ContentField =
   | "title_style"
   | "trust_place"
   | "note_place"
+  | "title_mix"
+  | "words_place"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -140,13 +150,27 @@ function stripGalleryFields(section: AnySection): RegistryField[] {
 export const STEPS_FIELDS = [
   ["layout", "steps_layout"],
   ["numbers", "numbers"],
+  ["connector", "steps_connector"],
 ] as const satisfies readonly (readonly [keyof typeof STEPS_SETTINGS, ContentField])[]
 
 /** The figures strip's switch and the steps' two steps, open in "Diziliş" (adr/0077 §10). */
 function pointsFields(section: AnySection): RegistryField[] {
   if (section.type === "stats") {
     const D = `${E}.stats.dividers`
-    return [{ ...entry(section, "dividers", `${D}.label`, [], "layout"), term: `${D}.term` }]
+    const I = `${E}.stats.item_style`
+    return [
+      {
+        ...entry(
+          section,
+          "stats_style",
+          `${I}.label`,
+          STATS_SETTINGS.item_style.map((step) => `${I}.${step}`),
+          "layout"
+        ),
+        term: `${I}.term`,
+      },
+      { ...entry(section, "dividers", `${D}.label`, [], "layout"), term: `${D}.term` },
+    ]
   }
   return STEPS_FIELDS.map(([name, field]) => {
     const P = `${E}.steps.${name}`
@@ -164,10 +188,12 @@ function pointsFields(section: AnySection): RegistryField[] {
   })
 }
 
-/** The collage's two steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
+/** The collage's steps by setting and field name, open in "Diziliş" (`collage-groups.tsx`). */
 export const COLLAGE_FIELDS = [
   ["layout", "collage_layout"],
   ["phone", "collage_phone"],
+  ["card", "collage_card"],
+  ["height", "collage_height"],
 ] as const satisfies readonly (readonly [keyof typeof PHOTO_COLLAGE_SETTINGS, ContentField])[]
 
 /** The photo collage's layout from 1024 px and on a phone (adr/0077 §10). */
@@ -221,7 +247,22 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "reviews":
       return [
         limit(section),
-        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
+        ...(section.variant === "carousel"
+          ? [
+              // The product's picture on each card (adr/0077 §10 Ek), open in "Diziliş"
+              {
+                ...entry(
+                  section,
+                  "reviews_product_image",
+                  `${E}.reviewsCard.productImage.label`,
+                  REVIEWS_PRODUCT_IMAGES.map((step) => `${E}.reviewsCard.productImage.${step}`),
+                  "layout"
+                ),
+                term: `${E}.reviewsCard.productImage.term`,
+              },
+              ...scrollerFields(section.id, section.scroller),
+            ]
+          : []),
       ]
     case "photo_collage":
       return collageFields(section)

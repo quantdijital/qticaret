@@ -12,7 +12,8 @@ import { woff2CodePoints } from "./woff2-cmap"
 const publicDir = fileURLToPath(new URL("../../../public", import.meta.url))
 const css = readFileSync(fileURLToPath(new URL("../fonts.css", import.meta.url)), "utf8")
 const accentFiles = Object.values(ACCENT_FONT_FILES).flat()
-const listed = [...Object.values(FONT_FILES).flat(), ...accentFiles]
+// The serif accents reuse the heading faces' files: each file counted once
+const listed = [...new Set([...Object.values(FONT_FILES).flat(), ...accentFiles])]
 
 const HEADINGS: readonly ThemeHeadingFont[] = [
   "fraunces",

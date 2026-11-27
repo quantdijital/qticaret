@@ -16,6 +16,7 @@ export function BrandBlock({ block, shop, t, editor }: BlockProps<"brand">) {
       withContact={false}
       block={{
         logo: block.logo,
+        logoSize: block.logoSize,
         profiles: block.social,
         address: block.address,
         headingId: blockHeadingId(block.at),

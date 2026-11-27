@@ -1,8 +1,10 @@
 import {
   HEADER_MENU_IMAGES,
   HEADER_SEARCH_STYLES,
+  HEADER_SUBMENU_STYLES,
   HEADER_TOOL_LABELS,
   MARQUEE_SETTINGS,
+  NEWSLETTER_TONES,
 } from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type {
@@ -20,7 +22,7 @@ import { cardFooterFields } from "./card-field-ids"
 import type { FooterPart } from "../footer-rows/footer-rows-fields"
 import { bannerFields, bannerSettingId } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
-import { isFooterBand } from "./newsletter-band"
+import { isFooterBand, isNewsletterBand } from "./newsletter-band"
 import {
   HEADER_CATALOG_STEPS,
   headerCatalogOffers,
@@ -126,8 +128,10 @@ export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, F
 export const HEADER_GROUPS = {
   search_style: "search",
   menu_images: "menu",
+  submenu_style: "menu",
   tool_labels: "icons",
   sticky: "look",
+  over_cover: "look",
 } as const satisfies Readonly<Record<string, FieldGroupName>>
 
 /**
@@ -216,7 +220,9 @@ export const FIELD_IDS = {
   ...SHELF_IDS,
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
+  overCover: (sectionId: string) => `${sectionId}-over-cover`,
   menuImages: (sectionId: string) => `${sectionId}-menu-images`,
+  submenuStyle: (sectionId: string) => `${sectionId}-submenu-style`,
   searchStyle: (sectionId: string) => `${sectionId}-search-style`,
   toolLabels: (sectionId: string) => `${sectionId}-tool-labels`,
   toolsStyle: (sectionId: string) => `${sectionId}-tools-style`,
@@ -265,6 +271,17 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The content's counts and switches (docs/tema/bilesen-denetimi O2)
   fields.push(...contentFields(section))
+  // A band's ground tone, under "Stil", on a page or in the footer
+  if (isNewsletterBand(section)) {
+    fields.push({
+      key: "news_tone",
+      group: "appearance",
+      label: "storefront.editor.newsletter.tone",
+      term: "storefront.editor.newsletter.toneTerm",
+      options: NEWSLETTER_TONES.map((tone) => `storefront.editor.newsletter.tones.${tone}`),
+      target: CONTENT_IDS.content(id, "news_tone"),
+    })
+  }
   // The footer box's band on the footer's ground, under "Stil" (adr/0070 §4 Ek)
   if (isFooterBand(section, group)) {
     fields.push({
@@ -314,10 +331,22 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       options: [],
       target: FIELD_IDS.sticky(id),
     })
+    // The one-row header's own: over a full photograph opening
+    if (section.variant === "inline") {
+      fields.push({
+        key: "over_cover",
+        group: HEADER_GROUPS.over_cover,
+        label: "storefront.editor.headerBar.overCover",
+        term: "storefront.editor.headerBar.overCoverTerm",
+        options: [],
+        target: FIELD_IDS.overCover(id),
+      })
+    }
     // Every variant's: the search's look and the menus' pictures (adr/0049 Ek 2026-11-15)
     for (const [key, steps, target] of [
       ["search_style", HEADER_SEARCH_STYLES, FIELD_IDS.searchStyle(id)],
       ["menu_images", HEADER_MENU_IMAGES, FIELD_IDS.menuImages(id)],
+      ["submenu_style", HEADER_SUBMENU_STYLES, FIELD_IDS.submenuStyle(id)],
     ] as const) {
       fields.push({
         key,

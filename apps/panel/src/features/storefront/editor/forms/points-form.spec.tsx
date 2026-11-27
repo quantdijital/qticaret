@@ -117,6 +117,25 @@ describe("the figures strip's panel", () => {
     expect(changes.at(-1)).toMatchObject({ dividers: "off" })
   })
 
+  it("offers the item look in Diziliş, the large figure by default", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(newHomeSection("stats", STATS))
+    await openGroup(user, "Diziliş")
+
+    expect(screen.getByRole("radio", { name: /Büyük rakam/ })).toBeChecked()
+    await user.click(screen.getByRole("radio", { name: /İkonlu madde/ }))
+    expect(changes.at(-1)).toMatchObject({ item_style: "feature" })
+  })
+
+  it("writes the line over the heading and the hand note", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(newHomeSection("stats", STATS))
+
+    await user.type(screen.getByLabelText(/^Üst satır/), "Neden biz")
+    await user.type(screen.getByLabelText(/^El yazısı not/), "Yol")
+    expect(changes.at(-1)).toMatchObject({ eyebrow: "Neden biz", note: "Yol" })
+  })
+
   it("offers the row in Diziliş, stacked by default, and the profiles' switch only on the row", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("stats", STATS))
@@ -186,17 +205,19 @@ describe("the steps' panel", () => {
 })
 
 describe("the settings search and the preview's marks", () => {
-  it("finds the strip's switch and the steps' two settings in Diziliş", () => {
+  it("finds the strip's switch and the steps' three settings in Diziliş", () => {
     const strip = newHomeSection("stats", STATS)
     const steps = newHomeSection("steps", STEPS)
 
     expect(contentFields(strip).map((each) => [each.key, each.group])).toEqual([
+      ["stats_style", "layout"],
       ["dividers", "layout"],
       ["show_icons", "layout"],
     ])
     expect(contentFields(steps).map((each) => [each.key, each.group])).toEqual([
       ["steps_layout", "layout"],
       ["numbers", "layout"],
+      ["steps_connector", "layout"],
     ])
   })
 

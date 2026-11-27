@@ -28,6 +28,7 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
       news_place: "brand",
       brand_contact: "show",
       bottom_align: "spread",
+      wordmark: "off",
     })
     expect(FOOTER_COLUMNS_LIMITS.about).toBe(240)
   })
@@ -36,5 +37,6 @@ describe("the brand columns footer (adr/0049 Ek 2026-11-17)", () => {
     expect(FOOTER_COLUMNS_SETTINGS.news_place).toEqual(["brand", "column"])
     expect(FOOTER_COLUMNS_SETTINGS.brand_contact).toEqual(["show", "hide"])
     expect(FOOTER_COLUMNS_SETTINGS.bottom_align).toEqual(["spread", "center"])
+    expect(FOOTER_COLUMNS_SETTINGS.wordmark).toEqual(["off", "on"])
   })
 })

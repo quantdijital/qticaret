@@ -34,4 +34,12 @@ export const SURFACE_STYLES = ["filled", "lined"] as const
  * this list and never an address. Absent from a row before it: `none`.
  * `ACCENT_FONTS` in the contract (`hand-note.ts`).
  */
-export const ACCENT_FONTS = ["none", "caveat", "dancing-script", "kalam"] as const
+export const ACCENT_FONTS = [
+  "none",
+  "caveat",
+  "dancing-script",
+  "kalam",
+  "dm-serif",
+  "fraunces",
+  "playfair",
+] as const

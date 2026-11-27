@@ -1,3 +1,4 @@
+import { TitleText } from "../parts/TitleText"
 import { fieldMark } from "@qticaret/ui"
 import type { DepartureRowView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -78,7 +79,7 @@ export function Departures({ section, t }: { section: Of<"departures">; t: Trans
       <Container className="flex flex-col gap-(--head-gap)">
         <div className="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center">
           <h2 id={id} {...fieldMark(section.editor, "title")}>
-            {section.title}
+            <TitleText text={section.title} />
           </h2>
           {section.intro && (
             <p className="text-text-2" {...fieldMark(section.editor, "intro")}>

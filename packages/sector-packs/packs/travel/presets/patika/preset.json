@@ -4,13 +4,13 @@
   "version": 1,
   "theme": "atolye",
   "name": "Patika",
-  "description": "Yürüyüş ve doğa turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, yayla bandı, yorumlar ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "description": "Kültür, doğa ve şehir turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, kutulu kampanya bandı, tur görselli yorum kartları ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
-      "file": "images/kapak-gol-gezgin.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:Backpacker_over_a_lake_(Unsplash).jpg",
-      "license": "CC0, Jeremy Yap (Unsplash; kırpılıp küçültüldü, WebP'ye çevrildi)"
+      "file": "images/kapak-kapadokya-balon.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Cappadociasunrise.jpg",
+      "license": "CC BY-SA 4.0, Ivankazaryan (kırpıldı, küçültülüp WebP'ye çevrildi)"
     },
     {
       "file": "images/rota-kapadokya.webp",
@@ -36,11 +36,6 @@
       "file": "images/rota-agri.webp",
       "source": "https://commons.wikimedia.org/wiki/File:Mount_Ararat,_Ararat_Plain,_Armenia-Turkey_border,_Armenia.jpg",
       "license": "CC BY 4.0, Vyacheslav Argenberg (küçültülüp WebP'ye çevrildi)"
-    },
-    {
-      "file": "images/bant-ayder.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:Ayder_Yayla_-_panoramio.jpg",
-      "license": "CC BY 3.0, Hüseyin Öcal (küçültülüp WebP'ye çevrildi)"
     }
   ]
 }

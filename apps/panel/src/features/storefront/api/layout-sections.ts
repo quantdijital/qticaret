@@ -13,8 +13,10 @@ import type {
   MarqueeSettings,
   PostsPanelStep,
   ProductSource,
+  ProgramPlace,
   ProgramVariant,
   RelatedProductsVariant,
+  ReviewsProductImage,
   ReviewsVariant,
   ScrollerSettings,
   SectionDevice,
@@ -22,6 +24,7 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  NewsletterTone,
   NewsletterVariant,
   PageTextSwitch,
   PostsVariant,
@@ -256,6 +259,8 @@ export interface ReviewsSection extends BodySectionBase {
   variant: ReviewsVariant
   /** `carousel`: the scroller kit's settings. */
   scroller?: ScrollerSettings
+  /** `carousel`: the reviewed product's picture on each card; absent: `none` (adr/0077 §10 Ek). */
+  product_image?: ReviewsProductImage
 }
 
 /** The latest posts or reviews: a title and how many. */
@@ -331,6 +336,8 @@ export interface NewsletterFields {
    * above the footer. A page's box never has it.
    */
   joined?: boolean
+  /** The boxed bands' ground (`split`, `image_card`, `strip`); absent: `plain`. */
+  tone?: NewsletterTone
 }
 
 export interface NewsletterSection extends BodySectionBase, NewsletterFields {
@@ -407,6 +414,8 @@ export interface RelatedProductsSection extends BodySectionBase {
 export interface ProgramSection extends BodySectionBase {
   type: "program"
   title: string | null
+  /** A tab beside the description (`tab`); absent: its own section (today's). */
+  place?: ProgramPlace
   /** The server fills `timeline` on reading. */
   variant: ProgramVariant
 }
@@ -482,6 +491,8 @@ export type CategorySection = (
 export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
   lines: string[]
+  /** The small button beside the lines; absent or null: none. */
+  link?: LayoutLink | null
 } & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {

@@ -156,7 +156,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
       }
     case "program":
       // adr/0078: the steps are the product's, read by the storefront for its page
-      return { id, type, title: section.title, variant: section.variant }
+      return {
+        id,
+        type,
+        title: section.title,
+        variant: section.variant,
+        // A tab beside the description; absent: its own section (today's)
+        ...(section.place === "tab" ? { place: "tab" as const } : {}),
+      }
     case "featured_product":
       return {
         id,
@@ -280,6 +287,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
             limit: section.limit,
             variant: section.variant,
             scroller: section.scroller,
+            // The product's picture on each card, only once written (adr/0077 §10 Ek)
+            ...(section.product_image ? { product_image: section.product_image } : {}),
           }
         : { id, type, title: section.title, limit: section.limit }
     case "google_rating":

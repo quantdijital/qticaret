@@ -1,0 +1,31 @@
+/*
+ * The style kit's S10 `section_title` (adr/0067, `data-section-title` on
+ * the theme's root): `serif_accent` sets the home sections' headings
+ * (`h2` with a `bolum-` id: `SectionHead`, steps, departures, the collage)
+ * large and light in their own face, as the opening's mixed heading
+ * (`hero-full-mix.css`), and the words the shop put between asterisks
+ * (`.gf-title-em`, `parts/TitleText`) in the accent face's italic, heavier,
+ * in the heading's ink. With no accent face, the heading face in italic.
+ * At the default the accent's words are the heading's own (no italic):
+ * only the asterisks go.
+ */
+.gf-title-em {
+  font-style: inherit;
+}
+
+[data-section-title="serif_accent"] h2[id^="bolum-"] {
+  max-width: 22ch;
+  font-size: clamp(2.25rem, 2.2vw + 1.4rem, 3.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+[data-section-title="serif_accent"] h2[id^="bolum-"] .gf-title-em {
+  font-family: var(--font-accent, var(--font-heading));
+  font-style: italic;
+  /* The faces ship upright only: the theme turns synthesis off (`base.css`), the accent takes it back */
+  font-synthesis: style;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}

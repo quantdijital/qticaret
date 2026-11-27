@@ -1,0 +1,216 @@
+/*
+ * The wide submenu panel (frame/AisleMega, `submenu_style: mega`, adr/0049
+ * Ek 2026-11-26): one box under the menu line, centred on the page
+ * (Aisle sets `--gf-mega-x` as it opens), as wide as the page's content
+ * at most. The children as columns (a 4:3 picture, the name and count,
+ * then their own links), the item itself as a tall card at the end. The
+ * box is the dropdown's (page ink, field ground, hairline, float shadow);
+ * it eases in from 4 px above unless the visitor asks for less motion.
+ */
+@layer components {
+  .gf-mega {
+    position: absolute;
+    top: calc(100% + var(--space-xs));
+    left: var(--gf-mega-x, 0);
+    z-index: var(--z-dropdown);
+    width: min(72rem, calc(100vw - 2 * var(--space-md)));
+    max-height: min(75dvh, calc(100dvh - var(--gf-head-h, 9.5625rem) - 2rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-lg);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    background: var(--color-field);
+    color: var(--color-text);
+    box-shadow: var(--shadow-float-edged);
+    scrollbar-color: var(--color-rule) transparent;
+    scrollbar-width: thin;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gf-mega[data-state="open"] {
+      animation: gf-mega-in var(--dur-short) var(--ease-out);
+    }
+  }
+  @keyframes gf-mega-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+  }
+
+  .gf-mega-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    gap: var(--space-xl);
+  }
+  .gf-mega-grid--words {
+    grid-template-columns: minmax(0, 1fr) 14rem;
+  }
+  .gf-mega-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    align-content: start;
+    gap: var(--space-lg) var(--space-md);
+  }
+  .gf-mega-column {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+
+  .gf-mega-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    border-radius: var(--radius-inner);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .gf-mega-picture {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-inner);
+    background: var(--color-media-deep);
+  }
+  .gf-mega-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--dur-long) var(--ease-out);
+  }
+  .gf-mega-title {
+    display: flex;
+    min-height: 1.75rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    line-height: 1.3;
+  }
+  .gf-mega-links {
+    display: flex;
+    flex-direction: column;
+  }
+  .gf-mega-link {
+    display: block;
+    padding-block: var(--space-3xs);
+    color: var(--color-text-2);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    text-decoration: none;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .gf-mega-more {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .gf-mega-feature {
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    min-height: 16rem;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-radius: var(--radius-tile);
+    background: var(--color-paper-2);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  /* No pictures (`menu_images: off`): a quiet "Tümünü gör" box, as tall as its words */
+  .gf-mega-grid--words .gf-mega-feature {
+    min-height: 0;
+    align-self: start;
+  }
+  .gf-mega-feature .gf-mega-picture {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+  /* The catalogue's card: its kinds' pictures in a grid, a hairline between */
+  .gf-mega-mosaic {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .gf-mega-mosaic[data-count="3"] > :first-child {
+    grid-row: span 2;
+  }
+  .gf-mega-mosaic[data-count="2"] {
+    grid-template-columns: 1fr;
+  }
+  .gf-mega-mosaic .gf-mega-img {
+    height: 100%;
+    min-height: 0;
+  }
+  /* Words over the picture: a dark wash at its foot keeps them readable */
+  .gf-mega-feature:has(.gf-mega-img) {
+    color: #fff;
+  }
+  .gf-mega-feature:has(.gf-mega-img)::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.7), rgb(0 0 0 / 0) 60%);
+    content: "";
+  }
+  /*
+   * An item with no picture of its own (a link to the whole shop, not a
+   * category): the shop's own colour, not an empty grey frame that reads
+   * as a picture that failed to load (owner 2026-11-27)
+   */
+  .gf-mega-feature:not(:has(.gf-mega-img)) {
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+  .gf-mega-feature .gf-mega-picture:empty {
+    display: none;
+  }
+  .gf-mega-feature-text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+  }
+  .gf-mega-feature-name {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .gf-mega-feature-all {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+  .gf-mega-feature-all svg {
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .gf-mega-head:hover .gf-mega-img,
+    .gf-mega-feature:hover .gf-mega-img {
+      transform: scale(1.04);
+    }
+    .gf-mega-head:hover .gf-menu-word,
+    .gf-mega-link:hover {
+      color: var(--color-text);
+    }
+    .gf-mega-feature:hover .gf-mega-feature-all svg {
+      transform: translateX(0.25rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-mega-img,
+    .gf-mega-feature-all svg {
+      transition: none;
+    }
+  }
+}

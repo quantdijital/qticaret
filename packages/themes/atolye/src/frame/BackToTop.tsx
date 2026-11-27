@@ -26,6 +26,24 @@ const NARROW = "(max-width: 40rem)"
 type Mode = "corner" | "tab" | "dock"
 
 /**
+ * The side's class by the mode, written whole for Tailwind: the corner 4 px
+ * in from the container's edge, so on a screen wider than the container it
+ * stays in the content's own gutter, not out in the margin.
+ */
+const SIDES = {
+  left: {
+    tab: "left-0",
+    corner: "left-[max(0.25rem,calc((100%_-_var(--container))_/_2_+_0.25rem))]",
+    dock: "left-1",
+  },
+  right: {
+    tab: "right-0",
+    corner: "right-[max(0.25rem,calc((100%_-_var(--container))_/_2_+_0.25rem))]",
+    dock: "right-1",
+  },
+} as const
+
+/**
  * Where a fixed button stands: on a phone above the bottom bar; above the
  * WhatsApp button when both are on the right (56 px and a 16 px gap), so
  * the two never overlap. Written whole for Tailwind.
@@ -152,13 +170,7 @@ export function BackToTop({
       className={cn(
         "z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge",
         docked ? "absolute" : cn("fixed", bottomOf(aboveBottomBar, overWhatsApp)),
-        view.side === "left"
-          ? mode === "tab"
-            ? "left-0"
-            : "left-1"
-          : mode === "tab"
-            ? "right-0"
-            : "right-1",
+        SIDES[view.side === "left" ? "left" : "right"][mode],
         shapeOf(mode, view),
         !view.mobile && "max-lg:hidden"
       )}

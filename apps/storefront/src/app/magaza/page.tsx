@@ -3,6 +3,7 @@ import { t } from "@/lib/i18n"
 import { pageTitle } from "@/lib/seo/paging"
 import { siteSeo } from "@/lib/store-api/requests"
 import { stateFromSearch } from "@/lib/views/listing"
+import { allProductsTitle } from "@/lib/views/theme-settings"
 import { type Query, ShopScreen, toSearch } from "@/screens/shop"
 
 export async function generateMetadata({
@@ -10,7 +11,7 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<Query>
 }): Promise<Metadata> {
-  const [site, query] = await Promise.all([siteSeo(), searchParams])
+  const [site, query, title] = await Promise.all([siteSeo(), searchParams, allProductsTitle()])
   const state = stateFromSearch(toSearch(query))
   // Filters (`stok=var` among them), a price range or a sort narrow the list
   const narrowed = state.filters.length > 0 || state.price !== null || state.sort !== null
@@ -18,12 +19,7 @@ export async function generateMetadata({
   const path = state.page > 1 && !narrowed ? `/magaza?sayfa=${String(state.page)}` : "/magaza"
   return {
     title: {
-      absolute: pageTitle(
-        `${t("listing.all_products")} | ${site.shop.name}`,
-        state.page,
-        site.shop.name,
-        t
-      ),
+      absolute: pageTitle(`${title} | ${site.shop.name}`, state.page, site.shop.name, t),
     },
     description: t("listing.all_products_description", { shop: site.shop.name }),
     alternates: site.canonical_host ? { canonical: `https://${site.canonical_host}${path}` } : null,

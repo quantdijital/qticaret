@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import type { StoreReviewPhoto, StoreReviewReply } from "@qticaret/types"
-import type { ImageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { pageTitle } from "@/lib/seo/paging"
@@ -12,9 +11,8 @@ import { storeGet } from "@/lib/store-api/server"
 import { googleReviews, reviewSummary } from "@/lib/store-api/extras"
 import { reviewPhotos, reviewReply, shopRatingView } from "@/lib/views/card-extras"
 import { googleReviewsView } from "@/lib/views/google-reviews"
-import { productImages } from "@/lib/views/image"
 import { reviewFilterView, reviewsPath, starsOf } from "@/lib/views/review-filter"
-import { productsInOrder } from "@/lib/views/section-data"
+import { reviewedProductPictures } from "@/lib/views/review-cards"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
@@ -44,27 +42,6 @@ interface Answer {
 }
 
 type Query = Record<string, string | string[] | undefined>
-
-/**
- * Each reviewed product's first picture, for the review's card (adr/0046
- * Ek 2026-11-05): one call for the page; without an answer, no pictures.
- */
-async function productPictures(ids: readonly string[]): Promise<Map<string, ImageView>> {
-  try {
-    const products = await productsInOrder(ids)
-    return new Map(
-      products.flatMap((product) => {
-        const [first] = productImages(product)
-        return first ? [[product.id, first] as const] : []
-      })
-    )
-  } catch (error) {
-    if (!isStoreApiError(error)) {
-      throw error
-    }
-    return new Map()
-  }
-}
 
 function pageOf(query: Query): number | null {
   const raw = query["sayfa"]
@@ -132,7 +109,7 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
     pathsOf("product", ids),
     // The shop-wide average and spread (adr/0046 Ek 2026-11-05), not this page's
     reviewSummary(),
-    productPictures(ids),
+    reviewedProductPictures(ids),
     // adr/0058: the shop's Google reviews, apart from its own, on the first page only
     page === 1 && stars === null ? googleReviews(GOOGLE_REVIEWS) : Promise.resolve(null),
   ])

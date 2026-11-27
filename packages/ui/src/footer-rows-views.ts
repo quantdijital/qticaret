@@ -1,9 +1,12 @@
 import type {
   FooterImageWidth,
+  FooterContactIconStyle,
+  FooterLogoSize,
   FooterNewsletterVariant,
   FooterRowLayout,
   FooterRowStep,
   FooterRowsStep,
+  FooterTextStyle,
   FooterTrustLayout,
 } from "@qticaret/types"
 import type { ShopMarkView } from "./card-views"
@@ -22,6 +25,8 @@ export interface FooterRowsView {
   ground: FooterRowsStep<"ground">
   /** The ways to pay on white cards or straight on the ground (on the stage always cards). */
   badgeStyle: FooterRowsStep<"badge_style">
+  /** The legal texts in their own strip, or in the bottom line beside the year. */
+  legalPlace: FooterRowsStep<"legal_place">
   /** The ways to pay in the fixed bottom line. */
   bottomBadges: boolean
 }
@@ -50,7 +55,14 @@ interface FooterBlockViewBase {
 /** A block, its words and links resolved. */
 export type FooterBlockView = FooterBlockViewBase &
   (
-    | { type: "text"; title: string | null; /** The backend's HTML (adr/0019). */ html: string }
+    | {
+        type: "text"
+        title: string | null
+        /** The backend's HTML (adr/0019). */
+        html: string
+        /** `hand`: in the shop's hand face, as the hero's note. */
+        style: FooterTextStyle
+      }
     | {
         type: "menu"
         /** The block's title, else the menu's. */
@@ -63,6 +75,8 @@ export type FooterBlockView = FooterBlockViewBase &
         type: "brand"
         /** The store profile's logo; null: the shop's name (or the block asked for none). */
         logo: ImageView | null
+        /** `large`: a step taller, so a logo's own small line reads. */
+        logoSize: FooterLogoSize
         name: string
         about: string | null
         /** The shop's profiles; empty: none (or the block shows none). */
@@ -87,6 +101,8 @@ export type FooterBlockView = FooterBlockViewBase &
         whatsappHref: string | null
         email: string | null
         hours: OpeningHoursView[]
+        /** `inline`: small signs in the line, no kind above; `boxed`: round boxes, the kind small above. */
+        iconStyle: FooterContactIconStyle
       }
     | { type: "social"; title: string | null; profiles: SocialLinkView[] }
     | { type: "payments"; title: string | null; payments: ShopMarkView[]; carriers: ShopMarkView[] }

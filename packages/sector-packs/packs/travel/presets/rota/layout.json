@@ -6,10 +6,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "standard",
+      "variant": "inline",
       "sticky": true,
-      "menu_images": "off",
-      "search_style": "icon"
+      "menu_images": "submenus",
+      "submenu_style": "mega",
+      "search_style": "icon",
+      "over_cover": true,
+      "tools_style": "plain"
     }
   ],
   "home": [
@@ -20,23 +23,30 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "full_image",
-      "eyebrow": "Küçük gruplarla rehberli turlar",
-      "heading": "Türkiye'yi keşfetmenin",
-      "title_accent": "sınırsız yolu",
-      "text": "Kapadokya'dan Karadeniz yaylalarına, Likya Yolu'ndan Ege koylarına. Nereye, ne zaman ve kaç kişi gideceğinizi seçin.",
-      "links": [{ "$href": "/magaza", "label": "Turları incele" }],
+      "heading": "Türkiye,",
+      "title_accent": "sınır tanımadan.",
+      "title_after": "Sıradanın ötesini keşfedin.",
+      "text": "Size göre kurulan Türkiye yolculukları: kendi hızınız, kendi rotanız, kendi merakınız. Her deneyim kişisel, zahmetsiz ve gerçekten sizin.",
+      "links": [
+        {
+          "$href": "/magaza",
+          "label": "Turumu şimdi planla"
+        }
+      ],
       "image": {
-        "$image": "images/kapak-kapadokya.webp",
-        "alt": "Gün doğarken Göreme vadileri üstünde sıcak hava balonları"
+        "$image": "images/kapak-erciyes.webp",
+        "alt": "Gün batımında karlı Erciyes Dağı ve eteklerindeki sırtlar"
       },
-      "action": "search",
+      "action": "button",
       "search_position": "inside",
       "height": "screen",
-      "scrim": "light",
+      "scrim": "faint",
       "align": "center",
       "image_side": "full",
       "edge": "straight",
-      "show_trust": false
+      "show_trust": false,
+      "title_mix": "serif_accent",
+      "words_place": "split"
     },
     {
       "id": "populerturlar",
@@ -45,13 +55,18 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Popüler turlar",
-      "source": { "kind": "best_sellers" },
+      "title": "*En sevilen* turlarımız",
+      "source": {
+        "kind": "best_sellers"
+      },
       "limit": 12,
-      "more": { "$href": "/magaza", "label": "Tüm turlar" },
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm turlar"
+      },
       "card_variant": null,
       "scroller": {
-        "desktop": "three",
+        "desktop": "five",
         "mobile": "peek",
         "arrows": "always",
         "arrow_style": "round",
@@ -60,20 +75,17 @@
         "autoplay": "off",
         "speed": "medium",
         "loop": "off",
-        "drag": "on"
+        "drag": "on",
+        "focus": "on"
+      },
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": null,
+        "align": "center",
+        "width": null
       }
-    },
-    {
-      "id": "yaklasankalkislar",
-      "type": "departures",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": "Yaklaşan kalkışlar",
-      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
-      "source": { "kind": "all" },
-      "limit": 6,
-      "layout": "list"
     },
     {
       "id": "rakamlarlarota",
@@ -85,19 +97,69 @@
         "space_outer": null,
         "space_below": null,
         "space_inner": null,
+        "ground": "page",
+        "align": "center",
+        "width": null
+      },
+      "title": null,
+      "items": [
+        {
+          "value": "120+",
+          "label": "Rota",
+          "text": "Yurt içinde ve yakın coğrafyada."
+        },
+        {
+          "value": "15",
+          "label": "Yıllık deneyim",
+          "text": null
+        },
+        {
+          "value": "4 mevsim",
+          "label": "Kalkış",
+          "text": "Yaz yaylaları, kış Kapadokya'sı."
+        },
+        {
+          "value": "12",
+          "label": "Kişilik gruplar",
+          "text": "Kalabalık değil, birlikte."
+        }
+      ],
+      "dividers": "off",
+      "icons": "off"
+    },
+    {
+      "id": "deneyimlerrota",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "panels",
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": "large",
         "ground": "stage",
         "align": "center",
         "width": null
       },
-      "title": "Yolda geçen yıllar",
-      "items": [
-        { "value": "120+", "label": "Rota", "text": "Yurt içinde ve yakın coğrafyada." },
-        { "value": "15", "label": "Yıllık deneyim", "text": null },
-        { "value": "4 mevsim", "label": "Kalkış", "text": "Yaz yaylaları, kış Kapadokya'sı." },
-        { "value": "12", "label": "Kişilik gruplar", "text": "Kalabalık değil, birlikte." }
+      "title": "Türkiye, *sıradanın ötesinde*",
+      "category_ids": [
+        {
+          "$handle": "category:kultur-turlari"
+        },
+        {
+          "$handle": "category:doga-ve-trekking"
+        },
+        {
+          "$handle": "category:gemi-turlari"
+        }
       ],
-      "dividers": "on",
-      "icons": "off"
+      "columns": 3,
+      "height": "medium",
+      "lead": "off",
+      "links": 0,
+      "show_count": false,
+      "more": null
     },
     {
       "id": "nasilplanlanir",
@@ -105,7 +167,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Yolculuğunuz dört adımda",
+      "title": "Yolculuğunuz *dört adımda*",
       "intro": "Rotayı birlikte seçer, ayrıntıları biz düşünürüz. Size kalan, yola çıkmak.",
       "items": [
         {
@@ -125,9 +187,24 @@
           "text": "Rehberiniz kalkış noktasında sizi karşılar; gerisi yolun tadı."
         }
       ],
-      "link": { "$href": "/magaza", "label": "Turlara göz atın" },
+      "link": null,
       "layout": "row",
-      "numbers": "padded"
+      "numbers": "padded",
+      "connector": "dotted"
+    },
+    {
+      "id": "yaklasankalkislar",
+      "type": "departures",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "*Yaklaşan* kalkışlar",
+      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
+      "source": {
+        "kind": "all"
+      },
+      "limit": 6,
+      "layout": "list"
     },
     {
       "id": "gezginyorumlari",
@@ -136,7 +213,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Gezginler ne diyor?",
+      "title": "Gezginler *ne diyor?*",
       "limit": 6,
       "scroller": {
         "desktop": "three",
@@ -149,6 +226,16 @@
         "speed": "medium",
         "loop": "off",
         "drag": "on"
+      },
+      "product_image": "thumb",
+
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": null,
+        "align": "center",
+        "width": null
       }
     },
     {
@@ -219,10 +306,12 @@
       "back_to_top_side": "right",
       "back_to_top_shape": "round",
       "back_to_top_mobile": true,
-      "top_strip": true,
+      "top_strip": false,
       "about": "Küçük gruplarla, yerel rehberlerle, acele etmeden. Her turun programı, dahil olanları ve kalkış tarihleri kendi sayfasında.",
       "ground": "stage",
-      "badge_style": "plain"
+      "badge_style": "plain",
+      "brand_contact": "hide",
+      "wordmark": "on"
     },
     {
       "id": "rotabulten",
@@ -230,13 +319,10 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "split",
-      "title": "Yeni rotalar e-postanızda",
+      "variant": "standard",
+      "title": "Bir sonraki hikâyeniz Türkiye olsun.",
       "text": null,
-      "description": "Yeni turları, erken rezervasyon dönemlerini ve son yerleri ayda birkaç kez haber veririz.",
-      "note": "Ayda birkaç e-posta. İstediğiniz an ayrılırsınız.",
-      "show_note": true,
-      "joined": true
+      "description": "Yeni turları, erken rezervasyon dönemlerini ve son yerleri ayda birkaç kez haber veririz."
     }
   ],
   "product": [
@@ -252,6 +338,7 @@
     {
       "id": "rotaprogram",
       "type": "program",
+      "place": "tab",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
@@ -266,7 +353,9 @@
       "ends_at": null,
       "variant": "grid",
       "title": "Bunlara da göz atın",
-      "source": { "kind": "same_category" },
+      "source": {
+        "kind": "same_category"
+      },
       "limit": 4,
       "card_variant": null,
       "columns": 4,

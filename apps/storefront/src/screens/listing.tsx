@@ -8,7 +8,7 @@ import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { visitorAmounts } from "@/lib/analytics/tags"
 import { currentWholesale } from "@/lib/account/wholesale"
-import { t } from "@/lib/i18n"
+import { t, withCountWord } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   allCategories,
@@ -44,6 +44,7 @@ import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
 import { categoryMainOf } from "@/lib/views/main-sections"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
 import {
+  countWordsOf,
   dateFilterView,
   datedChip,
   layoutOf,
@@ -324,7 +325,7 @@ export async function ListingContent({
       />
       <JsonLd blocks={jsonLd} />
       <theme.ListingPage
-        t={t}
+        t={withCountWord(shape.count_word)}
         subscribe={subscribeNewsletter}
         quickAdd={addToCart}
         view={{
@@ -337,6 +338,8 @@ export async function ListingContent({
           sectionsBottom: sections.bottom,
           ...(sections.main ? { main: sections.main } : {}),
           breadcrumbs: trailOf(breadcrumbs(heading.title), shape),
+          // Absent while the trail stands above the title (today's page)
+          ...(shape.crumbs_place === "beside" ? { crumbsPlace: "beside" as const } : {}),
           subcategories: heading.subcategories,
           products: cards,
           total: answer.count,
@@ -344,7 +347,9 @@ export async function ListingContent({
           ...facets,
           // Dated products only: no "in stock" toggle; a search counts results, not products
           stock: stockForCards(facets.stock, cards),
-          ...(isSearch ? { countLabel: t("search.count", { count: answer.count }) } : {}),
+          ...(isSearch
+            ? { countLabel: t("search.count", { count: answer.count }) }
+            : countWordsOf(answer.count, shape, t)),
           // The grid or list (`listing_page`): absent while the shop draws today's page
           ...(shape.default_view === "list" || shape.view_switch === "show"
             ? { layout: layoutOf(shape, state) }

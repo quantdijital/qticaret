@@ -38,6 +38,8 @@ export const SCROLLER_SETTINGS = {
   loop: ["off", "on"],
   /** A mouse may drag the row on a wide screen (touch always swipes). */
   drag: ["off", "on"],
+  /** From 1024 px the card in the middle of the row full size, the ones toward the edges smaller. */
+  focus: ["off", "on"],
   // The slider's own controls (a slide stage: the openings' sliders); a row does not draw them yet
   /**
    * The pause button while it turns by itself: shown, or hidden until the
@@ -73,6 +75,7 @@ export const SCROLLER_DEFAULTS: { readonly [S in ScrollerSetting]: ScrollerStep<
   speed: "medium",
   loop: "off",
   drag: "off",
+  focus: "off",
   play_button: "on",
   dot_style: "dots",
   controls_place: "center",
@@ -95,6 +98,7 @@ export const ROW_SCROLLER = [
   "speed",
   "loop",
   "drag",
+  "focus",
 ] as const satisfies readonly ScrollerSetting[]
 
 /** A setting's step as a reader takes it: one this build does not know reads as the default. */

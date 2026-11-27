@@ -4,6 +4,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { CONTROL, Cell, SelectCell } from "./search-form-cells"
 import type { BarFrom } from "./search-form-cells"
 import { SearchDates } from "./SearchDates"
+import { SectionIcon } from "./SectionIcon"
 
 /** A field across the phone's grid (the words, or the one left over in an odd count). */
 const WIDE = "col-span-2"
@@ -25,10 +26,15 @@ const BUTTON: Readonly<Record<BarFrom, string>> = {
 /**
  * The categories as tabs over the bar (`category_style: tabs`, Wanderly's
  * look): a radio group, so it works without JavaScript and the arrow keys
- * move along it; the chosen one underlined in the ink.
+ * move along it; the chosen one underlined in the ink. A tab the shop gave
+ * an icon draws it small before its name (`search_form.tabs`); without the
+ * empty choice (`tab_all` off) the tabs are the categories alone.
  */
 function CategoryTabs({ field }: { field: SearchFormSelectView }) {
-  const choices = [{ value: "", label: field.anyLabel ?? "" }, ...field.options]
+  const choices =
+    field.anyLabel === null
+      ? field.options
+      : [{ value: "", label: field.anyLabel }, ...field.options]
   return (
     <fieldset className="flex flex-wrap gap-x-1 border-b border-rule px-2">
       <legend className="sr-only">{field.label}</legend>
@@ -41,7 +47,13 @@ function CategoryTabs({ field }: { field: SearchFormSelectView }) {
             defaultChecked={field.value === choice.value}
             className="peer sr-only"
           />
-          <span className="block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text">
+          <span
+            className={cn(
+              "block px-3 py-3 text-sm font-semibold text-text-2 peer-checked:text-text peer-checked:shadow-[inset_0_-2px_0_currentColor] peer-focus-visible:outline-2 peer-focus-visible:outline-focus hover:text-text",
+              "icon" in choice && "flex items-center gap-2"
+            )}
+          >
+            {"icon" in choice && <SectionIcon icon={choice.icon} className="size-4 shrink-0" />}
             {choice.label}
           </span>
         </label>

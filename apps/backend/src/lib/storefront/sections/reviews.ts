@@ -16,8 +16,28 @@ const common = {
 /** Today's drawing: the shop's summary beside the three newest quotes. */
 const grid = z.object({ ...common, variant: defaultVariant("reviews") }).strict()
 
-/** adr/0077 §10: the newest reviews one card each in a row that slides (the scroller kit). */
-const carousel = z.object({ ...common, variant: z.literal("carousel"), scroller }).strict()
+/**
+ * The reviewed product's picture on each carousel card (adr/0077 §10 Ek):
+ * none (today's card), a small square beside its name, or a short cover
+ * across the card's top. Mirrors `@qticaret/types`' `section-reviews.ts`.
+ */
+export const REVIEWS_PRODUCT_IMAGES = ["none", "thumb", "cover"] as const
+
+/**
+ * adr/0077 §10: the newest reviews one card each in a row that slides (the
+ * scroller kit). `product_image` absent until written: a carousel saved
+ * before it prints as it did.
+ */
+const carousel = z
+  .object({
+    ...common,
+    variant: z.literal("carousel"),
+    scroller,
+    product_image: z
+      .enum(REVIEWS_PRODUCT_IMAGES, { error: "storefront_layout.section_invalid" })
+      .optional(),
+  })
+  .strict()
 
 export const REVIEWS_BRANCHES: Readonly<Record<SectionVariant<"reviews">, VariantBranch>> = {
   grid,

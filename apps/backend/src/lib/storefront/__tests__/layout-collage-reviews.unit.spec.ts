@@ -11,7 +11,7 @@ import {
   PHOTO_COLLAGE_SETTINGS,
   photoCollage,
 } from "../sections/photo-collage"
-import { reviews } from "../sections/reviews"
+import { REVIEWS_PRODUCT_IMAGES, reviews } from "../sections/reviews"
 import { storedSection } from "../sections/stored"
 
 // The contract's own files (`@qticaret/types`), through jest: the package is ESM for tsc here
@@ -56,6 +56,8 @@ describe("the photo collage (adr/0077 §10)", () => {
       items: [1, 2, 3].map((n) => ({ ...photo(n), caption: null, link: null })),
       layout: "asymmetric",
       phone: "scroll",
+      card: "over",
+      height: "standard",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "photo_collage", layout: "asymmetric" })
   })
@@ -101,6 +103,29 @@ describe("the photo collage (adr/0077 §10)", () => {
     ) as BodySection
     expect(imagesOf(section)).toEqual([1, 2, 3].map((n) => `${URL}-${String(n)}.jpg`))
     expect(linksOf(section)).toEqual([shop])
+    const all = { kind: "system", target: "shop", label: "Tüm rotalar" } as const
+    const listed = photoCollage.parse(collage({ more: all })) as BodySection
+    expect(linksOf(listed)).toEqual([all])
+  })
+
+  it("keeps the white card, its small lines, the line over the heading and the list's link", () => {
+    const all = { kind: "system", target: "shop", label: "Tüm rotalar" }
+    const section = photoCollage.parse(
+      collage({
+        card: "below",
+        eyebrow: "Popüler rotalar",
+        more: all,
+        items: [photo(1, { subtitle: "Dağ • Macera" }), photo(2), photo(3)],
+      })
+    )
+    expect(section).toMatchObject({ card: "below", eyebrow: "Popüler rotalar", more: all })
+    expect(section.items[0]).toMatchObject({ subtitle: "Dağ • Macera" })
+    expect(section.items[1]).not.toHaveProperty("subtitle")
+    expect(photoCollage.parse(collage())).not.toHaveProperty("eyebrow")
+    expect(photoCollage.safeParse(collage({ card: "flat" })).success).toBe(false)
+    expect(photoCollage.parse(collage({ height: "tall" }))).toMatchObject({ height: "tall" })
+    expect(photoCollage.safeParse(collage({ height: "huge" })).success).toBe(false)
+    expect(photoCollage.safeParse(collage({ eyebrow: "x".repeat(61) })).success).toBe(false)
   })
 
   it("mirrors the contract's lists: a step goes there first", () => {
@@ -129,6 +154,21 @@ describe("the reviews' variants (adr/0077 §10)", () => {
     ])
     // A grid holds no scroller
     expect(issues({ home: [quotes({ scroller: {} })] })).not.toEqual([])
+  })
+
+  it("takes the carousel's product picture as the contract lists it, absent until written", () => {
+    const plain = layoutDocument.parse({ home: [quotes({ variant: "carousel" })] })
+    expect(plain.home[0]).not.toHaveProperty("product_image")
+    const cover = layoutDocument.parse({
+      home: [quotes({ variant: "carousel", product_image: "cover" })],
+    })
+    expect(cover.home[0]).toMatchObject({ product_image: "cover" })
+    expect(issues({ home: [quotes({ variant: "carousel", product_image: "poster" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    // The grid holds none
+    expect(issues({ home: [quotes({ product_image: "thumb" })] })).not.toEqual([])
+    expect(REVIEWS_PRODUCT_IMAGES).toEqual(contract("section-reviews")["REVIEWS_PRODUCT_IMAGES"])
   })
 
   it("reads a variant off the list as the grid, keeping only the grid's fields", () => {
@@ -160,6 +200,13 @@ describe("the collage and the reviews on the storefront", () => {
       context()
     )
     expect(carousel).toMatchObject({ variant: "carousel", scroller: { desktop: "three" } })
+    expect(carousel).not.toHaveProperty("product_image")
+
+    const covered = await hydrateSection(
+      reviews.parse(quotes({ variant: "carousel", product_image: "cover" })),
+      context()
+    )
+    expect(covered).toMatchObject({ variant: "carousel", product_image: "cover" })
   })
 
   it("prints the photographs with their own words, captions filled, links placed", async () => {

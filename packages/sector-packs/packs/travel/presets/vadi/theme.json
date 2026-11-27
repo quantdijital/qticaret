@@ -12,17 +12,19 @@
   },
   "radius": "round",
   "product_card": {
-    "ratio": "4:5",
+    "ratio": "1:1",
     "show_brand": false,
     "show_rating": true,
     "variant": "standard",
     "hover_image": true,
+    "hover_cycle": true,
+    "density": "compact",
     "delivery_note": false,
     "full_button": false,
     "no_reviews": "hide",
     "text_position": "over_split",
     "rating_badge": true,
-    "duration_row": false,
+    "duration_row": true,
     "per_person": false
   },
   "header": {
@@ -42,7 +44,12 @@
     "category_style": "select",
     "placeholder": "Nereye gitmek istersiniz?"
   },
-  "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
+  "listing_page": {
+    "default_view": "grid",
+    "view_switch": "show",
+    "breadcrumb_current": "hide",
+    "count_word": "tur"
+  },
   "menu_style": "underline",
   "shadow": "float",
   "media_ground": "well",

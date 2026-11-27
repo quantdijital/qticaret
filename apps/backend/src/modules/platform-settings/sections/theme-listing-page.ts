@@ -12,19 +12,34 @@ export const LISTING_PAGE = {
   default_view: ["grid", "list"],
   view_switch: ["show", "hide"],
   breadcrumb_current: ["show", "hide"],
+  crumbs_place: ["above", "beside"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
+
+/** The longest word after the count (`@qticaret/types`' `LISTING_COUNT_WORD_MAX`). */
+export const LISTING_COUNT_WORD_MAX = 24
+
+/** The longest all-products title (`@qticaret/types`' `LISTING_ALL_TITLE_MAX`). */
+export const LISTING_ALL_TITLE_MAX = 40
 
 export interface ListingPageSettings {
   default_view: (typeof LISTING_PAGE.default_view)[number]
   view_switch: (typeof LISTING_PAGE.view_switch)[number]
   breadcrumb_current: (typeof LISTING_PAGE.breadcrumb_current)[number]
+  crumbs_place: (typeof LISTING_PAGE.crumbs_place)[number]
+  /** The word after the count ("tur"); none: the page's own "ürün". */
+  count_word: string | null
+  /** The all-products page's title ("Tüm turlar"); none: "Tüm ürünler". */
+  all_title: string | null
 }
 
-/** A grid, no switch, the trail to the page itself: today's page. */
+/** A grid, no switch, the trail to the page itself, the count in products: today's page. */
 export const LISTING_PAGE_DEFAULTS: Readonly<ListingPageSettings> = {
   default_view: "grid",
   view_switch: "hide",
   breadcrumb_current: "show",
+  crumbs_place: "above",
+  count_word: null,
+  all_title: null,
 }
 
 /** The group's schema: a step on its list only, every field present. */
@@ -33,6 +48,9 @@ export const listingPageSchema = z
     default_view: z.enum(LISTING_PAGE.default_view),
     view_switch: z.enum(LISTING_PAGE.view_switch),
     breadcrumb_current: z.enum(LISTING_PAGE.breadcrumb_current),
+    crumbs_place: z.enum(LISTING_PAGE.crumbs_place),
+    count_word: z.string().trim().min(1).max(LISTING_COUNT_WORD_MAX).nullable(),
+    all_title: z.string().trim().min(1).max(LISTING_ALL_TITLE_MAX).nullable(),
   })
   .strict()
 

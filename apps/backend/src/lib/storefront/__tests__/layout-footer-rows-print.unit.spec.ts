@@ -160,6 +160,7 @@ describe("the free rows footer as the storefront reads it (adr/0070 §2.2)", () 
       type: "text",
       title: "Kargo",
       html: "<p><strong>&lt;b&gt;14.00&lt;/b&gt; &amp; sonrası</strong></p>",
+      style: "plain",
     })
   })
 

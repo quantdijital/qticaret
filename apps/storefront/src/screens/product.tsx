@@ -39,6 +39,7 @@ import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extra
 import { swatchLookup } from "@/lib/views/color"
 import { sharedSettingsOf } from "@/lib/views/shared-settings"
 import { productMainOf } from "@/lib/views/main-sections"
+import { programTabOf } from "@/lib/views/program"
 import { sectionViews, showsOwnCategory } from "@/lib/views/sections"
 import { theme } from "@/theme"
 
@@ -140,7 +141,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     reviews,
     questions,
     related,
-    sections,
+    // The program the shop put among the description's tabs is drawn there, not again below
+    ...programTabOf(sections),
     // The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7)
     main: productMainOf(layout.main),
     // The amount is the variant; the cart form asks who the card is for (adr/0025 Ek 2026-11-03)

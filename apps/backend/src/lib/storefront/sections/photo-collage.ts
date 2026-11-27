@@ -18,11 +18,15 @@ export const PHOTO_COLLAGE_LIMITS = {
   intro: 240,
   caption: 60,
   alt: 300,
+  subtitle: 60,
+  eyebrow: 60,
 } as const
 
 export const PHOTO_COLLAGE_SETTINGS = {
   layout: ["asymmetric", "even"],
   phone: ["scroll", "stack"],
+  card: ["over", "below"],
+  height: ["standard", "tall"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof PHOTO_COLLAGE_SETTINGS
@@ -31,6 +35,8 @@ type Step<S extends Setting> = (typeof PHOTO_COLLAGE_SETTINGS)[S][number]
 export const PHOTO_COLLAGE_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   layout: "asymmetric",
   phone: "scroll",
+  card: "over",
+  height: "standard",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -60,6 +66,8 @@ export const photoCollage = z
             image: described,
             caption: optional(shopText(PHOTO_COLLAGE_LIMITS.caption)),
             link: optional(storefrontLink),
+            // Absent until written: a collage saved before it prints as it did
+            subtitle: shopText(PHOTO_COLLAGE_LIMITS.subtitle).nullable().optional(),
           })
           .strict()
       )
@@ -67,6 +75,10 @@ export const photoCollage = z
       .max(PHOTO_COLLAGE_LIMITS.items.max),
     layout: setting("layout"),
     phone: setting("phone"),
+    card: setting("card"),
+    height: setting("height"),
+    eyebrow: shopText(PHOTO_COLLAGE_LIMITS.eyebrow).nullable().optional(),
+    more: storefrontLink.nullable().optional(),
   })
   .strict()
 

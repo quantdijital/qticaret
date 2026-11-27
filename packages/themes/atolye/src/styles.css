@@ -31,6 +31,7 @@
 @import "./listing-text.css";
 @import "./slider.css";
 @import "./scroller.css";
+@import "./scroller-focus.css";
 @import "./banner.css";
 @import "./split.css";
 @import "./strips.css";
@@ -42,31 +43,41 @@
 @import "./frame.css";
 @import "./shadow.css";
 @import "./menu.css";
+@import "./mega.css";
 @import "./header-catalog.css";
 @import "./header-inline.css";
+@import "./header-over.css";
 @import "./search-toggle.css";
 @import "./look.css";
 @import "./thin.css";
 @import "./density.css";
+@import "./announcement.css";
 @import "./kit-steps.css";
 @import "./marquee.css";
 @import "./marquee-options.css";
 @import "./card.css";
 @import "./card-over.css";
+@import "./card-cycle.css";
+@import "./card-glass.css";
 @import "./catalog.css";
 @import "./catalog-fit.css";
 @import "./hero-full.css";
 @import "./search-boxed.css";
 @import "./search-fields.css";
 @import "./hover.css";
+@import "./hero-full-mix.css";
+@import "./hero-full-split.css";
 @import "./collage.css";
 @import "./panels.css";
 @import "./surface.css";
 @import "./media.css";
 @import "./footer-columns.css";
 @import "./footer-rows.css";
+@import "./footer-rows-line.css";
 @import "./newsletter.css";
 @import "./motion.css";
+@import "./steps-connector.css";
+@import "./section-title.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

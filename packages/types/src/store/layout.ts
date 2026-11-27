@@ -30,9 +30,11 @@ import type { StoreRichTextSection } from "./section-rich-text.js"
 import type { StorePostsSection } from "./section-posts.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { StorePhotoCollageSection } from "./section-collage.js"
+import type { ReviewsProductImage } from "./section-reviews.js"
 import type {
   CardVariant,
   FaqVariant,
+  ProgramPlace,
   ProgramVariant,
   RelatedProductsVariant,
   ReviewsVariant,
@@ -175,6 +177,8 @@ export interface StoreReviewsSection {
   limit: number
   variant?: ReviewsVariant
   scroller?: ScrollerSettings
+  /** `carousel` only, while set: the reviewed product's picture on each card (`section-reviews.ts`). */
+  product_image?: ReviewsProductImage
 }
 
 /**
@@ -328,6 +332,8 @@ export type StoreProductSection =
       /** A dated product's program (adr/0078); needs `catalog.booking` (`section-requires`). */
       type: "program"
       title: string | null
+      /** Its own section (`section`, absent) or a tab beside the description (`tab`). */
+      place?: ProgramPlace
       /** One this build does not know reads as `timeline`. */
       variant?: ProgramVariant
     })
@@ -356,6 +362,11 @@ export type StoreAnnouncementBar = {
   id: string
   type: "announcement_bar"
   lines: string[]
+  /**
+   * A small button beside the lines (its words the link's own label);
+   * absent or null (today's): none.
+   */
+  link?: StoreLayoutLink | null
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {

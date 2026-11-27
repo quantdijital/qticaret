@@ -42,6 +42,7 @@ export function FooterNewsletterBox({
         description: news.description ?? null,
         note: news.note ?? null,
         image: news.image ?? null,
+        tone: news.tone ?? "plain",
       }}
       title={news.title}
       headingId="bulten"

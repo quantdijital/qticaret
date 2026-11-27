@@ -28,6 +28,7 @@ export const FOOTER_ROW_LAYOUTS = [
   "1-1-2",
   "1-1-1-1",
   "2-1-1-1",
+  "2-1-1-1-1",
 ] as const
 
 export type FooterRowLayout = (typeof FOOTER_ROW_LAYOUTS)[number]
@@ -66,7 +67,8 @@ export const FOOTER_ROW_DEFAULTS = {
 /** The variant's own steps: its ground and how the ways to pay stand (`brand_columns`' names). */
 export const FOOTER_ROWS_SETTINGS = {
   ground: ["well", "page", "stage"],
-  badge_style: ["card", "plain"],
+  badge_style: ["card", "plain", "muted"],
+  legal_place: ["strip", "bottom_line"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type FooterRowsSetting = keyof typeof FOOTER_ROWS_SETTINGS
@@ -76,6 +78,7 @@ export type FooterRowsStep<S extends FooterRowsSetting> = (typeof FOOTER_ROWS_SE
 export const FOOTER_ROWS_DEFAULTS = {
   ground: "well",
   badge_style: "card",
+  legal_place: "strip",
   /** The ways to pay in the fixed bottom line. */
   bottom_badges: true,
 } as const satisfies { [S in FooterRowsSetting]: FooterRowsStep<S> } & { bottom_badges: boolean }
@@ -116,7 +119,7 @@ export const FOOTER_BLOCK_MAX = {
  */
 export const FOOTER_ROWS_LIMITS = {
   rows: 6,
-  columns: 4,
+  columns: 5,
   perColumn: 6,
   blocks: 24,
   title: 60,
@@ -138,6 +141,15 @@ export const FOOTER_IMAGE_WIDTHS = ["medium", "small", "full"] as const
 export type FooterImageWidth = (typeof FOOTER_IMAGE_WIDTHS)[number]
 
 export const FOOTER_TRUST_LAYOUTS = ["list", "inline"] as const
+/** A text block's face: the theme's, or the shop's hand face (`hand`, the hero's note's). */
+export const FOOTER_TEXT_STYLES = ["plain", "hand"] as const
+/** The brand block's logo: the footer's usual height, or a step taller (`large`). */
+export const FOOTER_LOGO_SIZES = ["medium", "large"] as const
+/** The contact block's signs: in round boxes beside a small kind (`boxed`), or small in the line (`inline`). */
+export const FOOTER_CONTACT_ICON_STYLES = ["boxed", "inline"] as const
+export type FooterContactIconStyle = (typeof FOOTER_CONTACT_ICON_STYLES)[number]
+export type FooterTextStyle = (typeof FOOTER_TEXT_STYLES)[number]
+export type FooterLogoSize = (typeof FOOTER_LOGO_SIZES)[number]
 export type FooterTrustLayout = (typeof FOOTER_TRUST_LAYOUTS)[number]
 
 /** The trust block's count of the design's shared badges. */
@@ -168,6 +180,7 @@ export const FOOTER_ROWS_START = [
             visible: true,
             device: "all",
             logo: true,
+            logo_size: "medium",
             about: null,
             social: false,
             address: false,
@@ -213,6 +226,7 @@ export const FOOTER_ROWS_START = [
             whatsapp: true,
             email: true,
             hours: true,
+            icon_style: "boxed",
           },
         ],
       },
@@ -234,7 +248,13 @@ interface StoreFooterBlockBase {
 /** A block as `GET /store/storefront-layout` prints it: shown now, its text, picture and link resolved. */
 export type StoreFooterBlock = StoreFooterBlockBase &
   (
-    | { type: "text"; title: string | null; /** The backend's HTML (adr/0019). */ html: string }
+    | {
+        type: "text"
+        title: string | null
+        /** The backend's HTML (adr/0019). */
+        html: string
+        style: FooterTextStyle
+      }
     | {
         type: "menu"
         /** The footer menu by its order, from 1; none there: not drawn. */
@@ -246,6 +266,7 @@ export type StoreFooterBlock = StoreFooterBlockBase &
     | {
         type: "brand"
         logo: boolean
+        logo_size: FooterLogoSize
         about: string | null
         social: boolean
         /** The shop's address under its line, as the brand columns draw it. */
@@ -267,6 +288,7 @@ export type StoreFooterBlock = StoreFooterBlockBase &
         whatsapp: boolean
         email: boolean
         hours: boolean
+        icon_style: FooterContactIconStyle
       }
     | { type: "social"; title: string | null }
     | { type: "payments"; title: string | null; carriers: boolean }
@@ -297,6 +319,7 @@ export interface StoreFooterRow {
 export interface StoreFooterRows {
   ground: FooterRowsStep<"ground">
   badge_style: FooterRowsStep<"badge_style">
+  legal_place: FooterRowsStep<"legal_place">
   bottom_badges: boolean
   rows: StoreFooterRow[]
 }

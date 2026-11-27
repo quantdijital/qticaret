@@ -18,6 +18,7 @@ import type {
   CardSoldOutRow,
 } from "@qticaret/types"
 import type { HomeSectionView } from "./content-views"
+import type { ProgramSectionView } from "./program-views"
 import type { ProductVideoView } from "./video-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -42,6 +43,14 @@ export interface ProductCardView {
    * turned it off.
    */
   secondImage?: ImageView | null
+  /**
+   * The product's photos after the second, in its order, while the shop has
+   * `hover_cycle` on (sahip 2026-11-26): with a mouse resting on the card
+   * they follow the second in turn. Never on a touch screen, nor for a
+   * shopper who asks for less motion; each loaded only just before its
+   * turn. None: today's second photo alone.
+   */
+  morePhotos?: readonly ImageView[]
   price: PriceView | null
   available: boolean
   /** The product's reviews in short, when the storefront has them for a card; shown when the shop asks. */
@@ -111,6 +120,25 @@ export interface CardLookView {
   duration: boolean
   /** "kişi başı" after a dated card's price. */
   perPerson: boolean
+  /**
+   * A standard card's compact rows (`density: compact`, sahip 2026-11-26):
+   * the price right under the name, then the stars with their count and a
+   * dated card's length on one line; over the photo, the stars' pill
+   * carries the count and the length. Absent: false.
+   */
+  compact?: boolean
+  /**
+   * The stars, a dated card's length and its nearest departure as frosted
+   * pills on the photo's corners instead of rows (`meta_place: over`, sahip
+   * 2026-11-26), on a standard card. Absent: false.
+   */
+  metaOver?: boolean
+  /**
+   * A standard card's frosted panel (`style: glass`, sahip 2026-11-26): the
+   * photo fills the card, the name and price float on a blurred panel at its
+   * foot that lifts on hover with a "İncele" arrow. Absent: false.
+   */
+  glass?: boolean
 }
 
 /** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */
@@ -283,6 +311,12 @@ export interface ProductPageView {
   maxQuantity?: number | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
+  /**
+   * The product's program as a tab beside the description and the specs
+   * (`program.place: tab`, adr/0078); then it is not among `sections`.
+   * Absent or null: no such tab (today's page).
+   */
+  program?: ProgramSectionView | null
   /** The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7); absent: today's. */
   main?: ProductMainView
   /**

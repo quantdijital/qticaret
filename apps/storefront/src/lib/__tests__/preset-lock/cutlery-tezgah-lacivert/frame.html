@@ -95,7 +95,10 @@
           aria-hidden="true"
         />
       </button>
-      <a href="/" class="flex min-h-11 min-w-0 items-center rounded-inner mr-auto lg:mr-0">
+      <a
+        href="/"
+        class="gf-wordmark flex min-h-11 min-w-0 items-center rounded-inner mr-auto lg:mr-0"
+      >
         <span
           class="truncate font-display text-wordmark leading-none font-extrabold tracking-(--tracking-display)"
         >
@@ -1149,6 +1152,7 @@
     data-variant="free_rows"
     data-ground="well"
     data-badges="card"
+    data-legal="strip"
     class="gf-footer-rows mt-(--footer-gap)"
   >
     <div data-footer-band="" class="border-b border-rule">
@@ -1246,7 +1250,7 @@
                         Telefon
                       </span>
                       <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
+                        class="font-semibold wrap-anywhere transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
                       >
                         0532 000 00 00
                       </span>
@@ -1279,7 +1283,7 @@
                         WhatsApp
                       </span>
                       <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
+                        class="font-semibold wrap-anywhere transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
                       >
                         Mesaj gönderin
                       </span>
@@ -1305,9 +1309,11 @@
                         E-posta
                       </span>
                       <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
+                        class="font-semibold wrap-anywhere transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
                       >
-                        bilgi@example.com
+                        bilgi@
+                        <wbr/>
+                        example.com
                       </span>
                     </span>
                   </a>
@@ -1747,6 +1753,14 @@
                   KVKK Aydınlatma Metni
                 </a>
               </li>
+              <li>
+                <a
+                  href="/cerez-tercihleri"
+                  class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                >
+                  Çerez tercihleri
+                </a>
+              </li>
             </ul>
           </nav>
           <div class="flex items-start gap-4">
@@ -1801,15 +1815,15 @@
                   decoding="async"
                 />
               </li>
-              <li data-mark="bank_transfer">
-                <svg
-                  width="24"
-                  height="24"
-                  stroke-width="2"
-                  class="lucide lucide-landmark size-4 shrink-0"
-                  aria-hidden="true"
+              <li data-mark="bank_transfer" data-logo="">
+                <img
+                  src="/marks/havale.svg"
+                  alt="Havale / EFT"
+                  width="268"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
                 />
-                Havale / EFT
               </li>
               <li data-mark="cash_on_delivery">
                 <svg
@@ -1829,14 +1843,6 @@
                 marks.[object Object]
               </li>
             </ul>
-          </div>
-          <div class="gf-foot-tools">
-            <a
-              href="/cerez-tercihleri"
-              class="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-            >
-              Çerez tercihleri
-            </a>
           </div>
         </div>
       </div>
@@ -1959,7 +1965,7 @@
     title="Yukarı çık"
     data-back-to-top=""
     data-mode="corner"
-    class="z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-24 right-1 size-10 rounded-inner"
+    class="z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-24 right-[max(0.25rem,calc((100%_-_var(--container))_/_2_+_0.25rem))] size-10 rounded-inner"
   >
     <svg
       width="24"

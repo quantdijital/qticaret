@@ -1,3 +1,4 @@
+import { TitleText } from "../parts/TitleText"
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -21,6 +22,8 @@ const WIDE: Readonly<Record<number, string>> = {
  * number beside the words. The printed number is for the eye only: the
  * list says the order. One optional link under the steps, the section's
  * action. Its ground and alignment are the section's look (`Look`).
+ * `connector: dotted` (a row only): from 1024 px a dotted line runs from
+ * each number to the next instead of the hairlines (`steps-connector.css`).
  */
 export function Steps({ section }: { section: Of<"steps"> }) {
   const id = headingId(section.id)
@@ -31,7 +34,7 @@ export function Steps({ section }: { section: Of<"steps"> }) {
       <Container className="flex flex-col gap-(--head-gap)">
         <div className="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center">
           <h2 id={id} {...fieldMark(section.editor, "title")}>
-            {section.title}
+            <TitleText text={section.title} />
           </h2>
           {section.intro && (
             <p className="text-text-2" {...fieldMark(section.editor, "intro")}>
@@ -41,6 +44,7 @@ export function Steps({ section }: { section: Of<"steps"> }) {
         </div>
         <ol
           role="list"
+          data-connector={row && section.connector === "dotted" ? "dotted" : undefined}
           className={cn(
             "grid gap-x-(--gap-columns) gap-y-(--gap-rows)",
             row

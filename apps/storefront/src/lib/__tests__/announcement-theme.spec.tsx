@@ -44,6 +44,22 @@ describe("the announcement bar's lines as the server prints them", () => {
     }
   })
 
+  it("draws the main colour's ground and the pill button only when the shop sets them", () => {
+    const plain = frame({})
+    expect(plain).not.toContain("data-bar=")
+    expect(plain).not.toContain("gf-bar-btn")
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({
+        announcements: LINES,
+        announcementSettings: settings({ tone: "primary" }),
+        announcementLink: { path: "/magaza", label: "Teklif al" },
+      })
+    )
+    expect(html).toMatch(/<div data-bar="primary" class="gf-stage/)
+    expect(html).toMatch(/<a href="\/magaza" class="gf-bar-btn">Teklif al<svg/)
+  })
+
   it("stands them side by side on a wide screen, a phone keeping the first", () => {
     const html = frame({ mode: "inline" })
     expect(html).toMatch(/<ul aria-label="Duyurular"/)

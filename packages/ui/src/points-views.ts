@@ -1,4 +1,5 @@
 import type { SectionIcon, StatsSettings, StepsSettings } from "@qticaret/types"
+import type { HandNoteView } from "./hand-note-views"
 import type { LinkView, SocialLinkView } from "./views"
 
 /**
@@ -17,6 +18,10 @@ export interface StatsSectionView extends StatsSettings {
   /** The list's name for a screen reader while there is no heading. */
   label: string
   items: StatsItemView[]
+  /** A small upper-case line over the heading; absent: none. */
+  eyebrow?: string
+  /** A short hand note beside the heading; absent: none. */
+  note?: HandNoteView
   /**
    * The shop's social profiles at the row's end (`social: on`) under their
    * line ("Bizi izleyin"); absent: none (the setting off, or no profile).

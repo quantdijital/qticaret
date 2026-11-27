@@ -100,6 +100,7 @@ medusaIntegrationTestRunner({
         news_place: "brand",
         brand_contact: "show",
         bottom_align: "spread",
+        wordmark: "off",
       })
 
       // What the shop set, beside the footer's common settings, live on publishing

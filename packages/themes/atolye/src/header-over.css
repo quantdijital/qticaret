@@ -1,0 +1,91 @@
+/*
+ * The one-row header over the opening (`header_bar` `inline`,
+ * `over_cover`, frame/HeaderInline.tsx `data-over-cover`). Only while the
+ * page's first section is the full photograph opening (`.gf-cover` without
+ * `gf-section` is the first one; `data-side="full"` its words over the
+ * picture): the header's row lies over the opening's top, which runs on
+ * under it, and while the page rests at its top the header has no ground,
+ * its words and tools light over a faint shade for legibility. Once the page
+ * scrolls (`data-js-scroll`, frame/ScrollCue), or anything in the header is
+ * focused or open (a dropdown, the search, the menu sheet), it takes its own
+ * ground and inks again. Any other page, or the setting off: drawn as before.
+ * Unlayered, as the one-row header's own rules (`header-inline.css`).
+ */
+:root:has(#icerik .gf-cover[data-side="full"]:not(.gf-section)) .gf-head[data-over-cover] {
+  margin-bottom: -3.5rem;
+  /* The fold's slide (`frame.css`) kept beside the ground's fade */
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+/* The opening's words start under the row that lies over it */
+:root:has(.gf-head[data-over-cover])
+  #icerik
+  .gf-cover[data-side="full"]:not(.gf-section)
+  .gf-cover-stage {
+  padding-top: 3.5rem;
+}
+
+:root:not([data-js-scroll]):has(#icerik .gf-cover[data-side="full"]:not(.gf-section))
+  .gf-head[data-over-cover]:not(:focus-within, :has([data-state="open"], [aria-expanded="true"])) {
+  background-color: transparent;
+  background-image: linear-gradient(oklch(18% 0.02 255 / 0.32), transparent);
+  color: #fff;
+
+  & .gf-menu-item,
+  & .gf-menu-item[aria-current="page"] {
+    color: #fff;
+  }
+  & .gf-menu-item:hover {
+    background-color: rgb(255 255 255 / 0.14);
+    color: #fff;
+  }
+  & .gf-tool.gf-icon-btn {
+    border-color: rgb(255 255 255 / 0.55);
+    background: transparent;
+    color: #fff;
+  }
+  /* The plain tools stay without a ring */
+  &[data-tools="plain"] .gf-tool.gf-icon-btn {
+    border-color: transparent;
+  }
+  & .gf-tool.gf-icon-btn:hover,
+  & .gf-icon-btn:hover {
+    background: rgb(255 255 255 / 0.14);
+  }
+  /* The wide row's own ground (`frame.css`, for the fold) goes too */
+  & .gf-head-row {
+    background: transparent;
+  }
+  /* A logo drawn for the page's ground turns light, as the words do */
+  & [data-gf-head-row] img {
+    filter: brightness(0) invert(1);
+  }
+  &::after {
+    content: none;
+  }
+}
+
+@media (width >= 64rem) {
+  :root:has(#icerik .gf-cover[data-side="full"]:not(.gf-section)) .gf-head[data-over-cover] {
+    margin-bottom: -6rem;
+  }
+  :root:has(.gf-head[data-over-cover])
+    #icerik
+    .gf-cover[data-side="full"]:not(.gf-section)
+    .gf-cover-stage {
+    padding-top: 6rem;
+  }
+  /* The plain tools' row is lower (72 px, `HeaderInline`) */
+  :root:has(#icerik .gf-cover[data-side="full"]:not(.gf-section))
+    .gf-head[data-over-cover][data-tools="plain"] {
+    margin-bottom: -4.5rem;
+  }
+  :root:has(.gf-head[data-over-cover][data-tools="plain"])
+    #icerik
+    .gf-cover[data-side="full"]:not(.gf-section)
+    .gf-cover-stage {
+    padding-top: 4.5rem;
+  }
+}

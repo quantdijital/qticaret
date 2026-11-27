@@ -48,7 +48,7 @@ export const FOOTER_BLOCK_MAX = {
 
 export const FOOTER_ROWS_LIMITS = {
   rows: 6,
-  columns: 4,
+  columns: 5,
   perColumn: 6,
   blocks: 24,
   title: 60,
@@ -65,6 +65,12 @@ export const FOOTER_ROWS_LIMITS = {
 export const FOOTER_NEWSLETTER_VARIANTS = ["standard", "in_footer"] as const
 export const FOOTER_IMAGE_WIDTHS = ["medium", "small", "full"] as const
 export const FOOTER_TRUST_LAYOUTS = ["list", "inline"] as const
+/** A text block's face: the theme's, or the shop's hand face (`hand`, the hero's note's). */
+export const FOOTER_TEXT_STYLES = ["plain", "hand"] as const
+/** The brand block's logo: the footer's usual height, or a step taller (`large`). */
+export const FOOTER_LOGO_SIZES = ["medium", "large"] as const
+/** The contact block's signs: in round boxes beside a small kind (`boxed`), or small in the line (`inline`). */
+export const FOOTER_CONTACT_ICON_STYLES = ["boxed", "inline"] as const
 export const FOOTER_TRUST_LIMIT = { min: 1, max: 4, default: 3 } as const
 export const FOOTER_APP_HOSTS = {
   app_store: "apps.apple.com",
@@ -111,7 +117,13 @@ const common = { id: base.id, visible: base.visible, device }
 const blockTitle = optional(text(L.title))
 
 const textBlock = z
-  .object({ ...common, type: z.literal("text"), title: blockTitle, body: footerDoc })
+  .object({
+    ...common,
+    type: z.literal("text"),
+    title: blockTitle,
+    body: footerDoc,
+    style: step(FOOTER_TEXT_STYLES),
+  })
   .strict()
 
 const menuBlock = z
@@ -131,6 +143,7 @@ const brandBlock = z
     ...common,
     type: z.literal("brand"),
     logo: z.boolean().default(true),
+    logo_size: step(FOOTER_LOGO_SIZES),
     about: optional(text(L.about)),
     social: z.boolean().default(false),
     /** The shop's address (its store details) under its line, as the brand columns draw it. */
@@ -165,6 +178,7 @@ const contactBlock = z
     whatsapp: z.boolean().default(true),
     email: z.boolean().default(true),
     hours: z.boolean().default(true),
+    icon_style: step(FOOTER_CONTACT_ICON_STYLES),
   })
   .strict()
 

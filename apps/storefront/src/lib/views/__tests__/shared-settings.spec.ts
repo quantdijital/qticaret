@@ -113,6 +113,7 @@ describe("the theme's settings and a menu set in the design (adr/0063 §3)", () 
     motion: "calm",
     page_width: "standard",
     accent_ink: "auto",
+    section_title: "plain",
   })
   const frame = { primary_color: "#0b5c99" } as Parameters<typeof themeSourceOf>[1]["storefront"]
   const menu = (title: string): StoreMenu => ({ title, location: "main", rank: 0, items: [] })

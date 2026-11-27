@@ -10478,7 +10478,14 @@
         "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used.",
         "joined": "Joined to the footer",
         "joinedTerm": "footer band",
-        "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway."
+        "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway.",
+        "tone": "Box ground",
+        "toneTerm": "box tone",
+        "toneHint": "The band's ground when drawn as a box: the theme's box colour or a very light tone of the shop's main colour. A band joined to the footer takes the footer's ground.",
+        "tones": {
+          "plain": "Plain",
+          "tint": "Main colour tint"
+        }
       },
       "announcement": {
         "line": "Announcement {{number}}",
@@ -10531,6 +10538,17 @@
           "medium": "Medium",
           "large": "Large",
           "hint": "The bar's height and text size together: 32, 36 or 44 pixels."
+        },
+        "tone": {
+          "label": "Ground colour",
+          "term": "tone",
+          "graphite": "Dark",
+          "primary": "Main colour",
+          "hint": "Dark is the bar's graphite ground as today; Main colour uses the shop's main colour."
+        },
+        "link": {
+          "label": "Bar button",
+          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn."
         }
       },
       "problems": {
@@ -10629,14 +10647,17 @@
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
         },
         "accentFont": "Accent font",
-        "accentFontTerm": "handwriting · font-family",
-        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font, like handwriting. With None the note is drawn in the body font, italic. The font loads only on a page with a note.",
+        "accentFontTerm": "handwriting · serif · font-family",
+        "accentFontHint": "The short notes you write in sections (the opening and the split band) show in this font; with the opening's heading font mix, the heading's accent part is drawn in it, italic. With None the note is drawn in the body font, italic. The font loads only on a page that uses it.",
         "handwriting": "handwriting",
         "accentFonts": {
           "none": "None",
           "caveat": "Caveat",
           "dancing-script": "Dancing Script",
-          "kalam": "Kalam"
+          "kalam": "Kalam",
+          "dm-serif": "DM Serif Display",
+          "fraunces": "Fraunces",
+          "playfair": "Playfair Display"
         },
         "shapes": "Shapes",
         "radius": "Corners",
@@ -10749,6 +10770,15 @@
               "light": "Always white"
             },
             "hint": "Automatic sets the words on the accent colour (a button, a pill) white or dark, whichever reads better. Always white keeps bold white words on a bright accent such as orange: the colour should give at least 3:1 against white."
+          },
+          "section_title": {
+            "label": "Section heading",
+            "term": "section_title",
+            "steps": {
+              "plain": "Plain",
+              "serif_accent": "Large, italic accent"
+            },
+            "hint": "The home sections' headings. Plain is the theme's own. Large, italic accent sets them large and light; the words you put between asterisks (\"Our *favourite* tours\") come in the accent face's italic."
           }
         },
         "card": "Product card",
@@ -10757,7 +10787,8 @@
         "ratios": {
           "4x5": "4:5 (portrait)",
           "1x1": "1:1 (square)",
-          "3x4": "3:4 (tall)"
+          "3x4": "3:4 (tall)",
+          "4x3": "4:3 (wide, short)"
         },
         "ratioHint": "The shape of the picture on product cards. Grafit draws a square (1:1).",
         "show_brand": "Show the brand",
@@ -10815,6 +10846,12 @@
             "over": "Over the photo",
             "over_split": "Over the photo, price at the right"
           },
+          "density": "Card density",
+          "densityHint": "Compact: the price right under the name; the rating, review count and tour length on one line (on the photo's badge when the text stands over it). Standard cards only.",
+          "densities": {
+            "regular": "Regular",
+            "compact": "Compact"
+          },
           "rating_badge": "Show the rating as a badge on the photo",
           "rating_badgeHint": "The stars and average show in a small badge at the photo's top left instead of under the name. A product without reviews gets none.",
           "arrow": "Show an arrow at the card's bottom right",
@@ -10822,7 +10859,31 @@
           "duration_row": "Show the tour's length",
           "duration_rowHint": "A \"5 days • 4 nights\" row on a dated product, read from its Tour details' Length field; none when it is empty.",
           "per_person": "Write \"per person\" after the price",
-          "per_personHint": "Only on a dated product."
+          "per_personHint": "Only on a dated product.",
+          "meta_place": "Rating, date and length",
+          "meta_placeHint": "Over the photo: the stars and review count, the nearest departure and the tour's length stand in frosted badges on the photo's corners; under it only the name and price remain. Standard cards only.",
+          "metaPlaces": {
+            "below": "Under the photo",
+            "over": "Over the photo (badges)"
+          },
+          "style": "Card style",
+          "styleHint": "Glass panel: the photo fills the card; the name and price float on a frosted panel at its foot, which lifts a little on hover as \"View\" shows. Standard cards only.",
+          "styles": {
+            "plain": "Plain",
+            "glass": "Glass panel"
+          },
+          "presets": {
+            "title": "Ready-made card looks",
+            "hint": "Picking one fills in its settings; you can still change each one afterwards.",
+            "custom": "Custom",
+            "customHint": "The settings match none of the ready-made looks.",
+            "classic": "Classic",
+            "classicHint": "Under the photo: the name, price, rating, length and date rows.",
+            "modern": "Modern",
+            "modernHint": "The rating, date and length in badges on the photo; only the name and price under it. The name and price can go inside the photo too, with \"Where the text stands\".",
+            "glass": "Glass panel",
+            "glassHint": "The name and price on a frosted panel floating on the photo; badges on its corners, every photo in turn on hover."
+          }
         },
         "cardVariant": "Card style",
         "cardVariants": {
@@ -10835,6 +10896,8 @@
         "framedHint": "Applies wherever a card is drawn framed: as the shop's style or on a rail set to framed.",
         "hover_image": "Second photo on hover",
         "hover_imageHint": "The product's second photo shows when the pointer is over the card; on a phone the photos of a large card swipe sideways. Applies to every card style; no effect on a product with one photo.",
+        "hover_cycle": "Every photo in turn on hover",
+        "hover_cycleHint": "While the pointer rests on the card, the product's photos (up to 5) follow one another. Not on a phone nor for a visitor who asks for less motion; each photo loads when its turn comes.",
         "delivery_note": "Free shipping note",
         "delivery_noteHint": "\"Free shipping\" under the price of a product whose price reaches the free shipping threshold. The threshold is set on the Promotions page.",
         "full_button": "Full-width button",
@@ -10905,7 +10968,21 @@
             "label": "Page's own name in the breadcrumb",
             "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
           },
-          "words": "list grid view row breadcrumb trail category page all products"
+          "crumbs_place": {
+            "label": "Breadcrumb on the title's line",
+            "hint": "On wide screens the breadcrumb sits on the right of the title's line, small and quiet. Off: on its own line above the title. On phones it is always above."
+          },
+          "count_word": {
+            "label": "Unit word in the product count",
+            "hint": "Written beside the count on the page (24 tur). Empty: products. E.g. tur, oda, kurs.",
+            "placeholder": "e.g. tur"
+          },
+          "all_title": {
+            "label": "All products title",
+            "hint": "The all-products page's (/magaza) title; the breadcrumb and the browser tab show it too. Empty: Tüm ürünler. E.g. Tüm turlar.",
+            "placeholder": "e.g. Tüm turlar"
+          },
+          "words": "list grid view row breadcrumb trail category page all products count unit word title"
         },
         "searchFormTitle": "Search box",
         "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",
@@ -10951,6 +11028,18 @@
           "boxed_fields": {
             "label": "Boxed fields",
             "hint": "Each field's name on top and the field in a light grey box, with room between them. Off, a hairline divides the fields."
+          },
+          "tabs": {
+            "label": "Categories on the tabs",
+            "hint": "The categories you tick become tabs in this order; each can have a small icon. With none ticked, every top category shows, without icons.",
+            "tabOf": "{{name}} on a tab",
+            "iconOf": "{{name}} icon",
+            "noIcon": "No icon",
+            "empty": "No categories yet."
+          },
+          "tab_all": {
+            "label": "\"All\" tab",
+            "hint": "Off, the first tab opens chosen and a search always names a category."
           }
         }
       },
@@ -11403,6 +11492,9 @@
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
         "stickyTerm": "sticky",
+        "overCover": "Over the cover photo",
+        "overCoverHint": "When the page opens with a full photo cover, the header has no ground and light words over the photo; once the page scrolls it takes its own ground again.",
+        "overCoverTerm": "transparent header",
         "search_placeholder": {
           "label": "Search box text",
           "term": "placeholder",
@@ -11471,6 +11563,13 @@
           "show": "With words",
           "hide": "Icons only",
           "hint": "With icons only the tools at the top right (search, favourites, cart, account) are round icons without words; screen readers still read their names."
+        },
+        "submenu_style": {
+          "label": "Submenu look",
+          "term": "submenu",
+          "hint": "Wide panel: hovering a menu item opens a page-wide panel; each child becomes a column with its picture and its own links, with the item's large picture card beside them. The phone menu stays the same.",
+          "list": "List",
+          "mega": "Wide panel"
         },
         "tools_style": {
           "label": "Icons on the right",
@@ -11578,7 +11677,8 @@
           "hint": "The addresses come from your social accounts in Store settings.",
           "text": "As text",
           "icons": "As icons",
-          "hidden": "Hidden"
+          "hidden": "Hidden",
+          "bare": "Bare icons"
         },
         "payment_badges": {
           "label": "Payment badges",
@@ -11638,7 +11738,8 @@
           "term": "payment marks",
           "hint": "On the dark background the logos always stand on white cards; card networks want their logos on a light field.",
           "card": "On cards",
-          "plain": "Plain"
+          "plain": "Plain",
+          "muted": "Grey, quiet"
         },
         "news_place": {
           "label": "Newsletter place",
@@ -11659,12 +11760,26 @@
           "spread": "Spread",
           "center": "Centred"
         },
+        "wordmark": {
+          "label": "Large wordmark",
+          "term": "wordmark",
+          "hint": "The shop's name very large and faint under the bottom line, cut by the footer's edge.",
+          "off": "Off",
+          "on": "On"
+        },
         "bottom_badges": {
           "label": "Payment logos in the bottom line",
           "term": "payment badges",
           "hint": "The fixed line at the very bottom shows the payment methods' logos, from the \"Payment logos\" choice above."
         },
-        "freeRowsNote": "Edit the rows and blocks in the page list on the left, under Footer. The legal strip and the bottom line always stay at the bottom."
+        "freeRowsNote": "Edit the rows and blocks in the page list on the left, under Footer. The legal strip and the bottom line always stay at the bottom.",
+        "legal_place": {
+          "label": "Legal links' place",
+          "term": "legal links",
+          "hint": "In the bottom line: the legal texts and cookie choices beside the copyright, no strip of their own.",
+          "strip": "Own strip",
+          "bottom_line": "In the bottom line"
+        }
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
@@ -11893,6 +12008,13 @@
           "off": "Off",
           "on": "On",
           "hint": "Scrolls by dragging with a mouse on a wide screen."
+        },
+        "focus": {
+          "label": "Larger centre card",
+          "term": "center focus",
+          "off": "Off",
+          "on": "On",
+          "hint": "On a wide screen the card in the middle stands full size and the cards towards the edges shrink; scrolling moves the large one. Looks best with an odd number of cards (3 or 5)."
         },
         "play_button": {
           "label": "Pause button",
@@ -12207,6 +12329,24 @@
             "all": "All",
             "mobile": "Phone",
             "desktop": "Wide screen"
+          },
+          "style": {
+            "label": "Text style",
+            "term": "text style",
+            "plain": "Plain",
+            "hand": "Handwriting"
+          },
+          "logo_size": {
+            "label": "Logo size",
+            "term": "logo size",
+            "medium": "Medium",
+            "large": "Large"
+          },
+          "icon_style": {
+            "label": "Icons",
+            "term": "icon style",
+            "boxed": "In round boxes",
+            "inline": "Small, in the line"
           }
         },
         "source": {
@@ -12306,6 +12446,17 @@
           "term": "icon",
           "hint": "The icon you pick above each figure; a figure with none shows no icon."
         },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Why us). Empty, none is drawn.",
+        "note": "Hand note",
+        "noteHint": "A short tilted handwritten note beside the heading, a brush stroke under it. Empty, none is drawn.",
+        "item_style": {
+          "label": "Item look",
+          "term": "style",
+          "hint": "A large figure, or an icon on a light round ground with a bold title and one line.",
+          "figure": "Large figure",
+          "feature": "Icon item"
+        },
         "arrangement": {
           "label": "Arrangement",
           "term": "arrangement",
@@ -12343,6 +12494,13 @@
           "hint": "How the number before each step is written.",
           "padded": "01, 02",
           "plain": "1, 2"
+        },
+        "connector": {
+          "label": "Connecting line",
+          "term": "connector",
+          "hint": "A dotted line from each number to the next when the steps stand side by side (on a wide screen). Not drawn one under another nor on a phone.",
+          "off": "None",
+          "dotted": "Dotted"
         }
       },
       "departures": {
@@ -12363,6 +12521,16 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        }
+      },
+      "reviewsCard": {
+        "productImage": {
+          "label": "Product picture",
+          "term": "product_image",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one).",
+          "none": "None",
+          "thumb": "Small",
+          "cover": "Cover"
         }
       },
       "searchBox": {
@@ -12403,6 +12571,12 @@
           "term": "accent",
           "placeholder": "E.g. Find your escape.",
           "hint": "A second line under the heading, in your main colour. Left empty, it is not drawn."
+        },
+        "after": {
+          "label": "Last line",
+          "term": "last line",
+          "placeholder": "E.g. Discover beyond the ordinary.",
+          "hint": "A line after the accent line, in the heading's own colour. With the font mix on, the accent ends the first line and this is the second. Leave it empty to draw none."
         },
         "note": {
           "label": "Note",
@@ -12473,7 +12647,8 @@
           "hint": "The dark veil over the image, so the text reads on any picture.",
           "light": "Light",
           "strong": "Strong",
-          "side": "From the side"
+          "side": "From the side",
+          "faint": "Faint"
         },
         "edge": {
           "label": "Image edge",
@@ -12537,6 +12712,20 @@
           "hint": "The note over the heading, or in the opening's top right corner with a brush stroke under it (1024 px and up; over the heading on a phone).",
           "heading": "Over the heading",
           "corner": "Top right corner"
+        },
+        "title_mix": {
+          "label": "Heading font mix",
+          "term": "font mix",
+          "hint": "The heading's second part follows on the same line in an italic serif; the rest is drawn light. Choose the font in Theme settings › Fonts › Accent font.",
+          "none": "One font",
+          "serif_accent": "Accent in italic serif"
+        },
+        "words_place": {
+          "label": "Words layout",
+          "term": "layout",
+          "hint": "The words stand together, or the heading at the cover's top and the text and button at its foot, the picture showing between.",
+          "together": "Together",
+          "split": "Heading top, button bottom"
         }
       },
       "trustCard": {
@@ -12631,10 +12820,32 @@
           "hint": "On a narrow screen the photos slide sideways or stack.",
           "scroll": "Slide sideways",
           "stack": "Stacked"
+        },
+        "eyebrow": "Line above",
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty, none is drawn.",
+        "more": "See all link",
+        "moreHint": "A link with an arrow beside the heading (e.g. All routes). Empty, none is drawn.",
+        "subtitle": "Photo {{number}} small line",
+        "subtitleHint": "A small single line under the name on the card (e.g. Mountain • Adventure).",
+        "card": {
+          "label": "Card look",
+          "term": "card",
+          "hint": "A name plate on the photo, or a white card with the name, a small line and an arrow under it.",
+          "over": "Plate on the photo",
+          "below": "White card"
+        },
+        "height": {
+          "label": "Photo height",
+          "term": "height",
+          "hint": "Landscape photos, or taller portrait ones.",
+          "standard": "Standard",
+          "tall": "Tall"
         }
       },
       "program": {
-        "note": "The steps are written in each product’s own Program card. A product without a program does not show this section."
+        "note": "The steps are written in each product’s own Program card. A product without a program does not show this section.",
+        "inTabs": "Show in the description tabs",
+        "inTabsHint": "On: the program is the last tab beside Description and Product details on the product page, not drawn as its own section. Off: its own section below the description."
       },
       "productMain": {
         "image_ratio": {

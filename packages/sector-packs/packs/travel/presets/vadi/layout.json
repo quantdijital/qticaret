@@ -8,7 +8,8 @@
       "ends_at": null,
       "variant": "inline",
       "sticky": true,
-      "menu_images": "off",
+      "menu_images": "submenus",
+      "submenu_style": "mega",
       "search_style": "icon",
       "tool_labels": "hide"
     }
@@ -213,10 +214,10 @@
           "icon": "calendar"
         }
       ],
-      "dividers": "off",
+      "dividers": "on",
       "icons": "on",
-      "arrangement": "row",
-      "social": "on"
+      "arrangement": "stacked",
+      "social": "off"
     }
   ],
   "footer": [
@@ -266,6 +267,7 @@
     {
       "id": "vadiprogram",
       "type": "program",
+      "place": "tab",
       "visible": true,
       "starts_at": null,
       "ends_at": null,

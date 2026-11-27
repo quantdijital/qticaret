@@ -1,4 +1,4 @@
-import type { ListingTextSettings, ListingViewMode } from "@qticaret/types"
+import type { ListingCrumbsPlace, ListingTextSettings, ListingViewMode } from "@qticaret/types"
 import type { SearchFormView } from "./search-form-views"
 import type { CategoryCardView } from "./card-views"
 import type { HomeSectionView } from "./content-views"
@@ -131,6 +131,8 @@ export interface ListingPageView {
   total: number
   /** The count in words where "N ürün" is not the word (a search's "N sonuç"); absent: "N ürün". */
   countLabel?: string
+  /** The filter sheet's button where "N ürünü göster" is not the word ("N tur göster"); absent: it. */
+  showResultsLabel?: string
   pagination: PaginationView
   sort: SortOptionView[]
   filters: FilterGroupView[]
@@ -156,6 +158,12 @@ export interface ListingPageView {
    * Absent: today's grid.
    */
   layout?: ListingViewMode
+  /**
+   * Where the trail stands (`StoreThemeSettings.listing_page.crumbs_place`):
+   * on the title's line, flush right, from 1024 px (`beside`); absent or
+   * `above`: on its own line above the title, as today.
+   */
+  crumbsPlace?: ListingCrumbsPlace
   /** The shopper's grid/list switch beside the sort; none: no switch (today's page). */
   viewSwitch?: ListingViewSwitchView | null
   /**

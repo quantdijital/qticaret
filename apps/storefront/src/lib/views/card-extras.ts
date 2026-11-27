@@ -224,11 +224,13 @@ export function customerPhotos(
 /**
  * The providers' own marks the storefront serves from `public/marks/`
  * (their sources in its README), by the backend's key, with each file's
- * size. A way to pay with no company's mark (a bank transfer, cash at the
- * door) has none: the theme draws its name.
+ * size. A bank transfer has our own drawn mark (owner 2026-11-27: it stood
+ * out among the networks' cards); cash at the door and instalments have
+ * none: the theme draws their name.
  */
 const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height: number }>> = {
   visa: { file: "visa.png", width: 208, height: 68 },
+  bank_transfer: { file: "havale.svg", width: 268, height: 40 },
   mastercard: { file: "mastercard.svg", width: 41, height: 26 },
   troy: { file: "troy.svg", width: 298, height: 137 },
   amex: { file: "amex.svg", width: 24, height: 24 },

@@ -1,0 +1,25 @@
+/*
+ * The full image opening's mixed heading (`title_mix: serif_accent`,
+ * sections/HeroFull.tsx `data-title-mix`): the heading set light in its own
+ * face, a step smaller and tighter than the bold opening heading, and its
+ * second part (`.gf-cover-accent`) inline after it in the shop's accent face
+ * (`--font-accent`, a serif chosen in the theme's fonts), italic and heavier,
+ * in the heading's own ink. With no accent face, the page's heading face in
+ * italic. Every rule sits under the setting's own mark: no other opening
+ * changes. Unlayered: the heading's width is a utility on it.
+ */
+.gf-cover[data-title-mix="serif_accent"] .gf-cover-title {
+  max-width: 24ch;
+  font-size: clamp(2.25rem, 2.4vw + 1.25rem, 3.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+.gf-cover[data-title-mix="serif_accent"] .gf-cover-accent {
+  font-family: var(--font-accent, var(--font-heading));
+  font-style: italic;
+  /* The faces ship upright only: the theme turns synthesis off (`base.css`), the accent takes it back */
+  font-synthesis: style;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}

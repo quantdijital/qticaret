@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import {
   HEADER_MENU_IMAGES,
   HEADER_SEARCH_STYLES,
+  HEADER_SUBMENU_STYLES,
   HEADER_TOOL_LABELS,
   HEADER_TOOLS_STYLES,
 } from "@qticaret/types"
@@ -72,6 +73,22 @@ export function HeaderGroups({
       nameOf={(step) => t(`${H}.menu_images.${step}`)}
       onChange={(step) => {
         onChange({ ...section, menu_images: step })
+      }}
+    />
+  )
+  // How a menu item's children open, every variant's: the dropdown list or the wide panel
+  const submenuStyle = (
+    <StepChoice
+      id={FIELD_IDS.submenuStyle(section.id)}
+      label={t(`${H}.submenu_style.label`)}
+      term={t(`${H}.submenu_style.term`)}
+      hint={t(`${H}.submenu_style.hint`)}
+      steps={HEADER_SUBMENU_STYLES}
+      value={section.submenu_style ?? "list"}
+      fallback="list"
+      nameOf={(step) => t(`${H}.submenu_style.${step}`)}
+      onChange={(step) => {
+        onChange({ ...section, submenu_style: step })
       }}
     />
   )
@@ -160,11 +177,15 @@ export function HeaderGroups({
           after: action ? (
             <>
               {menuImages}
+              {submenuStyle}
               {action}
               {toolsStyle}
             </>
           ) : (
-            menuImages
+            <>
+              {menuImages}
+              {submenuStyle}
+            </>
           ),
         })
       )}
@@ -180,15 +201,28 @@ export function HeaderGroups({
       {toolLabels ? group("icons", toolLabels) : null}
       {group(
         "look",
-        <SwitchRow
-          id={FIELD_IDS.sticky(section.id)}
-          label={t(`${H}.sticky`)}
-          hint={t(`${H}.stickyHint`)}
-          checked={section.sticky}
-          onChange={(next) => {
-            onChange({ ...section, sticky: next })
-          }}
-        />
+        <>
+          <SwitchRow
+            id={FIELD_IDS.sticky(section.id)}
+            label={t(`${H}.sticky`)}
+            hint={t(`${H}.stickyHint`)}
+            checked={section.sticky}
+            onChange={(next) => {
+              onChange({ ...section, sticky: next })
+            }}
+          />
+          {section.variant === "inline" && (
+            <SwitchRow
+              id={FIELD_IDS.overCover(section.id)}
+              label={t(`${H}.overCover`)}
+              hint={t(`${H}.overCoverHint`)}
+              checked={section.over_cover === true}
+              onChange={(next) => {
+                onChange({ ...section, over_cover: next })
+              }}
+            />
+          )}
+        </>
       )}
     </>
   )

@@ -13,6 +13,7 @@ import { ChoiceSelect, SwitchRow } from "./theme-fields"
 import { THEME_FIELD, THEME_GROUP_TITLES } from "./forms/theme-registry"
 import type { ThemeRegistryField } from "./forms/theme-registry"
 import { whereAttributes } from "./forms/theme-registry-search"
+import { SearchTabsField } from "./theme-search-tabs-field"
 
 const C = "storefront.editor.theme"
 const S = `${C}.searchForm`
@@ -49,6 +50,7 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
   // As typed (its spaces too); the saved one is trimmed
   const rawHint = theme.search_form.placeholder ?? ""
   const styleField = THEME_FIELD["search_form.category_style"]
+  const tabsField = THEME_FIELD["search_form.tabs"]
   // A key saved before its attribute went keeps its place, by its own name
   const keys = [
     NONE,
@@ -63,6 +65,7 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
       | "flexible_month"
       | "date_words"
       | "boxed_fields"
+      | "tab_all"
   ) => {
     const field = THEME_FIELD[`search_form.${name}`]
     return shown(field) ? (
@@ -131,6 +134,17 @@ export function SearchFormGroup({ theme, reveal, onChange }: SearchFormGroupProp
           hint={t(`${S}.category_style.hint`)}
         />
       )}
+      {shown(tabsField) && (
+        <SearchTabsField
+          id={tabsField.target}
+          label={t(tabsField.label)}
+          tabs={form.tabs}
+          onChange={(tabs) => {
+            set({ tabs })
+          }}
+        />
+      )}
+      {toggle("tab_all")}
       {toggle("show_dates")}
       {toggle("flexible_month")}
       {toggle("date_words")}

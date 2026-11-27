@@ -7,6 +7,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderSubmenuStyle,
   HeaderToolLabels,
   HeaderToolsStyle,
   HeaderSearchWidth,
@@ -47,10 +48,23 @@ export interface HeaderBarView {
    * drops it down). Absent: `field`.
    */
   searchStyle?: HeaderSearchStyle
+  /**
+   * How a menu item's children open from 1024 px (adr/0049 Ek 2026-11-26):
+   * `list` the dropdown under the item (the drawing from before); `mega` a
+   * wide panel, each child a column with its picture and its own children.
+   * Absent: `list`.
+   */
+  submenuStyle?: HeaderSubmenuStyle
   /** The one-row header's tools with words (`show`) or as round icons only (`hide`). Absent: `show`. */
   toolLabels?: HeaderToolLabels
   /** The one-row header's tools: `plain` small icons and the action pill; absent: the round tools. */
   toolsStyle?: HeaderToolsStyle
+  /**
+   * The one-row header over the page's first section when that is a full
+   * photograph opening: see-through, its words light, until the page
+   * scrolls; absent: on its own ground, as before.
+   */
+  overCover?: true
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**
@@ -154,6 +168,8 @@ export interface FooterColumnsView {
   brandContact?: "hide"
   /** The bottom line's words in the middle between two rules (absent: spread). */
   bottomAlign?: "center"
+  /** The shop's name very large and faint under the bottom line (absent: none). */
+  wordmark?: "on"
 }
 
 export interface BackToTopView {

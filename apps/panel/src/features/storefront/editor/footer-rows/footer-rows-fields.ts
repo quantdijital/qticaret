@@ -1,8 +1,11 @@
 import {
+  FOOTER_CONTACT_ICON_STYLES,
   FOOTER_IMAGE_WIDTHS,
+  FOOTER_LOGO_SIZES,
   FOOTER_NEWSLETTER_VARIANTS,
   FOOTER_ROW_LAYOUTS,
   FOOTER_ROW_SETTINGS,
+  FOOTER_TEXT_STYLES,
   FOOTER_TRUST_LAYOUTS,
   SECTION_DEVICES,
 } from "@qticaret/types"
@@ -48,11 +51,11 @@ export const ROW_GROUPS = {
 
 /** Each block type's own fields, in its form's order. */
 export const BLOCK_FIELDS = {
-  text: ["title", "body"],
+  text: ["title", "body", "style"],
   menu: ["slot", "title", "collapse_phone"],
-  brand: ["logo", "about", "address", "social"],
+  brand: ["logo", "about", "address", "social", "logo_size"],
   newsletter: ["title", "description", "text", "variant"],
-  contact: ["title", "address", "phone", "whatsapp", "email", "hours"],
+  contact: ["title", "address", "phone", "whatsapp", "email", "hours", "icon_style"],
   social: ["title"],
   payments: ["title", "carriers"],
   image: ["image", "link", "width"],
@@ -71,6 +74,9 @@ const STYLE_GROUPS: Partial<Record<BlockField, FieldGroupName>> = {
   variant: "variant",
   width: "appearance",
   layout: "appearance",
+  style: "appearance",
+  logo_size: "appearance",
+  icon_style: "appearance",
   collapse_phone: "phone",
   visible: "visibility",
   device: "visibility",
@@ -101,6 +107,9 @@ function blockOptions(field: BlockField): readonly string[] {
     variant: FOOTER_NEWSLETTER_VARIANTS,
     width: FOOTER_IMAGE_WIDTHS,
     layout: FOOTER_TRUST_LAYOUTS,
+    style: FOOTER_TEXT_STYLES,
+    logo_size: FOOTER_LOGO_SIZES,
+    icon_style: FOOTER_CONTACT_ICON_STYLES,
     device: SECTION_DEVICES,
   }
   return (steps[field] ?? []).map((step) => `${FR}.fields.${field}.${step}`)

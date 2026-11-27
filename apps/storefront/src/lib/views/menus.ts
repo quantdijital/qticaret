@@ -4,6 +4,7 @@ import type {
   FooterGroupView,
   LinkView,
   NavCategoryView,
+  NavChildView,
   Translate,
 } from "@qticaret/ui"
 import { categoryCard } from "./card-extras"
@@ -68,7 +69,8 @@ const menuAt = (menus: readonly StoreMenu[], location: StoreMenu["location"]) =>
 export function mainMenu(
   menus: readonly StoreMenu[],
   t: Translate,
-  pictures: ReadonlyMap<string, StoreImage> = new Map()
+  pictures: ReadonlyMap<string, StoreImage> = new Map(),
+  subcategories: (categoryId: string) => LinkView[] = () => []
 ): NavCategoryView[] | null {
   const main = menuAt(menus, "main")
   if (!main || main.items.length === 0) {
@@ -79,8 +81,20 @@ export function mainMenu(
     const picture = link.kind === "category" && link.target ? pictures.get(link.target) : null
     return view ? [categoryCard(view, picture)] : []
   }
+  // A child's own links for the wide panel: its menu children, else its category's children
+  const child = (link: StoreMenuLink): NavChildView[] =>
+    card(link).map((view) => {
+      const own = menuLinks(link.children, t)
+      const links =
+        own.length > 0
+          ? own
+          : link.kind === "category" && link.target
+            ? subcategories(link.target)
+            : []
+      return links.length > 0 ? { ...view, links } : view
+    })
   return main.items.flatMap((item) =>
-    card(item).map((view) => ({ ...view, children: item.children.flatMap(card) }))
+    card(item).map((view) => ({ ...view, children: item.children.flatMap(child) }))
   )
 }
 

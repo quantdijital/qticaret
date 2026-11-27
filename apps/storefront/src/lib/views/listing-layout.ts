@@ -70,6 +70,26 @@ export function trailOf(crumbs: BreadcrumbView[], settings: ListingPageSettings)
     : crumbs
 }
 
+/**
+ * The count in the shop's own word ("24 tur") and the filter sheet's
+ * button with it ("24 tur göster"); none while the shop writes no word,
+ * the page then saying "ürün" as it did.
+ */
+export function countWordsOf(
+  total: number,
+  settings: ListingPageSettings,
+  t: Translate
+): { countLabel: string; showResultsLabel: string } | Record<string, never> {
+  const word = settings.count_word
+  if (!word) {
+    return {}
+  }
+  return {
+    countLabel: t("listing.count_word", { count: total, word }),
+    showResultsLabel: t("listing.show_results_word", { count: total, word }),
+  }
+}
+
 /** The state with these dates (none: no dates), from the first page. */
 function withDated(state: ListingState, dated: DatedState): ListingState {
   const next: ListingState = {

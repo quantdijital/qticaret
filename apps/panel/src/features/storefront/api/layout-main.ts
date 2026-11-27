@@ -6,6 +6,7 @@ import type {
   HeaderMenuGround,
   HeaderMenuImages,
   HeaderSearchStyle,
+  HeaderSubmenuStyle,
   HeaderToolLabels,
   HeaderToolsStyle,
   HeaderSearchWidth,
@@ -55,6 +56,11 @@ interface HeaderBarCommon extends MainBase {
   tool_labels?: HeaderToolLabels
   /** The one-row header's tools (`inline` only); absent: `round`. */
   tools_style?: HeaderToolsStyle
+  /** The one-row header over a full photograph opening; absent: on its own ground. */
+  over_cover?: boolean
+
+  /** How a menu item's children open, on every variant (adr/0049 Ek 2026-11-26); absent: `list`. */
+  submenu_style?: HeaderSubmenuStyle
   /**
    * The header's action button, on every variant (the catalog header's
    * highlighted link): its words and where it goes; null or absent: none.
@@ -108,6 +114,7 @@ export interface FooterColumnsFields {
   news_place: FooterColumnsStep<"news_place">
   brand_contact: FooterColumnsStep<"brand_contact">
   bottom_align: FooterColumnsStep<"bottom_align">
+  wordmark: FooterColumnsStep<"wordmark">
 }
 
 export type FooterColumnsSection = FooterBarCommon & {

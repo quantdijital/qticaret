@@ -24,9 +24,11 @@ export function FooterSocial({
   if (profiles.length === 0 || style === "hidden") {
     return null
   }
-  const icons = style === "icons"
+  // `bare`: the glyphs alone, no ring or field (the icons' room to tap kept)
+  const bare = style === "bare"
+  const icons = style === "icons" || bare
   return (
-    <ul aria-label={label} className="flex flex-wrap gap-2">
+    <ul aria-label={label} className={cn("flex flex-wrap", bare ? "-ml-3 gap-1" : "gap-2")}>
       {profiles.map((profile) => (
         <li key={profile.href}>
           <a
@@ -35,8 +37,13 @@ export function FooterSocial({
             target="_blank"
             aria-label={icons ? profile.label : undefined}
             className={cn(
-              FACE,
-              icons ? "size-11 justify-center rounded-pill text-text" : "px-4 text-sm font-semibold"
+              bare
+                ? "inline-flex size-11 items-center justify-center rounded-pill text-text no-underline hover:text-text-2"
+                : FACE,
+              !bare &&
+                (icons
+                  ? "size-11 justify-center rounded-pill text-text"
+                  : "px-4 text-sm font-semibold")
             )}
           >
             {icons ? (

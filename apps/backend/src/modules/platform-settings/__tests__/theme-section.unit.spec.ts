@@ -44,6 +44,8 @@ describe("theme section", () => {
         // adr/0049 Ek 2026-11-14 §3.3: today's card; the framed card's switches for when it is chosen
         variant: "standard",
         hover_image: true,
+        hover_cycle: false,
+        density: "regular",
         delivery_note: true,
         full_button: true,
         // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
@@ -65,6 +67,8 @@ describe("theme section", () => {
         arrow: false,
         duration_row: false,
         per_person: false,
+        meta_place: "below",
+        style: "plain",
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
@@ -73,7 +77,14 @@ describe("theme section", () => {
       // adr/0075: a listing page's own text at its foot, normal size, a reading measure, folded
       listing_text: { size: "md", align: "start", width: "narrow", collapse: true },
       // A listing page: a grid, no switch, the trail to the page itself (today's page)
-      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
+      listing_page: {
+        default_view: "grid",
+        view_switch: "hide",
+        breadcrumb_current: "show",
+        crumbs_place: "above",
+        count_word: null,
+        all_title: null,
+      },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {
         attribute_key: null,
@@ -84,6 +95,8 @@ describe("theme section", () => {
         date_words: false,
         boxed_fields: false,
         category_style: "select",
+        tabs: [],
+        tab_all: true,
         placeholder: null,
       },
       // adr/0067 §1: the style kit at today's drawing
@@ -98,6 +111,7 @@ describe("theme section", () => {
       // adr/0067 Ek 2026-11-25: the page width and the accent words as before
       page_width: "standard",
       accent_ink: "auto",
+      section_title: "plain",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -319,7 +333,14 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       // and before the listing text (adr/0075): its defaults
       listing_text: LISTING_TEXT_DEFAULTS,
       // and before the listing page: today's page
-      listing_page: { default_view: "grid", view_switch: "hide", breadcrumb_current: "show" },
+      listing_page: {
+        default_view: "grid",
+        view_switch: "hide",
+        breadcrumb_current: "show",
+        crumbs_place: "above",
+        count_word: null,
+        all_title: null,
+      },
       // and before the search form (adr/0077): its defaults
       search_form: SEARCH_FORM_DEFAULTS,
     })
@@ -327,7 +348,14 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       ...stored,
       ...STYLE_KIT_DEFAULTS,
       listing_text: { ...LISTING_TEXT_DEFAULTS, size: "lg" },
-      listing_page: { default_view: "list", view_switch: "show", breadcrumb_current: "hide" },
+      listing_page: {
+        default_view: "list",
+        view_switch: "show",
+        breadcrumb_current: "hide",
+        crumbs_place: "above",
+        count_word: null,
+        all_title: null,
+      },
       search_form: { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" },
       section_spacing: "compact",
       surface_style: "lined",

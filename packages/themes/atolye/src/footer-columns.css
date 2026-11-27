@@ -185,11 +185,47 @@
   .gf-pay [data-mark="amex"] img {
     height: 1.5rem;
   }
+  /* The drawn transfer mark is a wide wordmark: lower, and given the room to read */
+  .gf-pay [data-mark="bank_transfer"] img {
+    max-width: 7rem;
+    height: 0.9375rem;
+  }
   .gf-pay [data-mark="troy"] img,
   .gf-pay [data-mark="paytr"] img,
   .gf-pay [data-mark="iyzico"] img {
     height: 1rem;
   }
+  /*
+   * On a dark part the marks stand on their white cards: a way to pay with
+   * no company's mark (a transfer, cash at the door) on the same white
+   * card, in dark ink, not a dark box among white ones (owner 2026-11-26)
+   */
+  .gf-footer-cols[data-ground="stage"] .gf-pay > li:not([data-logo]),
+  .gf-footer-rows :is(.gf-stage, .gf-frow[data-ground="primary"]) .gf-pay > li:not([data-logo]),
+  .gf-footer-rows .gf-frow[data-ground="stage"] .gf-pay > li:not([data-logo]) {
+    border-color: color-mix(in oklab, var(--color-rule) 70%, transparent);
+    background: #fff;
+    color: var(--color-stage);
+  }
+  /*
+   * `wordmark: on`: the shop's name under the bottom line, as wide as the
+   * container lets it, in the ground's text at a whisper, its foot cut by
+   * the footer's edge. Drawing only (aria-hidden), never selected.
+   */
+  .gf-footer-mark {
+    overflow: hidden;
+    height: clamp(3.5rem, 12vw, 11.5rem);
+    color: color-mix(in oklab, var(--color-text) 7%, transparent);
+    font-family: var(--font-heading);
+    font-size: clamp(5rem, 17vw, 16rem);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+  }
+
   /* Straight on a light ground: no card, the marks a little taller */
   .gf-footer-cols[data-badges="plain"]:not([data-ground="stage"]) .gf-pay > li[data-logo] {
     min-width: 0;

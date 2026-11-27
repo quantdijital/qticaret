@@ -17,6 +17,14 @@ import type { NewsletterVariant } from "./section-variants.js"
  */
 export const NEWSLETTER_LIMITS = { description: 240, note: 80 } as const
 
+/**
+ * The boxed bands' (`split`, `image_card`, `strip`) ground: the theme's pane
+ * (`plain`, as it was) or a light wash of the shop's main colour (`tint`).
+ * Drawn where the band is a box: on a page, or above the free rows footer.
+ */
+export const NEWSLETTER_TONES = ["plain", "tint"] as const
+export type NewsletterTone = (typeof NEWSLETTER_TONES)[number]
+
 /** The variants only the footer's box takes: a page's box has no footer column to sit in. */
 export const NEWSLETTER_FOOTER_ONLY = ["in_footer"] as const satisfies readonly NewsletterVariant[]
 
@@ -62,4 +70,6 @@ export interface StoreNewsletterSection {
    * above the footer. The other footers draw it inside them either way.
    */
   joined?: boolean
+  /** The boxed bands' ground; absent: `plain`. */
+  tone?: NewsletterTone
 }

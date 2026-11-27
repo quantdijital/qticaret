@@ -71,7 +71,16 @@ export interface LinkView {
  * both too, for the header's dropdown and the phone drawer's rows.
  */
 export interface NavCategoryView extends CategoryCardView {
-  children: CategoryCardView[]
+  children: NavChildView[]
+}
+
+/**
+ * A menu entry's child; its own links (a menu link's children, or a
+ * category's subcategories) are what the wide panel lists under it
+ * (`submenuStyle: mega`); the dropdown list and the sheet leave them unread.
+ */
+export interface NavChildView extends CategoryCardView {
+  links?: LinkView[]
 }
 
 /** A promise in the trust strip (D3): an icon name, a title and a line. */
@@ -173,6 +182,8 @@ export interface ShopView {
    * the first line alone.
    */
   announcementSettings?: AnnouncementSettings
+  /** The bar's small button beside its lines (the shop's link and words); absent: none. */
+  announcementLink?: LinkView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

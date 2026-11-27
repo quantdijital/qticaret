@@ -2,6 +2,7 @@ import { ArrowRight, Play } from "lucide-react"
 import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { HandNoteView, HeroFullView, TrustBadgeView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { BrushStroke } from "../parts/BrushStroke"
 import { HandNote } from "../parts/HandNote"
 import { TrustIcon } from "../parts/TrustIcon"
 import { HeroVideo } from "./HeroVideo"
@@ -134,23 +135,12 @@ export function HeroCornerNote({
         className={cn(
           "mx-auto -rotate-6 text-center leading-[1.05]",
           note.hand ? "text-3xl lg:text-3xl xl:text-4xl" : "text-xl lg:text-xl",
-          inked ? "text-text" : "text-stage-text"
+          inked
+            ? "text-text"
+            : "text-stage-text [text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_16px_rgb(0_0_0/0.6)]"
         )}
       />
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 120 14"
-        className={cn(
-          "mx-auto mt-1 h-3 w-28 -rotate-6",
-          inked ? "text-signal" : "text-signal-on-stage"
-        )}
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-      >
-        <path d="M4 10C30 5 64 3 116 4" strokeWidth="3.5" />
-        <path d="M14 12C44 8 74 7 104 8" strokeWidth="1.5" opacity="0.7" />
-      </svg>
+      <BrushStroke className={inked ? "text-signal" : "text-signal-on-stage"} />
     </div>
   )
 }

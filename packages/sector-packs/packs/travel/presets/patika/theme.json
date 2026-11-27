@@ -13,19 +13,23 @@
   },
   "radius": "gentle",
   "product_card": {
-    "ratio": "4:5",
+    "ratio": "4:3",
     "show_brand": false,
     "show_rating": true,
     "variant": "standard",
     "hover_image": true,
+    "hover_cycle": true,
+    "density": "compact",
     "delivery_note": false,
     "full_button": false,
     "no_reviews": "hide",
     "text_position": "below",
-    "rating_badge": true,
+    "rating_badge": false,
     "arrow": true,
     "duration_row": true,
-    "per_person": true
+    "per_person": true,
+    "meta_place": "over",
+    "style": "plain"
   },
   "header": {
     "layout": "left",
@@ -43,11 +47,25 @@
     "placeholder": "Nereye gitmek istersiniz?",
     "boxed_fields": true,
     "flexible_month": false,
-    "date_words": true
+    "date_words": true,
+    "tabs": [
+      { "handle": "yurt-ici-turlar", "icon": "mountain" },
+      { "handle": "yurt-disi-turlar", "icon": "plane" },
+      { "handle": "gemi-turlari", "icon": "compass" },
+      { "handle": "etkinlik-ve-atolyeler", "icon": "sparkles" }
+    ],
+    "tab_all": false
   },
-  "listing_page": { "default_view": "grid", "view_switch": "show", "breadcrumb_current": "hide" },
+  "listing_page": {
+    "default_view": "grid",
+    "view_switch": "show",
+    "breadcrumb_current": "hide",
+    "crumbs_place": "beside",
+    "count_word": "tur",
+    "all_title": "Tüm turlar"
+  },
   "menu_style": "plain",
   "chip_style": "lined",
-  "density": "balanced",
+  "density": "airy",
   "motion": "lively"
 }

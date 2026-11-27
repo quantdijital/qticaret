@@ -129,7 +129,7 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   // The full image's accent line, a line of its heading (adr/0077 §9), and its hand note
   if (
     parts.length === 1 &&
-    (first === "title_accent" || first === "note") &&
+    (first === "title_accent" || first === "title_after" || first === "note") &&
     section.variant === "full_image"
   ) {
     return content(PREVIEW_IDS.text(section.id, first))

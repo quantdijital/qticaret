@@ -48,6 +48,7 @@ export const FOOTER_COLUMNS_FIELDS = [
   "news_place",
   "brand_contact",
   "bottom_align",
+  "wordmark",
 ] as const
 export type FooterColumnsField = (typeof FOOTER_COLUMNS_FIELDS)[number]
 const FOOTER_COLUMNS_GROUPS = {
@@ -58,15 +59,17 @@ const FOOTER_COLUMNS_GROUPS = {
   news_place: "appearance",
   brand_contact: "appearance",
   bottom_align: "appearance",
+  wordmark: "appearance",
 } as const satisfies Record<FooterColumnsField, string>
 
 /** The free rows footer's own (adr/0070): the marks in the bottom line, its look as the brand columns'. */
-export const FOOTER_ROWS_OWN = ["bottom_badges", "ground", "badge_style"] as const
+export const FOOTER_ROWS_OWN = ["bottom_badges", "ground", "badge_style", "legal_place"] as const
 export type FooterRowsOwnField = (typeof FOOTER_ROWS_OWN)[number]
 const FOOTER_ROWS_OWN_GROUPS = {
   bottom_badges: "content",
   ground: "appearance",
   badge_style: "appearance",
+  legal_place: "appearance",
 } as const satisfies Record<FooterRowsOwnField, string>
 
 export type FooterField = (typeof FOOTER_FIELDS)[number] | FooterColumnsField | FooterRowsOwnField

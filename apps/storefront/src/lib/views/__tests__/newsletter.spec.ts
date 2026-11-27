@@ -17,6 +17,7 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
       description: null,
       note: null,
       image: null,
+      tone: "plain",
     })
   })
 
@@ -26,6 +27,7 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
       description: t("newsletter.description"),
       note: t("newsletter.note"),
       image: null,
+      tone: "plain",
     })
     expect(
       newsletterLookOf(
@@ -43,6 +45,17 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
     )
     expect(newsletterLookOf({ variant: "split", image: PICTURE }, t, "page").image).toBeNull()
     expect(newsletterLookOf({ variant: "strip", note: "Ayda bir" }, t, "page").note).toBeNull()
+  })
+
+  it("washes a band in the main colour on `tint` only, never the standard or column box", () => {
+    expect(newsletterLookOf({ variant: "strip", tone: "tint" }, t, "footer").tone).toBe("tint")
+    expect(newsletterLookOf({ variant: "split", tone: "tint" }, t, "page").tone).toBe("tint")
+    expect(newsletterLookOf({ variant: "strip" }, t, "page").tone).toBe("plain")
+    expect(newsletterLookOf({ tone: "tint" }, t, "page").tone).toBe("plain")
+    expect(newsletterLookOf({ variant: "in_footer", tone: "tint" }, t, "footer").tone).toBe("plain")
+    expect(newsletterLookOf({ variant: "strip", tone: "neon" as never }, t, "page").tone).toBe(
+      "plain"
+    )
   })
 
   it("reads the footer column variant as today's on a page, as itself in the footer", () => {

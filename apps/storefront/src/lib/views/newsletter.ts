@@ -14,7 +14,10 @@ import { layoutImage } from "./layout"
  * column variant (a newer or forged answer reads as `standard`).
  */
 export function newsletterLookOf(
-  section: Pick<StoreNewsletterSection, "variant" | "description" | "note" | "show_note" | "image">,
+  section: Pick<
+    StoreNewsletterSection,
+    "variant" | "description" | "note" | "show_note" | "image" | "tone"
+  >,
   t: Translate,
   place: "page" | "footer"
 ): NewsletterLookView {
@@ -30,5 +33,10 @@ export function newsletterLookOf(
         : null,
     // Beside the heading, which names the box: the picture's own alt text, else none
     image: variant === "image_card" && section.image ? layoutImage(section.image, "") : null,
+    // The bands' wash of the main colour; a standard or column box has none
+    tone:
+      section.tone === "tint" && variant !== "standard" && variant !== "in_footer"
+        ? "tint"
+        : "plain",
   }
 }

@@ -13,6 +13,8 @@ describe("search form settings", () => {
       date_words: false,
       boxed_fields: false,
       category_style: "select",
+      tabs: [],
+      tab_all: true,
       placeholder: null,
     })
     expect(SEARCH_FORM_CATEGORY_STYLES).toEqual(["select", "tabs"])
@@ -30,6 +32,23 @@ describe("search form settings", () => {
     ).toEqual(SEARCH_FORM_DEFAULTS)
   })
 
+  it("keeps each well-formed tab once, a malformed icon none, at most eight", () => {
+    const tabs = [
+      { handle: "yurt-ici", icon: "map_pin" },
+      { handle: "yurt-ici", icon: "plane" },
+      { handle: "Gemi Turlari", icon: "palm" },
+      { handle: "gemi", icon: "Ship!" },
+      "atolye",
+      ...Array.from({ length: 9 }, (_, at) => ({ handle: `k${String(at)}` })),
+    ]
+    expect(searchFormOf({ tabs }).tabs).toEqual([
+      { handle: "yurt-ici", icon: "map_pin" },
+      { handle: "gemi", icon: null },
+      ...Array.from({ length: 6 }, (_, at) => ({ handle: `k${String(at)}`, icon: null })),
+    ])
+    expect(searchFormOf({ tabs: "gemi" }).tabs).toEqual([])
+  })
+
   it("keeps the shop's choices", () => {
     expect(
       searchFormOf({
@@ -41,6 +60,8 @@ describe("search form settings", () => {
         date_words: true,
         boxed_fields: true,
         category_style: "tabs",
+        tabs: [{ handle: "gemi-turlari", icon: "palm" }],
+        tab_all: false,
         placeholder: "  Nereye gitmek istersiniz?  ",
       })
     ).toEqual({
@@ -52,6 +73,8 @@ describe("search form settings", () => {
       date_words: true,
       boxed_fields: true,
       category_style: "tabs",
+      tabs: [{ handle: "gemi-turlari", icon: "palm" }],
+      tab_all: false,
       placeholder: "Nereye gitmek istersiniz?",
     })
   })

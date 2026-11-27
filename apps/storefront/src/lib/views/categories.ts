@@ -1,4 +1,10 @@
-import type { CategoryCardView, CategoryTreeView, NavCategoryView } from "@qticaret/ui"
+import type {
+  CategoryCardView,
+  CategoryTreeView,
+  LinkView,
+  NavCategoryView,
+  NavChildView,
+} from "@qticaret/ui"
 import type { StoreCategory, StoreImage } from "@qticaret/types"
 import { categoryCard } from "./card-extras"
 
@@ -29,7 +35,21 @@ type Pictures = ReadonlyMap<string, StoreImage>
 
 const NO_PICTURES: Pictures = new Map()
 
-/** The menu: top categories and their children, with their pictures, those with a live path only. */
+/** A category's children as links, in the shop's order, those with a live path only (the wide panel's). */
+export const subcategoryLinks = (
+  categories: readonly StoreCategory[],
+  paths: Readonly<Record<string, string>>,
+  parentId: string
+): LinkView[] =>
+  childrenOf(categories, parentId).flatMap((category) => {
+    const path = paths[category.id]
+    return path ? [{ label: category.name, path }] : []
+  })
+
+/**
+ * The menu: top categories and their children, with their pictures, those
+ * with a live path only; a child's own children as its links (the wide panel's).
+ */
 export function navigation(
   categories: readonly StoreCategory[],
   paths: Record<string, string>,
@@ -40,11 +60,14 @@ export function navigation(
     if (!path) {
       return []
     }
-    const children = childrenOf(categories, top.id).flatMap((child): CategoryCardView[] => {
+    const children = childrenOf(categories, top.id).flatMap((child): NavChildView[] => {
       const childPath = paths[child.id]
-      return childPath
-        ? [categoryCard({ label: child.name, path: childPath }, pictures.get(child.id))]
-        : []
+      if (!childPath) {
+        return []
+      }
+      const card = categoryCard({ label: child.name, path: childPath }, pictures.get(child.id))
+      const links = subcategoryLinks(categories, paths, child.id)
+      return [links.length > 0 ? { ...card, links } : card]
     })
     return [{ ...categoryCard({ label: top.name, path }, pictures.get(top.id)), children }]
   })

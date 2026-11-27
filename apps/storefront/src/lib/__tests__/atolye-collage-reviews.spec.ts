@@ -31,7 +31,7 @@ const collage = (over: Partial<StorePhotoCollageSection> = {}): StorePhotoCollag
   ...over,
 })
 
-const review = (n: number, more: Partial<ReviewView> = {}) => ({
+const review = (n: number, more: Partial<ReviewView> & { product?: unknown } = {}) => ({
   rating: 5 - (n % 2),
   title: null,
   body: `Yorum ${String(n)}: elinize iyi oturuyor, kılıfı biraz sıkı.`,
@@ -125,6 +125,33 @@ describe("the photo collage in Atölye", () => {
     expect(html).toContain("Her bıçak elde biter.")
     expect(html).toMatch(/<figcaption[^>]*>Tezgâh<\/figcaption>/)
     expect(count(html, "<a href=")).toBeGreaterThan(0)
+    // The plate as before: no white card, no line over the heading
+    expect(html).not.toContain("shadow-float")
+    expect(html).not.toContain("tracking-[0.18em]")
+  })
+
+  it("draws the white card with its small line and arrow, the eyebrow and the list's link", () => {
+    const shop = { label: null, kind: "system" as const, target: "shop" as const, path: null }
+    const html = draw({
+      title: "İlham veren rotalar",
+      card: "below",
+      layout: "even",
+      eyebrow: "Popüler rotalar",
+      more: { ...shop, label: "Tüm rotalar" },
+      items: [
+        { image: image(1), caption: "Kapadokya", subtitle: "Vadiler • Balon", link: shop },
+        { image: image(2), caption: "Karadeniz", link: null },
+        { image: image(3), caption: null, link: null },
+      ],
+    })
+    expect(html).toMatch(/<p[^>]*uppercase[^>]*>Popüler rotalar<\/p><h2[^>]*>İlham veren rotalar/)
+    expect(html).toMatch(/<a href="[^"]+" class="gf-link[^"]*">Tüm rotalar<svg/)
+    expect(count(html, "shadow-float")).toBe(3)
+    expect(html).toContain("Vadiler • Balon</span>")
+    expect(html).not.toContain("<figcaption")
+    // The linked card alone shows the arrow
+    expect(count(html, "rounded-full border border-rule")).toBe(1)
+    expect(html).not.toContain("aspect-[4/5]")
   })
 })
 
@@ -164,5 +191,59 @@ describe("the reviews in Atölye (adr/0077 §10)", () => {
     expect(html).toContain('alt="Müşteri 1 fotoğrafı"')
     expect(html).toContain(`aria-label="${t("scroller.next")}"`)
     expect(html).toContain(`aria-label="${t("scroller.previous")}"`)
+  })
+
+  describe("the cards' product picture (adr/0077 §10 Ek)", () => {
+    const picture = (n: number) => ({
+      ...image(n),
+      src: `/u${String(n)}.jpg`,
+      sources: { avif: null, webp: null },
+      alt: `Tur ${String(n)} görseli`,
+    })
+    const about = (n: number, withImage = true) => ({
+      label: `Kapadokya turu ${String(n)}`,
+      path: `/urun/tur-${String(n)}`,
+      ...(withImage ? { image: picture(n) } : {}),
+    })
+    const carousel = (productImage?: string) =>
+      quotes({
+        variant: "carousel",
+        scroller: SCROLLER_DEFAULTS,
+        ...(productImage ? { product_image: productImage } : {}),
+        reviews: [
+          review(1, { product: about(1) }),
+          review(2, { product: about(2, false) }),
+          review(3),
+        ],
+      })
+
+    it("draws today's card while none is asked for", () => {
+      const html = home([carousel()])
+      expect(home([carousel("none")])).toBe(html)
+      expect(html).not.toContain('alt="Tur 1 görseli"')
+      expect(html).toContain(">Kapadokya turu 1</a>")
+    })
+
+    it("draws a cover across the card's top with the product's name on it, its link", () => {
+      const html = home([carousel("cover")])
+      expect(html).toContain('alt="Tur 1 görseli"')
+      expect(html).toContain(
+        'aria-label="Yorumlanan ürün: Kapadokya turu 1"'.replace(
+          "Yorumlanan ürün",
+          t("reviews.about")
+        )
+      )
+      expect(html).toContain('href="/urun/tur-1"')
+      // A product without a picture keeps its name as a link
+      expect(html).toContain(">Kapadokya turu 2</a>")
+      expect(count(html, "<blockquote")).toBe(3)
+    })
+
+    it("draws a small square picture beside the product's name at the card's foot", () => {
+      const html = home([carousel("thumb")])
+      expect(html).toContain('alt="Tur 1 görseli"')
+      expect(html).toContain("size-12 shrink-0")
+      expect(html).toContain('href="/urun/tur-2"')
+    })
   })
 })

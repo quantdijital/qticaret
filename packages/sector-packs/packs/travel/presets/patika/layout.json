@@ -6,13 +6,17 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "lines": ["Size özel tur planı için bize ulaşın"],
+      "lines": [
+        "2027 yaz kalkışları açıldı · Küçük gruplar, yerel rehberler, 14 güne kadar ücretsiz iptal"
+      ],
       "mode": "first",
       "interval": "slow",
       "pause_button": "always",
       "hover_pause": "on",
       "align": "center",
-      "size": "small"
+      "size": "small",
+      "tone": "primary",
+      "link": null
     },
     {
       "id": "mainheader",
@@ -22,7 +26,8 @@
       "ends_at": null,
       "variant": "inline",
       "sticky": true,
-      "menu_images": "off",
+      "menu_images": "submenus",
+      "submenu_style": "mega",
       "search_style": "icon",
       "highlight_link": {
         "$href": "/magaza",
@@ -39,7 +44,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "full_image",
-      "eyebrow": "Keşfet. Yaşa. Ait ol.",
+      "eyebrow": null,
       "heading": "Sınırların Ötesine",
       "title_accent": "Yolculuk",
       "text": "Anadolu'nun en nefes kesen rotalarına özenle hazırlanmış yolculuklar. Çünkü hayat keşfetmek için var.",
@@ -54,8 +59,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-gol-gezgin.webp",
-        "alt": "Sırt çantalı bir gezgin, ormanla çevrili gölün üstündeki kayada oturmuş manzaraya bakıyor"
+        "$image": "images/kapak-kapadokya-balon.webp",
+        "alt": "Kapadokya'da ufukta doğan güneş, peri bacalı vadiler üzerinde süzülen sıcak hava balonları"
       },
       "action": "both",
       "search_position": "overlap",
@@ -70,7 +75,7 @@
       "title_style": "stacked",
       "trust_place": "inside",
       "note": "Anı biriktir, eşya değil",
-      "note_place": "corner"
+      "note_place": "heading"
     },
     {
       "id": "rotakartlari",
@@ -78,8 +83,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Popüler rotalar",
-      "intro": "En çok seçilen beş bölge. Her birinde farklı süre ve zorlukta turlar var.",
+      "title": "İlham veren rotalar",
+      "intro": null,
+      "eyebrow": "Popüler rotalar",
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm rotalar"
+      },
       "items": [
         {
           "image": {
@@ -87,6 +97,7 @@
             "alt": "Gün batımında Kapadokya'nın peri bacaları ve vadileri"
           },
           "caption": "Kapadokya",
+          "subtitle": "Vadiler • Balon",
           "link": {
             "$href": "/magaza"
           }
@@ -97,6 +108,7 @@
             "alt": "Yukarıdan bakışla Ölüdeniz lagünü ve kumsal"
           },
           "caption": "Ege ve Akdeniz",
+          "subtitle": "Koylar • Deniz",
           "link": {
             "$href": "/magaza"
           }
@@ -107,6 +119,7 @@
             "alt": "Ormanlı yamaçlar arasında Uzungöl ve kıyısındaki köy"
           },
           "caption": "Karadeniz",
+          "subtitle": "Yaylalar • Doğa",
           "link": {
             "$href": "/magaza"
           }
@@ -117,6 +130,7 @@
             "alt": "Pamukkale'nin beyaz traverten havuzları"
           },
           "caption": "Pamukkale",
+          "subtitle": "Travertenler • Tarih",
           "link": {
             "$href": "/magaza"
           }
@@ -127,13 +141,16 @@
             "alt": "Ovanın ardında karlı Ağrı Dağı"
           },
           "caption": "Doğu Anadolu",
+          "subtitle": "Dağlar • Macera",
           "link": {
             "$href": "/magaza"
           }
         }
       ],
       "layout": "even",
-      "phone": "scroll"
+      "phone": "scroll",
+      "card": "below",
+      "height": "tall"
     },
     {
       "id": "nedenpatika",
@@ -141,35 +158,46 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "Neden bizimle yürümeli?",
+      "look": {
+        "space_outer": "small",
+        "space_below": "small",
+        "space_inner": null,
+        "ground": null,
+        "align": null,
+        "width": null
+      },
+      "title": "Bir turdan fazlası",
+      "eyebrow": "Neden bizimle yolculuk",
+      "note": "Yol seni değiştirir",
       "items": [
         {
-          "value": "12 kişi",
-          "label": "En kalabalık grup",
-          "text": "Patikada sıra beklemeden, rehberinizle tanışarak.",
-          "icon": "users"
-        },
-        {
-          "value": "Yerel",
-          "label": "Rehberler",
-          "text": "Bölgeyi bilen, yolu yürümüş rehberler.",
+          "value": "Seçkin",
+          "label": "Özenle seçilmiş rotalar",
+          "text": "Her rotayı önce kendimiz geziyoruz.",
           "icon": "compass"
         },
         {
-          "value": "Açık",
-          "label": "Program",
-          "text": "Günlük mesafe, zorluk ve konaklama tur sayfasında yazılı.",
-          "icon": "map_pin"
+          "value": "Esnek",
+          "label": "Size göre program",
+          "text": "Tempo ve konaklama sizin seçiminiz.",
+          "icon": "calendar"
         },
         {
-          "value": "7/24",
-          "label": "Yolda destek",
-          "text": "Tur boyunca bize her an ulaşabilirsiniz.",
-          "icon": "headset"
+          "value": "Kolay",
+          "label": "Dert yok",
+          "text": "Ulaşım, otel ve rehber bizden.",
+          "icon": "leaf"
+        },
+        {
+          "value": "Unutulmaz",
+          "label": "Unutulmaz anlar",
+          "text": "Yıllarca anlatacağınız hikâyeler.",
+          "icon": "heart"
         }
       ],
       "dividers": "on",
-      "icons": "on"
+      "icons": "on",
+      "item_style": "feature"
     },
     {
       "id": "seciliturlar",
@@ -192,6 +220,146 @@
       "columns_mobile": 1
     },
     {
+      "id": "patikakategoriler",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "collage",
+      "title": "Popüler kategoriler",
+      "category_ids": [
+        {
+          "$handle": "category:kapadokya-turlari"
+        },
+        {
+          "$handle": "category:ege-ve-akdeniz-turlari"
+        },
+        {
+          "$handle": "category:yurt-disi-turlar"
+        },
+        {
+          "$handle": "category:gemi-turlari"
+        },
+        {
+          "$handle": "category:kultur-turlari"
+        },
+        {
+          "$handle": "category:gunubirlik-turlar"
+        },
+        {
+          "$handle": "category:doga-ve-trekking"
+        }
+      ],
+      "show_count": true,
+      "more": {
+        "$href": "/kategoriler",
+        "label": "Tüm kategoriler"
+      },
+      "columns": 4,
+      "height": "medium",
+      "lead": "on",
+      "links": 0
+    },
+    {
+      "id": "raykapadokya",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Kapadokya turları",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:kapadokya-turlari"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/kategori/yurt-ici-turlar/kapadokya-turlari",
+        "label": "Tüm Kapadokya turları"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
+      "id": "rayege",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Ege ve Akdeniz",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:ege-ve-akdeniz-turlari"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/kategori/yurt-ici-turlar/ege-ve-akdeniz-turlari",
+        "label": "Tüm Ege ve Akdeniz turları"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
+      "id": "raygunubirlik",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Günübirlik",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:gunubirlik-turlar"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/kategori/yurt-ici-turlar/gunubirlik-turlar",
+        "label": "Tüm günübirlik turlar"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      }
+    },
+    {
       "id": "yaylabandi",
       "type": "banner",
       "visible": true,
@@ -201,12 +369,12 @@
       "slides": [
         {
           "image": {
-            "$image": "images/bant-ayder.webp",
-            "alt": "Sisli yamaçlar arasında Ayder yaylasının ahşap evleri"
+            "$image": "images/rota-oludeniz.webp",
+            "alt": "Yukarıdan bakışla Ölüdeniz lagünü, turkuaz su ve kumsal"
           },
           "mobile_image": null,
-          "heading": "Yaylalarda bir hafta",
-          "text": "Kaçkarların eteğinde yürüyüş, yayla evlerinde konaklama. Yaz kalkışları açıldı.",
+          "heading": "Yaz kalkışları açıldı",
+          "text": "İstanbul'dan Kapadokya'ya, Ege koylarından Karadeniz yaylalarına: rehberli turlarda yerinizi şimdiden ayırın.",
           "link": {
             "$href": "/magaza",
             "label": "Kalkışları gör"
@@ -215,11 +383,45 @@
           "tone": "light"
         }
       ],
-      "width": "full",
-      "height": "high",
+      "width": "boxed",
+      "height": "low",
       "text_position": "middle_left",
       "overlay": "light",
       "button_style": "solid"
+    },
+    {
+      "id": "rayyurtdisi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Yurt dışı turları",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:yurt-disi-turlar"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/kategori/yurt-disi-turlar",
+        "label": "Tüm yurt dışı turları"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      },
+      "tabs": "off"
     },
     {
       "id": "yuruyusyorumlari",
@@ -228,7 +430,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Yürüyenler anlatıyor",
+      "title": "Misafir yorumları",
       "limit": 6,
       "scroller": {
         "desktop": "three",
@@ -241,7 +443,8 @@
         "speed": "medium",
         "loop": "off",
         "drag": "on"
-      }
+      },
+      "product_image": "cover"
     },
     {
       "id": "patikayazilari",
@@ -262,14 +465,15 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "free_rows",
-      "social": "icons",
+      "social": "bare",
       "payment_badges": ["visa", "mastercard", "troy", "bank_transfer"],
       "back_to_top": true,
       "back_to_top_side": "right",
       "back_to_top_shape": "round",
       "back_to_top_mobile": true,
-      "ground": "stage",
-      "badge_style": "plain",
+      "ground": "well",
+      "badge_style": "muted",
+      "legal_place": "bottom_line",
       "bottom_badges": true,
       "rows": [
         {
@@ -289,7 +493,8 @@
                   "device": "all",
                   "type": "brand",
                   "logo": true,
-                  "about": "Rehberli yürüyüş ve doğa turları. Günlük mesafe, zorluk ve konaklama her turun sayfasında yazılı.",
+                  "logo_size": "large",
+                  "about": "Kültür, doğa ve şehir turları: İstanbul'dan Kapadokya'ya, Ege'den Karadeniz'e. Program, konaklama ve dahil olanlar her turun sayfasında yazılı.",
                   "social": true,
                   "address": false
                 }
@@ -331,9 +536,32 @@
                   "title": null,
                   "address": true,
                   "phone": true,
-                  "whatsapp": true,
+                  "whatsapp": false,
                   "email": true,
-                  "hours": true
+                  "hours": false,
+                  "icon_style": "inline"
+                },
+                {
+                  "id": "patikasoz",
+                  "visible": true,
+                  "device": "all",
+                  "type": "text",
+                  "title": null,
+                  "body": {
+                    "type": "doc",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Keşfet, hayal et, yola çık."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "style": "hand"
                 }
               ]
             }
@@ -350,8 +578,8 @@
       "variant": "strip",
       "title": "Yol notları e-postanızda",
       "text": null,
-      "description": "Yeni rotalar, açılan kalkışlar ve patikadan notlar.",
-      "joined": true
+      "description": "Yeni rotalar, açılan kalkışlar ve yoldan notlar.",
+      "tone": "tint"
     }
   ],
   "product": [
@@ -367,11 +595,12 @@
     {
       "id": "patikaprogram",
       "type": "program",
+      "place": "tab",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
       "variant": "timeline",
-      "title": "Yürüyüş programı"
+      "title": "Tur programı"
     },
     {
       "id": "patikabenzer",

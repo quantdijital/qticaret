@@ -75,6 +75,7 @@ export const VARIANT_FIELDS: {
     full_image: {
       ...HERO_FULL_DEFAULTS,
       title_accent: null,
+      title_after: null,
       show_trust: false,
       video_url: null,
       video_label: null,
@@ -168,7 +169,13 @@ const OPTIONAL_FIELDS: {
   // A preset's icons by handle (adr/0077 §10 Ek): the icon row's, dropped with it
   categories: { icons: ["category_icons_by_handle"] },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
-  newsletter: { split: ["joined"], image_card: ["joined"], strip: ["joined"] },
+  newsletter: {
+    split: ["joined", "tone"],
+    image_card: ["joined", "tone"],
+    strip: ["joined", "tone"],
+  },
+  // The carousel cards' product picture (adr/0077 §10 Ek): the grid holds none
+  reviews: { carousel: ["product_image"] },
 }
 
 /**

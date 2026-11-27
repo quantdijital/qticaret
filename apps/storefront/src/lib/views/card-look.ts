@@ -12,6 +12,9 @@ export const CARD_LOOK_DEFAULTS: CardLookView = {
   arrow: false,
   duration: false,
   perPerson: false,
+  compact: false,
+  metaOver: false,
+  glass: false,
 }
 
 const KEYS = Object.keys(CARD_LOOK_DEFAULTS) as (keyof CardLookView)[]
@@ -28,12 +31,18 @@ export function cardLookOf(card: StoreThemeSettings["product_card"]): CardLookVi
     arrow: card.arrow,
     duration: card.duration_row,
     perPerson: card.per_person,
+    compact: card.density === "compact",
+    metaOver: card.meta_place === "over",
+    glass: card.style === "glass",
   }
 }
 
 /** The card's `look` when the shop changed any of it; none for today's card. */
 export function cardLook(options: CardLookView | undefined): CardLookView | undefined {
-  if (!options || KEYS.every((key) => options[key] === CARD_LOOK_DEFAULTS[key])) {
+  if (
+    !options ||
+    KEYS.every((key) => (options[key] ?? CARD_LOOK_DEFAULTS[key]) === CARD_LOOK_DEFAULTS[key])
+  ) {
     return undefined
   }
   return { ...options }

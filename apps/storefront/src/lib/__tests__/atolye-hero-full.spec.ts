@@ -113,6 +113,18 @@ describe("Atölye's full image opening", () => {
     expect(home([cover()])).not.toContain("text-signal-on-stage")
   })
 
+  it("ends the heading with its last line in the heading's ink, none without one", () => {
+    const html = home([
+      cover(full({ title_mix: "serif_accent" }, { accent: "sınırsız.", after: "Öte." })),
+    ])
+
+    const heading = /<h1[^>]*>(.*?)<\/h1>/.exec(html)?.[1] ?? ""
+    expect(heading).toMatch(
+      /gf-cover-accent">sınırsız\.<\/span><span class="gf-cover-after block">Öte\.<\/span>$/
+    )
+    expect(home([cover()])).not.toContain("gf-cover-after")
+  })
+
   it("preloads its picture and asks for it first; a later opening is an h2 with a lazy one", () => {
     const html = home([cover()])
 
@@ -269,5 +281,15 @@ describe("the full image's stylesheet", () => {
     expect(ruleBody(css, '.gf-cover[data-edge="wave"] .gf-cover-media')).toContain("mask-image:")
     expect(css).not.toContain("text-decoration")
     expect(css).not.toContain(":hover")
+  })
+
+  it("rounds the play button's hover ground with its ring and eases it in, still when asked", () => {
+    expect(ruleBody(css, ".gf-cover .gf-btn--play")).toContain("min-height: calc(2.75rem + 2px)")
+    const eased = ruleBody(css, ".gf-cover .gf-btn.gf-btn--play")
+    expect(eased).toContain("background-color var(--dur-short) ease")
+    expect(eased).toContain("box-shadow var(--dur-short) ease")
+    expect(css).toMatch(
+      /prefers-reduced-motion: reduce\) \{\s*\.gf-cover \.gf-btn\.gf-btn--play \{\s*transition: none;/
+    )
   })
 })

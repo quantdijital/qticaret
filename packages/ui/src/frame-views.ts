@@ -1,3 +1,4 @@
+import type { CardRatio } from "@qticaret/types"
 import type { StyleKit } from "@qticaret/types/style-kit"
 
 /**
@@ -9,7 +10,7 @@ import type { StyleKit } from "@qticaret/types/style-kit"
 export interface ThemeView {
   card: {
     /** The picture's shape; also `--card-ratio`. */
-    ratio: "4:5" | "1:1" | "3:4"
+    ratio: CardRatio
     /** The storefront leaves `brand` out of the cards when the shop hides it. */
     showBrand: boolean
     /** Stars on a card, when its view carries a rating. */

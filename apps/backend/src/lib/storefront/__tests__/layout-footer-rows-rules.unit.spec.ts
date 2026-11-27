@@ -71,6 +71,9 @@ describe("the free rows footer's mirror of the contract", () => {
       "FOOTER_NEWSLETTER_VARIANTS",
       "FOOTER_IMAGE_WIDTHS",
       "FOOTER_TRUST_LAYOUTS",
+      "FOOTER_TEXT_STYLES",
+      "FOOTER_LOGO_SIZES",
+      "FOOTER_CONTACT_ICON_STYLES",
       "FOOTER_TRUST_LIMIT",
       "FOOTER_APP_HOSTS",
     ] as const) {

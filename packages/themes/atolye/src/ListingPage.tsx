@@ -55,12 +55,24 @@ export function ListingPage({
   // A collection's picture is the page's largest: it alone loads first
   const banner = search ? null : (view.image ?? null)
   const bottom = view.sectionsBottom ?? []
+  // The trail on the title's line (`listing_page.crumbs_place`); absent: above it
+  const beside = view.crumbsPlace === "beside"
   return (
     <>
       <Container className="pt-4 lg:pt-6">
-        <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
-        <header className="mt-4 flex flex-col gap-3 lg:mt-6">
-          <h1>{view.title}</h1>
+        {!beside && <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />}
+        <header className={beside ? "flex flex-col gap-3" : "mt-4 flex flex-col gap-3 lg:mt-6"}>
+          {beside ? (
+            // The trail first to read, on the title's line flush right from 1024 px
+            <div className="flex flex-col gap-4 lg:flex-row-reverse lg:items-baseline lg:justify-between lg:gap-8">
+              <div className="lg:shrink-0">
+                <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
+              </div>
+              <h1 className="lg:min-w-0">{view.title}</h1>
+            </div>
+          ) : (
+            <h1>{view.title}</h1>
+          )}
           {!search && view.description.length > 0 && (
             <div className="flex max-w-[72ch] flex-col gap-3 text-md text-text-2 lg:text-lead">
               {view.description.map((paragraph, index) => (
@@ -113,7 +125,7 @@ export function ListingPage({
             >
               {panel && (
                 <aside aria-labelledby="filtre-baslik" className="max-lg:hidden">
-                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2">
+                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto pb-2">
                     <h2 id="filtre-baslik" className="flex min-h-11 items-center text-title">
                       {t("listing.filters")}
                     </h2>
@@ -156,7 +168,9 @@ export function ListingPage({
               id={SHEET}
               title={t("listing.filters")}
               close={t("listing.close_filters")}
-              showResults={t("listing.show_results", { count: view.total })}
+              showResults={
+                view.showResultsLabel ?? t("listing.show_results", { count: view.total })
+              }
               results={RESULTS}
               clear={
                 view.clearPath ? { label: t("listing.clear_short"), path: view.clearPath } : null

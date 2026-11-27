@@ -31,6 +31,18 @@ describe("cardLookOf", () => {
       arrow: true,
       duration: true,
       perPerson: true,
+      compact: false,
+      metaOver: false,
+      glass: false,
+    })
+    expect(cardLookOf({ ...card, density: "compact" })).toEqual({
+      ...CARD_LOOK_DEFAULTS,
+      compact: true,
+    })
+    expect(cardLookOf({ ...card, meta_place: "over", style: "glass" })).toEqual({
+      ...CARD_LOOK_DEFAULTS,
+      metaOver: true,
+      glass: true,
     })
     expect(cardLookOf({ ...all, show_rating: false }).ratingBadge).toBe(false)
     const split = cardLookOf({ ...all, text_position: "over_split", show_rating: true })

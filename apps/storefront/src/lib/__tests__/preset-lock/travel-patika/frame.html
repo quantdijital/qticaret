@@ -1,4 +1,20 @@
 <!-- preset lock: travel-patika (docs/tema/bilesen-standardi.md §7) -->
+<!-- not in the fixture shop: home.patikakategoriler category:kapadokya-turlari -->
+<!-- not in the fixture shop: home.patikakategoriler category:ege-ve-akdeniz-turlari -->
+<!-- not in the fixture shop: home.patikakategoriler category:yurt-disi-turlar -->
+<!-- not in the fixture shop: home.patikakategoriler category:gemi-turlari -->
+<!-- not in the fixture shop: home.patikakategoriler category:kultur-turlari -->
+<!-- not in the fixture shop: home.patikakategoriler category:gunubirlik-turlar -->
+<!-- not in the fixture shop: home.patikakategoriler category:doga-ve-trekking -->
+<!-- not in the fixture shop: home.raykapadokya category:kapadokya-turlari -->
+<!-- not in the fixture shop: home.rayege category:ege-ve-akdeniz-turlari -->
+<!-- not in the fixture shop: home.raygunubirlik category:gunubirlik-turlar -->
+<!-- not in the fixture shop: home.rayyurtdisi category:yurt-disi-turlar -->
+<!-- section dropped: home.patikakategoriler -->
+<!-- section dropped: home.raykapadokya -->
+<!-- section dropped: home.rayege -->
+<!-- section dropped: home.raygunubirlik -->
+<!-- section dropped: home.rayyurtdisi -->
 <link rel="preload" href="/fonts/inter-latin.c940764593.woff2" as="font" type="font/woff2"/>
 <link rel="preload" href="/fonts/inter-tr.51341ab647.woff2" as="font" type="font/woff2"/>
 <link rel="preload" href="/fonts/montserrat-latin.06b16db7a9.woff2" as="font" type="font/woff2"/>
@@ -16,7 +32,7 @@
   --font-sans:var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-accent:var(--font-caveat), cursive;
   --radius-scale:0.8;
-  --card-ratio:4 / 5;
+  --card-ratio:4 / 3;
   --color-mark:#a7d46f;
   --color-mark-ink:#111113;
   --color-mark-deep:color-mix(in oklab,#a7d46f 85%,#111113);
@@ -29,18 +45,17 @@
   data-surface="lined"
   data-menu-style="plain"
   data-chip-style="lined"
-  data-density="balanced"
   data-motion="lively"
 >
   <a href="#icerik" class="gf-skip">
     İçeriğe geç
   </a>
-  <div class="gf-stage text-xs">
+  <div data-bar="primary" class="gf-stage text-xs">
     <div
       class="mx-auto w-full max-w-(--container) px-(--gutter) flex min-h-8 items-center justify-center gap-6"
     >
       <p aria-label="Duyurular" class="py-1.5 text-center font-semibold">
-        Size özel tur planı için bize ulaşın
+        2027 yaz kalkışları açıldı · Küçük gruplar, yerel rehberler, 14 güne kadar ücretsiz iptal
       </p>
     </div>
   </div>
@@ -70,7 +85,10 @@
           aria-hidden="true"
         />
       </button>
-      <a href="/" class="flex min-h-11 min-w-0 items-center rounded-inner mr-auto lg:mr-0">
+      <a
+        href="/"
+        class="gf-wordmark flex min-h-11 min-w-0 items-center rounded-inner mr-auto lg:mr-0"
+      >
         <span
           class="truncate font-display text-wordmark leading-none font-extrabold tracking-(--tracking-display)"
         >
@@ -85,7 +103,7 @@
               class="flex flex-wrap items-center gap-x-1 justify-center"
               dir="ltr"
             >
-              <li data-aisle-item="" class="relative">
+              <li data-aisle-item="">
                 <button
                   id="radix-«id»-trigger-/kategori/el-yapimi-caki"
                   data-state="closed"
@@ -110,146 +128,287 @@
                   data-orientation="horizontal"
                   data-state="closed"
                   data-gf-drop="/kategori/el-yapimi-caki"
-                  class="gf-drop data-[state=closed]:hidden"
+                  class="gf-mega data-[state=closed]:hidden"
                   style="pointer-events:none"
                   dir="ltr"
                 >
-                  <ul>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/damascus-celik-bicaklar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Damascus Çelik
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            10
+                  <div class="gf-mega-grid">
+                    <ul class="gf-mega-columns">
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/damascus-celik-bicaklar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/01.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            10 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Damascus Çelik
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                10
+                              </span>
+                              <span class="sr-only">
+                                10 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/elmax-cakilar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Elmax Çakılar
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            6
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/elmax-cakilar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/elmax-cakilar.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            6 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Elmax Çakılar
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                6
+                              </span>
+                              <span class="sr-only">
+                                6 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/n690-cakilar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          N690 Çakılar
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            13
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/n690-cakilar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/02.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            13 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              N690 Çakılar
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                13
+                              </span>
+                              <span class="sr-only">
+                                13 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/geyik-boynuzu-sapli-cakilar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Geyik Boynuzu Saplı
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            9
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/geyik-boynuzu-sapli-cakilar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/geyik-boynuzu-sapli-cakilar.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            9 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Geyik Boynuzu Saplı
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                9
+                              </span>
+                              <span class="sr-only">
+                                9 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/kemik-sapli-cakilar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Kemik Saplı
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            5
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/kemik-sapli-cakilar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/03-400.webp 400w, https://cdn.example.com/p/03-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/03.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            5 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Kemik Saplı
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                5
+                              </span>
+                              <span class="sr-only">
+                                5 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/el-yapimi-caki/epoksi-cakilar"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Epoksi Saplı
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            12
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/el-yapimi-caki/epoksi-cakilar"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/epoksi-cakilar.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            12 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Epoksi Saplı
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                12
+                              </span>
+                              <span class="sr-only">
+                                12 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                  </ul>
-                  <a
-                    href="/kategori/el-yapimi-caki"
-                    class="gf-drop-row gf-drop-row--words gf-drop-all"
-                    data-radix-collection-item=""
-                  >
-                    <span class="gf-menu-word" aria-hidden="true">
-                      Tümünü gör
-                    </span>
-                    <span class="sr-only">
-                      Tümünü gör: El Yapımı Çakılar
-                    </span>
-                    <span class="gf-menu-count gf-menu-count--dark">
-                      <span aria-hidden="true">
-                        3
+                        </a>
+                      </li>
+                    </ul>
+                    <a
+                      href="/kategori/el-yapimi-caki"
+                      class="gf-mega-feature"
+                      data-radix-collection-item=""
+                    >
+                      <span class="gf-mega-picture">
+                        <picture>
+                          <img
+                            src="https://cdn.example.com/c/el-yapimi-caki.webp"
+                            alt=""
+                            width="800"
+                            height="800"
+                            loading="lazy"
+                            fetchPriority="auto"
+                            decoding="async"
+                            class="gf-mega-img"
+                          />
+                        </picture>
                       </span>
-                      <span class="sr-only">
-                        3 ürün
+                      <span class="gf-mega-feature-text">
+                        <span class="gf-mega-feature-name">
+                          El Yapımı Çakılar
+                        </span>
+                        <span class="gf-mega-feature-all">
+                          <span aria-hidden="true">
+                            Tümünü gör
+                          </span>
+                          <span class="sr-only">
+                            Tümünü gör: El Yapımı Çakılar
+                          </span>
+                          <span class="gf-menu-count gf-menu-count--dark">
+                            <span aria-hidden="true">
+                              3
+                            </span>
+                            <span class="sr-only">
+                              3 ürün
+                            </span>
+                          </span>
+                          <svg
+                            width="24"
+                            height="24"
+                            stroke-width="2"
+                            class="lucide lucide-arrow-right size-4"
+                            aria-hidden="true"
+                          />
+                        </span>
                       </span>
-                    </span>
-                  </a>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li data-aisle-item="">
@@ -263,7 +422,7 @@
                   </span>
                 </a>
               </li>
-              <li data-aisle-item="" class="relative">
+              <li data-aisle-item="">
                 <button
                   id="radix-«id»-trigger-/kategori/outdoor-ve-kamp"
                   data-state="closed"
@@ -288,73 +447,140 @@
                   data-orientation="horizontal"
                   data-state="closed"
                   data-gf-drop="/kategori/outdoor-ve-kamp"
-                  class="gf-drop data-[state=closed]:hidden"
+                  class="gf-mega data-[state=closed]:hidden"
                   style="pointer-events:none"
                   dir="ltr"
                 >
-                  <ul>
-                    <li>
-                      <a
-                        href="/kategori/outdoor-ve-kamp/kamp-bicaklari"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Kamp Bıçakları
+                  <div class="gf-mega-grid">
+                    <ul class="gf-mega-columns">
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/outdoor-ve-kamp/kamp-bicaklari"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/02.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
+                          </span>
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Kamp Bıçakları
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                11
+                              </span>
+                              <span class="sr-only">
+                                11 ürün
+                              </span>
+                            </span>
+                          </span>
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/outdoor-ve-kamp/kamp-baltalari"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/kamp-baltalari.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
+                          </span>
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Kamp Baltaları
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                7
+                              </span>
+                              <span class="sr-only">
+                                7 ürün
+                              </span>
+                            </span>
+                          </span>
+                        </a>
+                      </li>
+                    </ul>
+                    <a
+                      href="/kategori/outdoor-ve-kamp"
+                      class="gf-mega-feature"
+                      data-radix-collection-item=""
+                    >
+                      <span class="gf-mega-picture">
+                        <picture>
+                          <img
+                            src="https://cdn.example.com/c/outdoor-ve-kamp.webp"
+                            alt=""
+                            width="800"
+                            height="800"
+                            loading="lazy"
+                            fetchPriority="auto"
+                            decoding="async"
+                            class="gf-mega-img"
+                          />
+                        </picture>
+                      </span>
+                      <span class="gf-mega-feature-text">
+                        <span class="gf-mega-feature-name">
+                          Outdoor ve Kamp
                         </span>
-                        <span class="gf-menu-count">
+                        <span class="gf-mega-feature-all">
                           <span aria-hidden="true">
-                            11
+                            Tümünü gör
                           </span>
                           <span class="sr-only">
-                            11 ürün
+                            Tümünü gör: Outdoor ve Kamp
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/outdoor-ve-kamp/kamp-baltalari"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Kamp Baltaları
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            7
+                          <span class="gf-menu-count gf-menu-count--dark">
+                            <span aria-hidden="true">
+                              4
+                            </span>
+                            <span class="sr-only">
+                              4 ürün
+                            </span>
                           </span>
-                          <span class="sr-only">
-                            7 ürün
-                          </span>
+                          <svg
+                            width="24"
+                            height="24"
+                            stroke-width="2"
+                            class="lucide lucide-arrow-right size-4"
+                            aria-hidden="true"
+                          />
                         </span>
-                      </a>
-                    </li>
-                  </ul>
-                  <a
-                    href="/kategori/outdoor-ve-kamp"
-                    class="gf-drop-row gf-drop-row--words gf-drop-all"
-                    data-radix-collection-item=""
-                  >
-                    <span class="gf-menu-word" aria-hidden="true">
-                      Tümünü gör
-                    </span>
-                    <span class="sr-only">
-                      Tümünü gör: Outdoor ve Kamp
-                    </span>
-                    <span class="gf-menu-count gf-menu-count--dark">
-                      <span aria-hidden="true">
-                        4
                       </span>
-                      <span class="sr-only">
-                        4 ürün
-                      </span>
-                    </span>
-                  </a>
+                    </a>
+                  </div>
                 </div>
               </li>
-              <li data-aisle-item="" class="relative">
+              <li data-aisle-item="">
                 <button
                   id="radix-«id»-trigger-/kategori/mutfak-ve-sef-bicaklari"
                   data-state="closed"
@@ -379,89 +605,177 @@
                   data-orientation="horizontal"
                   data-state="closed"
                   data-gf-drop="/kategori/mutfak-ve-sef-bicaklari"
-                  class="gf-drop data-[state=closed]:hidden"
+                  class="gf-mega data-[state=closed]:hidden"
                   style="pointer-events:none"
                   dir="ltr"
                 >
-                  <ul>
-                    <li>
-                      <a
-                        href="/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Şef Bıçakları
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            10
+                  <div class="gf-mega-grid">
+                    <ul class="gf-mega-columns">
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/sef-bicaklari.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            10 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Şef Bıçakları
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                10
+                              </span>
+                              <span class="sr-only">
+                                10 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Mutfak Bıçak Setleri
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            6
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/01.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            6 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Mutfak Bıçak Setleri
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                6
+                              </span>
+                              <span class="sr-only">
+                                6 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                    <li>
-                      <a
-                        href="/kategori/mutfak-ve-sef-bicaklari/kasap-bicaklari"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Kasap Bıçakları
-                        </span>
-                        <span class="gf-menu-count">
-                          <span aria-hidden="true">
-                            13
+                        </a>
+                      </li>
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/mutfak-ve-sef-bicaklari/kasap-bicaklari"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <img
+                                src="https://cdn.example.com/c/kasap-bicaklari.webp"
+                                alt=""
+                                width="800"
+                                height="800"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
                           </span>
-                          <span class="sr-only">
-                            13 ürün
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Kasap Bıçakları
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                13
+                              </span>
+                              <span class="sr-only">
+                                13 ürün
+                              </span>
+                            </span>
                           </span>
-                        </span>
-                      </a>
-                    </li>
-                  </ul>
-                  <a
-                    href="/kategori/mutfak-ve-sef-bicaklari"
-                    class="gf-drop-row gf-drop-row--words gf-drop-all"
-                    data-radix-collection-item=""
-                  >
-                    <span class="gf-menu-word" aria-hidden="true">
-                      Tümünü gör
-                    </span>
-                    <span class="sr-only">
-                      Tümünü gör: Mutfak ve Şef Bıçakları
-                    </span>
-                    <span class="gf-menu-count gf-menu-count--dark">
-                      <span aria-hidden="true">
-                        3
+                        </a>
+                      </li>
+                    </ul>
+                    <a
+                      href="/kategori/mutfak-ve-sef-bicaklari"
+                      class="gf-mega-feature"
+                      data-radix-collection-item=""
+                    >
+                      <span class="gf-mega-picture">
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                            sizes="320px"
+                          />
+                          <img
+                            src="https://cdn.example.com/p/01.webp"
+                            alt=""
+                            width="1200"
+                            height="1200"
+                            loading="lazy"
+                            fetchPriority="auto"
+                            decoding="async"
+                            class="gf-mega-img"
+                          />
+                        </picture>
                       </span>
-                      <span class="sr-only">
-                        3 ürün
+                      <span class="gf-mega-feature-text">
+                        <span class="gf-mega-feature-name">
+                          Mutfak ve Şef Bıçakları
+                        </span>
+                        <span class="gf-mega-feature-all">
+                          <span aria-hidden="true">
+                            Tümünü gör
+                          </span>
+                          <span class="sr-only">
+                            Tümünü gör: Mutfak ve Şef Bıçakları
+                          </span>
+                          <span class="gf-menu-count gf-menu-count--dark">
+                            <span aria-hidden="true">
+                              3
+                            </span>
+                            <span class="sr-only">
+                              3 ürün
+                            </span>
+                          </span>
+                          <svg
+                            width="24"
+                            height="24"
+                            stroke-width="2"
+                            class="lucide lucide-arrow-right size-4"
+                            aria-hidden="true"
+                          />
+                        </span>
                       </span>
-                    </span>
-                  </a>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li data-aisle-item="">
@@ -475,7 +789,7 @@
                   </span>
                 </a>
               </li>
-              <li data-aisle-item="" class="relative">
+              <li data-aisle-item="">
                 <button
                   id="radix-«id»-trigger-/kategori/kiliclar"
                   data-state="closed"
@@ -500,51 +814,102 @@
                   data-orientation="horizontal"
                   data-state="closed"
                   data-gf-drop="/kategori/kiliclar"
-                  class="gf-drop data-[state=closed]:hidden"
+                  class="gf-mega data-[state=closed]:hidden"
                   style="pointer-events:none"
                   dir="ltr"
                 >
-                  <ul>
-                    <li>
-                      <a
-                        href="/kategori/kiliclar/kilic-modelleri"
-                        class="gf-drop-row gf-drop-row--words"
-                        data-radix-collection-item=""
-                      >
-                        <span class="gf-menu-word">
-                          Kılıç Modelleri
+                  <div class="gf-mega-grid">
+                    <ul class="gf-mega-columns">
+                      <li class="gf-mega-column">
+                        <a
+                          href="/kategori/kiliclar/kilic-modelleri"
+                          class="gf-mega-head"
+                          data-radix-collection-item=""
+                        >
+                          <span class="gf-mega-picture">
+                            <picture>
+                              <source
+                                type="image/webp"
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+                                sizes="(min-width: 1280px) 220px, 180px"
+                              />
+                              <img
+                                src="https://cdn.example.com/p/01.webp"
+                                alt=""
+                                width="1200"
+                                height="1200"
+                                loading="lazy"
+                                fetchPriority="auto"
+                                decoding="async"
+                                class="gf-mega-img"
+                              />
+                            </picture>
+                          </span>
+                          <span class="gf-mega-title">
+                            <span class="gf-menu-word">
+                              Kılıç Modelleri
+                            </span>
+                            <span class="gf-menu-count">
+                              <span aria-hidden="true">
+                                12
+                              </span>
+                              <span class="sr-only">
+                                12 ürün
+                              </span>
+                            </span>
+                          </span>
+                        </a>
+                      </li>
+                    </ul>
+                    <a
+                      href="/kategori/kiliclar"
+                      class="gf-mega-feature"
+                      data-radix-collection-item=""
+                    >
+                      <span class="gf-mega-picture">
+                        <picture>
+                          <img
+                            src="https://cdn.example.com/c/kiliclar.webp"
+                            alt=""
+                            width="800"
+                            height="800"
+                            loading="lazy"
+                            fetchPriority="auto"
+                            decoding="async"
+                            class="gf-mega-img"
+                          />
+                        </picture>
+                      </span>
+                      <span class="gf-mega-feature-text">
+                        <span class="gf-mega-feature-name">
+                          Kılıçlar
                         </span>
-                        <span class="gf-menu-count">
+                        <span class="gf-mega-feature-all">
                           <span aria-hidden="true">
-                            12
+                            Tümünü gör
                           </span>
                           <span class="sr-only">
-                            12 ürün
+                            Tümünü gör: Kılıçlar
                           </span>
+                          <span class="gf-menu-count gf-menu-count--dark">
+                            <span aria-hidden="true">
+                              5
+                            </span>
+                            <span class="sr-only">
+                              5 ürün
+                            </span>
+                          </span>
+                          <svg
+                            width="24"
+                            height="24"
+                            stroke-width="2"
+                            class="lucide lucide-arrow-right size-4"
+                            aria-hidden="true"
+                          />
                         </span>
-                      </a>
-                    </li>
-                  </ul>
-                  <a
-                    href="/kategori/kiliclar"
-                    class="gf-drop-row gf-drop-row--words gf-drop-all"
-                    data-radix-collection-item=""
-                  >
-                    <span class="gf-menu-word" aria-hidden="true">
-                      Tümünü gör
-                    </span>
-                    <span class="sr-only">
-                      Tümünü gör: Kılıçlar
-                    </span>
-                    <span class="gf-menu-count gf-menu-count--dark">
-                      <span aria-hidden="true">
-                        5
                       </span>
-                      <span class="sr-only">
-                        5 ürün
-                      </span>
-                    </span>
-                  </a>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li data-aisle-item="">
@@ -657,85 +1022,96 @@
     <main data-preset-lock="page">
     </main>
   </main>
+  <div data-footer-group="">
+    <div data-qs="patikabulten">
+      <div class="gf-section">
+        <div class="mx-auto w-full max-w-(--container) px-(--gutter)">
+          <section
+            aria-labelledby="bolum-patikabulten"
+            data-news="strip"
+            class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-(--gap-columns) rounded-tile gf-news-tint px-5 py-4 sm:px-6"
+          >
+            <div class="flex min-w-0 flex-1 items-start gap-3 lg:items-center">
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-mail mt-0.5 size-5 shrink-0 lg:mt-0"
+                aria-hidden="true"
+              />
+              <div class="flex min-w-0 flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-3">
+                <h2 id="bolum-patikabulten" class="text-md font-semibold lg:shrink-0">
+                  Yol notları e-postanızda
+                </h2>
+                <p class="text-sm text-text-2">
+                  Yeni rotalar, açılan kalkışlar ve yoldan notlar.
+                </p>
+              </div>
+            </div>
+            <form
+              class="flex flex-col gap-2 gf-news gf-news-small gf-join-box w-full lg:w-[24rem] lg:shrink-0"
+            >
+              <label for="bolum-patikabulten-form-eposta" class="sr-only">
+                E-posta adresiniz
+              </label>
+              <div class="gf-join">
+                <input
+                  id="bolum-patikabulten-form-eposta"
+                  type="email"
+                  required=""
+                  maxLength="254"
+                  autoComplete="email"
+                  inputMode="email"
+                  placeholder="ornek@eposta.com"
+                  aria-describedby="bolum-patikabulten-form-durum"
+                  class="gf-field min-w-0 flex-1"
+                  name="email"
+                />
+                <button type="submit" class="gf-btn shrink-0">
+                  Abone ol
+                </button>
+              </div>
+              <div class="gf-news-more flex flex-col gap-3">
+                <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+                  <input
+                    type="checkbox"
+                    required=""
+                    class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+                    name="consent"
+                    value="1"
+                  />
+                  <span>
+                    Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
+                  </span>
+                </label>
+                <p
+                  id="bolum-patikabulten-form-durum"
+                  role="alert"
+                  class="min-h-[1lh] text-sm font-semibold"
+                >
+                </p>
+              </div>
+              <p class="gf-news-privacy text-xs">
+                <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
+                  KVKK aydınlatma metni
+                </a>
+              </p>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
   <footer
     data-gf-clear=""
     data-qs="mainfooter"
     data-variant="free_rows"
-    data-ground="stage"
-    data-badges="plain"
+    data-ground="well"
+    data-badges="muted"
+    data-legal="bottom_line"
     class="gf-footer-rows mt-(--footer-gap)"
   >
-    <div data-footer-band="" class="border-b border-rule gf-stage">
-      <div class="mx-auto w-full max-w-(--container) px-(--gutter) py-8 lg:py-10">
-        <section
-          aria-labelledby="bulten"
-          data-news="strip"
-          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-(--gap-columns) py-2"
-        >
-          <div class="flex min-w-0 flex-1 items-start gap-3 lg:items-center">
-            <svg
-              width="24"
-              height="24"
-              stroke-width="1.75"
-              class="lucide lucide-mail mt-0.5 size-5 shrink-0 lg:mt-0"
-              aria-hidden="true"
-            />
-            <div class="flex min-w-0 flex-col gap-0.5 lg:flex-row lg:items-baseline lg:gap-3">
-              <h2 id="bulten" class="text-md font-semibold lg:shrink-0">
-                Yol notları e-postanızda
-              </h2>
-              <p class="text-sm text-text-2">
-                Yeni rotalar, açılan kalkışlar ve patikadan notlar.
-              </p>
-            </div>
-          </div>
-          <form class="flex flex-col gap-2 gf-news gf-news-small w-full lg:w-[24rem] lg:shrink-0">
-            <label for="bulten-alt-eposta" class="sr-only">
-              E-posta adresiniz
-            </label>
-            <div class="gf-join">
-              <input
-                id="bulten-alt-eposta"
-                type="email"
-                required=""
-                maxLength="254"
-                autoComplete="email"
-                inputMode="email"
-                placeholder="ornek@eposta.com"
-                aria-describedby="bulten-alt-durum"
-                class="gf-field min-w-0 flex-1"
-                name="email"
-              />
-              <button type="submit" class="gf-btn shrink-0">
-                Abone ol
-              </button>
-            </div>
-            <div class="gf-news-more flex flex-col gap-3">
-              <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-                <input
-                  type="checkbox"
-                  required=""
-                  class="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-                  name="consent"
-                  value="1"
-                />
-                <span>
-                  Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak Örnek Atölye Ltd. Şti. tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.
-                </span>
-              </label>
-              <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
-              </p>
-            </div>
-            <p class="gf-news-privacy text-xs">
-              <a href="/yasal/kvkk-aydinlatma-metni" class="font-semibold underline">
-                KVKK aydınlatma metni
-              </a>
-            </p>
-          </form>
-        </section>
-      </div>
-    </div>
-    <div class="gf-frow gf-stage" data-ground="inherit" data-space="medium" data-align="start">
+    <div class="gf-frow" data-ground="inherit" data-space="medium" data-align="start">
       <div
         class="mx-auto w-full max-w-(--container) px-(--gutter) gf-frow-grid"
         data-layout="2-1-1-1"
@@ -751,16 +1127,16 @@
                 Örnek Atölye
               </h2>
               <p class="max-w-[40ch] text-sm text-text-2">
-                Rehberli yürüyüş ve doğa turları. Günlük mesafe, zorluk ve konaklama her turun sayfasında yazılı.
+                Kültür, doğa ve şehir turları: İstanbul&#x27;dan Kapadokya&#x27;ya, Ege&#x27;den Karadeniz&#x27;e. Program, konaklama ve dahil olanlar her turun sayfasında yazılı.
               </p>
-              <ul aria-label="Sosyal medya" class="flex flex-wrap gap-2">
+              <ul aria-label="Sosyal medya" class="flex flex-wrap -ml-3 gap-1">
                 <li>
                   <a
                     href="https://www.instagram.com/ornek"
                     rel="noopener noreferrer me"
                     target="_blank"
                     aria-label="Instagram"
-                    class="inline-flex min-h-11 items-center rounded-button border border-rule bg-field no-underline hover:border-edge size-11 justify-center rounded-pill text-text"
+                    class="inline-flex size-11 items-center justify-center rounded-pill text-text no-underline hover:text-text-2"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -803,7 +1179,7 @@
                     rel="noopener noreferrer me"
                     target="_blank"
                     aria-label="YouTube"
-                    class="inline-flex min-h-11 items-center rounded-button border border-rule bg-field no-underline hover:border-edge size-11 justify-center rounded-pill text-text"
+                    class="inline-flex size-11 items-center justify-center rounded-pill text-text no-underline hover:text-text-2"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -913,13 +1289,13 @@
                   Örnek Mah. 1. Sok. No: 1, Denizli
                 </span>
               </p>
-              <ul aria-label="Bize ulaşın" class="gf-reach">
+              <ul aria-label="Bize ulaşın" data-icons="inline" class="flex flex-col gap-1">
                 <li class="min-w-0">
                   <a
                     href="tel:+905320000000"
-                    class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
+                    class="flex min-h-11 items-center gap-3 text-sm text-text-2 no-underline transition-colors duration-(--dur-micro) hover:text-text lg:pointer-fine:min-h-8"
                   >
-                    <span class="gf-reach-sign">
+                    <span class="flex shrink-0 text-text">
                       <svg
                         width="24"
                         height="24"
@@ -928,57 +1304,20 @@
                         aria-hidden="true"
                       />
                     </span>
-                    <span class="flex min-w-0 flex-col">
-                      <span class="text-xs text-text-3">
-                        Telefon
+                    <span class="min-w-0 wrap-break-word">
+                      <span class="sr-only">
+                        Telefon:
                       </span>
-                      <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
-                      >
-                        0532 000 00 00
-                      </span>
-                    </span>
-                  </a>
-                </li>
-                <li class="min-w-0">
-                  <a
-                    href="https://wa.me/905320000000"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
-                  >
-                    <span class="gf-reach-sign">
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                        fill="currentColor"
-                        class="shrink-0 size-4"
-                      >
-                        <path
-                          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
-                        >
-                        </path>
-                      </svg>
-                    </span>
-                    <span class="flex min-w-0 flex-col">
-                      <span class="text-xs text-text-3">
-                        WhatsApp
-                      </span>
-                      <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
-                      >
-                        Mesaj gönderin
-                      </span>
+                      0532 000 00 00
                     </span>
                   </a>
                 </li>
                 <li class="min-w-0">
                   <a
                     href="mailto:bilgi@example.com"
-                    class="group/reach flex min-h-11 items-center gap-3 text-text no-underline"
+                    class="flex min-h-11 items-center gap-3 text-sm text-text-2 no-underline transition-colors duration-(--dur-micro) hover:text-text lg:pointer-fine:min-h-8"
                   >
-                    <span class="gf-reach-sign">
+                    <span class="flex shrink-0 text-text">
                       <svg
                         width="24"
                         height="24"
@@ -987,89 +1326,37 @@
                         aria-hidden="true"
                       />
                     </span>
-                    <span class="flex min-w-0 flex-col">
-                      <span class="text-xs text-text-3">
-                        E-posta
+                    <span class="min-w-0 wrap-break-word">
+                      <span class="sr-only">
+                        E-posta:
                       </span>
-                      <span
-                        class="truncate font-semibold transition-colors duration-(--dur-micro) group-hover/reach:text-text-2"
-                      >
-                        bilgi@example.com
-                      </span>
+                      bilgi@
+                      <wbr/>
+                      example.com
                     </span>
                   </a>
                 </li>
               </ul>
-              <div class="flex flex-col gap-2">
-                <p class="text-xs font-semibold text-text">
-                  Çalışma saatleri
+            </section>
+          </div>
+          <div class="gf-fblock" data-block="text">
+            <section class="flex flex-col gap-3">
+              <div
+                class="gf-foot-prose w-fit -rotate-3 font-(family-name:--font-accent) text-2xl leading-tight font-normal lg:text-3xl"
+                data-style="hand"
+              >
+                <p>
+                  Keşfet, hayal et, yola çık.
                 </p>
-                <dl class="flex max-w-[22rem] flex-col gap-1 text-xs">
-                  <div class="flex justify-between gap-4">
-                    <dt class="text-text-2">
-                      Pazartesi – Cuma
-                    </dt>
-                    <dd class="tabular font-semibold text-text">
-                      09:00 – 18:00
-                    </dd>
-                  </div>
-                  <div class="flex justify-between gap-4">
-                    <dt class="text-text-2">
-                      Cumartesi – Pazar
-                    </dt>
-                    <dd class="tabular font-semibold text-text">
-                      Kapalı
-                    </dd>
-                  </div>
-                </dl>
               </div>
             </section>
           </div>
         </div>
       </div>
     </div>
-    <div class="gf-foot-fixed gf-stage">
+    <div class="gf-foot-fixed">
       <div data-footer-legal="" class="border-t border-rule">
-        <div
-          class="mx-auto w-full max-w-(--container) px-(--gutter) flex flex-col gap-4 py-6 lg:flex-row lg:items-start lg:justify-between lg:gap-(--gap-columns)"
-        >
-          <nav aria-label="Yasal metinler" class="min-w-0 lg:max-w-[60%]">
-            <ul class="flex flex-wrap gap-x-5">
-              <li>
-                <a
-                  href="/yasal/mesafeli-satis-sozlesmesi"
-                  class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  distance_sales
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/yasal/on-bilgilendirme-formu"
-                  class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  pre_information
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/yasal/iade-politikasi"
-                  class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  return_policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/yasal/kvkk-aydinlatma-metni"
-                  title="privacy_notice"
-                  class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-                >
-                  KVKK Aydınlatma Metni
-                </a>
-              </li>
-            </ul>
-          </nav>
+        <div class="mx-auto w-full max-w-(--container) px-(--gutter) py-5">
           <div class="flex items-start gap-4">
             <ul class="flex flex-col gap-0.5 text-xs text-text-3">
               <li class="font-semibold text-text-2">
@@ -1087,9 +1374,56 @@
       </div>
       <div class="border-t border-rule">
         <div class="mx-auto w-full max-w-(--container) px-(--gutter) gf-foot-line py-4 lg:py-5">
-          <p class="gf-foot-copy text-xs text-text-3">
-            © 2026 Örnek Atölye Ltd. Şti.
-          </p>
+          <div class="gf-foot-copy flex flex-col gap-x-6 lg:flex-row lg:flex-wrap lg:items-center">
+            <p class="text-xs text-text-3 max-lg:py-2">
+              © 2026 Örnek Atölye Ltd. Şti.
+            </p>
+            <nav aria-label="Yasal metinler" class="min-w-0">
+              <ul class="flex flex-wrap gap-x-5">
+                <li>
+                  <a
+                    href="/yasal/mesafeli-satis-sozlesmesi"
+                    class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                  >
+                    distance_sales
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/on-bilgilendirme-formu"
+                    class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                  >
+                    pre_information
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/iade-politikasi"
+                    class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                  >
+                    return_policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/yasal/kvkk-aydinlatma-metni"
+                    title="privacy_notice"
+                    class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                  >
+                    KVKK Aydınlatma Metni
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/cerez-tercihleri"
+                    class="inline-flex min-h-11 items-center text-xs text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
+                  >
+                    Çerez tercihleri
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
           <div class="gf-foot-marks">
             <ul aria-label="Ödeme seçenekleri" class="gf-pay">
               <li data-mark="visa" data-logo="">
@@ -1122,15 +1456,15 @@
                   decoding="async"
                 />
               </li>
-              <li data-mark="bank_transfer">
-                <svg
-                  width="24"
-                  height="24"
-                  stroke-width="2"
-                  class="lucide lucide-landmark size-4 shrink-0"
-                  aria-hidden="true"
+              <li data-mark="bank_transfer" data-logo="">
+                <img
+                  src="/marks/havale.svg"
+                  alt="Havale / EFT"
+                  width="268"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
                 />
-                Havale / EFT
               </li>
             </ul>
             <span aria-hidden="true" class="h-6 w-px shrink-0 bg-rule max-md:hidden">
@@ -1140,14 +1474,6 @@
                 marks.[object Object]
               </li>
             </ul>
-          </div>
-          <div class="gf-foot-tools">
-            <a
-              href="/cerez-tercihleri"
-              class="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-text-2 no-underline hover:text-text lg:pointer-fine:min-h-8"
-            >
-              Çerez tercihleri
-            </a>
           </div>
         </div>
       </div>
@@ -1270,7 +1596,7 @@
     title="Yukarı çık"
     data-back-to-top=""
     data-mode="corner"
-    class="z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-24 right-1 size-10 rounded-pill"
+    class="z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] lg:bottom-24 right-[max(0.25rem,calc((100%_-_var(--container))_/_2_+_0.25rem))] size-10 rounded-pill"
   >
     <svg
       width="24"

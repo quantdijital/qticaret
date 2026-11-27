@@ -20,37 +20,46 @@ export function Program({ section }: { section: Of<"program"> }) {
           {section.title}
         </h2>
         <div className="w-full max-w-4xl">
-          {section.variant === "accordion" ? (
-            <ProgramAccordion section={section} />
-          ) : (
-            <ol className="flex flex-col">
-              {section.steps.map((step, index) => (
-                <li
-                  key={`${String(index)}-${step.title}`}
-                  className="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
-                >
-                  {/* The rule joining the dots; none below the last */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
-                  />
-                  <div className="flex min-w-0 flex-col gap-3">
-                    <h3 className="flex flex-col gap-0.5">
-                      <span className="text-sm font-semibold text-text-3">{step.label}</span>
-                      <span className="text-title font-semibold text-text">{step.title}</span>
-                    </h3>
-                    <StepBody step={step} />
-                  </div>
-                </li>
-              ))}
-            </ol>
-          )}
+          <ProgramSteps section={section} />
         </div>
       </Container>
     </section>
+  )
+}
+
+/**
+ * The program's steps as the shop chose to draw them, without a head:
+ * under the section's own (`Program`) or a tab's beside the description
+ * (`program.place: tab`).
+ */
+export function ProgramSteps({ section }: { section: Of<"program"> }) {
+  return section.variant === "accordion" ? (
+    <ProgramAccordion section={section} />
+  ) : (
+    <ol className="flex flex-col">
+      {section.steps.map((step, index) => (
+        <li
+          key={`${String(index)}-${step.title}`}
+          className="group/step relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-4 pb-8 last:pb-0"
+        >
+          {/* The rule joining the dots; none below the last */}
+          <span
+            aria-hidden="true"
+            className="absolute top-3 bottom-0 left-[0.6875rem] w-px bg-rule group-last/step:hidden"
+          />
+          <span
+            aria-hidden="true"
+            className="relative mt-1.5 size-6 rounded-full border-2 border-text bg-paper"
+          />
+          <div className="flex min-w-0 flex-col gap-3">
+            <h3 className="flex flex-col gap-0.5">
+              <span className="text-sm font-semibold text-text-3">{step.label}</span>
+              <span className="text-title font-semibold text-text">{step.title}</span>
+            </h3>
+            <StepBody step={step} />
+          </div>
+        </li>
+      ))}
+    </ol>
   )
 }

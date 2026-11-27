@@ -40,6 +40,7 @@ export function Signup({
               description: section.description ?? null,
               note: section.note ?? null,
               image: section.image ?? null,
+              tone: section.tone ?? "plain",
             }}
             title={section.title}
             headingId={id}

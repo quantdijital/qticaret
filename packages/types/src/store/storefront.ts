@@ -126,7 +126,8 @@ export interface StoreThemeSettings extends StyleKit {
   }
   radius: RadiusStep
   product_card: {
-    ratio: "4:5" | "1:1" | "3:4"
+    /** The photo's shape (`CARD_RATIOS`); `4:3` the short, wide one (sahip 2026-11-26). */
+    ratio: CardRatio
     show_brand: boolean
     show_rating: boolean
     /** How cards are drawn; a product rail may draw its own (`card_variant`). */
@@ -136,6 +137,14 @@ export interface StoreThemeSettings extends StyleKit {
      * screen (sahip 2026-11-18; the framed card's E5 before).
      */
     hover_image: boolean
+    /**
+     * While `hover_image` is on: every photo of the product in turn while a
+     * mouse rests on the card, not only the second (sahip 2026-11-26). Off:
+     * today's second photo.
+     */
+    hover_cycle: boolean
+    /** A standard card's rows, today's `regular` or `compact` (`CARD_DENSITIES`). */
+    density: CardDensity
     /** A framed card's "free shipping" line, from its price and the shop's threshold (E5). */
     delivery_note: boolean
     /** A framed card's add button across its foot instead of the round "+" (E5). */
@@ -173,6 +182,16 @@ export interface StoreThemeSettings extends StyleKit {
     duration_row: boolean
     /** "kişi başı" after a dated product's price. */
     per_person: boolean
+    /**
+     * A standard card's stars, length and nearest departure (`CARD_META_PLACES`,
+     * sahip 2026-11-26): in its rows (today's `below`) or as glass pills on the photo.
+     */
+    meta_place: CardMetaPlace
+    /**
+     * A standard card's frame (`CARD_STYLES`, sahip 2026-11-26): today's `plain`,
+     * or `glass`, the name and price on a frosted panel floating on the photo.
+     */
+    style: CardStyle
   }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
@@ -275,6 +294,38 @@ export type CardQuickViewTrigger = (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
  */
 export const CARD_TEXT_POSITIONS = ["below", "over", "over_split"] as const
 export type CardTextPosition = (typeof CARD_TEXT_POSITIONS)[number]
+
+/**
+ * A card photo's shape, width to height: today's square first among the
+ * tall ones; `4:3` (sahip 2026-11-26) a short, wide photo for a compact card.
+ */
+export const CARD_RATIOS = ["4:5", "1:1", "3:4", "4:3"] as const
+export type CardRatio = (typeof CARD_RATIOS)[number]
+
+/**
+ * A standard card's rows (sahip 2026-11-26, a tour card): `regular`
+ * today's; `compact` the price right under the name, the stars with their
+ * count and a dated product's length on one line (on the photo's pill when
+ * the words stand over it), less room between them.
+ */
+export const CARD_DENSITIES = ["regular", "compact"] as const
+export type CardDensity = (typeof CARD_DENSITIES)[number]
+
+/**
+ * Where a standard card's stars, length and nearest departure stand
+ * (sahip 2026-11-26): `below` today's rows; `over` frosted pills on the
+ * photo's corners, leaving the name and price under it.
+ */
+export const CARD_META_PLACES = ["below", "over"] as const
+export type CardMetaPlace = (typeof CARD_META_PLACES)[number]
+
+/**
+ * A standard card's frame (sahip 2026-11-26): `plain` today's; `glass` the
+ * photo filling the card, the name and price on a frosted panel floating
+ * at its foot that lifts on hover.
+ */
+export const CARD_STYLES = ["plain", "glass"] as const
+export type CardStyle = (typeof CARD_STYLES)[number]
 
 /** A shop's shipping class (adr/0087): its key on products and its surcharge in lira (its name stays in the panel). */
 export interface StoreShippingClass {

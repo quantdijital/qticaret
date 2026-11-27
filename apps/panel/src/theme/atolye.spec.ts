@@ -143,6 +143,7 @@ describe("the panel's mirror of the Atölye theme", () => {
       "4:5": entry(ratio, "4:5"),
       "1:1": entry(ratio, "1:1") ?? "1 / 1",
       "3:4": entry(ratio, "3:4"),
+      "4:3": entry(ratio, "4:3"),
     })
   })
 

@@ -1,9 +1,13 @@
 import {
   ACCENT_FONTS,
   CARD_BUTTON_STYLES,
+  CARD_DENSITIES,
+  CARD_META_PLACES,
   CARD_NO_REVIEWS,
   CARD_QUICK_VIEW_TRIGGERS,
+  CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
+  CARD_STYLES,
   CARD_TEXT_POSITIONS,
   CARD_VARIANTS,
   LISTING_PAGE_DEFAULTS,
@@ -65,7 +69,8 @@ export const BACKGROUNDS = [
 ] as const satisfies StorefrontBackground[]
 /** The corners, sharpest first (adr/0067 Ek 2026-11-16 added `crisp` and `gentle`): the contract's list. */
 export const RADII = RADIUS_STEPS
-export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
+/** The photo's shape and a standard card's rows (sahip 2026-11-26 added `4:3` and `compact`): the contract's lists. */
+export { CARD_DENSITIES, CARD_RATIOS }
 /** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
 export { CARD_VARIANTS }
 /**
@@ -95,7 +100,7 @@ export const QUICK_VIEW_SWITCHES = [
  * switch; a dated card's length row and "kişi başı", each a switch shown
  * only while the shop sells dated products.
  */
-export { CARD_TEXT_POSITIONS }
+export { CARD_META_PLACES, CARD_STYLES, CARD_TEXT_POSITIONS }
 export const TOUR_CARD_SWITCHES = ["rating_badge", "arrow"] as const
 export const DATED_CARD_SWITCHES = ["duration_row", "per_person"] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
@@ -147,6 +152,10 @@ export interface ThemeSettings extends StyleKit {
     variant: (typeof CARD_VARIANTS)[number]
     /** The product's second photo on hover, every card's (sahip 2026-11-18). */
     hover_image: boolean
+    /** While `hover_image` is on, every photo in turn under a resting mouse (sahip 2026-11-26). */
+    hover_cycle: boolean
+    /** A standard card's rows: today's or compact (sahip 2026-11-26). */
+    density: (typeof CARD_DENSITIES)[number]
     sold_out_row: (typeof CARD_SOLD_OUT_ROWS)[number]
     no_reviews: (typeof CARD_NO_REVIEWS)[number]
     button_style: (typeof CARD_BUTTON_STYLES)[number]
@@ -155,6 +164,9 @@ export interface ThemeSettings extends StyleKit {
     quick_view_trigger: (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
     /** A standard card's words under or over its photo (adr/0077 Ek "tur kartı"). */
     text_position: (typeof CARD_TEXT_POSITIONS)[number]
+    /** The stars, length and departure on the photo; the frosted panel card (sahip 2026-11-26). */
+    meta_place: (typeof CARD_META_PLACES)[number]
+    style: (typeof CARD_STYLES)[number]
   } & Record<
     | (typeof FRAMED_CARD_SWITCHES)[number]
     | (typeof CARD_BADGE_SWITCHES)[number]
@@ -204,6 +216,8 @@ export const GRAFIT_THEME: ThemeChoices = {
     show_rating: false,
     variant: "standard",
     hover_image: true,
+    hover_cycle: false,
+    density: "regular",
     delivery_note: true,
     full_button: true,
     sale_badge: true,
@@ -222,6 +236,8 @@ export const GRAFIT_THEME: ThemeChoices = {
     arrow: false,
     duration_row: false,
     per_person: false,
+    meta_place: "below",
+    style: "plain",
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",

@@ -26,13 +26,13 @@ import { wholesaleCheckoutBlocked } from "./cart-wholesale"
 import { linePicturesOf, productPathsOf, shippingClassesOf } from "./line-paths"
 import { drawerShippingOf } from "./shipping-estimate"
 import { imageView } from "./image"
-import { navigation, withPicturesOf } from "./categories"
+import { navigation, subcategoryLinks, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
 import { withNavCounts } from "./nav-counts"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
-import { currentLayout, currentMenus, isEditorSession } from "./layout"
+import { currentLayout, currentMenus, isEditorSession, layoutLink } from "./layout"
 import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
@@ -133,7 +133,8 @@ export async function shopView(): Promise<ShopView> {
   // each category's page its product count (the dropdown's and the sheet's badges)
   const menu = withNavCounts(
     await withNavPictures(
-      mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures),
+      mainMenu(menus, t, pictures, (id) => subcategoryLinks(categories, paths, id)) ??
+        navigation(categories, paths, pictures),
       categories,
       paths
     ),
@@ -152,6 +153,8 @@ export async function shopView(): Promise<ShopView> {
   const bars = layout.header.filter((section) => section.type === "announcement_bar")
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
+  // The bar's small button (its link's own words); none: not drawn
+  const announcementLink = bar?.type === "announcement_bar" ? layoutLink(bar.link ?? null, t) : null
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
@@ -196,6 +199,7 @@ export async function shopView(): Promise<ShopView> {
       layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
     ...(announcementMark ? { announcementMark } : {}),
+    ...(announcementLink ? { announcementLink } : {}),
     ...(editing ? { editor: true as const } : {}),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them

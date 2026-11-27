@@ -1,11 +1,14 @@
 import type { JSONContent } from "@tiptap/react"
 import type {
   FooterBlockType,
+  FooterContactIconStyle,
   FooterImageWidth,
+  FooterLogoSize,
   FooterNewsletterVariant,
   FooterRowLayout,
   FooterRowStep,
   FooterRowsStep,
+  FooterTextStyle,
   FooterTrustLayout,
 } from "@qticaret/types"
 import type { LayoutImage, LayoutLink } from "./layout-sections"
@@ -31,6 +34,8 @@ export interface FooterTextBlock extends FooterBlockBase {
   title: string | null
   /** A content document without headings, quotes, tables, pictures or cards (`footerDoc`). */
   body: JSONContent
+  /** `hand`: in the shop's hand face, as the hero's note. */
+  style: FooterTextStyle
 }
 
 export interface FooterMenuBlock extends FooterBlockBase {
@@ -44,6 +49,8 @@ export interface FooterMenuBlock extends FooterBlockBase {
 export interface FooterBrandBlock extends FooterBlockBase {
   type: "brand"
   logo: boolean
+  /** `large`: a step taller, so a logo's own small line reads. */
+  logo_size: FooterLogoSize
   about: string | null
   social: boolean
   /** The shop's address (its store details) under its line. */
@@ -67,6 +74,8 @@ export interface FooterContactBlock extends FooterBlockBase {
   whatsapp: boolean
   email: boolean
   hours: boolean
+  /** `inline`: small signs in the line; `boxed`: round boxes, the kind small above. */
+  icon_style: FooterContactIconStyle
 }
 
 export interface FooterSocialBlock extends FooterBlockBase {
@@ -134,6 +143,7 @@ export interface FooterRow {
 export interface FooterRowsFields {
   ground: FooterRowsStep<"ground">
   badge_style: FooterRowsStep<"badge_style">
+  legal_place: FooterRowsStep<"legal_place">
   bottom_badges: boolean
   rows: FooterRow[]
 }

@@ -23,13 +23,14 @@ describe("the free rows footer (adr/0070)", () => {
     expect(variantOf("footer_bar", undefined)).toBe("ledger")
   })
 
-  it("splits a row into one to four columns, each split's parts its columns", () => {
-    expect(FOOTER_ROW_LAYOUTS).toHaveLength(10)
+  it("splits a row into one to five columns, each split's parts its columns", () => {
+    expect(FOOTER_ROW_LAYOUTS).toHaveLength(11)
     for (const layout of FOOTER_ROW_LAYOUTS) {
       expect(footerRowColumns(layout)).toBeGreaterThanOrEqual(1)
       expect(footerRowColumns(layout)).toBeLessThanOrEqual(FOOTER_ROWS_LIMITS.columns)
     }
     expect(footerRowColumns("2-1-1-1")).toBe(4)
+    expect(footerRowColumns("2-1-1-1-1")).toBe(5)
     expect(FOOTER_ROW_LAYOUTS).toContain(FOOTER_ROW_DEFAULTS.layout)
   })
 
@@ -49,11 +50,14 @@ describe("the free rows footer (adr/0070)", () => {
     // (the brand columns' own block and line settings stay theirs)
     expect(FOOTER_ROWS_SETTINGS).toEqual({
       ground: FOOTER_COLUMNS_SETTINGS.ground,
-      badge_style: FOOTER_COLUMNS_SETTINGS.badge_style,
+      // The columns' two ways to pay and a quiet third; the legal texts' place is the rows' own
+      badge_style: [...FOOTER_COLUMNS_SETTINGS.badge_style, "muted"],
+      legal_place: ["strip", "bottom_line"],
     })
     expect(FOOTER_ROWS_DEFAULTS).toEqual({
       ground: "well",
       badge_style: "card",
+      legal_place: "strip",
       bottom_badges: true,
     })
   })
@@ -65,7 +69,7 @@ describe("the free rows footer (adr/0070)", () => {
       expect(max).toBeLessThanOrEqual(FOOTER_ROWS_LIMITS.blocks)
     }
     expect(FOOTER_BLOCK_MAX.menu).toBe(FOOTER_ROWS_LIMITS.slots)
-    expect(FOOTER_ROWS_LIMITS).toMatchObject({ rows: 6, columns: 4, perColumn: 6, blocks: 24 })
+    expect(FOOTER_ROWS_LIMITS).toMatchObject({ rows: 6, columns: 5, perColumn: 6, blocks: 24 })
     for (const variant of FOOTER_NEWSLETTER_VARIANTS) {
       expect(SECTION_VARIANTS.newsletter).toContain(variant)
     }
