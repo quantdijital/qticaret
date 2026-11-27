@@ -255,7 +255,8 @@ medusaIntegrationTestRunner({
       })
       expect(await content.listContentEntries({ kind: "post" })).toHaveLength(1)
       expect(await content.listContentTerms({})).toHaveLength(3)
-      expect(wp.pictures).toHaveLength(4)
+      // The products' four files and the post's picture, each fetched once
+      expect(wp.pictures).toHaveLength(5)
     })
   },
 })
