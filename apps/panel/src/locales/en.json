@@ -10968,6 +10968,10 @@
             "label": "Page's own name in the breadcrumb",
             "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
           },
+          "crumbs_place": {
+            "label": "Breadcrumb on the title's line",
+            "hint": "On wide screens the breadcrumb sits on the right of the title's line, small and quiet. Off: on its own line above the title. On phones it is always above."
+          },
           "count_word": {
             "label": "Unit word in the product count",
             "hint": "Written beside the count on the page (24 tur). Empty: products. E.g. tur, oda, kurs."

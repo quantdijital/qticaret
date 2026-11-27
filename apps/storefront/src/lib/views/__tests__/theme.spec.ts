@@ -77,6 +77,7 @@ describe("themeSettings", () => {
         default_view: "list",
         view_switch: "show",
         breadcrumb_current: "hide",
+        crumbs_place: "above",
         count_word: null,
       },
       search_form: {
@@ -154,6 +155,7 @@ describe("themeSettings", () => {
         default_view: "grid",
         view_switch: "hide",
         breadcrumb_current: "show",
+        crumbs_place: "above",
         count_word: null,
       },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down

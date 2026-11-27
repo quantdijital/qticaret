@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   LISTING_BREADCRUMB_CURRENTS,
   LISTING_COUNT_WORD_MAX,
+  LISTING_CRUMBS_PLACES,
   LISTING_PAGE_DEFAULTS,
   LISTING_VIEWS,
   LISTING_VIEW_SWITCHES,
@@ -15,11 +16,14 @@ describe("listing page settings", () => {
       default_view: "grid",
       view_switch: "hide",
       breadcrumb_current: "show",
+      crumbs_place: "above",
       count_word: null,
     })
     expect(LISTING_VIEWS).toContain(LISTING_PAGE_DEFAULTS.default_view)
     expect(LISTING_VIEW_SWITCHES).toContain(LISTING_PAGE_DEFAULTS.view_switch)
     expect(LISTING_BREADCRUMB_CURRENTS).toContain(LISTING_PAGE_DEFAULTS.breadcrumb_current)
+    expect(LISTING_CRUMBS_PLACES).toContain(LISTING_PAGE_DEFAULTS.crumbs_place)
+    expect(listingPageOf({ crumbs_place: "beside" }).crumbs_place).toBe("beside")
   })
 
   it("reads none (a backend before it) and unknown values at their defaults", () => {
@@ -30,6 +34,7 @@ describe("listing page settings", () => {
         default_view: "table",
         view_switch: true,
         breadcrumb_current: 1,
+        crumbs_place: "left",
         count_word: 3,
       })
     ).toEqual(LISTING_PAGE_DEFAULTS)
@@ -39,6 +44,7 @@ describe("listing page settings", () => {
       default_view: "list",
       view_switch: "show",
       breadcrumb_current: "hide",
+      crumbs_place: "above",
       count_word: null,
     })
   })

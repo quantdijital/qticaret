@@ -40,6 +40,7 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
   const view = THEME_FIELD["listing_page.default_view"]
   const swap = THEME_FIELD["listing_page.view_switch"]
   const crumb = THEME_FIELD["listing_page.breadcrumb_current"]
+  const place = THEME_FIELD["listing_page.crumbs_place"]
   const word = THEME_FIELD["listing_page.count_word"]
   // As typed (its spaces too); the saved one is trimmed
   const rawWord = typedWord(theme.listing_page)
@@ -77,6 +78,15 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
         checked={page.breadcrumb_current === "show"}
         onChange={(on) => {
           set({ breadcrumb_current: on ? "show" : "hide" })
+        }}
+      />
+      <SwitchRow
+        id={place.target}
+        label={t(place.label)}
+        hint={t(`${P}.crumbs_place.hint`)}
+        checked={page.crumbs_place === "beside"}
+        onChange={(on) => {
+          set({ crumbs_place: on ? "beside" : "above" })
         }}
       />
       <Field label={t(word.label)} htmlFor={word.target} hint={t(`${P}.count_word.hint`)}>

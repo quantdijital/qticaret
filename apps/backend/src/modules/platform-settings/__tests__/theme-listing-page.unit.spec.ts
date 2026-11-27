@@ -22,12 +22,14 @@ describe("theme section: the listing page", () => {
     expect(LISTING_PAGE.default_view).toEqual(contract["LISTING_VIEWS"])
     expect(LISTING_PAGE.view_switch).toEqual(contract["LISTING_VIEW_SWITCHES"])
     expect(LISTING_PAGE.breadcrumb_current).toEqual(contract["LISTING_BREADCRUMB_CURRENTS"])
+    expect(LISTING_PAGE.crumbs_place).toEqual(contract["LISTING_CRUMBS_PLACES"])
     expect(LISTING_PAGE_DEFAULTS).toEqual(contract["LISTING_PAGE_DEFAULTS"])
     expect(LISTING_COUNT_WORD_MAX).toBe(contract["LISTING_COUNT_WORD_MAX"])
     expect(defaults.listing_page).toEqual({
       default_view: "grid",
       view_switch: "hide",
       breadcrumb_current: "show",
+      crumbs_place: "above",
       count_word: null,
     })
   })
@@ -36,8 +38,16 @@ describe("theme section: the listing page", () => {
     for (const default_view of LISTING_PAGE.default_view) {
       for (const view_switch of LISTING_PAGE.view_switch) {
         for (const breadcrumb_current of LISTING_PAGE.breadcrumb_current) {
-          const listing_page = { default_view, view_switch, breadcrumb_current, count_word: null }
-          expect(full.safeParse({ ...defaults, listing_page }).success).toBe(true)
+          for (const crumbs_place of LISTING_PAGE.crumbs_place) {
+            const listing_page = {
+              default_view,
+              view_switch,
+              breadcrumb_current,
+              crumbs_place,
+              count_word: null,
+            }
+            expect(full.safeParse({ ...defaults, listing_page }).success).toBe(true)
+          }
         }
       }
     }
@@ -55,6 +65,7 @@ describe("theme section: the listing page", () => {
     expect(off({ default_view: "table" })).toBe(false)
     expect(off({ view_switch: true })).toBe(false)
     expect(off({ breadcrumb_current: "none" })).toBe(false)
+    expect(off({ crumbs_place: "left" })).toBe(false)
     expect(off({ columns: 4 })).toBe(false)
   })
 
@@ -88,6 +99,7 @@ describe("theme section: the listing page", () => {
     expect(shownTheme(written, defaults, null).listing_page).toEqual({
       ...LISTING_PAGE_DEFAULTS,
       breadcrumb_current: "hide",
+      crumbs_place: "above",
     })
     expect(shownTheme(null, defaults, null).listing_page).toEqual(LISTING_PAGE_DEFAULTS)
   })

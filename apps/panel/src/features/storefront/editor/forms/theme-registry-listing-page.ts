@@ -13,7 +13,7 @@ const C = "storefront.editor.theme"
 const P = `${C}.listingPage`
 
 const field = (
-  name: "default_view" | "view_switch" | "breadcrumb_current" | "count_word"
+  name: "default_view" | "view_switch" | "breadcrumb_current" | "crumbs_place" | "count_word"
 ): FieldMeta => ({
   group: "listingPage",
   label: `${P}.${name}.label`,
@@ -27,5 +27,6 @@ export const LISTING_PAGE_META = {
   "listing_page.default_view": field("default_view"),
   "listing_page.view_switch": field("view_switch"),
   "listing_page.breadcrumb_current": field("breadcrumb_current"),
+  "listing_page.crumbs_place": field("crumbs_place"),
   "listing_page.count_word": field("count_word"),
 } satisfies Record<string, FieldMeta>

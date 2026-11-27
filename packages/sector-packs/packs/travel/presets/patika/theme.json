@@ -60,6 +60,7 @@
     "default_view": "grid",
     "view_switch": "show",
     "breadcrumb_current": "hide",
+    "crumbs_place": "beside",
     "count_word": "tur"
   },
   "menu_style": "plain",

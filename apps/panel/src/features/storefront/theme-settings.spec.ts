@@ -55,6 +55,7 @@ const SAVED: ThemeSettings = {
     default_view: "list",
     view_switch: "show",
     breadcrumb_current: "hide",
+    crumbs_place: "above",
     count_word: null,
   },
   search_form: {
@@ -97,6 +98,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
         default_view: "list",
         view_switch: "show",
         breadcrumb_current: "hide",
+        crumbs_place: "above",
         count_word: null,
       },
       search_form: { ...SAVED.search_form },
@@ -157,6 +159,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
         default_view: "grid",
         view_switch: "hide",
         breadcrumb_current: "show",
+        crumbs_place: "above",
         count_word: null,
       },
       search_form: {

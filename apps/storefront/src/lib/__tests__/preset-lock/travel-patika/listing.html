@@ -16,19 +16,25 @@
 <!-- section dropped: home.raygunubirlik -->
 <!-- section dropped: home.rayyurtdisi -->
 <div class="mx-auto w-full max-w-(--container) px-(--gutter) pt-4 lg:pt-6">
-  <nav aria-label="Bulunduğunuz yer">
-    <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
-      <li class="flex items-center gap-x-2">
-        <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
-          Ana sayfa
-        </a>
-      </li>
-    </ol>
-  </nav>
-  <header class="mt-4 flex flex-col gap-3 lg:mt-6">
-    <h1>
-      El Yapımı Çakılar
-    </h1>
+  <header class="flex flex-col gap-3">
+    <div
+      class="flex flex-col gap-4 lg:flex-row-reverse lg:items-baseline lg:justify-between lg:gap-8"
+    >
+      <div class="lg:shrink-0">
+        <nav aria-label="Bulunduğunuz yer">
+          <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
+            <li class="flex items-center gap-x-2">
+              <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
+                Ana sayfa
+              </a>
+            </li>
+          </ol>
+        </nav>
+      </div>
+      <h1 class="lg:min-w-0">
+        El Yapımı Çakılar
+      </h1>
+    </div>
   </header>
   <div class="mt-6 flex flex-col gap-8 empty:hidden lg:mt-8">
     <section aria-labelledby="alt-kategoriler" class="flex min-w-0 flex-col gap-4">
@@ -218,7 +224,7 @@
     <div class="grid gap-8 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-(--space-xl)">
       <aside aria-labelledby="filtre-baslik" class="max-lg:hidden">
         <div
-          class="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2"
+          class="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto pb-2"
         >
           <h2 id="filtre-baslik" class="flex min-h-11 items-center text-title">
             Filtreler
