@@ -7,7 +7,7 @@ import {
 
 describe("the reviews carousel's product picture (adr/0077 §10 Ek)", () => {
   it("lists none, a small square and a cover; none by default, today's card", () => {
-    expect(REVIEWS_PRODUCT_IMAGES).toEqual(["none", "thumb", "cover"])
+    expect(REVIEWS_PRODUCT_IMAGES).toEqual(["none", "thumb", "cover", "compact"])
     expect(REVIEWS_PRODUCT_IMAGE_DEFAULT).toBe("none")
   })
 

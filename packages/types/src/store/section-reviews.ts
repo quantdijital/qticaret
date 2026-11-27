@@ -2,14 +2,16 @@
  * The reviews carousel's picture of the product each review is about
  * (adr/0077 §10 Ek): `none` (today's card: the customer's photo when
  * there is one, the product's name as a link), `thumb` (a small square
- * picture of the product beside its name at the card's foot) or `cover`
+ * picture of the product beside its name at the card's foot), `cover`
  * (a short picture across the card's top: the customer's photo, else the
- * product's, its name on it). A product with no picture draws as `none`.
+ * product's, its name on it) or `compact` (the card no taller than today's: a
+ * small square picture, the name and one star with the score at its head,
+ * the quote under). A product with no picture draws as `none`.
  *
  * Mirrors the backend's `sections/reviews.ts`; a unit test keeps them equal.
  */
 
-export const REVIEWS_PRODUCT_IMAGES = ["none", "thumb", "cover"] as const
+export const REVIEWS_PRODUCT_IMAGES = ["none", "thumb", "cover", "compact"] as const
 export type ReviewsProductImage = (typeof REVIEWS_PRODUCT_IMAGES)[number]
 
 /** Absent (a carousel saved before it) or unknown (a newer backend's): `none`, today's card. */

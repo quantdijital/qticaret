@@ -12185,10 +12185,11 @@
         "productImage": {
           "label": "Ürün görseli",
           "term": "product_image",
-          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o).",
+          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o). Kompakt: kart bugünkünden büyümez; başında küçük görsel, ürün adı ve tek yıldızla puan.",
           "none": "Yok",
           "thumb": "Küçük",
-          "cover": "Kapak"
+          "cover": "Kapak",
+          "compact": "Kompakt"
         }
       },
       "searchBox": {

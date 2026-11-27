@@ -1,4 +1,4 @@
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, Star } from "lucide-react"
 import type { ReviewsProductImage } from "@qticaret/types/section-reviews"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
@@ -179,6 +179,71 @@ function PlainCard({ review, sizes, t }: { review: Review; sizes: string; t: Tra
   )
 }
 
+/**
+ * `compact` (owner 2026-11-28): the card no taller than today's. At its
+ * head the product as a small square picture beside its name and one star
+ * with the score, both one link; the quote under, then who and when.
+ */
+function CompactCard({ review, t }: { review: Review; t: Translate }) {
+  const product = review.product
+  const score = review.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })
+  const head = (
+    <>
+      {product?.image && (
+        <span className="relative block size-14 shrink-0 overflow-hidden rounded-media bg-media">
+          <ResponsiveImage image={product.image} sizes="56px" className={ZOOM} />
+        </span>
+      )}
+      <span className="flex min-w-0 flex-col gap-1">
+        {product && (
+          <span className="line-clamp-2 text-sm leading-snug font-semibold text-text">
+            {product.label}
+          </span>
+        )}
+        <span
+          className="inline-flex items-center gap-1 text-sm font-semibold text-text"
+          role="img"
+          aria-label={t("reviews.stars", { rating: review.rating })}
+        >
+          <Star className="size-4 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+          {score}
+        </span>
+      </span>
+    </>
+  )
+  return (
+    <article className="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-4 lg:p-5">
+      {product ? (
+        <a
+          href={product.path}
+          className="group flex items-center gap-3 no-underline"
+          aria-label={`${t("reviews.about")}: ${product.label}`}
+        >
+          {head}
+        </a>
+      ) : (
+        <span className="flex items-center gap-3">{head}</span>
+      )}
+      <blockquote className="flex-1 text-sm leading-relaxed text-text-2">
+        <p className="line-clamp-4">“{quoteOf(review.body)}”</p>
+      </blockquote>
+      <footer className="flex items-center gap-1.5 border-t border-rule pt-3 text-xs text-text-2">
+        <span className="font-semibold text-text">{review.author}</span>
+        {review.verified && (
+          <BadgeCheck
+            className="size-3.5 shrink-0 text-ok"
+            role="img"
+            aria-label={t("product.verified")}
+            strokeWidth={2}
+          />
+        )}
+        <span aria-hidden="true">·</span>
+        <span>{review.date}</span>
+      </footer>
+    </article>
+  )
+}
+
 /** The card the carousel's `product_image` asks for; `none` (or absent) is today's. */
 export function ReviewCard(props: {
   review: Review
@@ -186,6 +251,9 @@ export function ReviewCard(props: {
   t: Translate
   productImage: ReviewsProductImage
 }) {
+  if (props.productImage === "compact") {
+    return <CompactCard {...props} />
+  }
   if (props.productImage === "cover") {
     return <CoverCard {...props} />
   }
