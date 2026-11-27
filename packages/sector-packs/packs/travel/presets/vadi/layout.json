@@ -37,7 +37,7 @@
         "alt": "Bulutlu ormanlı dağların arasında Uzungöl, kıyısındaki kasaba ve yeşil yayla evleri"
       },
       "action": "both",
-      "search_position": "inside",
+      "search_position": "overlap",
       "height": "screen",
       "scrim": "light",
       "align": "start",
@@ -69,14 +69,15 @@
       "scroller": {
         "desktop": "four",
         "mobile": "peek",
-        "arrows": "hidden",
+        "arrows": "always",
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
         "autoplay": "off",
         "speed": "medium",
         "loop": "off",
-        "drag": "on"
+        "drag": "on",
+        "focus": "on"
       }
     },
     {
@@ -113,22 +114,50 @@
       "category_handles": ["macera", "plaj", "doga", "kultur", "balayi", "aile"]
     },
     {
-      "id": "geziyazilari",
-      "type": "posts",
+      "id": "vadikalkislar",
+      "type": "departures",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "intro_panel",
-      "title": "Yolculuğa ilham veren notlar",
-      "limit": 2,
-      "eyebrow": "Gezi yazıları",
-      "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
-      "panel_tone": "tint",
-      "ornament": "leaves",
-      "cover_ratio": "wide",
-      "link": {
-        "$href": "/blog",
-        "label": "Tüm yazılar"
+      "title": "Yakında *yola çıkanlar*",
+      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli.",
+      "source": {
+        "kind": "all"
+      },
+      "limit": 3,
+      "layout": "cards"
+    },
+    {
+      "id": "vadidoga",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Doğa ve *yürüyüş* rotaları",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:doga-ve-trekking"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm rotalar"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
       }
     },
     {
@@ -172,6 +201,61 @@
       "text_position": "middle_left",
       "overlay": "none",
       "button_style": "solid"
+    },
+    {
+      "id": "vadiadimlar",
+      "type": "steps",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yola çıkmak *bu kadar kolay*",
+      "intro": "Rotanı seç, gerisini biz düşünelim.",
+      "items": [
+        {
+          "title": "Rotanı seç",
+          "text": "Yere, türe ya da aya göre ara; programı ve dahil olanları tur sayfasında gör."
+        },
+        {
+          "title": "Tarihini belirle",
+          "text": "Kalkış gününü ve kaç kişi olduğunuzu seç; fiyat hemen görünür."
+        },
+        {
+          "title": "Yerini ayırt",
+          "text": "Güvenle öde; onay ve yolculuk bilgileri e-postana gelsin."
+        }
+      ],
+      "link": null,
+      "layout": "row",
+      "numbers": "plain",
+      "connector": "dotted"
+    },
+    {
+      "id": "vadiyorumlar",
+      "type": "reviews",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Gezginler *ne diyor*",
+      "limit": 6
+    },
+    {
+      "id": "geziyazilari",
+      "type": "posts",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "intro_panel",
+      "title": "Yolculuğa ilham veren notlar",
+      "limit": 2,
+      "eyebrow": "Gezi yazıları",
+      "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
+      "panel_tone": "tint",
+      "ornament": "leaves",
+      "cover_ratio": "wide",
+      "link": {
+        "$href": "/blog",
+        "label": "Tüm yazılar"
+      }
     },
     {
       "id": "rakamlarlavadi",

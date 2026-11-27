@@ -181,209 +181,209 @@
             </a>
           </div>
         </div>
-        <form
-          role="search"
-          aria-label="Ürün ara"
-          class="rounded-tile border border-rule bg-field text-left text-text shadow-float-edged w-full lg:w-[86%]"
-          action="/arama"
-          method="get"
-        >
-          <div class="flex flex-col gap-2 p-2 lg:flex-row lg:items-center">
-            <div
-              class="grid min-w-0 grid-cols-2 gap-2 lg:flex lg:flex-1 lg:flex-row lg:items-stretch lg:gap-0"
-            >
-              <label
-                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  stroke-width="1.75"
-                  class="lucide lucide-map-pin size-5 shrink-0 text-text-3"
-                  aria-hidden="true"
-                />
-                <span class="flex min-w-0 flex-1 flex-col">
-                  <span class="text-xs font-semibold text-text">
-                    Gidilecek yer
-                  </span>
-                  <select
-                    name="gidilecek_yer"
-                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
-                  >
-                    <option value="" selected="">
-                      Tümü
-                    </option>
-                    <option value="kapadokya">
-                      Kapadokya
-                    </option>
-                    <option value="ege">
-                      Ege
-                    </option>
-                    <option value="karadeniz">
-                      Karadeniz
-                    </option>
-                    <option value="dogu-anadolu">
-                      Doğu Anadolu
-                    </option>
-                  </select>
-                </span>
-              </label>
-              <div
-                role="group"
-                aria-label="Tarih"
-                class="flex min-w-0 max-lg:contents lg:flex-row lg:border-l lg:border-rule lg:min-w-fit lg:flex-[2]"
-              >
-                <label
-                  class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    stroke-width="1.75"
-                    class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
-                    aria-hidden="true"
-                  />
-                  <span class="flex min-w-0 flex-1 flex-col">
-                    <span class="text-xs font-semibold text-text">
-                      Başlangıç
-                    </span>
-                    <input
-                      type="date"
-                      min="2026-11-15"
-                      max="2027-10-31"
-                      class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
-                      name="tarih_baslangic"
-                      value=""
-                    />
-                  </span>
-                </label>
-                <label
-                  class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    stroke-width="1.75"
-                    class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
-                    aria-hidden="true"
-                  />
-                  <span class="flex min-w-0 flex-1 flex-col">
-                    <span class="text-xs font-semibold text-text">
-                      Bitiş
-                    </span>
-                    <input
-                      type="date"
-                      min="2026-11-15"
-                      max="2027-10-31"
-                      class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
-                      name="tarih_bitis"
-                      value=""
-                    />
-                  </span>
-                </label>
-              </div>
-              <label
-                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  stroke-width="1.75"
-                  class="lucide lucide-users size-5 shrink-0 text-text-3"
-                  aria-hidden="true"
-                />
-                <span class="flex min-w-0 flex-1 flex-col">
-                  <span class="text-xs font-semibold text-text">
-                    Kişi
-                  </span>
-                  <select
-                    name="kisi"
-                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
-                  >
-                    <option value="1" selected="">
-                      1 kişi
-                    </option>
-                    <option value="2">
-                      2 kişi
-                    </option>
-                    <option value="3">
-                      3 kişi
-                    </option>
-                    <option value="4">
-                      4 kişi
-                    </option>
-                    <option value="5">
-                      5 kişi
-                    </option>
-                    <option value="6">
-                      6 kişi
-                    </option>
-                    <option value="7">
-                      7 kişi
-                    </option>
-                    <option value="8">
-                      8 kişi
-                    </option>
-                    <option value="9">
-                      9 kişi
-                    </option>
-                    <option value="10">
-                      10 kişi
-                    </option>
-                    <option value="11">
-                      11 kişi
-                    </option>
-                    <option value="12">
-                      12 kişi
-                    </option>
-                    <option value="13">
-                      13 kişi
-                    </option>
-                    <option value="14">
-                      14 kişi
-                    </option>
-                    <option value="15">
-                      15 kişi
-                    </option>
-                    <option value="16">
-                      16 kişi
-                    </option>
-                    <option value="17">
-                      17 kişi
-                    </option>
-                    <option value="18">
-                      18 kişi
-                    </option>
-                    <option value="19">
-                      19 kişi
-                    </option>
-                    <option value="20">
-                      20 kişi
-                    </option>
-                  </select>
-                </span>
-              </label>
-            </div>
-            <button type="submit" class="gf-btn shrink-0 gap-2 lg:self-stretch">
-              <svg
-                width="24"
-                height="24"
-                stroke-width="2"
-                class="lucide lucide-search size-4.5"
-                aria-hidden="true"
-              />
-              Ara
-            </button>
-          </div>
-        </form>
       </div>
     </div>
     <div
       class="mx-auto w-full max-w-(--container) px-(--gutter) gf-cover-foot relative z-(--z-raised) flex flex-col gap-4"
     >
+      <form
+        role="search"
+        aria-label="Ürün ara"
+        class="rounded-tile border border-rule bg-field text-left text-text shadow-float-edged w-full"
+        action="/arama"
+        method="get"
+      >
+        <div class="flex flex-col gap-2 p-2 lg:flex-row lg:items-center">
+          <div
+            class="grid min-w-0 grid-cols-2 gap-2 lg:flex lg:flex-1 lg:flex-row lg:items-stretch lg:gap-0"
+          >
+            <label
+              class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+            >
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-map-pin size-5 shrink-0 text-text-3"
+                aria-hidden="true"
+              />
+              <span class="flex min-w-0 flex-1 flex-col">
+                <span class="text-xs font-semibold text-text">
+                  Gidilecek yer
+                </span>
+                <select
+                  name="gidilecek_yer"
+                  class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                >
+                  <option value="" selected="">
+                    Tümü
+                  </option>
+                  <option value="kapadokya">
+                    Kapadokya
+                  </option>
+                  <option value="ege">
+                    Ege
+                  </option>
+                  <option value="karadeniz">
+                    Karadeniz
+                  </option>
+                  <option value="dogu-anadolu">
+                    Doğu Anadolu
+                  </option>
+                </select>
+              </span>
+            </label>
+            <div
+              role="group"
+              aria-label="Tarih"
+              class="flex min-w-0 max-lg:contents lg:flex-row lg:border-l lg:border-rule lg:min-w-fit lg:flex-[2]"
+            >
+              <label
+                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-xs font-semibold text-text">
+                    Başlangıç
+                  </span>
+                  <input
+                    type="date"
+                    min="2026-11-15"
+                    max="2027-10-31"
+                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                    name="tarih_baslangic"
+                    value=""
+                  />
+                </span>
+              </label>
+              <label
+                class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus lg:min-w-40"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  stroke-width="1.75"
+                  class="lucide lucide-calendar-days size-5 shrink-0 text-text-3"
+                  aria-hidden="true"
+                />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="text-xs font-semibold text-text">
+                    Bitiş
+                  </span>
+                  <input
+                    type="date"
+                    min="2026-11-15"
+                    max="2027-10-31"
+                    class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                    name="tarih_bitis"
+                    value=""
+                  />
+                </span>
+              </label>
+            </div>
+            <label
+              class="flex min-w-0 flex-1 items-center gap-2 border border-rule px-2.5 py-2 lg:gap-3 lg:border-0 lg:border-l lg:px-3 lg:py-2.5 lg:first:border-l-0 cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus"
+            >
+              <svg
+                width="24"
+                height="24"
+                stroke-width="1.75"
+                class="lucide lucide-users size-5 shrink-0 text-text-3"
+                aria-hidden="true"
+              />
+              <span class="flex min-w-0 flex-1 flex-col">
+                <span class="text-xs font-semibold text-text">
+                  Kişi
+                </span>
+                <select
+                  name="kisi"
+                  class="w-full min-w-0 appearance-none truncate bg-transparent text-sm text-text-2 outline-none [color-scheme:light]"
+                >
+                  <option value="1" selected="">
+                    1 kişi
+                  </option>
+                  <option value="2">
+                    2 kişi
+                  </option>
+                  <option value="3">
+                    3 kişi
+                  </option>
+                  <option value="4">
+                    4 kişi
+                  </option>
+                  <option value="5">
+                    5 kişi
+                  </option>
+                  <option value="6">
+                    6 kişi
+                  </option>
+                  <option value="7">
+                    7 kişi
+                  </option>
+                  <option value="8">
+                    8 kişi
+                  </option>
+                  <option value="9">
+                    9 kişi
+                  </option>
+                  <option value="10">
+                    10 kişi
+                  </option>
+                  <option value="11">
+                    11 kişi
+                  </option>
+                  <option value="12">
+                    12 kişi
+                  </option>
+                  <option value="13">
+                    13 kişi
+                  </option>
+                  <option value="14">
+                    14 kişi
+                  </option>
+                  <option value="15">
+                    15 kişi
+                  </option>
+                  <option value="16">
+                    16 kişi
+                  </option>
+                  <option value="17">
+                    17 kişi
+                  </option>
+                  <option value="18">
+                    18 kişi
+                  </option>
+                  <option value="19">
+                    19 kişi
+                  </option>
+                  <option value="20">
+                    20 kişi
+                  </option>
+                </select>
+              </span>
+            </label>
+          </div>
+          <button type="submit" class="gf-btn shrink-0 gap-2 lg:self-stretch">
+            <svg
+              width="24"
+              height="24"
+              stroke-width="2"
+              class="lucide lucide-search size-4.5"
+              aria-hidden="true"
+            />
+            Ara
+          </button>
+        </div>
+      </form>
       <ul
         aria-label="Alışveriş güvenceleri"
-        class="gf-trust-box grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2 lg:py-7 lg:grid-cols-3 mx-auto lg:w-[82%]"
+        class="gf-trust-box grid grid-cols-2 gap-x-4 gap-y-5 rounded-tile bg-field px-4 py-5 text-left text-text shadow-float sm:px-6 lg:gap-x-0 lg:px-2 lg:py-7 lg:grid-cols-3"
       >
         <li
           class="flex items-start gap-3 last:odd:col-span-2 lg:border-l lg:border-rule lg:px-6 lg:first:border-l-0 lg:last:odd:col-span-1"
