@@ -51,28 +51,28 @@ describe("Assurances tiles beside the shipping card", () => {
 
   it("draws two tiles side by side", () => {
     const html = render([...DELIVERY, ...OTHERS.slice(0, 2)])
-    // Two to a row at every width
-    expect(html).toContain('class="grid grid-cols-2 gap-2"')
+    // One low row each on a phone, two to a row from sm
+    expect(html).toContain('class="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2"')
     const classes = tiles(html)
     expect(classes).toHaveLength(2)
-    expect(classes.some((c) => c.includes("col-span-2"))).toBe(false)
+    expect(classes.some((c) => c.includes("sm:col-span-2"))).toBe(false)
   })
 
   it("lets the last of three tiles span the row", () => {
     const classes = tiles(render(OTHERS.slice(0, 3)))
     expect(classes).toHaveLength(3)
-    expect(classes.map((c) => c.includes("col-span-2"))).toEqual([false, false, true])
+    expect(classes.map((c) => c.includes("sm:col-span-2"))).toEqual([false, false, true])
   })
 
   it("keeps four tiles in even pairs", () => {
     const classes = tiles(render(OTHERS))
     expect(classes).toHaveLength(4)
-    expect(classes.some((c) => c.includes("col-span-2"))).toBe(false)
+    expect(classes.some((c) => c.includes("sm:col-span-2"))).toBe(false)
   })
 })
 
 describe("Assurances tile text on narrow columns", () => {
-  it("stacks a tile on a phone, its title two lines and its line one; icon beside from sm", () => {
+  it("keeps title and line to one line each on a phone, two from sm", () => {
     const html = render([
       {
         icon: "gift",
@@ -81,14 +81,15 @@ describe("Assurances tile text on narrow columns", () => {
       },
       badge("card", "Mastercard"),
     ])
-    expect(tiles(html).every((c) => c.includes("flex-col") && c.includes("sm:flex-row"))).toBe(true)
-    expect(html).toMatch(
-      /<span class="line-clamp-2 text-\[13px\][^"]*">Sevdiklerinize Özel Bir Hediye</
+    expect(html).toContain(
+      '<span class="truncate font-semibold sm:line-clamp-2 sm:whitespace-normal">Sevdiklerinize Özel Bir Hediye</span>'
     )
-    // The whole line stays in the markup, clamped to one line on a phone and two from sm
-    expect(html).toMatch(
-      /<span class="line-clamp-1 [^"]*sm:line-clamp-2">Kutulu Seçeneklerle birlikte<\/span>/
+    // The whole line stays in the markup, cut visually only
+    expect(html).toContain(
+      '<span class="truncate text-xs text-text-2 sm:line-clamp-2 sm:whitespace-normal">Kutulu Seçeneklerle birlikte</span>'
     )
+    // Low rows on a phone, the usual padding from sm
+    expect(tiles(html).every((c) => c.includes("py-2 sm:py-3"))).toBe(true)
   })
 })
 

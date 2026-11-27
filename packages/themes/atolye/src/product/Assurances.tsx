@@ -3,26 +3,26 @@ import type { ProductPageView, TrustBadgeView, Translate } from "@qticaret/ui"
 import { TrustIcon } from "../parts/TrustIcon"
 
 /**
- * One promise in a compact tile. On a phone two to a row, each stacked:
- * the icon, the title (two lines at most), its line (one, an ellipsis);
- * from `sm` the icon in a round chip beside the title and a line of two at
- * most, so no tile stretches its row (owner 2026-11-27). Clamped text stays
- * whole in the markup for a screen reader.
+ * One promise in a compact row: its icon in a round chip, the title, its
+ * line. On a phone one low row each, title and line one line apiece (an
+ * ellipsis); from `sm` two to a row, the title and the line two lines at
+ * most, so no tile stretches its row (owner 2026-11-27). Clamped text
+ * stays whole in the markup for a screen reader.
  */
 function Fact({ badge, wide }: { badge: TrustBadgeView; wide: boolean }) {
   return (
     <li
-      className={`flex flex-col items-start gap-1 rounded-media gf-box p-2.5 sm:flex-row sm:items-center sm:gap-3 sm:p-3${wide ? " col-span-2" : ""}`}
+      className={`flex items-center gap-3 rounded-media gf-box px-3 py-2 sm:py-3${wide ? " sm:col-span-2" : ""}`}
     >
-      <span className="flex shrink-0 items-center justify-center sm:size-9 sm:rounded-pill sm:bg-paper">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-pill bg-paper sm:size-9">
         <TrustIcon icon={badge.icon} className="size-5" />
       </span>
-      <span className="flex min-w-0 flex-col">
-        <span className="line-clamp-2 text-[13px] leading-tight font-semibold sm:text-sm sm:leading-snug">
+      <span className="flex min-w-0 flex-col text-sm leading-snug">
+        <span className="truncate font-semibold sm:line-clamp-2 sm:whitespace-normal">
           {badge.title}
         </span>
         {badge.text && (
-          <span className="line-clamp-1 text-xs leading-snug text-text-2 sm:line-clamp-2">
+          <span className="truncate text-xs text-text-2 sm:line-clamp-2 sm:whitespace-normal">
             {badge.text}
           </span>
         )}
@@ -44,8 +44,8 @@ const CARD_ICONS: ReadonlySet<TrustBadgeView["icon"]> = new Set(["truck", "clock
  * a row; no well around them. Owner decision 2026-11-27 (adr/0066 owner
  * change, docs/tema/bilesen-standardi.md §7): the tiles show only as a group
  * of two or more (a lone tile looked stranded; the badge still shows on the
- * home strip, footer and cart); two to a row (stacked tiles on a phone),
- * an odd last tile spanning the row so no cell stands empty. Without the card,
+ * home strip, footer and cart); one low row each on a phone, from `sm` two
+ * to a row with an odd last tile spanning it so no cell stands empty. Without the card,
  * delivery and returns as plain facts on a filled well (the free shipping
  * line, every promise).
  */
@@ -59,7 +59,10 @@ export function Assurances({ view, t }: { view: ProductPageView; t: Translate })
     }
     const odd = rest.length % 2 === 1
     return (
-      <ul aria-label={t("product.assurances")} className="grid grid-cols-2 gap-2">
+      <ul
+        aria-label={t("product.assurances")}
+        className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2"
+      >
         {rest.map((badge, index) => (
           <Fact key={badge.title} badge={badge} wide={odd && index === rest.length - 1} />
         ))}
