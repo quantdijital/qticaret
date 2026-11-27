@@ -63,7 +63,9 @@ describe("the shop's header and footer under a preset (adr/0063 §4)", () => {
     )
 
     // Its settings filled with the defaults: the first line alone, as before (bilesen-denetimi (b) 6)
-    expect(doc.header).toEqual([{ ...announcements, ...ANNOUNCEMENT_DEFAULTS }])
+    expect(doc.header).toEqual([
+      { ...announcements, variant: "graphite", ...ANNOUNCEMENT_DEFAULTS },
+    ])
     expect(doc.footer.map((section) => section.id)).toEqual(["ebultenkutusu"])
     expect(frame.kept).toEqual(["header.duyurular"])
   })

@@ -122,6 +122,8 @@ medusaIntegrationTestRunner({
         {
           id: "duyurular",
           type: "announcement_bar",
+          // The top strip's design (owner 2026-11-27): the dark bar, every part shown
+          variant: "graphite",
           lines: ["Bize 0532 123 45 67 ile ulaşın"],
           mode: "first",
           interval: "medium",

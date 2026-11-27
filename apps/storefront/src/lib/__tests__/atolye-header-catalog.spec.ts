@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HeaderCatalogView, ShopView } from "@qticaret/ui"
-import { renderFrame, shopFixture } from "@/test/theme-render"
+import { catalogStrip, renderFrame, shopFixture, shopOf } from "@/test/theme-render"
 import { readFileSync } from "node:fs"
 import { aisleFit } from "../../../../../packages/themes/atolye/src/frame/aisle-fit"
 
@@ -39,14 +39,16 @@ const CATALOG: HeaderCatalogView = {
   menuGround: "stage",
 }
 
+// The catalog header with the top strip its settings read into (owner 2026-11-27)
 const catalogShop = (set: Partial<HeaderCatalogView> = {}, over: Partial<ShopView> = {}) =>
-  shopFixture({
+  shopOf({
     headerBar: {
       id: "mainheader",
       variant: "catalog",
       sticky: true,
       catalog: { ...CATALOG, ...set },
     },
+    ...catalogStrip({ ...CATALOG, ...set }),
     ...over,
   })
 
