@@ -70,9 +70,7 @@ function fromMap(key: string, icon: LucideIcon, { exact }: { exact?: true } = {}
 export const NAV_GROUPS: NavGroup[] = [
   {
     key: null,
-    items: [
-      fromMap("dashboard", LayoutDashboard, { exact: true }),
-    ],
+    items: [fromMap("dashboard", LayoutDashboard, { exact: true })],
   },
   {
     key: "sales",
