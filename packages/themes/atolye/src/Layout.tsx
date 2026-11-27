@@ -14,6 +14,8 @@ import { Footer } from "./frame/Footer"
 import { FooterGroup } from "./frame/FooterGroup"
 import { Header } from "./frame/Header"
 import { topStripOf } from "./frame/TopStrip"
+import { TopSlider } from "./frame/TopSlider"
+import { topSliderWords } from "./frame/top-slider-words"
 import { CardCycle } from "./frame/CardCycle"
 import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
@@ -103,6 +105,13 @@ export function Layout({
     <div className="flex min-h-dvh flex-col" {...marks}>
       <LayerMarks marks={layers}>
         {skip}
+        {shop.topSlider && (
+          <TopSlider
+            view={shop.topSlider}
+            words={topSliderWords(t, shop.topSlider.slides.length)}
+            mark={shop.editor ? shop.topSlider.id : undefined}
+          />
+        )}
         {strip.above}
         {shop.marquee && (
           <Marquee

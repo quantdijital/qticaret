@@ -104,6 +104,9 @@ export function EditorTree({
           onAddFooterSection={(before = null) => {
             onAdding({ where: "footer", before })
           }}
+          onAddTopStrip={() => {
+            onAdding({ where: "top_strip", before: null })
+          }}
           onTheme={() => {
             setOpened({ kind: "theme" })
           }}

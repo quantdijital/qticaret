@@ -9789,18 +9789,97 @@
         "pages": "Pages in draft",
         "pageLive": "Also put the {{title}} page live"
       },
+      "topSlider": {
+        "empty": "No pictures yet: the strip shows on the storefront once you add one.",
+        "slides": "Slides",
+        "slide": "Slide {{number}}",
+        "noAlt": "No description",
+        "flawed": "A field needs fixing",
+        "image": "Picture",
+        "imageHint": "Cropped to the strip's full width at the height you pick; choose a wide, landscape picture (e.g. 1920 × 120).",
+        "mobileImage": "Phone picture",
+        "mobileHint": "Optional: shown instead below 640 pixels.",
+        "link": "Link",
+        "linkHint": "Optional: the page a click on the picture opens.",
+        "add": "Add picture",
+        "addHint": "Up to {{max}} pictures, shown one at a time.",
+        "full": "Up to {{max}} pictures can be added.",
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "thin": "Thin",
+          "medium": "Medium",
+          "tall": "Tall",
+          "hint": "48, 80 or 120 pixels on a wide screen; a little lower on a phone."
+        },
+        "interval": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast",
+          "hint": "How long each picture stays: 8, 6 or 4 seconds. With reduced motion it does not turn by itself."
+        },
+        "transition": {
+          "label": "Transition",
+          "term": "transition",
+          "slide": "Slide",
+          "fade": "Fade",
+          "hint": "Slide: the next comes in from the side. Fade: it fades in place."
+        },
+        "arrows": {
+          "label": "Previous / next arrows",
+          "term": "arrows",
+          "off": "Off",
+          "on": "On",
+          "hint": "Small arrows on either side; visitors step through by hand."
+        },
+        "dots": {
+          "label": "Show dots",
+          "term": "dots",
+          "off": "Off",
+          "on": "On",
+          "hint": "A dot for each picture under the band."
+        }
+      },
       "topStrip": {
         "title": "Top strip",
         "hide": "Hide the top strip",
         "show": "Show the top strip",
         "off": "Top strip hidden: nothing is drawn above the header on any screen.",
-        "add": "Add top strip",
+        "add": "Add to the top strip",
+        "full": "The top strip holds a strip and a scrolling strip; remove one to add another.",
+        "pick": {
+          "title": "Add to the top strip",
+          "description": "Add a strip or a scrolling strip above the header. You can change the strip's design and motion later in its settings.",
+          "taken": "Already added.",
+          "barTaken": "Already added: the top strip has a text strip; change its dark or light design in its settings.",
+          "graphite": {
+            "name": "Announcement strip",
+            "description": "Dark strip: your announcement, a small button beside it, and on wide screens the top links and phone."
+          },
+          "light": {
+            "name": "Light strip",
+            "description": "Thin light strip: a short note, the top links and, if you like, “My account”."
+          },
+          "slider": {
+            "name": "Image slider strip",
+            "description": "Your pictures at full width, one at a time, sliding; with arrows, each may link somewhere."
+          },
+          "marquee": {
+            "name": "Scrolling text",
+            "description": "Your short words or a campaign, in a strip that keeps scrolling."
+          },
+          "sliderLine1": "Free shipping on orders of {ücretsiz_kargo_eşiği} and over",
+          "sliderLine2": "Your orders are packed with care and shipped quickly",
+          "sliderLine3": "Secure payment with instalments on credit cards"
+        },
         "linksLabel": "Top links",
         "linksHint": "The links in your “Top” menu, from 1024 px.",
         "phoneLabel": "Phone",
         "phoneHint": "The phone in your store profile, from 1024 px.",
         "accountLabel": "“My account” text",
-        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable."
+        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable. Announcements taking turns are on the dark design: set the design to “Dark strip” under Style."
       },
       "tree": {
         "label": "The page's sections",
@@ -9879,6 +9958,10 @@
         "none": "No section matches your search."
       },
       "types": {
+        "top_slider": {
+          "name": "Image slider",
+          "description": "Your pictures at full width above the header, one at a time; each may link somewhere."
+        },
         "announcement_bar": {
           "name": "Top strip",
           "description": "The thin strip above the header: your announcements, top links and phone. Dark or light; separate from the header, hidden it draws nothing."
@@ -10266,6 +10349,7 @@
         "image": "Image",
         "alt": "Image description",
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
+        "altPlaceholder": "e.g. Winter sale: 20% off everything",
         "noImage": "No image",
         "limit": "How many to show",
         "limitTerm": "limit",
@@ -10509,13 +10593,16 @@
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
         "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "lineLink": "Announcement {{number}}'s link",
+        "addSecond": "Add a second announcement",
+        "sliderNeedsTwo": "Add at least two announcements for them to take turns.",
         "mode": {
           "label": "Several announcements",
           "term": "multiple",
           "first": "First only",
           "rotate": "In turn",
           "inline": "Side by side",
-          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: one announcement at a time, changing at the interval you pick; set its transition, arrows and pausing under Motion. With reduced motion it does not turn by itself; with arrows on, visitors step through by hand."
         },
         "interval": {
           "label": "Interval",
@@ -10538,6 +10625,20 @@
           "on": "On",
           "off": "Off",
           "hint": "It always stops when the keyboard reaches the bar."
+        },
+        "transition": {
+          "label": "Transition",
+          "term": "transition",
+          "fade": "Fade",
+          "slide": "Slide",
+          "hint": "Fade: the announcement fades out in place and the next appears (as today). Slide: the next slides in from the side and the old one leaves the other way. With reduced motion both change instantly."
+        },
+        "arrows": {
+          "label": "Previous / next arrows",
+          "term": "arrows",
+          "off": "Off",
+          "on": "On",
+          "hint": "Small arrows beside the announcement let visitors step through by hand. They also work with reduced motion."
         },
         "align": {
           "label": "Alignment",
@@ -10565,7 +10666,9 @@
         },
         "link": {
           "label": "Bar button",
-          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn."
+          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn.",
+          "lightLabel": "Note link",
+          "lightHint": "Optional: the page a click on the note opens."
         }
       },
       "problems": {
@@ -10575,6 +10678,7 @@
         "textInvalid": "The text cannot hold invisible control characters.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu.",
         "linkLabel": "Enter the shown text of the address.",
+        "altRequired": "Write a short text describing the picture (e.g. Winter sale: 20% off everything).",
         "slidesRequired": "Add at least one image.",
         "productsRequired": "Pick at least one product.",
         "productRequired": "Choose a product.",

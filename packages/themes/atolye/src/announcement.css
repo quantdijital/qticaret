@@ -8,6 +8,11 @@
  * - `link`: a small pill button beside the lines, the bar's light ink on
  *   its ground, the ground's colour as its words (Wanderly's "Get a Free
  *   Quote"). Its height fits the small bar; a touch screen's is 32 px.
+ * - `transition: slide` (`frame/AnnouncementTurns.tsx`, owner 2026-11-27):
+ *   the turning lines slide like a slider's: the line coming in from the
+ *   end (from the start on a step back), the one it pushes out leaving the
+ *   other way; the list clips them, so the bar's size never moves. No
+ *   movement before the first step, nor under reduced motion.
  */
 @layer components {
   .gf-stage[data-bar="primary"] {
@@ -45,5 +50,53 @@
     .gf-bar-btn {
       min-height: 2rem;
     }
+  }
+
+  .gf-turns[data-transition="slide"] {
+    --gf-turn-from: 100%;
+    --gf-turn-to: -100%;
+    overflow: clip;
+  }
+  .gf-turns[data-transition="slide"][data-back] {
+    --gf-turn-from: -100%;
+    --gf-turn-to: 100%;
+  }
+  .gf-turns[data-transition="slide"] > [data-move="in"] {
+    animation: gf-turn-in 450ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  .gf-turns[data-transition="slide"] > [data-move="out"] {
+    animation: gf-turn-out 450ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-turns[data-transition="slide"] > [data-move] {
+      animation: none;
+    }
+  }
+}
+
+@keyframes gf-turn-in {
+  from {
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(var(--gf-turn-from));
+  }
+  to {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Drawn while it leaves, then hidden again as every line not shown */
+@keyframes gf-turn-out {
+  from {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    visibility: hidden;
+    opacity: 1;
+    transform: translateX(var(--gf-turn-to));
   }
 }

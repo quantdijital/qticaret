@@ -1,7 +1,7 @@
 import "server-only"
 import { announcementSettingsOf } from "@qticaret/types/section-announcement"
 import { headers } from "next/headers"
-import type { ContactView, ShopView, Translate } from "@qticaret/ui"
+import type { ContactView, ShopView, TopSliderView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
@@ -43,6 +43,7 @@ import { footerLogosOf } from "./footer-logo"
 import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
+import { topSliderView } from "./top-slider"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
 export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
@@ -166,6 +167,11 @@ export async function shopView(): Promise<ShopView> {
           ? layoutLink({ ...bar.link, label: note }, t)
           : null
         : layoutLink(bar.link ?? null, t)
+  // The dark bar's lines' own links, by each line's place (owner 2026-11-27: a slider's)
+  const lineLinks =
+    bar?.type === "announcement_bar" && bar.variant !== "light" && bar.line_links?.some(Boolean)
+      ? bar.line_links.map((link) => layoutLink(link, t))
+      : null
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
@@ -213,7 +219,10 @@ export async function shopView(): Promise<ShopView> {
     // The top strip's design and parts (owner 2026-11-27); no strip section: none above the header
     ...(bar?.type === "announcement_bar" ? { topStrip: topStripOf(bar) } : {}),
     ...(announcementLink ? { announcementLink } : {}),
+    ...(lineLinks ? { announcementLineLinks: lineLinks } : {}),
     ...(editing ? { editor: true as const } : {}),
+    // The top image slider above it all (owner 2026-11-27); no slides yet: none
+    ...withTopSlider(topSliderView(layout.header, t)),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     // The catalog header's "Kategoriler" lists the top categories already read (no request),
@@ -264,3 +273,5 @@ export async function shopView(): Promise<ShopView> {
     ...(features?.natural_search === true ? { searchHint: t("search.natural_hint") } : {}),
   }
 }
+
+const withTopSlider = (view: TopSliderView | null) => (view ? { topSlider: view } : {})
