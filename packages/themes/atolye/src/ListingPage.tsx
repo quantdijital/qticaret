@@ -113,7 +113,7 @@ export function ListingPage({
             >
               {panel && (
                 <aside aria-labelledby="filtre-baslik" className="max-lg:hidden">
-                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto overscroll-contain pb-2">
+                  <div className="gf-scroll-fade sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-6 overflow-y-auto pb-2">
                     <h2 id="filtre-baslik" className="flex min-h-11 items-center text-title">
                       {t("listing.filters")}
                     </h2>
