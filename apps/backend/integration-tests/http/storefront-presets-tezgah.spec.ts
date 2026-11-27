@@ -23,6 +23,7 @@ interface Applied {
 
 interface StoreLayout {
   layout: {
+    header: Section[]
     home: Section[]
     footer: Section[]
     main: Record<string, Section & { catalog?: Record<string, unknown> }>
@@ -156,6 +157,10 @@ medusaIntegrationTestRunner({
       })
       // No free shipping threshold yet: no half sentence, no note
       expect(layout.main["header_bar"]?.catalog?.["strip_note"]).toBeNull()
+      // The catalog's strip is the top strip's own section, light (owner 2026-11-27)
+      expect(layout.header).toEqual([
+        expect.objectContaining({ id: "ustserit", variant: "light", lines: [] }),
+      ])
       expect(layout.settings.theme).toMatchObject({
         colors: { primary: "#b3261e", accent: "#2e3338", background: "steel" },
         radius: "sharp",
@@ -165,9 +170,14 @@ medusaIntegrationTestRunner({
         http.post("/admin/platform-settings/promotions", { free_shipping_threshold: 1500 }, asOwner)
       )
       expect(saved.status).toBe(200)
-      expect((await previewed()).main["header_bar"]?.catalog?.["strip_note"]).toBe(
+      const filled = await previewed()
+      expect(filled.main["header_bar"]?.catalog?.["strip_note"]).toBe(
         "₺1.500 üzeri siparişlerde kargo bedava"
       )
+      expect(filled.header[0]).toMatchObject({
+        variant: "light",
+        lines: ["₺1.500 üzeri siparişlerde kargo bedava"],
+      })
     })
   },
 })

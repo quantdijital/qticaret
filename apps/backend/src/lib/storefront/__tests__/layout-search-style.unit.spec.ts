@@ -20,7 +20,7 @@ describe("the header search's look (adr/0049 Ek 2026-11-15; adr/0066 K3b)", () =
   it("reads a header bar saved without it as drawn before: the box", () => {
     for (const variant of VARIANTS) {
       const old = readStoredLayout(header({ variant, sticky: false }))
-      expect(old.header[0]).toMatchObject({ variant, search_style: "field" })
+      expect(old.header.at(-1)).toMatchObject({ variant, search_style: "field" })
       expect(mainSectionsOf(old).header_bar).toMatchObject({ variant, search_style: "field" })
     }
     // A design with no header bar at all takes the theme's, with the same default
@@ -32,7 +32,7 @@ describe("the header search's look (adr/0049 Ek 2026-11-15; adr/0066 K3b)", () =
     for (const variant of VARIANTS) {
       for (const step of HEADER_SEARCH_STYLES) {
         const doc = layoutDocument.parse(header({ variant, search_style: step }))
-        expect(doc.header[0]).toMatchObject({ variant, search_style: step })
+        expect(doc.header.at(-1)).toMatchObject({ variant, search_style: step })
         expect(mainSectionsOf(doc).header_bar).toMatchObject({ variant, search_style: step })
       }
     }
@@ -48,7 +48,7 @@ describe("the header search's look (adr/0049 Ek 2026-11-15; adr/0066 K3b)", () =
     const doc = readStoredLayout(
       header({ variant: "centered", sticky: false, menu_images: "off", search_style: "drawer" })
     )
-    expect(doc.header[0]).toMatchObject({
+    expect(doc.header.at(-1)).toMatchObject({
       variant: "centered",
       sticky: false,
       menu_images: "off",

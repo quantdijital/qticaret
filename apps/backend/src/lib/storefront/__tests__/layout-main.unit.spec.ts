@@ -28,6 +28,8 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       menu_images: "submenus",
       search_style: "field",
       tool_labels: "show",
+      // A design without a header bar is read into the separate top strip (owner 2026-11-27)
+      top_strip: "separate",
       ...ALWAYS,
     })
     expect(doc.footer).toEqual([
@@ -139,7 +141,11 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
         { id: "maincategory", type: "category_main", by_variant: { showcase: { tabs: true } } },
       ],
     })
-    expect(doc.header[0]).toMatchObject({ variant: "standard", sticky: false })
+    // The header bar after the top strip its old drawing had (owner 2026-11-27)
+    expect(doc.header.find((section) => section.type === "header_bar")).toMatchObject({
+      variant: "standard",
+      sticky: false,
+    })
     expect(doc.category[0]).toMatchObject({ by_variant: {} })
   })
 

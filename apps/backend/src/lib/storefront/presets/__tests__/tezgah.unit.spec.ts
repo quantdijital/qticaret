@@ -80,17 +80,23 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
       expect(resolved.dropped).toEqual([])
       expect(resolved.images).toEqual(tezgah.images.map((image) => image.path))
       expect(doc.home).toHaveLength(18)
+      // The catalog's old strip as the top strip's own section, light (owner 2026-11-27)
       expect(doc.header).toEqual([
+        expect.objectContaining({
+          type: "announcement_bar",
+          variant: "light",
+          lines: ["{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"],
+        }),
         expect.objectContaining({
           type: "header_bar",
           variant: "catalog",
           menu_ground: "stage",
           menu_images: "all",
           search_style: "icon",
-          strip_note: "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava",
+          top_strip: "separate",
         }),
       ])
-      expect(doc.header[0]).toHaveProperty("strip_note_link.target", "sale")
+      expect(doc.header[0]).toHaveProperty("link.target", "sale")
       expect(doc.footer.map((section) => section.type)).toEqual(["footer_bar", "newsletter"])
       expect(doc.product.map((section) => section.type)).toEqual([
         "product_main",

@@ -68,6 +68,8 @@ medusaIntegrationTestRunner({
         menu_images: "submenus",
         search_style: "field",
         tool_labels: "show",
+        // The top strip is its own section (owner 2026-11-27): the bar says so
+        top_strip: "separate",
         ...ALWAYS,
       })
       expect(opened.draft.footer[0]).toMatchObject({ type: "footer_bar", variant: "ledger" })
@@ -127,9 +129,11 @@ medusaIntegrationTestRunner({
         ],
       })
       expect(saved.status).toBe(200)
+      // Saved without the top strip's mark: read into it, the bar keeping its dark design
       expect((await admin()).draft.header).toEqual([
         {
           ...bar,
+          variant: "graphite",
           mode: "first",
           interval: "medium",
           pause_button: "always",
@@ -146,6 +150,7 @@ medusaIntegrationTestRunner({
           menu_images: "all",
           search_style: "icon",
           tool_labels: "show",
+          top_strip: "separate",
           ...ALWAYS,
         },
       ])

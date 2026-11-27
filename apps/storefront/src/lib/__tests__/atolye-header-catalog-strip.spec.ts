@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HeaderCatalogView, ShopView } from "@qticaret/ui"
-import { renderFrame, shopFixture } from "@/test/theme-render"
+import { catalogStrip, renderFrame, shopOf } from "@/test/theme-render"
 import { headerCatalogOf } from "../views/header-catalog"
 
 /**
@@ -22,14 +22,16 @@ const CATALOG: HeaderCatalogView = {
   menuGround: "stage",
 }
 
+// The catalog header with the top strip its settings read into (owner 2026-11-27)
 const catalogShop = (set: Partial<HeaderCatalogView> = {}, over: Partial<ShopView> = {}) =>
-  shopFixture({
+  shopOf({
     headerBar: {
       id: "mainheader",
       variant: "catalog",
       sticky: true,
       catalog: { ...CATALOG, ...set },
     },
+    ...catalogStrip({ ...CATALOG, ...set }),
     ...over,
   })
 
@@ -130,12 +132,15 @@ describe("the catalog strip's note", () => {
     expect(strip).not.toContain('href="/hesap"')
   })
 
-  it("marks the note for the live editor only in its session", () => {
+  it("marks the strip and its note for the live editor only in its session", () => {
     const note = { stripNote: { text: NOTE, path: "/kampanyalar" } }
-    expect(stripOf(renderFrame(atolyeTheme, catalogShop(note)))).not.toContain("data-qf")
-    expect(stripOf(renderFrame(atolyeTheme, catalogShop(note, { editor: true })))).toContain(
-      'data-qf="strip_note"'
+    expect(stripOf(renderFrame(atolyeTheme, catalogShop(note)))).not.toContain("data-q")
+    // The top strip's own section (owner 2026-11-27): its id, its first line's field
+    const marked = stripOf(
+      renderFrame(atolyeTheme, catalogShop(note, { editor: true, announcementMark: "ustserit" }))
     )
+    expect(marked).toContain('data-qs="ustserit"')
+    expect(marked).toContain('data-qf="lines.0"')
   })
 })
 

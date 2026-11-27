@@ -28,7 +28,7 @@ describe("how the header's submenus open (adr/0049 Ek 2026-11-26)", () => {
     for (const variant of VARIANTS) {
       for (const step of HEADER_SUBMENU_STYLES) {
         const doc = layoutDocument.parse(header({ variant, submenu_style: step }))
-        expect(doc.header[0]).toMatchObject({ variant, submenu_style: step })
+        expect(doc.header.at(-1)).toMatchObject({ variant, submenu_style: step })
         expect(mainSectionsOf(doc).header_bar).toMatchObject({ variant, submenu_style: step })
       }
     }
@@ -46,8 +46,12 @@ describe("how the header's submenus open (adr/0049 Ek 2026-11-26)", () => {
     const doc = readStoredLayout(
       header({ variant: "centered", sticky: false, menu_images: "off", submenu_style: "grid" })
     )
-    expect(doc.header[0]).toMatchObject({ variant: "centered", sticky: false, menu_images: "off" })
-    expect(doc.header[0]).not.toHaveProperty("submenu_style")
+    expect(doc.header.at(-1)).toMatchObject({
+      variant: "centered",
+      sticky: false,
+      menu_images: "off",
+    })
+    expect(doc.header.at(-1)).not.toHaveProperty("submenu_style")
   })
 
   it("mirrors the contract's steps", () => {

@@ -20,7 +20,7 @@ describe("the menus' pictures (adr/0049 Ek 2026-11-15; adr/0066 K3b, K6)", () =>
   it("reads a header bar saved without them as drawn before: pictures in the submenus only", () => {
     for (const variant of VARIANTS) {
       const old = readStoredLayout(header({ variant, sticky: false }))
-      expect(old.header[0]).toMatchObject({ variant, menu_images: "submenus" })
+      expect(old.header.at(-1)).toMatchObject({ variant, menu_images: "submenus" })
       expect(mainSectionsOf(old).header_bar).toMatchObject({ variant, menu_images: "submenus" })
     }
     // A design with no header bar at all takes the theme's, with the same default
@@ -32,7 +32,7 @@ describe("the menus' pictures (adr/0049 Ek 2026-11-15; adr/0066 K3b, K6)", () =>
     for (const variant of VARIANTS) {
       for (const step of HEADER_MENU_IMAGES) {
         const doc = layoutDocument.parse(header({ variant, menu_images: step }))
-        expect(doc.header[0]).toMatchObject({ variant, menu_images: step })
+        expect(doc.header.at(-1)).toMatchObject({ variant, menu_images: step })
         expect(mainSectionsOf(doc).header_bar).toMatchObject({ variant, menu_images: step })
       }
     }
@@ -49,7 +49,7 @@ describe("the menus' pictures (adr/0049 Ek 2026-11-15; adr/0066 K3b, K6)", () =>
       const doc = readStoredLayout(
         header({ variant: "catalog", sticky: false, menu_ground: "well", menu_images: stray })
       )
-      expect(doc.header[0]).toMatchObject({
+      expect(doc.header.at(-1)).toMatchObject({
         variant: "catalog",
         sticky: false,
         menu_ground: "well",
