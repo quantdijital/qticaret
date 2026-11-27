@@ -14613,11 +14613,11 @@
         }
       },
       "fake": {
-        "name": "Deneme servisi",
-        "description": "Yalnız geliştirme ortamında görünür; gerçek bir servise bağlanmaz.",
-        "rejected": "Deneme servisi kayıtlı anahtarı reddetti.",
+        "name": "Vireo AI",
+        "description": "Metin yazma, görsel okuma ve arka plan temizleme servisi.",
+        "rejected": "Vireo AI kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Vireo AI hesabınızda kredi olup olmadığına bakın.",
         "checks": {
-          "secret_invalid": "Deneme servisi anahtarı kabul etmedi."
+          "secret_invalid": "Vireo AI anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
         }
       },
       "platform": {
@@ -14632,7 +14632,7 @@
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
       "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
       "bria": "Verinin işlendiği ülke ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş; Bria girdiyi saklamadığını, sonucu 3 gün geçici adreste tuttuğunu yazar.",
-      "fake": "Veri bu bilgisayardan çıkmaz.",
+      "fake": "Veri yanıttan sonra saklanmaz ve model eğitiminde kullanılmaz.",
       "platform": "İçerik, platformun anlaşmalı yapay zekâ servislerinden birine gönderilir; platform içeriği saklamaz. Bu servisler mağaza sözleşmesinde yazılıdır."
     },
     "data_detail": {
@@ -14642,7 +14642,7 @@
       "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "photoroom": "Photoroom görseli ABD'deki sunucularında işler ve yanıtı verdikten sonra siler. Görsellerin model eğitiminde kullanılıp kullanılmadığı Photoroom'un sayfalarında çelişkili anlatılıyor; bağlamadan önce kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
       "bria": "Bria, gönderilen görseli saklamadığını ve sonucu 3 gün boyunca geçici bir adreste tuttuğunu yazar. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belgelerinde belirtilmemiş; bunun yazılı teyidi bekleniyor. Bağlamadan önce Bria'nın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
-      "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
+      "fake": "Vireo AI gönderilen içeriği yanıtı verdikten sonra saklamaz ve model eğitiminde kullanmaz. Mağazanızdan yalnız vitrinde yayımlanan içerik ve düzenlenecek görsel gider."
     },
     "tasks": {
       "assistant": "Yardımcı",
