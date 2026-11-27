@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { OldAddress } from "@/features/settings/api/migration-addresses"
 import { AddressesCard } from "@/features/settings/components/migration/addresses-card"
-import { RunCard } from "@/features/settings/components/migration/run-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -58,9 +57,6 @@ const answers: Record<string, unknown> = {
     count: 2,
     limit: 50,
   },
-  "/admin/integrations/credentials": { key_configured: true, accounts: [] },
-  "/admin/migrations/feed": { async_job: { id: "job_1", status: "queued", progress: 0 } },
-  "/admin/async-jobs/job_1": { async_job: { id: "job_1", status: "running", progress: 40 } },
 }
 
 const renderWith = (element: React.ReactNode) => {
@@ -68,7 +64,7 @@ const renderWith = (element: React.ReactNode) => {
   return render(<QueryClientProvider client={new QueryClient()}>{element}</QueryClientProvider>)
 }
 
-describe("Settings > Migration", () => {
+describe("Settings > Migration > Old addresses", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })
@@ -132,34 +128,5 @@ describe("Settings > Migration", () => {
     renderWith(<AddressesCard />)
     expect(await screen.findByText("Alan adını bağlamaya henüz hazır değil")).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Adres biçimini aç" })).toBeNull()
-  })
-
-  it("checks a feed with the owner's parcel and shows the run going", async () => {
-    renderWith(<RunCard />)
-    await userEvent.click(await screen.findByRole("combobox", { name: "Kaynak" }))
-    await userEvent.click(await screen.findByRole("option", { name: /Ürün akışı/ }))
-    await userEvent.type(screen.getByLabelText("Akış adresi"), "https://eski.example/google.xml")
-    // The parcel is under "Gelişmiş": most shops leave it empty
-    await userEvent.click(screen.getByText("Gelişmiş"))
-    for (const [label, value] of [
-      ["Ağırlık (g)", "500"],
-      ["Uzunluk (cm)", "30"],
-      ["Genişlik (cm)", "20"],
-      ["Yükseklik (cm)", "10"],
-    ] as const) {
-      await userEvent.type(screen.getByLabelText(label), value)
-    }
-    await userEvent.click(screen.getByRole("button", { name: "Önizle" }))
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/admin/migrations/feed", {
-        method: "POST",
-        body: {
-          mode: "check",
-          defaults: { weight: 500, length: 30, width: 20, height: 10 },
-          url: "https://eski.example/google.xml",
-        },
-      })
-    })
-    expect(await screen.findByText(/Aktarılıyor… %40/)).toBeInTheDocument()
   })
 })

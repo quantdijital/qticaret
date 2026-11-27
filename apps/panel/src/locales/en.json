@@ -3236,9 +3236,6 @@
       "title": "Migration",
       "subtitle": "Bring the products, posts and customers of your old site here; the old addresses lead to the new pages.",
       "run": {
-        "title": "Move",
-        "description": "Preview first: nothing is saved, the report says what would happen. Running it again adds only new records; products, posts and pages moved before stay as they are, and product images that failed are tried again.",
-        "source": "Source",
         "sources": {
           "shopify": "Shopify",
           "wordpress": "WordPress / WooCommerce",
@@ -3263,15 +3260,6 @@
           "width": "Width (cm)",
           "height": "Height (cm)"
         },
-        "check": "Preview",
-        "apply": "Start the move",
-        "confirmTitle": "Start the move?",
-        "confirmText": "The source's new records are added to this shop. Products, posts and pages moved before stay as they are; product images that failed are tried again.",
-        "running": "Moving… {{progress}}%",
-        "failed": "The move stopped: {{reason}}",
-        "planned": "The preview is ready: nothing was saved, what would happen is below.",
-        "applied": "The move is done.",
-        "report": "Download the report",
         "kinds": {
           "category": "Categories",
           "brand": "Brands",
@@ -3285,54 +3273,6 @@
           "post_tag": "Blog tags",
           "post": "Blog posts",
           "page": "Other pages"
-        },
-        "columns": {
-          "kind": "Kind",
-          "read": "In the source",
-          "created": "Added",
-          "plannedCreated": "To add",
-          "found": "Already here",
-          "skipped": "Could not move"
-        },
-        "postImagesConfirmTitle": "Move the blog pictures?",
-        "postImagesConfirmText": "The pictures in the blog posts this file moved before are downloaded from the old site, added to the Media library and put into each post's text where they stood. Your other changes to the text stay; a picture added before and taken out since is not added again.",
-        "postImages": {
-          "applied": "Blog pictures moved.",
-          "planned": "Dry run finished: the pictures to move are below.",
-          "updated": "Posts given their pictures",
-          "plannedUpdated": "Posts to be given their pictures",
-          "stored": "Pictures added to the Media library",
-          "plannedStored": "Pictures to download",
-          "done": "Posts whose pictures are already in",
-          "notMoved": "Posts without pictures or not moved by an earlier run",
-          "notMovedHint": "Apply a run without the box ticked first to move the posts not moved yet.",
-          "failed": "Posts whose pictures could not be added",
-          "imageFailed": "Pictures that could not be downloaded",
-          "imageFailedHint": "The downloaded report names them and why; a run again tries only these."
-        },
-        "refreshConfirmTitle": "Refresh the descriptions?",
-        "refreshConfirmText": "The descriptions of the products this file moved before are replaced with the file's; description edits made in the panel since give way too. No other field changes.",
-        "descriptions": {
-          "applied": "Descriptions refreshed.",
-          "planned": "The preview is ready: the descriptions to refresh are below.",
-          "refreshed": "Descriptions refreshed",
-          "plannedRefreshed": "Descriptions to refresh",
-          "same": "Already the same",
-          "notMoved": "Products no earlier run moved",
-          "notMovedHint": "These have not moved yet; move them first with Move.",
-          "failed": "Not refreshed",
-          "withDocument": "With a formatted description",
-          "documents_one": "{{formatted}} product's description moved with its formatting",
-          "documents_other": "{{formatted}} products' descriptions moved with their formatting",
-          "plannedDocuments_one": "{{formatted}} product's description will move with its formatting",
-          "plannedDocuments_other": "{{formatted}} products' descriptions will move with their formatting",
-          "documentsHint": "Headings, paragraphs, lists and tables kept; edited in the Description card on the product's page.",
-          "facts_one": "{{formatted}} fact value from descriptions written to fields",
-          "facts_other": "{{formatted}} fact values from descriptions written to fields",
-          "plannedFacts_one": "{{formatted}} fact value from descriptions will be written to fields",
-          "plannedFacts_other": "{{formatted}} fact values from descriptions will be written to fields",
-          "factsLeft_one": "{{formatted}} row waits for you: select the products in Products and use “Bring over facts from the description”.",
-          "factsLeft_other": "{{formatted}} rows wait for you: select the products in Products and use “Bring over facts from the description”."
         },
         "advanced": "Advanced",
         "advancedHint": "Most shops do not need it"
@@ -3362,22 +3302,6 @@
           "parcel": "Enter all four parcel values above zero, or leave all four empty."
         },
         "report": {
-          "tabs": {
-            "counts": "Counts",
-            "attributes": "Attributes",
-            "notMoved": "Not moved"
-          },
-          "attributesNote": "Attributes not used for variations (e.g. steel type) are not moved; they can be written once an attribute group is set up.",
-          "attributesInFile": "Products and values per attribute are on the report's Notlar (notes) sheet.",
-          "noAttributes": "No attributes left behind.",
-          "columns": {
-            "attribute": "Attribute",
-            "products": "Products",
-            "values": "Values"
-          },
-          "addressOnly": "Pages kept only for their old addresses",
-          "addressOnlyHint": "Legal texts, system pages such as cart and account, and the front page do not become content pages. After the move, decide where their old addresses go in the Old addresses and redirects card, e.g. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
-          "notMoved": "In the report, not moved",
           "kinds": {
             "coupons": "Coupons",
             "menu_items": "Menu items",
@@ -3390,11 +3314,7 @@
             "product_tags": "The storefront has no product tag pages.",
             "blog_comments": "The storefront shows no blog comments."
           }
-        },
-        "postImages": "Move blog pictures only",
-        "postImagesHint": "The pictures in the blog posts an earlier run moved are downloaded from the old site, added to the Media library and put back where they stood. The rest of each post stays as it is.",
-        "refresh": "Refresh descriptions only",
-        "refreshHint": "Products an earlier run moved get their description rewritten from this file, with its headings, lists and tables. Prices, stock, status and SEO fields stay as they are, and nothing new is added. Applied only."
+        }
       },
       "runs": {
         "title": "Past moves",
@@ -3523,22 +3443,229 @@
         "title": "After the move",
         "description": "Once the move is done, take these three steps in order."
       },
-      "fix": {
-        "title": "Follow-up actions",
-        "description": "Each takes up again just one part of what moved and touches nothing else."
+      "overview": {
+        "title": "Moved",
+        "lastRun": "Last transfer: {{date}} · {{source}}",
+        "rule": "Records moved before are not touched; only what is missing is added. Use the completion actions to redo one part.",
+        "openResult": "Open the last transfer's result",
+        "newRun": "New migration",
+        "empty": "Nothing has moved yet. Start a new migration to bring in your old site's products, posts and customers.",
+        "kinds": {
+          "product": "Products",
+          "image": "Product images",
+          "category": "Categories",
+          "brand": "Brands",
+          "post": "Blog posts",
+          "page": "Pages",
+          "customer": "Customers",
+          "order": "Past orders",
+          "review": "Reviews"
+        },
+        "states": {
+          "ok": "Done",
+          "notMoved": "Not moved",
+          "problems": "{{count}} not moved",
+          "images": "{{count}} images missing",
+          "postImages": "{{count}} posts missing images"
+        }
       },
-      "refresh": {
-        "title": "Take product descriptions again",
-        "description": "Replaces the descriptions of products moved before with the WordPress file's; description edits made in the panel are lost.",
-        "wordpressOnly": "Only for products moved from WordPress / WooCommerce. Prices, stock, status, SEO and images stay as they are; no product is added.",
+      "completions": {
+        "title": "Completion actions",
+        "description": "Each takes one part of what moved again and touches nothing else.",
         "start": "Start",
-        "dialogText": "Choose the export file again: each move deletes its file when it ends.",
+        "none": "Nothing missing",
+        "running": "Running · {{progress}}%",
+        "failed": "Stopped: {{reason}}",
         "changes": "Changes:",
-        "changesText": "the descriptions of the products this file moved before, with their headings, lists and tables. Description edits made in the panel since are lost too.",
-        "keeps": "Stays:",
-        "keepsText": "prices, stock, status, SEO fields, images and every other product.",
-        "fileHint": "In WordPress: Tools > Export > All content; the XML or a zip holding it, up to 50 MB.",
-        "confirm": "Replace the descriptions"
+        "keeps": "Stays the same:",
+        "file": "Export file",
+        "fileHint": "The file is deleted after each action. Download it again in WordPress under Tools › Export › All content; XML or zip, up to 50 MB.",
+        "feedUrl": "Feed address",
+        "feedUrlHint": "The product feed address the migration used.",
+        "rows": {
+          "images": {
+            "title": "Download missing product images",
+            "text": "Tries the images that could not be fetched again. Leaves existing images, their order and your cover choice alone.",
+            "count": "missing on {{count}} products",
+            "changes": "only images that could not be fetched before are downloaded and added to their products.",
+            "keeps": "existing images, their order, your cover choice and product details.",
+            "submit": "Download images",
+            "done": "{{created}} images added · {{skipped}} could not be fetched"
+          },
+          "descriptions": {
+            "title": "Take product descriptions again",
+            "text": "Replaces descriptions with the file's; description edits made in the panel are lost. Leaves price, stock, title, SEO and images alone.",
+            "count": "{{count}} products",
+            "changes": "the moved products' descriptions, with headings, lists and tables. Description edits made in the panel are lost too.",
+            "keeps": "price, stock, status, title, SEO fields, images and other products.",
+            "submit": "Replace descriptions",
+            "done": "{{updated}} descriptions changed · {{found}} already the same"
+          },
+          "summaries": {
+            "title": "Fill in short descriptions",
+            "text": "Writes only to products with an empty short description; leaves the ones you filled alone.",
+            "count": "{{count}} empty",
+            "changes": "moved products whose short description is empty, or still the list an earlier transfer wrote by itself, get the file's short description.",
+            "keeps": "short descriptions you wrote or changed, the long description and other fields.",
+            "submit": "Write short descriptions",
+            "done": "{{updated}} short descriptions written · {{skipped}} products left alone"
+          },
+          "post_images": {
+            "title": "Complete blog post images",
+            "text": "Downloads cover and in-text images and puts them into the post. Leaves the post's text, title and SEO fields alone.",
+            "count": "missing in {{count}} posts",
+            "changes": "missing images are downloaded to the media library and put back in their place in the post.",
+            "keeps": "the post's text, title and SEO fields; images you removed do not come back.",
+            "submit": "Add images",
+            "done": "images added to {{updated}} posts · {{skipped}} images could not be fetched"
+          },
+          "category_covers": {
+            "title": "Complete category images",
+            "text": "Puts the old site's image only on categories without one.",
+            "count": "{{count}} categories without an image",
+            "changes": "moved categories without an image get the old site's image.",
+            "keeps": "categories that have an image and the categories' other fields.",
+            "submit": "Set images",
+            "done": "images set on {{covers}} categories"
+          },
+          "new": {
+            "title": "Bring newly added products and posts",
+            "text": "Brings what was added on the old site later. Leaves what already moved alone.",
+            "submit": "Open a new migration"
+          },
+          "links": {
+            "title": "Fix links to the old site in texts",
+            "text": "Points links to the old site in posts, pages and descriptions at the pages here. Leaves links to other sites alone.",
+            "changes": "links to the old site in texts point at the pages the old addresses redirect to.",
+            "keeps": "links to other sites and the rest of the text; unmatched ones are listed in the report.",
+            "submit": "Fix links",
+            "done": "{{changed}} links fixed · {{unresolved}} unmatched"
+          },
+          "urls": {
+            "title": "Rebuild redirects",
+            "text": "Redirects each moved record's old address to its new page (301). Leaves your redirect decisions alone.",
+            "count": "{{count}} missing",
+            "changes": "moved records' old addresses redirect to their new pages (301).",
+            "keeps": "your redirect and removed (410) decisions.",
+            "submit": "Build redirects",
+            "done": "{{reserved}} addresses redirected to their new page"
+          }
+        }
+      },
+      "afterCards": {
+        "addresses": "Old addresses",
+        "addressesSummary": "{{total}} addresses · {{undecided}} awaiting a decision",
+        "addressesNone": "No old addresses yet; they are listed here after the migration.",
+        "decide": "Decide",
+        "history": "Past transfers"
+      },
+      "addressesPage": {
+        "title": "Old addresses and redirects",
+        "description": "Decide on the old site's addresses: redirect to a new page (301) or report as removed (410).",
+        "back": "Migration"
+      },
+      "wizard": {
+        "title": "New migration",
+        "subtitle": "Bring your old site's records here step by step.",
+        "steps": {
+          "source": {
+            "title": "Source",
+            "description": "Which is your old site?"
+          },
+          "file": {
+            "title": "File",
+            "description": "Connect your source or choose its file."
+          },
+          "kinds": {
+            "title": "What to move",
+            "description": "What the file holds. Untick what you do not want."
+          },
+          "transfer": {
+            "title": "Transfer",
+            "description": "Moving. You can leave this page; the transfer continues in the background."
+          },
+          "result": {
+            "title": "Result",
+            "description": "What moved and what needs your attention."
+          }
+        },
+        "sources": {
+          "wordpress": {
+            "title": "WordPress / WooCommerce",
+            "text": "You upload the site's export file."
+          },
+          "shopify": {
+            "title": "Shopify",
+            "text": "You connect your store; products, customers, orders and pages come."
+          },
+          "feed": {
+            "title": "Another platform",
+            "text": "Ticimax, ikas, IdeaSoft, T-Soft: by the product feed address."
+          },
+          "customers": {
+            "title": "Customer list only",
+            "text": "The old platform's customer export (Excel or CSV)."
+          },
+          "bundle": {
+            "title": "Migration file",
+            "text": "The file our team prepared for you."
+          }
+        },
+        "back": "Back",
+        "next": "Next",
+        "cancel": "Cancel",
+        "review": "Review",
+        "background": "Continue in the background",
+        "done": "Done",
+        "fileRequired": "Choose the file first.",
+        "urlRequired": "Enter the feed address.",
+        "connectFirst": "Connect your Shopify store first.",
+        "reading": "Reading the file, nothing is saved…",
+        "previewFailed": "The file could not be read: {{reason}}",
+        "fileKept": "The file stays on this page; it is sent again when the transfer starts and deleted from the server when the job ends.",
+        "kinds": {
+          "kind": "Kind",
+          "url": "Redirects (301)",
+          "urlText": "Old addresses redirect to their new pages.",
+          "read": "{{count}} in the source",
+          "created": "{{count}} to add",
+          "found": "{{count}} already here",
+          "problems": "{{count}} problems",
+          "nothing": "Not in this source",
+          "required": "needed for {{kind}}",
+          "noneChosen": "Choose at least one kind.",
+          "problemsTitle": "Will not move",
+          "moreInReport": "All of them are in the report.",
+          "notMoved": "Not moved",
+          "attributes": "{{count}} attributes match no template and will not move: {{names}}. Set up a template under Settings › Attributes to write them."
+        },
+        "start": "Start the transfer",
+        "transfer": {
+          "progress": "{{done}} / {{total}}",
+          "waiting": "Waiting",
+          "finished": "Done",
+          "failed": "The transfer stopped: {{reason}}"
+        },
+        "result": {
+          "finished": "Migration finished · {{date}}",
+          "previewed": "Preview finished · nothing was saved",
+          "added": "{{kind}} added",
+          "attention": "Needs your attention",
+          "nothing": "Nothing needs your attention.",
+          "retry": "Try again",
+          "openProducts": "Open products",
+          "openAddresses": "Go to old addresses",
+          "list": "Which ones?",
+          "next": "Next",
+          "nextSteps": {
+            "addresses": "Decide on the old addresses",
+            "domain": "Point your domain at the new site",
+            "invites": "Send customers invitations"
+          },
+          "report": "Download the report (Excel)",
+          "csv": "Download the redirect list (CSV)",
+          "retryStarted": "Started; you can follow it on the Migration page."
+        }
       }
     },
     "maintenance": {
@@ -3851,7 +3978,12 @@
         "valuesPlaceholder": "Type a value and press Enter: S, M, L",
         "removeValue": "Remove {{value}}",
         "remove": "Remove option",
-        "suggestions": ["Size", "Colour", "Dimensions", "Material"]
+        "suggestions": [
+          "Size",
+          "Colour",
+          "Dimensions",
+          "Material"
+        ]
       },
       "pricingCard": "Price and stock",
       "pricingHint": "Prices include VAT.",

@@ -1,10 +1,8 @@
-import { ChevronRight, Eye, Info, Loader2, Play } from "lucide-react"
+import { ChevronRight, Info } from "lucide-react"
 import type { ComponentProps, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
-import { Button } from "@qticaret/admin-ui/ui/button"
-import type { MigrationMode } from "@/features/settings/api/migration"
 import { PARCEL_FIELDS } from "@/features/settings/components/migration/parcel"
 import type { ParcelField } from "@/features/settings/components/migration/parcel"
 
@@ -93,30 +91,5 @@ export function AdvancedOptions({ attention = false, children }: AdvancedOptions
       </summary>
       <div className="mt-3 flex flex-col gap-4">{children}</div>
     </details>
-  )
-}
-
-interface RunButtonsProps {
-  disabled: boolean
-  /** The mode a start under way was asked in: its button turns. */
-  pending: MigrationMode | null
-  onCheck: () => void
-  onApply: () => void
-}
-
-/** A preview first (nothing saved), then the run itself (confirmed, and proved again), side by side. */
-export function RunButtons({ disabled, pending, onCheck, onApply }: RunButtonsProps) {
-  const { t } = useTranslation()
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      <Button variant="outline" disabled={disabled} onClick={onCheck}>
-        {pending === "check" ? <Loader2 className="animate-spin" /> : <Eye />}
-        {t(`${R}.check`)}
-      </Button>
-      <Button disabled={disabled} onClick={onApply}>
-        {pending === "apply" ? <Loader2 className="animate-spin" /> : <Play />}
-        {t(`${R}.apply`)}
-      </Button>
-    </div>
   )
 }

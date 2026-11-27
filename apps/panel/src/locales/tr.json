@@ -3236,9 +3236,6 @@
       "title": "Taşıma",
       "subtitle": "Eski sitenizdeki ürünleri, yazıları ve müşterileri buraya getirin; eski adresler yeni sayfalara yönlendirilir.",
       "run": {
-        "title": "Aktarım",
-        "description": "Önce önizleyin: hiçbir şey kaydedilmez, ne olacağını rapor söyler. Yeniden çalıştırırsanız yalnız yeni kayıtlar eklenir; daha önce taşınan ürünler, yazılar ve sayfalar değişmez, alınamamış ürün görselleri yeniden denenir.",
-        "source": "Kaynak",
         "sources": {
           "shopify": "Shopify",
           "wordpress": "WordPress / WooCommerce",
@@ -3263,15 +3260,6 @@
           "width": "Genişlik (cm)",
           "height": "Yükseklik (cm)"
         },
-        "check": "Önizle",
-        "apply": "Aktarmayı başlat",
-        "confirmTitle": "Aktarım başlasın mı?",
-        "confirmText": "Kaynaktaki yeni kayıtlar bu mağazaya eklenir. Daha önce taşınan ürünler, yazılar ve sayfalar değişmez; alınamamış ürün görselleri yeniden denenir.",
-        "running": "Aktarılıyor… %{{progress}}",
-        "failed": "Aktarım durdu: {{reason}}",
-        "planned": "Önizleme hazır: hiçbir şey kaydedilmedi, ne olacağı aşağıda.",
-        "applied": "Aktarım bitti.",
-        "report": "Raporu indir",
         "kinds": {
           "category": "Kategoriler",
           "brand": "Markalar",
@@ -3285,54 +3273,6 @@
           "post_tag": "Blog etiketleri",
           "post": "Blog yazıları",
           "page": "Diğer sayfalar"
-        },
-        "columns": {
-          "kind": "Tür",
-          "read": "Kaynakta",
-          "created": "Eklenen",
-          "plannedCreated": "Eklenecek",
-          "found": "Zaten var",
-          "skipped": "Aktarılamayan"
-        },
-        "postImagesConfirmTitle": "Blog görselleri taşınsın mı?",
-        "postImagesConfirmText": "Bu dosyanın daha önce taşıdığı blog yazılarındaki görseller eski siteden indirilip Ortam kütüphanesine eklenir ve yazının metnine, eski sitedeki yerine konur. Yazının metnindeki diğer değişiklikleriniz korunur; daha önce eklenip sonradan çıkardığınız görsel yeniden eklenmez.",
-        "postImages": {
-          "applied": "Blog görselleri taşındı.",
-          "planned": "Kuru çalıştırma bitti: taşınacak görseller aşağıda.",
-          "updated": "Görselleri eklenen yazılar",
-          "plannedUpdated": "Görselleri eklenecek yazılar",
-          "stored": "Ortam kütüphanesine eklenen görseller",
-          "plannedStored": "İndirilecek görseller",
-          "done": "Görselleri zaten eklenmiş yazılar",
-          "notMoved": "Görselsiz ya da önceki bir çalıştırmada taşınmamış yazılar",
-          "notMovedHint": "Taşınmamış yazılar için önce kutuyu işaretlemeden bir taşıma uygulayın.",
-          "failed": "Görselleri eklenemeyen yazılar",
-          "imageFailed": "İndirilemeyen görseller",
-          "imageFailedHint": "Hangileri olduğu ve nedeni indirilen raporda; yeniden çalıştırınca yalnız bunlar denenir."
-        },
-        "refreshConfirmTitle": "Açıklamalar yenilensin mi?",
-        "refreshConfirmText": "Bu dosyanın daha önce taşıdığı ürünlerin açıklaması dosyadakiyle değiştirilir; panelde sonradan yaptığınız açıklama değişiklikleri de yerini dosyadakine bırakır. Başka hiçbir alan değişmez.",
-        "descriptions": {
-          "applied": "Açıklamalar yenilendi.",
-          "planned": "Önizleme hazır: yenilenecek açıklamalar aşağıda.",
-          "refreshed": "Yenilenen açıklamalar",
-          "plannedRefreshed": "Yenilenecek açıklamalar",
-          "same": "Zaten aynı olanlar",
-          "notMoved": "Önceki bir çalıştırmada taşınmamış ürünler",
-          "notMovedHint": "Bunlar henüz taşınmadı; önce Aktarım ile taşıyın.",
-          "failed": "Yenilenemeyenler",
-          "withDocument": "Biçimli açıklamaya sahip olanlar",
-          "documents_one": "{{formatted}} ürünün açıklaması biçimiyle taşındı",
-          "documents_other": "{{formatted}} ürünün açıklaması biçimiyle taşındı",
-          "plannedDocuments_one": "{{formatted}} ürünün açıklaması biçimiyle taşınacak",
-          "plannedDocuments_other": "{{formatted}} ürünün açıklaması biçimiyle taşınacak",
-          "documentsHint": "Başlıkları, paragrafları, listeleri ve tablolarıyla; ürün sayfasındaki Açıklama kartında düzenlenir.",
-          "facts_one": "Açıklamalardan {{formatted}} özellik değeri alanlara yazıldı",
-          "facts_other": "Açıklamalardan {{formatted}} özellik değeri alanlara yazıldı",
-          "plannedFacts_one": "Açıklamalardan {{formatted}} özellik değeri alanlara yazılacak",
-          "plannedFacts_other": "Açıklamalardan {{formatted}} özellik değeri alanlara yazılacak",
-          "factsLeft_one": "{{formatted}} satır kararınızı bekliyor: Ürünler'de ürünleri seçip “Açıklamadaki özellikleri aktar”.",
-          "factsLeft_other": "{{formatted}} satır kararınızı bekliyor: Ürünler'de ürünleri seçip “Açıklamadaki özellikleri aktar”."
         },
         "advanced": "Gelişmiş",
         "advancedHint": "Çoğu mağazada gerekmez"
@@ -3362,22 +3302,6 @@
           "parcel": "Paketin dört değerini de sıfırdan büyük girin ya da dördünü de boş bırakın."
         },
         "report": {
-          "tabs": {
-            "counts": "Sayılar",
-            "attributes": "Özellikler",
-            "notMoved": "Taşınmayanlar"
-          },
-          "attributesNote": "Varyasyonda kullanılmayan özellikler (ör. çelik türü) taşınmaz; özellik grubu kurulunca yazılabilir.",
-          "attributesInFile": "Özellik başına ürün ve değer sayısı raporun Notlar sayfasında.",
-          "noAttributes": "Taşınmayan özellik yok.",
-          "columns": {
-            "attribute": "Özellik",
-            "products": "Ürün",
-            "values": "Değer"
-          },
-          "addressOnly": "Yalnızca eski adresi tutulan sayfalar",
-          "addressOnlyHint": "Yasal metinler, sepet ve hesap gibi sistem sayfaları ve ön sayfa içerik sayfası olmaz. Aktarımdan sonra eski adreslerine Eski adresler ve yönlendirmeler kartında karar verin, ör. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
-          "notMoved": "Raporda, taşınmadı",
           "kinds": {
             "coupons": "Kuponlar",
             "menu_items": "Menü öğeleri",
@@ -3390,11 +3314,7 @@
             "product_tags": "Vitrinde ürün etiketi sayfası yok.",
             "blog_comments": "Vitrinde blog yorumu yok."
           }
-        },
-        "postImages": "Yalnız blog görsellerini taşı",
-        "postImagesHint": "Önceki bir çalıştırmanın taşıdığı blog yazılarındaki görseller eski siteden indirilir, Ortam kütüphanesine eklenir ve yazıdaki yerlerine konur. Yazının geri kalanı ve diğer alanları değişmez.",
-        "refresh": "Yalnız açıklamaları yenile",
-        "refreshHint": "Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması bu dosyadan başlık, liste ve tablolarıyla yeniden yazılır. Fiyat, stok, durum ve SEO alanlarına dokunulmaz, yeni kayıt eklenmez. Yalnızca uygulanır."
+        }
       },
       "runs": {
         "title": "Geçmiş aktarımlar",
@@ -3523,22 +3443,229 @@
         "title": "Taşımadan sonra",
         "description": "Aktarım bitince bu üç adımı sırayla yapın."
       },
-      "fix": {
-        "title": "Tamamlama işlemleri",
-        "description": "Taşınmış kayıtların yalnız bir parçasını yeniden ele alır; başka hiçbir şeye dokunmaz."
+      "overview": {
+        "title": "Taşınanlar",
+        "lastRun": "Son aktarım: {{date}} · {{source}}",
+        "rule": "Daha önce taşınan kayıtlara dokunulmaz; yalnız eksikler eklenir. Bir parçayı yenilemek için tamamlama işlemlerini kullanın.",
+        "openResult": "Son aktarımın sonucunu aç",
+        "newRun": "Yeni taşıma",
+        "empty": "Henüz hiçbir şey taşınmadı. Eski sitenizdeki ürünleri, yazıları ve müşterileri getirmek için yeni bir taşıma başlatın.",
+        "kinds": {
+          "product": "Ürünler",
+          "image": "Ürün görselleri",
+          "category": "Kategoriler",
+          "brand": "Markalar",
+          "post": "Blog yazıları",
+          "page": "Sayfalar",
+          "customer": "Müşteriler",
+          "order": "Geçmiş siparişler",
+          "review": "Yorumlar"
+        },
+        "states": {
+          "ok": "Tamam",
+          "notMoved": "Taşınmadı",
+          "problems": "{{count}} aktarılamadı",
+          "images": "{{count}} görsel eksik",
+          "postImages": "{{count}} yazının görseli eksik"
+        }
       },
-      "refresh": {
-        "title": "Ürün açıklamalarını yeniden al",
-        "description": "Daha önce taşınan ürünlerin açıklamasını WordPress dosyasındakiyle değiştirir; panelde yaptığınız açıklama değişiklikleri gider.",
-        "wordpressOnly": "Yalnız WordPress / WooCommerce'ten taşınan ürünler için. Fiyat, stok, durum, SEO ve görsellere dokunmaz, yeni ürün eklemez.",
+      "completions": {
+        "title": "Tamamlama işlemleri",
+        "description": "Taşınmış kayıtların yalnız bir parçasını yeniden alır; başka hiçbir şeye dokunmaz.",
         "start": "Başlat",
-        "dialogText": "Dışa aktarma dosyasını yeniden seçin: her aktarım bittiğinde dosya silinir.",
+        "none": "Eksik yok",
+        "running": "Çalışıyor · %{{progress}}",
+        "failed": "Durdu: {{reason}}",
         "changes": "Değişecek:",
-        "changesText": "bu dosyanın daha önce taşıdığı ürünlerin açıklaması, başlık, liste ve tablolarıyla. Panelde sonradan yaptığınız açıklama değişiklikleri de gider.",
         "keeps": "Değişmeyecek:",
-        "keepsText": "fiyat, stok, durum, SEO alanları, görseller ve diğer ürünler.",
-        "fileHint": "WordPress'te Araçlar > Dışa aktar > Tüm içerik; XML ya da onu tutan zip, en çok 50 MB.",
-        "confirm": "Açıklamaları değiştir"
+        "file": "Dışa aktarma dosyası",
+        "fileHint": "Her işlem bitince dosya silinir. WordPress'te Araçlar › Dışa aktar › Tüm içerik ile yeniden indirin; XML ya da zip, en çok 50 MB.",
+        "feedUrl": "Akış adresi",
+        "feedUrlHint": "Taşımada kullandığınız ürün akışının adresi.",
+        "rows": {
+          "images": {
+            "title": "Eksik ürün görsellerini indir",
+            "text": "Alınamayan görselleri eski siteden yeniden dener. Var olan görsellere, sıralamaya ve kapak seçiminize dokunmaz.",
+            "count": "{{count}} üründe eksik",
+            "changes": "yalnız daha önce alınamamış görseller indirilip ürünlerine eklenir.",
+            "keeps": "var olan görseller, sıraları, kapak seçiminiz ve ürün bilgileri.",
+            "submit": "Görselleri indir",
+            "done": "{{created}} görsel eklendi · {{skipped}} alınamadı"
+          },
+          "descriptions": {
+            "title": "Ürün açıklamalarını yeniden al",
+            "text": "Açıklamaları dosyadakiyle değiştirir; panelde yaptığınız açıklama değişiklikleri gider. Fiyat, stok, başlık, SEO ve görsellere dokunmaz.",
+            "count": "{{count}} ürün",
+            "changes": "taşınmış ürünlerin açıklaması, başlık, liste ve tablolarıyla. Panelde sonradan yaptığınız açıklama değişiklikleri de gider.",
+            "keeps": "fiyat, stok, durum, başlık, SEO alanları, görseller ve diğer ürünler.",
+            "submit": "Açıklamaları değiştir",
+            "done": "{{updated}} açıklama değişti · {{found}} zaten aynıydı"
+          },
+          "summaries": {
+            "title": "Kısa açıklamaları tamamla",
+            "text": "Yalnız kısa açıklaması boş olan ürünlere yazar; doldurduklarınıza dokunmaz.",
+            "count": "{{count}} boş",
+            "changes": "kısa açıklaması boş olan ya da eski bir aktarımın kendiliğinden yazdığı listeyle duran taşınmış ürünlere dosyadaki kısa açıklama yazılır.",
+            "keeps": "sizin yazdığınız ya da değiştirdiğiniz kısa açıklamalar, uzun açıklama ve diğer alanlar.",
+            "submit": "Kısa açıklamaları yaz",
+            "done": "{{updated}} kısa açıklama yazıldı · {{skipped}} ürüne dokunulmadı"
+          },
+          "post_images": {
+            "title": "Blog yazılarının görsellerini tamamla",
+            "text": "Kapak ve yazı içindeki görselleri indirip yazıya koyar. Yazının metnine, başlığına ve SEO alanlarına dokunmaz.",
+            "count": "{{count}} yazıda eksik",
+            "changes": "eksik görseller indirilip Ortam kütüphanesine eklenir ve yazıdaki yerlerine konur.",
+            "keeps": "yazının metni, başlığı ve SEO alanları; sonradan çıkardığınız görseller geri gelmez.",
+            "submit": "Görselleri ekle",
+            "done": "{{updated}} yazıya görsel eklendi · {{skipped}} görsel alınamadı"
+          },
+          "category_covers": {
+            "title": "Kategori görsellerini tamamla",
+            "text": "Yalnız görseli olmayan kategorilere eski sitedeki görseli koyar.",
+            "count": "{{count}} kategori görselsiz",
+            "changes": "görseli olmayan taşınmış kategorilere eski sitedeki görseli konur.",
+            "keeps": "görseli olan kategoriler ve kategorilerin diğer alanları.",
+            "submit": "Görselleri koy",
+            "done": "{{covers}} kategoriye görsel kondu"
+          },
+          "new": {
+            "title": "Yeni eklenen ürünleri ve yazıları getir",
+            "text": "Eski sitede sonradan eklenenleri getirir. Taşınmış olanlara dokunmaz.",
+            "submit": "Yeni taşıma aç"
+          },
+          "links": {
+            "title": "Metinlerdeki eski site bağlantılarını düzelt",
+            "text": "Yazı, sayfa ve açıklamalardaki eski site bağlantılarını buradaki sayfalara çevirir. Başka sitelere giden bağlantılara dokunmaz.",
+            "changes": "metinlerdeki eski site bağlantıları, eski adreslerin yönlendirdiği buradaki sayfalara çevrilir.",
+            "keeps": "başka sitelere giden bağlantılar ve metnin geri kalanı; eşleşmeyenler raporda listelenir.",
+            "submit": "Bağlantıları düzelt",
+            "done": "{{changed}} bağlantı düzeltildi · {{unresolved}} eşleşmedi"
+          },
+          "urls": {
+            "title": "Yönlendirmeleri yeniden oluştur",
+            "text": "Taşınan her kaydın eski adresini yeni sayfasına yönlendirir (301). Sizin verdiğiniz yönlendirme kararlarına dokunmaz.",
+            "count": "{{count}} eksik",
+            "changes": "taşınan kayıtların eski adresleri yeni sayfalarına yönlendirilir (301).",
+            "keeps": "sizin verdiğiniz yönlendirme ve kaldırıldı (410) kararları.",
+            "submit": "Yönlendirmeleri oluştur",
+            "done": "{{reserved}} adres yeni sayfasına yönlendirildi"
+          }
+        }
+      },
+      "afterCards": {
+        "addresses": "Eski adresler",
+        "addressesSummary": "{{total}} adres · {{undecided}} karar bekliyor",
+        "addressesNone": "Henüz eski adres yok; taşımadan sonra burada listelenir.",
+        "decide": "Karar ver",
+        "history": "Geçmiş aktarımlar"
+      },
+      "addressesPage": {
+        "title": "Eski adresler ve yönlendirmeler",
+        "description": "Eski sitenin adreslerine karar verin: yeni sayfaya yönlendir (301) ya da kaldırıldı olarak bildir (410).",
+        "back": "Taşıma"
+      },
+      "wizard": {
+        "title": "Yeni taşıma",
+        "subtitle": "Eski sitenizdeki kayıtları adım adım buraya getirin.",
+        "steps": {
+          "source": {
+            "title": "Kaynak",
+            "description": "Eski siteniz hangisi?"
+          },
+          "file": {
+            "title": "Dosya",
+            "description": "Kaynağınızı bağlayın ya da dosyasını seçin."
+          },
+          "kinds": {
+            "title": "Neler aktarılacak",
+            "description": "Dosyada bulunanlar. İstemediklerinizin işaretini kaldırın."
+          },
+          "transfer": {
+            "title": "Aktarım",
+            "description": "Aktarılıyor. Bu sayfadan ayrılabilirsiniz; aktarım arka planda sürer."
+          },
+          "result": {
+            "title": "Sonuç",
+            "description": "Neler taşındı, nelerle ilgilenmeniz gerekiyor."
+          }
+        },
+        "sources": {
+          "wordpress": {
+            "title": "WordPress / WooCommerce",
+            "text": "Sitenin dışa aktarma dosyasını yüklersiniz."
+          },
+          "shopify": {
+            "title": "Shopify",
+            "text": "Mağazanızı bağlarsınız; ürün, müşteri, sipariş ve sayfalar gelir."
+          },
+          "feed": {
+            "title": "Başka platform",
+            "text": "Ticimax, ikas, IdeaSoft, T-Soft: ürün akışı adresiyle."
+          },
+          "customers": {
+            "title": "Yalnız müşteri listesi",
+            "text": "Eski platformun müşteri dışa aktarması (Excel ya da CSV)."
+          },
+          "bundle": {
+            "title": "Geçiş dosyası",
+            "text": "Ekibimizin sizin için hazırladığı dosya."
+          }
+        },
+        "back": "Geri",
+        "next": "İleri",
+        "cancel": "Vazgeç",
+        "review": "İncele",
+        "background": "Arka planda sürdür",
+        "done": "Bitti",
+        "fileRequired": "Önce dosyayı seçin.",
+        "urlRequired": "Akış adresini girin.",
+        "connectFirst": "Önce Shopify mağazanızı bağlayın.",
+        "reading": "Dosya okunuyor, hiçbir şey kaydedilmiyor…",
+        "previewFailed": "Dosya okunamadı: {{reason}}",
+        "fileKept": "Dosya bu sayfada tutulur; aktarımı başlatınca yeniden gönderilir, iş bitince sunucudan silinir.",
+        "kinds": {
+          "kind": "Tür",
+          "url": "Yönlendirmeler (301)",
+          "urlText": "Eski adresler yeni sayfalarına yönlendirilir.",
+          "read": "{{count}} kaynakta",
+          "created": "{{count}} eklenecek",
+          "found": "{{count}} zaten var",
+          "problems": "{{count}} sorun",
+          "nothing": "Bu kaynakta yok",
+          "required": "{{kind}} için gerekli",
+          "noneChosen": "En az bir türü seçin.",
+          "problemsTitle": "Aktarılamayacaklar",
+          "moreInReport": "Tümü raporda.",
+          "notMoved": "Taşınmayanlar",
+          "attributes": "{{count}} özellik bir şablonla eşleşmediği için taşınmayacak: {{names}}. Ayarlar › Özellikler'de şablon kurunca yazılabilir."
+        },
+        "start": "Aktarmayı başlat",
+        "transfer": {
+          "progress": "{{done}} / {{total}}",
+          "waiting": "Sırada",
+          "finished": "Bitti",
+          "failed": "Aktarım durdu: {{reason}}"
+        },
+        "result": {
+          "finished": "Taşıma bitti · {{date}}",
+          "previewed": "Önizleme bitti · hiçbir şey kaydedilmedi",
+          "added": "{{kind}} eklendi",
+          "attention": "İlgilenmeniz gerekenler",
+          "nothing": "İlgilenmeniz gereken bir şey yok.",
+          "retry": "Yeniden dene",
+          "openProducts": "Ürünleri aç",
+          "openAddresses": "Eski adreslere git",
+          "list": "Hangileri?",
+          "next": "Sıradaki",
+          "nextSteps": {
+            "addresses": "Eski adreslere karar verin",
+            "domain": "Alan adınızı yeni siteye bağlayın",
+            "invites": "Müşterilere davet gönderin"
+          },
+          "report": "Raporu indir (Excel)",
+          "csv": "Yönlendirme listesini indir (CSV)",
+          "retryStarted": "İşlem başladı; ilerlemesini Taşıma sayfasında görebilirsiniz."
+        }
       }
     },
     "maintenance": {
@@ -3851,7 +3978,12 @@
         "valuesPlaceholder": "Değer yazıp Enter'a basın: S, M, L",
         "removeValue": "{{value}} değerini kaldır",
         "remove": "Seçeneği kaldır",
-        "suggestions": ["Beden", "Renk", "Boyut", "Malzeme"]
+        "suggestions": [
+          "Beden",
+          "Renk",
+          "Boyut",
+          "Malzeme"
+        ]
       },
       "pricingCard": "Fiyat ve stok",
       "pricingHint": "Fiyatlar KDV dahil girilir.",
