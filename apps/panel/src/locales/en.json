@@ -12192,7 +12192,7 @@
         "productImage": {
           "label": "Product picture",
           "term": "product_image",
-          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one). Compact: the card no taller than today's; a small picture, the name and one star with the score at its head.",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one). Compact: the card no taller than today's; a short product picture across its top, the name and one star with the score under.",
           "none": "None",
           "thumb": "Small",
           "cover": "Cover",

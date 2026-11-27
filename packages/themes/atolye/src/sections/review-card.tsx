@@ -180,28 +180,29 @@ function PlainCard({ review, sizes, t }: { review: Review; sizes: string; t: Tra
 }
 
 /**
- * `compact` (owner 2026-11-28): the card no taller than today's. At its
- * head the product as a small square picture beside its name and one star
- * with the score, both one link; the quote under, then who and when.
+ * `compact` (owner 2026-11-28): no taller than today's card. A short
+ * picture of the product across its top, then its name and one star with
+ * the score in a row (picture and name one link), the quote in three
+ * lines at most, who and when under a rule.
  */
-function CompactCard({ review, t }: { review: Review; t: Translate }) {
+function CompactCard({ review, sizes, t }: { review: Review; sizes: string; t: Translate }) {
   const product = review.product
   const score = review.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })
   const head = (
     <>
       {product?.image && (
-        <span className="relative block size-14 shrink-0 overflow-hidden rounded-media bg-media">
-          <ResponsiveImage image={product.image} sizes="56px" className={ZOOM} />
+        <span className="relative block aspect-[5/2] overflow-hidden bg-media">
+          <ResponsiveImage image={product.image} sizes={sizes} className={ZOOM} />
         </span>
       )}
-      <span className="flex min-w-0 flex-col gap-1">
+      <span className="flex items-center gap-3 px-4 pt-3 lg:px-5">
         {product && (
-          <span className="line-clamp-2 text-sm leading-snug font-semibold text-text">
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text">
             {product.label}
           </span>
         )}
         <span
-          className="inline-flex items-center gap-1 text-sm font-semibold text-text"
+          className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-text"
           role="img"
           aria-label={t("reviews.stars", { rating: review.rating })}
         >
@@ -212,34 +213,36 @@ function CompactCard({ review, t }: { review: Review; t: Translate }) {
     </>
   )
   return (
-    <article className="flex h-full flex-col gap-3 rounded-tile border border-rule bg-paper p-4 lg:p-5">
+    <article className="flex h-full flex-col overflow-hidden rounded-tile border border-rule bg-paper">
       {product ? (
         <a
           href={product.path}
-          className="group flex items-center gap-3 no-underline"
+          className="group block no-underline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text"
           aria-label={`${t("reviews.about")}: ${product.label}`}
         >
           {head}
         </a>
       ) : (
-        <span className="flex items-center gap-3">{head}</span>
+        <span className="block">{head}</span>
       )}
-      <blockquote className="flex-1 text-sm leading-relaxed text-text-2">
-        <p className="line-clamp-4">“{quoteOf(review.body)}”</p>
-      </blockquote>
-      <footer className="flex items-center gap-1.5 border-t border-rule pt-3 text-xs text-text-2">
-        <span className="font-semibold text-text">{review.author}</span>
-        {review.verified && (
-          <BadgeCheck
-            className="size-3.5 shrink-0 text-ok"
-            role="img"
-            aria-label={t("product.verified")}
-            strokeWidth={2}
-          />
-        )}
-        <span aria-hidden="true">·</span>
-        <span>{review.date}</span>
-      </footer>
+      <div className="flex flex-1 flex-col gap-3 px-4 pt-2 pb-4 lg:px-5 lg:pb-5">
+        <blockquote className="flex-1 text-sm leading-relaxed text-text-2">
+          <p className="line-clamp-3">“{quoteOf(review.body)}”</p>
+        </blockquote>
+        <footer className="flex items-center gap-1.5 border-t border-rule pt-3 text-xs text-text-2">
+          <span className="font-semibold text-text">{review.author}</span>
+          {review.verified && (
+            <BadgeCheck
+              className="size-3.5 shrink-0 text-ok"
+              role="img"
+              aria-label={t("product.verified")}
+              strokeWidth={2}
+            />
+          )}
+          <span aria-hidden="true">·</span>
+          <span>{review.date}</span>
+        </footer>
+      </div>
     </article>
   )
 }

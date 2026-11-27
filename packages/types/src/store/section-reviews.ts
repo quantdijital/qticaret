@@ -5,7 +5,7 @@
  * picture of the product beside its name at the card's foot), `cover`
  * (a short picture across the card's top: the customer's photo, else the
  * product's, its name on it) or `compact` (the card no taller than today's: a
- * small square picture, the name and one star with the score at its head,
+ * short picture across its top, the name and one star with the score under,
  * the quote under). A product with no picture draws as `none`.
  *
  * Mirrors the backend's `sections/reviews.ts`; a unit test keeps them equal.
