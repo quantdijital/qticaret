@@ -105,54 +105,67 @@ export async function customerData(container: Container, customerId: string) {
   const orderIds = (orders as { id: string }[]).map((order) => order.id)
   const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
   const byCustomer = { customer_id: customerId }
-  const [consents, legalConsents, returns, reviews, questions, alerts, saved, sent, legacy] =
-    await Promise.all([
-      container.resolve<MessagingModuleService>(MESSAGING_MODULE).listMessageConsents(byCustomer, {
-        select: ["channel", "status", "recipient_masked", "updated_at"],
+  const [
+    answers,
+    consents,
+    legalConsents,
+    returns,
+    reviews,
+    questions,
+    alerts,
+    saved,
+    sent,
+    legacy,
+  ] = await Promise.all([
+    // Their answers to others' questions, deleted ones too (adr/0037 Ek 2026-11-27)
+    container.resolve<ProductQaModuleService>(PRODUCT_QA_MODULE).listProductAnswers(byCustomer, {
+      select: ["product_id", "question_id", "body", "status", "created_at"],
+      withDeleted: true,
+    }),
+    container.resolve<MessagingModuleService>(MESSAGING_MODULE).listMessageConsents(byCustomer, {
+      select: ["channel", "status", "recipient_masked", "updated_at"],
+    }),
+    orderIds.length ? legal.listLegalConsents({ order_id: orderIds }) : [],
+    container
+      .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+      .listReturnRequests(byCustomer, {
+        select: ["order_id", "kind", "status", "reason", "note", "created_at"],
       }),
-      orderIds.length ? legal.listLegalConsents({ order_id: orderIds }) : [],
-      container
-        .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-        .listReturnRequests(byCustomer, {
-          select: ["order_id", "kind", "status", "reason", "note", "created_at"],
-        }),
-      container
-        .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
-        .listProductReviews(byCustomer, {
-          select: ["product_id", "rating", "title", "body", "status", "created_at"],
-        }),
-      container
-        .resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
-        // Deleted ones too: still held, and the shop may bring one back
-        .listProductQuestions(byCustomer, {
-          select: ["product_id", "body", "status", "created_at"],
-          withDeleted: true,
-        }),
-      container
-        .resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE)
-        .listStockAlerts(byCustomer, {
-          select: ["product_id", "variant_id", "email_masked", "status", "created_at"],
-        }),
-      container
-        .resolve<WishlistModuleService>(WISHLIST_MODULE)
-        .listWishlistItems(byCustomer, { select: ["product_id", "variant_id", "created_at"] }),
-      query
-        .graph({
-          entity: "notification",
-          fields: ["to", "channel", "template", "status", "created_at"],
-          filters: { receiver_id: customerId },
-        })
-        .then(({ data }) => data as Record<string, unknown>[]),
-      // Theirs by the account, and by their address (a guest's on the old platform)
-      container
-        .resolve<MigrationModuleService>(MIGRATION_MODULE)
-        .listLegacyOrders(
-          typeof customer["email"] === "string" && customer["email"] !== ""
-            ? { $or: [byCustomer, { email: customer["email"].trim().toLowerCase() }] }
-            : byCustomer,
-          { select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"] }
-        ),
-    ])
+    container
+      .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+      .listProductReviews(byCustomer, {
+        select: ["product_id", "rating", "title", "body", "status", "created_at"],
+      }),
+    container
+      .resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
+      // Deleted ones too: still held, and the shop may bring one back
+      .listProductQuestions(byCustomer, {
+        select: ["product_id", "body", "status", "created_at"],
+        withDeleted: true,
+      }),
+    container.resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE).listStockAlerts(byCustomer, {
+      select: ["product_id", "variant_id", "email_masked", "status", "created_at"],
+    }),
+    container
+      .resolve<WishlistModuleService>(WISHLIST_MODULE)
+      .listWishlistItems(byCustomer, { select: ["product_id", "variant_id", "created_at"] }),
+    query
+      .graph({
+        entity: "notification",
+        fields: ["to", "channel", "template", "status", "created_at"],
+        filters: { receiver_id: customerId },
+      })
+      .then(({ data }) => data as Record<string, unknown>[]),
+    // Theirs by the account, and by their address (a guest's on the old platform)
+    container
+      .resolve<MigrationModuleService>(MIGRATION_MODULE)
+      .listLegacyOrders(
+        typeof customer["email"] === "string" && customer["email"] !== ""
+          ? { $or: [byCustomer, { email: customer["email"].trim().toLowerCase() }] }
+          : byCustomer,
+        { select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"] }
+      ),
+  ])
   const email = typeof customer["email"] === "string" ? customer["email"] : ""
   // A booking request may carry a phone only (adr/0076 Ek 2026-11-23): the profile's phone finds it
   const phone = typeof customer["phone"] === "string" ? customer["phone"] : ""
@@ -194,6 +207,7 @@ export async function customerData(container: Container, customerId: string) {
     yorumlar: reviews,
     yorum_fotoğrafları: reviewPhotos,
     sorular: questions,
+    soru_cevapları: answers,
     stok_bildirimleri: alerts,
     favoriler: saved,
     iletişim_mesajları: contact,

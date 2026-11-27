@@ -140,6 +140,11 @@ export function QuestionDialog({
         {question ? (
           <div className="flex flex-wrap items-center gap-2">
             <QuestionStatus question={question} />
+            {question.edited_at && !question.by_shop ? (
+              <StatusBadge tone="info">
+                {t(`${Q}.editedByShop`, { when: formatDate(question.edited_at) })}
+              </StatusBadge>
+            ) : null}
             {question.product.title ? (
               <span className="text-sm text-muted-foreground">{question.product.title}</span>
             ) : null}

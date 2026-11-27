@@ -286,6 +286,17 @@ describe("FaqCard: the product's questions (owner 2026-11-27)", () => {
     })
   })
 
+  it("says in the dialog, never on the storefront, that the shop changed a customer's words", async () => {
+    const edited = { ...LISTED[0], edited_at: "2026-11-27T09:00:00Z" }
+    const user = setup({ listed: [edited] })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu aç: Sapı ısınır mı?" }))
+
+    expect(
+      within(await screen.findByRole("dialog")).getByText(/Mağaza tarafından düzenlendi/)
+    ).toBeInTheDocument()
+  })
+
   it("hides a published question", async () => {
     const user = setup({ listed: LISTED })
     await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))

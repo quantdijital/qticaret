@@ -9386,7 +9386,8 @@
           "published": "Yayında",
           "hidden": "Gizli",
           "waiting": "Yanıt bekliyor"
-        }
+        },
+        "editedByShop": "Mağaza tarafından düzenlendi · {{when}}"
       }
     },
     "photos": {

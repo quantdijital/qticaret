@@ -21,6 +21,8 @@ export interface QuestionRow {
   status: ReviewStatus
   has_link: boolean
   created_at: string
+  /** When the shop last changed the question's words; null as its author wrote them. */
+  edited_at?: string | null
   product: { id: string; title: string | null }
   answers: AnswerRow[]
 }

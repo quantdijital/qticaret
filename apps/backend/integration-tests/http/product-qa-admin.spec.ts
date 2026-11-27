@@ -19,6 +19,7 @@ interface AdminListed {
   questions: {
     id: string
     body: string
+    author_name: string
     status: string
     by_shop: boolean
     answers: { body: string; by_shop: boolean; status: string }[]
@@ -145,6 +146,38 @@ medusaIntegrationTestRunner({
         answers: [{ body: "Evet, deri kılıfla gelir." }],
       })
       expect(again.status).toBe(404)
+    })
+
+    // Security review 2026-11-27 (HIGH): a deleted question must not bring an erased name back
+    it("erases a customer's deleted question too, so Geri al never shows their name", async () => {
+      const asked = await post<{ question?: { id: string } }>(
+        `/store/products/${productId}/questions`,
+        { body: "Sapı ahşap mı, kaplama mı?" },
+        asker.headers
+      )
+      const id = asked.data.question?.id ?? ""
+      const before = await adminListed()
+      const realName = before.data.questions.find((row) => row.id === id)
+      await remove(`/admin/product-questions/${id}`)
+      const erasure = await post<{ privacy_request: { id: string } }>(
+        `/admin/customers/${asker.id}/privacy-requests`,
+        { kind: "erasure", channel: "letter", received_at: new Date().toISOString() }
+      )
+      const erased = await post(
+        `/admin/privacy-requests/${erasure.data.privacy_request.id}/erase`,
+        {}
+      )
+      const restored = await post(`/admin/product-questions/${id}/restore`, {})
+      const after = await http.get<{ questions: { id: string; author_name: string }[] }>(
+        `/admin/product-questions?product_id=${productId}`,
+        { headers: admin.headers }
+      )
+
+      expect(realName?.author_name).toBeTruthy()
+      expect(realName?.author_name).not.toBe("Anonim")
+      expect(erased.status).toBe(200)
+      expect(restored.status).toBe(200)
+      expect(after.data.questions.find((row) => row.id === id)?.author_name).toBe("Anonim")
     })
 
     it("checks what is added by hand", async () => {

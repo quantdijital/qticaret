@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { PRODUCT_QA_MODULE } from "../../../../modules/product-qa"
 import type ProductQaModuleService from "../../../../modules/product-qa/service"
@@ -6,9 +7,13 @@ import type { AuditedResource } from "../types"
 /**
  * A product question edited, deleted or brought back from the panel
  * (owner 2026-11-27): its state, whether it is deleted, how long its words
- * are and whether the shop answered, before and after. Not the words: a
- * customer's question may hold their details, and the storefront shows it.
+ * are, a digest of them and of the shop's answer (a change to a customer's
+ * words shows as a changed digest), who edited it last, before and after.
+ * Not the words: a customer's question may hold their details.
  */
+const digest = (text: string): string =>
+  createHash("sha256").update(text).digest("hex").slice(0, 16)
+
 const questionSnapshot = async ({
   scope,
   params,
@@ -20,7 +25,11 @@ const questionSnapshot = async ({
   const id = params["id"] ?? ""
   const [question] = await qa.listProductQuestions(
     { id },
-    { take: 1, withDeleted: true, select: ["status", "body", "author_kind", "deleted_at"] }
+    {
+      take: 1,
+      withDeleted: true,
+      select: ["status", "body", "author_kind", "deleted_at", "edited_by", "edited_at"],
+    }
   )
   if (!question) {
     return {}
@@ -34,7 +43,11 @@ const questionSnapshot = async ({
     by_shop: question.author_kind === "shop",
     deleted: question.deleted_at !== null,
     body_length: question.body.length,
+    body_digest: digest(question.body),
     shop_answer_length: shopAnswers[0]?.body.length ?? 0,
+    shop_answer_digest: shopAnswers[0] ? digest(shopAnswers[0].body) : null,
+    edited_by: question.edited_by,
+    edited_at: question.edited_at ? new Date(question.edited_at).toISOString() : null,
   }
 }
 

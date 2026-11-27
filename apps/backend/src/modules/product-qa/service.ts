@@ -5,9 +5,9 @@ import {
   MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { readsAsLink } from "../../lib/text/link-like"
 import { ProductAnswer } from "./models/product-answer"
 import { ProductQuestion } from "./models/product-question"
+import { editQuestion_, undoEdit_ } from "./editing"
 import type { QuestionEdit, QuestionEditUndo } from "./types"
 
 export type { QuestionEdit, QuestionEditUndo } from "./types"
@@ -164,73 +164,7 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     input: QuestionEdit,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<QuestionEditUndo> {
-    const question = await this.retrieveProductQuestion(
-      input.id,
-      {
-        select: ["id", "product_id", "body", "has_link", "status", "moderated_by", "moderated_at"],
-      },
-      sharedContext
-    )
-    const undo: QuestionEditUndo = {
-      id: question.id,
-      body: question.body,
-      has_link: question.has_link,
-      status: question.status,
-      moderated_by: question.moderated_by,
-      moderated_at: question.moderated_at ? new Date(question.moderated_at).toISOString() : null,
-      answer: null,
-    }
-    if (input.body !== undefined) {
-      await this.updateProductQuestions(
-        { id: question.id, body: input.body, has_link: readsAsLink(input.body) },
-        sharedContext
-      )
-    }
-    if (input.answer !== undefined) {
-      const [own] = await this.listProductAnswers(
-        { question_id: question.id, author_kind: "shop" },
-        { take: 1, order: { created_at: "ASC" }, select: ["id", "body"] },
-        sharedContext
-      )
-      if (own && input.answer !== null) {
-        await this.updateProductAnswers({ id: own.id, body: input.answer }, sharedContext)
-        undo.answer = { kind: "changed", id: own.id, body: own.body }
-      } else if (own) {
-        await this.softDeleteProductAnswers([own.id], {}, sharedContext)
-        undo.answer = { kind: "removed", id: own.id }
-      } else if (input.answer !== null) {
-        const now = new Date()
-        const created = await this.createProductAnswers(
-          {
-            question_id: question.id,
-            product_id: question.product_id,
-            author_kind: "shop",
-            customer_id: null,
-            user_id: input.user_id,
-            author_name: input.author_name,
-            body: input.answer,
-            status: "approved",
-            moderated_by: input.user_id,
-            moderated_at: now,
-          },
-          sharedContext
-        )
-        undo.answer = { kind: "added", id: created.id }
-      }
-      if (input.answer !== null && question.status === "pending") {
-        await this.updateProductQuestions(
-          {
-            id: question.id,
-            status: "approved",
-            moderated_by: input.user_id,
-            moderated_at: new Date(),
-          },
-          sharedContext
-        )
-      }
-      await this.recount_([question.id], sharedContext)
-    }
-    return undo
+    return editQuestion_(this, input, sharedContext)
   }
 
   /** An edit taken back (a failed workflow's compensation). */
@@ -239,26 +173,7 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     undo: QuestionEditUndo,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
-    await this.updateProductQuestions(
-      {
-        id: undo.id,
-        body: undo.body,
-        has_link: undo.has_link,
-        status: undo.status,
-        moderated_by: undo.moderated_by,
-        moderated_at: undo.moderated_at ? new Date(undo.moderated_at) : null,
-      },
-      sharedContext
-    )
-    const answer = undo.answer
-    if (answer?.kind === "changed") {
-      await this.updateProductAnswers({ id: answer.id, body: answer.body }, sharedContext)
-    } else if (answer?.kind === "removed") {
-      await this.restoreProductAnswers([answer.id], {}, sharedContext)
-    } else if (answer?.kind === "added") {
-      await this.deleteProductAnswers([answer.id], sharedContext)
-    }
-    await this.recount_([undo.id], sharedContext)
+    await undoEdit_(this, undo, sharedContext)
   }
 
   /**
@@ -322,8 +237,31 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     return { id, product_id: question.product_id }
   }
 
+  /**
+   * A customer erased (KVKK, L9): every question and answer of theirs
+   * carries the placeholder name, deleted ones too, so "Geri al" never
+   * brings their name back. The generated update does not reach a deleted
+   * row (see wholesale's `clearDeletedAccounts`), so it is written here.
+   */
   @InjectTransactionManager()
-  protected async recount_(
+  async eraseAuthor(
+    input: { customer_id: string; name: string },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const manager = sharedContext.transactionManager as {
+      execute: (sql: string, params: unknown[]) => Promise<unknown>
+    }
+    for (const table of ["product_question", "product_answer"] as const) {
+      await manager.execute(`update "${table}" set "author_name" = ? where "customer_id" = ?`, [
+        input.name,
+        input.customer_id,
+      ])
+    }
+  }
+
+  /** Each question's approved answers counted again (its `answer_count`). */
+  @InjectTransactionManager()
+  async recount_(
     questionIds: string[],
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {

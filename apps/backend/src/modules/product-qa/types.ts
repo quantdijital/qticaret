@@ -17,6 +17,8 @@ export interface QuestionEditUndo {
   moderated_by: string | null
   /** As text: the undo travels between workflow steps. */
   moderated_at: string | null
+  edited_by: string | null
+  edited_at: string | null
   answer:
     | { kind: "changed"; id: string; body: string }
     | { kind: "removed"; id: string }

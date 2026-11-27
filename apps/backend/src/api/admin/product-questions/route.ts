@@ -71,6 +71,8 @@ export async function GET(
       status: question.status,
       has_link: question.has_link,
       created_at: question.created_at,
+      // The words as the shop last changed them (panel only, never the storefront)
+      edited_at: question.edited_at,
       product: { id: question.product_id, title: titles.get(question.product_id) ?? null },
       answers: answers
         .filter((answer) => answer.question_id === question.id)

@@ -9386,7 +9386,8 @@
           "published": "Published",
           "hidden": "Hidden",
           "waiting": "Awaiting answer"
-        }
+        },
+        "editedByShop": "Edited by the shop · {{when}}"
       }
     },
     "photos": {
