@@ -37,7 +37,6 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "brands",
   "posts",
   "reviews",
-  "google_rating",
   "stats",
   "steps",
   "search_box",

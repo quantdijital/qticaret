@@ -245,20 +245,6 @@ export const PAGE_ENTRIES = [
     },
   },
   {
-    key: "reviews.google",
-    parent: "reviews",
-    path: "/reviews/google",
-    label: "reviews.sectionGoogle",
-    keywords: {
-      tr: ["google yorumu", "işletme yorumları"],
-      en: ["google reviews", "business reviews"],
-    },
-    help: {
-      tr: "Mağazanın Google işletme yorumları; vitrinde gösterilecekleri seçersiniz.",
-      en: "The shop's Google reviews; pick the ones the storefront shows.",
-    },
-  },
-  {
     key: "wholesale.tiers",
     parent: "wholesale",
     path: "/wholesale/tiers",

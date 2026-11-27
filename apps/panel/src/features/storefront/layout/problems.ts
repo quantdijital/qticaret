@@ -233,7 +233,6 @@ function fieldsOf(section: AnySection): Found[] {
       return postsProblems(section)
     case "brands":
     case "reviews":
-    case "google_rating":
     case "program":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":

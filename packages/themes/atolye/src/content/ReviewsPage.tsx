@@ -7,8 +7,6 @@ import { ReviewReply } from "../parts/ReviewReply"
 import { Stars } from "../parts/Stars"
 import { Trail } from "../parts/Trail"
 import { Summary } from "../sections/Reviews"
-import { GoogleReviews } from "./GoogleReviews"
-import { GoogleFoot, GoogleSummary } from "./ReviewsGoogle"
 
 type Review = ReviewsPageView["reviews"][number]
 
@@ -40,8 +38,7 @@ function Product({ product, t }: { product: NonNullable<Review["product"]>; t: T
 
 /**
  * One review whole: the stars, its title, the text, the customer's
- * photos, who and when, the shop's reply, the product; a Google review
- * the same, its link on Google where the product would be.
+ * photos, who and when, the shop's reply, the product.
  */
 function Card({ review, t }: { review: Review; t: Translate }) {
   const photos = review.photos ?? []
@@ -90,11 +87,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
         <span className="text-text-3">{review.date}</span>
       </p>
       {review.reply && <ReviewReply reply={review.reply} label={t("reviews.shop_reply")} />}
-      {review.google ? (
-        <GoogleFoot google={review.google} t={t} />
-      ) : (
-        review.product && <Product product={review.product} t={t} />
-      )}
+      {review.product && <Product product={review.product} t={t} />}
     </li>
   )
 }
@@ -105,12 +98,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
  * average set large, the stars, the count, the spread), the reviews in
  * two columns on the right, each card as tall as its own words (newest
  * first down each column), whole with its photos and the product it is
- * about; then the pages. Google reviews (adr/0058) are either mixed into
- * the list by date, in the same card with their link on Google where the
- * product would be, Google's own figures in a box under the shop's
- * summary (adr/0058 Ek 2026-11-27); or, given apart, a section of their
- * own on the first unfiltered page. With the star
- * filter (adr/0037 Ek 2026-11-05) the summary's bars are its links, and
+ * about; then the pages. With the star filter (adr/0037 Ek 2026-11-05) the summary's bars are its links, and
  * the stars shown stand above the reviews as a dark pill that takes them
  * off. Nothing is written for the shop.
  */
@@ -118,8 +106,6 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
   const summary = view.summary ?? null
   const filter = view.filter ?? null
   const shown = filter && filter.active !== null ? filter : null
-  // Google's reviews among the shop's: Google's figures beside the shop's, no block of their own
-  const mixed = view.google?.reviews.length === 0 ? view.google : null
   return (
     <Container className="flex flex-col gap-8 pt-6 lg:gap-10 lg:pt-10">
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
@@ -136,7 +122,6 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
                 </p>
               )
             )}
-            {mixed && <GoogleSummary google={mixed} t={t} />}
           </div>
         </div>
         <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-8">
@@ -164,7 +149,6 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         </div>
       </div>
       <Pager pagination={view.pagination} t={t} />
-      {view.google && !mixed && <GoogleReviews google={view.google} t={t} />}
     </Container>
   )
 }

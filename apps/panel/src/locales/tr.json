@@ -2485,7 +2485,7 @@
         "disconnected": "Google bağlantısı kaldırıldı.",
         "confirm": {
           "title": "Google bağlantısı kaldırılsın mı?",
-          "description": "Erişim Google'da da sonlandırılır, ürünler artık gönderilmez ve vitrindeki Google yorumları kaldırılır. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
+          "description": "Erişim Google'da da sonlandırılır ve ürünler artık gönderilmez. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
           "action": "Bağlantıyı kaldır"
         },
         "outcome": {
@@ -9305,7 +9305,6 @@
     "sections": "Müşteri yazıları",
     "sectionReviews": "Yorumlar",
     "sectionQuestions": "Sorular",
-    "sectionGoogle": "Google yorumları",
     "questions": {
       "description": "Müşterilerin ürünler hakkındaki soruları. Mağaza adına verdiğiniz cevap hemen görünür; ürünü teslim almış müşterilerin cevapları onayınızı bekler.",
       "views": "Soru durumu",
@@ -9336,86 +9335,6 @@
       "alt": "{{author}} yorumundaki fotoğraf {{number}}",
       "title": "{{author}} yorumundaki fotoğraf",
       "position": "{{number}} / {{count}}"
-    },
-    "google": {
-      "title": "Google yorumları",
-      "pageDescription": "Google İşletme Profilinizdeki yorumlar her gün okunur ve vitrinin Yorumlar sayfasında Google'ın puanı ve bağlantısıyla, kendi yorumlarınızdan ayrı gösterilir.",
-      "description": "Google'daki işletme profilinizin puanı, yorum sayısı ve en yeni yorumları vitrinde Google adıyla görünür. Yorumlar Google'ındır; burada düzenlenmez.",
-      "notConfigured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
-      "notConnected": "İşletme profilinizin sahibi ya da yöneticisi olan Google hesabıyla bağlanın. İzni Google'ın kendi ekranında verirsiniz; şifreniz bizimle paylaşılmaz.",
-      "notGranted": "Google hesabınız bağlı, ama İşletme Profili izni verilmemiş. Yorumları okuyabilmemiz için Google'ın ekranında bu izni de verin.",
-      "connect": "Google yorumlarını bağla",
-      "reconnect": "Yeniden bağla",
-      "connected": "Google yorumları bağlandı.",
-      "noLocations": "Bu Google hesabının yönettiği bir işletme profili yok. Profilin sahibi ya da yöneticisi olan hesapla yeniden bağlayın.",
-      "location": "İşletme konumu",
-      "chooseLocation": "Konum seçin",
-      "useLocation": "Bu konumu kullan",
-      "locationSaved": "Konum kaydedildi, yorumlar Google'dan okundu.",
-      "changeLocation": "Konumu değiştir",
-      "figures": "Google'da {{rating}} · {{count}} yorum",
-      "noFigures": "Google'da henüz yorum yok",
-      "syncedAgo": "son eşitleme {{when}}",
-      "errorReconnect": "Google bağlantısı yorumları okuyamıyor; yeniden bağlayın.",
-      "errorLost": "Bağlı Google hesabı bu işletme profiline artık erişemiyor; konumu yeniden seçin ya da profilin sahibi olan hesapla bağlayın.",
-      "errorLater": "Son eşitleme Google'dan yanıt alamadı; vitrinde son okunan yorumlar görünüyor. Ertesi gün kendiliğinden yeniden denenir.",
-      "syncNow": "Şimdi eşitle",
-      "synced": "Yorumlar Google'dan okundu.",
-      "syncFailed": "Google'dan yanıt alınamadı; daha sonra yeniden deneyin.",
-      "remove": "Bağlantıyı kaldır",
-      "removed": "Google yorumları vitrinden kaldırıldı.",
-      "confirm": {
-        "title": "Google yorumları kaldırılsın mı?",
-        "description": "Vitrindeki Google yorumları kaldırılır ve burada tutulan kopyaları silinir. Yorumlar Google'da kalır. Google hesabı bağlantısı (Merchant Center, Search Console) sürer.",
-        "action": "Kaldır"
-      },
-      "listTitle": "Yorumlar",
-      "listDescription": "Google'dan okunan yorumlar, en yeniden. Yanıtlamak ya da vitrinden kaldırmak için bir yoruma tıklayın. Bir yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için vitrinden kaldırabilirsiniz; Google'daki puan ve yorum sayısı değişmez.",
-      "empty": "Bu konumun Google'da yorumu yok.",
-      "anonymous": "Google kullanıcısı",
-      "noText": "Yalnızca puan verilmiş.",
-      "replied": "Yanıtlandı",
-      "hiddenBadge": "Vitrinden kaldırıldı",
-      "shownDone": "Yorum vitrine geri alındı.",
-      "hiddenDone": "Yorum vitrinden kaldırıldı.",
-      "hide": "Vitrinden kaldır",
-      "hideFor": "{{author}} yorumunu vitrinden kaldır",
-      "hideTitle": "Yorum vitrinden kaldırılsın mı?",
-      "hideDescription": "{{author}} yorumu Google'da kalır; yalnızca vitrinde görünmez. Gerekçeyi seçin.",
-      "hideReason": "Kaldırma gerekçesi",
-      "hideRule": "Olumsuz yorumlar puanı nedeniyle kaldırılamaz; yalnızca bu üç gerekçeyle kaldırabilirsiniz.",
-      "reasons": {
-        "personal_data": "Kişisel veri içeriyor",
-        "abusive": "Hakaret, küfür ya da nefret söylemi",
-        "off_topic": "Konu dışı ya da spam"
-      },
-      "hiddenWhy": "Gerekçe: {{reason}}",
-      "restore": "Vitrine geri al",
-      "open": "{{author}} yorumunu aç",
-      "dialogTitle": "{{author}} yorumu",
-      "reply": "Yanıtınız",
-      "replyHint": "Düz metin. Google'da ve vitrinde yorumun altında “Mağazanın yanıtı” olarak görünür.",
-      "replyPlaceholder": "Örn. Değerlendirmeniz için teşekkür ederiz…",
-      "replyBytes": "{{used}} / {{max}} bayt",
-      "replyTooLong": "Google en çok {{max}} bayt alıyor; Türkçe harfler iki sayılır. Biraz kısaltın.",
-      "replySend": "Yanıtla",
-      "replyUpdate": "Yanıtı güncelle",
-      "replyDelete": "Yanıtı sil",
-      "replySent": "Yanıt Google'a gönderildi.",
-      "replyUpdated": "Yanıt Google'da güncellendi.",
-      "replyDeleted": "Yanıt Google'dan silindi.",
-      "repliedAt": "Son yanıt {{when}}",
-      "replyPending": "Google onayında",
-      "replyPendingNote": "Google yanıtı inceliyor; onaylayınca vitrinde de görünür.",
-      "replyRejected": "Google yayımlamadı",
-      "replyRejectedNote": "Google bu yanıtı yayımlamadı; metni düzenleyip yeniden gönderebilirsiniz.",
-      "deleteConfirm": {
-        "title": "Yanıt silinsin mi?",
-        "description": "Yanıt Google'dan ve vitrinden kaldırılır; yorum yerinde kalır.",
-        "action": "Sil"
-      },
-      "visibility": "Vitrinde",
-      "shownLine": "Bu yorum vitrinin Yorumlar sayfasında görünüyor."
     }
   },
   "staff": {
@@ -9918,10 +9837,6 @@
           "name": "Müşteri yorumları",
           "description": "Müşterilerinizin son yorumları."
         },
-        "google_rating": {
-          "name": "Google puanı",
-          "description": "Google'daki ortalama puanınız ve değerlendirme sayınız; isterseniz son 4–5 yıldızlı yorumlardan alıntılar. Google yorumları bağlı değilse ya da yorum yoksa vitrinde görünmez."
-        },
         "rich_text": {
           "name": "Metin",
           "description": "Başlık ve biçimli metin; ürün ve kategori kartı da eklenebilir."
@@ -10237,7 +10152,6 @@
         "brands": "Markalar",
         "posts": "Blogdan",
         "reviews": "Müşterilerimiz ne diyor?",
-        "google_rating": "Google'da bizi değerlendirenler",
         "newsletter": "E-bültene abone olun",
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
@@ -11313,19 +11227,6 @@
           "term": "strips_dim",
           "hint": "Geniş ekranda bir şeridin üstüne gelinince ya da klavyeyle seçilince diğer şeritler kararır."
         }
-      },
-      "googleRating": {
-        "excerpts": "Son yorumlardan alıntı göster",
-        "excerptsTerm": "excerpts",
-        "excerptsHint": "Gizlediğiniz yorumlar hiçbir zaman çıkmaz; yalnızca 4 ve 5 yıldızlı, metni olan son yorumlar.",
-        "count": "Alıntı sayısı",
-        "countTerm": "count",
-        "countHint": "1 ile {{max}} arası.",
-        "profileLink": "Google'daki sayfanıza bağlantı",
-        "profileLinkTerm": "link",
-        "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
-        "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
-        "sourceLink": "Yorumlar > Google yorumları"
       },
       "shared": {
         "badges": {

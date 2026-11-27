@@ -99,7 +99,6 @@ describe("staff roles", () => {
     ["POST", "/admin/features/ai.assistant"],
     ["POST", "/admin/features/ai.storefront_search"],
     ["POST", "/admin/google/connect"],
-    ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
     ["GET", "/admin/invites"],
@@ -715,15 +714,6 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/google/merchant/sync": false,
   "DELETE /admin/google": false,
   "POST /admin/google/search-console": false,
-  // adr/0058: the shop's Google reviews set up by the admin; a review hidden by moderation
-  "POST /admin/google/reviews/connect": false,
-  "POST /admin/google/reviews/location": false,
-  "POST /admin/google/reviews/sync": false,
-  "DELETE /admin/google/reviews": false,
-  "POST /admin/google/reviews/items/:id": true,
-  // The shop's reply to a Google review, as a product question's answer (adr/0058 Ek 2026-11-06)
-  "POST /admin/google/reviews/items/:id/reply": true,
-  "DELETE /admin/google/reviews/items/:id/reply": true,
   "POST /admin/integrations/credentials/:provider/check": false,
   "POST /admin/integrations/credentials/:provider": false,
   "DELETE /admin/integrations/credentials/:provider": false,

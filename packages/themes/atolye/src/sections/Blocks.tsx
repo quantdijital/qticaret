@@ -16,7 +16,6 @@ import { CategoryIcons } from "./CategoryIcons"
 import { CategoryPanels } from "./CategoryPanels"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
-import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
 import { GuidesPanel } from "./GuidesPanel"
 import { Help } from "./Help"
@@ -200,8 +199,6 @@ function BlockView({
           )}
         </>
       )
-    case "google_rating":
-      return <GoogleRating section={section} t={t} />
     case "rich_text":
       return <Story section={section} />
     case "posts": {

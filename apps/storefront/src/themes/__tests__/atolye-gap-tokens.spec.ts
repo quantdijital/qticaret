@@ -56,7 +56,6 @@ const MOVED: readonly Moved[] = [
   HEAD("sections/CategoryCards.tsx"),
   HEAD("sections/CategoryCollage.tsx"),
   HEAD("sections/Guides.tsx"),
-  HEAD("sections/GoogleRating.tsx"),
   HEAD("sections/Reviews.tsx"),
   HEAD("ProductPage.tsx"),
   {

@@ -110,7 +110,6 @@ export const OWNER_ONLY: readonly Rule[] = [
   // A request to buy the platform's AI credits, a payment the shop owes (adr/0085 §3, K11)
   { methods: WRITES, path: "/admin/ai/credits/orders" },
   { methods: ["POST"], path: "/admin/google/connect" },
-  { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go
   { methods: WRITES, path: "/admin/platform-settings/bank_transfer" },
@@ -259,10 +258,6 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
   // The shop's reply under a review, as a question's answer
   { methods: ["POST", "DELETE"], path: "/admin/product-reviews/:id/reply" },
-  // A Google review taken off the storefront or put back (adr/0058), and the shop's
-  // reply to it, as a product question's answer (adr/0058 Ek 2026-11-06)
-  { methods: ["POST"], path: "/admin/google/reviews/items/:id" },
-  { methods: ["POST", "DELETE"], path: "/admin/google/reviews/items/:id/reply" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's
   { methods: ["POST"], path: "/admin/contact-messages/:id" },
   // A payment link for a customer in the DMs, without a discount (the workflow refuses

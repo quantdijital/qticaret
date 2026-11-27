@@ -138,7 +138,6 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
     | StorePostsSection
     | StoreReviewsSection
-    | StoreGoogleRatingSection
     | StoreRichTextSection
     | {
         id: string
@@ -202,22 +201,6 @@ export interface StoreMarqueeItem {
   text: string
   subtext: string | null
   link: StoreLayoutLink | null
-}
-
-/**
- * The home page's Google rating badge (adr/0058 Ek 2026-11-06): its
- * options only; the storefront reads Google's figures and the excerpts
- * from `GET /store/google-reviews` and draws nothing while there are none.
- */
-export interface StoreGoogleRatingSection {
-  id: string
-  type: "google_rating"
-  /** None: the storefront's own. */
-  title: string | null
-  /** Recent 4–5 star excerpts under the badge: 0 (none) to 3. */
-  excerpts: number
-  /** A link to the place on Google Maps beside the one to `/yorumlar`. */
-  profile_link: boolean
 }
 
 /**

@@ -129,7 +129,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | — |
 | Shopify | Dawn `featured-blog`: `post_limit` 2–4, `columns_desktop` 1–4, `show_view_all`, `show_image`, `show_date`, `show_author`. Yorum bölümü Dawn'ın bölüm listesinde yok |
 
-### 1.10 `google_rating` "Google puanı"
+### 1.10 `google_rating` "Google puanı" (2026-11-27 kaldırıldı, adr/0058)
 
 | | |
 | --- | --- |

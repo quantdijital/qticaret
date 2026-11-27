@@ -683,28 +683,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This Search Console property is not one the connected Google account can read.",
   "google.not_configured": "The Google connection is not set up for this shop yet.",
   "google.not_connected": "Connect the Google account first.",
-  "google.reviews_scope":
-    "The Google account was connected without Business Profile; connect it again for Google reviews.",
-  "google.location_invalid":
-    "This business location is not one the connected Google account manages; refresh the list.",
-  "google.review_not_found": "This Google review is gone; it may have been removed on Google.",
-  "google.hide_reason_required":
-    "Choose a reason to take the review off the storefront: personal data, abuse or off topic.",
-  "google.hide_reason_invalid":
-    "A Google review can only be taken off for personal data, abuse or being off topic.",
-  "google.hide_reason_unexpected": "A review put back on the storefront takes no reason.",
-  "google.reply_required": "The reply cannot be empty.",
-  "google.reply_too_long":
-    "The reply is over Google's limit (4096 bytes; accented letters count as two). Shorten it a little.",
-  "google.reply_invalid": "The reply holds invisible control characters; type it again.",
-  "google.reply_missing": "This review has no reply to remove.",
-  "google.reply_forbidden":
-    "The connected Google account may not reply to this business's reviews; connect an account that owns or manages the profile.",
-  "google.reply_unverified":
-    "Google allows replies only on verified Business Profiles; verify the profile on Google.",
-  "google.reply_refused": "Google did not accept this reply; review the text and try again.",
-  "google.reply_unavailable":
-    "Google did not take the reply just now; nothing changed. Try again shortly.",
   "reports.range_invalid":
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "catalog_import.cost_invalid":

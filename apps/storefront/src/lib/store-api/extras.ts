@@ -6,7 +6,6 @@ import type {
   StoreCategoryDescription,
   StoreCategoryImage,
   StoreCollectionDetails,
-  StoreGoogleReviews,
   StoreLatestReviewPhoto,
   StoreReviewSummary,
   StoreUpcomingDepartures,
@@ -165,38 +164,6 @@ export const reviewSummary = cache(
         rating: null,
       })
     ).rating
-)
-
-/**
- * The shop's Google reviews (adr/0058): Google's figures and the newest
- * reviews, shop-wide, kept a minute; none without an answer.
- */
-export const googleReviews = cache(
-  async (limit: number): Promise<StoreGoogleReviews["google_reviews"]> =>
-    (
-      await orNone(() => storePublicGet<StoreGoogleReviews>("/store/google-reviews", { limit }), {
-        google_reviews: null,
-      })
-    ).google_reviews
-)
-
-/**
- * Google's figures and the newest `limit` reviews of at least
- * `minRating` stars with text, for the home page's rating badge (adr/0058
- * Ek 2026-11-06); `limit` 0, the figures alone.
- */
-export const googleRatingReviews = cache(
-  async (limit: number, minRating: number): Promise<StoreGoogleReviews["google_reviews"]> =>
-    (
-      await orNone(
-        () =>
-          storePublicGet<StoreGoogleReviews>("/store/google-reviews", {
-            limit,
-            min_rating: minRating,
-          }),
-        { google_reviews: null }
-      )
-    ).google_reviews
 )
 
 /**

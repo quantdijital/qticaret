@@ -257,6 +257,8 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
 
 ## Ek (2026-11-06): Google puanı bölümü (`google_rating`; otonom, gözden geçir)
 
+> 2026-11-27: kaldırıldı (sahip kararı, adr/0058 son ek). Kayıtlı tasarımlardaki bu bölümler `google-reviews-removed` migration betiğiyle çıkarılır; okuma bilinmeyen türü zaten atlar.
+
 - Ana sayfaya isteğe bağlı yeni bölüm türü: Google'daki ortalama ve sayı, `/yorumlar`'a ve (isteğe bağlı) Google Haritalar'a bağlantı, 0–3 son 4–5 yıldızlı alıntı. Şema `lib/storefront/layout-google.ts` (`title`, `excerpts` 0–3, `profile_link`); ürün ve kategori sayfası almaz.
 - Belge yalnız ayarları tutar; rakamları vitrin her istekte okur (`/store/google-reviews`), gösterecek bir şey yoksa bölüm çizilmez. Ayrıntı, yapılandırılmış veri kararı ve kanıtlar: adr/0058 Ek 2026-11-06.
 - Panel: Bölüm ekle > "Google puanı" (başlık, "Son yorumlardan alıntı göster" + sayı 1–3, "Google'daki sayfanıza bağlantı"). Migration yok.

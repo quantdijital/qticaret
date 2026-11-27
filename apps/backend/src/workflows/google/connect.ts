@@ -8,9 +8,7 @@ import { panelUrl } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { googleApi } from "../../lib/google/client"
 import {
-  BUSINESS_PROFILE_SCOPE,
   GOOGLE_CALLBACK_PATH,
-  REVIEWS_STATE_PREFIX,
   authorizationUrl,
   googleClientOf,
   pkcePair,
@@ -46,26 +44,18 @@ const requireClient = () => {
  */
 interface StartInput {
   user_id: string
-  /** `reviews`: Business Profile's scope asked on top, back to the panel's Google reviews (adr/0058). */
-  purpose?: "reviews"
 }
 
 const startGoogleConnectStep = createStep(
   "google-start-connect",
   async (input: StartInput, { container }) => {
     const client = requireClient()
-    const reviews = input.purpose === "reviews"
     const { verifier, challenge } = pkcePair()
     const state = await container
       .resolve<GoogleMerchantModuleService>(GOOGLE_MERCHANT_MODULE)
-      .startState(input.user_id, verifier, reviews ? REVIEWS_STATE_PREFIX : "")
+      .startState(input.user_id, verifier)
     return new StepResponse({
-      url: authorizationUrl(client, {
-        state,
-        challenge,
-        redirectUri: redirectUri(),
-        ...(reviews ? { extraScopes: [BUSINESS_PROFILE_SCOPE] } : {}),
-      }),
+      url: authorizationUrl(client, { state, challenge, redirectUri: redirectUri() }),
     })
   }
 )

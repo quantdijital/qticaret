@@ -121,7 +121,6 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     expect(atolyeCss("sections/Guides.tsx")).toContain(
       "flex-col overflow-hidden rounded-tile gf-pane"
     )
-    expect(atolyeCss("content/GoogleReviews.tsx")).toContain("rounded-full bg-paper-3 object-cover")
     expect(atolyeCss("sections/Spotlight.tsx")).toContain(
       "overflow-hidden rounded-media bg-stage-2"
     )

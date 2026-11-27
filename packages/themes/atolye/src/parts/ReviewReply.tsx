@@ -1,8 +1,8 @@
 import type { ReviewReplyView } from "@qticaret/ui"
 
 /**
- * The shop's reply under one of its reviews, in the well a Google
- * review's reply sits in on `/yorumlar`: "Mağazanın yanıtı", the shop's
+ * The shop's reply under one of its reviews, in a well of its own:
+ * "Mağazanın yanıtı", the shop's
  * name and the day, then its words with their line breaks. Text only:
  * a reply is not a review, nothing of it goes into structured data.
  */

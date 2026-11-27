@@ -34,9 +34,6 @@ export type ContentField =
   | "show_count"
   | "list_limit"
   | "show_price"
-  | "excerpts"
-  | "excerpt_count"
-  | "profile_link"
   | "thumbs"
   | "thumbs_count"
   | "slider_height"
@@ -105,7 +102,6 @@ export const CONTENT_IDS = {
 const E = "storefront.editor"
 const F = `${E}.fields`
 const S = `${E}.slider`
-const G = `${E}.googleRating`
 const C = `${E}.heroCatalog`
 const PB = `${E}.priceBands`
 
@@ -303,12 +299,6 @@ export function contentFields(section: AnySection): RegistryField[] {
               : []),
           ]
         : heroFullFields(section, CONTENT_IDS.content)
-    case "google_rating":
-      return [
-        entry(section, "excerpts", `${G}.excerpts`),
-        ...(section.excerpts > 0 ? [entry(section, "excerpt_count", `${G}.count`)] : []),
-        entry(section, "profile_link", `${G}.profileLink`),
-      ]
     case "price_bands":
       return [
         entry(section, "thumbs", `${PB}.thumbs`, [], "thumbs"),

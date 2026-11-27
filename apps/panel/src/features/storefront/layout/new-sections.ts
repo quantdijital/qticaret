@@ -101,8 +101,6 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       return { ...base, type, title: null, limit: 3, variant: defaultVariant(type) }
     case "reviews":
       return { ...base, type, title: null, limit: 6, variant: "grid" }
-    case "google_rating":
-      return { ...base, type, title: null, excerpts: 0, profile_link: true }
     case "rich_text":
       return {
         ...base,

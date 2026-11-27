@@ -28,7 +28,6 @@ import {
   ScanSearch,
   Search,
   ShoppingBag,
-  Star,
   Tags,
   Text,
   Truck,
@@ -61,7 +60,6 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   brands: Tags,
   posts: BookOpen,
   reviews: MessageSquareQuote,
-  google_rating: Star,
   rich_text: Text,
   article: FileText,
   contact: Contact,
@@ -104,7 +102,6 @@ function ownTitle(section: AnySection): string | null {
     case "brands":
     case "posts":
     case "reviews":
-    case "google_rating":
     case "rich_text":
     case "faq":
     case "related_products":

@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import type { StoreGoogleReview, StoreReviewPhoto, StoreReviewReply } from "@qticaret/types"
-import type { ReviewsPageItemView } from "@qticaret/ui"
+import type { StoreReviewPhoto, StoreReviewReply } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { pageTitle } from "@/lib/seo/paging"
@@ -9,9 +8,8 @@ import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { googleReviews, reviewSummary } from "@/lib/store-api/extras"
+import { reviewSummary } from "@/lib/store-api/extras"
 import { reviewPhotos, reviewReply, shopRatingView } from "@/lib/views/card-extras"
-import { byDate, googleReviewItem, googleReviewsView } from "@/lib/views/google-reviews"
 import { reviewFilterView, reviewsPath, starsOf } from "@/lib/views/review-filter"
 import { reviewedProductPictures } from "@/lib/views/review-cards"
 import { theme } from "@/theme"
@@ -37,8 +35,6 @@ interface Answer {
     photos?: StoreReviewPhoto[]
     reply?: StoreReviewReply | null
   }[]
-  /** With `google=1`: the shop's Google reviews on this page (adr/0058 Ek 2026-11-27). */
-  google_reviews?: StoreGoogleReview[]
   count: number
 }
 
@@ -76,11 +72,8 @@ export async function generateMetadata({
 
 /**
  * `/yorumlar` (D10): every approved review, twenty a page, each with its
- * product's link, mixed by date with the shop's Google reviews, each of
- * those with its link on Google (adr/0058 Ek 2026-11-27); Google's own
- * average and count beside the shop's, never added to them, and none of
- * Google's in structured data. `?puan=5` the shop's five-star ones alone
- * (adr/0037 Ek 2026-11-05), the shop-wide spread its links.
+ * product's link; `?puan=5` the five-star ones alone (adr/0037 Ek
+ * 2026-11-05), the shop-wide spread its links.
  */
 export default async function ReviewsIndex({ searchParams }: { searchParams: Promise<Query> }) {
   const [query, site] = await Promise.all([searchParams, siteSeo()])
@@ -96,8 +89,7 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
     answer = await storeGet<Answer>("/store/reviews", {
       offset: (page - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
-      // Google's reviews only among every review: the star filter and its spread are the shop's
-      ...(stars === null ? { google: "1" } : { rating: stars }),
+      ...(stars === null ? {} : { rating: stars }),
     })
   } catch (error) {
     if (!isStoreApiError(error)) {
@@ -110,44 +102,14 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
     notFound()
   }
   const ids = [...new Set(answer.reviews.map((review) => review.product_id))]
-  const [paths, rating, pictures, fromGoogle] = await Promise.all([
+  const [paths, rating, pictures] = await Promise.all([
     pathsOf("product", ids),
     // The shop-wide average and spread (adr/0046 Ek 2026-11-05), not this page's
     reviewSummary(),
     reviewedProductPictures(ids),
-    // adr/0058: Google's own figures and links, beside the shop's (its reviews are in the list)
-    stars === null ? googleReviews(0) : Promise.resolve(null),
   ])
   const summary = shopRatingView(rating, t)
   const filter = reviewFilterView(summary, stars, t)
-  const google = googleReviewsView(fromGoogle, t)
-  const shopCards = answer.reviews.map((review) => {
-    const path = paths[review.product_id]
-    const author = review.author_name ?? t("product.anonymous")
-    const item: ReviewsPageItemView = {
-      rating: review.rating,
-      title: review.title,
-      body: review.body,
-      author,
-      date: DATE.format(new Date(review.created_at)),
-      verified: review.verified_purchase,
-      photos: reviewPhotos(review.photos, author, t),
-      reply: reviewReply(review.reply),
-      product: path
-        ? {
-            label: review.product_title,
-            path,
-            image: pictures.get(review.product_id) ?? null,
-          }
-        : null,
-    }
-    return { at: review.created_at, item }
-  })
-  const googleCards = (answer.google_reviews ?? []).flatMap((review) => {
-    const item = googleReviewItem(review, fromGoogle?.maps_url ?? null, site.shop.name, t)
-    return item ? [{ at: review.created_at, item }] : []
-  })
-  const reviews = byDate(shopCards, googleCards)
   return (
     <>
       <JsonLd
@@ -169,8 +131,27 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
           count: rating?.count ?? (stars === null ? answer.count : 0),
           ...(summary ? { summary } : {}),
           ...(filter ? { filter } : {}),
-          ...(google ? { google } : {}),
-          reviews,
+          reviews: answer.reviews.map((review) => {
+            const path = paths[review.product_id]
+            const author = review.author_name ?? t("product.anonymous")
+            return {
+              rating: review.rating,
+              title: review.title,
+              body: review.body,
+              author,
+              date: DATE.format(new Date(review.created_at)),
+              verified: review.verified_purchase,
+              photos: reviewPhotos(review.photos, author, t),
+              reply: reviewReply(review.reply),
+              product: path
+                ? {
+                    label: review.product_title,
+                    path,
+                    image: pictures.get(review.product_id) ?? null,
+                  }
+                : null,
+            }
+          }),
           pagination: {
             page,
             pages,

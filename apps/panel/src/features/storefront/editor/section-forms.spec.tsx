@@ -319,7 +319,6 @@ describe("a content page's section chooser (adr/0073 §3, Ek 2026-11-19 (2) K5)"
       "Markalar",
       "Blog yazıları",
       "Müşteri yorumları",
-      "Google puanı",
       "Metin",
       "Sık sorulan sorular",
       "Rakam şeridi",

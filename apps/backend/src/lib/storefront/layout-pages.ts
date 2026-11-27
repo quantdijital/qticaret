@@ -6,7 +6,6 @@ import { categories } from "./sections/categories"
 import { posts } from "./sections/posts"
 import { pageFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
-import { googleRating } from "./sections/google-rating"
 import { marquee } from "./sections/marquee"
 import { newsletter } from "./sections/newsletter"
 import { contact, pageOnlyOnce, paymentFacts, shippingFacts } from "./sections/page-text"
@@ -50,7 +49,6 @@ export const CONTENT_PAGE_SECTION_TYPES = [
   "brands",
   "posts",
   "reviews",
-  "google_rating",
   "stats",
   "steps",
   "search_box",
@@ -82,7 +80,6 @@ export const contentPageSection = z.discriminatedUnion(
     brands,
     posts,
     reviews,
-    googleRating,
     stats,
     steps,
     searchBox,
