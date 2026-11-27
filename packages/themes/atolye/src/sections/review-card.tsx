@@ -188,32 +188,39 @@ function PlainCard({ review, sizes, t }: { review: Review; sizes: string; t: Tra
 function CompactCard({ review, sizes, t }: { review: Review; sizes: string; t: Translate }) {
   const product = review.product
   const score = review.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })
+  // One star and the score: on the picture's corner, else before the name
+  const rating = (
+    <span
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-paper/90 px-2.5 py-1 text-sm font-semibold text-text shadow-sm backdrop-blur-sm"
+      role="img"
+      aria-label={t("reviews.stars", { rating: review.rating })}
+    >
+      <Star className="size-4 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+      {score}
+    </span>
+  )
+  const picture = product?.image ?? null
   const head = (
     <>
-      {product?.image && (
+      {picture && (
         <span className="relative block aspect-[5/2] overflow-hidden bg-media">
-          <ResponsiveImage image={product.image} sizes={sizes} className={ZOOM} />
+          <ResponsiveImage image={picture} sizes={sizes} className={ZOOM} />
+          <span className="absolute top-2.5 right-2.5">{rating}</span>
         </span>
       )}
-      <span className="flex items-center gap-3 px-4 pt-3 lg:px-5">
+      <span className="flex items-start gap-2 px-4 pt-3 lg:px-5">
+        {!picture && rating}
         {product && (
-          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text">
+          <span className="line-clamp-2 min-w-0 text-sm leading-snug font-semibold text-text">
             {product.label}
           </span>
         )}
-        <span
-          className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-text"
-          role="img"
-          aria-label={t("reviews.stars", { rating: review.rating })}
-        >
-          <Star className="size-4 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
-          {score}
-        </span>
       </span>
     </>
   )
+  // A breath of the shop's colour (owner 2026-11-28): the ground, its rule and the quote mark
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-tile border border-rule bg-paper">
+    <article className="flex h-full flex-col overflow-hidden rounded-tile border border-[color-mix(in_oklab,var(--color-signal)_18%,var(--color-rule))] bg-[color-mix(in_oklab,var(--color-signal)_6%,var(--color-paper))]">
       {product ? (
         <a
           href={product.path}
@@ -227,9 +234,17 @@ function CompactCard({ review, sizes, t }: { review: Review; sizes: string; t: T
       )}
       <div className="flex flex-1 flex-col gap-3 px-4 pt-2 pb-4 lg:px-5 lg:pb-5">
         <blockquote className="flex-1 text-sm leading-relaxed text-text-2">
-          <p className="line-clamp-3">“{quoteOf(review.body)}”</p>
+          <p className="line-clamp-3">
+            <span
+              aria-hidden="true"
+              className="me-0.5 font-display text-lg leading-none text-signal"
+            >
+              “
+            </span>
+            {quoteOf(review.body)}”
+          </p>
         </blockquote>
-        <footer className="flex items-center gap-1.5 border-t border-rule pt-3 text-xs text-text-2">
+        <footer className="flex items-center gap-1.5 border-t border-[color-mix(in_oklab,var(--color-signal)_18%,var(--color-rule))] pt-3 text-xs text-text-2">
           <span className="font-semibold text-text">{review.author}</span>
           {review.verified && (
             <BadgeCheck
