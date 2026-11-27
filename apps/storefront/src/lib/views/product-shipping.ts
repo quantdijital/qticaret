@@ -76,8 +76,8 @@ export function deliveryFacts(delivery: StoreDelivery, t: Translate): TrustBadge
         leaves,
         {
           icon: "clock",
-          title: t("product.shipping_cutoff", { time: untilHour(hour) }),
-          text: null,
+          title: t("product.shipping_cutoff_title"),
+          text: t("product.shipping_cutoff", { time: untilHour(hour) }),
         },
       ]
 }
