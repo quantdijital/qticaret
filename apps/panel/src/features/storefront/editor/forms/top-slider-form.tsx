@@ -3,16 +3,11 @@ import { TOP_SLIDER_DEFAULTS, TOP_SLIDER_SETTINGS, topSliderSettingsOf } from "@
 import type { TopSliderSetting } from "@qticaret/types"
 import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import { MediaField } from "@/components/patterns/media-field"
-import { RowActions } from "@/features/settings/components/storefront-rows"
-import type { TopSlide, TopSliderSection } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import type { TopSliderSection } from "@/features/storefront/api/layout"
 import { HintedName } from "./field-hint"
-import { ImageField } from "./image-field"
-import { LinkField } from "./link-field"
-import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { StepChoice } from "./step-choice"
+import { TopSlidesField } from "./top-slides-field"
 
 const S = "storefront.editor.topSlider"
 
@@ -27,17 +22,7 @@ type OnOff = "arrows" | "dots"
  */
 export function TopSliderForm({ section, problems, onChange }: SectionFormProps<TopSliderSection>) {
   const { t } = useTranslation()
-  const problem = useProblemText()
   const settings = topSliderSettingsOf(section)
-  const setSlides = (slides: TopSlide[], field?: string) => {
-    onChange({ ...section, slides }, field)
-  }
-  const setSlide = (index: number, slide: Partial<TopSlide>, field?: string) => {
-    setSlides(
-      section.slides.map((each, at) => (at === index ? { ...each, ...slide } : each)),
-      field
-    )
-  }
   const steps = (setting: Exclude<TopSliderSetting, OnOff>) => {
     const list: readonly string[] = TOP_SLIDER_SETTINGS[setting]
     return (
@@ -86,87 +71,14 @@ export function TopSliderForm({ section, problems, onChange }: SectionFormProps<
   }
   return (
     <div className="flex flex-col gap-5">
-      {section.slides.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{t(`${S}.empty`)}</p>
-      ) : null}
-      <ol className="flex flex-col gap-4">
-        {section.slides.map((slide, index) => {
-          const number = index + 1
-          const at = `slides.${String(index)}`
-          const id = `${section.id}-top-slide-${String(index)}`
-          return (
-            <li key={index} className="flex flex-col gap-3 rounded-md border p-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium">{t(`${S}.slide`, { number })}</span>
-                <RowActions
-                  index={index}
-                  count={section.slides.length}
-                  item={t(`${S}.slide`, { number })}
-                  removable
-                  onMove={(to) => {
-                    const next = section.slides.filter((_, other) => other !== index)
-                    next.splice(to, 0, slide)
-                    setSlides(next)
-                  }}
-                  onRemove={() => {
-                    setSlides(section.slides.filter((_, other) => other !== index))
-                  }}
-                />
-              </div>
-              <ImageField
-                id={`${id}-image`}
-                label={t(`${S}.image`)}
-                hint={t(`${S}.imageHint`)}
-                image={slide.image}
-                removable={false}
-                altError={problem(problems[`${at}.image`], L.alt)}
-                onChange={(image) => {
-                  if (image) setSlide(index, { image }, `${at}.image`)
-                }}
-              />
-              <ImageField
-                id={`${id}-mobile`}
-                label={t(`${S}.mobileImage`)}
-                hint={t(`${S}.mobileHint`)}
-                image={slide.mobile_image}
-                altError={problem(problems[`${at}.mobile_image`], L.alt)}
-                onChange={(mobile_image) => {
-                  setSlide(index, { mobile_image }, `${at}.mobile_image`)
-                }}
-              />
-              <LinkField
-                id={`${id}-link`}
-                label={t(`${S}.link`)}
-                hint={t(`${S}.linkHint`)}
-                link={slide.link}
-                error={problem(problems[`${at}.link`])}
-                onChange={(link, field) => {
-                  setSlide(index, { link }, field && `${at}.link.label`)
-                }}
-              />
-            </li>
-          )
-        })}
-      </ol>
-      {section.slides.length < L.slides ? (
-        <MediaField
-          id={`${section.id}-top-slider-add`}
-          label={t(`${S}.add`)}
-          hint={t(`${S}.addHint`, { max: L.slides })}
-          value={null}
-          emptyText={t(`${S}.add`)}
-          onChange={(asset) => {
-            if (asset) {
-              setSlides([
-                ...section.slides,
-                { image: { url: asset.url, alt: asset.alt }, mobile_image: null, link: null },
-              ])
-            }
-          }}
-        />
-      ) : (
-        <p className="text-xs text-muted-foreground">{t(`${S}.full`, { max: L.slides })}</p>
-      )}
+      <TopSlidesField
+        id={`${section.id}-top-slides`}
+        slides={section.slides}
+        problems={problems}
+        onChange={(slides, field) => {
+          onChange({ ...section, slides }, field)
+        }}
+      />
       {steps("height")}
       {steps("interval")}
       {steps("transition")}

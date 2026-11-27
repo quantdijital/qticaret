@@ -46,17 +46,36 @@ describe("the top image slider's form", () => {
     expect(screen.getAllByText("Görsel ekle").length).toBeGreaterThan(0)
   })
 
-  it("asks for a picture's words, and sets its height, transition and dots", async () => {
+  it("lists its slides as rows, one opened at a time, the words missing warned", async () => {
     const user = userEvent.setup()
-    const changes = renderForm({ ...newTopSlider("kaydirici1"), slides: [slide(null)] })
+    const changes = renderForm({
+      ...newTopSlider("kaydirici1"),
+      slides: [slide(null), slide("Yeni gelenler")],
+    })
+    const first = screen.getByRole("button", { name: /^1\. slayt(?!:)/ })
+    const second = screen.getByRole("button", { name: /^2\. slayt(?!:)/ })
+    expect(first).toHaveTextContent("Açıklama yok")
+    expect(second).toHaveTextContent("Yeni gelenler")
+    expect(first).toHaveAttribute("aria-expanded", "false")
+    await user.click(first)
+    expect(first).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByText(/Görseli anlatan kısa bir metin yazın/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Örn\. Kış indirimi/)).toBeInTheDocument()
+    await user.click(second)
+    expect(first).toHaveAttribute("aria-expanded", "false")
+    expect(second).toHaveAttribute("aria-expanded", "true")
+    await user.click(screen.getByRole("button", { name: "2. slayt: kaldır" }))
+    expect(changes.at(-1)?.slides).toHaveLength(1)
+  })
+
+  it("sets its height, transition and dots", async () => {
+    const user = userEvent.setup()
+    const changes = renderForm({ ...newTopSlider("kaydirici1"), slides: [slide("Kış")] })
     await user.click(screen.getByRole("radio", { name: "Yüksek" }))
     expect(changes.at(-1)).toMatchObject({ height: "tall" })
     await user.click(screen.getByRole("radio", { name: "Solarak" }))
     expect(changes.at(-1)).toMatchObject({ transition: "fade" })
     await user.click(screen.getByRole("switch", { name: /Noktaları göster/ }))
     expect(changes.at(-1)).toMatchObject({ dots: "on" })
-    await user.click(screen.getByRole("button", { name: "1. görsel: kaldır" }))
-    expect(changes.at(-1)).toMatchObject({ slides: [] })
   })
 })

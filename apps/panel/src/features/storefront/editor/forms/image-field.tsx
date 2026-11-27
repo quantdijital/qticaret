@@ -51,6 +51,7 @@ export function ImageField({
             id={`${id}-alt`}
             label={t(`${F}.alt`)}
             hint={t(`${F}.altHint`)}
+            placeholder={t(`${F}.altPlaceholder`)}
             value={image.alt}
             max={LAYOUT_LIMITS.alt}
             error={altError}
