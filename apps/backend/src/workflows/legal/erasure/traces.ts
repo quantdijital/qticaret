@@ -130,8 +130,9 @@ async function eraseContributions(container: Container, customerId: string) {
   const byCustomer = { customer_id: customerId }
   const [written, asked, answered] = await Promise.all([
     reviews.listProductReviews(byCustomer, { select: ["id"] }),
-    qa.listProductQuestions(byCustomer, { select: ["id"] }),
-    qa.listProductAnswers(byCustomer, { select: ["id"] }),
+    // Deleted ones too: the shop may bring one back ("Geri al", adr/0037 Ek 2026-11-27)
+    qa.listProductQuestions(byCustomer, { select: ["id"], withDeleted: true }),
+    qa.listProductAnswers(byCustomer, { select: ["id"], withDeleted: true }),
   ])
   if (written.length > 0) {
     await reviews.updateProductReviews(

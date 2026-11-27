@@ -123,8 +123,10 @@ export async function customerData(container: Container, customerId: string) {
         }),
       container
         .resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
+        // Deleted ones too: still held, and the shop may bring one back
         .listProductQuestions(byCustomer, {
           select: ["product_id", "body", "status", "created_at"],
+          withDeleted: true,
         }),
       container
         .resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE)

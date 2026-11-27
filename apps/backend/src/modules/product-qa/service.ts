@@ -5,6 +5,7 @@ import {
   MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
+import { readsAsLink } from "../../lib/text/link-like"
 import { ProductAnswer } from "./models/product-answer"
 import { ProductQuestion } from "./models/product-question"
 import type { QuestionEdit, QuestionEditUndo } from "./types"
@@ -181,7 +182,7 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     }
     if (input.body !== undefined) {
       await this.updateProductQuestions(
-        { id: question.id, body: input.body, has_link: false },
+        { id: question.id, body: input.body, has_link: readsAsLink(input.body) },
         sharedContext
       )
     }

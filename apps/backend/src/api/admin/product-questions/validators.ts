@@ -50,7 +50,8 @@ export type AdminGetQuestionsType = z.infer<typeof AdminGetQuestions>
 /** The shop's own words on a question: a few characters to a short paragraph, plain text. */
 export const shopQaText = z
   .string()
-  .transform(plainText)
+  // Invisible format characters too (direction overrides, zero widths): the text reads as stored
+  .transform((value) => plainText(value.replace(/\p{Cf}/gu, "")))
   .pipe(z.string().min(2).max(1000))
   .refine((value) => isCleanText(value.replace(/\n/g, " ")), { message: "questions.text_invalid" })
 

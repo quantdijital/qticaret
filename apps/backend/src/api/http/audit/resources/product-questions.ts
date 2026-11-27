@@ -48,6 +48,15 @@ const route = (method: "POST" | "DELETE", suffix: string, pattern: RegExp): Audi
 })
 
 export const PRODUCT_QUESTION_RESOURCES: readonly AuditedResource[] = [
+  // Added by hand: the new question's id is in the answer, not the path; recorded as an action
+  {
+    method: "POST",
+    route: "POST /admin/product-questions",
+    pattern: /^\/admin\/product-questions$/i,
+    resourceType: "product_question",
+    resourceId: () => null,
+    snapshot: () => Promise.resolve({}),
+  },
   route("POST", "/edit", /^\/admin\/product-questions\/(?<id>pq_[A-Za-z0-9]+)\/edit$/i),
   route("DELETE", "", /^\/admin\/product-questions\/(?<id>pq_[A-Za-z0-9]+)$/i),
   route("POST", "/restore", /^\/admin\/product-questions\/(?<id>pq_[A-Za-z0-9]+)\/restore$/i),

@@ -176,6 +176,10 @@ describe("the panel's question requests", () => {
     expect(AdminPostQuestionEdit.parse({ answer: null })).toEqual({ answer: null })
     expect(AdminPostQuestionEdit.parse({ body: "Kaç cm?" })).toEqual({ body: "Kaç cm?" })
     expect(AdminPostQuestionEdit.safeParse({}).success).toBe(false)
+    // Direction overrides and zero widths go: the text reads as it is stored
+    expect(AdminPostQuestionEdit.parse({ body: "Kaç\u202e cm\u200b?" })).toEqual({
+      body: "Kaç cm?",
+    })
     expect(AdminPostQuestionEdit.safeParse({ body: "Kaç cm?", status: "approved" }).success).toBe(
       false
     )
