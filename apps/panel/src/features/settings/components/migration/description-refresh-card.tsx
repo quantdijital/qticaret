@@ -87,7 +87,7 @@ export function DescriptionRefreshCard({ className }: { className?: string }) {
               parcel: null,
               file,
               categoryBase: "",
-              refresh: true,
+              refresh: "descriptions",
             },
             {
               onSuccess: (started) => {
