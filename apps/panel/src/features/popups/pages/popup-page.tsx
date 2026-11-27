@@ -117,9 +117,10 @@ function PopupDetailView({ id }: { id: string }) {
  * and counts beside it in the right column.
  */
 export function PopupPage() {
+  const { t } = useTranslation()
   const { id } = route.useParams()
   return (
-    <PopupsGate>
+    <PopupsGate title={t(`${P}.title`)}>
       <PopupDetailView id={id} />
     </PopupsGate>
   )

@@ -44,6 +44,8 @@ describe("CollectionsGate", () => {
   it("says collections are off, records kept, and offers the switch to the owner", () => {
     renderGate(false)
     expect(screen.queryByText("Koleksiyon listesi")).toBeNull()
+    // The page keeps its own heading while off (the panel's page walkers wait for it)
+    expect(screen.getByRole("heading", { level: 1, name: "Koleksiyonlar" })).toBeInTheDocument()
     expect(screen.getByText(/Koleksiyonlar bu mağazada kapalı/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Özelliklere git" })).toHaveAttribute(
       "href",
@@ -53,6 +55,7 @@ describe("CollectionsGate", () => {
 
   it("offers no switch to a role that cannot change settings", () => {
     renderGate(false, "operations")
+    expect(screen.getByRole("heading", { level: 1, name: "Koleksiyonlar" })).toBeInTheDocument()
     expect(screen.getByText(/Koleksiyonlar bu mağazada kapalı/)).toBeInTheDocument()
     expect(screen.queryByRole("link")).toBeNull()
   })
