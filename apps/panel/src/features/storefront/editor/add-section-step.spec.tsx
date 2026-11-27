@@ -94,6 +94,9 @@ describe("adding a section in the theme editor", () => {
     if (!between) {
       throw new Error("no '+' between the first two rows")
     }
+    // The "+" stands inside the row below it: the list holds its rows only (axe "list")
+    expect([...home.children].every((child) => child.matches("li[data-section]"))).toBe(true)
+    expect(between.closest("li")).toBe(home.children[1])
     expect(lines).toContain(between)
     await user.click(between)
     const picker = await screen.findByRole("region", { name: "Bölüm ekle" })

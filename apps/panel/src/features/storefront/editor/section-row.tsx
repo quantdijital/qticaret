@@ -30,6 +30,7 @@ import type { LucideIcon } from "lucide-react"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { OpenedSectionContext, SectionHoverContext } from "./editor-layout"
 import { useGoneRecords } from "./gone-records-context"
+import { InsertLine } from "./insert-line"
 import { Hint } from "./shared/hint"
 
 const R = "storefront.editor.row"
@@ -72,6 +73,8 @@ interface SectionRowProps {
   onPlace?: { to: "top" | "bottom"; run: () => void; label?: string } | undefined
   /** Opens the section chooser aimed above or below the row (the touch screen's "+" between rows). */
   onInsert?: { above: () => void; below: () => void } | undefined
+  /** The thin "+" over the row's top edge, aimed above it (`InsertLine`); none: not drawn. */
+  insertLine?: { hidden: boolean } | undefined
 }
 
 // The upper half of a row drops before it, the lower half after
@@ -103,6 +106,7 @@ export function SectionRow({
   drag,
   onPlace,
   onInsert,
+  insertLine,
 }: SectionRowProps) {
   const { t } = useTranslation()
   // Its settings open, or the last opened: the row stays marked
@@ -143,6 +147,9 @@ export function SectionRow({
           }
         }}
       >
+        {insertLine && onInsert ? (
+          <InsertLine name={name} hidden={insertLine.hidden} onInsert={onInsert.above} />
+        ) : null}
         {drag?.over ? (
           <span
             aria-hidden="true"

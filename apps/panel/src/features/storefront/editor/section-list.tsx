@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react"
+import { useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { BodySection, FooterSection, Placement } from "@/features/storefront/api/layout"
@@ -6,7 +6,6 @@ import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { CAPABILITY_GROUPS } from "@qticaret/types"
 import { isScheduled, offCapability } from "@/features/storefront/layout/sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
-import { InsertLine } from "./insert-line"
 import { SectionRow } from "./section-row"
 import { useSectionFlags } from "./section-flags"
 import type { DropPlace, RowDrag } from "./section-row"
@@ -119,71 +118,62 @@ export function SectionList<S extends BodySection | FooterSection>({
         }
         const next = sections[index + 1]?.id ?? null
         return (
-          <Fragment key={section.id}>
-            {onInsert ? (
-              <InsertLine
-                name={name}
-                hidden={dragged !== null}
-                onInsert={() => {
-                  onInsert(section.id)
-                }}
-              />
-            ) : null}
-            <SectionRow
-              id={section.id}
-              icon={SECTION_ICONS[kindOf(section, inFooter)]}
-              name={name}
-              detail={detail}
-              visible={section.visible}
-              scheduled={isScheduled(section)}
-              problem={problems.has(section.id)}
-              off={off !== null}
-              onOpen={() => {
-                onOpen(section.id)
-              }}
-              onToggle={() => {
-                dispatch({ type: "toggle", id: section.id })
-              }}
-              onRemove={() => {
-                onRemove(section)
-              }}
-              moves={{
-                up: index > 0 ? move(index - 1) : null,
-                down: index < sections.length - 1 ? move(index + 1) : null,
-              }}
-              onDuplicate={
-                full || !copies(section)
-                  ? null
-                  : () => {
-                      dispatch({ type: "duplicate", id: section.id })
-                    }
-              }
-              drag={dragOf(section.id)}
-              onPlace={
-                other
-                  ? {
-                      to: other,
-                      run: () => {
-                        dispatch({ type: "place", id: section.id, placement: other })
-                      },
-                      ...(placeLabel ? { label: placeLabel(other) } : {}),
-                    }
-                  : undefined
-              }
-              onInsert={
-                onInsert
-                  ? {
-                      above: () => {
-                        onInsert(section.id)
-                      },
-                      below: () => {
-                        onInsert(next)
-                      },
-                    }
-                  : undefined
-              }
-            />
-          </Fragment>
+          <SectionRow
+            key={section.id}
+            id={section.id}
+            icon={SECTION_ICONS[kindOf(section, inFooter)]}
+            name={name}
+            detail={detail}
+            visible={section.visible}
+            scheduled={isScheduled(section)}
+            problem={problems.has(section.id)}
+            off={off !== null}
+            onOpen={() => {
+              onOpen(section.id)
+            }}
+            onToggle={() => {
+              dispatch({ type: "toggle", id: section.id })
+            }}
+            onRemove={() => {
+              onRemove(section)
+            }}
+            moves={{
+              up: index > 0 ? move(index - 1) : null,
+              down: index < sections.length - 1 ? move(index + 1) : null,
+            }}
+            onDuplicate={
+              full || !copies(section)
+                ? null
+                : () => {
+                    dispatch({ type: "duplicate", id: section.id })
+                  }
+            }
+            drag={dragOf(section.id)}
+            onPlace={
+              other
+                ? {
+                    to: other,
+                    run: () => {
+                      dispatch({ type: "place", id: section.id, placement: other })
+                    },
+                    ...(placeLabel ? { label: placeLabel(other) } : {}),
+                  }
+                : undefined
+            }
+            insertLine={onInsert ? { hidden: dragged !== null } : undefined}
+            onInsert={
+              onInsert
+                ? {
+                    above: () => {
+                      onInsert(section.id)
+                    },
+                    below: () => {
+                      onInsert(next)
+                    },
+                  }
+                : undefined
+            }
+          />
         )
       })}
     </ol>
