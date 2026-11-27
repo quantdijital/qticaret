@@ -25,6 +25,24 @@ function Picture({ entry, sizes }: { entry: NavChildView; sizes: string }) {
   )
 }
 
+/** The card's picture made of its children's: two to four tiles, drawing only. */
+function Mosaic({ entries }: { entries: readonly NavChildView[] }) {
+  return (
+    <span className="gf-mega-picture gf-mega-mosaic" data-count={entries.length}>
+      {entries.map((entry) =>
+        entry.image ? (
+          <ResponsiveImage
+            key={entry.path}
+            image={{ ...entry.image, alt: "" }}
+            sizes="160px"
+            className="gf-mega-img"
+          />
+        ) : null
+      )}
+    </span>
+  )
+}
+
 /** A link of the panel: Radix's, so the arrow keys and Escape reach it and a press closes the menu. */
 function PanelLink({
   href,
@@ -107,6 +125,9 @@ export function Mega({
   words: MenuWords
   pictures?: boolean
 }) {
+  // An item with no picture of its own (a link to the whole catalogue): its
+  // children's pictures side by side, the kinds of tours at a glance
+  const mosaic = category.children.filter((child) => child.image).slice(0, 4)
   return (
     <div className={cn("gf-mega-grid", !pictures && "gf-mega-grid--words")}>
       <ul className="gf-mega-columns">
@@ -115,7 +136,12 @@ export function Mega({
         ))}
       </ul>
       <PanelLink href={category.path} className="gf-mega-feature">
-        {pictures && <Picture entry={category} sizes="320px" />}
+        {pictures &&
+          (category.image || mosaic.length < 2 ? (
+            <Picture entry={category} sizes="320px" />
+          ) : (
+            <Mosaic entries={mosaic} />
+          ))}
         <span className="gf-mega-feature-text">
           <span className="gf-mega-feature-name">{category.label}</span>
           <span className="gf-mega-feature-all">
