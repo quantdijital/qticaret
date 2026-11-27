@@ -51,22 +51,44 @@ describe("Assurances tiles beside the shipping card", () => {
 
   it("draws two tiles side by side", () => {
     const html = render([...DELIVERY, ...OTHERS.slice(0, 2)])
-    expect(html).toContain('class="grid grid-cols-2 gap-2"')
+    // One to a row on a phone, two from sm
+    expect(html).toContain('class="grid grid-cols-1 gap-2 sm:grid-cols-2"')
     const classes = tiles(html)
     expect(classes).toHaveLength(2)
-    expect(classes.some((c) => c.includes("col-span-2"))).toBe(false)
+    expect(classes.some((c) => c.includes("sm:col-span-2"))).toBe(false)
   })
 
   it("lets the last of three tiles span the row", () => {
     const classes = tiles(render(OTHERS.slice(0, 3)))
     expect(classes).toHaveLength(3)
-    expect(classes.map((c) => c.includes("col-span-2"))).toEqual([false, false, true])
+    expect(classes.map((c) => c.includes("sm:col-span-2"))).toEqual([false, false, true])
   })
 
   it("keeps four tiles in even pairs", () => {
     const classes = tiles(render(OTHERS))
     expect(classes).toHaveLength(4)
-    expect(classes.some((c) => c.includes("col-span-2"))).toBe(false)
+    expect(classes.some((c) => c.includes("sm:col-span-2"))).toBe(false)
+  })
+})
+
+describe("Assurances tile text on narrow columns", () => {
+  it("keeps the title to one line on a phone, two from sm, and the line to two", () => {
+    const html = render([
+      {
+        icon: "gift",
+        title: "Sevdiklerinize Özel Bir Hediye",
+        text: "Kutulu Seçeneklerle birlikte",
+      },
+      badge("card", "Mastercard"),
+    ])
+    expect(html).toContain(
+      '<span class="truncate font-semibold sm:line-clamp-2 sm:whitespace-normal">Sevdiklerinize Özel Bir Hediye</span>'
+    )
+    expect(html).toContain(
+      '<span class="line-clamp-2 text-xs text-text-2">Kutulu Seçeneklerle birlikte</span>'
+    )
+    // Lower rows on a phone, the usual padding from sm
+    expect(tiles(html).every((c) => c.includes("py-2 sm:py-3"))).toBe(true)
   })
 })
 
