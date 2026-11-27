@@ -92,6 +92,41 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
     }
   })
 
+  it("turns like a slider only when asked: fading, no arrows, no line links before", () => {
+    const before = layoutDocument.parse({ header: [bar({ mode: "rotate" })] }).header[0]
+    expect(before).toMatchObject({ transition: "fade", arrows: "off" })
+    expect(before).not.toHaveProperty("line_links")
+    const set = { mode: "rotate", transition: "slide", arrows: "on" }
+    expect(layoutDocument.parse({ header: [bar(set)] }).header[0]).toMatchObject(set)
+    expect(issues({ header: [bar({ transition: "spin" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(issues({ header: [bar({ arrows: true })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
+  it("keeps each line's own link on the dark bar, checked as every storefront link", () => {
+    const shop = { kind: "system" as const, target: "shop" as const, label: null }
+    const page = { kind: "url" as const, url: "/kampanyalar", label: "Kampanyalar" }
+    const doc = layoutDocument.parse({ header: [bar({ line_links: [shop, null, page] })] })
+    expect(doc.header[0]).toMatchObject({ line_links: [shop, null, page] })
+    // An address off the shop and not https, a sixth link, a link with no words of its own
+    expect(
+      issues({
+        header: [bar({ line_links: [{ kind: "url", url: "javascript:alert(1)", label: "x" }] })],
+      })
+    ).not.toEqual([])
+    expect(
+      issues({ header: [bar({ line_links: Array.from({ length: 6 }, () => shop) })] })
+    ).not.toEqual([])
+    expect(
+      issues({ header: [bar({ line_links: [{ kind: "url", url: "/a", label: "" }] })] })
+    ).not.toEqual([])
+    // The light strip's note keeps its one link: no line links there
+    expect(issues({ header: [bar({ variant: "light", line_links: [shop] })] })).not.toEqual([])
+  })
+
   it("mirrors the contract's lists: a step goes there first", () => {
     const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
     expect(ANNOUNCEMENT_SETTINGS).toEqual(contract["ANNOUNCEMENT_SETTINGS"])

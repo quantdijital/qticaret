@@ -114,6 +114,8 @@ describe("the screens a section shows on", () => {
     expect(sectionFields(newAnnouncementBar("duyuru0001"), "header").map((f) => f.key)).toEqual([
       // The top strip's design (owner 2026-11-27)
       "variant",
+      // The slider found from the first line on (owner 2026-11-27)
+      "announcement.mode",
       "announcement.align",
       "announcement.size",
       "announcement.tone",

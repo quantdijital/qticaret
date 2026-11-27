@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { MARQUEE_SETTINGS, SCROLLER_SETTINGS } from "@qticaret/types"
+import { ANNOUNCEMENT_SETTINGS, MARQUEE_SETTINGS, SCROLLER_SETTINGS } from "@qticaret/types"
 import { i18next } from "@/lib/i18n"
 
 /** The kits' two-step settings, "off" and "on": each drawn as a switch. */
@@ -11,6 +11,7 @@ const switches = (prefix: string, settings: Readonly<Record<string, readonly str
 const SWITCHES = [
   ...switches("storefront.editor.scroller", SCROLLER_SETTINGS),
   ...switches("storefront.editor.marquee", MARQUEE_SETTINGS),
+  ...switches("storefront.editor.announcement", ANNOUNCEMENT_SETTINGS),
 ]
 
 /** docs/tema/bilesen-standardi §3 "Aç/kapat", denetim O7: one face for every on/off setting. */
@@ -22,6 +23,7 @@ describe("the on/off settings' names", () => {
         "storefront.editor.scroller.loop",
         "storefront.editor.marquee.hover_pause",
         "storefront.editor.marquee.closable",
+        "storefront.editor.announcement.arrows",
       ])
     )
   })

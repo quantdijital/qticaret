@@ -132,6 +132,8 @@ medusaIntegrationTestRunner({
           align: "auto",
           size: "medium",
           tone: "graphite",
+          transition: "fade",
+          arrows: "off",
         },
       ])
       expect(defaultLive.footer.map((section) => section.type)).toEqual(["newsletter"])

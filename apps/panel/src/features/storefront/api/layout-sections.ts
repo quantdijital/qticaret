@@ -25,6 +25,7 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  TopSliderSettings,
   NewsletterConsentStyle,
   NewsletterTone,
   NewsletterVariant,
@@ -494,7 +495,29 @@ export type AnnouncementBar = SectionBase & {
   phone?: boolean
   /** The light strip's "Hesabım"; true: written. */
   account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only); absent: none (owner 2026-11-27: the strip as a slider).
+   */
+  line_links?: (LayoutLink | null)[]
 } & Partial<AnnouncementSettings>
+
+/** One picture of the top image slider: its words required, a phone's own and a link optional. */
+export interface TopSlide {
+  image: LayoutImage
+  mobile_image: LayoutImage | null
+  link: LayoutLink | null
+}
+
+/**
+ * The top image slider (owner 2026-11-27): a full-width band of the
+ * shop's pictures above the header, one at a time; a type of its own.
+ */
+export type TopSliderSection = SectionBase & {
+  type: "top_slider"
+  /** Up to six; none: nothing drawn yet. */
+  slides: TopSlide[]
+} & TopSliderSettings
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {
   type: "newsletter"
@@ -544,8 +567,8 @@ export interface LayoutSettings {
   design?: { id: string | null; digest: string } | null
 }
 
-/** The header: the announcement bar, the scrolling strip and the shop's bar, each at most once. */
-export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection
+/** The header: the image slider, the announcement bar, the scrolling strip and the shop's bar, each at most once. */
+export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection | TopSliderSection
 /** The footer group (adr/0070 §4): the bar, and above it a box, a rich text, badges, a strip. */
 export type FooterSection =
   FooterNewsletter | FooterBarSection | RichTextSection | TrustBadgesSection | MarqueeSection

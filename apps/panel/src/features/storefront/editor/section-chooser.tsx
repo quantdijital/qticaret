@@ -26,9 +26,13 @@ import {
 } from "@/features/storefront/layout/sections"
 import { AddSectionPicker } from "./add-section-picker"
 import type { EditorPage } from "./editor-page"
+import { TopStripPicker } from "./top-strip-picker"
 
-/** Where the chooser adds: a side of a category page's sections, or the footer group (adr/0070 §4). */
-export type Adding = Placement | "footer"
+/**
+ * Where the chooser adds: a side of a category page's sections, the footer
+ * group (adr/0070 §4), or the top strip group (its own kinds, `TopStripPicker`).
+ */
+export type Adding = Placement | "footer" | "top_strip"
 
 /** The chooser's aim: its group, and the section it lands before (null: at the end). */
 export interface AddingAt {
@@ -62,6 +66,9 @@ export function SectionChooser({
   act: (action: EditorAction) => void
 }) {
   const { where, before } = adding
+  if (where === "top_strip") {
+    return <TopStripPicker doc={doc} onBack={onClose} act={act} onAdded={onAdded} />
+  }
   const footer = where === "footer"
   const at = before === null ? {} : { before }
   const marqueeFull = footer

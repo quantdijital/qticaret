@@ -21,6 +21,8 @@ export const ANNOUNCEMENT_SETTINGS = {
   align: ["auto", "left", "center", "right"],
   size: ["small", "medium", "large"],
   tone: ["graphite", "primary"],
+  transition: ["fade", "slide"],
+  arrows: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -35,9 +37,14 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   align: "auto",
   size: "medium",
   tone: "graphite",
+  transition: "fade",
+  arrows: "off",
 }
 
 export const ANNOUNCEMENT_SETTING_NAMES = Object.keys(ANNOUNCEMENT_SETTINGS) as Setting[]
+
+/** The bar's most lines, and so its most line links. */
+export const LINE_LIMIT = 5
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
 
@@ -56,14 +63,16 @@ const setting = <S extends Setting>(name: S) => {
  * their small button and from 1024 px the top links and the phone at its
  * end. `light`, the thin light strip the catalog header drew of its own:
  * the first line as a note (a link when `link` goes somewhere), the top
- * links and, when asked, "Hesabım". No lines: only the links and the phone,
- * from 1024 px. `links` and `phone` off are written `false`; absent: shown,
- * as every bar saved before them. `account` is written once switched on.
+ * links and, when asked, "Hesabım". The dark bar's lines may each link
+ * somewhere (`line_links`, owner 2026-11-27: the strip as a slider). No
+ * lines: only the links and the phone, from 1024 px. `links` and `phone`
+ * off are written `false`; absent: shown, as every bar saved before them.
+ * `account` is written once switched on.
  */
 const common = {
   ...base,
   type: z.literal("announcement_bar"),
-  lines: z.array(shopText(120)).max(5),
+  lines: z.array(shopText(120)).max(LINE_LIMIT),
   mode: setting("mode"),
   interval: setting("interval"),
   pause_button: setting("pause_button"),
@@ -71,6 +80,8 @@ const common = {
   align: setting("align"),
   size: setting("size"),
   tone: setting("tone"),
+  transition: setting("transition"),
+  arrows: setting("arrows"),
   // The small button beside the lines; absent until written, so a bar saved before it prints as it did
   link: storefrontLink.nullable().optional(),
   /** The shop's top links in the strip (from 1024 px). */
@@ -83,6 +94,12 @@ const graphite = z
     variant: defaultVariant("announcement_bar"),
     /** The shop's phone at the bar's end (from 1024 px). */
     phone: z.boolean().optional(),
+    /**
+     * Each line's own link, by its place among `lines` (null: that line is
+     * words only). Absent until written, so a bar saved before it prints as
+     * it did; the light strip's note keeps `link`.
+     */
+    line_links: z.array(storefrontLink.nullable()).max(LINE_LIMIT).optional(),
   })
   .strict()
 
