@@ -194,7 +194,30 @@ describe("Settings > Migration: the WordPress source", () => {
     await waitFor(() => {
       expect(onRun).toHaveBeenCalledWith(
         "check",
-        expect.objectContaining({ refresh: false, categoryBase: "", parcel: null })
+        expect.objectContaining({ refresh: null, categoryBase: "", parcel: null })
+      )
+    })
+  })
+
+  // adr/0042 Ek 2026-11-27: the blog posts' pictures an earlier run left out, tried dry first
+  it("moves only the blog pictures, one refresh at a time, the dry run kept", async () => {
+    const onRun = vi.fn()
+    render(<WordpressSource disabled={false} pending={null} onRun={onRun} />)
+    await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), exportFile("site.xml"))
+    const descriptions = screen.getByRole("checkbox", { name: "Yalnız açıklamaları yenile" })
+    const pictures = screen.getByRole("checkbox", { name: "Yalnız blog görsellerini taşı" })
+    await userEvent.click(descriptions)
+    await userEvent.click(pictures)
+
+    expect(pictures).toBeChecked()
+    expect(descriptions).not.toBeChecked()
+    expect(screen.getByLabelText("Kategori adres öneki")).toBeDisabled()
+    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
+
+    await waitFor(() => {
+      expect(onRun).toHaveBeenCalledWith(
+        "check",
+        expect.objectContaining({ refresh: "post_images", categoryBase: "", parcel: null })
       )
     })
   })

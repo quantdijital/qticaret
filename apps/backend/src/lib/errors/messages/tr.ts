@@ -256,6 +256,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.too_large":
     "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
   "content.unknown": "İçerik bulunamadı.",
+  "content.changed_meanwhile": "İçerik bu arada değişti; yeniden açıp tekrar deneyin.",
   "content.page_text_in_editor":
     "Sayfanın metni tema düzenleyicide, sayfanın bölümlerinde düzenlenir; buradan yalnız başlık, adres, kapak ve durum kaydedilir.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
@@ -1493,7 +1494,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.description_refresh_empty":
     "Dışa aktarmada bu ürünün açıklaması yok; buradaki açıklaması olduğu gibi kaldı.",
   "migration.refresh_wordpress_only":
-    "Açıklama yenileme yalnızca WordPress dışa aktarmasıyla yapılır.",
+    "Yalnızca yenileme (açıklamalar, blog görselleri) WordPress dışa aktarmasıyla yapılır.",
+  "migration.post_gone": "Önceki taşımanın yaptığı yazı artık yok; görselleri eklenmedi.",
+  "migration.post_images_failed": "Yazının görselleri metnine eklenemedi; yazı olduğu gibi kaldı.",
   "migration.review_product_missing": "Yorumun ürünü taşınmadı; yorum da taşınmadı.",
   "migration.review_duplicate": "Bu müşterinin bu ürüne yorumu zaten var; ikinci yorum taşınmadı.",
   "migration.parcel_incomplete":
@@ -1601,7 +1604,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kısa açıklama 1.500 karakterden uzun; o noktada kesildi. Ürün sayfasında kısaltabilirsiniz.",
   "migration.wordpress_body_cut": "Metin çok uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_body_media":
-    "Metindeki görseller ya da ürün vitrini, galeri gibi bileşenler taşınmadı; yazı taşındı. Görselleri içerik düzenleyicide ekleyebilirsiniz.",
+    "Metindeki bazı görseller (başka siteden, liste ya da tablo içinde) ya da ürün vitrini gibi bileşenler taşınmadı; yazı taşındı. Eksikleri içerik düzenleyicide ekleyebilirsiniz.",
   "migration.wordpress_post_unread": "Yazının başlığı ya da kısa adı okunamadı; taşınmadı.",
   "migration.wordpress_path_reserved":
     "Bu adres vitrinin kendi sayfası (/blog, /sepet, /magaza gibi); içerik sayfası yapılmadı, eski adresi Eski adresler'de kararınızı bekliyor.",

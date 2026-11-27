@@ -111,7 +111,11 @@ async function withinStorage<T>(work: () => Promise<T>, undo?: () => Promise<unk
 type Outcome =
   { url: string; asset: Awaited<ReturnType<typeof storeImage>> } | { url: string; key: string }
 
-async function inTurns<T, R>(items: readonly T[], work: (item: T) => Promise<R>): Promise<R[]> {
+/** Each item worked on, CONCURRENCY at a time, the results in order. */
+export async function inTurns<T, R>(
+  items: readonly T[],
+  work: (item: T) => Promise<R>
+): Promise<R[]> {
   const results: R[] = new Array<R>(items.length)
   let next = 0
   const worker = async () => {
@@ -142,7 +146,9 @@ export async function migrateImages(
   products: readonly SourceProduct[],
   apply: boolean,
   progress: StepProgress,
-  fake: string | undefined = fakeOrigin()
+  fake: string | undefined = fakeOrigin(),
+  // One pace for the run: the old site answers all of its fetches (the posts' pictures' too)
+  pace: FetchPace = new FetchPace()
 ): Promise<{ counts: ImageCounts; problems: StepProblem[] }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -153,8 +159,6 @@ export async function migrateImages(
     "product",
     products.map((product) => product.source_key)
   )
-  // One pace for the run: the old site answers all of its fetches
-  const pace = new FetchPace()
   for (const [index, product] of products.entries()) {
     const urls = [...new Set(product.images)]
     counts.read += urls.length

@@ -18,7 +18,7 @@ export interface StartMigrationInput {
   /** A WordPress export: its product categories' address base, when the owner names one. */
   category_base?: string | null
   /** A WordPress export: what only is refreshed of what a run moved before (adr/0055). */
-  refresh?: "descriptions"[] | undefined
+  refresh?: ("descriptions" | "post_images")[] | undefined
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
