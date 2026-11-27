@@ -154,6 +154,13 @@ export interface MiniCartView {
 export interface ShopView {
   name: string
   logo: ImageView | null
+  /**
+   * The store profile's dark-ground logo, for the header over the opening's
+   * photograph, only when it is a different file from `logo` (its `alt`
+   * empty, `logo`'s twin). Null or left out: over the photograph the theme
+   * lightens `logo` as before.
+   */
+  logoOnDark?: ImageView | null
   categories: NavCategoryView[]
   cartQuantity: number
   /** The open cart's lines for the drawer; null without one. */

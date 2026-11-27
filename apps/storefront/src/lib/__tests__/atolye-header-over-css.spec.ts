@@ -12,4 +12,15 @@ describe("the over-the-opening header's stylesheet", () => {
     expect(css).toContain(":root:not([data-js-scroll])")
     expect(css).toContain('.gf-cover[data-side="full"]:not(.gf-section)')
   })
+
+  it("shows the shop's dark-ground logo unfiltered, lightening only a logo without one", () => {
+    const css = atolyeCss("header-over.css").replace(/\/\*[\s\S]*?\*\//g, "")
+    expect(css).toMatch(
+      /\.gf-wordmark:has\(\[data-gf-logo="dark"\]\)\s*\{\s*& \[data-gf-logo="light"\]\s*\{\s*display: none;/
+    )
+    expect(css).toMatch(/& \[data-gf-logo="dark"\]\s*\{\s*display: contents;/)
+    expect(css).toMatch(
+      /img:not\(\[data-gf-logo="dark"\] img\)\s*\{\s*filter: brightness\(0\) invert\(1\);/
+    )
+  })
 })

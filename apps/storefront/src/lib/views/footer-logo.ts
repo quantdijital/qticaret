@@ -71,6 +71,29 @@ export function footerLogoOf(shop: LogoSource, ground: LogoGround = "light"): Im
 const darkPrimary = (primary: string | null): boolean =>
   !isHexColor(primary) || readableOn(primary) === "#ffffff"
 
+/**
+ * The header's logo for over the opening's photograph (as Shopify's "logo
+ * for transparent header"): the shop's dark-ground logo, only when the
+ * header has a logo and the dark one is a different file; else null and the
+ * theme lightens the header's own logo as before. Its `alt` empty: it is the
+ * header logo's twin, the link names the shop once.
+ */
+export function headerLogoOnDarkOf(shop: LogoSource): ImageView | null {
+  const dark = shop.logos?.dark ?? null
+  // The header draws `logo_url` (the light-ground logo); without it, the name
+  const own = shop.logo_url
+  if (!own || !dark || typeof dark.url !== "string" || dark.url.length === 0 || dark.url === own) {
+    return null
+  }
+  return {
+    src: dark.url,
+    alt: "",
+    width: size(dark.width),
+    height: size(dark.height),
+    sources: { avif: null, webp: null },
+  }
+}
+
 /** The footer's logos by ground (`FooterLogos`), the main colour's read from `primary`. */
 export function footerLogosOf(shop: LogoSource, primary: string | null): FooterLogos {
   const light = footerLogoOf(shop, "light")

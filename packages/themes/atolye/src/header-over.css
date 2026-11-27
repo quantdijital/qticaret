@@ -58,8 +58,20 @@
   & .gf-head-row {
     background: transparent;
   }
-  /* A logo drawn for the page's ground turns light, as the words do */
-  & [data-gf-head-row] img {
+  /*
+   * The shop's dark-ground logo, when it has its own (`Wordmark`
+   * `logoOnDark`), takes the logo's place as drawn; else a logo drawn for
+   * the page's ground turns light, as the words do
+   */
+  & [data-gf-head-row] .gf-wordmark:has([data-gf-logo="dark"]) {
+    & [data-gf-logo="light"] {
+      display: none;
+    }
+    & [data-gf-logo="dark"] {
+      display: contents;
+    }
+  }
+  & [data-gf-head-row] img:not([data-gf-logo="dark"] img) {
     filter: brightness(0) invert(1);
   }
   &::after {
