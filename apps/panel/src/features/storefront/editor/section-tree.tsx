@@ -151,7 +151,7 @@ export function SectionTree({
   }
   return (
     <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
-      <TopStripGroup doc={doc} dispatch={dispatch} row={row} onAdd={add} onOpenHeader={onOpen} />
+      <TopStripGroup doc={doc} dispatch={dispatch} row={row} onAdd={add} />
       <TreeGroup title={t(`${T}.header`)}>
         <ul className="flex flex-col gap-0.5">
           {mainRow("header_bar")}

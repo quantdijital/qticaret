@@ -261,6 +261,7 @@ export const newAnnouncementBar = (id: string): AnnouncementBar => ({
   id,
   ...ALWAYS,
   type: "announcement_bar",
+  variant: "graphite",
   lines: [""],
   ...ANNOUNCEMENT_DEFAULTS,
 })

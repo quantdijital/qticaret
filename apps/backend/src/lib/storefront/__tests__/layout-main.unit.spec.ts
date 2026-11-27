@@ -225,24 +225,4 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       }).success
     ).toBe(false)
   })
-  it("prints the top strip off only once switched off, on every variant, and refuses a non-boolean", () => {
-    const header = (extra: Record<string, unknown>) =>
-      mainSectionsOf(
-        withMainSections(
-          layoutDocument.parse({
-            header: [{ id: "mainheader", type: "header_bar", variant: "standard", ...extra }],
-          }),
-          LEFT
-        )
-      ).header_bar
-    expect(header({ top_strip: false })).toMatchObject({ top_strip: false })
-    expect(header({ variant: "catalog", top_strip: false })).toMatchObject({ top_strip: false })
-    expect(header({})).not.toHaveProperty("top_strip")
-    expect(header({ top_strip: true })).not.toHaveProperty("top_strip")
-    expect(
-      layoutDocument.safeParse({
-        header: [{ id: "mainheader", type: "header_bar", variant: "standard", top_strip: "off" }],
-      }).success
-    ).toBe(false)
-  })
 })

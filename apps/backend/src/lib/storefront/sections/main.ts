@@ -211,12 +211,12 @@ const headerCommon = {
    */
   over_cover: z.boolean().optional(),
   /**
-   * The top strip above the header (the announcement bar's lines, the top
-   * links and the phone; the header's scrolling strip under it): false, none
-   * of it drawn on any width. Absent until switched off, so a bar saved
-   * before it reads and stores as it did, the strip drawn.
+   * The design's top strip is its own section (owner's decision 2026-11-27):
+   * written on every bar read since, so a design is read into it once
+   * (`withSeparateTopStrip`). Absent: a design from before, whose header drew
+   * a strip of its own.
    */
-  top_strip: z.boolean().optional(),
+  top_strip: z.literal("separate").optional(),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

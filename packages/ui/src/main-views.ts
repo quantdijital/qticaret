@@ -65,12 +65,6 @@ export interface HeaderBarView {
    * scrolls; absent: on its own ground, as before.
    */
   overCover?: true
-  /**
-   * The shop turned the top strip off: neither the bar above the header
-   * (announcement lines, top links, phone) nor the header's scrolling strip
-   * is drawn, on any width. Absent: drawn, as before.
-   */
-  topStripOff?: true
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
   /**

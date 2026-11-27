@@ -46,6 +46,8 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   menu_images: "submenus",
   search_style: "field",
   tool_labels: "show",
+  // A design without a header bar is read into the separate top strip first
+  top_strip: "separate",
 })
 
 const FOOTER_BAR: FooterBar = {
@@ -140,8 +142,6 @@ export function mainSectionsOf<L>(
       ...(header.tools_style ? { tools_style: header.tools_style } : {}),
       // Over the opening only once switched on: a bar without it prints as before
       ...(header.over_cover ? { over_cover: true } : {}),
-      // The top strip off only once switched off: a bar without it prints as before
-      ...(header.top_strip === false ? { top_strip: false } : {}),
 
       // How the submenus open: only once set (absent: the dropdown list)
       ...(header.submenu_style ? { submenu_style: header.submenu_style } : {}),

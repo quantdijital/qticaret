@@ -48,6 +48,8 @@ export const shopFixture = (over: Partial<ShopView> = {}): ShopView => ({
   cartQuantity: 2,
   cart: null,
   announcements: [],
+  // The dark top strip with every part on: what a design from before the separate strip draws
+  topStrip: { variant: "graphite", links: true, phone: true, account: false },
   newsletter: null,
   topLinks: [{ label: "Hakkımızda", path: "/hakkimizda" }],
   footerGroups: [{ title: "Yardım", links: [{ label: "İletişim", path: "/iletisim" }] }],

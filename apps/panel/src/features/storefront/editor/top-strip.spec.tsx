@@ -35,9 +35,6 @@ vi.mock("@tanstack/react-router", () => ({
 
 let user: UserEvent
 
-const headerBar = () =>
-  lastSaved(fetchMock)?.header.find((section) => section.type === "header_bar")
-
 describe("the top strip in the editor's tree (owner 2026-11-27)", () => {
   beforeEach(() => {
     user = holdClock()
@@ -49,41 +46,36 @@ describe("the top strip in the editor's tree (owner 2026-11-27)", () => {
     releaseClock()
   })
 
-  it("names the top strip and the header apart: no two rows called the same", async () => {
+  it("lists the top strip apart from the header, the strip named by its design", async () => {
     renderEditor()
     const tree = await opened()
     const strip = within(tree).getByRole("group", { name: "Üst şerit" })
     const header = within(tree).getByRole("group", { name: "Üst bilgi" })
-    // The announcement bar and the scrolling strip are the top strip's, not the header's
-    expect(within(strip).getByRole("button", { name: "Kargo bedava" })).toBeVisible()
+    expect(within(strip).getByRole("button", { name: "Koyu şerit" })).toBeVisible()
     expect(within(strip).getByRole("button", { name: "Kayan yazı ekle" })).toBeVisible()
-    expect(within(strip).getByText("Üst bağlantılar ve telefon")).toBeVisible()
-    expect(within(header).queryByRole("button", { name: "Kargo bedava" })).toBeNull()
+    expect(within(header).queryByRole("button", { name: "Koyu şerit" })).toBeNull()
     expect(within(header).getByRole("button", { name: "Üst bilgi düzeni" })).toBeVisible()
     expect(within(tree).queryByRole("button", { name: "Üst bilgi" })).toBeNull()
   })
 
-  it("turns the whole strip off from its heading and back on as it was stored", async () => {
+  it("hides the whole strip from its heading's eye and shows it again", async () => {
     renderEditor()
     const tree = await opened()
     const strip = within(tree).getByRole("group", { name: "Üst şerit" })
+    const bar = () =>
+      lastSaved(fetchMock)?.header.find((section) => section.type === "announcement_bar")
 
     await user.click(within(strip).getByRole("button", { name: "Üst şeridi gizle" }))
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(headerBar()).toMatchObject({ type: "header_bar", top_strip: false })
+      expect(bar()).toMatchObject({ visible: false })
     })
-    expect(within(strip).getByText(/^Üst şerit kapalı/)).toBeVisible()
-    // The announcement bar keeps its own eye and stays as it was
-    expect(
-      lastSaved(fetchMock)?.header.find((section) => section.type === "announcement_bar")
-    ).toMatchObject({ visible: true })
+    expect(within(strip).getByText(/^Üst şerit gizli/)).toBeVisible()
 
     await user.click(within(strip).getByRole("button", { name: "Üst şeridi göster" }))
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(headerBar()).not.toHaveProperty("top_strip")
+      expect(bar()).toMatchObject({ visible: true })
     })
-    expect(within(strip).queryByText(/^Üst şerit kapalı/)).toBeNull()
   })
 })

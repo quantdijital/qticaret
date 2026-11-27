@@ -51,7 +51,8 @@ export function announcementOffers(section: AnnouncementBar, setting: Announceme
 
 /** The bar's settings the panel shows, as the search finds them. */
 export function announcementFields(section: AnySection): RegistryField[] {
-  if (section.type !== "announcement_bar") {
+  // The light strip shows its first line as a note: none of the dark bar's settings (owner 2026-11-27)
+  if (section.type !== "announcement_bar" || section.variant === "light") {
     return []
   }
   return ANNOUNCEMENT_SETTING_NAMES.filter((setting) => announcementOffers(section, setting)).map(

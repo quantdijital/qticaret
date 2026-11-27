@@ -6,15 +6,14 @@ import type {
   ShopView,
   Translate,
 } from "@qticaret/ui"
-import { drawnVariant } from "@qticaret/ui"
-import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { FooterGroup } from "./frame/FooterGroup"
-import { HEADER_VARIANTS, Header, catalogOf } from "./frame/Header"
+import { Header } from "./frame/Header"
+import { topStripOf } from "./frame/TopStrip"
 import { CardCycle } from "./frame/CardCycle"
 import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
@@ -32,8 +31,7 @@ import { WhatsAppClear } from "./frame/WhatsAppClear"
 /**
  * The frame every page shares (docs/tema/yon-2026-11-05.md § Frame): a
  * skip link, the graphite announcement bar, the shop's scrolling strip
- * when its header group has one (adr/0049 Ek 2026-11-14 §4.1), both
- * away when the shop turned its top strip off, the sticky two-row header,
+ * when its header group has one (adr/0049 Ek 2026-11-14 §4.1), the sticky two-row header,
  * the page, the graphite mast footer, and under 1024 px the bottom bar.
  * The WhatsApp button stays away from the checkout and the cart, and
  * while the cookie question waits. `ScrollCue` tells the stylesheet
@@ -92,46 +90,21 @@ export function Layout({
       </div>
     )
   }
-  // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
-  // its search: not twice
-  const catalog = catalogOf(shop)
-  // The one-row header keeps no top strip of links or phone: they are in its menu sheet; the
-  // strip stays for the shop's announcements
-  const inline = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS) === "inline"
+  // The shop's top strip, its own section whatever the header (owner 2026-11-27)
+  const strip = topStripOf(shop, t)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
     shop.bottomNav.current !== "cart" &&
     shop.cookieBanner?.due !== true
   // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
-  // The shop turned its top strip off: neither the bar above the header nor its scrolling strip
-  const topStrip = shop.headerBar?.topStripOff !== true
   const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
     <div className="flex min-h-dvh flex-col" {...marks}>
       <LayerMarks marks={layers}>
         {skip}
-        {topStrip && (
-          <Announcement
-            lines={shop.announcements}
-            settings={shop.announcementSettings}
-            button={shop.announcementLink}
-            mark={shop.announcementMark}
-            links={catalog?.links || inline ? [] : shop.topLinks}
-            contact={
-              catalog?.phone || inline
-                ? { ...shop.contact, phone: null, phoneHref: null }
-                : shop.contact
-            }
-            words={{
-              announcements: t("nav.announcements"),
-              links: t("nav.top_links"),
-              pause: t("nav.announcements_pause"),
-              play: t("nav.announcements_play"),
-            }}
-          />
-        )}
-        {topStrip && shop.marquee && (
+        {strip.above}
+        {shop.marquee && (
           <Marquee
             section={shop.marquee}
             t={t}
@@ -139,7 +112,13 @@ export function Layout({
             mark={shop.editor ? shop.marquee.id : undefined}
           />
         )}
-        <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
+        <Header
+          shop={shop}
+          t={t}
+          searchSuggest={searchSuggest}
+          changeCartLine={changeCartLine}
+          strip={strip.inHeader}
+        />
         <main id="icerik" className="flex-1">
           {children}
         </main>

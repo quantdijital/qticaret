@@ -102,11 +102,6 @@ export interface StoreMainSections {
      * opening; absent: on its own ground, as before.
      */
     over_cover?: boolean
-    /**
-     * The top strip above the header (announcement lines, top links, phone,
-     * the header's scrolling strip): false, none of it drawn; absent: drawn, as before.
-     */
-    top_strip?: boolean
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
     /**

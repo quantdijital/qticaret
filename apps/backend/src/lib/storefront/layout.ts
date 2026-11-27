@@ -11,6 +11,7 @@ import {
 } from "./layout-sections"
 import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
+import { withSeparateTopStrip } from "./top-strip-legacy"
 import { pageSections, pagesGroup } from "./layout-pages"
 import { legacyTextAt, storedPages } from "./layout-pages-stored"
 import { DESIGN_LIMITS } from "./designs/limits"
@@ -234,10 +235,12 @@ const named = (value: unknown): string | null =>
  * document that is not one at all is given as it is, for the schema to
  * refuse. A save is still held to the schema.
  */
-export function storedDocument(stored: unknown): unknown {
-  if (stored === null || typeof stored !== "object" || Array.isArray(stored)) {
-    return stored
+export function storedDocument(raw: unknown): unknown {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    return raw
   }
+  // A design from before the separate top strip, read into it once (owner 2026-11-27)
+  const stored = withSeparateTopStrip(raw as Record<string, unknown>)
   const skipped: { group: string; id: string | null; type: string | null }[] = []
   const groups: Record<string, unknown[]> = Object.fromEntries(
     GROUPS.flatMap((group) => {

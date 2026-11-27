@@ -1,4 +1,5 @@
 import type {
+  AnnouncementBarVariant,
   AnnouncementSettings,
   BannerSettings,
   BannerSplitButtonTone,
@@ -475,9 +476,21 @@ export type CategorySection = (
  */
 export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
+  /**
+   * The top strip's design (owner's decision 2026-11-27): `graphite` the dark
+   * bar, `light` the thin light strip (the catalog header's before).
+   */
+  variant: AnnouncementBarVariant
+  /** Up to five lines; none: the strip carries only its links (and the bar its phone). */
   lines: string[]
-  /** The small button beside the lines; absent or null: none. */
+  /** The small button beside the lines (the light strip: the note's link); absent or null: none. */
   link?: LayoutLink | null
+  /** The shop's top links in the strip; false: off, absent: shown. */
+  links?: boolean
+  /** The dark bar's phone; false: off, absent: shown. */
+  phone?: boolean
+  /** The light strip's "Hesabım"; true: written. */
+  account?: boolean
 } & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {

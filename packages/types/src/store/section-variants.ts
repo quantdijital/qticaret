@@ -82,6 +82,13 @@ export const SECTION_VARIANTS = {
    */
   header_bar: ["standard", "centered", "catalog", "inline"],
   /**
+   * The top strip above the header (owner's decision 2026-11-27, adr/0066
+   * Ek): `graphite`, today's dark bar (the lines, their button, the top
+   * links and the phone); `light`, the thin light strip the catalog header
+   * drew of its own (a note, the top links, "Hesabım").
+   */
+  announcement_bar: ["graphite", "light"],
+  /**
    * `ledger`: today's steel-well ledger; `brand_columns` (adr/0049 Ek
    * 2026-11-17): a brand block beside the link columns, an optional strip
    * above (newsletter, contact), one bottom line with the ways to pay as
@@ -359,6 +366,7 @@ export type RelatedProductsVariant = SectionVariant<"related_products">
 export type ReviewsVariant = SectionVariant<"reviews">
 export type ProgramVariant = SectionVariant<"program">
 export type HeaderBarVariant = SectionVariant<"header_bar">
+export type AnnouncementBarVariant = SectionVariant<"announcement_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type NewsletterVariant = SectionVariant<"newsletter">
 export type RichTextVariant = SectionVariant<"rich_text">

@@ -9728,9 +9728,14 @@
         "title": "Top strip",
         "hide": "Hide the top strip",
         "show": "Show the top strip",
-        "off": "Top strip off: announcements, scrolling strip, top links and phone are drawn on no screen.",
-        "links": "Top links and phone",
-        "catalog": "Catalog header's thin strip"
+        "off": "Top strip hidden: nothing is drawn above the header on any screen.",
+        "add": "Add top strip",
+        "linksLabel": "Top links",
+        "linksHint": "The links in your “Top” menu, from 1024 px.",
+        "phoneLabel": "Phone",
+        "phoneHint": "The phone in your store profile, from 1024 px.",
+        "accountLabel": "“My account” text",
+        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable."
       },
       "tree": {
         "label": "The page's sections",
@@ -9803,8 +9808,8 @@
       },
       "types": {
         "announcement_bar": {
-          "name": "Announcement bar",
-          "description": "A thin bar at the very top; several announcements show the first only, in turn or side by side."
+          "name": "Top strip",
+          "description": "The thin strip above the header: your announcements, top links and phone. Dark or light; separate from the header, hidden it draws nothing."
         },
         "hero": {
           "name": "Hero",
@@ -9944,6 +9949,10 @@
           "strip": "Strip",
           "lined": "Lined boxes",
           "card": "Floating card"
+        },
+        "announcement_bar": {
+          "graphite": "Dark strip",
+          "light": "Light strip"
         },
         "header_bar": {
           "standard": "Logo on the left",

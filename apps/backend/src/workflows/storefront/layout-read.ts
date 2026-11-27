@@ -132,7 +132,12 @@ export async function storeLayout(
         : {
             id: section.id,
             type: section.type,
-            lines: section.lines.map((line) => fillShopText(line, values)),
+            variant: section.variant,
+            // The light strip's note as the catalog's was: one naming a detail the shop lacks is left out
+            lines:
+              section.variant === "light"
+                ? section.lines.flatMap((line) => fillShopTextWhole(line, values) ?? [])
+                : section.lines.map((line) => fillShopText(line, values)),
             // How it shows more than one line (docs/tema/bilesen-denetimi (b) 6), as saved
             mode: section.mode,
             interval: section.interval,
@@ -144,6 +149,10 @@ export async function storeLayout(
             tone: section.tone,
             // The small button beside the lines, only once the shop gave one
             ...(section.link ? { link: resolve(section.link) } : {}),
+            // Its parts off only once switched off; "Hesabım" only once on
+            ...(section.links === false ? { links: false } : {}),
+            ...(section.variant === "graphite" && section.phone === false ? { phone: false } : {}),
+            ...(section.variant === "light" && section.account === true ? { account: true } : {}),
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),

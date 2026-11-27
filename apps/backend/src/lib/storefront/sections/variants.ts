@@ -59,6 +59,8 @@ export const SECTION_VARIANTS = {
   posts: ["grid", "intro_panel"],
   // adr/0077 Ek (Vadi): today's band first; `split` the picture beside a panel on the ground
   banner: ["standard", "split"],
+  // The top strip (owner 2026-11-27): today's dark bar first; `light` the catalog's thin strip
+  announcement_bar: ["graphite", "light"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
