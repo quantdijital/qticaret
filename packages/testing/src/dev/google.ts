@@ -27,12 +27,15 @@ const env = (name: string): string | undefined => {
 const port = Number(env("FAKE_GOOGLE_PORT") ?? 9109)
 const title = env("FAKE_GOOGLE_BUSINESS_NAME") ?? "Bıçak Atölyesi"
 const city = env("FAKE_GOOGLE_BUSINESS_CITY") ?? "Denizli"
+// Fixed, so Settings > Marketing takes the same Merchant Center account on every run
+const merchantId = env("FAKE_GOOGLE_MERCHANT_ID") ?? "5432109876"
 
 void startFakeGoogle({
   port,
   client,
   email: env("FAKE_GOOGLE_EMAIL") ?? "atolye.magaza@gmail.com",
   business: { title, city },
+  merchantId,
   stateFile: stateFileFor("google", port),
 }).then((fake) => {
   process.stdout.write(
@@ -43,8 +46,10 @@ void startFakeGoogle({
       `  GOOGLE_OAUTH_CLIENT_ID=${client.clientId}`,
       `  GOOGLE_OAUTH_CLIENT_SECRET=${client.clientSecret}`,
       `Bağlanan hesap: ${fake.email}`,
+      `Merchant Center hesap kimliği: ${fake.merchantId}`,
       `İşletme Profili: ${title} (${city}), ${String([...fake.business.reviews.values()].flat().length)} Google yorumu`,
       "Panel > Yorumlar > Google yorumları > Google yorumlarını bağla",
+      "Panel > Ayarlar > Pazarlama > Google: bağlan, sonra hesap kimliğini yaz",
       "",
     ].join("\n")
   )

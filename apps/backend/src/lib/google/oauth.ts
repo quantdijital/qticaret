@@ -11,7 +11,7 @@ import type { Env } from "../env"
 
 export const GOOGLE_PROVIDER = "google"
 
-/** Where Google sends the shop back: the backend, on the panel's own host (adr/0022 §4). */
+/** Where Google sends the shop back: the backend, reached through the panel's origin (adr/0022 §4). */
 export const GOOGLE_CALLBACK_PATH = "/google/callback"
 
 /**
@@ -39,7 +39,11 @@ export const BUSINESS_PROFILE_SCOPE = "https://www.googleapis.com/auth/business.
 /** A `state` started from the panel's Google reviews: the callback goes back there. */
 export const REVIEWS_STATE_PREFIX = "r."
 
-/** The panel page Google's callback returns to, by the state's prefix (adr/0022 §4). */
+/**
+ * The panel page Google's callback returns to, by the state's prefix
+ * (adr/0022 §4): a path, never an address, so the browser stays on the
+ * origin the callback came in on (the panel's) and no redirect leaves it.
+ */
 export const panelPathOfState = (state: string | undefined): string =>
   state?.startsWith(REVIEWS_STATE_PREFIX) ? "/reviews/google" : "/settings/marketing"
 

@@ -53,7 +53,7 @@ Apple ile giriş kapalı kalıyor (kullanıcı kararı, 2026-10-30); Apple için
 1. **Google Auth Platform > İstemciler > İstemci oluştur:** tür **Web uygulaması**, ad `Panel - Google bağlantısı`.
 2. **Yetkili yönlendirme URI'leri:** her mağaza panelinin adresi ve sonuna `/google/callback`. Örnekler:
    - `https://panel.ornekmagaza.com/google/callback`
-   - Geliştirme için: `http://localhost:9000/google/callback`
+   - Geliştirme için: `http://localhost:5173/google/callback`
 
    Yeni mağaza açıldıkça adresi buraya eklenir (F16 kurulum listesinde bir madde).
 

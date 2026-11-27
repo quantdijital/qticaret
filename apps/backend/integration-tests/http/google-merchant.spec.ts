@@ -101,6 +101,29 @@ medusaIntegrationTestRunner({
     })
 
     it("connects the shop's Google account through state and PKCE, each used once", async () => {
+      // Google comes back to the panel's origin, where the staff member's session is
+      // (adr/0022 §4): the dev server's locally, the shop's one host once set
+      const backend = process.env["BACKEND_URL"]
+      const redirectUri = async () => {
+        const { data } = await http.post<{ url: string }>(
+          "/admin/google/connect",
+          {},
+          { headers: admin.headers }
+        )
+        return new URL(data.url).searchParams.get("redirect_uri")
+      }
+      try {
+        Reflect.deleteProperty(process.env, "BACKEND_URL")
+        expect(await redirectUri()).toBe("http://localhost:5173/google/callback")
+        process.env["BACKEND_URL"] = "https://magaza.example.com"
+        expect(await redirectUri()).toBe("https://magaza.example.com/google/callback")
+      } finally {
+        if (backend === undefined) {
+          Reflect.deleteProperty(process.env, "BACKEND_URL")
+        } else {
+          process.env["BACKEND_URL"] = backend
+        }
+      }
       // Someone else holding the address, without the staff member's session, finishes nothing
       const stranger = await callback(await consentPath(), {})
       const path = await consentPath()

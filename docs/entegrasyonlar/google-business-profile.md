@@ -34,7 +34,7 @@ Platformun bir kez yapacakları (mağaza başına değil):
    - Google My Business API
    (Google'ın kurulum sayfası yedi Business Profile API'sinin açılmasını önerir; bu özellik bu üçünü kullanır.)
 6. **OAuth onay ekranı:** kapsamlara `https://www.googleapis.com/auth/business.manage` eklenir. Hassas kapsam olduğu için Google'ın **uygulama doğrulaması** gerekir (`auth/content` ve `auth/webmasters` için yapılan doğrulamayla aynı süreç, adr/0038 §5). Doğrulama tamamlanana kadar mağazalar "doğrulanmamış uygulama" uyarısı görür ve test kullanıcı sınırı uygulanır.
-7. **Yönlendirme adresi:** değişmez, her mağazanın `BACKEND_URL/google/callback` adresi zaten kayıtlı olmalı.
+7. **Yönlendirme adresi:** değişmez, her mağazanın `BACKEND_URL/google/callback` adresi zaten kayıtlı olmalı. Adres panelin origin'idir (`panelUrl()`): canlıda panel ve backend aynı host'ta olduğundan `BACKEND_URL`'dir; reverse proxy (F16) `/google/callback`'i backend'e geçirmelidir. Yerelde `http://localhost:5173/google/callback`; Vite proxy'si `/google`'ı oturum çereziyle backend'e iletir.
 
 Mağazanın yapacakları:
 
@@ -68,6 +68,7 @@ GOOGLE_OAUTH_CLIENT_ID=gelistirme-google-istemcisi.apps.googleusercontent.com
 GOOGLE_OAUTH_CLIENT_SECRET=gelistirme-google-sirri
 ```
 
-- Sahte sunucu tarayıcıda Google'ın onay ekranını gösterir, Merchant API, Search Console ve Business Profile'ı yanıtlar; bir bıçak atölyesinin 16 yorumu vardır. Ad ve şehir `FAKE_GOOGLE_BUSINESS_NAME`, `FAKE_GOOGLE_BUSINESS_CITY`; bağlanan hesap `FAKE_GOOGLE_EMAIL`; port `FAKE_GOOGLE_PORT`.
+- Sahte sunucu tarayıcıda Google'ın onay ekranını gösterir, Merchant API, Search Console ve Business Profile'ı yanıtlar; bir bıçak atölyesinin 16 yorumu vardır. Ad ve şehir `FAKE_GOOGLE_BUSINESS_NAME`, `FAKE_GOOGLE_BUSINESS_CITY`; bağlanan hesap `FAKE_GOOGLE_EMAIL`; Merchant Center hesap kimliği sabit `5432109876` (`FAKE_GOOGLE_MERCHANT_ID`; sunucu açılışta yazar, Merchant API `accounts.list` ile de listelenir); port `FAKE_GOOGLE_PORT`.
+- Yerelde backend `.env`'inde `BACKEND_URL` olmamalı: varsa Google panel yerine 9000'e döner (davet bağlantıları gibi, `panelUrl()`).
 - Token'lar `qticaret-local-providers/google-9109.json` dosyasında (işletim sisteminin geçici klasörü) yeniden başlatmalar arasında kalır.
 - `GOOGLE_BASE_URL` development ve test dışında reddedilir.
