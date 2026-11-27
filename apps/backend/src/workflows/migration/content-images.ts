@@ -27,6 +27,13 @@ type Container = Pick<MedusaContainer, "resolve">
  * keys also give the old file's address its 301 (adr/0059, `legacy-addresses.ts`).
  */
 
+/**
+ * What a body picture became, by `<entry> <file>`: its stored copy (`image`,
+ * kept as soon as it is stored, so a failed save fetches nothing again) and
+ * its place in the entry's text (`body_image`, once the entry is saved).
+ */
+export const PLACED_KIND = "body_image"
+
 /** The image record a body picture is remembered under. */
 export const bodyImageKey = (entryKey: string, url: string) => `${entryKey} ${url}`
 
@@ -47,13 +54,14 @@ export interface LocalBody {
 }
 
 export class BodyImages {
-  private readonly pace = new FetchPace()
   private readonly runs = new Map<string, Promise<Fetched>>()
 
   constructor(
     private readonly container: Container,
     private readonly source: string,
-    private readonly fake: string | undefined = fakeOrigin()
+    private readonly fake: string | undefined = fakeOrigin(),
+    // The run's pace, shared with the products' pictures: one budget, one view of the host
+    private readonly pace: FetchPace = new FetchPace()
   ) {}
 
   /** The files a run stored before for this entry and are still in the library: old file → copy. */
@@ -127,12 +135,37 @@ export class BodyImages {
     return { doc: swapImages(doc, stored), stored, fetched, found, problems, items }
   }
 
-  /** The entry's pictures remembered: once it is saved, so a failed save fetches them again. */
+  /** The entry's pictures as stored (or refused): kept whether or not the entry saves. */
   async remember(items: readonly RememberedItem[]): Promise<void> {
     if (items.length > 0) {
       await this.container
         .resolve<MigrationModuleService>(MIGRATION_MODULE)
         .remember(this.source, "image", items)
+    }
+  }
+
+  /** The entry's files a run already put into its text. */
+  async placed(entryKey: string, urls: readonly string[]): Promise<Set<string>> {
+    const found = await this.container.resolve<MigrationModuleService>(MIGRATION_MODULE).targetsOf(
+      this.source,
+      PLACED_KIND,
+      urls.map((url) => bodyImageKey(entryKey, url))
+    )
+    return new Set(urls.filter((url) => found.get(bodyImageKey(entryKey, url))?.status === "done"))
+  }
+
+  /** The pictures now in the saved entry's text: a refresh does not add them again. */
+  async rememberPlaced(entryKey: string, stored: ReadonlyMap<string, string>): Promise<void> {
+    if (stored.size > 0) {
+      await this.container.resolve<MigrationModuleService>(MIGRATION_MODULE).remember(
+        this.source,
+        PLACED_KIND,
+        [...stored.keys()].map((url) => ({
+          source_key: bodyImageKey(entryKey, url),
+          target_id: null,
+          status: "done" as const,
+        }))
+      )
     }
   }
 }

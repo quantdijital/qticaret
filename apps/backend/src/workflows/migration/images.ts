@@ -146,7 +146,9 @@ export async function migrateImages(
   products: readonly SourceProduct[],
   apply: boolean,
   progress: StepProgress,
-  fake: string | undefined = fakeOrigin()
+  fake: string | undefined = fakeOrigin(),
+  // One pace for the run: the old site answers all of its fetches (the posts' pictures' too)
+  pace: FetchPace = new FetchPace()
 ): Promise<{ counts: ImageCounts; problems: StepProblem[] }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -157,8 +159,6 @@ export async function migrateImages(
     "product",
     products.map((product) => product.source_key)
   )
-  // One pace for the run: the old site answers all of its fetches
-  const pace = new FetchPace()
   for (const [index, product] of products.entries()) {
     const urls = [...new Set(product.images)]
     counts.read += urls.length

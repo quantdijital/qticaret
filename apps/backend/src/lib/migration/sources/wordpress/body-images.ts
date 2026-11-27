@@ -27,9 +27,13 @@ export type ImageOf = (attributes: string) => BodyImage | null
 
 // As content entries keep an image's alt (workflows/content/rules CONTENT_LIMITS)
 const MAX_ALT = 300
-const ATTRIBUTE = /([a-zA-Z_:][-\w:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g
+// The name bounded: a long run of letters with no `=` stays a linear scan
+const ATTRIBUTE = /([a-zA-Z_:][-\w:.]{0,63})\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g
 const PHOTON = /^i[0-3]\.wp\.com$/
 const ID = /^\d{1,12}$/
+// A tag's attributes read at most (a real one is far shorter), and a file's address
+const MAX_ATTRIBUTES = 8_192
+const MAX_SRC = 1_000
 
 const bareHost = (host: string) => host.toLowerCase().replace(/^www\./, "")
 const isWeb = (address: string) => /^https?:\/\//i.test(address)
@@ -138,7 +142,9 @@ const altOf = (attachment: WxrItem) => altText(attachment.meta.get("_wp_attachme
 /** How the bodies of this export read their pictures. */
 export function bodyImagesOf(context: Pick<WordpressContext, "attachments" | "wxr">): ImageOf {
   const site = context.wxr.site
-  return (text) => {
+  const fits = (image: BodyImage | null) => (image && image.src.length <= MAX_SRC ? image : null)
+  return (text) => (text.length > MAX_ATTRIBUTES ? null : fits(imageOf(text)))
+  function imageOf(text: string): BodyImage | null {
     const attributes = attributesOf(text)
     const own = altText(attributes.get("alt"))
     const id = [

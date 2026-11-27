@@ -16,7 +16,7 @@ import type ContentModuleService from "../../modules/content/service"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import { saveContentWorkflow } from "../content/workflows"
-import { BodyImages, bodyImageKey } from "./content-images"
+import { BodyImages } from "./content-images"
 import type { ImageCounts } from "./images"
 import { emptyCounts } from "./report"
 import type { KindCounts, ReportProblem, RunCounts } from "./report"
@@ -66,24 +66,21 @@ export async function refreshPostImages(
       post.skipped += 1
       continue
     }
-    const [entry] = await service.listContentEntries(
-      { id, kind: "post" },
-      { select: ["id", "body", "revised_at"], take: 1 }
-    )
-    if (!entry) {
+    const entryOf = async () =>
+      (
+        await service.listContentEntries(
+          { id, kind: "post" },
+          { select: ["id", "body", "revised_at"], take: 1 }
+        )
+      )[0]
+    if (!(await entryOf())) {
       post.failed += 1
       problems.push({ kind: "post", source_key: each.source_key, key: "migration.post_gone" })
       continue
     }
-    const before = await migration.targetsOf(
-      sourceId,
-      "image",
-      files.map((url) => bodyImageKey(each.source_key, url))
-    )
-    // A picture a run stored (and maybe the owner took out since) is not added again
-    const pending = files.filter(
-      (url) => before.get(bodyImageKey(each.source_key, url))?.status !== "done"
-    )
+    // A picture a run put into the text (and maybe the owner took out since) is not added again
+    const placed = await bodyImages.placed(each.source_key, files)
+    const pending = files.filter((url) => !placed.has(url))
     image.read += files.length
     image.found += files.length - pending.length
     if (pending.length === 0) {
@@ -105,13 +102,19 @@ export async function refreshPostImages(
     image.created += local.fetched.size
     image.skipped += local.problems.length
     problems.push(...local.problems.map((problem) => ({ ...problem, kind: "image" as const })))
-    const problem = await writeBody(container, entry, each, local.stored)
+    // Stored ones kept even if the save fails: a run again takes them without fetching
+    await bodyImages.remember(local.items)
+    // The text as it is now, read again after the fetches: an edit meanwhile is not lost
+    const entry = await entryOf()
+    const problem = entry
+      ? await writeBody(container, entry, each, local.stored)
+      : { source_key: each.source_key, key: "migration.post_gone" }
     if (problem) {
       post.failed += 1
       problems.push({ ...problem, kind: "post" })
       continue
     }
-    await bodyImages.remember(local.items)
+    await bodyImages.rememberPlaced(each.source_key, local.stored)
     if (local.stored.size > 0) {
       post.updated += 1
     } else {

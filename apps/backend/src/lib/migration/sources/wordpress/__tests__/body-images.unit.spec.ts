@@ -107,6 +107,16 @@ describe("a WordPress post's pictures (adr/0042 Ek 2026-11-27)", () => {
     expect(lost).toEqual(["post:40"])
   })
 
+  it("leaves out a tag past its bounds, at once: a long run of letters, an overlong address", () => {
+    const started = Date.now()
+    const { pictures, lost } = postWith(
+      `<img ${"a".repeat(200_000)}><img src="${upload(`${"u".repeat(1_100)}.png`)}">`
+    )
+    expect(pictures).toEqual([])
+    expect(lost).toEqual(["post:40"])
+    expect(Date.now() - started).toBeLessThan(2_000)
+  })
+
   it("reads a picture element by its img", () => {
     const { pictures } = postWith(
       `<picture><source type="image/webp" srcset="${upload("d.jpg.webp")}"><img src="${upload("d.jpg")}" alt="D"></picture>`

@@ -14,6 +14,8 @@ import type { RememberedItem } from "../../modules/migration/service"
 import type { PostTermsInput } from "../content/term-rules"
 import { saveContentWorkflow } from "../content/workflows"
 import { imageSources } from "../../lib/migration/body-images"
+import { fakeOrigin } from "../../lib/migration/fetch"
+import type { FetchPace } from "../../lib/migration/fetch-pace"
 import { BodyImages } from "./content-images"
 import { importPage } from "./content-page"
 import { ImageRefused, storeImage } from "./images"
@@ -44,7 +46,8 @@ export async function migrateContent(
   posts: readonly SourcePost[],
   pages: readonly SourcePage[],
   apply: boolean,
-  progress: StepProgress
+  progress: StepProgress,
+  pace?: FetchPace
 ): Promise<{
   counts: Record<ContentKinds, TermCounts>
   /** The pictures in the new entries' texts. */
@@ -105,7 +108,7 @@ export async function migrateContent(
   const remembered: Record<"post" | "page", RememberedItem[]> = { post: [], page: [] }
   const covers: RememberedItem[] = []
   const images: ImageCounts = { read: 0, created: 0, found: 0, skipped: 0 }
-  const bodyImages = new BodyImages(container, source)
+  const bodyImages = new BodyImages(container, source, fakeOrigin(), pace)
   const found = await existingEntries(container, source, entries)
   for (const [index, entry] of entries.entries()) {
     const own = counts[entry.kind]
@@ -131,6 +134,7 @@ export async function migrateContent(
       images.found += local.found
       images.skipped += local.problems.length
       problems.push(...local.problems.map((problem) => ({ ...problem, kind: "image" as const })))
+      await bodyImages.remember(local.items)
       const written = await writeEntry(
         container,
         entry.kind,
@@ -148,7 +152,7 @@ export async function migrateContent(
       if (written.id) {
         own.created += 1
         kept({ target_id: written.id, status: "done" })
-        await bodyImages.remember(local.items)
+        await bodyImages.rememberPlaced(entry.source_key, local.stored)
         // The cover's old file answers with its new address (adr/0059), as products' pictures do
         if (written.coverId && entry.content.cover) {
           covers.push({
