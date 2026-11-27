@@ -1114,7 +1114,8 @@
         "refund": "Refund",
         "legal_document": "Legal text",
         "vat_rate": "VAT rate",
-        "message_template": "Customer message"
+        "message_template": "Customer message",
+        "product_question": "Product question"
       }
     },
     "locations": {
@@ -4974,7 +4975,7 @@
     },
     "faq": {
       "title": "Frequently asked questions",
-      "description": "Add questions and answers in the shop's name to the product page's Q&A. They are published at once; you can hide them under Reviews and questions › Questions.",
+      "description": "The product page's Q&A: customers' questions and the questions and answers you add in the shop's name. Added ones are published at once; click a question to edit, hide or delete it.",
       "empty": "The AI suggests 3–5 questions and answers from the product's description, short description, attributes and options. No question is written that the data cannot answer.",
       "draft": "FAQ draft",
       "hint": "Tick the ones to add; you can edit each question and answer before adding.",
@@ -4992,7 +4993,15 @@
         "too_long": "A question can be at most 120 characters, an answer at most 400."
       },
       "summary": "A question and answer draft from the product's details",
-      "summaryOpen": "Draft open"
+      "summaryOpen": "Draft open",
+      "addOne": "Add question",
+      "noAnswer": "No answer yet",
+      "none": "No questions on this product yet.",
+      "listLabel": "The product's questions",
+      "open": "Open question: {{question}}",
+      "more": "Showing the newest {{shown}} questions ({{count}} in all). See all on Reviews and questions › Questions.",
+      "summaryCount_one": "{{count}} question",
+      "summaryCount_other": "{{count}} questions"
     },
     "addonTemplates": {
       "title": "Add-on groups",
@@ -9336,6 +9345,49 @@
         "pending": "No questions or answers to look at.",
         "approved": "No published questions.",
         "rejected": "No rejected questions."
+      },
+      "manage": {
+        "edit": "Edit",
+        "editFor": "Edit question: {{question}}",
+        "addTitle": "Add question",
+        "editTitle": "Edit question",
+        "newDescription": "Added in the shop's name and published on the product page at once.",
+        "question": "Question",
+        "answer": "Shop's answer",
+        "questionPlaceholder": "E.g. Can the knife go in the dishwasher?",
+        "answerPlaceholder": "E.g. We don't recommend it; wash by hand in warm water and dry at once.",
+        "customerHint": "A customer's question. Edit it only for a typo or personal details (phone, address).",
+        "answerHint": "Left empty, the shop's answer is removed. Answering a waiting question publishes it too.",
+        "answerHintNew": "The question is published with its answer.",
+        "customerAnswers": "Customers' answers",
+        "customerAnswersHint": "Customers' answers are not changed; approve or reject them on Reviews and questions › Questions.",
+        "save": "Save",
+        "add": "Add",
+        "hide": "Hide",
+        "show": "Publish",
+        "delete": "Delete",
+        "added": "Question added to the product page.",
+        "saved": "Question saved.",
+        "hidden": "Question hidden; it no longer shows on the product page.",
+        "shown": "Question published.",
+        "deleted": "Question deleted.",
+        "restored": "Question restored.",
+        "undo": "Undo",
+        "deleteConfirm": {
+          "title": "Delete this question?",
+          "description": "The question and all its answers are removed from the product page. You can bring it back right after with \"Undo\".",
+          "action": "Delete question"
+        },
+        "issues": {
+          "short": "Write at least 2 characters.",
+          "long": "At most 1,000 characters."
+        },
+        "state": {
+          "published": "Published",
+          "hidden": "Hidden",
+          "waiting": "Awaiting answer"
+        },
+        "editedByShop": "Edited by the shop · {{when}}"
       }
     },
     "photos": {
@@ -9343,7 +9395,12 @@
       "alt": "Photo {{number}} in {{author}}'s review",
       "title": "Photo in {{author}}'s review",
       "position": "{{number}} / {{count}}"
-    }
+    },
+    "hide": "Hide",
+    "show": "Publish",
+    "hideFor": "Hide {{author}}'s review",
+    "showFor": "Publish {{author}}'s review",
+    "customerText": "A customer's review and rating cannot be changed or deleted; you can hide the review instead."
   },
   "staff": {
     "roles": {

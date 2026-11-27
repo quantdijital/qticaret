@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { aiServicesQuery } from "@/features/ai/api/ai"
 import { addFaqItems } from "@/features/ai/api/suggestions"
@@ -22,6 +22,7 @@ export interface FaqDraftItem extends AiFaqItem {
  * Closing with nothing added dismisses the draft.
  */
 export function useFaqAi(productId: string) {
+  const client = useQueryClient()
   const services = useQuery(aiServicesQuery())
   const view = services.data?.tasks.find((each) => each.id === TASK)
   const usable = view?.usable ?? []
@@ -119,6 +120,8 @@ export function useFaqAi(productId: string) {
         setOpen(false)
         setEdits(null)
         suggestion.reset()
+        // The product's list of questions shows them at once
+        void client.invalidateQueries({ queryKey: ["questions"] })
         return added
       } catch (error) {
         setFailure(error)

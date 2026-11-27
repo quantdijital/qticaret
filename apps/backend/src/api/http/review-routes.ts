@@ -9,6 +9,8 @@ import {
   AdminGetQuestions,
   AdminModerateAnswers,
   AdminModerateQuestions,
+  AdminPostQuestionEdit,
+  AdminPostShopQuestion,
   StoreGetQuestions,
   StorePostQaText,
 } from "../admin/product-questions/validators"
@@ -104,6 +106,27 @@ export const REVIEW_ROUTES = [
     matcher: "/admin/product-questions",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetQuestions, {})],
+  },
+  // The shop's own question with its answer, added by hand on the product page
+  {
+    matcher: "/admin/product-questions",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostShopQuestion)],
+  },
+  {
+    matcher: "/admin/product-questions/:id/edit",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostQuestionEdit)],
+  },
+  {
+    matcher: "/admin/product-questions/:id",
+    methods: ["DELETE" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/product-questions/:id/restore",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor],
   },
   {
     matcher: "/admin/product-questions/moderate",

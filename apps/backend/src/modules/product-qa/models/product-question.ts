@@ -23,6 +23,9 @@ export const ProductQuestion = model
     answer_count: model.number().default(0),
     moderated_by: model.text().nullable(),
     moderated_at: model.dateTime().nullable(),
+    /** Staff who last changed the question's words (owner 2026-11-27); shown in the panel only. */
+    edited_by: model.text().nullable(),
+    edited_at: model.dateTime().nullable(),
   })
   .indexes([
     { on: ["product_id", "status"], where: "deleted_at IS NULL" },

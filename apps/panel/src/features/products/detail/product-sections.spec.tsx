@@ -86,7 +86,7 @@ describe("ProductSections", () => {
     await waitFor(() => {
       expect(
         screen.getAllByRole("button", { expanded: false }).map((button) => button.textContent)
-      ).toEqual(["Arama motoru görünümü"])
+      ).toEqual(["Arama motoru görünümü", "Sık sorulan sorular"])
     })
     expect(part("Arama motoru görünümü")).toHaveAccessibleDescription(
       "Başlık 21/60 · Açıklama (otomatik) 15/155"
