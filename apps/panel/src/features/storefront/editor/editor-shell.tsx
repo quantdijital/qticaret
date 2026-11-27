@@ -16,9 +16,10 @@ import type { EditorLayout, EditorView } from "./editor-layout"
 const E = "storefront.editor"
 
 // A column of the editor: its own scroll (`data-scroll-area`, e2e/support/scroll.ts), the card
-// surface, a line to its right
+// surface, a line to its right. Positioned, so a screen-reader-only text inside (`sr-only` is
+// absolute) scrolls and clips with the column instead of stretching the window below the editor
 const COLUMN =
-  "flex min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-card"
+  "relative flex min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-card"
 
 interface EditorShellProps {
   layout: EditorLayout
@@ -151,7 +152,10 @@ export function EditorShell({
                 {t(`${E}.drawer.description`)}
               </SheetDescription>
             </SheetHeader>
-            <div data-scroll-area="y" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+            <div
+              data-scroll-area="y"
+              className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
+            >
               {tree}
             </div>
           </SheetContent>

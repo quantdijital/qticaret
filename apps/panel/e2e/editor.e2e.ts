@@ -35,6 +35,11 @@ test("opens the theme editor with the draft in the preview and a section's setti
 
   await tree.getByRole("button", { name: "Tema ayarları" }).click()
   await expect(page.getByRole("heading", { name: "Tema ayarları" })).toBeVisible()
+  // The window itself never scrolls: a screen-reader-only text deep in a long form once
+  // stretched the page and showed an empty band below the editor (owner, 2026-11-27)
+  expect(
+    await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+  ).toBeLessThanOrEqual(0)
   await page.getByRole("button", { name: "Bölümlere dön" }).click()
   await expect(tree).toBeVisible()
 
