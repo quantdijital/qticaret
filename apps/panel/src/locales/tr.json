@@ -424,12 +424,20 @@
       "previewValue": "Örnek ürün adı",
       "previewField": "Örnek alan",
       "colors": "Renkler",
-      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod sayfanın, menü zemini sol menünün zeminini belirler.",
+      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; zemin rengi yüzeylerin tonunu, mod açık ya da koyu zemini, menü zemini sol menünün zeminini belirler.",
       "layout": "Düzen",
       "layoutHint": "Menünün davranışı, köşeler ve satır yüksekliği.",
       "radiusHint": "Kartların, düğmelerin ve alanların köşeleri.",
       "densityHint": "Tablo satırlarının ve alanların yüksekliği.",
-      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
+      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler.",
+      "surface": "Zemin rengi",
+      "surfaceHint": "Sayfa, kart ve menülerin tonu. Marka rengi düğmelerde, bağlantılarda ve grafiklerde kalır.",
+      "surfaceOptions": {
+        "brand": "Markaya göre",
+        "neutral": "Nötr",
+        "warm": "Sıcak",
+        "cool": "Soğuk"
+      }
     },
     "saved": "Ayarlar kaydedildi.",
     "catalogDefaults": {

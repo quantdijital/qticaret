@@ -117,7 +117,7 @@ Bir bileşenin boyutu, çizgisi ya da köşesi sabit kodlanmaz; token'dan okunur
 
 ## 5. Tema motoru (`packages/admin-ui/src/theme/engine.ts`)
 
-Mağaza sahibi yedi şey seçer; gerisi türetilir:
+Mağaza sahibi sekiz şey seçer; gerisi türetilir:
 
 | Ayar           | Değerler                    | Etkisi                                                                                                                                                                                                                                                        |
 | -------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -125,12 +125,13 @@ Mağaza sahibi yedi şey seçer; gerisi türetilir:
 | Logo           | açık ve koyu için görsel    | Menü başı, giriş sayfası                                                                                                                                                                                                                                      |
 | Köşe           | keskin / yumuşak / yuvarlak | `--radius` 4 / 8 / 12                                                                                                                                                                                                                                         |
 | Yoğunluk       | ferah / kompakt             | kontrol ve satır yükseklikleri                                                                                                                                                                                                                                |
+| Zemin rengi    | markaya göre / nötr / sıcak / soğuk | sayfa, kart, kenarlık, üzerine gelme ve seçili zemini (`--accent`), koyu ve açık menünün tonu, grafik ızgarası (`ground.ts`); marka rengi düğme, bağlantı ve grafik serisinde kalır. Varsayılan "markaya göre" (bugünkü görünüm) |
 | Mod            | açık / koyu / sistem        | anlamsal token seti                                                                                                                                                                                                                                           |
 | Menü zemini    | koyu / açık / marka rengi   | `--sidebar-*`                                                                                                                                                                                                                                                 |
 | Menü davranışı | açık / kapalı / otomatik    | geniş ekranda sol menü: hep açık, yalnızca ikonlar ya da ikonlar ve üzerine gelince sayfayı itmeden açılan menü (50 ms gecikme, 100 ms açılış); üst çubuktaki düğme bir sonraki ziyarete kadar açıp kapatır; telefonda menü her zaman düğmeyle açılan çekmece |
 
 - Marka renginden OKLCH'de 11 tonluk ölçek üretilir (`culori`). `--primary` için açıklık `[0,40 – 0,62]` aralığına çekilir ki beyaz metin AA (≥ 4,5:1) sağlasın; düzeltme yapıldıysa ayar ekranı "renginiz koyulaştırıldı" uyarısı gösterir. Kontrast testi birim testidir.
-- Nötr ölçek, marka tonuna `kroma 0,006` ile eğilir; böylece panel "gri" değil, markanın soğuk/sıcak havasında olur ama renk okunaklılığı bozulmaz.
+- Nötr ölçek, "Zemin rengi" markaya göre iken marka tonuna `kroma 0,006` ile eğilir (üzerine gelme/seçili zemini en çok 0,035, koyu modda 0,06; koyu menü 0,02); böylece panel markanın havasında olur. Kırmızı, mavi gibi doygun renklerde bu ton fazla hissedilirse sahip zemini ayrı seçer (sahip isteği 2026-11-27): nötr saf gri (kroma 0), sıcak ve soğuk markadan bağımsız sabit gri (ton 70 / 250, kroma 0,008). Her ton için metin çiftleri AA birim testindedir (`ground.spec.ts`).
 - Koyu mod aynı ölçekten ters okunarak türetilir; durum renkleri koyu modda bir ton açılır.
 - Değerler `platform-settings` `appearance` bölümünde durur; panel açılışta okur, `document.documentElement`'e CSS değişkeni olarak yazar. Önizleme aynı motorla, kaydetmeden çalışır.
 - Hazır paletler (6 adet) yalnızca başlangıç noktasıdır; hepsi aynı motordan geçer.
