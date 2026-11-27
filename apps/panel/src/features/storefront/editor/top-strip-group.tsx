@@ -58,7 +58,8 @@ export function TopStripGroup({
         if (on) {
           dispatch({ type: "update", section: { ...header, top_strip: false } })
         } else {
-          const { top_strip: _off, ...back } = header
+          const back = { ...header }
+          delete back.top_strip
           dispatch({ type: "update", section: back })
         }
       }}
