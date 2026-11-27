@@ -9,6 +9,7 @@ import type {
 } from "@/features/settings/api/migration"
 import {
   isDescriptionRefresh,
+  isPostImageRefresh,
   wordpressReportOf,
 } from "@/features/settings/api/migration-wordpress"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
@@ -18,6 +19,7 @@ import {
   FactsLine,
   RefreshResult,
 } from "@/features/settings/components/migration/description-result"
+import { PostImagesResult } from "@/features/settings/components/migration/post-images-result"
 import { WordpressReport } from "@/features/settings/components/migration/wordpress-report"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 
@@ -105,6 +107,8 @@ export function RunResult({ job, source }: { job: MigrationJob; source: Migratio
   const summary = job.result_summary as { mode: MigrationMode; counts: Counts }
   // ADR-0055: a run that only rewrote the descriptions of products moved before
   const refresh = source === "wordpress" && isDescriptionRefresh(job.result_summary)
+  // adr/0042 Ek 2026-11-27: a run that only added pictures to blog posts moved before
+  const postImages = source === "wordpress" && isPostImageRefresh(job.result_summary)
   const documents = documentsOf(summary.counts)
   const facts = factsOf(summary.counts)
   const table = (
@@ -114,20 +118,24 @@ export function RunResult({ job, source }: { job: MigrationJob; source: Migratio
       {facts !== null ? <FactsLine mode={summary.mode} facts={facts} /> : null}
     </div>
   )
-  const heading = refresh
-    ? summary.mode === "apply"
-      ? `${R}.descriptions.applied`
-      : `${R}.descriptions.planned`
-    : summary.mode === "apply"
-      ? `${R}.applied`
-      : `${R}.planned`
+  const heading = postImages
+    ? `${R}.postImages.${summary.mode === "apply" ? "applied" : "planned"}`
+    : refresh
+      ? summary.mode === "apply"
+        ? `${R}.descriptions.applied`
+        : `${R}.descriptions.planned`
+      : summary.mode === "apply"
+        ? `${R}.applied`
+        : `${R}.planned`
   return (
     <div className="flex flex-col gap-3">
       <p className="flex items-start gap-2 text-sm font-medium">
         <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
         {t(heading)}
       </p>
-      {refresh ? (
+      {postImages ? (
+        <PostImagesResult mode={summary.mode} counts={summary.counts} />
+      ) : refresh ? (
         <RefreshResult mode={summary.mode} counts={summary.counts} />
       ) : source === "wordpress" ? (
         <WordpressReport counts={summary.counts} report={wordpressReportOf(job.result_summary)}>

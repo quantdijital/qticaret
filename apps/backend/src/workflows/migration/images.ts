@@ -111,7 +111,11 @@ async function withinStorage<T>(work: () => Promise<T>, undo?: () => Promise<unk
 type Outcome =
   { url: string; asset: Awaited<ReturnType<typeof storeImage>> } | { url: string; key: string }
 
-async function inTurns<T, R>(items: readonly T[], work: (item: T) => Promise<R>): Promise<R[]> {
+/** Each item worked on, CONCURRENCY at a time, the results in order. */
+export async function inTurns<T, R>(
+  items: readonly T[],
+  work: (item: T) => Promise<R>
+): Promise<R[]> {
   const results: R[] = new Array<R>(items.length)
   let next = 0
   const worker = async () => {

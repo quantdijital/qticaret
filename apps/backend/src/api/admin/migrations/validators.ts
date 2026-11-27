@@ -24,7 +24,7 @@ export type AdminPostMigrationQueryType = z.infer<typeof AdminPostMigrationQuery
  * or a WordPress export (`source=wordpress`), whose product categories'
  * address base (`category_base=/urun-kategori/`) the owner may name, and
  * which may refresh only what a run moved before (`refresh=descriptions`,
- * adr/0055).
+ * adr/0055; `refresh=post_images`, adr/0042 Ek 2026-11-27).
  */
 export const AdminPostMigrationFileQuery = AdminPostMigrationQuery.extend({
   source: z.enum(["bundle", "wordpress"]).default("bundle"),

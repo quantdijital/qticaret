@@ -76,7 +76,8 @@ medusaIntegrationTestRunner({
         covers_uploaded: 1,
         covers_failed: 1,
       })
-      expect(applied.counts["image"]).toMatchObject({ read: 3, created: 3 })
+      // The post's picture too (adr/0042 Ek 2026-11-27)
+      expect(applied.counts["image"]).toMatchObject({ read: 4, created: 4 })
       // Each file fetched once
       expect([fetched("tava.png"), fetched("mutfak.png")]).toEqual([1, 1])
 

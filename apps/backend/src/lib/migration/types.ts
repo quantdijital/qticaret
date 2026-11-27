@@ -179,7 +179,11 @@ export interface SourceReview {
 export interface SourceContent {
   /** The handle wanted: the old slug, so the address stays alike. */
   handle: string
-  /** A checked document (lib/content): pictures left out, they must be the shop's own uploads. */
+  /**
+   * A checked document (lib/content). Its image blocks name the old site's
+   * files: the run stores them in the media library and swaps the address
+   * before the save, which takes the shop's own uploads only (adr/0042 Ek 2026-11-27).
+   */
   body: ContentDoc
   excerpt: string | null
   author: string | null

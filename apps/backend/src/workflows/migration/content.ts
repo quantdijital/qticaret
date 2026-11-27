@@ -13,10 +13,13 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import type { PostTermsInput } from "../content/term-rules"
 import { saveContentWorkflow } from "../content/workflows"
+import { imageSources } from "../../lib/migration/body-images"
+import { BodyImages } from "./content-images"
 import { importPage } from "./content-page"
 import { ImageRefused, storeImage } from "./images"
 import { migratePostTerms, refusalOf, writeSeo } from "./post-terms"
 import type { TermCounts } from "./post-terms"
+import type { ImageCounts } from "./images"
 import type { ReportProblem } from "./report"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -28,7 +31,9 @@ export type ContentKinds = "post" | "post_category" | "post_tag" | "page"
  * 2026-11-03), through the content workflows as the panel saves them: a
  * post filed under its category and tags (made first), its cover picture
  * fetched as a product's are (adr/0042 §7), its first publishing date
- * kept, its SEO fields written. One a run made before, or one of the same
+ * kept, its SEO fields written, the pictures in its text stored in the
+ * media library and the text pointed at them (`content-images.ts`, adr/0042
+ * Ek 2026-11-27). One a run made before, or one of the same
  * handle here, is kept as it is: never written over. A page without text
  * of its own moves only its address, for the owner's decision. A dry run
  * writes nothing and counts what a run would make.
@@ -40,7 +45,12 @@ export async function migrateContent(
   pages: readonly SourcePage[],
   apply: boolean,
   progress: StepProgress
-): Promise<{ counts: Record<ContentKinds, TermCounts>; problems: ReportProblem[] }> {
+): Promise<{
+  counts: Record<ContentKinds, TermCounts>
+  /** The pictures in the new entries' texts. */
+  images: ImageCounts
+  problems: ReportProblem[]
+}> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const problems: ReportProblem[] = []
   const termsOf = (pick: (post: SourcePost) => (SourcePostTerm | null)[]) => [
@@ -94,6 +104,8 @@ export async function migrateContent(
   }
   const remembered: Record<"post" | "page", RememberedItem[]> = { post: [], page: [] }
   const covers: RememberedItem[] = []
+  const images: ImageCounts = { read: 0, created: 0, found: 0, skipped: 0 }
+  const bodyImages = new BodyImages(container, source)
   const found = await existingEntries(container, source, entries)
   for (const [index, entry] of entries.entries()) {
     const own = counts[entry.kind]
@@ -109,12 +121,21 @@ export async function migrateContent(
       kept({ target_id: here, status: "done" })
     } else if (!apply) {
       own.created += 1
+      const files = imageSources(entry.content.body).length
+      images.read += files
+      images.created += files
     } else {
+      const local = await bodyImages.localize(entry.source_key, entry.content.body)
+      images.read += local.stored.size + local.problems.length
+      images.created += local.fetched.size
+      images.found += local.found
+      images.skipped += local.problems.length
+      problems.push(...local.problems.map((problem) => ({ ...problem, kind: "image" as const })))
       const written = await writeEntry(
         container,
         entry.kind,
         entry.title,
-        entry.content,
+        { ...entry.content, body: local.doc },
         entry.terms
       )
       problems.push(
@@ -127,6 +148,7 @@ export async function migrateContent(
       if (written.id) {
         own.created += 1
         kept({ target_id: written.id, status: "done" })
+        await bodyImages.remember(local.items)
         // The cover's old file answers with its new address (adr/0059), as products' pictures do
         if (written.coverId && entry.content.cover) {
           covers.push({
@@ -149,6 +171,7 @@ export async function migrateContent(
   }
   return {
     counts: { ...counts, post_category: categories.counts, post_tag: tags.counts },
+    images,
     problems,
   }
 }

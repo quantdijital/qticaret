@@ -27,21 +27,28 @@ export const wxrContentType = (file: File) =>
 export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
 
 /**
+ * What a WordPress run may refresh alone of what an earlier run moved: the
+ * products' descriptions (ADR-0055) or the pictures in the blog posts'
+ * texts (adr/0042 Ek 2026-11-27).
+ */
+export type WordpressRefresh = "descriptions" | "post_images"
+
+/**
  * `POST /admin/migrations?source=wordpress`: the mode, the address base
  * when the owner names one (left out, the server reads it from the site's
  * own links), the parcel's four numbers when given.
- * A description refresh (ADR-0055) sends `refresh=descriptions` alone: it
+ * A refresh sends `refresh=descriptions` or `refresh=post_images` alone: it
  * reads neither the base nor the parcel.
  */
 export function wordpressUploadPath(
   mode: MigrationMode,
   parcel: Parcel | null,
   categoryBase: string,
-  refresh = false
+  refresh: WordpressRefresh | null = null
 ): string {
   const query = new URLSearchParams({ source: "wordpress", mode })
   if (refresh) {
-    query.set("refresh", "descriptions")
+    query.set("refresh", refresh)
     return `/admin/migrations?${query.toString()}`
   }
   if (categoryBase.trim() !== "") {
@@ -96,3 +103,7 @@ const refreshSchema = z.object({ refresh: z.array(z.string()) })
 /** Whether a run only refreshed the descriptions of products moved before (ADR-0055). */
 export const isDescriptionRefresh = (summary: unknown): boolean =>
   refreshSchema.safeParse(summary).data?.refresh.includes("descriptions") ?? false
+
+/** Whether a run only added the pictures to the texts of blog posts moved before. */
+export const isPostImageRefresh = (summary: unknown): boolean =>
+  refreshSchema.safeParse(summary).data?.refresh.includes("post_images") ?? false

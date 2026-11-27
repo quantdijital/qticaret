@@ -1,6 +1,6 @@
 # WordPress + WooCommerce (WXR geçiş kaynağı)
 
-> Karar: ADR-0042 "Ek (2026-11-03): WordPress (WXR) kaynağı"; ürün açıklaması içerik belgesi olarak ve açıklama yenileme: ADR-0055. Kod: `apps/backend/src/lib/migration/sources/wordpress/`. Yazma tarafı: `apps/backend/src/workflows/migration/categories.ts` (kategori SEO alanları), `products.ts` + `attributes.ts` + `attribute-report.ts` (açıklayıcı özellikler), `content.ts`, `post-terms.ts`. Testler: `src/lib/migration/sources/wordpress/__tests__/`, `integration-tests/http/migration-wordpress.spec.ts`, `migration-wordpress-descriptions.spec.ts` (belge ve yenileme).
+> Karar: ADR-0042 "Ek (2026-11-03): WordPress (WXR) kaynağı"; ürün açıklaması içerik belgesi olarak ve açıklama yenileme: ADR-0055. Kod: `apps/backend/src/lib/migration/sources/wordpress/`. Yazma tarafı: `apps/backend/src/workflows/migration/categories.ts` (kategori SEO alanları), `products.ts` + `attributes.ts` + `attribute-report.ts` (açıklayıcı özellikler), `content.ts`, `post-terms.ts`. Testler: `src/lib/migration/sources/wordpress/__tests__/`, `integration-tests/http/migration-wordpress.spec.ts`, `migration-wordpress-descriptions.spec.ts` (belge ve yenileme), `migration-wordpress-post-images.spec.ts` (blog görselleri yenilemesi); yazı görselleri `body-images.ts`, `workflows/migration/content-images.ts`, `post-images.ts`.
 
 WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün kategorileri, markalar, ürünler ve varyasyonları, görseller, yorumlar, blog yazıları (kategori ve etiketleriyle), içerik sayfaları ve hepsinin eski adresleri. Eklenti, API anahtarı ya da sitede değişiklik gerekmez.
 
@@ -49,7 +49,8 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
 - **Kaynak kimliği:** `wordpress:<sitenin alan adı>`. Kayıt anahtarları WordPress kimlikleriyle: `product:2208`, `variation:2210`, `post:812`, `page:24`, `product_cat:mutfak`, `category:rehberler`, `post_tag:bakim`, `comment:4410`.
 - **Tekrarsızlık:** bir kez taşınan ürün, yazı ve sayfa yeniden çalıştırmada yazılmaz; aynı tanıtıcılı sayfa ya da yazı sitede zaten varsa (profil betiğinin açtığı Hakkımızda gibi) bulunmuş sayılır, eski adresi ona bağlanır.
 - **SEO eklentisi:** terim SEO alanlarını Rank Math terimin kendi meta'sında tutar, dosyada gelir. Yoast terimlerinkini bir seçenekte (`wpseo_taxonomy_meta`) tutar, dışa aktarmaya girmez: Yoast'lı sitede kategoriler mağazanın şablonlarını alır. Terimin robots ayarı taşınmaz (listeleme sayfalarının robots kuralı platformundur).
-- **Görseller:** sitenin ortam kütüphanesinden (`/wp-content/uploads/...`) güvenli indirmeyle (iç ağ reddi, 10 MB, tür ve piksel denetimi). Alan adı kısıtı yok, CDN'deki kütüphane de gelir. Yazı gövdesindeki görseller taşınmaz; raporda yazı yazı listelenir.
+- **Görseller:** sitenin ortam kütüphanesinden (`/wp-content/uploads/...`) güvenli indirmeyle (iç ağ reddi, 10 MB, tür ve piksel denetimi). Ortam kütüphanesindeki dosyada alan adı kısıtı yok, CDN'deki kütüphane de gelir.
+- **Yazı ve sayfa gövdesindeki görseller** (ADR-0042 Ek 2026-11-27): `<img>`, blok düzenleyici görseli (`wp-image-<id>`), `srcset`/tembel yükleyici adresleri, `<picture>`, `[gallery ids]` ve Flatsome `[ux_image id]` aynı güvenli yoldan indirilip Ortam kütüphanesine eklenir ve gövde kopyalara çevrilir. Boyutlu dosya (`-300x200`, `-scaled`) özgün yüklemeye çevrilir. Kütüphanede olmayan görsel yalnız eski sitenin kendi alan adındaysa (Jetpack `i0.wp.com/<alan adı>/…` dahil) alınır; başka alan adındaki, liste/tablo/alıntı içindeki görsel düşer ve raporda yazı yazı listelenir. İndirilemeyen görsel raporda nedeniyle; yazı yine taşınır.
 
 ## Açıklamaları yenileme (ADR-0055)
 
@@ -59,6 +60,15 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
 - **İstek:** `POST /admin/migrations?source=wordpress&mode=apply&refresh=descriptions` (API kuru çalıştırmayı da kabul eder: `mode=check` yalnızca sayar). İşin girdisinde `refresh: ["descriptions"]`; yarıda kalan iş yeniden başlatılırsa seçenek korunur. Başka kaynakla `migration.refresh_wordpress_only`.
 - **Ne yazılır:** kaynak kimliğiyle (`wordpress:<alan adı>`) daha önce taşınmış (`done`) her ürüne dışa aktarmadaki gövdeden belge ve onun düz metni, panelin açıklama kaydıyla aynı yoldan (`setProductCatalogWorkflow`). Fiyat, stok, durum, başlık, SEO alanları, kategoriler, görseller ve özellikler olduğu gibi kalır. Mağazanın panelde sonradan yazdığı açıklamanın üzerine yazılır: kutunun anlamı budur.
 - **Sayılar** (`counts.product`): `updated` yenilenen, `found` zaten aynı (belge ve düz metin), `skipped` daha önce taşınmamış ya da dışa aktarmada gövdesi boş (boşsa ürünün açıklamasına dokunulmaz, Notlar'da `migration.description_refresh_empty`), `failed` reddedilen ya da artık olmayan ürün (`migration.product_gone`), `documents` belgeyle yenilenen. Diğer türlerin sayıları sıfırdır. İşin özeti `refresh: ["descriptions"]` taşır, `wordpress` bloğunu taşımaz.
+
+## Blog görsellerini sonradan taşıma (ADR-0042 Ek 2026-11-27)
+
+Yazı gövdesindeki görseller taşınmadan önce taşınmış mağaza için: yazıların yalnız görselleri eklenir, başka hiçbir şey taşınmaz.
+
+- **Panel:** Ayarlar > Taşıma > WordPress, **Yalnız blog görsellerini taşı** kutusu. Kuru çalıştırma açık (kaç yazıya kaç görsel ekleneceğini sayar); kategori tabanı ve paket alanları devre dışı.
+- **İstek:** `POST /admin/migrations?source=wordpress&mode=check|apply&refresh=post_images`; işin girdisinde `refresh: ["post_images"]`.
+- **Ne yazılır:** daha önce taşınmış her yazıda henüz eklenmemiş görseller indirilir ve yazının bugünkü metnine, dışa aktarmada izledikleri paragrafın arkasına konur. Sahibin sonradan yaptığı değişiklikler ve düzeltilmiş bağlantılar kalır, güncellenme tarihi değişmez. İkinci çalıştırma bir şey eklemez; eklendikten sonra çıkarılan görsel geri gelmez. Sayfalar yenilenmez.
+- **Sayılar:** `counts.post` (`updated` görsel eklenen, `found` eklenecek görseli kalmamış, `skipped` taşınmamış ya da görselsiz, `failed`), `counts.image` (`created` indirilen, `found` önceden indirilmiş, `skipped` indirilemeyen; nedenleri Notlar'da). İndirilemeyenler için yeniden çalıştırmak yalnız onları dener.
 
 ## Açıklayıcı özellikler
 

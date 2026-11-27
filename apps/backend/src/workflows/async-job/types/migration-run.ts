@@ -10,6 +10,7 @@ import type MigrationModuleService from "../../../modules/migration/service"
 import { openSource } from "../../migration/open-source"
 import { reportSheets } from "../../migration/report"
 import { runDescriptionRefresh } from "../../migration/descriptions"
+import { runPostImageRefresh } from "../../migration/post-images"
 import { linkCounts, migrationLinkSheet, settleMigratedLinks } from "../../migration/links"
 import { runMigration } from "../../migration/run"
 import type { JobType } from "./types"
@@ -23,10 +24,12 @@ export const WORDPRESS_FILE_PREFIX = "migration-wordpress-"
 /** A product category address base the owner names (`/urun-kategori/`): a path of one segment or none. */
 export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
 /**
- * What a WordPress run may refresh alone (adr/0055): `descriptions`, the
- * documents and their plain text of the products a run moved before.
+ * What a WordPress run may refresh alone: `descriptions` (adr/0055), the
+ * documents and their plain text of the products a run moved before;
+ * `post_images` (adr/0042 Ek 2026-11-27), the pictures in the texts of
+ * the blog posts a run moved before.
  */
-export const REFRESH_KINDS = ["descriptions"] as const
+export const REFRESH_KINDS = ["descriptions", "post_images"] as const
 
 const shared = {
   mode: z.enum(["check", "apply"]),
@@ -154,12 +157,14 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       }
       const { counts, productRows, problems } = refresh.includes("descriptions")
         ? await runDescriptionRefresh(container, source, run.id, mode, report)
-        : await runMigration(container, source, run.id, mode, defaults, {
-            progress: report,
-            origin: { job_id: job.id, actor_id: job.requested_by },
-            audit: (action, changes) =>
-              mode === "apply" ? record(action, changes) : Promise.resolve(),
-          })
+        : refresh.includes("post_images")
+          ? await runPostImageRefresh(container, source, run.id, mode, report)
+          : await runMigration(container, source, run.id, mode, defaults, {
+              progress: report,
+              origin: { job_id: job.id, actor_id: job.requested_by },
+              audit: (action, changes) =>
+                mode === "apply" ? record(action, changes) : Promise.resolve(),
+            })
       // adr/0042 Ek 2026-11-05: the records' old paths answer at once, the moved texts' links
       // to the old site point here (a refresh rewrote descriptions from the source again)
       // Not the run's to fail: what moved stays, and the content link job can be run later

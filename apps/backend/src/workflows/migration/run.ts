@@ -282,6 +282,11 @@ export async function runMigration(
   for (const kind of ["post_category", "post_tag", "post", "page"] as const) {
     await keep(kind, content.counts[kind])
   }
+  // The pictures in the posts' and pages' texts count with the products' (adr/0042 Ek 2026-11-27)
+  for (const key of ["read", "created", "found", "skipped"] as const) {
+    counts.image[key] += content.images[key]
+  }
+  await migration.count(runId, "image", { ...content.images })
   if (apply) {
     // Every old address the records had, for the 301s (F14.7)
     await inventoryFromItems(container, source.id)
