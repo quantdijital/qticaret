@@ -11,6 +11,7 @@ import { findSection } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
 import { sayDroppedPages } from "./dropped-pages"
 import {
+  EditorChromeContext,
   OpenedSectionContext,
   SectionHoverContext,
   editorLayoutNow,
@@ -24,6 +25,7 @@ import { SectionFlagsProvider } from "./section-flags-provider"
 import { GoneRecordsContext } from "./gone-records-context"
 import type { Adding } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
+import { useSidebarSteps } from "./use-sidebar-steps"
 import { EditorTopBar } from "./editor-top-bar"
 import { OpenedForm } from "./opened-form"
 import { formKeyOf, openedAtFirst } from "./opened"
@@ -46,9 +48,9 @@ import { useUndoKeys } from "./use-undo-keys"
 const E = "storefront.editor"
 
 /**
- * The theme editor (adr/0049): full screen, the page's parts, the open
- * part's settings and the storefront itself, laid out as the window allows
- * (`EditorShell`). Every change is kept here with its history and saved to
+ * The theme editor (adr/0049): full screen, one side panel (the page's
+ * parts, then the open part's settings) and the storefront itself, laid
+ * out as the window allows (`EditorShell`). Every change is kept here with its history and saved to
  * the draft once typing pauses (a change made in one go at once); the
  * preview redraws in place after each save (adr/0065);
  * "Yayınla" puts the draft live.
@@ -199,6 +201,14 @@ export function ThemeEditor({
   )
   const formKey = formKeyOf(opened, found ? found.section.id : null)
   const sidebar = useEditorSidebar(formKey, shape !== "narrow")
+  const steps = useSidebarSteps({
+    opened,
+    setOpened,
+    found: found ? found.section.id : null,
+    root: page === "content" ? pages.contentPage.title : null,
+    page,
+    formKey,
+  })
   const tree = (
     <EditorTree
       doc={shownDoc}
@@ -267,34 +277,41 @@ export function ThemeEditor({
               />
             }
           />
-          <OpenedSectionContext.Provider value={found ? found.section.id : null}>
-            <SectionHoverContext.Provider value={hover}>
-              <EditorShell
-                layout={shape}
-                view={view}
-                sidebar={sidebar.shown}
-                tree={tree}
-                form={form}
-                formKey={formKey}
-                preview={
-                  <PreviewFrame
-                    preview={preview}
-                    device={device}
-                    onDevice={setDevice}
-                    sample={
-                      page === "home" || page === "content" ? null : (
-                        <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
-                      )
-                    }
-                    missing={target.missing}
-                    notice={notice}
-                    announce={announce}
-                    finding={target.finding}
-                  />
-                }
-              />
-            </SectionHoverContext.Provider>
-          </OpenedSectionContext.Provider>
+          <EditorChromeContext.Provider value={steps.chrome}>
+            <OpenedSectionContext.Provider value={steps.marked}>
+              <SectionHoverContext.Provider value={hover}>
+                <EditorShell
+                  layout={shape}
+                  view={view}
+                  sidebar={sidebar.shown}
+                  tree={tree}
+                  form={form}
+                  formKey={formKey}
+                  onUp={steps.up}
+                  preview={
+                    <PreviewFrame
+                      preview={preview}
+                      device={device}
+                      onDevice={setDevice}
+                      sample={
+                        page === "home" || page === "content" ? null : (
+                          <SamplePicker
+                            page={page}
+                            sample={target.sample}
+                            onChange={target.choose}
+                          />
+                        )
+                      }
+                      missing={target.missing}
+                      notice={notice}
+                      announce={announce}
+                      finding={target.finding}
+                    />
+                  }
+                />
+              </SectionHoverContext.Provider>
+            </OpenedSectionContext.Provider>
+          </EditorChromeContext.Provider>
           <SectionChooser
             doc={shownDoc}
             page={page}

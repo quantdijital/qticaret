@@ -101,7 +101,7 @@ export function SectionRow({
   onPlace,
 }: SectionRowProps) {
   const { t } = useTranslation()
-  // Its settings open beside the list: the row stays marked
+  // Its settings open, or the last opened: the row stays marked
   const current = useContext(OpenedSectionContext) === id
   // It names a record deleted since: drawn without it, saved as it is, picked again here
   const gone = useGoneRecords().has(id)

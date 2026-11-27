@@ -1,48 +1,41 @@
-import { useMemo, useState } from "react"
+import { useLayoutEffect, useRef } from "react"
 import type { ReactNode } from "react"
-import { useTranslation } from "react-i18next"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@qticaret/admin-ui/ui/sheet"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import { EditorChromeContext } from "./editor-layout"
 import { SIDEBAR_ID } from "./editor-sidebar"
 import type { EditorLayout, EditorView } from "./editor-layout"
+import { useLevelEscape } from "./use-level-escape"
 
-const E = "storefront.editor"
-
-// A column of the editor: its own scroll (`data-scroll-area`, e2e/support/scroll.ts), the card
-// surface, a line to its right. Positioned, so a screen-reader-only text inside (`sr-only` is
-// absolute) scrolls and clips with the column instead of stretching the window below the editor
-const COLUMN =
-  "relative flex min-h-0 shrink-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-card"
+// A step of the side panel: its own scroll (`data-scroll-area`, e2e/support/scroll.ts).
+// Positioned, so a screen-reader-only text inside (`sr-only` is absolute) scrolls and clips
+// with it instead of stretching the window below the editor
+const LEVEL = "relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain"
 
 interface EditorShellProps {
   layout: EditorLayout
-  /** The narrow editor's choice between the settings and the preview. */
+  /** The narrow editor's choice between the side panel and the preview. */
   view: EditorView
-  /** Whether the side panel (the parts and the settings) is shown; folded, the preview takes its room. */
+  /** Whether the side panel is shown; folded, the preview takes its room. */
   sidebar: boolean
-  /** The page's parts. */
+  /** The page's parts: the side panel's first step. */
   tree: ReactNode
-  /** The open part's settings (a section's, or the theme's). */
+  /** The open part's settings (a section's, or the theme's): the next step. */
   form: ReactNode
-  /** Which settings are open, null for none: another one starts at its top and closes the drawer. */
+  /** Which settings are open, null for none: another one starts at its top. */
   formKey: string | null
+  /** One step up (Escape), null at the page's parts. */
+  onUp: (() => void) | null
   preview: ReactNode
 }
 
 /**
- * The editor below its top bar, as wide as the window allows: the page's
- * parts, the open part's settings and the preview side by side on a wide
- * screen (the preview takes the settings' room while none is open); the
- * settings beside the preview, the parts in a drawer, on a laptop; one of
- * the two at a time on a tablet or phone. What is hidden stays mounted, so
- * a half-filled form survives a look at the preview.
+ * The editor below its top bar (the owner, 2026-11-27: one side panel,
+ * not one beside another): a side panel whose content swaps, the page's
+ * parts, then a part's settings, then a footer row's (each with the way
+ * back in its header), beside the preview; on a tablet or phone one of
+ * the two at a time. The list stays mounted while a part's settings are
+ * open, so its scroll and its search are as they were on the way back;
+ * what is hidden or folded stays mounted, so a half-filled form survives
+ * a look at the preview.
  */
 export function EditorShell({
   layout,
@@ -51,116 +44,96 @@ export function EditorShell({
   tree,
   form,
   formKey,
+  onUp,
   preview,
 }: EditorShellProps) {
-  const { t } = useTranslation()
-  const [drawer, setDrawer] = useState(false)
-  // A part picked (from the drawer or elsewhere) closes the drawer
-  const [shownKey, setShownKey] = useState(formKey)
-  if (shownKey !== formKey) {
-    setShownKey(formKey)
-    setDrawer(false)
-  }
-  const wide = layout === "wide"
-  const open = formKey !== null
-  const chrome = useMemo(
-    () => ({
-      openSections:
-        wide || !open
-          ? null
-          : () => {
-              setDrawer(true)
-            },
-    }),
-    [wide, open]
-  )
   const narrow = layout === "narrow"
-  // Folded, the columns stay mounted (hidden): a half-filled form survives it
+  const open = formKey !== null
+  // Folded, the side panel stays mounted (hidden): a half-filled form survives it
   const folded = !sidebar && !narrow
+  const away = folded || (narrow && view === "preview")
+  useLevelEscape(away ? null : onUp)
+  // The list's scroll, kept while it is hidden behind a part's settings
+  const list = useRef<HTMLDivElement>(null)
+  const listTop = useRef(0)
+  const level = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const shown = list.current
+    if (!open && shown) {
+      shown.scrollTop = listTop.current
+    }
+  }, [open])
+  // The keyboard's place follows the swap: onto the settings' title, back to the row left
+  const first = useRef(true)
+  useLayoutEffect(() => {
+    // Not on the way in: the page opens where it was asked to, the focus left alone
+    if (first.current) {
+      first.current = false
+      return
+    }
+    const active = document.activeElement
+    const lost = active === null || active === document.body
+    if (formKey !== null) {
+      if (lost || list.current?.contains(active)) {
+        level.current
+          ?.querySelector<HTMLElement>("[data-panel-title]")
+          ?.focus({ preventScroll: true })
+      }
+    } else if (lost || !active.isConnected) {
+      list.current
+        ?.querySelector<HTMLElement>('[aria-current="true"]')
+        ?.focus({ preventScroll: true })
+    }
+  }, [formKey])
   return (
-    <EditorChromeContext.Provider value={chrome}>
-      <main className="flex min-h-0 flex-1">
+    <main className="flex min-h-0 flex-1">
+      <div
+        id={SIDEBAR_ID}
+        data-editor-sidebar={folded ? "hidden" : "shown"}
+        data-editor-column="sidebar"
+        hidden={away}
+        className={cn(
+          "relative flex min-h-0 shrink-0 flex-col bg-card",
+          narrow
+            ? "w-full"
+            : "w-[clamp(22rem,28vw,26rem)] border-r motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-left-4 motion-safe:duration-150"
+        )}
+      >
         <div
-          id={SIDEBAR_ID}
-          data-editor-sidebar={folded ? "hidden" : "shown"}
-          hidden={folded || (narrow && view === "preview")}
-          className={cn(
-            "flex min-h-0",
-            narrow
-              ? "w-full"
-              : "shrink-0 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-left-4 motion-safe:duration-150"
-          )}
+          ref={list}
+          data-editor-level="list"
+          data-scroll-area="y"
+          hidden={open}
+          className={LEVEL}
+          onScroll={(event) => {
+            listTop.current = event.currentTarget.scrollTop
+          }}
         >
-          {wide ? (
-            <div
-              data-editor-column="parts"
-              data-scroll-area="y"
-              className={cn(COLUMN, "w-[clamp(17rem,20vw,20rem)] border-r")}
-            >
-              {tree}
-            </div>
-          ) : null}
-          {wide && open ? (
-            <div
-              key={formKey}
-              data-editor-column="settings"
-              data-scroll-area="y"
-              className={cn(COLUMN, "w-[clamp(24rem,30vw,30rem)] border-r")}
-            >
-              {form}
-            </div>
-          ) : null}
-          {wide ? null : (
-            <div
-              key={formKey ?? "parts"}
-              data-editor-column="settings"
-              data-scroll-area="y"
-              className={cn(COLUMN, narrow ? "w-full" : "w-[clamp(22rem,36vw,26rem)] border-r")}
-            >
-              {open ? form : tree}
-            </div>
-          )}
+          {tree}
         </div>
-        <div
-          data-editor-column="preview"
-          hidden={narrow && view === "edit"}
-          className="flex min-h-0 min-w-0 flex-1 flex-col"
-        >
-          {preview}
-        </div>
-      </main>
-      {wide ? null : (
-        <Sheet open={drawer && open} onOpenChange={setDrawer}>
-          <SheetContent
-            side="left"
-            className="w-[min(20rem,calc(100vw-3rem))] gap-0 bg-card p-0 sm:max-w-none"
-            onEscapeKeyDown={(event) => {
-              // Escape in the settings search clears the query first; the next one closes
-              const target = event.target
-              if (
-                target instanceof HTMLInputElement &&
-                target.type === "search" &&
-                target.value !== ""
-              ) {
-                event.preventDefault()
-              }
-            }}
+        {open ? (
+          <div
+            key={formKey}
+            ref={level}
+            data-editor-level="settings"
+            data-editor-column="settings"
+            data-scroll-area="y"
+            className={cn(
+              LEVEL,
+              "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-right-2 motion-safe:duration-150"
+            )}
           >
-            <SheetHeader className="border-b px-4 py-3">
-              <SheetTitle className="text-sm">{t(`${E}.drawer.title`)}</SheetTitle>
-              <SheetDescription className="text-xs">
-                {t(`${E}.drawer.description`)}
-              </SheetDescription>
-            </SheetHeader>
-            <div
-              data-scroll-area="y"
-              className="relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto"
-            >
-              {tree}
-            </div>
-          </SheetContent>
-        </Sheet>
-      )}
-    </EditorChromeContext.Provider>
+            {form}
+          </div>
+        ) : null}
+      </div>
+      <div
+        data-editor-column="preview"
+        hidden={narrow && view === "edit"}
+        className="flex min-h-0 min-w-0 flex-1 flex-col"
+      >
+        {preview}
+      </div>
+    </main>
   )
 }

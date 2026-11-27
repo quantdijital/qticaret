@@ -58,8 +58,8 @@ test("opens the theme editor with the draft in the preview and a section's setti
  * The owner, 2026-11-03: the editor was cramped. Read only, at a desktop,
  * a laptop and a phone size: the bar's controls all on show, no field
  * narrower than 160 px, the preview scaled into its room rather than cut
- * off, the page's parts beside the settings, in a drawer, or one view at a
- * time.
+ * off, one side panel whose content swaps (the page's parts, then a part's
+ * settings) beside the preview, or one view at a time.
  */
 test("lays the theme editor out for the window it has", async ({ page, guard }) => {
   const bar = page.getByRole("banner")
@@ -105,7 +105,9 @@ test("lays the theme editor out for the window it has", async ({ page, guard }) 
   await barReady()
   await tree.getByRole("button", { name: "Tema ayarları" }).click()
   await expect(page.getByRole("region", { name: "Tema ayarları" })).toBeVisible()
-  await expect(tree).toBeVisible()
+  // One side panel: the settings take the list's place, the breadcrumb leads back
+  await expect(tree).toBeHidden()
+  await expect(page.getByRole("navigation", { name: "Konum" })).toContainText("Ana sayfa")
   await expect(preview).toBeVisible({ timeout: 30_000 })
   await expect.poll(fits).toBe(true)
   expect(await narrowFields()).toEqual([])
@@ -113,14 +115,15 @@ test("lays the theme editor out for the window it has", async ({ page, guard }) 
   await expect(preview).toHaveAttribute("data-device", "tablet")
   await expect.poll(fits).toBe(true)
 
-  // A laptop: the parts fold into a drawer beside the settings
+  // A laptop: the same side panel; Escape takes it up to the list and back again
   await page.setViewportSize({ width: 1100, height: 800 })
   await barReady()
-  await expect(tree).toHaveCount(0)
-  await page.getByRole("button", { name: "Bölümler", exact: true }).click()
-  await expect(page.getByRole("dialog", { name: "Sayfanın bölümleri" })).toBeVisible()
-  await page.keyboard.press("Escape")
+  await expect(page.getByRole("region", { name: "Tema ayarları" })).toBeVisible()
   expect(await narrowFields()).toEqual([])
+  await page.keyboard.press("Escape")
+  await expect(tree).toBeVisible()
+  await tree.getByRole("button", { name: "Tema ayarları" }).click()
+  await expect(page.getByRole("region", { name: "Tema ayarları" })).toBeVisible()
   await expect.poll(fits).toBe(true)
 
   // A phone: the settings or the preview, switched from the bar
