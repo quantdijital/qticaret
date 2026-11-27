@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import type { SearchFormDayView, SearchFormSelectView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { PickerLabel } from "./PickerLabel"
 
 /**
  * The search box's fields (adr/0077 §1), shared by the form and its dates
@@ -36,16 +37,20 @@ export function Cell({
   label,
   className,
   from = "md",
+  picker = false,
   children,
 }: {
   icon: LucideIcon
   label: string
   className?: string | false | undefined
   from?: BarFrom | undefined
+  /** Around a select: a press anywhere on the cell opens its list (`PickerLabel`). */
+  picker?: boolean
   children: ReactNode
 }) {
+  const Label = picker ? PickerLabel : "label"
   return (
-    <label
+    <Label
       className={cn(
         CELL[from],
         "cursor-pointer rounded-tile focus-within:outline-2 focus-within:outline-focus",
@@ -57,7 +62,7 @@ export function Cell({
         <span className="text-xs font-semibold text-text">{label}</span>
         {children}
       </span>
-    </label>
+    </Label>
   )
 }
 
@@ -73,7 +78,7 @@ export function SelectCell({
   from?: BarFrom | undefined
 }) {
   return (
-    <Cell icon={icon} label={field.label} className={className} from={from}>
+    <Cell icon={icon} label={field.label} className={className} from={from} picker>
       <select name={field.name} defaultValue={field.value} className={CONTROL}>
         {field.anyLabel !== null && <option value="">{field.anyLabel}</option>}
         {field.options.map((option) => (
