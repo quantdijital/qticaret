@@ -181,6 +181,8 @@ describe("the free rows footer's schema (adr/0070 §2)", () => {
     expect(blockIssues(block("menu"))).toEqual(invalid)
     expect(blockIssues(block("trust", { limit: 5 }))).toEqual(invalid)
     expect(blockIssues(block("newsletter", { variant: "split" }))).toEqual(invalid)
+    expect(blockIssues(block("newsletter", { consent_style: "popover" }))).toEqual(invalid)
+    expect(blockIssues(block("newsletter", { consent_style: "line" }))).toEqual([])
     expect(
       blockIssues(block("image", { image: { url: "/media/a.png", alt: "A" }, width: "huge" }))
     ).toEqual(invalid)

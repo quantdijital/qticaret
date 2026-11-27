@@ -5,10 +5,12 @@ import {
   FOOTER_NEWSLETTER_VARIANTS,
   FOOTER_TEXT_STYLES,
   FOOTER_TRUST_LAYOUTS,
+  NEWSLETTER_CONSENT_STYLES,
   SECTION_DEVICES,
 } from "@qticaret/types"
 import { NamedGroup } from "../named-group"
 import { StepChoice } from "../forms/step-choice"
+import { withConsentStyle } from "../forms/newsletter-band"
 import { BlockContent } from "./block-content"
 import { BlockSwitch } from "./block-kit"
 import { useBlockKit } from "./use-block-kit"
@@ -56,9 +58,20 @@ export function BlockForm({
       </NamedGroup>
       {block.type === "newsletter" ? (
         <NamedGroup name="variant">
-          {steps("variant", FOOTER_NEWSLETTER_VARIANTS, block.variant, (variant) => {
-            onChange({ ...block, variant })
-          })}
+          <div className="flex flex-col gap-5">
+            {steps("variant", FOOTER_NEWSLETTER_VARIANTS, block.variant, (variant) => {
+              onChange({ ...block, variant })
+            })}
+            {steps(
+              "consent_style",
+              NEWSLETTER_CONSENT_STYLES,
+              block.consent_style ?? "box",
+              (style) => {
+                // The box is the field's absence: a block saved before it reads as it did
+                onChange(withConsentStyle(block, style), "consent_style")
+              }
+            )}
+          </div>
         </NamedGroup>
       ) : null}
       {block.type === "image" || block.type === "trust" ? (

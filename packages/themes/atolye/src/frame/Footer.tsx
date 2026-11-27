@@ -151,7 +151,7 @@ export function Footer({
               quiet
               action={subscribe}
               privacyPath={shop.privacyPath}
-              words={newsletterWords(t, shop.newsletter.text)}
+              words={newsletterWords(t, shop.newsletter.text, shop.newsletter.consentStyle)}
               marks={Boolean(shop.newsletter.mark)}
               className="lg:col-span-6"
             />

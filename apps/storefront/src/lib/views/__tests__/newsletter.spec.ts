@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
-import { newsletterLookOf } from "../newsletter"
+import { consentWordsKey, newsletterLookOf } from "../newsletter"
 
 const PICTURE = {
   url: "https://cdn.example.com/media/bulten.jpg",
@@ -18,6 +18,7 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
       note: null,
       image: null,
       tone: "plain",
+      consentStyle: "box",
     })
   })
 
@@ -28,6 +29,7 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
       note: t("newsletter.note"),
       image: null,
       tone: "plain",
+      consentStyle: "box",
     })
     expect(
       newsletterLookOf(
@@ -62,5 +64,22 @@ describe("the newsletter box's look (adr/0049 Ek 2026-11-17 e-bülten)", () => {
     expect(newsletterLookOf({ variant: "in_footer" }, t, "page").variant).toBe("standard")
     expect(newsletterLookOf({ variant: "in_footer" }, t, "footer").variant).toBe("in_footer")
     expect(newsletterLookOf({ variant: "bento" as never }, t, "footer").variant).toBe("standard")
+  })
+})
+
+describe("the newsletter box's consent setting", () => {
+  it("reads the box when unset or unknown, the line only when set", () => {
+    expect(newsletterLookOf({ variant: "strip" }, t, "page").consentStyle).toBe("box")
+    expect(newsletterLookOf({ consent_style: "line" }, t, "footer").consentStyle).toBe("line")
+    expect(newsletterLookOf({ consent_style: "popover" as never }, t, "footer").consentStyle).toBe(
+      "box"
+    )
+  })
+
+  it("fills the storefront's short line for the line, its sentence for the box", () => {
+    expect(t(consentWordsKey("line"), { shop: "Atölye" })).toBe(
+      "Abone olarak Atölye tarafından ticari elektronik ileti gönderilmesini kabul edersiniz."
+    )
+    expect(consentWordsKey("box")).toBe("newsletter.text")
   })
 })

@@ -19,7 +19,7 @@ import { featuredView } from "./featured"
 import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
-import { newsletterLookOf } from "./newsletter"
+import { consentStyleOf, consentWordsKey, newsletterLookOf } from "./newsletter"
 import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postsView } from "./posts-section"
@@ -188,7 +188,10 @@ async function sectionView(
         type: "newsletter",
         title: section.title ?? t("newsletter.title"),
         text:
-          section.text ?? t("newsletter.text", { shop: identity.company_title ?? site.shop.name }),
+          section.text ??
+          t(consentWordsKey(consentStyleOf(section)), {
+            shop: identity.company_title ?? site.shop.name,
+          }),
         privacyPath: notice ? legalPath("privacy_notice") : null,
         ...newsletterLookOf(section, t, "page"),
       }

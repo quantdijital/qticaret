@@ -28,7 +28,7 @@ export function Signup({
 }) {
   const id = headingId(section.id)
   const variant = drawnVariant("newsletter", section.variant, ON_PAGE)
-  const words = newsletterWords(t, section.text)
+  const words = newsletterWords(t, section.text, section.consentStyle)
   if (variant !== "standard") {
     return (
       <div className="gf-section">
@@ -41,6 +41,7 @@ export function Signup({
               note: section.note ?? null,
               image: section.image ?? null,
               tone: section.tone ?? "plain",
+              consentStyle: section.consentStyle ?? "box",
             }}
             title={section.title}
             headingId={id}

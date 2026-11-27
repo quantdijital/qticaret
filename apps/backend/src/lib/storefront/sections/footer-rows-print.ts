@@ -79,6 +79,7 @@ function printedBlock<L>(block: FooterBlock, tools: FooterRowTools<L>) {
         text: tools.fill(block.text),
         description: tools.fill(block.description),
         variant: block.variant,
+        ...(block.consent_style === "line" ? { consent_style: "line" as const } : {}),
       }
     case "contact":
       return {

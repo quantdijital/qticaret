@@ -5,6 +5,7 @@ import type {
   FooterImageWidth,
   FooterLogoSize,
   FooterNewsletterVariant,
+  NewsletterConsentStyle,
   FooterRowLayout,
   FooterRowStep,
   FooterRowsStep,
@@ -64,6 +65,8 @@ export interface FooterNewsletterBlock extends FooterBlockBase {
   text: string | null
   description: string | null
   variant: FooterNewsletterVariant
+  /** How the consent is asked: the required box or one small line; absent: `box`. */
+  consent_style?: NewsletterConsentStyle
 }
 
 export interface FooterContactBlock extends FooterBlockBase {

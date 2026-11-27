@@ -760,6 +760,7 @@
   "newsletter.title": "E-bültene abone olun",
   "newsletter.text": "Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak {shop} tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.",
   "newsletter.privacy_link": "KVKK aydınlatma metni",
+  "newsletter.line": "Abone olarak {shop} tarafından ticari elektronik ileti gönderilmesini kabul edersiniz.",
   "newsletter.email": "E-posta adresiniz",
   "newsletter.submit": "Abone ol",
   "newsletter.sent": "Onay bağlantısını e-postanıza gönderdik. Aboneliğiniz bağlantıyı açınca başlar.",

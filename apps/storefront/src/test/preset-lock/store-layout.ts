@@ -119,6 +119,7 @@ function footerNewsletter(box: Section) {
     ...(variant !== "standard" && variant !== "in_footer" && box["tone"] === "tint"
       ? { tone: "tint" }
       : {}),
+    ...(box["consent_style"] === "line" ? { consent_style: "line" } : {}),
   }
 }
 

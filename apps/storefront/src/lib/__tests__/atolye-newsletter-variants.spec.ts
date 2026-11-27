@@ -175,3 +175,44 @@ describe("the consent box in every newsletter variant", () => {
     }
   )
 })
+
+/**
+ * The consent asked by one small line (`consentStyle` `line`): no box and
+ * nothing opening on focus; the line, always shown, says that subscribing
+ * is consenting and carries the privacy notice's link; the form tells the
+ * action so (`consent=line`).
+ */
+describe("the newsletter box's one-line consent", () => {
+  const LINE = /<input type="hidden" name="consent" value="line"\/>/
+
+  it.each(["standard", "split", "image_card", "strip"] as const)(
+    "the %s box on a page draws the line, no box",
+    (variant) => {
+      const html = home(
+        box({ variant, ...LOOK, image: PICTURE, consentStyle: "line", text: "Abone olarak kabul." })
+      )
+      expect(html).not.toMatch(CONSENT)
+      expect(html).toMatch(LINE)
+      expect(html).not.toContain("gf-news-more")
+      expect(html).not.toContain("gf-news-privacy")
+      expect(html).toMatch(
+        /<p id="[^"]+-onay" class="text-xs leading-relaxed"><span>Abone olarak kabul\.<\/span> <a href="\/yasal\/kvkk"/
+      )
+      expect(html).toMatch(/aria-describedby="[^"]+-onay [^"]+-durum"/)
+    }
+  )
+
+  it.each(["standard", "split", "in_footer"] as const)(
+    "the %s box in the footer opens nothing on focus",
+    (variant) => {
+      const html = footerOf(
+        shopFixture({
+          newsletter: { title: "Bülten", text: "Satır.", variant, ...LOOK, consentStyle: "line" },
+        })
+      )
+      expect(html).toMatch(LINE)
+      expect(html).not.toMatch(CONSENT)
+      expect(html).not.toMatch(/class="[^"]*\bgf-news\b/)
+    }
+  )
+})

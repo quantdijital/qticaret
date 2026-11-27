@@ -25,6 +25,18 @@ export const NEWSLETTER_LIMITS = { description: 240, note: 80 } as const
 export const NEWSLETTER_TONES = ["plain", "tint"] as const
 export type NewsletterTone = (typeof NEWSLETTER_TONES)[number]
 
+/**
+ * How the box asks for the consent (İYS): `box`, the consent box under the
+ * field, unticked and required, its sentence the label (as it was; the
+ * footer's shows it once the visitor starts on the form); `line`, no box,
+ * one small line under the form saying that subscribing is consenting,
+ * with the privacy notice's link, always shown. Either way the address's
+ * owner confirms by the e-mailed link (double opt-in) and the proof names
+ * the words' version.
+ */
+export const NEWSLETTER_CONSENT_STYLES = ["box", "line"] as const
+export type NewsletterConsentStyle = (typeof NEWSLETTER_CONSENT_STYLES)[number]
+
 /** The variants only the footer's box takes: a page's box has no footer column to sit in. */
 export const NEWSLETTER_FOOTER_ONLY = ["in_footer"] as const satisfies readonly NewsletterVariant[]
 
@@ -72,4 +84,6 @@ export interface StoreNewsletterSection {
   joined?: boolean
   /** The boxed bands' ground; absent: `plain`. */
   tone?: NewsletterTone
+  /** How the consent is asked; absent: `box`. */
+  consent_style?: NewsletterConsentStyle
 }
