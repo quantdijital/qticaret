@@ -131,6 +131,22 @@
     aspect-ratio: auto;
     border-radius: 0;
   }
+  /* The catalogue's card: its kinds' pictures in a grid, a hairline between */
+  .gf-mega-mosaic {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .gf-mega-mosaic[data-count="3"] > :first-child {
+    grid-row: span 2;
+  }
+  .gf-mega-mosaic[data-count="2"] {
+    grid-template-columns: 1fr;
+  }
+  .gf-mega-mosaic .gf-mega-img {
+    height: 100%;
+    min-height: 0;
+  }
   /* Words over the picture: a dark wash at its foot keeps them readable */
   .gf-mega-feature:has(.gf-mega-img) {
     color: #fff;
