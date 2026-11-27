@@ -109,6 +109,8 @@ export const SETTINGS = [
   "/settings/einvoice?part=vat",
   "/settings/einvoice",
   "/settings/migration",
+  "/settings/migration/new",
+  "/settings/migration/addresses",
   // adr/0061 Ek C14: the package, limits and payment (a shop without a plan says so)
   "/settings/subscription",
   "/settings/api",
