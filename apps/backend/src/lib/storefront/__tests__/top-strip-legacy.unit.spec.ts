@@ -120,6 +120,23 @@ describe("the top strip read out of the header (owner 2026-11-27)", () => {
     })
   })
 
+  it("names the strip apart from a content page's section and a footer row's block", () => {
+    const read = withSeparateTopStrip({
+      header: [bar()],
+      pages: [{ page_id: "cnt_1", sections: [{ id: "ustserit", type: "rich_text" }] }],
+      footer: [
+        {
+          id: "mainfooter",
+          type: "footer_bar",
+          rows: [{ id: "ustserit2", columns: [{ id: "sutun001", blocks: [{ id: "ustserit3" }] }] }],
+        },
+      ],
+    })
+    expect(stripOf(read["header"] as Record<string, unknown>[])).toMatchObject({
+      id: "ustserit4",
+    })
+  })
+
   it("reads whole through today's schema, and the same again once saved", () => {
     const first = readStoredLayout({ header: [bar({ variant: "catalog", strip_note: "Not" })] })
     expect(first.header.map((section) => section.type)).toEqual(["announcement_bar", "header_bar"])

@@ -30,18 +30,31 @@ const isRecord = (value: unknown): value is Raw =>
 /** A stored catalog field as its schema reads it: the default when absent. */
 const field = (bar: Raw, key: string, fallback: unknown): unknown => bar[key] ?? fallback
 
-/** An id among the design's own, the strip's name first. */
-function freshId(stored: Raw): string {
-  const ids = new Set<string>()
-  for (const group of Object.values(stored)) {
-    if (Array.isArray(group)) {
-      for (const section of group) {
-        if (isRecord(section) && typeof section["id"] === "string") {
-          ids.add(section["id"])
-        }
-      }
+/**
+ * Every id the stored design holds, at any depth: its groups' sections,
+ * its content pages' sections, a free rows footer's rows and blocks
+ * (`sectionIds`' whole id space, read here from the raw document before
+ * the schema: a superset of it).
+ */
+function idsIn(value: unknown, into: Set<string>): Set<string> {
+  if (Array.isArray(value)) {
+    for (const each of value) {
+      idsIn(each, into)
+    }
+  } else if (isRecord(value)) {
+    if (typeof value["id"] === "string") {
+      into.add(value["id"])
+    }
+    for (const each of Object.values(value)) {
+      idsIn(each, into)
     }
   }
+  return into
+}
+
+/** An id the design does not hold anywhere, the strip's name first. */
+function freshId(stored: Raw): string {
+  const ids = idsIn(stored, new Set())
   let id = STRIP_ID
   for (let n = 2; ids.has(id); n += 1) {
     id = `${STRIP_ID}${String(n)}`
