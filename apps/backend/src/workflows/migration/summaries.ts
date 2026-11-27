@@ -52,8 +52,7 @@ export interface SummaryFill {
   keptKeys: string[]
 }
 
-/** The products' short descriptions now, by id (null: none). */
-export async function currentSummaries(container: Container, ids: readonly string[]) {
+async function currentSummaries(container: Container, ids: readonly string[]) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const found = new Map<string, unknown>()
   for (const chunk of chunksOf(ids, READ_CHUNK)) {

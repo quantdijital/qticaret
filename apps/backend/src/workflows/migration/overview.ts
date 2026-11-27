@@ -1,9 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
-import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
-import { currentSummaries } from "./summaries"
+import { movedRecordCounts } from "./overview-counts"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -34,21 +32,7 @@ export async function migrationOverview(container: Container) {
       own.problems += count
     }
   }
-  const movedIds = async (kind: string) =>
-    (
-      await migration.listMigrationItems(
-        { kind, status: "done", target_id: { $ne: null } },
-        { select: ["target_id"], take: null }
-      )
-    ).flatMap((item) => (item.target_id ? [item.target_id] : []))
-  const products = [...new Set(await movedIds("product"))]
-  const summaries = await currentSummaries(container, products)
-  const categories = [...new Set(await movedIds("category"))]
-  const pictured = categories.length
-    ? await container
-        .resolve<CatalogExtensionModuleService>(CATALOG_EXTENSION_MODULE)
-        .listCategoryImages({ category_id: categories }, { select: ["category_id"], take: null })
-    : []
+  const moved = await movedRecordCounts(container)
   const unpictured = (kind: "product" | "post") =>
     tallies.unpictured.find((row) => row.kind === kind)?.count ?? 0
   const [, addresses] = await migration.listAndCountMigrationUrls({}, { take: 1, select: ["id"] })
@@ -72,12 +56,11 @@ export async function migrationOverview(container: Container) {
     missing: {
       images: unpictured("product"),
       post_images: unpictured("post"),
-      // Products gone since are not counted: there is nothing to fill
-      summaries: [...summaries.values()].filter((doc) => doc === null).length,
-      category_covers:
-        new Set(categories).size - new Set(pictured.map((row) => row.category_id)).size,
+      // Counted in the database, no document read (overview-counts.ts)
+      summaries: moved.without_summary,
+      category_covers: moved.without_cover,
       urls: tallies.unaddressed,
-      descriptions: products.length,
+      descriptions: moved.products,
     },
     addresses: { total: addresses, undecided },
   }
