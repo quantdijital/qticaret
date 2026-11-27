@@ -10,6 +10,7 @@ import {
   Eye,
   EyeOff,
   GripVertical,
+  ListPlus,
   Settings2,
   Trash2,
   TriangleAlert,
@@ -69,6 +70,8 @@ interface SectionRowProps {
   drag?: RowDrag
   /** A category (or content) page's section: to the other side of the products (its text); `label` says so. */
   onPlace?: { to: "top" | "bottom"; run: () => void; label?: string } | undefined
+  /** Opens the section chooser aimed above or below the row (the touch screen's "+" between rows). */
+  onInsert?: { above: () => void; below: () => void } | undefined
 }
 
 // The upper half of a row drops before it, the lower half after
@@ -99,6 +102,7 @@ export function SectionRow({
   onDuplicate,
   drag,
   onPlace,
+  onInsert,
 }: SectionRowProps) {
   const { t } = useTranslation()
   // Its settings open, or the last opened: the row stays marked
@@ -285,6 +289,18 @@ export function SectionRow({
                 {onPlace.to === "bottom" ? <ArrowDownToLine /> : <ArrowUpToLine />}
                 {onPlace.label ?? t(`${R}.place.${onPlace.to}`)}
               </DropdownMenuItem>
+            ) : null}
+            {onInsert ? (
+              <>
+                <DropdownMenuItem onSelect={onInsert.above}>
+                  <ListPlus />
+                  {t(`${R}.addAbove`)}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onInsert.below}>
+                  <ListPlus />
+                  {t(`${R}.addBelow`)}
+                </DropdownMenuItem>
+              </>
             ) : null}
             {onDuplicate !== undefined ? (
               <DropdownMenuItem disabled={!onDuplicate} onSelect={() => onDuplicate?.()}>

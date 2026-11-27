@@ -111,7 +111,7 @@ describe("the theme editor's pages", () => {
     await choosePage("Ürün sayfası")
 
     await user.click(within(tree).getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     expect(
       within(chooser)
         .getAllByRole("button")
@@ -177,7 +177,7 @@ describe("the theme editor's pages", () => {
 
     // Added above the grid from its own button
     await user.click(within(tree).getByRole("button", { name: "Üste bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     expect(chooser).toHaveTextContent("ürün ızgarasının üstüne eklenir")
     expect(within(chooser).queryByRole("button", { name: /Benzer ürünler/ })).toBeNull()
     await user.click(within(chooser).getByRole("button", { name: /E-bülten/ }))

@@ -1,5 +1,5 @@
 import { useIsMutating, useQuery } from "@tanstack/react-query"
-import { useEffect, useMemo, useReducer, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
@@ -23,7 +23,7 @@ import { EditorTree } from "./editor-tree"
 import { SectionChooser } from "./section-chooser"
 import { SectionFlagsProvider } from "./section-flags-provider"
 import { GoneRecordsContext } from "./gone-records-context"
-import type { Adding } from "./section-chooser"
+import type { AddingAt } from "./section-chooser"
 import { useEditorSidebar } from "./editor-sidebar"
 import { useSidebarSteps } from "./use-sidebar-steps"
 import { EditorTopBar } from "./editor-top-bar"
@@ -91,7 +91,18 @@ export function ThemeEditor({
       sayDroppedPages(t, count)
     },
   })
-  const [opened, setOpened] = useState<Opened>(() => openedAtFirst(openAtFirst, content))
+  const [opened, setOpenedNow] = useState<Opened>(() => openedAtFirst(openAtFirst, content))
+  // The section chooser as a step of the side panel, aimed at its group (and a row, or the end)
+  const [adding, setAddingNow] = useState<AddingAt | null>(null)
+  // Whatever opens (or the way back to the page's parts) closes the chooser
+  const setOpened = useCallback((next: Opened) => {
+    setAddingNow(null)
+    setOpenedNow(next)
+  }, [])
+  const setAdding = useCallback((next: AddingAt | null) => {
+    setOpenedNow(null)
+    setAddingNow(next)
+  }, [])
   // Each pick of the settings search a fresh number: the same field picked again is shown again
   const picks = useRef(0)
   // The page worked on and shown; a link followed in the preview may change it (adr/0065 Faz 2)
@@ -103,8 +114,6 @@ export function ThemeEditor({
     },
   })
   const { page, target } = place
-  // The chooser is open for this side of a category page's products (the others have one)
-  const [adding, setAdding] = useState<Adding | null>(null)
   const shape = useEditorLayout()
   const [view, setView] = useState<EditorView>("edit")
   // A phone's preview starts as a phone; a wider screen's as a desktop
@@ -228,6 +237,22 @@ export function ThemeEditor({
       showSidebar={sidebar.show}
     />
   )
+  const picker = adding ? (
+    <SectionChooser
+      doc={shownDoc}
+      page={page}
+      content={place.contentPage.id}
+      adding={adding}
+      act={pages.act}
+      onClose={() => {
+        setAdding(null)
+      }}
+      onAdded={(id) => {
+        markNew(id)
+        setOpened({ kind: "section", id })
+      }}
+    />
+  ) : null
   const tools = (
     <>
       <LooksMenu
@@ -287,7 +312,14 @@ export function ThemeEditor({
                   tree={tree}
                   form={form}
                   formKey={formKey}
-                  onUp={steps.up}
+                  picker={picker}
+                  onUp={
+                    adding
+                      ? () => {
+                          setAdding(null)
+                        }
+                      : steps.up
+                  }
                   preview={
                     <PreviewFrame
                       preview={preview}
@@ -312,21 +344,6 @@ export function ThemeEditor({
               </SectionHoverContext.Provider>
             </OpenedSectionContext.Provider>
           </EditorChromeContext.Provider>
-          <SectionChooser
-            doc={shownDoc}
-            page={page}
-            content={place.contentPage.id}
-            adding={adding}
-            act={pages.act}
-            onClose={() => {
-              setAdding(null)
-            }}
-            onAdded={(id) => {
-              markNew(id)
-              setAdding(null)
-              setOpened({ kind: "section", id })
-            }}
-          />
           <LeaveGuard when={autosave.dirty} />
         </div>
       </GoneRecordsContext.Provider>

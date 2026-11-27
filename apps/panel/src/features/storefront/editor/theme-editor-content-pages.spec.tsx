@@ -190,7 +190,7 @@ describe("the theme editor's content pages", () => {
     await within(tree).findByRole("list", { name: "Sayfadaki bölümler" })
 
     await user.click(within(tree).getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     expect(chooser).toHaveTextContent("Bu sayfaya, bölümlerin sonuna eklenir")
     expect(within(chooser).queryByRole("button", { name: /Giriş/ })).toBeNull()
     await user.click(within(chooser).getByRole("button", { name: /Yardım kutusu/ }))

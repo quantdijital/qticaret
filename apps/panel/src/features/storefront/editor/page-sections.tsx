@@ -84,8 +84,11 @@ interface PageSectionsProps {
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
   onRemove: (section: BodySection) => void
-  /** Opens the chooser for the page; a category page's for one side of its products. */
-  onAdd: (placement?: Placement) => void
+  /**
+   * Opens the chooser for the page; a category page's for one side of its
+   * products; aimed before a row (the "+" between rows), none: at the end.
+   */
+  onAdd: (placement?: Placement, before?: string | null) => void
 }
 
 /**
@@ -128,6 +131,13 @@ export function PageSections({
         dispatch={dispatch}
         onOpen={onOpen}
         onRemove={onRemove}
+        onInsert={
+          full
+            ? null
+            : (before) => {
+                onAdd(placement, before)
+              }
+        }
       />
     )
   if (page === "category") {

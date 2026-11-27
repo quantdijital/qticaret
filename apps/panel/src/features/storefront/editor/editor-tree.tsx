@@ -5,7 +5,7 @@ import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-prob
 import { EditorNotices } from "./editor-notices"
 import type { EditorPage, ShownPage, TreeContentPage } from "./editor-page"
 import type { Opened } from "./opened"
-import type { Adding } from "./section-chooser"
+import type { AddingAt } from "./section-chooser"
 import { SectionTree } from "./section-tree"
 import { SettingsSearch } from "./settings-search-panel"
 
@@ -23,7 +23,8 @@ interface EditorTreeProps {
   /** Each pick of the settings search a fresh number: the same field picked again is shown again. */
   nextPick: () => number
   onRemove: (section: AnySection) => void
-  onAdding: (adding: Adding) => void
+  /** Opens the section chooser for a group, aimed before a row (null: at the end). */
+  onAdding: (adding: AddingAt) => void
   /** The side panel shown again (folded, it comes back with a part asked for). */
   showSidebar: () => void
 }
@@ -97,11 +98,11 @@ export function EditorTree({
             setOpened({ kind: "section", id })
           }}
           onRemove={onRemove}
-          onAddSection={(placement) => {
-            onAdding(placement ?? "bottom")
+          onAddSection={(placement, before = null) => {
+            onAdding({ where: placement ?? "bottom", before })
           }}
-          onAddFooterSection={() => {
-            onAdding("footer")
+          onAddFooterSection={(before = null) => {
+            onAdding({ where: "footer", before })
           }}
           onTheme={() => {
             setOpened({ kind: "theme" })
