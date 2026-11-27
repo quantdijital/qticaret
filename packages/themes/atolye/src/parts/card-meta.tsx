@@ -30,7 +30,7 @@ export function CardMeta({
   add?: boolean
 }) {
   const rating = product.rating ? (
-    <li className={PILL}>
+    <li key="rating" className={PILL}>
       <RatingWords product={product} plain />
     </li>
   ) : null
