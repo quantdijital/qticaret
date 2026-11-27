@@ -10189,6 +10189,7 @@
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
         "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
+        "newsletterLine": "Vitrinin metni: abone olarak ticari elektronik ileti gönderilmesini kabul edersiniz…",
         "faq": "Sık sorulan sorular",
         "related_products": "Benzer ürünler",
         "price_bands": "Fiyata göre alışveriş",
@@ -10427,6 +10428,14 @@
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
+        "consentLineHint": "Formun altındaki küçük satır: abone olmanın ticari ileti almayı kabul etmek olduğunu söylemeli ve mağazanızın adını anmalıdır; KVKK aydınlatma metni bağlantısı yanına kendiliğinden eklenir. Boş bırakırsanız vitrinin kısa metni kullanılır.",
+        "consentStyle": "Onay biçimi",
+        "consentStyleTerm": "İYS",
+        "consentStyleHint": "Onay kutusu: ziyaretçi abone olmak için kutuyu işaretler; alt bilgide kutu forma dokununca açılır. Tek satır: kutu yok, formun altında hep görünen küçük bir satır abone olmanın onay olduğunu söyler ve KVKK aydınlatma metnine bağlanır. İkisinde de abonelik, e-postadaki onay bağlantısı açılınca başlar ve kayda geçer.",
+        "consentStyles": {
+          "box": "Onay kutusu",
+          "line": "Tek satır"
+        },
         "joined": "Alt bilgiyle birleşik",
         "joinedTerm": "footer band",
         "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer.",
@@ -12281,6 +12290,12 @@
             "term": "icon style",
             "boxed": "Yuvarlak kutulu",
             "inline": "Satır içi, küçük"
+          },
+          "consent_style": {
+            "label": "Onay biçimi",
+            "term": "İYS",
+            "box": "Onay kutusu",
+            "line": "Tek satır"
           }
         },
         "source": {

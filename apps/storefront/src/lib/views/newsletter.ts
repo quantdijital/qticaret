@@ -1,4 +1,4 @@
-import type { StoreNewsletterSection } from "@qticaret/types"
+import type { NewsletterConsentStyle, StoreNewsletterSection } from "@qticaret/types"
 import { newsletterHasNote, newsletterOnPage } from "@qticaret/types/section-newsletter"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { NewsletterLookView, Translate } from "@qticaret/ui"
@@ -16,7 +16,7 @@ import { layoutImage } from "./layout"
 export function newsletterLookOf(
   section: Pick<
     StoreNewsletterSection,
-    "variant" | "description" | "note" | "show_note" | "image" | "tone"
+    "variant" | "description" | "note" | "show_note" | "image" | "tone" | "consent_style"
   >,
   t: Translate,
   place: "page" | "footer"
@@ -38,5 +38,18 @@ export function newsletterLookOf(
       section.tone === "tint" && variant !== "standard" && variant !== "in_footer"
         ? "tint"
         : "plain",
+    consentStyle: consentStyleOf(section),
   }
 }
+
+/** How the box asks for the consent; absent or unknown: the required box, as it was. */
+export const consentStyleOf = (section: {
+  consent_style?: NewsletterConsentStyle | undefined
+}): NewsletterConsentStyle => (section.consent_style === "line" ? "line" : "box")
+
+/**
+ * The storefront's consent words when the shop wrote none: the box's
+ * sentence, or the one small line saying that subscribing is consenting.
+ */
+export const consentWordsKey = (style: NewsletterConsentStyle): string =>
+  style === "line" ? "newsletter.line" : "newsletter.text"

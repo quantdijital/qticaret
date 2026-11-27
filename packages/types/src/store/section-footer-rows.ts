@@ -1,4 +1,5 @@
 import type { StoreLayoutImage, StoreLayoutLink } from "./layout.js"
+import type { NewsletterConsentStyle } from "./section-newsletter.js"
 
 /**
  * The `free_rows` footer ("Serbest düzen", adr/0070): the shop lays its
@@ -279,6 +280,8 @@ export type StoreFooterBlock = StoreFooterBlockBase &
         text: string | null
         description: string | null
         variant: FooterNewsletterVariant
+        /** How the consent is asked; absent: `box` (the newsletter box's `consent_style`). */
+        consent_style?: NewsletterConsentStyle
       }
     | {
         type: "contact"

@@ -52,6 +52,7 @@ export type ContentField =
   | "show_note"
   | "joined"
   | "news_tone"
+  | "news_consent"
   | "image_side"
   | "outline"
   | "questions"

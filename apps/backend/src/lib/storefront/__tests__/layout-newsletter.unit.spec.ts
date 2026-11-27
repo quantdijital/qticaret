@@ -1,6 +1,7 @@
 import path from "node:path"
 import { layoutDocument, readStoredLayout } from "../layout"
 import {
+  NEWSLETTER_CONSENT_STYLES,
   NEWSLETTER_LIMITS,
   NEWSLETTER_TONES,
   newsletterImages,
@@ -129,5 +130,33 @@ describe("the newsletter box's variants (adr/0049 Ek 2026-11-17 e-bülten)", () 
     )
     expect(NEWSLETTER_LIMITS).toEqual(contract("section-newsletter")["NEWSLETTER_LIMITS"])
     expect(NEWSLETTER_TONES).toEqual(contract("section-newsletter")["NEWSLETTER_TONES"])
+    expect(NEWSLETTER_CONSENT_STYLES).toEqual(
+      contract("section-newsletter")["NEWSLETTER_CONSENT_STYLES"]
+    )
+  })
+})
+
+describe("the newsletter box's consent setting (box or one small line)", () => {
+  it("takes the line on every variant, page and footer, and prints it only when set", () => {
+    const line = layoutDocument.parse({
+      home: [box({ consent_style: "line" })],
+      footer: [box({ id: "altbulten", variant: "in_footer", consent_style: "line" })],
+    })
+    const plain = layoutDocument.parse({ home: [box({ id: "seritkutu", variant: "strip" })] })
+
+    expect(printedNewsletter(line.home[0] as never, same, asIs)).toEqual(
+      box({ consent_style: "line" })
+    )
+    expect(printedNewsletter(line.footer[0] as never, same, asIs)).toMatchObject({
+      consent_style: "line",
+    })
+    expect(printedNewsletter(plain.home[0] as never, same, asIs)).toEqual({
+      ...box({ id: "seritkutu" }),
+      variant: "strip",
+    })
+  })
+
+  it("refuses a style it does not know", () => {
+    expect(issues({ home: [box({ consent_style: "popover" })] })).not.toEqual([])
   })
 })

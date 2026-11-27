@@ -1,4 +1,5 @@
 import type {
+  NewsletterConsentStyle,
   FooterImageWidth,
   FooterContactIconStyle,
   FooterLogoSize,
@@ -91,6 +92,8 @@ export type FooterBlockView = FooterBlockViewBase &
         consent: string
         description: string | null
         variant: FooterNewsletterVariant
+        /** How the consent is asked: the required box or one small line under the form. */
+        consentStyle: NewsletterConsentStyle
       }
     | {
         type: "contact"

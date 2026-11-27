@@ -19,7 +19,7 @@ import {
 import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage, pathOf } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
-import { newsletterLookOf } from "./newsletter"
+import { consentStyleOf, consentWordsKey, newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
 import { drawerSuggestions, withSuggestions } from "./cart-cross-sells"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
@@ -63,7 +63,7 @@ function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): Shop
   return section
     ? {
         title: section.title ?? t("newsletter.title"),
-        text: section.text ?? t("newsletter.text", { shop }),
+        text: section.text ?? t(consentWordsKey(consentStyleOf(section)), { shop }),
         // How it is drawn in the footer (adr/0049 Ek 2026-11-17 e-bülten)
         ...newsletterLookOf(section, t, "footer"),
         // Its band on the free rows footer's ground (adr/0070 §4 Ek)
