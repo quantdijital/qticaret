@@ -39,6 +39,16 @@ describe("subscribeNewsletter", () => {
     })
   })
 
+  it("names the line's words when the form asked by the small line instead of the box", async () => {
+    await expect(send({ email: "ayse@example.com", consent: "line" })).resolves.toMatchObject({
+      ok: true,
+    })
+    expect(store.storeCall).toHaveBeenCalledWith("/store/newsletter", {
+      method: "POST",
+      body: { email: "ayse@example.com", text_version: "bulten-satir-1" },
+    })
+  })
+
   it.each([
     ["no consent field", {}],
     ["an empty consent", { consent: "" }],

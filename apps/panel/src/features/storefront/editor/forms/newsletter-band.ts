@@ -1,4 +1,4 @@
-import type { NewsletterTone } from "@qticaret/types"
+import type { NewsletterConsentStyle, NewsletterTone } from "@qticaret/types"
 import type {
   AnySection,
   FooterNewsletter,
@@ -37,4 +37,14 @@ export function withTone<T extends NewsletterSection | FooterNewsletter>(
   const next = { ...section }
   delete next.tone
   return tone === "tint" ? { ...next, tone } : next
+}
+
+/** The box with how it asks for the consent, or without the field (`box`: as it was). */
+export function withConsentStyle<T extends { consent_style?: NewsletterConsentStyle }>(
+  section: T,
+  style: NewsletterConsentStyle
+): T {
+  const next = { ...section }
+  delete next.consent_style
+  return style === "line" ? { ...next, consent_style: style } : next
 }

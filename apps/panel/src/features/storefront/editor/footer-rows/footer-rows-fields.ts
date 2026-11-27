@@ -7,6 +7,7 @@ import {
   FOOTER_ROW_SETTINGS,
   FOOTER_TEXT_STYLES,
   FOOTER_TRUST_LAYOUTS,
+  NEWSLETTER_CONSENT_STYLES,
   SECTION_DEVICES,
 } from "@qticaret/types"
 import type { FooterBlockType } from "@qticaret/types"
@@ -54,7 +55,7 @@ export const BLOCK_FIELDS = {
   text: ["title", "body", "style"],
   menu: ["slot", "title", "collapse_phone"],
   brand: ["logo", "about", "address", "social", "logo_size"],
-  newsletter: ["title", "description", "text", "variant"],
+  newsletter: ["title", "description", "text", "variant", "consent_style"],
   contact: ["title", "address", "phone", "whatsapp", "email", "hours", "icon_style"],
   social: ["title"],
   payments: ["title", "carriers"],
@@ -72,6 +73,7 @@ export type BlockField =
 /** Where a block's field stands: its words under "İçerik", how it is drawn under "Stil". */
 const STYLE_GROUPS: Partial<Record<BlockField, FieldGroupName>> = {
   variant: "variant",
+  consent_style: "variant",
   width: "appearance",
   layout: "appearance",
   style: "appearance",
@@ -105,6 +107,7 @@ export const blockLabel = (field: BlockField) => ({
 function blockOptions(field: BlockField): readonly string[] {
   const steps: Partial<Record<BlockField, readonly string[]>> = {
     variant: FOOTER_NEWSLETTER_VARIANTS,
+    consent_style: NEWSLETTER_CONSENT_STYLES,
     width: FOOTER_IMAGE_WIDTHS,
     layout: FOOTER_TRUST_LAYOUTS,
     style: FOOTER_TEXT_STYLES,

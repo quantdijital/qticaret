@@ -902,6 +902,13 @@ Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle
 - **Bilerek konmayanlar:** kutuya özel zemin, köşe ya da gölge ayarı yok; görünüş stil takımından ve bölümün sayfa ayarından (`look`) gelir.
 - **Doğrulama:** beş biçim 1440 ve 390 px, Chromium + WebKit (bileşen düzeyi, sunucu çizimi): taşma yok, telefonda yığılma düzgün, odakta onay kutusu görünüyor. Backend http testi yerelde koşulmadı, CI'da koşar.
 
+### Ek 2026-11-27 (Deniz): e-bülten onay biçimi (`consent_style`: onay kutusu ya da tek satır)
+
+- **Dayanak:** sahip, alt bilgideki e-bülten formunda alana dokununca açılan onay kutusunu ve uzun onay metnini "gereksiz ve rahatsız edici" buldu. Kıyas: Shopify Dawn'ın alt bilgi bülteninde onay kutusu ya da onay metni yok (yalnız alan + düğme); ikas mağazalarında (Zeki Triko) formun altında tek kısa cümle ("Kampanya ve duyurular hakkında e-posta almak istiyorum"), aydınlatma metni alt bilginin yasal bağlantılarında. Türkiye'de yaygın kalıp: formun altında tek satır "abone olarak ticari elektronik ileti almayı kabul edersiniz" + aydınlatma metni bağlantısı.
+- **Hukuk:** KVKK md. 10 aydınlatması toplama anında erişilebilir bağlantıyla yapılır (satırdaki bağlantı). 6563 ve Yönetmelik md. 7: onay olumlu irade beyanıyla alınır ve kanıtı saklanır. Abonelik zaten çift onaylıdır: kayıt, e-postadaki bağlantı açılınca, kaynak (`storefront`), zaman, metin sürümü ve IP özetiyle yazılır (adr/0038 §2). Bu kayıt değişmedi; satırla gelen istekte metin sürümü ayrıdır (`bulten-satir-1`, kutuyla `bulten-1`), kanıt hangi sözlerin gösterildiğini söyler. Hukukçu onayı yok (docs/12); kutu seçeneği yerinde durur.
+- **Karar (adr/0066 §7, ayar):** her bülten kutusunda (sayfa ve alt bilgi, her biçim) ve Serbest düzen alt bilgisinin bülten bloğunda `consent_style`: `box` (varsayılan, bugünkü çizim: işaretsiz zorunlu kutu, alt bilgide forma dokununca açılır) · `line` (kutu yok, odakla açılan bir şey yok; formun altında hep görünen küçük tek satır: mağazanın onay cümlesi ya da boşsa vitrinin kısa cümlesi `newsletter.line` + "KVKK aydınlatma metni" bağlantısı, aynı sekmede, bugünkü yasal bağlantılar gibi). Store çıktısı alanı yalnız `line` iken basar; hazır görünümler değişmedi (kilit aynı). `text` alanının anlamı değişmedi (onay cümlesi; satırda o satır olur).
+- **Panel:** bülten kutusunda İçerik › Onay metninin üstünde "Onay biçimi" (Onay kutusu / Tek satır); Serbest düzen bloğunda Stil › Biçim'de. Migration yok.
+
 ### Ek 2026-11-18 (Deniz): üstüne gelince ikinci fotoğraf her ürün kartında
 
 - **Dayanak:** sahip kararı (2026-11-18): ürün kartında üstüne gelince ürünün ikinci fotoğrafı her görünümde görünür (klasik e-ticaret davranışı).

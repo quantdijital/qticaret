@@ -10174,6 +10174,7 @@
         "help": "Something on your mind?",
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
         "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…",
+        "newsletterLine": "The storefront's text: by subscribing you agree to receive commercial e-mails…",
         "faq": "Frequently asked questions",
         "related_products": "Related products",
         "price_bands": "Shop by price",
@@ -10412,6 +10413,14 @@
         "consent": "Consent sentence",
         "consentTerm": "İYS",
         "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used.",
+        "consentLineHint": "The small line under the form: it must say that subscribing is agreeing to commercial messages, and name your shop; the privacy notice's link is added after it. Left empty, the storefront's short line is used.",
+        "consentStyle": "Consent style",
+        "consentStyleTerm": "İYS",
+        "consentStyleHint": "Consent box: the visitor ticks the box to subscribe; in the footer the box opens once the form is touched. One line: no box; a small line always shown under the form says that subscribing is consenting and links the privacy notice. Either way the subscription starts, and is recorded, when the e-mailed confirmation link is opened.",
+        "consentStyles": {
+          "box": "Consent box",
+          "line": "One line"
+        },
         "joined": "Joined to the footer",
         "joinedTerm": "footer band",
         "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway.",
@@ -12266,6 +12275,12 @@
             "term": "icon style",
             "boxed": "In round boxes",
             "inline": "Small, in the line"
+          },
+          "consent_style": {
+            "label": "Consent style",
+            "term": "İYS",
+            "box": "Consent box",
+            "line": "One line"
           }
         },
         "source": {
