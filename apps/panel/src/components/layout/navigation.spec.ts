@@ -27,13 +27,15 @@ describe("itemFor: the menu item a page lights", () => {
 describe("the menu's groups (the owner, 2026-11-23)", () => {
   it("puts each item under its kind: sales, catalog, storefront, content, marketing", () => {
     expect(NAV_GROUPS.map((group) => [group.key, group.items.map((item) => item.key)])).toEqual([
-      [null, ["dashboard", "reports"]],
+      [null, ["dashboard"]],
       ["sales", ["orders", "paymentLinks", "customers", "wholesale"]],
       ["catalog", ["products", "categories", "brands", "collections", "inventory"]],
       ["storefront", ["themeEditor", "looks", "menus"]],
       ["content", ["pages", "content", "media"]],
       // SEO is Settings > SEO now, its one home
       ["marketing", ["promotions", "bulkMessages", "popups", "reviews"]],
+      // The reports under Marketing (the owner, 2026-11-27)
+      [null, ["reports"]],
     ])
   })
 
