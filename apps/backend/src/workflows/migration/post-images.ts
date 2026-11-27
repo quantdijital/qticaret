@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { ContentDoc } from "../../lib/content"
 import { contentDoc } from "../../lib/content"
+import { isConflictError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
 import { imageSources, insertImages } from "../../lib/migration/body-images"
 import { MIGRATION_KINDS } from "../../lib/migration/types"
@@ -66,14 +67,11 @@ export async function refreshPostImages(
       post.skipped += 1
       continue
     }
-    const entryOf = async () =>
-      (
-        await service.listContentEntries(
-          { id, kind: "post" },
-          { select: ["id", "body", "revised_at"], take: 1 }
-        )
-      )[0]
-    if (!(await entryOf())) {
+    const [here] = await service.listContentEntries(
+      { id, kind: "post" },
+      { select: ["id"], take: 1 }
+    )
+    if (!here) {
       post.failed += 1
       problems.push({ kind: "post", source_key: each.source_key, key: "migration.post_gone" })
       continue
@@ -104,11 +102,7 @@ export async function refreshPostImages(
     problems.push(...local.problems.map((problem) => ({ ...problem, kind: "image" as const })))
     // Stored ones kept even if the save fails: a run again takes them without fetching
     await bodyImages.remember(local.items)
-    // The text as it is now, read again after the fetches: an edit meanwhile is not lost
-    const entry = await entryOf()
-    const problem = entry
-      ? await writeBody(container, entry, each, local.stored)
-      : { source_key: each.source_key, key: "migration.post_gone" }
+    const problem = await writeBody(container, id, each, local.stored)
     if (problem) {
       post.failed += 1
       problems.push({ ...problem, kind: "post" })
@@ -125,35 +119,58 @@ export async function refreshPostImages(
   return { post, image, problems }
 }
 
-/** The post's text with the stored pictures added, its revision date kept; why not, or null. */
+// A save refused because the post changed meanwhile is tried once more on the new text
+const SAVE_TRIES = 2
+
+/**
+ * The post's text with the stored pictures added, its revision date kept;
+ * why not, or null. The text is read right before the save, which refuses
+ * it if the post changed since (`expected_updated_at`, under the content
+ * lock): an edit made while the pictures were fetched is never lost. A
+ * picture whose copy the text already shows is not added twice.
+ */
 async function writeBody(
   container: Container,
-  entry: { id: string; body: unknown; revised_at: Date | null },
+  id: string,
   post: SourcePost,
   stored: ReadonlyMap<string, string>
 ): Promise<StepProblem | null> {
   if (stored.size === 0) {
     return null
   }
+  const service = container.resolve<ContentModuleService>(CONTENT_MODULE)
   const failed = { source_key: post.source_key, key: "migration.post_images_failed" }
-  const current = contentDoc.safeParse(entry.body)
-  if (!current.success) {
-    return failed
+  for (let attempt = 1; ; attempt++) {
+    const [entry] = await service.listContentEntries(
+      { id, kind: "post" },
+      { select: ["id", "body", "revised_at", "updated_at"], take: 1 }
+    )
+    if (!entry) {
+      return { source_key: post.source_key, key: "migration.post_gone" }
+    }
+    const current = contentDoc.safeParse(entry.body)
+    if (!current.success) {
+      return failed
+    }
+    const body = insertImages(current.data, post.content.body, stored)
+    if (body.content.length === current.data.content.length) {
+      return null
+    }
+    try {
+      await saveContentWorkflow(container as MedusaContainer).run({
+        input: { id, values: { body }, expected_updated_at: entry.updated_at },
+      })
+    } catch (error) {
+      if (isConflictError(error) && attempt < SAVE_TRIES) {
+        continue
+      }
+      logger.warn({ event: "migration.post_images_failed", err: errorSummary(error) })
+      return failed
+    }
+    // Pictures moved in are no revision of the text
+    await service.updateContentEntries({ id, revised_at: entry.revised_at })
+    return null
   }
-  const body = insertImages(current.data, post.content.body, stored)
-  try {
-    await saveContentWorkflow(container as MedusaContainer).run({
-      input: { id: entry.id, values: { body } },
-    })
-  } catch (error) {
-    logger.warn({ event: "migration.post_images_failed", err: errorSummary(error) })
-    return failed
-  }
-  // Pictures moved in are no revision of the text
-  await container
-    .resolve<ContentModuleService>(CONTENT_MODULE)
-    .updateContentEntries({ id: entry.id, revised_at: entry.revised_at })
-  return null
 }
 
 /** A refresh run's whole work: the source's posts read, their pictures added; nothing else. */

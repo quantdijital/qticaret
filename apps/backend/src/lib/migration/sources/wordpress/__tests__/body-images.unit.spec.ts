@@ -9,10 +9,10 @@ const upload = (name: string) => `${SITE}/wp-content/uploads/2026/01/${name}`
 const POST_PICTURE = /<figure><img [^>]*><\/figure>/
 
 /** The fixture's post (post:40) with this body in place of its one picture. */
-function postWith(html: string) {
+function postWith(html: string, library: (wxr: string) => string = (wxr) => wxr) {
   const wxr = wxrFixture(SITE)
   expect(wxr).toMatch(POST_PICTURE)
-  const records = wordpressRecords(wxr.replace(POST_PICTURE, html))
+  const records = wordpressRecords(library(wxr.replace(POST_PICTURE, html)))
   const post = records.posts.find((each) => each.source_key === "post:40")
   const pictures = (post?.content.body.content ?? []).flatMap((block) =>
     block.type === "image" ? [block.attrs] : []
@@ -115,6 +115,33 @@ describe("a WordPress post's pictures (adr/0042 Ek 2026-11-27)", () => {
     expect(pictures).toEqual([])
     expect(lost).toEqual(["post:40"])
     expect(Date.now() - started).toBeLessThan(2_000)
+  })
+
+  it("takes the library's file only on the site's own host, else the tag's own address", () => {
+    const elsewhere = (wxr: string) =>
+      wxr.replace(
+        `<wp:attachment_url><![CDATA[${upload("tava.png")}]]>`,
+        "<wp:attachment_url><![CDATA[https://cdn.baska.example.net/tava.png]]>"
+      )
+    const { pictures } = postWith(
+      `<p><img class="wp-image-101" src="${upload("tava-300x300.png")}"></p><p><img class="wp-image-101"></p>`,
+      elsewhere
+    )
+    // The tag's own file on the site; the one naming only the upload has none to fall back to
+    expect(pictures).toEqual([{ src: upload("tava-300x300.png") }])
+  })
+
+  it("writes the library's address as a parsed URL: a space cannot break the text", () => {
+    const spaced = (wxr: string) =>
+      wxr.replace(
+        `<wp:attachment_url><![CDATA[${upload("tava.png")}]]>`,
+        `<wp:attachment_url><![CDATA[${upload("döküm tava.png")}]]>`
+      )
+    const { pictures, post } = postWith(`<p><img class="wp-image-101"></p>`, spaced)
+    expect(pictures).toEqual([
+      { src: upload("d%C3%B6k%C3%BCm%20tava.png"), alt: "Döküm tava önden" },
+    ])
+    expect(post?.content.body.content.map((block) => block.type)).toContain("heading")
   })
 
   it("reads a picture element by its img", () => {

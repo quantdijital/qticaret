@@ -256,6 +256,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.too_large":
     "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
   "content.unknown": "İçerik bulunamadı.",
+  "content.changed_meanwhile": "İçerik bu arada değişti; yeniden açıp tekrar deneyin.",
   "content.page_text_in_editor":
     "Sayfanın metni tema düzenleyicide, sayfanın bölümlerinde düzenlenir; buradan yalnız başlık, adres, kapak ve durum kaydedilir.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",

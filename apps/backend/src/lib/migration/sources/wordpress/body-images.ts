@@ -11,9 +11,10 @@ import type { WxrItem } from "./reader"
  * `data-id`), its original file rather than a size WordPress cut from it
  * (`kapak-300x200.jpg`, `kapak-scaled.jpg`): matched by the upload's stem
  * (`lib/seo/legacy/files.ts`). Else the largest file the tag names
- * (`srcset`, a lazy loader's `data-src`), only on the old site's own host
- * (a CDN's copy of it, `i0.wp.com/<host>/…`, read as the site's): a
- * picture from anywhere else is left out and counted, as before.
+ * (`srcset`, a lazy loader's `data-src`). Every address, the library's
+ * too, only on the old site's own host (a CDN's copy of it,
+ * `i0.wp.com/<host>/…`, read as the site's) and written as a parsed URL
+ * writes it: a picture from anywhere else is left out and counted, as before.
  */
 
 /** A body picture: the old file to fetch and its alt text. */
@@ -142,6 +143,8 @@ const altOf = (attachment: WxrItem) => altText(attachment.meta.get("_wp_attachme
 /** How the bodies of this export read their pictures. */
 export function bodyImagesOf(context: Pick<WordpressContext, "attachments" | "wxr">): ImageOf {
   const site = context.wxr.site
+  // An upload's file on the old site's own host, as one written address; else none
+  const librarySrc = (upload: WxrItem) => onSite(upload.attachmentUrl, site)?.href ?? null
   const fits = (image: BodyImage | null) => (image && image.src.length <= MAX_SRC ? image : null)
   return (text) => (text.length > MAX_ATTRIBUTES ? null : fits(imageOf(text)))
   function imageOf(text: string): BodyImage | null {
@@ -153,8 +156,9 @@ export function bodyImagesOf(context: Pick<WordpressContext, "attachments" | "wx
       attributes.get("data-attachment-id"),
     ].find((value) => value && ID.test(value))
     const attachment = id ? context.attachments.get(id) : undefined
-    if (attachment && isWeb(attachment.attachmentUrl)) {
-      return { src: attachment.attachmentUrl, alt: own ?? altOf(attachment) }
+    const library = attachment ? librarySrc(attachment) : null
+    if (attachment && library) {
+      return { src: library, alt: own ?? altOf(attachment) }
     }
     const candidates = [
       attributes.get("data-orig-file"),
@@ -172,8 +176,9 @@ export function bodyImagesOf(context: Pick<WordpressContext, "attachments" | "wx
     }
     for (const url of candidates) {
       const upload = byStem.get(uploadKey(url.pathname))
-      if (upload) {
-        return { src: upload.attachmentUrl, alt: own ?? altOf(upload) }
+      const src = upload ? librarySrc(upload) : null
+      if (upload && src) {
+        return { src, alt: own ?? altOf(upload) }
       }
     }
     return { src: first.href, alt: own }

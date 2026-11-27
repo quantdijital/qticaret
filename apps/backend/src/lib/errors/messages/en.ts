@@ -251,6 +251,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.too_large":
     "The content is too long or too deeply nested; a page can hold at most 200,000 characters and a few levels of nested lists.",
   "content.unknown": "Content not found.",
+  "content.changed_meanwhile": "The content changed meanwhile; open it again and retry.",
   "content.page_text_in_editor":
     "A page's text is edited in the theme editor, in the page's sections; only its title, address, cover and status are saved here.",
   "errors.busy": "The record is being updated by another action; try again in a few seconds.",

@@ -81,6 +81,16 @@ describe("a moved body's pictures (adr/0042 Ek 2026-11-27)", () => {
     )
   })
 
+  it("does not add a picture whose copy the text already shows", () => {
+    const current = doc(text("Bir"), image(`${NEW}/a.webp`, "A"))
+    const merged = insertImages(
+      current,
+      doc(text("Bir"), image(`${OLD}/a.png`, "A")),
+      new Map([[`${OLD}/a.png`, `${NEW}/a.webp`]])
+    )
+    expect(merged).toEqual(current)
+  })
+
   it("adds nothing when nothing is new", () => {
     const current = doc(text("Bir"))
     expect(insertImages(current, doc(text("Bir"), image(`${OLD}/a.png`)), new Map())).toEqual(

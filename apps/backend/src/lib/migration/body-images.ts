@@ -74,7 +74,8 @@ const textOf = (block: Block) => plainOf(block).join(" ").replace(/\s+/g, " ").t
  * address): the body as it is now, each picture put after the text block
  * it followed in the export (matched by its words; edited text is passed
  * over, the picture then follows the last block that matched). Pictures
- * not named in `added` are not touched.
+ * not named in `added` are not touched, nor one whose copy the body
+ * already shows (a save that went through before its record did).
  */
 export function insertImages(
   current: ContentDoc,
@@ -82,11 +83,15 @@ export function insertImages(
   added: ReadonlyMap<string, string>
 ): ContentDoc {
   const out: Block[] = [...current.content]
+  const shown = new Set(
+    current.content.flatMap((block) => (block.type === "image" ? [block.attrs.src] : []))
+  )
   let at = 0
   for (const block of source.content) {
     if (block.type === "image") {
       const copy = added.get(block.attrs.src)
-      if (copy) {
+      if (copy && !shown.has(copy)) {
+        shown.add(copy)
         out.splice(at, 0, { ...block, attrs: { ...block.attrs, src: copy } })
         at += 1
       }
