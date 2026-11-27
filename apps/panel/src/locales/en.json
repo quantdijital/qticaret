@@ -1723,7 +1723,7 @@
         "title": "Where do you manage shipping?",
         "description": "Choose where you make shipping labels. Customers still pay the shipping fee set on the Options tab.",
         "options": {
-          "own": "My own contract (Aras / Yurtiçi)",
+          "own": "My own contract",
           "birfatura": "BirFatura"
         },
         "hints": {

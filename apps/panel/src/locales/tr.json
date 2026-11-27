@@ -1723,7 +1723,7 @@
         "title": "Kargoyu nereden yönetiyorsun?",
         "description": "Kargo etiketlerini nerede oluşturduğunu seç. Kargo ücretini müşteri yine Seçenekler sekmesindeki ayara göre öder.",
         "options": {
-          "own": "Kendi anlaşmam (Aras / Yurtiçi)",
+          "own": "Kendi anlaşmam",
           "birfatura": "BirFatura"
         },
         "hints": {
