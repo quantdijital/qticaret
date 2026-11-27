@@ -7,21 +7,16 @@
       "starts_at": null,
       "ends_at": null,
       "lines": [
-        "2027 yaz kalkışları açıldı: yerinizi erken ayırın",
-        "Küçük gruplar, yerel rehberler, 14 güne kadar ücretsiz iptal",
-        "Kapadokya balon sabahları için son yerler"
+        "2027 yaz kalkışları açıldı · Küçük gruplar, yerel rehberler, 14 güne kadar ücretsiz iptal"
       ],
-      "mode": "rotate",
-      "interval": "medium",
-      "pause_button": "hover",
+      "mode": "first",
+      "interval": "slow",
+      "pause_button": "always",
       "hover_pause": "on",
       "align": "center",
       "size": "small",
       "tone": "primary",
-      "link": {
-        "$href": "/magaza",
-        "label": "Kalkışları gör"
-      }
+      "link": null
     },
     {
       "id": "mainheader",
@@ -80,7 +75,7 @@
       "title_style": "stacked",
       "trust_place": "inside",
       "note": "Anı biriktir, eşya değil",
-      "note_place": "corner"
+      "note_place": "heading"
     },
     {
       "id": "rotakartlari",

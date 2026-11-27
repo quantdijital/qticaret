@@ -183,7 +183,12 @@ export function HeroFull({
               <HandNote
                 note={full.note}
                 mark={corner ? {} : fieldMark(on, "note")}
-                className={cn(inked ? "text-text" : "text-stage-text", corner && "lg:hidden")}
+                className={cn(
+                  inked
+                    ? "text-text"
+                    : "text-stage-text [text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_16px_rgb(0_0_0/0.6)]",
+                  corner && "lg:hidden"
+                )}
               />
             )}
             <Heading

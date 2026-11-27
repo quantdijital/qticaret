@@ -135,7 +135,9 @@ export function HeroCornerNote({
         className={cn(
           "mx-auto -rotate-6 text-center leading-[1.05]",
           note.hand ? "text-3xl lg:text-3xl xl:text-4xl" : "text-xl lg:text-xl",
-          inked ? "text-text" : "text-stage-text"
+          inked
+            ? "text-text"
+            : "text-stage-text [text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_16px_rgb(0_0_0/0.6)]"
         )}
       />
       <BrushStroke className={inked ? "text-signal" : "text-signal-on-stage"} />
