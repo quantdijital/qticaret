@@ -4,19 +4,25 @@
 <!-- not in the fixture shop: home.deneyimlerrota category:gemi-turlari -->
 <!-- section dropped: home.deneyimlerrota -->
 <div class="mx-auto w-full max-w-(--container) px-(--gutter) pt-4 lg:pt-6">
-  <nav aria-label="Bulunduğunuz yer">
-    <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
-      <li class="flex items-center gap-x-2">
-        <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
-          Ana sayfa
-        </a>
-      </li>
-    </ol>
-  </nav>
-  <header class="mt-4 flex flex-col gap-3 lg:mt-6">
-    <h1>
-      El Yapımı Çakılar
-    </h1>
+  <header class="flex flex-col gap-3">
+    <div
+      class="flex flex-col gap-4 lg:flex-row-reverse lg:items-baseline lg:justify-between lg:gap-8"
+    >
+      <div class="lg:shrink-0">
+        <nav aria-label="Bulunduğunuz yer">
+          <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
+            <li class="flex items-center gap-x-2">
+              <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
+                Ana sayfa
+              </a>
+            </li>
+          </ol>
+        </nav>
+      </div>
+      <h1 class="lg:min-w-0">
+        El Yapımı Çakılar
+      </h1>
+    </div>
   </header>
   <div class="mt-6 flex flex-col gap-8 empty:hidden lg:mt-8">
     <section aria-labelledby="alt-kategoriler" class="flex min-w-0 flex-col gap-4">
@@ -719,7 +725,7 @@
           class="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-[repeat(3,minmax(0,1fr))]"
         >
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-2">
+            <article class="group gf-card gf-card-glass @container relative h-full">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -767,8 +773,75 @@
                   <i>
                   </i>
                 </span>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                </ul>
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                  </ul>
+                  <ul
+                    class="gf-card-meta pointer-events-none flex gap-1 ms-auto max-w-full flex-col items-end"
+                  >
+                    <li
+                      class="gf-card-glass-pill flex items-center gap-1 rounded-pill px-2 py-1 text-xs font-semibold whitespace-nowrap"
+                    >
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span>
+                            4,5
+                          </span>
+                          (4)
+                        </span>
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (4 değerlendirme)
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="gf-card-glass-panel absolute right-2 bottom-2 left-2 flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-media)*0.75)] px-3 py-2.5 data-add:right-14"
+                  data-add=""
+                >
+                  <h3
+                    class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
+                  >
+                    <a
+                      href="/urun/karacelik-alageyik-sam-celigi-av-bicagi"
+                      class="line-clamp-2 no-underline after:absolute after:-inset-[100vmax] after:content-[&#x27;&#x27;]"
+                    >
+                      Alageyik Şam Çeliği Av Bıçağı
+                    </a>
+                  </h3>
+                  <div class="flex items-end justify-between gap-2">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
+                      <span
+                        class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
+                      >
+                        450,00 TL
+                      </span>
+                    </p>
+                    <span
+                      class="gf-card-glass-go flex shrink-0 items-center gap-1 text-xs font-semibold @max-[13rem]:hidden"
+                      aria-hidden="true"
+                    >
+                      İncele
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="2"
+                        class="lucide lucide-arrow-right size-3.5"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -794,49 +867,10 @@
                   </span>
                 </form>
               </div>
-              <div class="flex flex-1 flex-col gap-1">
-                <h3
-                  class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
-                >
-                  <a
-                    href="/urun/karacelik-alageyik-sam-celigi-av-bicagi"
-                    class="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
-                  >
-                    Alageyik Şam Çeliği Av Bıçağı
-                  </a>
-                </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
-                  <span
-                    class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
-                  >
-                    450,00 TL
-                  </span>
-                </p>
-                <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-text-2">
-                  <span class="flex items-center gap-1">
-                    <svg
-                      width="24"
-                      height="24"
-                      stroke-width="1.5"
-                      class="lucide lucide-star size-3.5 fill-star text-star"
-                      aria-hidden="true"
-                    />
-                    <span aria-hidden="true" class="tabular">
-                      <span class="font-semibold text-text">
-                        4,5
-                      </span>
-                      (4)
-                    </span>
-                    <span class="sr-only">
-                      5 üzerinden 4,5 (4 değerlendirme)
-                    </span>
-                  </span>
-                </p>
-              </div>
             </article>
           </li>
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-2">
+            <article class="group gf-card gf-card-glass @container relative h-full">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -884,16 +918,63 @@
                   <i>
                   </i>
                 </span>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
-                    <span aria-hidden="true">
-                      %16
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
+                      <span aria-hidden="true">
+                        %16
+                      </span>
+                      <span class="sr-only">
+                        %16 indirim
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="gf-card-glass-panel absolute right-2 bottom-2 left-2 flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-media)*0.75)] px-3 py-2.5 data-add:right-14"
+                  data-add=""
+                >
+                  <h3
+                    class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
+                  >
+                    <a
+                      href="/urun/yaman-n690-katlanir-caki"
+                      class="line-clamp-2 no-underline after:absolute after:-inset-[100vmax] after:content-[&#x27;&#x27;]"
+                    >
+                      N690 Katlanır Çakı
+                    </a>
+                  </h3>
+                  <div class="flex items-end justify-between gap-2">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
+                      <span
+                        class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
+                      >
+                        625,00 TL
+                      </span>
+                      <s class="tabular text-sm text-text-3">
+                        <span class="sr-only">
+                          Önceki fiyat:
+                        </span>
+                        750,00 TL
+                      </s>
+                    </p>
+                    <span
+                      class="gf-card-glass-go flex shrink-0 items-center gap-1 text-xs font-semibold @max-[13rem]:hidden"
+                      aria-hidden="true"
+                    >
+                      İncele
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="2"
+                        class="lucide lucide-arrow-right size-3.5"
+                        aria-hidden="true"
+                      />
                     </span>
-                    <span class="sr-only">
-                      %16 indirim
-                    </span>
-                  </li>
-                </ul>
+                  </div>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -919,35 +1000,10 @@
                   </span>
                 </form>
               </div>
-              <div class="flex flex-1 flex-col gap-1">
-                <h3
-                  class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
-                >
-                  <a
-                    href="/urun/yaman-n690-katlanir-caki"
-                    class="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
-                  >
-                    N690 Katlanır Çakı
-                  </a>
-                </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
-                  <span
-                    class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg text-deal"
-                  >
-                    625,00 TL
-                  </span>
-                  <s class="tabular text-sm text-text-3">
-                    <span class="sr-only">
-                      Önceki fiyat:
-                    </span>
-                    750,00 TL
-                  </s>
-                </p>
-              </div>
             </article>
           </li>
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-2">
+            <article class="group gf-card gf-card-glass @container relative h-full">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -995,11 +1051,52 @@
                   <i>
                   </i>
                 </span>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-field px-2 py-1 text-text">
-                    Az kaldı
-                  </li>
-                </ul>
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-field px-2 py-1 text-text">
+                      Az kaldı
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="gf-card-glass-panel absolute right-2 bottom-2 left-2 flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-media)*0.75)] px-3 py-2.5 data-add:right-14"
+                  data-add=""
+                >
+                  <h3
+                    class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
+                  >
+                    <a
+                      href="/urun/karacelik-kamp-baltasi"
+                      class="line-clamp-2 no-underline after:absolute after:-inset-[100vmax] after:content-[&#x27;&#x27;]"
+                    >
+                      Kamp Baltası
+                    </a>
+                  </h3>
+                  <div class="flex items-end justify-between gap-2">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
+                      <span
+                        class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
+                      >
+                        975,00 TL
+                      </span>
+                    </p>
+                    <span
+                      class="gf-card-glass-go flex shrink-0 items-center gap-1 text-xs font-semibold @max-[13rem]:hidden"
+                      aria-hidden="true"
+                    >
+                      İncele
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="2"
+                        class="lucide lucide-arrow-right size-3.5"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -1025,29 +1122,10 @@
                   </span>
                 </form>
               </div>
-              <div class="flex flex-1 flex-col gap-1">
-                <h3
-                  class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
-                >
-                  <a
-                    href="/urun/karacelik-kamp-baltasi"
-                    class="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
-                  >
-                    Kamp Baltası
-                  </a>
-                </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
-                  <span
-                    class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
-                  >
-                    975,00 TL
-                  </span>
-                </p>
-              </div>
             </article>
           </li>
           <li class="min-w-0">
-            <article class="group gf-card @container relative flex h-full flex-col gap-2">
+            <article class="group gf-card gf-card-glass @container relative h-full">
               <div
                 class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
               >
@@ -1095,30 +1173,51 @@
                   <i>
                   </i>
                 </span>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-text px-2 py-1 text-paper">
-                    Tükendi
-                  </li>
-                </ul>
-              </div>
-              <div class="flex flex-1 flex-col gap-1">
-                <h3
-                  class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
                 >
-                  <a
-                    href="/urun/demirhan-kasap-seti"
-                    class="line-clamp-2 no-underline transition-colors duration-(--dur-micro) group-hover:text-text-2 after:absolute after:inset-0 after:content-[&#x27;&#x27;]"
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-text px-2 py-1 text-paper">
+                      Tükendi
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="gf-card-glass-panel absolute right-2 bottom-2 left-2 flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-media)*0.75)] px-3 py-2.5 data-add:right-14"
+                >
+                  <h3
+                    class="text-sm leading-snug font-semibold tracking-normal lg:@min-[16rem]:text-md"
                   >
-                    Kasap Bıçağı Seti
-                  </a>
-                </h3>
-                <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
-                  <span
-                    class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
-                  >
-                    1.325,00 TL
-                  </span>
-                </p>
+                    <a
+                      href="/urun/demirhan-kasap-seti"
+                      class="line-clamp-2 no-underline after:absolute after:-inset-[100vmax] after:content-[&#x27;&#x27;]"
+                    >
+                      Kasap Bıçağı Seti
+                    </a>
+                  </h3>
+                  <div class="flex items-end justify-between gap-2">
+                    <p class="flex flex-wrap items-baseline gap-x-2 min-w-0">
+                      <span
+                        class="tabular font-extrabold tracking-[-0.01em] text-md lg:@min-[16rem]:text-lg "
+                      >
+                        1.325,00 TL
+                      </span>
+                    </p>
+                    <span
+                      class="gf-card-glass-go flex shrink-0 items-center gap-1 text-xs font-semibold @max-[13rem]:hidden"
+                      aria-hidden="true"
+                    >
+                      İncele
+                      <svg
+                        width="24"
+                        height="24"
+                        stroke-width="2"
+                        class="lucide lucide-arrow-right size-3.5"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </div>
               </div>
             </article>
           </li>

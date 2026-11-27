@@ -34,8 +34,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-erciyes.webp",
-        "alt": "Gün batımında karlı Erciyes Dağı ve eteklerindeki sırtlar"
+        "$image": "images/kapak-ayasofya.webp",
+        "alt": "Gün batımında turuncu gökyüzüne karşı Ayasofya'nın kubbesi ve minareleri"
       },
       "action": "button",
       "search_position": "inside",

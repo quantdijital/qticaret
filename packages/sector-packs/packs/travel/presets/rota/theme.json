@@ -17,7 +17,9 @@
     "no_reviews": "hide",
     "rating_badge": false,
     "duration_row": true,
-    "per_person": true
+    "per_person": true,
+    "meta_place": "over",
+    "style": "glass"
   },
   "header": { "layout": "left", "sticky": true },
   "buttons": "pill",
@@ -35,7 +37,9 @@
     "default_view": "grid",
     "view_switch": "show",
     "breadcrumb_current": "hide",
-    "count_word": "tur"
+    "crumbs_place": "beside",
+    "count_word": "tur",
+    "all_title": "Tüm turlar"
   },
   "menu_style": "plain",
   "density": "airy",

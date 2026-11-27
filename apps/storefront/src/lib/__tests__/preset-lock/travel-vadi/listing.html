@@ -1,18 +1,24 @@
 <!-- preset lock: travel-vadi (docs/tema/bilesen-standardi.md §7) -->
 <div class="mx-auto w-full max-w-(--container) px-(--gutter) pt-4 lg:pt-6">
-  <nav aria-label="Bulunduğunuz yer">
-    <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
-      <li class="flex items-center gap-x-2">
-        <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
-          Ana sayfa
-        </a>
-      </li>
-    </ol>
-  </nav>
-  <header class="mt-4 flex flex-col gap-3 lg:mt-6">
-    <h1>
-      El Yapımı Çakılar
-    </h1>
+  <header class="flex flex-col gap-3">
+    <div
+      class="flex flex-col gap-4 lg:flex-row-reverse lg:items-baseline lg:justify-between lg:gap-8"
+    >
+      <div class="lg:shrink-0">
+        <nav aria-label="Bulunduğunuz yer">
+          <ol class="flex-wrap items-center gap-x-2 text-sm text-text-3 flex">
+            <li class="flex items-center gap-x-2">
+              <a href="/" class="inline-flex min-h-11 items-center hover:text-text">
+                Ana sayfa
+              </a>
+            </li>
+          </ol>
+        </nav>
+      </div>
+      <h1 class="lg:min-w-0">
+        El Yapımı Çakılar
+      </h1>
+    </div>
   </header>
   <div class="mt-6 flex flex-col gap-8 empty:hidden lg:mt-8">
     <section aria-labelledby="alt-kategoriler" class="flex min-w-0 flex-col gap-4">
@@ -790,28 +796,38 @@
                     </span>
                   </p>
                 </div>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="gf-card-pill-dark flex items-center gap-1.5 rounded-pill px-2 py-1">
-                    <span class="flex items-center gap-1">
-                      <svg
-                        width="24"
-                        height="24"
-                        stroke-width="1.5"
-                        class="lucide lucide-star size-3.5 fill-star text-star"
-                        aria-hidden="true"
-                      />
-                      <span aria-hidden="true" class="tabular">
-                        <span>
-                          4,5
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                  </ul>
+                  <ul
+                    class="gf-card-meta pointer-events-none flex gap-1 ms-auto max-w-full flex-col items-end"
+                  >
+                    <li
+                      class="gf-card-glass-pill flex items-center gap-1 rounded-pill px-2 py-1 text-xs font-semibold whitespace-nowrap"
+                    >
+                      <span class="flex items-center gap-1">
+                        <svg
+                          width="24"
+                          height="24"
+                          stroke-width="1.5"
+                          class="lucide lucide-star size-3.5 fill-star text-star"
+                          aria-hidden="true"
+                        />
+                        <span aria-hidden="true" class="tabular">
+                          <span>
+                            4,5
+                          </span>
+                          (4)
                         </span>
-                        (4)
+                        <span class="sr-only">
+                          5 üzerinden 4,5 (4 değerlendirme)
+                        </span>
                       </span>
-                      <span class="sr-only">
-                        5 üzerinden 4,5 (4 değerlendirme)
-                      </span>
-                    </span>
-                  </li>
-                </ul>
+                    </li>
+                  </ul>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -915,16 +931,20 @@
                     </span>
                   </p>
                 </div>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
-                    <span aria-hidden="true">
-                      %16
-                    </span>
-                    <span class="sr-only">
-                      %16 indirim
-                    </span>
-                  </li>
-                </ul>
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-deal px-2 py-1 text-deal-ink">
+                      <span aria-hidden="true">
+                        %16
+                      </span>
+                      <span class="sr-only">
+                        %16 indirim
+                      </span>
+                    </li>
+                  </ul>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -1028,11 +1048,15 @@
                     </span>
                   </p>
                 </div>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-field px-2 py-1 text-text">
-                    Az kaldı
-                  </li>
-                </ul>
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-field px-2 py-1 text-text">
+                      Az kaldı
+                    </li>
+                  </ul>
+                </div>
                 <form
                   class="relative z-(--z-raised) contents"
                   action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
@@ -1135,11 +1159,15 @@
                     </span>
                   </p>
                 </div>
-                <ul class="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-                  <li class="rounded-pill bg-text px-2 py-1 text-paper">
-                    Tükendi
-                  </li>
-                </ul>
+                <div
+                  class="pointer-events-none absolute top-2 right-2 left-2 flex flex-wrap items-start justify-between gap-1"
+                >
+                  <ul class="flex min-w-0 flex-wrap gap-1 text-xs font-extrabold">
+                    <li class="rounded-pill bg-text px-2 py-1 text-paper">
+                      Tükendi
+                    </li>
+                  </ul>
+                </div>
               </div>
             </article>
           </li>
