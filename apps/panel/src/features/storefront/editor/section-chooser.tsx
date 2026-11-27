@@ -24,16 +24,24 @@ import {
   newSectionId,
   priceBandsOn,
 } from "@/features/storefront/layout/sections"
-import { AddSectionDialog } from "./add-section-dialog"
+import { AddSectionPicker } from "./add-section-picker"
 import type { EditorPage } from "./editor-page"
 
 /** Where the chooser adds: a side of a category page's sections, or the footer group (adr/0070 §4). */
 export type Adding = Placement | "footer"
 
+/** The chooser's aim: its group, and the section it lands before (null: at the end). */
+export interface AddingAt {
+  where: Adding
+  before: string | null
+}
+
 /**
  * The section chooser for the page being edited (a content page: the one
- * picked, adr/0073 §5), or for the footer group: the picked section is
- * added, marked new for the preview and opened.
+ * picked, adr/0073 §5), or for the footer group, as a step of the side
+ * panel: the picked section is added where it was aimed (before a row, or
+ * at the end), marked new for the preview and opened. Null when there is
+ * nothing to add to (a content page not picked yet).
  */
 export function SectionChooser({
   doc,
@@ -48,23 +56,29 @@ export function SectionChooser({
   page: EditorPage
   /** The content page picked (`page: "content"`). */
   content?: string | null
-  adding: Adding | null
+  adding: AddingAt
   onClose: () => void
   onAdded: (id: string) => void
   act: (action: EditorAction) => void
 }) {
-  const footer = adding === "footer"
+  const { where, before } = adding
+  const footer = where === "footer"
+  const at = before === null ? {} : { before }
   const marqueeFull = footer
     ? footerMarqueeFull(doc)
     : page === "content"
       ? content !== null && pageMarqueesFull(doc, content)
       : marqueesOn(doc, page) >= MARQUEE_LIMITS.perPage
+  if (page === "content" && content === null && !footer) {
+    return null
+  }
+  const placement = footer ? "bottom" : where
   return (
-    <AddSectionDialog
-      open={adding !== null && (page !== "content" || content !== null || footer)}
+    <AddSectionPicker
       page={footer ? "footer" : page === "content" ? "pages" : page}
       footerTypes={footerTypesLeft(doc)}
-      placement={adding === null || footer ? "bottom" : adding}
+      placement={placement}
+      aimed={before !== null}
       taken={
         page === "content" && content !== null && !footer
           ? pageOnlyTaken(pageSectionsOf(doc, content))
@@ -72,21 +86,17 @@ export function SectionChooser({
       }
       marqueeFull={marqueeFull}
       priceBandsFull={page !== "content" && priceBandsOn(doc, page) >= PRICE_BANDS_LIMITS.perPage}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
+      onBack={onClose}
       onPick={(type) => {
         const id = newSectionId(idsOf(doc))
         // Marked new before it lands, so the preview scrolls to it
         onAdded(id)
-        const placement = adding === null || footer ? "bottom" : adding
         if (footer) {
           act({
             type: "add",
             group: "footer",
             section: newFooterSection(type as FooterAddType, id),
+            ...at,
           })
         } else if (page === "content") {
           if (content !== null) {
@@ -98,6 +108,7 @@ export function SectionChooser({
                 type === "article"
                   ? newPageText(id)
                   : (newBodySection("pages", type, id) as ContentPageSection),
+              ...at,
             })
           }
         } else if (type !== "article") {
@@ -105,6 +116,7 @@ export function SectionChooser({
             type: "add",
             group: page,
             section: newBodySection(page, type, id, placement),
+            ...at,
           })
         }
       }}

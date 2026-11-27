@@ -69,6 +69,23 @@ describe("a content page's layout in the editor", () => {
       "yorumlar",
     ])
 
+    // Aimed before a section of the page: right there, whatever `at` says
+    const aimed = editorReducer(state, {
+      type: "add",
+      group: "pages",
+      page: "cnt_hakkimizda",
+      section: pageSection("faq", "aradasss"),
+      at: 0,
+      before: "yorumlar",
+    })
+    expect(ids(aimed.doc, "cnt_hakkimizda")).toEqual([
+      "ustbant",
+      "hakkimizdametin",
+      "hakkimizdayardim",
+      "aradasss",
+      "yorumlar",
+    ])
+
     // The page's text moves past the others as any section does
     const moved = editorReducer(state, { type: "move", id: "hakkimizdametin", to: 3 })
     expect(ids(moved.doc, "cnt_hakkimizda")).toEqual([

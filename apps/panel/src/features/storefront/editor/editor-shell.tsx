@@ -22,6 +22,8 @@ interface EditorShellProps {
   form: ReactNode
   /** Which settings are open, null for none: another one starts at its top. */
   formKey: string | null
+  /** The section chooser ("Bölüm ekle"), a step of its own in place of the list; null: closed. */
+  picker?: ReactNode
   /** One step up (Escape), null at the page's parts. */
   onUp: (() => void) | null
   preview: ReactNode
@@ -30,8 +32,8 @@ interface EditorShellProps {
 /**
  * The editor below its top bar (the owner, 2026-11-27: one side panel,
  * not one beside another): a side panel whose content swaps, the page's
- * parts, then a part's settings, then a footer row's (each with the way
- * back in its header), beside the preview; on a tablet or phone one of
+ * parts, then a part's settings, then a footer row's, or the section
+ * chooser in the list's place (each with the way back in its header), beside the preview; on a tablet or phone one of
  * the two at a time. The list stays mounted while a part's settings are
  * open, so its scroll and its search are as they were on the way back;
  * what is hidden or folded stays mounted, so a half-filled form survives
@@ -44,11 +46,14 @@ export function EditorShell({
   tree,
   form,
   formKey,
+  picker = null,
   onUp,
   preview,
 }: EditorShellProps) {
   const narrow = layout === "narrow"
-  const open = formKey !== null
+  // The step shown over the list: the chooser, else the open part's settings
+  const levelKey = picker === null ? formKey : "add-section"
+  const open = levelKey !== null
   // Folded, the side panel stays mounted (hidden): a half-filled form survives it
   const folded = !sidebar && !narrow
   const away = folded || (narrow && view === "preview")
@@ -73,18 +78,24 @@ export function EditorShell({
     }
     const active = document.activeElement
     const lost = active === null || active === document.body
-    if (formKey !== null) {
+    if (levelKey !== null) {
       if (lost || list.current?.contains(active)) {
-        level.current
-          ?.querySelector<HTMLElement>("[data-panel-title]")
-          ?.focus({ preventScroll: true })
+        // The chooser's search box (not on a touch screen: its keyboard would cover the
+        // cards), else the settings' title
+        const shown = level.current
+        const touch =
+          typeof window.matchMedia === "function" && window.matchMedia("(pointer: coarse)").matches
+        const target =
+          (touch ? null : shown?.querySelector<HTMLElement>("[data-level-focus]")) ??
+          shown?.querySelector<HTMLElement>("[data-panel-title]")
+        target?.focus({ preventScroll: true })
       }
     } else if (lost || !active.isConnected) {
       list.current
         ?.querySelector<HTMLElement>('[aria-current="true"]')
         ?.focus({ preventScroll: true })
     }
-  }, [formKey])
+  }, [levelKey])
   return (
     <main className="flex min-h-0 flex-1">
       <div
@@ -113,9 +124,9 @@ export function EditorShell({
         </div>
         {open ? (
           <div
-            key={formKey}
+            key={levelKey}
             ref={level}
-            data-editor-level="settings"
+            data-editor-level={picker === null ? "settings" : "add"}
             data-editor-column="settings"
             data-scroll-area="y"
             className={cn(
@@ -123,7 +134,7 @@ export function EditorShell({
               "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-right-2 motion-safe:duration-150"
             )}
           >
-            {form}
+            {picker ?? form}
           </div>
         ) : null}
       </div>
