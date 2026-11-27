@@ -86,6 +86,26 @@ describe("Liste sayfası in the theme panel", () => {
     expect(found("birim")).toContain("listing_page.count_word")
   })
 
+  it("puts the all-products title in the draft, an empty one as none", async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ListingPageGroup theme={THEME} reveal={null} onChange={onChange} />)
+    const box = screen.getByRole("textbox", { name: "Tüm ürünler başlığı" })
+    expect(box).toHaveValue("")
+
+    await user.type(box, "T")
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, all_title: "T" },
+    })
+    await user.type(box, " ")
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, all_title: null },
+    })
+    expect(found("başlık")).toContain("listing_page.all_title")
+  })
+
   it("is found by the settings search", () => {
     expect(found("liste")).toContain("listing_page.default_view")
     expect(found("breadcrumb")).toContain("listing_page.breadcrumb_current")

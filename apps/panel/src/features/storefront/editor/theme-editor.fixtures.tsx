@@ -67,6 +67,7 @@ export const THEME: ThemeSettings = {
     breadcrumb_current: "show",
     crumbs_place: "above",
     count_word: null,
+    all_title: null,
   },
   search_form: { ...SEARCH_FORM_DEFAULTS },
   menu_style: "filled",

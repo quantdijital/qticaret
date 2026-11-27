@@ -5,6 +5,7 @@ import { listingPage } from "@/lib/store-api/listings"
 import { siteSeo } from "@/lib/store-api/requests"
 import { categoryTiles } from "@/lib/views/category-tiles"
 import { searchOf, stateFromSearch } from "@/lib/views/listing"
+import { allProductsTitle } from "@/lib/views/theme-settings"
 import { ListingContent } from "./listing"
 
 /** A page's query as Next gives it (`searchParams`). */
@@ -32,7 +33,7 @@ export const queryOf = (search: URLSearchParams): Query => {
 
 /** `/magaza` (D4): the whole catalogue, with the filters and sorts every listing has. */
 export async function ShopScreen({ query }: { query: Query }) {
-  const site = await siteSeo()
+  const [site, title] = await Promise.all([siteSeo(), allProductsTitle()])
   const state = stateFromSearch(toSearch(query))
   const incoming = await headers()
   const origin = incoming.get("host") ? `http://${incoming.get("host") ?? ""}` : "http://localhost"
@@ -52,7 +53,7 @@ export async function ShopScreen({ query }: { query: Query }) {
       state={state}
       url={url}
       heading={async () => ({
-        title: t("listing.all_products"),
+        title,
         description: [],
         // The shop's top categories as the catalogue's aisles, each with its picture
         subcategories: await categoryTiles([]),
@@ -63,7 +64,7 @@ export async function ShopScreen({ query }: { query: Query }) {
       ]}
       jsonLd={breadcrumbJsonLd(site.canonical_host, [
         { name: t("home.label"), path: "/" },
-        { name: t("listing.all_products"), path: "/magaza" },
+        { name: title, path: "/magaza" },
       ])}
     />
   )

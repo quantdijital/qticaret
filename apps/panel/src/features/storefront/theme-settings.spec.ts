@@ -57,6 +57,7 @@ const SAVED: ThemeSettings = {
     breadcrumb_current: "hide",
     crumbs_place: "above",
     count_word: null,
+    all_title: null,
   },
   search_form: {
     attribute_key: "bolge",
@@ -100,6 +101,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
         breadcrumb_current: "hide",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       search_form: { ...SAVED.search_form },
       menu_style: "filled",
@@ -161,6 +163,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
         breadcrumb_current: "show",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       search_form: {
         attribute_key: null,

@@ -41,6 +41,12 @@ export type ListingCrumbsPlace = (typeof LISTING_CRUMBS_PLACES)[number]
  */
 export const LISTING_COUNT_WORD_MAX = 24
 
+/**
+ * The longest title the shop may give its all-products page (`all_title`:
+ * "Tüm turlar" for "Tüm ürünler").
+ */
+export const LISTING_ALL_TITLE_MAX = 40
+
 export interface ListingPageSettings {
   default_view: ListingViewMode
   view_switch: ListingViewSwitch
@@ -48,6 +54,8 @@ export interface ListingPageSettings {
   crumbs_place: ListingCrumbsPlace
   /** The word after the count ("tur", "oda", "kurs"); none: the page's own "ürün". */
   count_word: string | null
+  /** The all-products page's title ("Tüm turlar"); none: the page's own "Tüm ürünler". */
+  all_title: string | null
 }
 
 /** Each setting's default: today's page, a grid with no switch, the trail to the page itself. */
@@ -57,6 +65,7 @@ export const LISTING_PAGE_DEFAULTS: Readonly<ListingPageSettings> = {
   breadcrumb_current: "show",
   crumbs_place: "above",
   count_word: null,
+  all_title: null,
 }
 
 /** The shopper's choice in the page's address (`?gorunum=liste`); the grid writes none. */
@@ -93,12 +102,13 @@ export function listingPageOf(
       value?.crumbs_place,
       LISTING_PAGE_DEFAULTS.crumbs_place
     ),
-    count_word: countWordOf(value?.count_word),
+    count_word: textOf(value?.count_word, LISTING_COUNT_WORD_MAX),
+    all_title: textOf(value?.all_title, LISTING_ALL_TITLE_MAX),
   }
 }
 
-/** The shop's word, trimmed and at most its length; empty or anything else: none. */
-function countWordOf(value: unknown): string | null {
+/** The shop's text, trimmed and at most its length; empty or anything else: none. */
+function textOf(value: unknown, max: number): string | null {
   const text = typeof value === "string" ? value.trim() : ""
-  return text === "" ? null : text.slice(0, LISTING_COUNT_WORD_MAX)
+  return text === "" ? null : text.slice(0, max)
 }

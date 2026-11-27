@@ -14,6 +14,12 @@ vi.mock("@/lib/store-api/requests", async (importOriginal) => ({
   siteSeo: () => Promise.resolve({ shop: { name: SHOP }, canonical_host: HOST, indexing: true }),
 }))
 
+// The shop's own all-products title, as a theme gives it ("Tüm turlar")
+vi.mock("@/lib/views/theme-settings", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  allProductsTitle: () => Promise.resolve("Tüm turlar"),
+}))
+
 const entity = await import("../[...path]/page")
 const shop = await import("../magaza/page")
 const blog = await import("../blog/page")
@@ -111,10 +117,10 @@ describe("a paginated list's metadata", () => {
 
   it("titles /magaza's later page, its own canonical", async () => {
     const second = await shop.generateMetadata(query({ sayfa: "2" }))
-    expect(second.title).toEqual({ absolute: `Tüm ürünler – Sayfa 2 | ${SHOP}` })
+    expect(second.title).toEqual({ absolute: `Tüm turlar – Sayfa 2 | ${SHOP}` })
     expect(second.alternates?.canonical).toBe(`https://${HOST}/magaza?sayfa=2`)
     const first = await shop.generateMetadata(query({}))
-    expect(first.title).toEqual({ absolute: `Tüm ürünler | ${SHOP}` })
+    expect(first.title).toEqual({ absolute: `Tüm turlar | ${SHOP}` })
     expect(first.alternates?.canonical).toBe(`https://${HOST}/magaza`)
   })
 

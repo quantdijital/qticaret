@@ -61,7 +61,8 @@
     "view_switch": "show",
     "breadcrumb_current": "hide",
     "crumbs_place": "beside",
-    "count_word": "tur"
+    "count_word": "tur",
+    "all_title": "Tüm turlar"
   },
   "menu_style": "plain",
   "chip_style": "lined",

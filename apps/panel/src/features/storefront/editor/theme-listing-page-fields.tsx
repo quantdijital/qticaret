@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { LISTING_COUNT_WORD_MAX, listingPageOf } from "@qticaret/types"
+import { LISTING_ALL_TITLE_MAX, LISTING_COUNT_WORD_MAX, listingPageOf } from "@qticaret/types"
 import type { ListingPageSettings } from "@qticaret/types"
 import { LISTING_VIEWS } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -16,6 +16,10 @@ const P = `${C}.listingPage`
 const typedWord = (saved: Partial<ListingPageSettings> | undefined): string =>
   saved?.count_word ?? ""
 
+/** The all-products title as typed (none before the setting). */
+const typedTitle = (saved: Partial<ListingPageSettings> | undefined): string =>
+  saved?.all_title ?? ""
+
 interface ListingPageGroupProps {
   theme: ThemeSettings
   /** Opens the group now (the settings search's pick); null: none. */
@@ -27,7 +31,8 @@ interface ListingPageGroupProps {
  * "Liste sayfası": how the shop's listing pages (all products, a
  * category, a brand) lay out their products, shop-wide: a grid or one to
  * a row by default, whether the shopper may switch, and whether the trail
- * ends with the page itself, and the word after the count ("24 tur").
+ * ends with the page itself, the word after the count ("24 tur") and the
+ * all-products page's title ("Tüm turlar").
  * Every default is today's page; a draft from before the group reads at
  * its defaults.
  */
@@ -42,8 +47,10 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
   const crumb = THEME_FIELD["listing_page.breadcrumb_current"]
   const place = THEME_FIELD["listing_page.crumbs_place"]
   const word = THEME_FIELD["listing_page.count_word"]
+  const all = THEME_FIELD["listing_page.all_title"]
   // As typed (its spaces too); the saved one is trimmed
   const rawWord = typedWord(theme.listing_page)
+  const rawTitle = typedTitle(theme.listing_page)
   return (
     <PanelGroup
       name="listingPage"
@@ -98,6 +105,18 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
           onChange={(event) => {
             const text = event.target.value
             set({ count_word: text.trim() === "" ? null : text })
+          }}
+        />
+      </Field>
+      <Field label={t(all.label)} htmlFor={all.target} hint={t(`${P}.all_title.hint`)}>
+        <Input
+          id={all.target}
+          value={rawTitle}
+          maxLength={LISTING_ALL_TITLE_MAX}
+          autoComplete="off"
+          onChange={(event) => {
+            const text = event.target.value
+            set({ all_title: text.trim() === "" ? null : text })
           }}
         />
       </Field>

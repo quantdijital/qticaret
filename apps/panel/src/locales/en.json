@@ -10976,7 +10976,11 @@
             "label": "Unit word in the product count",
             "hint": "Written beside the count on the page (24 tur). Empty: products. E.g. tur, oda, kurs."
           },
-          "words": "list grid view row breadcrumb trail category page all products count unit word"
+          "all_title": {
+            "label": "All products title",
+            "hint": "The all-products page's (/magaza) title; the breadcrumb and the browser tab show it too. Empty: Tüm ürünler. E.g. Tüm turlar."
+          },
+          "words": "list grid view row breadcrumb trail category page all products count unit word title"
         },
         "searchFormTitle": "Search box",
         "searchFormHint": "The fields of the shop's one search box: the same in the Search box section and on top of the search page.",

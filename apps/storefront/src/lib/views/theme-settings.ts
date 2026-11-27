@@ -1,7 +1,8 @@
 import "server-only"
 import { cache } from "react"
-import { withCountWord } from "@/lib/i18n"
+import { t, withCountWord } from "@/lib/i18n"
 import { storefrontSettings } from "@/lib/store-api/requests"
+import { listingPageOf } from "@qticaret/types"
 import { handNoteOf } from "@qticaret/types/hand-note"
 import { handFace } from "./accent"
 import { currentLayout } from "./layout"
@@ -23,6 +24,16 @@ export const currentTheme = cache(async () => {
 /** The words for this request, a product count in the shop's own word (`withCountWord`). */
 export const shopWords = cache(async () =>
   withCountWord((await currentTheme()).listing_page?.count_word)
+)
+
+/**
+ * The all-products page's title (`/magaza`): the shop's own
+ * (`listing_page.all_title`, "Tüm turlar"), else "Tüm ürünler". Its
+ * heading, trail, structured data and page title all read it.
+ */
+export const allProductsTitle = cache(
+  async () =>
+    listingPageOf((await currentTheme()).listing_page).all_title ?? t("listing.all_products")
 )
 
 /**
