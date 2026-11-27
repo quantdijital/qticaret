@@ -34,6 +34,17 @@ html[data-js-scroll="down"]:not(
     animation-timeline: scroll(self);
   }
 }
+/* Its own scrollbar a hairline in the rule's tone, a shade darker under the pointer
+   (owner 2026-11-27: the browser's full bar read heavy beside the filters) */
+.gf-scroll-fade {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rule) transparent;
+  scrollbar-gutter: stable;
+}
+.gf-scroll-fade:hover,
+.gf-scroll-fade:focus-within {
+  scrollbar-color: var(--color-text-3) transparent;
+}
 @keyframes gf-scroll-fade {
   0%,
   98% {
