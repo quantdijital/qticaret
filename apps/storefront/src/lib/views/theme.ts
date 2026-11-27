@@ -114,7 +114,10 @@ const DISPLAY_WEIGHT = 800
  * for 800 there would lean on the browser's matching, so its own is printed.
  */
 export const THEME_FONTS: Readonly<
-  Record<ThemeFont, { variable: string; fallback: string; displayWeight: number }>
+  Record<
+    ThemeFont,
+    { variable: string; fallback: string; displayWeight: number; wordSpace?: string }
+  >
 > = {
   fraunces: { variable: "--font-fraunces", fallback: SERIF, displayWeight: 800 },
   playfair: { variable: "--font-playfair", fallback: SERIF, displayWeight: 800 },
@@ -123,7 +126,13 @@ export const THEME_FONTS: Readonly<
   manrope: { variable: "--font-manrope", fallback: SANS, displayWeight: 800 },
   "source-sans": { variable: "--font-source-sans", fallback: SANS, displayWeight: 800 },
   nunito: { variable: "--font-nunito", fallback: SANS, displayWeight: 800 },
-  "plus-jakarta": { variable: "--font-plus-jakarta", fallback: SANS, displayWeight: 800 },
+  // Its own space is 0.17em, words run together (sahip 2026-11-27): widened to a common 0.25em
+  "plus-jakarta": {
+    variable: "--font-plus-jakarta",
+    fallback: SANS,
+    displayWeight: 800,
+    wordSpace: "0.08em",
+  },
   montserrat: { variable: "--font-montserrat", fallback: SANS, displayWeight: 800 },
 }
 
@@ -348,6 +357,14 @@ export function themeStyle(
   }
   if (typography.body !== DEFAULT_THEME.typography.body) {
     declarations.push(`--font-sans:${fontValue(typography.body)}`)
+  }
+  const bodySpace = THEME_FONTS[typography.body].wordSpace
+  if (bodySpace) {
+    declarations.push(`--word-space-body:${bodySpace}`)
+  }
+  const headSpace = THEME_FONTS[typography.heading].wordSpace
+  if (headSpace) {
+    declarations.push(`--word-space-head:${headSpace}`)
   }
   declarations.push(...accentDeclarations(settings))
   const scale = RADIUS_SCALE[radius]

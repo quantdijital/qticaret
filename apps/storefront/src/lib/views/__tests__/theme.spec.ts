@@ -331,6 +331,20 @@ describe("themeStyle", () => {
     }
   })
 
+  it("widens a narrow-spaced face's word space, for the body and the headings apart", () => {
+    const both = themeStyle(
+      theme({ typography: { heading: "plus-jakarta", body: "plus-jakarta" } })
+    )
+    expect(both).toContain("--word-space-body:0.08em")
+    expect(both).toContain("--word-space-head:0.08em")
+    const headOnly = themeStyle(theme({ typography: { heading: "plus-jakarta", body: "inter" } }))
+    expect(headOnly).toContain("--word-space-head:0.08em")
+    expect(headOnly).not.toContain("--word-space-body")
+    expect(themeStyle(theme({ typography: { heading: "inter", body: "inter" } }))).not.toContain(
+      "--word-space"
+    )
+  })
+
   it("sets a heading's weight to what its face carries: 400 for DM Serif, 800 (unprinted) for the rest", () => {
     expect(themeStyle(theme({ typography: { heading: "dm-serif", body: "manrope" } }))).toBe(
       ':root{--font-heading:var(--font-dm-serif), ui-serif, Georgia, "Times New Roman", serif;' +

@@ -33,8 +33,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-uzungol.webp",
-        "alt": "Ormanlı yamaçlar arasında sisli mavi tonlarla uzanan dağ vadisi ve önünde sakin bir göl"
+        "$image": "images/kapak-uzungol-yayla.webp",
+        "alt": "Bulutlu ormanlı dağların arasında Uzungöl, kıyısındaki kasaba ve yeşil yayla evleri"
       },
       "action": "both",
       "search_position": "inside",
