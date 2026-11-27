@@ -157,6 +157,8 @@ describe("isStaticFile", () => {
       "/fonts/inter-latin.c940764593.woff2",
       "/fonts/source-sans-tr.2739d40613.woff2",
       "/marks/visa.png",
+      "/marks/surat.png",
+      "/marks/ptt.png",
     ]) {
       expect(isStaticFile(path)).toBe(true)
       expect(isFileName(path)).toBe(true)
