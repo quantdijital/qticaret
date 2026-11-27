@@ -147,6 +147,13 @@ export async function storeLayout(
             align: section.align,
             size: section.size,
             tone: section.tone,
+            // How they turn like a slider (owner 2026-11-27)
+            transition: section.transition,
+            arrows: section.arrows,
+            // Each line's own link, only once the shop gave one (one to a removed record: words)
+            ...(section.variant === "graphite" && section.line_links?.some(Boolean)
+              ? { line_links: section.line_links.map((link) => (link ? resolve(link) : null)) }
+              : {}),
             // The small button beside the lines, only once the shop gave one
             ...(section.link ? { link: resolve(section.link) } : {}),
             // Its parts off only once switched off; "Hesabım" only once on

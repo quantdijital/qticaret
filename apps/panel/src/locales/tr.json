@@ -10443,13 +10443,14 @@
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
         "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
+        "lineLink": "{{number}}. duyurunun bağlantısı",
         "mode": {
           "label": "Birden çok duyuru",
           "term": "multiple",
           "first": "Yalnız ilki",
-          "rotate": "Sırayla dönsün",
+          "rotate": "Kaydırıcı (tek tek döner)",
           "inline": "Yan yana",
-          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla: hareket azaltılmışsa ilk duyuru kalır."
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Kaydırıcı: duyurular tek tek, seçtiğiniz sürede değişir; geçişi, okları ve durdurmayı Hareket bölümünden ayarlarsınız. Hareket azaltılmışsa kendiliğinden dönmez, oklar açıksa ziyaretçi elle geçer."
         },
         "interval": {
           "label": "Geçiş süresi",
@@ -10472,6 +10473,20 @@
           "on": "Açık",
           "off": "Kapalı",
           "hint": "Klavyeyle şeride gelince her zaman durur."
+        },
+        "transition": {
+          "label": "Geçiş biçimi",
+          "term": "transition",
+          "fade": "Solarak",
+          "slide": "Kayarak",
+          "hint": "Solarak: duyuru yerinde solup yenisi belirir (bugünkü). Kayarak: yenisi yandan kayarak gelir, eskisi öbür yana çıkar. Hareket azaltılmışsa ikisi de anında değişir."
+        },
+        "arrows": {
+          "label": "Önceki / sonraki okları",
+          "term": "arrows",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Duyurunun iki yanında küçük oklar çıkar; ziyaretçi duyurular arasında elle geçer. Hareket azaltılmış ekranlarda da çalışır."
         },
         "align": {
           "label": "Hizalama",

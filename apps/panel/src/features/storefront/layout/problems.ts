@@ -96,10 +96,17 @@ type Found = [string, Problem | null]
 function fieldsOf(section: AnySection): Found[] {
   switch (section.type) {
     case "announcement_bar":
-      return section.lines.map((line, index): Found => [
-        `lines.${String(index)}`,
-        line.trim() === "" ? "required" : textProblem(line, L.line, true),
-      ])
+      return [
+        ...section.lines.map((line, index): Found => [
+          `lines.${String(index)}`,
+          line.trim() === "" ? "required" : textProblem(line, L.line, true),
+        ]),
+        // Each line's own link (owner 2026-11-27)
+        ...(section.line_links ?? []).map((link, index): Found => [
+          `line_links.${String(index)}`,
+          linkProblem(link),
+        ]),
+      ]
     case "hero":
       return [
         ["eyebrow", textProblem(section.eyebrow, L.eyebrow, true)],

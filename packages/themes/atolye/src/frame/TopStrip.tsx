@@ -41,12 +41,14 @@ export function topStripOf(
       ) : null,
     }
   }
+  const count = shop.announcements.filter((each) => each.length > 0).length
   return {
     above: (
       <Announcement
         lines={shop.announcements}
         settings={shop.announcementSettings}
         button={shop.announcementLink}
+        lineLinks={shop.announcementLineLinks}
         mark={shop.announcementMark}
         links={strip.links ? shop.topLinks : []}
         contact={strip.phone ? shop.contact : { ...shop.contact, phone: null, phoneHref: null }}
@@ -55,6 +57,12 @@ export function topStripOf(
           links: t("nav.top_links"),
           pause: t("nav.announcements_pause"),
           play: t("nav.announcements_play"),
+          // The slider's arrows and each line's place, read only where drawn
+          previous: t("nav.announcements_previous"),
+          next: t("nav.announcements_next"),
+          slides: Array.from({ length: count }, (_, index) =>
+            t("nav.announcements_slide", { n: index + 1, total: count })
+          ),
         }}
       />
     ),

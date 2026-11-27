@@ -26,11 +26,17 @@ import type MediaModuleService from "../../modules/media/service"
 import { assertCardIds, mediaOf } from "../content/rules"
 import { existingRecords, isRecordKind } from "./menu-links"
 
+/** The dark bar's lines' own links (owner 2026-11-27); the light strip has none. */
+const lineLinksOf = (section: HeaderSection) =>
+  section.type === "announcement_bar" && section.variant === "graphite"
+    ? (section.line_links ?? [])
+    : []
+
 /** Every link a section holds: buttons, slides, "see all", a scrolling strip's items. */
 export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
-  // The announcement bar's small button
+  // The announcement bar's small button and its lines' own links
   if (section.type === "announcement_bar") {
-    return section.link ? [section.link] : []
+    return [section.link, ...lineLinksOf(section)].flatMap((link) => (link ? [link] : []))
   }
   if (section.type === "marquee") {
     return section.items.flatMap((item) => (item.link ? [item.link] : []))
@@ -90,11 +96,16 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
 /**
  * The header's sections that hold links: its scrolling strip and the
  * header bar (its action button; the catalog's strip note) and the
- * announcement bar with a button. The announcement's lines are words.
+ * announcement bar with a button or with its lines' own links.
  */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  // The strip and the bar always; the announcement bar (the only other) with a button
-  doc.header.filter((section) => section.type !== "announcement_bar" || Boolean(section.link))
+  // The strip and the bar always; the announcement bar (the only other) with a link
+  doc.header.filter(
+    (section) =>
+      section.type !== "announcement_bar" ||
+      Boolean(section.link) ||
+      lineLinksOf(section).some(Boolean)
+  )
 
 /** Every record a section names by id, as a link would point at it. */
 export function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {

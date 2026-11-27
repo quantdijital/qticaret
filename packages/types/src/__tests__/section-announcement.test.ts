@@ -16,11 +16,23 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
       "align",
       "size",
       "tone",
+      "transition",
+      "arrows",
     ])
     expect(ANNOUNCEMENT_SETTINGS.mode).toEqual(["first", "rotate", "inline"])
     expect(ANNOUNCEMENT_SETTINGS.interval).toEqual(["slow", "medium", "fast"])
     expect(ANNOUNCEMENT_SETTINGS.align).toEqual(["auto", "left", "center", "right"])
     expect(ANNOUNCEMENT_SETTINGS.size).toEqual(["small", "medium", "large"])
+  })
+
+  it("turns like a slider only when asked: fading in place, no arrows, as before", () => {
+    expect(ANNOUNCEMENT_SETTINGS.transition).toEqual(["fade", "slide"])
+    expect(ANNOUNCEMENT_SETTINGS.arrows).toEqual(["off", "on"])
+    expect(ANNOUNCEMENT_DEFAULTS).toMatchObject({ transition: "fade", arrows: "off" })
+    expect(announcementSettingsOf({ transition: "spin", arrows: "on" })).toMatchObject({
+      transition: "fade",
+      arrows: "on",
+    })
   })
 
   it("never offers to take the pause button away (WCAG 2.2.2)", () => {

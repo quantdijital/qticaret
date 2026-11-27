@@ -197,6 +197,11 @@ export interface ShopView {
   /** The bar's small button beside its lines (the shop's link and words); absent: none. */
   announcementLink?: LinkView
   /**
+   * Each of the bar's lines' own link, by its place among `announcements`
+   * (null: words only); absent: none links (owner 2026-11-27).
+   */
+  announcementLineLinks?: (LinkView | null)[]
+  /**
    * The top strip as the shop set it (owner's decision 2026-11-27): its
    * design and which of its parts show. Absent: no strip section, nothing
    * drawn above the header.

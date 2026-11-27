@@ -76,10 +76,10 @@ describe("the announcement bar's settings", () => {
       within(mode)
         .getAllByRole("radio")
         .map((radio) => radio.textContent)
-    ).toEqual(["Yalnız ilki", "Sırayla dönsün", "Yan yana"])
+    ).toEqual(["Yalnız ilki", "Kaydırıcı (tek tek döner)", "Yan yana"])
     expect(field("interval")).toBeNull()
 
-    await user.click(screen.getByRole("radio", { name: /Sırayla dönsün/ }))
+    await user.click(screen.getByRole("radio", { name: /Kaydırıcı/ }))
     expect(changes.at(-1)).toMatchObject({ mode: "rotate" })
     // The group comes in "Stil", closed as every group but the variant
     expect(field("interval")).not.toBeNull()
@@ -96,6 +96,48 @@ describe("the announcement bar's settings", () => {
     expect(screen.getByText(/Düğme tamamen kaldırılamaz/)).toBeInTheDocument()
     await user.click(screen.getByRole("switch", { name: /Üzerine gelince dur/ }))
     expect(changes.at(-1)).toMatchObject({ hover_pause: "off" })
+  })
+
+  it("make the turning lines a slider: sliding, with arrows, fading and none as today", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(bar({ mode: "rotate" }))
+    await openTab(user, "style")
+    await openGroup(user, "Hareket")
+    const transition = field("transition")
+    if (!transition) throw new Error("no transition field")
+    expect(within(transition).getByRole("radio", { name: "Solarak" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    )
+    await user.click(within(transition).getByRole("radio", { name: "Kayarak" }))
+    expect(changes.at(-1)).toMatchObject({ transition: "slide", arrows: "off" })
+    const arrows = screen.getByRole("switch", { name: /Önceki \/ sonraki okları/ })
+    expect(arrows).not.toBeChecked()
+    await user.click(arrows)
+    expect(changes.at(-1)).toMatchObject({ transition: "slide", arrows: "on" })
+  })
+
+  it("give each line of the dark bar its own link, moved and removed with its line", async () => {
+    const user = userEvent.setup()
+    const shop = { kind: "system" as const, target: "shop" as const, label: "Mağaza" }
+    const changes = renderPanel(bar({ line_links: [shop, null] }))
+    expect(screen.getByText("1. duyurunun bağlantısı")).toBeInTheDocument()
+    expect(screen.getByText("2. duyurunun bağlantısı")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "1. duyuru: aşağı taşı" }))
+    expect(changes.at(-1)).toMatchObject({
+      lines: ["Aynı gün kargo", "Kargo bedava"],
+      line_links: [null, shop],
+    })
+    await user.click(screen.getByRole("button", { name: "2. duyuru: kaldır" }))
+    expect(changes.at(-1)?.type === "announcement_bar" && changes.at(-1)).toEqual(
+      expect.objectContaining({ lines: ["Aynı gün kargo"] })
+    )
+    expect(changes.at(-1)).not.toHaveProperty("line_links")
+  })
+
+  it("leave the light strip's note to its one link", () => {
+    renderPanel(bar({ variant: "light" }))
+    expect(screen.queryByText("1. duyurunun bağlantısı")).toBeNull()
   })
 
   it("offer where the lines sit and the bar's size alone in Stil, open, even for one line", async () => {
@@ -177,5 +219,8 @@ describe("the announcement bar's settings", () => {
         (each) => each.key === "announcement.hover_pause"
       )?.group
     ).toBe("motion")
+    expect(keys(bar({ mode: "rotate" }), "kayarak")).toContain("announcement.transition")
+    expect(keys(bar({ mode: "rotate" }), "oklar")).toContain("announcement.arrows")
+    expect(keys(bar({ mode: "first" }), "kayarak")).not.toContain("announcement.transition")
   })
 })

@@ -491,6 +491,11 @@ export type AnnouncementBar = SectionBase & {
   phone?: boolean
   /** The light strip's "Hesabım"; true: written. */
   account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only); absent: none (owner 2026-11-27: the strip as a slider).
+   */
+  line_links?: (LayoutLink | null)[]
 } & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {

@@ -362,6 +362,11 @@ export type StoreAnnouncementBar = {
   phone?: boolean
   /** The light strip's "Hesabım" (true); absent: not written. */
   account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only, or a link to a record since removed); absent: none.
+   */
+  line_links?: (StoreLayoutLink | null)[]
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {

@@ -166,6 +166,11 @@ export async function shopView(): Promise<ShopView> {
           ? layoutLink({ ...bar.link, label: note }, t)
           : null
         : layoutLink(bar.link ?? null, t)
+  // The dark bar's lines' own links, by each line's place (owner 2026-11-27: a slider's)
+  const lineLinks =
+    bar?.type === "announcement_bar" && bar.variant !== "light" && bar.line_links?.some(Boolean)
+      ? bar.line_links.map((link) => layoutLink(link, t))
+      : null
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
@@ -213,6 +218,7 @@ export async function shopView(): Promise<ShopView> {
     // The top strip's design and parts (owner 2026-11-27); no strip section: none above the header
     ...(bar?.type === "announcement_bar" ? { topStrip: topStripOf(bar) } : {}),
     ...(announcementLink ? { announcementLink } : {}),
+    ...(lineLinks ? { announcementLineLinks: lineLinks } : {}),
     ...(editing ? { editor: true as const } : {}),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them

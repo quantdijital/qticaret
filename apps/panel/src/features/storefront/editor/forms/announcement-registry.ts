@@ -32,6 +32,8 @@ const GROUPS: Readonly<Record<AnnouncementSetting, FieldGroupName>> = {
   align: "appearance",
   size: "appearance",
   tone: "appearance",
+  transition: "motion",
+  arrows: "motion",
 }
 
 /**

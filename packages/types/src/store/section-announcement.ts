@@ -41,6 +41,17 @@ export const ANNOUNCEMENT_SETTINGS = {
   size: ["small", "medium", "large"],
   /** The bar's ground: the graphite stage (today's) or the shop's main colour. */
   tone: ["graphite", "primary"],
+  /**
+   * How a line gives way while they take turns: fading in place (today's)
+   * or sliding across like a slider (the next comes in from the end, a step
+   * back from the start). Under reduced motion neither moves.
+   */
+  transition: ["fade", "slide"],
+  /**
+   * Small previous / next arrows beside the turning lines (a slider's).
+   * They work under reduced motion too, where the lines never turn by themselves.
+   */
+  arrows: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type AnnouncementSetting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -56,6 +67,8 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in AnnouncementSetting]: Annou
   align: "auto",
   size: "medium",
   tone: "graphite",
+  transition: "fade",
+  arrows: "off",
 }
 
 /** The settings in the order the panel offers them. */

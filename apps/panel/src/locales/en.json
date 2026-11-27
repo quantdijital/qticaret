@@ -10443,13 +10443,14 @@
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
         "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "lineLink": "Announcement {{number}}'s link",
         "mode": {
           "label": "Several announcements",
           "term": "multiple",
           "first": "First only",
-          "rotate": "In turn",
+          "rotate": "Slider (one at a time)",
           "inline": "Side by side",
-          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. Slider: one announcement at a time, changing at the interval you pick; set its transition, arrows and pausing under Motion. With reduced motion it does not turn by itself; with arrows on, visitors step through by hand."
         },
         "interval": {
           "label": "Interval",
@@ -10472,6 +10473,20 @@
           "on": "On",
           "off": "Off",
           "hint": "It always stops when the keyboard reaches the bar."
+        },
+        "transition": {
+          "label": "Transition",
+          "term": "transition",
+          "fade": "Fade",
+          "slide": "Slide",
+          "hint": "Fade: the announcement fades out in place and the next appears (as today). Slide: the next slides in from the side and the old one leaves the other way. With reduced motion both change instantly."
+        },
+        "arrows": {
+          "label": "Previous / next arrows",
+          "term": "arrows",
+          "off": "Off",
+          "on": "On",
+          "hint": "Small arrows beside the announcement let visitors step through by hand. They also work with reduced motion."
         },
         "align": {
           "label": "Alignment",
