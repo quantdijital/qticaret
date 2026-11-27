@@ -46,6 +46,8 @@ const Raw = z.looseObject({
   comment: z.string().optional(),
   createTime: z.string().optional(),
   updateTime: z.string().optional(),
+  // Not in the v4 reference, but in Google's answers: the review's page in Business Profile
+  reviewReplyUrl: z.string().optional(),
   reviewReply: z
     .looseObject({
       comment: z.string().optional(),
@@ -66,6 +68,8 @@ export interface GoogleReviewInput {
   reply: string | null
   replied_at: Date | null
   reply_state: ReplyState | null
+  /** The review's id on Google Maps (`reviewReplyUrl`'s last part), for its link; null when Google gives none. */
+  maps_review_id: string | null
 }
 
 const REVIEW_ID = /^[\w.~-]{1,512}$/
@@ -99,6 +103,34 @@ export function photoOf(value: string | undefined, fakeOrigin?: string): string 
   }
 }
 
+// Maps' review id: base64url of a short protobuf (`Ci9DQUlRQUNv…EAE`, `ChZDSUhNMG9n…EAE`)
+const MAPS_REVIEW_ID = /^[A-Za-z0-9_-]{16,512}$/
+
+/**
+ * The review's id on Google Maps, from the address Business Profile gives
+ * as `reviewReplyUrl` (`https://business.google.com/n/{location}/reviews/{id}`):
+ * the same id Maps names the review by in its link, unlike the API's
+ * encrypted `reviewId` (adr/0058 Ek 2026-11-27). Null for anything else.
+ */
+export function mapsReviewIdOf(value: string | undefined): string | null {
+  if (!value || value.length > 2000) {
+    return null
+  }
+  try {
+    const url = new URL(value)
+    const parts = url.pathname.split("/").filter(Boolean)
+    const id = parts.at(-1) ?? ""
+    return url.protocol === "https:" &&
+      url.hostname === "business.google.com" &&
+      parts.at(-2) === "reviews" &&
+      MAPS_REVIEW_ID.test(id)
+      ? id
+      : null
+  } catch {
+    return null
+  }
+}
+
 /** A review as kept; null for one without a star rating, an id or a date (none is shown). */
 export function reviewOf(value: unknown, photoOrigin?: string): GoogleReviewInput | null {
   const parsed = Raw.safeParse(value)
@@ -127,5 +159,6 @@ export function reviewOf(value: unknown, photoOrigin?: string): GoogleReviewInpu
     reply: replyText,
     replied_at: replyText ? (dateOf(reply?.updateTime) ?? null) : null,
     reply_state: replyText ? replyStateOf(reply?.reviewReplyState) : null,
+    maps_review_id: mapsReviewIdOf(raw.reviewReplyUrl),
   }
 }

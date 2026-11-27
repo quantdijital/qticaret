@@ -2,6 +2,8 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGoogle } from "@qticaret/testing"
 import type { FakeBusinessReview, FakeGoogle } from "@qticaret/testing"
 import { GOOGLE_REVIEWS_MODULE } from "../../src/modules/google-reviews"
+import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
+import type ProductReviewsModuleService from "../../src/modules/product-reviews/service"
 import type GoogleReviewsModuleService from "../../src/modules/google-reviews/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
@@ -42,9 +44,22 @@ interface StoreAnswer {
       comment: string | null
       created_at: string
       reply: { comment: string; created_at: string | null } | null
+      url: string | null
     }[]
   } | null
 }
+
+type StoreGoogleReview = NonNullable<StoreAnswer["google_reviews"]>["reviews"][number]
+
+interface MixedAnswer {
+  reviews: { id: string; created_at: string }[]
+  google_reviews?: StoreGoogleReview[]
+  count: number
+}
+
+// The fake place's CID (`?cid=12673514229871092736`) in hex, as Maps' review links carry it
+const REVIEW_LINK =
+  /^https:\/\/www\.google\.com\/maps\/reviews\/data=!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNv[\w-]+!2m1!1s0x0:0xafe15e0b7f532400\?hl=tr$/
 
 const ENV = ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_BASE_URL"] as const
 const BASE = [
@@ -166,6 +181,11 @@ medusaIntegrationTestRunner({
         true
       )
       expect(shown?.reviews.some((each) => each.comment === null)).toBe(true)
+      // Each one links to itself on Google Maps (adr/0058 Ek 2026-11-27)
+      for (const each of shown?.reviews ?? []) {
+        expect(each.url).toMatch(REVIEW_LINK)
+      }
+      expect(new Set(shown?.reviews.map((each) => each.url)).size).toBe(16)
       expect(JSON.stringify(raw.data)).not.toContain("1//")
     })
 
@@ -328,6 +348,63 @@ medusaIntegrationTestRunner({
       expect(removed).toBeNull()
       expect(stillConnected).toMatchObject({ connected: true, location: null })
       expect(gone).toBeNull()
+    })
+
+    it("mixes Google's reviews among the shop's by date on the reviews page, the star filter the shop's alone", async () => {
+      const container = getContainer()
+      await loadTrAddressFixture(container)
+      const shop = await stockShop(container)
+      const handle = `bicak-mix-${String(Date.now())}`
+      const { productId } = await stockedProduct(container, shop, handle, 5, 250)
+      storefront = await createStorefront(container)
+      await connect("/admin/google/reviews/connect")
+      const day = 24 * 60 * 60 * 1000
+      // Newer than every Google review, then between them (theirs go back over a year)
+      const [newest, middle] = await container
+        .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+        .addMigratedReviews(
+          [new Date(), new Date(Date.now() - 100 * day)].map((created_at, index) => ({
+            source_ref: `google-mix:${handle}:${String(index)}`,
+            product_id: productId,
+            customer_id: null,
+            rating: 5,
+            title: null,
+            body: "Elime ulaştı, anlatıldığı gibi.",
+            author_name: "A. Y.",
+            has_link: false,
+            published: true,
+            created_at,
+          }))
+        )
+      const page = async (query: string) =>
+        (await http.get<MixedAnswer>(`/store/reviews?${query}`, { headers: storefront.headers }))
+          .data
+
+      const all = await page("google=1&limit=50")
+      const first = await page("google=1&limit=1")
+      const second = await page("google=1&offset=1&limit=3")
+      const filtered = await page("google=1&rating=5&limit=50")
+      const plain = await page("limit=50")
+
+      // Both sources, one count; Google's figures stay apart (`/store/google-reviews`)
+      expect(all.count).toBe(18)
+      expect(all.reviews.map((each) => each.id)).toEqual([newest, middle])
+      expect(all.google_reviews).toHaveLength(16)
+      expect(all.google_reviews?.[0]?.url).toMatch(REVIEW_LINK)
+      const dates = all.google_reviews?.map((each) => each.created_at) ?? []
+      expect([...dates].sort().reverse()).toEqual(dates)
+      // The newest is the shop's; the next three Google's, the shop's older one further down
+      expect(first.reviews.map((each) => each.id)).toEqual([newest])
+      expect(first.google_reviews).toEqual([])
+      expect(second.reviews).toEqual([])
+      expect(second.google_reviews?.map((each) => each.id)).toEqual(
+        all.google_reviews?.slice(0, 3).map((each) => each.id)
+      )
+      // The stars and the plain list are the shop's alone
+      expect(filtered.google_reviews).toBeUndefined()
+      expect(filtered.count).toBe(2)
+      expect(plain.google_reviews).toBeUndefined()
+      expect(plain.count).toBe(2)
     })
 
     it("never puts Google reviews in the structured data: Product and OnlineStore carry ours only", async () => {

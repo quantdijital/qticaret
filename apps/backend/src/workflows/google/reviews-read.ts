@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { replyShown } from "../../lib/google/business-review"
+import { reviewLinkOf } from "../../lib/google/review-link"
 import { BUSINESS_PROFILE_SCOPE, googleClientOf, hasScope } from "../../lib/google/oauth"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -101,13 +102,44 @@ export async function panelGoogleReviews(container: Resolver, offset: number) {
 }
 
 /**
+ * The location whose Google reviews the storefront may show: picked, synced,
+ * and what was kept within Google's 30 days; null otherwise.
+ */
+export async function shownGoogleLocation(
+  container: Resolver,
+  now = new Date()
+): Promise<LocationRow | null> {
+  const location = await googleReviewsOf(container).currentLocation()
+  return location && fresh(location, now) ? location : null
+}
+
+/**
+ * One Google review as the Store API gives it: the reviewer as Google shows
+ * them, the owner's reply once Google shows it, and the review's own link on
+ * Google Maps (adr/0058 Ek 2026-11-27), null when it cannot be made.
+ */
+export const storeGoogleReview = (review: ReviewRow, location: Pick<LocationRow, "maps_uri">) => ({
+  id: review.id,
+  author: review.reviewer_name,
+  photo_url: review.reviewer_photo_url,
+  rating: review.rating,
+  comment: review.comment,
+  created_at: iso(review.written_at),
+  reply:
+    review.reply && replyShown(review.reply_state)
+      ? { comment: review.reply, created_at: iso(review.replied_at) }
+      : null,
+  url: reviewLinkOf(review.maps_review_id ?? null, location.maps_uri),
+})
+
+/**
  * The storefront's Google reviews (adr/0058): the location's name, Google's
  * own average and count, its Maps and "write a review" links, and the
  * newest reviews the shop did not hide, each with the owner's reply once
- * Google shows it. `minRating`: only reviews with at least these stars
- * and text (the home page's excerpts, adr/0058 Ek 2026-11-06); `limit` 0,
- * none (the figures alone). Null with no location, before the first sync
- * and once what was kept is past Google's 30 days.
+ * Google shows it and its own link. `minRating`: only reviews with at least
+ * these stars and text (the home page's excerpts, adr/0058 Ek 2026-11-06);
+ * `limit` 0, none (the figures alone). Null with no location, before the
+ * first sync and once what was kept is past Google's 30 days.
  */
 export async function storefrontGoogleReviews(
   container: Resolver,
@@ -115,13 +147,12 @@ export async function storefrontGoogleReviews(
   now = new Date(),
   minRating?: number
 ) {
-  const reviews = googleReviewsOf(container)
-  const location = await reviews.currentLocation()
-  if (!location || !fresh(location, now)) {
+  const location = await shownGoogleLocation(container, now)
+  if (!location) {
     return null
   }
   const shown = (
-    await reviews.newest({
+    await googleReviewsOf(container).newest({
       limit,
       shownOnly: true,
       ...(minRating === undefined ? {} : { minRating }),
@@ -136,17 +167,6 @@ export async function storefrontGoogleReviews(
     count: location.total_review_count ?? 0,
     maps_url: location.maps_uri,
     write_url: location.new_review_uri,
-    reviews: shown.map((review) => ({
-      id: review.id,
-      author: review.reviewer_name,
-      photo_url: review.reviewer_photo_url,
-      rating: review.rating,
-      comment: review.comment,
-      created_at: iso(review.written_at),
-      reply:
-        review.reply && replyShown(review.reply_state)
-          ? { comment: review.reply, created_at: iso(review.replied_at) }
-          : null,
-    })),
+    reviews: shown.map((review) => storeGoogleReview(review, location)),
   }
 }

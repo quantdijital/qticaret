@@ -42,6 +42,7 @@ describe("a Google review read", () => {
       reply: "Teşekkür ederiz.",
       replied_at: new Date("2026-10-31T12:00:00Z"),
       reply_state: "approved",
+      maps_review_id: null,
     })
   })
 

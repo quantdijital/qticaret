@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto"
+
 /**
  * What the Business Profile stand-in serves (adr/0058): one account, one
  * location of a knife workshop and its Google reviews in Turkish, written
@@ -28,6 +30,8 @@ export interface FakeBusinessReview {
   createTime: string
   updateTime: string
   reviewReply?: { comment: string; updateTime: string; reviewReplyState?: string }
+  /** The review in Business Profile, by its Maps id (Google sends it, the v4 reference does not list it). */
+  reviewReplyUrl?: string
 }
 
 export interface FakeBusinessAccount {
@@ -156,6 +160,26 @@ const idOf = (seed: string): string =>
     .toString("base64url")
     .replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 48)
 
+/** A protobuf length-delimited field (short values only: one-byte lengths). */
+const field = (tag: number, bytes: Buffer): Buffer =>
+  Buffer.concat([Buffer.from([(tag << 3) | 2, bytes.length]), bytes])
+
+/**
+ * A stable Maps id for a review, in the shape Google Maps gives it
+ * (`Ci9DQUlRQUNv…EAE`): base64url of `{1: inner, 2: 1}`, where `inner` is
+ * base64url of `{1: 2, 2: 0, 5: {1: "rp_h:<22 characters>"}}`.
+ */
+export function mapsReviewIdOf(seed: string): string {
+  const key = createHash("sha256").update(seed).digest("base64url").slice(0, 22)
+  const inner = Buffer.concat([
+    Buffer.from([0x08, 0x02, 0x10, 0x00]),
+    field(5, field(1, Buffer.from(`rp_h:${key}`))),
+  ]).toString("base64url")
+  return Buffer.concat([field(1, Buffer.from(inner)), Buffer.from([0x10, 0x01])]).toString(
+    "base64url"
+  )
+}
+
 export interface FakeBusinessProfileData {
   accounts: FakeBusinessAccount[]
   /** Each account's locations, by the account's name. */
@@ -195,6 +219,7 @@ export function businessProfileData(options: {
       ...(each.text ? { comment: each.text } : {}),
       createTime: written.toISOString(),
       updateTime: written.toISOString(),
+      reviewReplyUrl: `https://business.google.com/n/${location.slice("locations/".length)}/reviews/${mapsReviewIdOf(id)}`,
       ...(each.reply
         ? {
             reviewReply: {
