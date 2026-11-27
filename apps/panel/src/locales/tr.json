@@ -10666,7 +10666,9 @@
         },
         "link": {
           "label": "Şerit düğmesi",
-          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez."
+          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez.",
+          "lightLabel": "Notun bağlantısı",
+          "lightHint": "İsteğe bağlı: nota tıklayınca gidilecek sayfa."
         }
       },
       "problems": {

@@ -147,6 +147,16 @@ export function AnnouncementForm({
       ) : (
         <AnnouncementMode section={section} onChange={onChange} />
       )}
+      {/* The dark bar's small button, the light strip's note's link: the strip's content */}
+      <LinkField
+        id={`${section.id}-announcement-link`}
+        label={t(`${A}.link.${linked ? "label" : "lightLabel"}`)}
+        hint={t(`${A}.link.${linked ? "hint" : "lightHint"}`)}
+        link={section.link ?? null}
+        onChange={(link) => {
+          onChange({ ...section, link })
+        }}
+      />
       <TopStripParts
         section={section}
         onChange={(next) => {

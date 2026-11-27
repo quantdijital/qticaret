@@ -11,6 +11,7 @@ import {
   TOP_SLIDER_SETTING_NAMES,
   newsletterHasNote,
 } from "@qticaret/types"
+import type { TopSliderSetting } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { heroFullFields } from "./hero-full-registry"
@@ -110,6 +111,15 @@ const PB = `${E}.priceBands`
 
 /** One entry: its label and term keys (`<label>Term` beside a flat label), its steps' names. */
 const T = "storefront.editor.topSlider"
+
+/** Where the top image slider's settings stand in its "Stil" tab (`top-slider-groups.tsx`). */
+const TOP_SLIDER_GROUPS: Readonly<Record<TopSliderSetting, FieldGroupName>> = {
+  height: "layout",
+  interval: "motion",
+  transition: "motion",
+  arrows: "controls",
+  dots: "controls",
+}
 
 const entry = (
   section: AnySection,
@@ -401,7 +411,7 @@ export function contentFields(section: AnySection): RegistryField[] {
         const steps: readonly string[] = TOP_SLIDER_SETTINGS[name]
         return {
           key: `top_slider.${name}`,
-          group: "content" as const,
+          group: TOP_SLIDER_GROUPS[name],
           label: `${T}.${name}.label`,
           term: `${T}.${name}.term`,
           options: steps.map((step) => `${T}.${name}.${step}`),

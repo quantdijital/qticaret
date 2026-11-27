@@ -10666,7 +10666,9 @@
         },
         "link": {
           "label": "Bar button",
-          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn."
+          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn.",
+          "lightLabel": "Note link",
+          "lightHint": "Optional: the page a click on the note opens."
         }
       },
       "problems": {
