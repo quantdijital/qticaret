@@ -161,7 +161,7 @@ describe("the footer's own settings", () => {
     expect(right).toContain("bottom-[calc(9.5rem+env(safe-area-inset-bottom))]")
     expect(right).toContain("rounded-pill")
     const left = on({ side: "left", shape: "square", mobile: false })
-    expect(left).toContain("left-1")
+    expect(left).toContain("left-[max(0.25rem,calc((100%_-_var(--container))_/_2_+_0.25rem))]")
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
