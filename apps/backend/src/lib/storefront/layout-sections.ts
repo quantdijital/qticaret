@@ -7,7 +7,6 @@ import { brands } from "./sections/brands"
 import { categories } from "./sections/categories"
 import { faq, placedFaq } from "./sections/faq"
 import { featuredProduct } from "./sections/featured-product"
-import { googleRating } from "./sections/google-rating"
 import { hero } from "./sections/hero"
 import { heroSlider } from "./sections/hero-slider"
 import { categoryMain, footerBar, headerBar, productMain } from "./sections/main"
@@ -63,7 +62,6 @@ export const pageSection = z.discriminatedUnion(
     brands,
     posts,
     reviews,
-    googleRating,
     stats,
     steps,
     searchBox,

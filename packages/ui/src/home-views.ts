@@ -10,40 +10,6 @@ import type { CardRatingView, ImageView, LinkView, ProductCardView, SpecView } f
  */
 
 /**
- * The home page's Google rating badge (`google_rating`, adr/0058 Ek
- * 2026-11-06): Google's own average (one decimal) and count from the
- * shop's Business Profile, a link to `/yorumlar`, if the shop wants a link
- * to its place on Google Maps, and up to three recent 4–5 star excerpts.
- * The storefront leaves the section out when there is nothing to show.
- * Text only: never structured data (Google's review snippet guidelines).
- */
-export interface GoogleRatingSectionView {
-  id: string
-  type: "google_rating"
-  title: string
-  /** Google's average in Turkish (`4,6`), or null while Google has none. */
-  average: string | null
-  /** The same as a number, for the stars. */
-  rating: number | null
-  /** The whole badge in words for a screen reader. */
-  label: string
-  /** "Google'da 16 değerlendirme", the link to `/yorumlar`. */
-  reviews: LinkView
-  /** "Google'da gör": the place on Google Maps (https, a new tab); null when off or unknown. */
-  profileUrl: string | null
-  excerpts: GoogleRatingExcerptView[]
-}
-
-export interface GoogleRatingExcerptView {
-  author: string
-  rating: number
-  ratingLabel: string
-  /** The review's text, whole and on one line; a theme quotes its first sentence. */
-  text: string
-  date: { label: string; dateTime: string }
-}
-
-/**
  * The home page's sliding opening (`hero_slider`, adr/0049 Ek 2026-11-06),
  * an extra to the still hero: 2–6 slides in the shop's order. Nothing
  * moves by itself unless its `autoplay` is on; the theme stops it on hover, focus,

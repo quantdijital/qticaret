@@ -29,9 +29,6 @@ export const LAYOUT_LIMITS = {
   reviews: 12,
 } as const
 
-/** The Google rating badge's excerpts: none (off) to three (adr/0058 Ek 2026-11-06). */
-export const GOOGLE_RATING_LIMITS = { excerpts: { max: 3, on: 2 } } as const
-
 /** A hero slider's slides (adr/0049 Ek 2026-11-06); how long each stays is the scroller kit's speed. */
 export const SLIDER_LIMITS = {
   slides: { min: 2, max: 6 },

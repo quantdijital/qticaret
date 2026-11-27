@@ -26,7 +26,6 @@ const SHOP_FILLED: ReadonlySet<AnySection["type"]> = new Set([
   "brands",
   "posts",
   "reviews",
-  "google_rating",
   "trust_badges",
   "featured_product",
   // Its strips whose record is gone are left out; with none left it is not drawn

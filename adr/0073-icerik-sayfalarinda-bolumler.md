@@ -99,7 +99,7 @@ Ana sayfanın türlerinden **ana sayfanın açılışı olanlar ile üst ve alt 
 | Tür | Sayfada | Neden |
 | --- | --- | --- |
 | `rich_text`, `banner`, `strip_gallery`, `faq`, `trust_badges`, `help`, `newsletter` (sayfa biçimleri), `marquee` | Var | Ürün ve kategori sayfasındakilerin aynısı ve görsel anlatım |
-| `products`, `featured_product`, `categories`, `brands`, `posts`, `reviews`, `google_rating` | Var | Kurumsal sayfada satışa ve güvene köprü (seçki, yorumlar, puan) |
+| `products`, `featured_product`, `categories`, `brands`, `posts`, `reviews` (`google_rating` 2026-11-27 kaldırıldı, adr/0058) | Var | Kurumsal sayfada satışa ve güvene köprü (seçki, yorumlar, puan) |
 | `hero`, `hero_slider` | Yok | Ana sayfanın açılışı: ilk sırada h1'i ve LCP görselini sahiplenir (`Hero.tsx` `first`). İçerik sayfasında h1 sayfa başınındır; açılış görseli kapaktır. |
 | `price_bands` | Yok | Ana sayfaya özgü alışveriş aracı, sayfada bir kez sınırı var |
 | `announcement_bar`, `header_bar`, `footer_bar`, `newsletter` `in_footer` biçimi, alt bilgi satırları | Yok | Üst ve alt bilgi grubunundur, her sayfada zaten çizilir |

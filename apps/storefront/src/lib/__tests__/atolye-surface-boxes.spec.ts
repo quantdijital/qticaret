@@ -55,7 +55,6 @@ const MOVED: Record<string, [pane: number, inner: number]> = {
   "order/ReturnForm.tsx": [0, 2],
   "payment-link/LinkLines.tsx": [0, 2],
   "sections/Faq.tsx": [1, 0],
-  "sections/GoogleRating.tsx": [1, 0],
   "sections/Guides.tsx": [1, 0],
   "sections/ShelfRack.tsx": [1, 0],
   "sections/Signup.tsx": [1, 0],

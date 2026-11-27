@@ -36,13 +36,9 @@ class GoogleMerchantModuleService extends MedusaService({
     this.encryptionKey = parseKey(options.encryptionKey, "google-merchant encryptionKey")
   }
 
-  /**
-   * A new `state` for the staff member, keeping the PKCE verifier on the
-   * server. `prefix` (a few letters and a dot, never in base64url) tells the
-   * callback which panel page to go back to; the hash covers it too.
-   */
-  async startState(userId: string, verifier: string, prefix = ""): Promise<string> {
-    const state = `${prefix}${randomBytes(24).toString("base64url")}`
+  /** A new `state` for the staff member, keeping the PKCE verifier on the server. */
+  async startState(userId: string, verifier: string): Promise<string> {
+    const state = randomBytes(24).toString("base64url")
     await this.createGoogleOauthStates({
       state_hash: hashOf(state),
       verifier_encrypted: encryptPii(verifier, this.encryptionKey, CONTEXT),

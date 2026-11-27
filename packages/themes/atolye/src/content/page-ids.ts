@@ -34,7 +34,6 @@ export const PAGE_FIXED_IDS: readonly string[] = [
   "taksit-secenekleri",
   "guvencelerimiz",
   "kargo-firmalari",
-  "google-yorumlari",
   // A legal text's and a post's parts
   "diger-metinler",
   "etiketler",

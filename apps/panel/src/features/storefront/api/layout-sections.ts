@@ -266,20 +266,6 @@ export interface ReviewsSection extends BodySectionBase {
 /** The latest posts or reviews: a title and how many. */
 export type CountedSection = PostsSection | ReviewsSection
 
-/**
- * The home page's Google rating badge (adr/0058 Ek 2026-11-06): Google's
- * average and count from the shop's Business Profile, shown only while
- * the shop's Google reviews are connected and there are some.
- */
-export interface GoogleRatingSection extends BodySectionBase {
-  type: "google_rating"
-  title: string | null
-  /** Recent 4–5 star excerpts under the badge: 0 (off) to 3. */
-  excerpts: number
-  /** "Google'da gör": the place on Google Maps. */
-  profile_link: boolean
-}
-
 export interface RichTextSection extends BodySectionBase {
   type: "rich_text"
   title: string | null
@@ -454,7 +440,6 @@ export type HomeSection =
   | FeaturedProductSection
   | BrandsSection
   | CountedSection
-  | GoogleRatingSection
   | RichTextSection
   | TrustBadgesSection
   | WordedSection

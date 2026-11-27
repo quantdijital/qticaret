@@ -696,28 +696,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu Search Console mülkü bağlı Google hesabının okuyabildikleri arasında değil.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
-  "google.reviews_scope":
-    "Google hesabı İşletme Profili izni verilmeden bağlanmış; Google yorumları için yeniden bağlayın.",
-  "google.location_invalid":
-    "Bu işletme konumu bağlı Google hesabının yönettikleri arasında değil; listeyi yenileyin.",
-  "google.review_not_found": "Bu Google yorumu artık yok; Google'da silinmiş olabilir.",
-  "google.hide_reason_required":
-    "Yorumu vitrinden kaldırmak için bir gerekçe seçin: kişisel veri, hakaret ya da konu dışı.",
-  "google.hide_reason_invalid":
-    "Google yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için kaldırılabilir.",
-  "google.hide_reason_unexpected": "Vitrine geri alınan yorum için gerekçe gönderilmez.",
-  "google.reply_required": "Yanıt boş olamaz.",
-  "google.reply_too_long":
-    "Yanıt Google'ın sınırını aşıyor (4096 bayt; Türkçe harfler iki sayılır). Biraz kısaltın.",
-  "google.reply_invalid": "Yanıtta görünmeyen denetim karakterleri var; metni yeniden yazın.",
-  "google.reply_missing": "Bu yorumun kaldırılacak bir yanıtı yok.",
-  "google.reply_forbidden":
-    "Bağlı Google hesabının bu işletmenin yorumlarını yanıtlama yetkisi yok; profilin sahibi ya da yöneticisi olan hesabı bağlayın.",
-  "google.reply_unverified":
-    "Google yalnızca doğrulanmış işletme profillerinde yanıta izin veriyor; profili Google'da doğrulayın.",
-  "google.reply_refused": "Google bu yanıtı kabul etmedi; metni gözden geçirip yeniden deneyin.",
-  "google.reply_unavailable":
-    "Google yanıtı şu an almadı; hiçbir şey değişmedi. Biraz sonra yeniden deneyin.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",

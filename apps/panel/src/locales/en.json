@@ -2485,7 +2485,7 @@
         "disconnected": "Google disconnected.",
         "confirm": {
           "title": "Disconnect Google?",
-          "description": "Access ends at Google too, products are no longer sent and the Google reviews leave the storefront. The products in Merchant Center stay there until you remove them or they lapse.",
+          "description": "Access ends at Google too and products are no longer sent. The products in Merchant Center stay there until you remove them or they lapse.",
           "action": "Disconnect"
         },
         "outcome": {
@@ -9305,7 +9305,6 @@
     "sections": "Customers' words",
     "sectionReviews": "Reviews",
     "sectionQuestions": "Questions",
-    "sectionGoogle": "Google reviews",
     "questions": {
       "description": "Customers' questions about products. An answer in the shop's name shows at once; answers from customers who received the product wait for you.",
       "views": "Question state",
@@ -9336,86 +9335,6 @@
       "alt": "Photo {{number}} in {{author}}'s review",
       "title": "Photo in {{author}}'s review",
       "position": "{{number}} / {{count}}"
-    },
-    "google": {
-      "title": "Google reviews",
-      "pageDescription": "The reviews on your Google Business Profile are read every day and shown on the storefront's reviews page with Google's rating and link, apart from your own reviews.",
-      "description": "Your business profile's rating, review count and newest reviews appear on the storefront under Google's name. The reviews are Google's; they are not edited here.",
-      "notConfigured": "The Google connection is not set up for this shop yet.",
-      "notConnected": "Connect with the Google account that owns or manages your business profile. You allow it on Google's own screen; your password is not shared with us.",
-      "notGranted": "Your Google account is connected, but without Business Profile access. Allow it too on Google's screen so we can read the reviews.",
-      "connect": "Connect Google reviews",
-      "reconnect": "Connect again",
-      "connected": "Google reviews connected.",
-      "noLocations": "This Google account manages no business profile. Connect again with the account that owns or manages it.",
-      "location": "Business location",
-      "chooseLocation": "Choose a location",
-      "useLocation": "Use this location",
-      "locationSaved": "Location saved; the reviews were read from Google.",
-      "changeLocation": "Change location",
-      "figures": "{{rating}} on Google · {{count}} reviews",
-      "noFigures": "No reviews on Google yet",
-      "syncedAgo": "last synced {{when}}",
-      "errorReconnect": "The Google connection cannot read the reviews; connect again.",
-      "errorLost": "The connected Google account no longer reaches this business profile; choose the location again or connect with the profile's owner.",
-      "errorLater": "The last sync got no answer from Google; the storefront shows the reviews last read. It is tried again the next day.",
-      "syncNow": "Sync now",
-      "synced": "The reviews were read from Google.",
-      "syncFailed": "No answer from Google; try again later.",
-      "remove": "Disconnect",
-      "removed": "Google reviews removed from the storefront.",
-      "confirm": {
-        "title": "Remove Google reviews?",
-        "description": "The Google reviews leave the storefront and the copies kept here are deleted. The reviews stay on Google. The Google account connection (Merchant Center, Search Console) stays.",
-        "action": "Remove"
-      },
-      "listTitle": "Reviews",
-      "listDescription": "The reviews read from Google, newest first. Click a review to reply or take it off the storefront. A review can be taken off the storefront only for personal data, abuse or being off topic; Google's rating and count do not change.",
-      "empty": "This location has no reviews on Google.",
-      "anonymous": "Google user",
-      "noText": "A rating only.",
-      "replied": "Replied",
-      "hiddenBadge": "Off the storefront",
-      "shownDone": "The review is back on the storefront.",
-      "hiddenDone": "The review is off the storefront.",
-      "hide": "Take off the storefront",
-      "hideFor": "Take {{author}}'s review off the storefront",
-      "hideTitle": "Take the review off the storefront?",
-      "hideDescription": "{{author}}'s review stays on Google; it is only left off the storefront. Choose the reason.",
-      "hideReason": "Reason",
-      "hideRule": "A negative review cannot be taken off for its rating; only for one of these three reasons.",
-      "reasons": {
-        "personal_data": "Contains personal data",
-        "abusive": "Insults, profanity or hate speech",
-        "off_topic": "Off topic or spam"
-      },
-      "hiddenWhy": "Reason: {{reason}}",
-      "restore": "Put back on the storefront",
-      "open": "Open {{author}}'s review",
-      "dialogTitle": "{{author}}'s review",
-      "reply": "Your reply",
-      "replyHint": "Plain text. Shown under the review on Google and on the storefront as “The shop's reply”.",
-      "replyPlaceholder": "E.g. Thank you for your review…",
-      "replyBytes": "{{used}} / {{max}} bytes",
-      "replyTooLong": "Google takes at most {{max}} bytes; accented letters count as two. Shorten it a little.",
-      "replySend": "Reply",
-      "replyUpdate": "Update reply",
-      "replyDelete": "Delete reply",
-      "replySent": "Reply sent to Google.",
-      "replyUpdated": "Reply updated on Google.",
-      "replyDeleted": "Reply deleted from Google.",
-      "repliedAt": "Last reply {{when}}",
-      "replyPending": "Awaiting Google",
-      "replyPendingNote": "Google is reviewing the reply; once approved it shows on the storefront too.",
-      "replyRejected": "Not published by Google",
-      "replyRejectedNote": "Google did not publish this reply; you can edit it and send it again.",
-      "deleteConfirm": {
-        "title": "Delete the reply?",
-        "description": "The reply is removed from Google and the storefront; the review stays.",
-        "action": "Delete"
-      },
-      "visibility": "On the storefront",
-      "shownLine": "This review shows on the storefront's reviews page."
     }
   },
   "staff": {
@@ -9918,10 +9837,6 @@
           "name": "Customer reviews",
           "description": "Your customers' latest reviews."
         },
-        "google_rating": {
-          "name": "Google rating",
-          "description": "Your average rating and review count on Google, and if you like excerpts from recent 4–5 star reviews. Not shown on the storefront while Google reviews are not connected or there are none."
-        },
         "rich_text": {
           "name": "Text",
           "description": "A title and formatted text; product and category cards may be added."
@@ -10237,7 +10152,6 @@
         "brands": "Brands",
         "posts": "From the blog",
         "reviews": "What our customers say",
-        "google_rating": "Rated on Google",
         "newsletter": "Subscribe to the newsletter",
         "help": "Something on your mind?",
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
@@ -11313,19 +11227,6 @@
           "term": "strips_dim",
           "hint": "On wide screens, while the mouse is over a strip or the keyboard selects one, the other strips darken."
         }
-      },
-      "googleRating": {
-        "excerpts": "Show excerpts from recent reviews",
-        "excerptsTerm": "excerpts",
-        "excerptsHint": "Reviews you hid never show; only recent 4 and 5 star reviews with text.",
-        "count": "Number of excerpts",
-        "countTerm": "count",
-        "countHint": "Between 1 and {{max}}.",
-        "profileLink": "Link to your Google page",
-        "profileLinkTerm": "link",
-        "profileLinkHint": "Beside the link to the reviews, your page on Google Maps opens in a new tab.",
-        "source": "The rating and count are Google's; the storefront never changes them. Connection and reviews:",
-        "sourceLink": "Reviews > Google reviews"
       },
       "shared": {
         "badges": {

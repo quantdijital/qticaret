@@ -273,7 +273,6 @@ export function storeAnswer(
         rating: { average: 4.4, count: 5, distribution: { 1: 0, 2: 0, 3: 1, 4: 1, 5: 3 } },
       }
     case "/store/reviews/photos":
-    case "/store/google-reviews":
     case "/store/consents/cookies":
     case "/store/customers/me":
       throw notFound()
