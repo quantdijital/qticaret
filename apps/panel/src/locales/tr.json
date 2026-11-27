@@ -10628,6 +10628,10 @@
             "label": "Yol izinde sayfanın kendi adı",
             "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
           },
+          "crumbs_place": {
+            "label": "Yol izi başlıkla aynı satırda",
+            "hint": "Geniş ekranda yol izi (breadcrumb) başlığın satırında sağda, küçük ve soluk durur. Kapalı: başlığın üstünde ayrı satırda. Telefonda hep üsttedir."
+          },
           "count_word": {
             "label": "Ürün sayısında birim kelimesi",
             "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs."

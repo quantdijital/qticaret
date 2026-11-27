@@ -15,6 +15,7 @@ const found = (query: string) => searchTheme(query, THEME, standard, t).map((hit
 
 const SWITCH = "Ziyaretçi görünümü değiştirebilsin"
 const CRUMB = "Yol izinde sayfanın kendi adı"
+const PLACE = "Yol izi başlıkla aynı satırda"
 
 /** A listing page's layout: one shop-wide group of the theme, today's page by default. */
 describe("Liste sayfası in the theme panel", () => {
@@ -25,6 +26,7 @@ describe("Liste sayfası in the theme panel", () => {
     expect(screen.getByRole("combobox", { name: "Varsayılan görünüm" })).toHaveTextContent("Izgara")
     expect(screen.getByRole("switch", { name: SWITCH })).not.toBeChecked()
     expect(screen.getByRole("switch", { name: CRUMB })).toBeChecked()
+    expect(screen.getByRole("switch", { name: PLACE })).not.toBeChecked()
   })
 
   it("reads a draft from before the group at its defaults", () => {
@@ -56,6 +58,12 @@ describe("Liste sayfası in the theme panel", () => {
       ...THEME,
       listing_page: { ...THEME.listing_page, breadcrumb_current: "hide" },
     })
+
+    await user.click(screen.getByRole("switch", { name: PLACE }))
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, crumbs_place: "beside" },
+    })
   })
 
   it("puts the count's word in the draft, an empty one as none", async () => {
@@ -81,6 +89,7 @@ describe("Liste sayfası in the theme panel", () => {
   it("is found by the settings search", () => {
     expect(found("liste")).toContain("listing_page.default_view")
     expect(found("breadcrumb")).toContain("listing_page.breadcrumb_current")
+    expect(found("breadcrumb")).toContain("listing_page.crumbs_place")
     expect(found("görünüm")).toEqual(
       expect.arrayContaining([
         "listing_page.default_view",

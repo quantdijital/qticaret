@@ -338,6 +338,8 @@ export async function ListingContent({
           sectionsBottom: sections.bottom,
           ...(sections.main ? { main: sections.main } : {}),
           breadcrumbs: trailOf(breadcrumbs(heading.title), shape),
+          // Absent while the trail stands above the title (today's page)
+          ...(shape.crumbs_place === "beside" ? { crumbsPlace: "beside" as const } : {}),
           subcategories: heading.subcategories,
           products: cards,
           total: answer.count,

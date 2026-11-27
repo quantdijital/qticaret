@@ -34,6 +34,7 @@ interface Frame {
       default_view: string
       view_switch: string
       breadcrumb_current: string
+      crumbs_place: string
       count_word: string | null
     }
     search_form: Record<string, unknown>
@@ -60,6 +61,7 @@ const LISTING_PAGE = {
   default_view: "grid",
   view_switch: "hide",
   breadcrumb_current: "show",
+  crumbs_place: "above",
   count_word: null,
 }
 

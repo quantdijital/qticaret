@@ -28,6 +28,14 @@ export const LISTING_BREADCRUMB_CURRENTS = ["show", "hide"] as const
 export type ListingBreadcrumbCurrent = (typeof LISTING_BREADCRUMB_CURRENTS)[number]
 
 /**
+ * Where the trail stands: on its own line above the title (`above`, the
+ * default) or on the title's line, flush right, from 1024 px (`beside`);
+ * narrower, above it either way.
+ */
+export const LISTING_CRUMBS_PLACES = ["above", "beside"] as const
+export type ListingCrumbsPlace = (typeof LISTING_CRUMBS_PLACES)[number]
+
+/**
  * The longest word the shop may write after the product count in the
  * page's toolbar (`count_word`: "24 tur" for "24 ürün").
  */
@@ -37,6 +45,7 @@ export interface ListingPageSettings {
   default_view: ListingViewMode
   view_switch: ListingViewSwitch
   breadcrumb_current: ListingBreadcrumbCurrent
+  crumbs_place: ListingCrumbsPlace
   /** The word after the count ("tur", "oda", "kurs"); none: the page's own "ürün". */
   count_word: string | null
 }
@@ -46,6 +55,7 @@ export const LISTING_PAGE_DEFAULTS: Readonly<ListingPageSettings> = {
   default_view: "grid",
   view_switch: "hide",
   breadcrumb_current: "show",
+  crumbs_place: "above",
   count_word: null,
 }
 
@@ -77,6 +87,11 @@ export function listingPageOf(
       LISTING_BREADCRUMB_CURRENTS,
       value?.breadcrumb_current,
       LISTING_PAGE_DEFAULTS.breadcrumb_current
+    ),
+    crumbs_place: listed(
+      LISTING_CRUMBS_PLACES,
+      value?.crumbs_place,
+      LISTING_PAGE_DEFAULTS.crumbs_place
     ),
     count_word: countWordOf(value?.count_word),
   }

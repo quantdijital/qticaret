@@ -65,6 +65,7 @@ export const THEME: ThemeSettings = {
     default_view: "grid",
     view_switch: "hide",
     breadcrumb_current: "show",
+    crumbs_place: "above",
     count_word: null,
   },
   search_form: { ...SEARCH_FORM_DEFAULTS },

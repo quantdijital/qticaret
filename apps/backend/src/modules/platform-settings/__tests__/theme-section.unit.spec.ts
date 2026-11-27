@@ -81,6 +81,7 @@ describe("theme section", () => {
         default_view: "grid",
         view_switch: "hide",
         breadcrumb_current: "show",
+        crumbs_place: "above",
         count_word: null,
       },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
@@ -335,6 +336,7 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
         default_view: "grid",
         view_switch: "hide",
         breadcrumb_current: "show",
+        crumbs_place: "above",
         count_word: null,
       },
       // and before the search form (adr/0077): its defaults
@@ -348,6 +350,7 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
         default_view: "list",
         view_switch: "show",
         breadcrumb_current: "hide",
+        crumbs_place: "above",
         count_word: null,
       },
       search_form: { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" },
