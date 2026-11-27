@@ -88,7 +88,14 @@ export function Panel({
               {Icon ? (
                 <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               ) : null}
-              <h2 id={id} className="min-w-0 truncate text-sm font-semibold">
+              {/* Where the keyboard lands when the panel opens (`editor-shell.tsx`): not the
+                  back button, whose hint would take the first Escape */}
+              <h2
+                id={id}
+                tabIndex={-1}
+                data-panel-title
+                className="min-w-0 truncate text-sm font-semibold outline-none"
+              >
                 {title}
               </h2>
             </li>

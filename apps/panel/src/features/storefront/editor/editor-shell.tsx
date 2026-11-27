@@ -63,7 +63,7 @@ export function EditorShell({
       shown.scrollTop = listTop.current
     }
   }, [open])
-  // The keyboard's place follows the swap: into the settings' header, back to the row left
+  // The keyboard's place follows the swap: onto the settings' title, back to the row left
   const first = useRef(true)
   useLayoutEffect(() => {
     // Not on the way in: the page opens where it was asked to, the focus left alone
@@ -75,7 +75,9 @@ export function EditorShell({
     const lost = active === null || active === document.body
     if (formKey !== null) {
       if (lost || list.current?.contains(active)) {
-        level.current?.querySelector<HTMLElement>("button")?.focus({ preventScroll: true })
+        level.current
+          ?.querySelector<HTMLElement>("[data-panel-title]")
+          ?.focus({ preventScroll: true })
       }
     } else if (lost || !active.isConnected) {
       list.current

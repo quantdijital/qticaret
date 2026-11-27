@@ -59,6 +59,8 @@ describe("the theme editor's layout", () => {
 
       await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
       expect(settings()).toBeVisible()
+      // The keyboard lands on its title, not on the back button and its hint
+      expect(screen.getByRole("heading", { name: "Giriş" })).toHaveFocus()
       // The list makes room: one side panel, not one beside another, and no drawer
       expect(tree).not.toBeVisible()
       expect(screen.queryByRole("button", { name: "Bölümler" })).toBeNull()
@@ -70,11 +72,12 @@ describe("the theme editor's layout", () => {
       await userEvent.click(screen.getByRole("button", { name: "Bölümlere dön" }))
       expect(screen.queryByRole("region")).toBeNull()
       expect(tree).toBeVisible()
-      // The section just left stays marked
+      // The section just left stays marked, the keyboard back on it
       expect(within(tree).getByRole("button", { name: "Giriş" })).toHaveAttribute(
         "aria-current",
         "true"
       )
+      expect(within(tree).getByRole("button", { name: "Giriş" })).toHaveFocus()
     }
   )
 
