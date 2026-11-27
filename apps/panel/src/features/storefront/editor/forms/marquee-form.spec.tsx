@@ -15,7 +15,7 @@ import {
   newHomeSection,
 } from "@/features/storefront/layout/sections"
 import { AddSectionPicker } from "../add-section-picker"
-import { SectionTree } from "../section-tree"
+import { TopStripPicker } from "../top-strip-picker"
 import { DOC } from "../theme-editor.fixtures"
 import { sectionFields } from "./field-registry"
 import { MarqueeForm } from "./marquee-form"
@@ -133,31 +133,16 @@ describe("scrolling strips per page", () => {
     expect(problems.get("serit1")).toEqual({ limit: "marqueeLimit" })
   })
 
-  it("adds the header's strip from the tree, not while a page has its two", async () => {
-    const dispatch = vi.fn()
-    const tree = (doc: LayoutDocument) => (
-      <SectionTree
-        page="home"
-        doc={doc}
-        problems={new Set()}
-        dispatch={dispatch}
-        onOpen={() => undefined}
-        onRemove={() => undefined}
-        onAddSection={() => undefined}
-        onTheme={() => undefined}
-        themeProblem={false}
-        onLooks={() => undefined}
-        looksProblem={false}
-        onPreferences={() => undefined}
-      />
+  it("adds the header's strip from the top strip's chooser, not while a page has its two", async () => {
+    const act = vi.fn()
+    const picker = (doc: LayoutDocument) => (
+      <TopStripPicker doc={doc} onBack={() => undefined} act={act} onAdded={() => undefined} />
     )
-    const { rerender } = render(tree(docWith(0, 1)))
-    await userEvent.click(screen.getByRole("button", { name: "Kayan yazı ekle" }))
-    expect(dispatch).toHaveBeenLastCalledWith(
-      expect.objectContaining({ type: "add", group: "header" })
-    )
-    rerender(tree(docWith(0, 2)))
-    expect(screen.getByRole("button", { name: "Kayan yazı ekle" })).toBeDisabled()
+    const { rerender } = render(picker(docWith(0, 1)))
+    await userEvent.click(screen.getByRole("button", { name: /^Kayan yazı/ }))
+    expect(act).toHaveBeenLastCalledWith(expect.objectContaining({ type: "add", group: "header" }))
+    rerender(picker(docWith(0, 2)))
+    expect(screen.getByRole("button", { name: /^Kayan yazı/ })).toBeDisabled()
   })
 
   it("offers no other strip in the add dialog once the page has its two", () => {

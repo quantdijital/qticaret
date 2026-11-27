@@ -4,12 +4,10 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { AnySection, LayoutDocument } from "@/features/storefront/api/layout"
-import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { anyPageMarqueesFull } from "@/features/storefront/layout/page-layouts"
 import { AddRow, TreeGroup } from "./tree-rows"
 
-const T = "storefront.editor.tree"
 const S = "storefront.editor.topStrip"
 
 /**
@@ -30,7 +28,8 @@ export function TopStripGroup({
   dispatch: Dispatch<EditorAction>
   /** A section's row, as the tree draws it. */
   row: (section: AnySection) => ReactNode
-  onAdd: (which: "announcement" | "marquee") => void
+  /** Opens the group's chooser: a strip in one of its looks, or the scrolling strip. */
+  onAdd: () => void
 }) {
   const { t } = useTranslation()
   // The header draws its bar first, its strip under it (adr/0049 Ek 2026-11-14 §4.1)
@@ -67,31 +66,12 @@ export function TopStripGroup({
         <p className="px-2 text-xs text-muted-foreground">{t(`${S}.off`)}</p>
       ) : null}
       <ul className="flex flex-col gap-0.5">
-        {bar ? (
-          row(bar)
-        ) : (
-          <AddRow
-            label={t(`${S}.add`)}
-            onClick={() => {
-              onAdd("announcement")
-            }}
-          />
-        )}
-        {strip ? (
-          row(strip)
-        ) : (
-          <AddRow
-            label={t(`${T}.addMarquee`)}
-            full={
-              stripFull
-                ? t("storefront.editor.marquee.full", { max: MARQUEE_LIMITS.perPage })
-                : null
-            }
-            onClick={() => {
-              onAdd("marquee")
-            }}
-          />
-        )}
+        {parts.map((section) => row(section))}
+        <AddRow
+          label={t(`${S}.add`)}
+          full={bar && (strip || stripFull) ? t(`${S}.full`) : null}
+          onClick={onAdd}
+        />
       </ul>
     </TreeGroup>
   )

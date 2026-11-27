@@ -1,4 +1,4 @@
-import { waitFor, within } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -52,10 +52,26 @@ describe("the top strip in the editor's tree (owner 2026-11-27)", () => {
     const strip = within(tree).getByRole("group", { name: "Üst şerit" })
     const header = within(tree).getByRole("group", { name: "Üst bilgi" })
     expect(within(strip).getByRole("button", { name: "Koyu şerit" })).toBeVisible()
-    expect(within(strip).getByRole("button", { name: "Kayan yazı ekle" })).toBeVisible()
+    expect(within(strip).getByRole("button", { name: "Üst şeride ekle" })).toBeVisible()
     expect(within(header).queryByRole("button", { name: "Koyu şerit" })).toBeNull()
     expect(within(header).getByRole("button", { name: "Üst bilgi düzeni" })).toBeVisible()
     expect(within(tree).queryByRole("button", { name: "Üst bilgi" })).toBeNull()
+  })
+
+  it("adds to it as sections are added: the strip's kinds as cards, one of each", async () => {
+    renderEditor()
+    const tree = await opened()
+    const strip = within(tree).getByRole("group", { name: "Üst şerit" })
+    await user.click(within(strip).getByRole("button", { name: "Üst şeride ekle" }))
+    const card = (name: string) => screen.getByRole("button", { name: new RegExp(`^${name}`) })
+    // A strip is there: its looks are changed in its settings, not added again
+    for (const name of ["Duyuru şeridi", "Açık şerit", "Kaydırıcı şerit"]) {
+      expect(card(name)).toBeDisabled()
+      expect(card(name)).toHaveTextContent("Zaten ekli")
+    }
+    await user.click(card("Kayan yazı"))
+    // Added, its settings opened as a picked section's are
+    expect(await screen.findByRole("region", { name: "Kayan yazı" })).toBeVisible()
   })
 
   it("hides the whole strip from its heading's eye and shows it again", async () => {

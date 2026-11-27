@@ -9794,13 +9794,39 @@
         "hide": "Hide the top strip",
         "show": "Show the top strip",
         "off": "Top strip hidden: nothing is drawn above the header on any screen.",
-        "add": "Add top strip",
+        "add": "Add to the top strip",
+        "full": "The top strip holds a strip and a scrolling strip; remove one to add another.",
+        "pick": {
+          "title": "Add to the top strip",
+          "description": "Add a strip or a scrolling strip above the header. You can change the strip's design and motion later in its settings.",
+          "taken": "Already added.",
+          "barTaken": "Already added: the top strip has a strip; change its design and slider in its settings.",
+          "graphite": {
+            "name": "Announcement strip",
+            "description": "Dark strip: your announcement, a small button beside it, and on wide screens the top links and phone."
+          },
+          "light": {
+            "name": "Light strip",
+            "description": "Thin light strip: a short note, the top links and, if you like, “My account”."
+          },
+          "slider": {
+            "name": "Slider strip",
+            "description": "Announcements change one at a time, sliding; with arrows and a link of its own for each."
+          },
+          "marquee": {
+            "name": "Scrolling text",
+            "description": "Your short words or a campaign, in a strip that keeps scrolling."
+          },
+          "sliderLine1": "Free shipping on orders of {ücretsiz_kargo_eşiği} and over",
+          "sliderLine2": "Your orders are packed with care and shipped quickly",
+          "sliderLine3": "Secure payment with instalments on credit cards"
+        },
         "linksLabel": "Top links",
         "linksHint": "The links in your “Top” menu, from 1024 px.",
         "phoneLabel": "Phone",
         "phoneHint": "The phone in your store profile, from 1024 px.",
         "accountLabel": "“My account” text",
-        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable."
+        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable. The slider (announcements one at a time) is on the dark design: set the design to “Dark strip” under Style."
       },
       "tree": {
         "label": "The page's sections",
@@ -10510,6 +10536,8 @@
         "add": "Add announcement",
         "hint": "Up to {{max}} lines of up to {{length}} characters each.",
         "lineLink": "Announcement {{number}}'s link",
+        "addSecond": "Add a second announcement",
+        "sliderNeedsTwo": "Add at least two announcements for the slider.",
         "mode": {
           "label": "Several announcements",
           "term": "multiple",

@@ -9794,13 +9794,39 @@
         "hide": "Üst şeridi gizle",
         "show": "Üst şeridi göster",
         "off": "Üst şerit gizli: üst bilginin üstünde hiçbir ekranda bir şey çizilmez.",
-        "add": "Üst şerit ekle",
+        "add": "Üst şeride ekle",
+        "full": "Üst şeritte bir şerit ve bir kayan yazı var; yenisi için birini kaldırın.",
+        "pick": {
+          "title": "Üst şeride ekle",
+          "description": "Üst bilginin üstüne bir şerit ya da kayan yazı ekleyin. Şeridin tasarımını ve hareketini sonra ayarlarından değiştirebilirsiniz.",
+          "taken": "Zaten ekli.",
+          "barTaken": "Zaten ekli: üst şeritte bir şerit var; tasarımını ve kaydırıcıyı onun ayarlarından değiştirin.",
+          "graphite": {
+            "name": "Duyuru şeridi",
+            "description": "Koyu şerit: duyurunuz, yanında küçük bir düğme, geniş ekranda üst bağlantılar ve telefon."
+          },
+          "light": {
+            "name": "Açık şerit",
+            "description": "İnce açık şerit: kısa bir not, üst bağlantılar ve istenirse “Hesabım”."
+          },
+          "slider": {
+            "name": "Kaydırıcı şerit",
+            "description": "Duyurular tek tek kayarak değişir; okları ve her duyurunun kendi bağlantısı vardır."
+          },
+          "marquee": {
+            "name": "Kayan yazı",
+            "description": "Kısa sözleriniz ya da bir kampanya, yan yana sürekli kayan bir şerit olarak."
+          },
+          "sliderLine1": "{ücretsiz_kargo_eşiği} ve üzeri siparişlerde kargo bedava",
+          "sliderLine2": "Siparişleriniz özenle paketlenip hızla kargoya verilir",
+          "sliderLine3": "Kredi kartına taksit seçenekleriyle güvenli ödeme"
+        },
         "linksLabel": "Üst bağlantılar",
         "linksHint": "“Üst” menünüzdeki bağlantılar, 1024 px ve üstünde.",
         "phoneLabel": "Telefon",
         "phoneHint": "Mağaza profilinizdeki telefon, 1024 px ve üstünde.",
         "accountLabel": "“Hesabım” yazısı",
-        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır."
+        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır. Kaydırıcı (duyuruların tek tek dönmesi) koyu tasarımdadır: Stil'de tasarımı «Koyu şerit» yapın."
       },
       "tree": {
         "label": "Sayfanın bölümleri",
@@ -10510,6 +10536,8 @@
         "add": "Duyuru ekle",
         "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
         "lineLink": "{{number}}. duyurunun bağlantısı",
+        "addSecond": "İkinci duyuruyu ekle",
+        "sliderNeedsTwo": "Kaydırıcı için en az iki duyuru ekleyin.",
         "mode": {
           "label": "Birden çok duyuru",
           "term": "multiple",

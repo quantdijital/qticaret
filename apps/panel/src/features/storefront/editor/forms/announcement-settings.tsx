@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
+import { Plus } from "lucide-react"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import {
   ANNOUNCEMENT_DEFAULTS,
@@ -105,9 +107,32 @@ export function AnnouncementMode({
   section: AnnouncementBar
   onChange: (section: AnnouncementBar) => void
 }) {
-  return announcementOffers(section, "mode") ? (
-    <StepsOf section={section} setting="mode" onChange={onChange} />
-  ) : null
+  const { t } = useTranslation()
+  if (!announcementOffers(section, "mode")) {
+    return null
+  }
+  // One line shows alone whatever the choice: say what the slider needs, never refuse it
+  return (
+    <div className="flex flex-col gap-2">
+      <StepsOf section={section} setting="mode" onChange={onChange} />
+      {section.lines.length < 2 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs text-muted-foreground">{t(`${A}.sliderNeedsTwo`)}</p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              onChange({ ...section, lines: [...section.lines, ""] })
+            }}
+          >
+            <Plus />
+            {t(`${A}.addSecond`)}
+          </Button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 /**

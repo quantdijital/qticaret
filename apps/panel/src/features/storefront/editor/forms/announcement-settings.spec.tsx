@@ -61,10 +61,19 @@ const field = (setting: AnnouncementSetting) =>
 
 /** docs/tema/bilesen-denetimi (b) 6: how several announcements show and turn. */
 describe("the announcement bar's settings", () => {
-  it("start as the first line alone, offered only once there are several lines", () => {
-    renderPanel(bar({ lines: ["Kargo bedava"] }))
-    expect(field("mode")).toBeNull()
+  it("offer the slider from the first line on, saying it needs two, never refusing it", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
+    expect(field("mode")).not.toBeNull()
     expect(screen.queryByRole("button", { name: "Hareket" })).toBeNull()
+    expect(screen.getByText("Kaydırıcı için en az iki duyuru ekleyin.")).toBeInTheDocument()
+    await user.click(screen.getByRole("radio", { name: /Kaydırıcı/ }))
+    expect(changes.at(-1)).toMatchObject({ mode: "rotate", lines: ["Kargo bedava"] })
+    // The turning's settings come with the choice, a second line one click away
+    expect(field("interval")).not.toBeNull()
+    await user.click(screen.getByRole("button", { name: "İkinci duyuruyu ekle" }))
+    expect(changes.at(-1)).toMatchObject({ lines: ["Kargo bedava", ""] })
+    expect(screen.queryByText("Kaydırıcı için en az iki duyuru ekleyin.")).toBeNull()
   })
 
   it("show the turning's settings in Stil › Hareket once the lines take turns", async () => {
@@ -135,9 +144,10 @@ describe("the announcement bar's settings", () => {
     expect(changes.at(-1)).not.toHaveProperty("line_links")
   })
 
-  it("leave the light strip's note to its one link", () => {
+  it("leave the light strip's note to its one link, pointing to the dark design's slider", () => {
     renderPanel(bar({ variant: "light" }))
     expect(screen.queryByText("1. duyurunun bağlantısı")).toBeNull()
+    expect(screen.getByText(/Kaydırıcı .* koyu tasarımdadır/)).toBeInTheDocument()
   })
 
   it("offer where the lines sit and the bar's size alone in Stil, open, even for one line", async () => {
@@ -209,6 +219,7 @@ describe("the announcement bar's settings", () => {
       )
 
     expect(keys(bar(), "birden çok")).toContain("announcement.mode")
+    expect(keys(bar({ lines: ["Kargo bedava"] }), "kaydırıcı")).toContain("announcement.mode")
     expect(keys(bar({ lines: ["Kargo bedava"] }), "hizalama")).toContain("announcement.align")
     expect(keys(bar(), "Büyük")).toContain("announcement.size")
     expect(keys(bar(), "interval")).not.toContain("announcement.interval")

@@ -38,17 +38,15 @@ const GROUPS: Readonly<Record<AnnouncementSetting, FieldGroupName>> = {
 
 /**
  * Which settings the panel shows as the bar stands (bilesen-standardi §0.3):
- * where its lines sit and its size always, how it shows several lines only
- * once it has more than one, the turning's settings only while they take turns.
+ * where its lines sit, its size and how it shows several lines always (the
+ * slider is found from the first line on, owner 2026-11-27), the turning's
+ * settings only while they take turns.
  */
 export function announcementOffers(section: AnnouncementBar, setting: AnnouncementSetting) {
-  if (setting === "align" || setting === "size" || setting === "tone") {
+  if (setting === "align" || setting === "size" || setting === "tone" || setting === "mode") {
     return true
   }
-  if (section.lines.length < 2) {
-    return false
-  }
-  return setting === "mode" || announcementSettingsOf(section).mode === "rotate"
+  return announcementSettingsOf(section).mode === "rotate"
 }
 
 /** The bar's settings the panel shows, as the search finds them. */
