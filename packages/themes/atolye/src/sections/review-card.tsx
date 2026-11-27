@@ -220,7 +220,7 @@ function CompactCard({ review, sizes, t }: { review: Review; sizes: string; t: T
   )
   // A breath of the shop's colour (owner 2026-11-28): the ground, its rule and the quote mark
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-tile border border-[color-mix(in_oklab,var(--color-signal)_18%,var(--color-rule))] bg-[color-mix(in_oklab,var(--color-signal)_6%,var(--color-paper))]">
+    <article className="flex h-full flex-col overflow-hidden rounded-tile bg-[color-mix(in_oklab,var(--color-signal)_9%,var(--color-paper))]">
       {product ? (
         <a
           href={product.path}
