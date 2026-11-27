@@ -44,21 +44,32 @@ const row = (
   test: IntegrationRow["test"] = null
 ): IntegrationRow => ({ id, group, state, notes, test })
 
+/**
+ * Providers whose check can refuse details but never confirm them (PTT:
+ * it answers a made-up account as it does a right one): "not verified"
+ * is all they ever get, said as a note, not as something to fix.
+ */
+const NEVER_CONFIRMED: ReadonlySet<string> = new Set(["ptt"])
+
 /** A provider account (adr/0027): its stored state, and its test mode where it has one. */
 export function accountRow(group: IntegrationGroup, status: CredentialStatus): IntegrationRow {
   const testMode = status.settings?.["test_mode"] === true
+  const modeNotes = testMode ? [{ code: "test_mode" }] : []
   switch (status.state) {
     case "not_configured":
       return row(status.provider, group, "not_set_up")
     case "connected":
-      return row(
-        status.provider,
-        group,
-        "connected",
-        testMode ? [{ code: "test_mode" }] : [],
-        "account"
-      )
+      return row(status.provider, group, "connected", modeNotes, "account")
     case "unverified":
+      return NEVER_CONFIRMED.has(status.provider)
+        ? row(
+            status.provider,
+            group,
+            "connected",
+            [...modeNotes, { code: "unconfirmed" }],
+            "account"
+          )
+        : row(status.provider, group, "attention", [{ code: status.state }], "account")
     case "rejected":
     case "unreadable":
       return row(status.provider, group, "attention", [{ code: status.state }], "account")

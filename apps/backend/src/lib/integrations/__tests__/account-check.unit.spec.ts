@@ -1,14 +1,17 @@
 import {
   fakeIyzicoAccount,
   fakePaytrAccount,
+  fakePttAccount,
   fakeSecret,
   startFakeIyzico,
   startFakePaytr,
+  startFakePtt,
 } from "@qticaret/testing"
-import type { FakeIyzico, FakePaytr } from "@qticaret/testing"
+import type { FakeIyzico, FakePaytr, FakePtt } from "@qticaret/testing"
 import { checkAccount } from "../account-check"
 import { iyzicoHealthCheck } from "../health/iyzico-check"
 import { paytrHealthCheck } from "../health/paytr-check"
+import { pttHealthCheck } from "../health/ptt-check"
 
 // The shared PayTR client reads its address once: one fake for the whole file
 const account = fakePaytrAccount()
@@ -133,5 +136,44 @@ describe("checkAccount for iyzico", () => {
         signal
       )
     ).toEqual({ status: "down", reason: "auth_failed" })
+  })
+})
+
+describe("checkAccount for PTT Kargo", () => {
+  // The shared client reads its address once
+  const keys = fakePttAccount()
+  const details = (password = keys.password) => ({
+    settings: { customer_id: keys.customerId, test_mode: false },
+    secrets: { password },
+  })
+  let fake: FakePtt
+
+  beforeAll(async () => {
+    fake = await startFakePtt(keys)
+    process.env["PTT_BASE_URL"] = fake.url
+  })
+
+  afterAll(async () => {
+    delete process.env["PTT_BASE_URL"]
+    await fake.close()
+  })
+
+  it("never calls an account valid: PTT answers a made-up one alike", async () => {
+    expect(await checkAccount("ptt", details())).toBe("unconfirmed")
+    expect(await checkAccount("ptt", details("uydurma-sifre"))).toBe("unconfirmed")
+  })
+
+  it("refuses it only when PTT's words name the account", async () => {
+    fake.queue("gonderiSorgu2", "code:0:Kullanıcı adı veya şifre hatalı.")
+    expect(await checkAccount("ptt", details())).toBe("secret_invalid")
+  })
+
+  it("reports health as reached, or down when PTT refuses the account", async () => {
+    const signal = AbortSignal.timeout(5_000)
+    const health = pttHealthCheck(() => Promise.resolve(details()))
+
+    expect(await health.check(signal)).toEqual({ status: "ok" })
+    fake.queue("gonderiSorgu2", "code:0:Kullanıcı adı veya şifre hatalı.")
+    expect(await health.check(signal)).toEqual({ status: "down", reason: "auth_failed" })
   })
 })

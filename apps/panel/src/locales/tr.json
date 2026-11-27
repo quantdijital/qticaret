@@ -1763,7 +1763,7 @@
         "customerIdHint": "9 ya da 10 hane.",
         "customerIdInvalid": "Müşteri numarası 9 ya da 10 haneden oluşur.",
         "password": "Web servis şifresi",
-        "keysHint": "Kaydederken PTT'ye bu bilgilerle bir takip sorgusu yapılır ve doğrulanır.",
+        "keysHint": "Kaydederken PTT'ye bu bilgilerle bir takip sorgusu yapılır. PTT yanlış bilgiyi her zaman reddetmediği için bilgiler kaydedilir ama \"Doğrulanmadı\" görünür; ilk gönderiyi test modunda yükleyerek deneyin.",
         "live": {
           "title": "Canlıya geçiş",
           "description": "Test modunda gönderiler PTT'nin test sistemine yüklenir; şubede kabul edilmez."
@@ -1772,8 +1772,10 @@
         "testModeHint": "Kapatınca gönderiler gerçek PTT hesabınıza yüklenir. Test ve canlı bilgileri ayrı olabileceğinden şifre yeniden istenir.",
         "checks": {
           "merchant_invalid": "PTT Kargo bu müşteri numarasını kabul etmedi. Numarayı PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın.",
-          "secret_invalid": "PTT Kargo bu müşteri numarası ve şifreyi kabul etmedi. Bilgileri PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın."
+          "secret_invalid": "PTT Kargo bu müşteri numarası ve şifreyi kabul etmedi. Bilgileri PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın.",
+          "unconfirmed": "Bilgiler kaydedildi ama doğrulanamadı: PTT Kargo yanlış bilgileri de reddetmeden yanıtlıyor. Müşteri numarası ve şifreyi PTT'nin verdiği belgeyle karşılaştırın, ilk gönderiyi test modunda yükleyerek deneyin."
         },
+        "unverified": "Bilgiler doğrulanmadı: PTT Kargo yanlış bilgileri de reddetmeden yanıtladığı için hesabın doğru olduğu kayıtta anlaşılamıyor. Müşteri numarası ve şifreyi PTT'nin verdiği belgeyle karşılaştırın; ilk gönderiyi test modunda yükleyin. Bilgiler yanlışsa PTT gönderiyi reddeder.",
         "rejected": "PTT Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi yüklenemez. PTT'nin verdiği güncel şifreyi girin.",
         "ranges": {
           "title": "Barkod aralığı",
@@ -1879,6 +1881,7 @@
       "notes": {
         "test_mode": "Test modunda: gerçek para ya da gönderi yok.",
         "unverified": "Kaydedildi ama sağlayıcıya sorulamadı; bağlantıyı test edin.",
+        "unconfirmed": "Hesap doğrulanamıyor: sağlayıcı yanlış bilgileri de reddetmeden yanıtlıyor. Bilgiler yanlışsa ilk gönderi reddedilir.",
         "rejected": "Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.",
         "unreadable": "Kayıtlı bilgiler okunamıyor; hesabı yeniden girin.",
         "search_console_not_granted": "Search Console izni verilmemiş; Google'ı yeniden bağlayın.",
@@ -1902,6 +1905,7 @@
       "tested": {
         "valid": "{{name}} bağlantısı çalışıyor.",
         "unreachable": "{{name}} şu an yanıt vermedi; biraz sonra tekrar deneyin.",
+        "unconfirmed": "{{name}} yanıt verdi ve bilgileri reddetmedi, ama doğruluklarını onaylamıyor; hesap doğrulanmadı olarak kalır.",
         "merchant_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
         "secret_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
         "failed": "{{name}} beklenmedik bir yanıt verdi.",

@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { toast } from "sonner"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { PttAccount } from "@/features/settings/api/payments"
@@ -39,6 +40,7 @@ const saves = () =>
 
 describe("PttSettings", () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     fetchMock.mockReset()
     fetchMock.mockResolvedValue({ account: connected, check: "valid" })
   })
@@ -85,5 +87,26 @@ describe("PttSettings", () => {
         },
       })
     })
+  })
+
+  it("says why an account PTT cannot confirm shows as not verified", async () => {
+    const unverified: PttAccount = { ...connected, state: "unverified", verified_at: null }
+    fetchMock.mockResolvedValue({ account: unverified, check: "unconfirmed" })
+    renderSettings(undefined)
+
+    await userEvent.type(field("ptt-customer-id"), "900123456")
+    await userEvent.type(field("ptt-password"), "web-servis-sifresi")
+    await userEvent.click(saveButton())
+
+    await waitFor(() => {
+      expect(toast.warning).toHaveBeenCalledWith(expect.stringMatching(/doğrulanamadı/))
+    })
+    expect(toast.success).not.toHaveBeenCalled()
+  })
+
+  it("keeps the warning on the page while the account is not verified", () => {
+    renderSettings({ ...connected, state: "unverified", verified_at: null })
+
+    expect(screen.getByText(/reddetmeden yanıtladığı için/)).toBeInTheDocument()
   })
 })

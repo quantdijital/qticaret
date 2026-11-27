@@ -23,8 +23,10 @@ export interface CheckedDraft {
  * connection be saved as "not checked", but never replaces an account
  * that works: payments would stop on details nobody checked (except a
  * service whose check is not documented enough, `replacesUnchecked`:
- * there a refused key alone stops the save). The draft is
- * opened here and nowhere kept.
+ * there a refused key alone stops the save). An `unconfirmed` answer (a
+ * provider that can refuse details but never confirm them: PTT) is saved
+ * as "not verified" and the panel warns. The draft is opened here and
+ * nowhere kept.
  */
 export const checkDraftStep = createStep(
   "integration-credentials-check-draft",

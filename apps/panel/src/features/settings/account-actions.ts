@@ -36,6 +36,9 @@ export function useAccountActions(provider: string, name: string, ns = "settings
       toast.warning(
         t(source === "save" ? `${A}.checks.unreachable` : `${A}.checks.unreachableTest`, { name })
       )
+    } else if (answer === "unconfirmed") {
+      // The provider refused nothing but cannot confirm either: its own words say why
+      toast.warning(t(`${ns}.${provider}.checks.unconfirmed`, { name }))
     } else {
       toast.error(t(`${A}.checks.${answer}`, { name }))
     }

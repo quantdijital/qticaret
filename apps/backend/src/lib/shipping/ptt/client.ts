@@ -267,20 +267,23 @@ export function createPttApi(options: Partial<Omit<HttpClientOptions, "provider"
   }
 
   /**
-   * Whether PTT takes the account: a query for a barcode nobody has.
-   * Tracking is the one read with the account; a refusal naming it is
-   * `secret_invalid`, anything else a working account (PTT's words for a
-   * wrong password are to confirm with a real account).
+   * Whether PTT refuses the account: a query for a barcode nobody has.
+   * Tracking is the one read with the account, and it proves nothing in
+   * its favour: real PTT answers "not found" to a made-up customer number
+   * and password too (2026-11-27), so "not found" or any other answer
+   * without a refusal is `unconfirmed`, never `valid`. Only a refusal
+   * naming the account is a verdict (`secret_invalid`). A fault or an
+   * answer out of shape is thrown (no verdict either).
    */
   async function checkLogin(
     credentials: PttCredentials,
     options: { signal?: AbortSignal } = {}
-  ): Promise<"valid" | "secret_invalid"> {
+  ): Promise<"unconfirmed" | "secret_invalid"> {
     // 00 and ten random digits: outside the ranges PTT gives
     const barcode = pttBarcodeOf(serialOf(randomInt(0, 10_000_000_000)))
     try {
       await track(credentials, barcode, options.signal)
-      return "valid"
+      return "unconfirmed"
     } catch (error) {
       if ((error as { providerCode?: string }).providerCode === "login_refused") {
         return "secret_invalid"

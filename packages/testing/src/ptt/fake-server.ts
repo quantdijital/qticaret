@@ -173,7 +173,7 @@ export async function startFakePtt(
     return said(1, "Silme işlemi başarılı.")
   }
 
-  const track = (body: string) => {
+  const track = (body: string, forced: string | undefined) => {
     const op = "gonderiSorgu2"
     const result = (code: number, text: string, rows = "") => ({
       status: 200,
@@ -185,11 +185,17 @@ export async function startFakePtt(
         `<ax21:ALICI>AY** YI****</ax21:ALICI><ax21:BARNO>${escape(field(body, "barkod"))}</ax21:BARNO><ax21:GONDEREN>ANA DEPO</ax21:GONDEREN>${rows}<ax21:sonucAciklama>${escape(text)}</ax21:sonucAciklama><ax21:sonucKodu>${String(code)}</ax21:sonucKodu>`
       ),
     })
+    if (forced?.startsWith("code:")) {
+      const [, code = "0", ...text] = forced.split(":")
+      return result(Number(code), text.join(":"))
+    }
+    // As real PTT answered a made-up customer number and password (2026-11-27): "not found",
+    // the same words as for a barcode it does not know; it never says the account is wrong
     if (
       field(body, "kullanici") !== account.customerId ||
       field(body, "sifre") !== account.password
     ) {
-      return result(0, "Kullanıcı adı veya şifre hatalı.")
+      return result(0, "Kayıt bulunamadı.")
     }
     const barcode = field(body, "barkod")
     const shipment = shipments.get(barcode)
@@ -224,7 +230,7 @@ export async function startFakePtt(
         return { status: 500, text: fault(SOAP12), type }
       }
       return operation === "gonderiSorgu2" || operation === "gonderiSorgu"
-        ? { ...track(body), type }
+        ? { ...track(body, forced), type }
         : { status: 500, text: fault(SOAP12), type }
     }
     const type = "text/xml; charset=utf-8"

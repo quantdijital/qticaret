@@ -114,9 +114,25 @@ describe("PTT client against the fake services", () => {
     expect(sameFile).toMatchObject({ providerCode: "ptt_-3" })
   })
 
-  it("checks the account by tracking a barcode nobody has", async () => {
-    expect(await api.checkLogin(account)).toBe("valid")
-    expect(await api.checkLogin(credentials({ password: "yanlis-sifre" }))).toBe("secret_invalid")
+  it('never confirms an account: PTT says "not found" to a made-up one too', async () => {
+    // Real PTT, 2026-11-27: a made-up customer number and password got "Kayıt bulunamadı."
+    expect(await api.checkLogin(account)).toBe("unconfirmed")
+    expect(await api.checkLogin(credentials({ password: "yanlis-sifre" }))).toBe("unconfirmed")
+    expect(fake.requests.at(-1)?.operation).toBe("gonderiSorgu2")
+  })
+
+  it("calls the account wrong only when PTT's answer names it", async () => {
+    fake.queue("gonderiSorgu2", "code:0:Kullanıcı adı veya şifre hatalı.")
+    expect(await api.checkLogin(account)).toBe("secret_invalid")
+
+    // Any other words without events: still no verdict either way
+    fake.queue("gonderiSorgu2", "code:-1:Sistemde beklenmeyen bir durum oluştu.")
+    expect(await api.checkLogin(account)).toBe("unconfirmed")
+
+    // A fault is thrown: no verdict, the caller decides (`failed`)
+    fake.queue("gonderiSorgu2", "fault")
+    const fault = await failure(() => api.checkLogin(account))
+    expect(isProviderError(fault)).toBe(true)
   })
 
   it("deletes a lost upload at once, and says so when PTT keeps it", async () => {
