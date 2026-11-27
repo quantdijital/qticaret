@@ -203,40 +203,27 @@
       "button_style": "solid"
     },
     {
-      "id": "vadiadimlar",
-      "type": "steps",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "title": "Yola çıkmak *bu kadar kolay*",
-      "intro": "Rotanı seç, gerisini biz düşünelim.",
-      "items": [
-        {
-          "title": "Rotanı seç",
-          "text": "Yere, türe ya da aya göre ara; programı ve dahil olanları tur sayfasında gör."
-        },
-        {
-          "title": "Tarihini belirle",
-          "text": "Kalkış gününü ve kaç kişi olduğunuzu seç; fiyat hemen görünür."
-        },
-        {
-          "title": "Yerini ayırt",
-          "text": "Güvenle öde; onay ve yolculuk bilgileri e-postana gelsin."
-        }
-      ],
-      "link": null,
-      "layout": "row",
-      "numbers": "plain",
-      "connector": "dotted"
-    },
-    {
       "id": "vadiyorumlar",
       "type": "reviews",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
       "title": "Gezginler *ne diyor*",
-      "limit": 6
+      "limit": 8,
+      "variant": "carousel",
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
+      },
+      "product_image": "compact"
     },
     {
       "id": "geziyazilari",
