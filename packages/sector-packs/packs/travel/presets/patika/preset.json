@@ -8,6 +8,11 @@
   "tone": "light",
   "credits": [
     {
+      "file": "images/kapak-kapadokya-balon.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Cappadociasunrise.jpg",
+      "license": "CC BY-SA 4.0, Ivankazaryan (kırpıldı, küçültülüp WebP'ye çevrildi)"
+    },
+    {
       "file": "images/rota-kapadokya.webp",
       "source": "https://commons.wikimedia.org/wiki/File:Cappadocia_Landscape_At_Sunset_(135658433).jpeg",
       "license": "CC BY 3.0, James Farnham Long (küçültülüp WebP'ye çevrildi)"
@@ -31,11 +36,6 @@
       "file": "images/rota-agri.webp",
       "source": "https://commons.wikimedia.org/wiki/File:Mount_Ararat,_Ararat_Plain,_Armenia-Turkey_border,_Armenia.jpg",
       "license": "CC BY 4.0, Vyacheslav Argenberg (küçültülüp WebP'ye çevrildi)"
-    },
-    {
-      "file": "images/bant-oludeniz.webp",
-      "source": "https://cdn2.goturkiye.com/fethiye-oludeniz-header-1920x1080.jpg",
-      "license": "GoTürkiye (T.C. Kültür ve Turizm Bakanlığı); yalnız yerel önizleme, lisansı netleşmeden pakete girmez"
     },
     {
       "file": "images/bant-yaz.webp",
