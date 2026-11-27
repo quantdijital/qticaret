@@ -3294,6 +3294,24 @@
           "found": "Zaten var",
           "skipped": "Aktarılamayan"
         },
+        "postImagesConfirmTitle": "Blog görselleri taşınsın mı?",
+        "postImagesConfirmText": "Bu dosyanın daha önce taşıdığı blog yazılarındaki görseller eski siteden indirilip Ortam kütüphanesine eklenir ve yazının metnine, eski sitedeki yerine konur. Yazının metnindeki diğer değişiklikleriniz korunur; daha önce eklenip sonradan çıkardığınız görsel yeniden eklenmez.",
+        "postImages": {
+          "applied": "Blog görselleri taşındı.",
+          "planned": "Kuru çalıştırma bitti: taşınacak görseller aşağıda.",
+          "updated": "Görselleri eklenen yazılar",
+          "plannedUpdated": "Görselleri eklenecek yazılar",
+          "stored": "Ortam kütüphanesine eklenen görseller",
+          "plannedStored": "İndirilecek görseller",
+          "done": "Görselleri zaten eklenmiş yazılar",
+          "notMoved": "Görselsiz ya da önceki bir çalıştırmada taşınmamış yazılar",
+          "notMovedHint": "Taşınmamış yazılar için önce kutuyu işaretlemeden bir taşıma uygulayın.",
+          "failed": "Görselleri eklenemeyen yazılar",
+          "imageFailed": "İndirilemeyen görseller",
+          "imageFailedHint": "Hangileri olduğu ve nedeni indirilen raporda; yeniden çalıştırınca yalnız bunlar denenir."
+        },
+        "refreshConfirmTitle": "Açıklamalar yenilensin mi?",
+        "refreshConfirmText": "Bu dosyanın daha önce taşıdığı ürünlerin açıklaması dosyadakiyle değiştirilir; panelde sonradan yaptığınız açıklama değişiklikleri de yerini dosyadakine bırakır. Başka hiçbir alan değişmez.",
         "descriptions": {
           "applied": "Açıklamalar yenilendi.",
           "planned": "Önizleme hazır: yenilenecek açıklamalar aşağıda.",
@@ -3372,7 +3390,11 @@
             "product_tags": "Vitrinde ürün etiketi sayfası yok.",
             "blog_comments": "Vitrinde blog yorumu yok."
           }
-        }
+        },
+        "postImages": "Yalnız blog görsellerini taşı",
+        "postImagesHint": "Önceki bir çalıştırmanın taşıdığı blog yazılarındaki görseller eski siteden indirilir, Ortam kütüphanesine eklenir ve yazıdaki yerlerine konur. Yazının geri kalanı ve diğer alanları değişmez.",
+        "refresh": "Yalnız açıklamaları yenile",
+        "refreshHint": "Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması bu dosyadan başlık, liste ve tablolarıyla yeniden yazılır. Fiyat, stok, durum ve SEO alanlarına dokunulmaz, yeni kayıt eklenmez. Yalnızca uygulanır."
       },
       "runs": {
         "title": "Geçmiş aktarımlar",

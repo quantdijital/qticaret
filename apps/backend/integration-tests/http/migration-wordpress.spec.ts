@@ -32,7 +32,8 @@ medusaIntegrationTestRunner({
         product: { read: 4, created: 4, skipped: 0, failed: 0 },
         // `malzeme` written; `pa_desen` has no field, `pa_malzeme`'s value is no choice of it
         attribute: { read: 3, created: 1, skipped: 2 },
-        image: { read: 3, created: 3 },
+        // The products' three and the picture in the post's text (adr/0042 Ek 2026-11-27)
+        image: { read: 4, created: 4 },
         review: { read: 2, created: 2 },
         post_category: { read: 1, created: 1, seo_own: 1, seo_default: 0 },
         post_tag: { read: 2, created: 2 },

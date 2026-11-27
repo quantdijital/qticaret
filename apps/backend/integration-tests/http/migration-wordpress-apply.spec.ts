@@ -35,7 +35,8 @@ medusaIntegrationTestRunner({
         brand: { created: 1 },
         product: { created: 4, failed: 0 },
         attribute: { read: 3, created: 1, skipped: 2 },
-        image: { read: 3, created: 3 },
+        // The products' three and the picture in the post's text (adr/0042 Ek 2026-11-27)
+        image: { read: 4, created: 4 },
         review: { created: 2 },
         post_category: { created: 1 },
         post_tag: { created: 2 },
@@ -156,6 +157,18 @@ medusaIntegrationTestRunner({
       })
       expect(new Date(post?.published_at ?? 0).toISOString()).toBe("2024-03-01T07:30:00.000Z")
       expect(post?.image_url?.startsWith(wp.site())).toBe(false)
+      // The picture in its text stored here, the text pointing at the copy with its alt
+      const pictures = (post?.body as unknown as ContentDoc).content.filter(
+        (block) => block.type === "image"
+      )
+      expect(pictures).toHaveLength(1)
+      const [picture] = await getContainer()
+        .resolve<MediaModuleService>(MEDIA_MODULE)
+        .listMediaAssets({
+          url: pictures.map((block) => (block as { attrs: { src: string } }).attrs.src),
+        })
+      expect(picture).toBeDefined()
+      expect(pictures[0]).toMatchObject({ attrs: { alt: "x" } })
       const links = await content.listContentEntryTerms({ entry_id: post?.id ?? "" })
       const terms = await content.listContentTerms({ id: links.map((link) => link.term_id) })
       expect(terms.map((term) => `${term.kind}:${term.handle}`).sort()).toEqual([

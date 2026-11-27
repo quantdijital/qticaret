@@ -3294,6 +3294,24 @@
           "found": "Already here",
           "skipped": "Could not move"
         },
+        "postImagesConfirmTitle": "Move the blog pictures?",
+        "postImagesConfirmText": "The pictures in the blog posts this file moved before are downloaded from the old site, added to the Media library and put into each post's text where they stood. Your other changes to the text stay; a picture added before and taken out since is not added again.",
+        "postImages": {
+          "applied": "Blog pictures moved.",
+          "planned": "Dry run finished: the pictures to move are below.",
+          "updated": "Posts given their pictures",
+          "plannedUpdated": "Posts to be given their pictures",
+          "stored": "Pictures added to the Media library",
+          "plannedStored": "Pictures to download",
+          "done": "Posts whose pictures are already in",
+          "notMoved": "Posts without pictures or not moved by an earlier run",
+          "notMovedHint": "Apply a run without the box ticked first to move the posts not moved yet.",
+          "failed": "Posts whose pictures could not be added",
+          "imageFailed": "Pictures that could not be downloaded",
+          "imageFailedHint": "The downloaded report names them and why; a run again tries only these."
+        },
+        "refreshConfirmTitle": "Refresh the descriptions?",
+        "refreshConfirmText": "The descriptions of the products this file moved before are replaced with the file's; description edits made in the panel since give way too. No other field changes.",
         "descriptions": {
           "applied": "Descriptions refreshed.",
           "planned": "The preview is ready: the descriptions to refresh are below.",
@@ -3372,7 +3390,11 @@
             "product_tags": "The storefront has no product tag pages.",
             "blog_comments": "The storefront shows no blog comments."
           }
-        }
+        },
+        "postImages": "Move blog pictures only",
+        "postImagesHint": "The pictures in the blog posts an earlier run moved are downloaded from the old site, added to the Media library and put back where they stood. The rest of each post stays as it is.",
+        "refresh": "Refresh descriptions only",
+        "refreshHint": "Products an earlier run moved get their description rewritten from this file, with its headings, lists and tables. Prices, stock, status and SEO fields stay as they are, and nothing new is added. Applied only."
       },
       "runs": {
         "title": "Past moves",

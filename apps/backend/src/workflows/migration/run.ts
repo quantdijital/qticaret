@@ -1,4 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { fakeOrigin } from "../../lib/migration/fetch"
+import { FetchPace } from "../../lib/migration/fetch-pace"
 import { packageOf } from "../../lib/migration/sheet"
 import type { PackageDefaults, StepProgress } from "../../lib/migration/types"
 import type { MigrationSource } from "../../lib/migration/types"
@@ -208,12 +210,16 @@ export async function runMigration(
   problems.push(...attributes.problems, ...(facts?.problems ?? []))
   await keep("attribute", { ...attributes.counts, ...facts?.counts })
 
+  // One pace for the run's fetches from the old site: products' pictures, then posts'
+  const pace = new FetchPace()
   const images = await migrateImages(
     container,
     source.id,
     products,
     apply,
-    spanOf(hooks, SPAN.image)
+    spanOf(hooks, SPAN.image),
+    fakeOrigin(),
+    pace
   )
   problems.push(...images.problems.map((problem) => ({ ...problem, kind: "image" as const })))
   await keep("image", images.counts)
@@ -276,12 +282,18 @@ export async function runMigration(
     source.posts ? await listOf(source.posts(), beat("content")) : [],
     await listOf(source.pages(), beat("content")),
     apply,
-    spanOf(hooks, SPAN.content)
+    spanOf(hooks, SPAN.content),
+    pace
   )
   problems.push(...content.problems)
   for (const kind of ["post_category", "post_tag", "post", "page"] as const) {
     await keep(kind, content.counts[kind])
   }
+  // The pictures in the posts' and pages' texts count with the products' (adr/0042 Ek 2026-11-27)
+  for (const key of ["read", "created", "found", "skipped"] as const) {
+    counts.image[key] += content.images[key]
+  }
+  await migration.count(runId, "image", { ...content.images })
   if (apply) {
     // Every old address the records had, for the 301s (F14.7)
     await inventoryFromItems(container, source.id)

@@ -241,6 +241,19 @@ export class BlockBuilder {
     }
   }
 
+  /**
+   * A picture as a block of its own where it stands, the text before it
+   * ended; false where a block cannot stand (a list, a quote, a table).
+   */
+  image(src: string, alt: string | null): boolean {
+    if (this.table || this.lists.length > 0 || this.quote) {
+      return false
+    }
+    this.flush()
+    this.blocks.push({ type: "image", attrs: alt ? { src, alt } : { src } })
+    return true
+  }
+
   /** A row's start or end. */
   row(open: boolean): void {
     this.table?.rowAt(open)

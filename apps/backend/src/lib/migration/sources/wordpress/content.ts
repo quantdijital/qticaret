@@ -3,6 +3,7 @@ import { toSlug } from "../../../seo/slug"
 import type { SourceContent, SourcePage, SourcePost, SourcePostTerm } from "../../types"
 import type { WordpressContext } from "./context"
 import { note } from "./context"
+import { bodyImagesOf } from "./body-images"
 import { bodyBlocks, documentOf, plainText } from "./html"
 import type { WxrItem } from "./reader"
 import { cutAt, seoFieldsOf } from "./seo"
@@ -58,7 +59,12 @@ export const looksLegal = (title: string, slug: string): boolean =>
 
 /** The item's text, picture and SEO fields as a content record; and what its body lost. */
 function contentOf(context: WordpressContext, item: WxrItem, handle: string) {
-  const body = bodyBlocks(item.content, { siteHost: context.siteHost, title: item.title })
+  // Its pictures as image blocks of the old files: the run stores them here (adr/0042 Ek 2026-11-27)
+  const body = bodyBlocks(item.content, {
+    siteHost: context.siteHost,
+    title: item.title,
+    image: bodyImagesOf(context),
+  })
   const { doc, cut } = documentOf(body.blocks)
   const excerpt = plainText(bodyBlocks(item.excerpt).blocks, 4 * CONTENT_LIMITS.excerpt).text
   const coverId = item.meta.get("_thumbnail_id")?.trim() ?? ""
