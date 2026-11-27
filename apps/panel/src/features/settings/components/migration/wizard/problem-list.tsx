@@ -45,8 +45,9 @@ export function ProblemList({ problems, action }: ProblemListProps) {
                   />
                 </summary>
                 <ul className="mt-1 flex flex-col gap-0.5 break-all">
-                  {group.samples.map((sample) => (
-                    <li key={sample}>{sample}</li>
+                  {group.samples.map((sample, index) => (
+                    // A record may be named twice (two problems of one reason): keyed by place
+                    <li key={index}>{sample}</li>
                   ))}
                   {group.count > group.samples.length ? <li>{t(`${K}.moreInReport`)}</li> : null}
                 </ul>
