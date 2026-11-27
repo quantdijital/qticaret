@@ -28,7 +28,8 @@ interface ContentPageSectionsProps {
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
   onRemove: (section: BodySection) => void
-  onAdd: () => void
+  /** Opens the chooser, aimed before a row (the "+" between rows); none: at the end. */
+  onAdd: (before?: string | null) => void
   /** Opens the page's own settings: its title, address, search look, cover, status. */
   onSettings: () => void
 }
@@ -84,9 +85,16 @@ export function ContentPageSections({
           dispatch={dispatch}
           onOpen={onOpen}
           onRemove={onRemove}
+          onInsert={note === null ? onAdd : null}
         />
       )}
-      <AddButton label={t("storefront.editor.tree.add")} disabled={note !== null} onClick={onAdd} />
+      <AddButton
+        label={t("storefront.editor.tree.add")}
+        disabled={note !== null}
+        onClick={() => {
+          onAdd()
+        }}
+      />
       {note ? <p className="px-2 text-xs text-muted-foreground">{note}</p> : null}
     </div>
   )

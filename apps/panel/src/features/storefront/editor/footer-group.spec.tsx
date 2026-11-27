@@ -12,7 +12,7 @@ import {
   newFooterSection,
 } from "@/features/storefront/layout/footer-group"
 import { marqueesOn, newHomeSection } from "@/features/storefront/layout/sections"
-import { AddSectionDialog } from "./add-section-dialog"
+import { AddSectionPicker } from "./add-section-picker"
 import { takesLook } from "./forms/field-registry"
 import { SectionTree } from "./section-tree"
 import { DOC } from "./theme-editor.fixtures"
@@ -81,13 +81,12 @@ describe("the footer group (adr/0070 §4)", () => {
     expect(footerTypesLeft(withFooter(strip, text, badges))).toEqual([])
     const onPick = vi.fn()
     render(
-      <AddSectionDialog
-        open
+      <AddSectionPicker
         page="footer"
         footerTypes={["newsletter", "rich_text"]}
         placement="bottom"
         marqueeFull={false}
-        onOpenChange={() => undefined}
+        onBack={() => undefined}
         onPick={onPick}
       />
     )

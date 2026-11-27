@@ -107,7 +107,7 @@ describe("the theme editor on the live preview (adr/0065 Faz 1)", () => {
     expect(postsTo(fetchMock)).toHaveLength(1)
 
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Metin/ }))
     await pass(0)
     await waitFor(() => {

@@ -338,7 +338,7 @@ describe("ThemeEditor", () => {
     await opened()
 
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Görsel bant/ }))
 
     expect(await screen.findByRole("heading", { name: "Görsel bant" })).toBeVisible()

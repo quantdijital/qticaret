@@ -142,8 +142,8 @@ export function AppSidebar({
       <SidebarContent className="gap-0 px-1 pt-2 group-data-[collapsible=icon]:overflow-y-auto">
         {/* A landmark screen readers list as the menu; `contents` keeps the sidebar's layout */}
         <nav aria-label={t("nav.label")} className="contents">
-          {groups.map((group) => (
-            <SidebarGroup key={group.key ?? "main"} className="py-1.5">
+          {groups.map((group, index) => (
+            <SidebarGroup key={group.key ?? `main-${index}`} className="py-1.5">
               {group.key ? (
                 // Collapsed, the label fades and slides over the item above it: it must not take its click
                 <SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-sidebar-muted-foreground group-data-[collapsible=icon]:pointer-events-none">

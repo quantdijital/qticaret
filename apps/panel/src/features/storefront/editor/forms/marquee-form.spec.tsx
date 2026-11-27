@@ -14,7 +14,7 @@ import {
   newHeaderMarquee,
   newHomeSection,
 } from "@/features/storefront/layout/sections"
-import { AddSectionDialog } from "../add-section-dialog"
+import { AddSectionPicker } from "../add-section-picker"
 import { SectionTree } from "../section-tree"
 import { DOC } from "../theme-editor.fixtures"
 import { sectionFields } from "./field-registry"
@@ -162,12 +162,11 @@ describe("scrolling strips per page", () => {
 
   it("offers no other strip in the add dialog once the page has its two", () => {
     render(
-      <AddSectionDialog
-        open
+      <AddSectionPicker
         page="home"
         placement="bottom"
         marqueeFull
-        onOpenChange={() => undefined}
+        onBack={() => undefined}
         onPick={() => undefined}
       />
     )

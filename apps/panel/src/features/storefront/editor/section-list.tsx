@@ -29,6 +29,12 @@ interface SectionListProps<S extends BodySection | FooterSection> {
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
   onRemove: (section: S) => void
+  /**
+   * Opens the section chooser aimed before a row (null: after the last);
+   * a "+" between the rows and the rows' "Üstüne / Altına bölüm ekle".
+   * None or null: nothing more may be added here.
+   */
+  onInsert?: ((before: string | null) => void) | null | undefined
 }
 
 /** Where a section dropped before or after `target` lands, as an index among the others. */
@@ -61,6 +67,7 @@ export function SectionList<S extends BodySection | FooterSection>({
   dispatch,
   onOpen,
   onRemove,
+  onInsert = null,
 }: SectionListProps<S>) {
   const { t } = useTranslation()
   const flags = useSectionFlags()
@@ -109,6 +116,7 @@ export function SectionList<S extends BodySection | FooterSection>({
         const move = (to: number) => () => {
           dispatch({ type: "move", id: section.id, to })
         }
+        const next = sections[index + 1]?.id ?? null
         return (
           <SectionRow
             key={section.id}
@@ -149,6 +157,19 @@ export function SectionList<S extends BodySection | FooterSection>({
                       dispatch({ type: "place", id: section.id, placement: other })
                     },
                     ...(placeLabel ? { label: placeLabel(other) } : {}),
+                  }
+                : undefined
+            }
+            insertLine={onInsert ? { hidden: dragged !== null } : undefined}
+            onInsert={
+              onInsert
+                ? {
+                    above: () => {
+                      onInsert(section.id)
+                    },
+                    below: () => {
+                      onInsert(next)
+                    },
                   }
                 : undefined
             }

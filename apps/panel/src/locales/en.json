@@ -424,12 +424,20 @@
       "previewValue": "Sample product name",
       "previewField": "Sample field",
       "colors": "Colours",
-      "colorsHint": "The brand colour paints buttons, selections and charts; the mode sets the page's ground, the menu ground the left menu's.",
-      "layout": "Layout",
-      "layoutHint": "How the menu behaves, the corners and the row height.",
+      "colorsHint": "The brand colour paints buttons, selections and charts; the background colour sets the surfaces' tone, the mode light or dark.",
+      "layout": "Menu and layout",
+      "layoutHint": "The left menu's ground and behaviour, corners and row height.",
       "radiusHint": "The corners of cards, buttons and fields.",
       "densityHint": "The height of table rows and fields.",
-      "modeHint": "A light or dark ground; by system follows your device."
+      "modeHint": "A light or dark ground; by system follows your device.",
+      "surface": "Background colour",
+      "surfaceHint": "The tone of the page, cards and menus. The brand colour stays on buttons, links and charts.",
+      "surfaceOptions": {
+        "brand": "From the brand",
+        "neutral": "Neutral",
+        "warm": "Warm",
+        "cool": "Cool"
+      }
     },
     "saved": "Settings saved.",
     "catalogDefaults": {
@@ -9791,7 +9799,10 @@
           "bottom": "Move below the grid"
         },
         "off": "Off",
-        "offNote": "{{capability}} is off, so this section is not shown on the storefront; it shows again once turned on."
+        "offNote": "{{capability}} is off, so this section is not shown on the storefront; it shows again once turned on.",
+        "insertAbove": "Add a section above {{name}}",
+        "addAbove": "Add section above",
+        "addBelow": "Add section below"
       },
       "add": {
         "title": "Add section",
@@ -9801,10 +9812,14 @@
           "top": "It is added on every category page, above the product grid.",
           "bottom": "It is added on every category page, below the product grid.",
           "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order.",
-          "pages": "Added to this page, after its sections; then drag it or use the arrows to move it."
+          "pages": "Added to this page, after its sections; then drag it or use the arrows to move it.",
+          "aimed": "Added where you chose; you can then drag it or use the arrows to move it."
         },
         "once": "Already on this page.",
-        "general": "General sections"
+        "general": "General sections",
+        "search": "Search sections",
+        "searchPlaceholder": "Search: products, banner, FAQ…",
+        "none": "No section matches your search."
       },
       "types": {
         "announcement_bar": {

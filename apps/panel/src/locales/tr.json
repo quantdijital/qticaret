@@ -424,12 +424,20 @@
       "previewValue": "Örnek ürün adı",
       "previewField": "Örnek alan",
       "colors": "Renkler",
-      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod sayfanın, menü zemini sol menünün zeminini belirler.",
-      "layout": "Düzen",
-      "layoutHint": "Menünün davranışı, köşeler ve satır yüksekliği.",
+      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; zemin rengi yüzeylerin tonunu, mod açık ya da koyu zemini belirler.",
+      "layout": "Menü ve düzen",
+      "layoutHint": "Sol menünün zemini ve davranışı, köşeler ve satır yüksekliği.",
       "radiusHint": "Kartların, düğmelerin ve alanların köşeleri.",
       "densityHint": "Tablo satırlarının ve alanların yüksekliği.",
-      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
+      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler.",
+      "surface": "Zemin rengi",
+      "surfaceHint": "Sayfa, kart ve menülerin tonu. Marka rengi düğmelerde, bağlantılarda ve grafiklerde kalır.",
+      "surfaceOptions": {
+        "brand": "Markadan",
+        "neutral": "Nötr",
+        "warm": "Sıcak",
+        "cool": "Soğuk"
+      }
     },
     "saved": "Ayarlar kaydedildi.",
     "catalogDefaults": {
@@ -9791,7 +9799,10 @@
           "bottom": "Izgaranın altına taşı"
         },
         "off": "Kapalı",
-        "offNote": "{{capability}} kapalı olduğu için bu bölüm vitrinde görünmez; özellik açılınca yeniden görünür."
+        "offNote": "{{capability}} kapalı olduğu için bu bölüm vitrinde görünmez; özellik açılınca yeniden görünür.",
+        "insertAbove": "{{name}} bölümünün üstüne bölüm ekle",
+        "addAbove": "Üstüne bölüm ekle",
+        "addBelow": "Altına bölüm ekle"
       },
       "add": {
         "title": "Bölüm ekle",
@@ -9801,10 +9812,14 @@
           "top": "Bütün kategori sayfalarında, ürün ızgarasının üstüne eklenir.",
           "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir.",
           "footer": "Bütün sayfalarda, ödeme sayfası dışında, alt bilginin üstünde görünür; her bölüm bir kez eklenir, sonra sürükleyerek sırasını değiştirebilirsiniz.",
-          "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
+          "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz.",
+          "aimed": "Seçtiğiniz yere eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
         },
         "once": "Bu sayfada zaten var.",
-        "general": "Genel bölümler"
+        "general": "Genel bölümler",
+        "search": "Bölüm ara",
+        "searchPlaceholder": "Ara: ürün, banner, SSS…",
+        "none": "Aramanızla eşleşen bölüm yok."
       },
       "types": {
         "announcement_bar": {

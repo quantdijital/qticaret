@@ -23,6 +23,7 @@ import {
   bodyAround,
   inPageOf,
   pageOnlyTaken,
+  pageSectionsOf,
   seededPage,
   withoutPages,
 } from "./page-layouts"
@@ -44,9 +45,22 @@ export interface EditorState {
 export type EditorAction =
   /** A document from the server (opened, discarded, restored): no step to undo. */
   | { type: "load"; doc: LayoutDocument }
-  | { type: "add"; group: ListGroup; section: AnySection; at?: number }
+  /**
+   * A section added at the end of its group, at `at`, or right before the
+   * section `before` names (the tree's "+" between two rows); a `before`
+   * not in the group (nor on the same side of a category page's products)
+   * adds it at the end.
+   */
+  | { type: "add"; group: ListGroup; section: AnySection; at?: number; before?: string }
   /** A content page's section (adr/0073): the first one makes the page's layout. */
-  | { type: "add"; group: "pages"; page: string; section: ContentPageSection; at?: number }
+  | {
+      type: "add"
+      group: "pages"
+      page: string
+      section: ContentPageSection
+      at?: number
+      before?: string
+    }
   /** A section's new settings; `merge` names the field being typed in. */
   | { type: "update"; section: AnySection; merge?: string | undefined }
   /**
@@ -136,12 +150,31 @@ function inGroupOf(
   return withGroup(doc, found.group, change(sections, found.index) as never)
 }
 
+/** Where `before` stands among `sections`, if it is there (and on `section`'s side of a category page). */
+function placeBefore(
+  sections: readonly AnySection[],
+  section: AnySection,
+  before: string | undefined
+): number | undefined {
+  if (before === undefined) {
+    return undefined
+  }
+  const index = sections.findIndex((each) => each.id === before)
+  const target = sections[index]
+  if (!target || isMain(target)) {
+    return undefined
+  }
+  const sideOf = (each: AnySection) => ("placement" in each ? each.placement : null)
+  return sideOf(target) === sideOf(section) ? index : undefined
+}
+
 function add(doc: LayoutDocument, action: Extract<EditorAction, { type: "add" }>) {
-  const { section, at } = action
+  const { section } = action
   if (idsOf(doc).has(section.id)) {
     return doc
   }
   if (action.group === "pages") {
+    const at = placeBefore(pageSectionsOf(doc, action.page), section, action.before) ?? action.at
     return addToPage(doc, action.page, action.section, at)
   }
   const { group } = action
@@ -153,6 +186,7 @@ function add(doc: LayoutDocument, action: Extract<EditorAction, { type: "add" }>
   if (full) {
     return doc
   }
+  const at = placeBefore(sections, section, action.before) ?? action.at
   const place = at === undefined ? sections.length : Math.max(0, Math.min(at, sections.length))
   sections.splice(place, 0, section)
   return withGroup(doc, group, sections as never)

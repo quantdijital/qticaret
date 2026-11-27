@@ -7,7 +7,7 @@ import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { ApplyReport } from "@/features/storefront/gallery/apply-report"
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import type { SectionFlags } from "@/features/storefront/layout/sections"
-import { AddSectionDialog } from "./add-section-dialog"
+import { AddSectionPicker } from "./add-section-picker"
 import { SectionFlagsContext } from "./section-flags"
 import { SectionTree } from "./section-tree"
 import { DOC } from "./theme-editor.fixtures"
@@ -30,12 +30,11 @@ function chooser(flags: SectionFlags) {
   render(
     withFlags(
       flags,
-      <AddSectionDialog
-        open
+      <AddSectionPicker
         page="home"
         placement="bottom"
         marqueeFull={false}
-        onOpenChange={() => undefined}
+        onBack={() => undefined}
         onPick={() => undefined}
       />
     )

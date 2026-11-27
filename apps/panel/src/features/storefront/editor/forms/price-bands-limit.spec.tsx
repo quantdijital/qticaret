@@ -6,7 +6,7 @@ import "@/lib/i18n"
 import type { LayoutDocument, PriceBandsSection } from "@/features/storefront/api/layout"
 import { documentProblems } from "@/features/storefront/layout/problems"
 import { findSection, newHomeSection, priceBandsOn } from "@/features/storefront/layout/sections"
-import { AddSectionDialog } from "../add-section-dialog"
+import { AddSectionPicker } from "../add-section-picker"
 import { OpenedForm } from "../opened-form"
 import { DOC } from "../theme-editor.fixtures"
 
@@ -58,13 +58,12 @@ describe("price bands strips per page", () => {
 
   it("offers no other strip in the add dialog once the home page has its two, and says why", () => {
     render(
-      <AddSectionDialog
-        open
+      <AddSectionPicker
         page="home"
         placement="bottom"
         marqueeFull={false}
         priceBandsFull
-        onOpenChange={() => undefined}
+        onBack={() => undefined}
         onPick={() => undefined}
       />
     )
