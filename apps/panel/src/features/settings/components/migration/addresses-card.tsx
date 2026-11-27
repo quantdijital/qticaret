@@ -21,6 +21,7 @@ import {
 } from "@/features/settings/api/migration-addresses"
 import type { AddressSummary, UrlFilter } from "@/features/settings/api/migration-addresses"
 import { AddressRow } from "@/features/settings/components/migration/address-row"
+import { stepTitle } from "@/features/settings/components/migration/step-title"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -217,7 +218,7 @@ function ApplyDecisions() {
   )
 }
 
-export function AddressesCard() {
+export function AddressesCard({ step }: { step?: number }) {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<UrlFilter>("all")
   const [page, setPage] = useState(0)
@@ -225,7 +226,7 @@ export function AddressesCard() {
   const list = useQuery(addressesQuery(filter, page * PAGE))
   return (
     <SectionCard
-      title={t(`${A}.title`)}
+      title={stepTitle(t, t(`${A}.title`), step)}
       description={t(`${A}.description`)}
       action={<ApplyDecisions />}
       flush

@@ -67,7 +67,7 @@ describe("Settings home", () => {
       "/settings/shipping"
     )
     // F14: moving the shop in, the owner's
-    expect(screen.getByRole("link", { name: /Taşıma.*301/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Taşıma.*yönlendirin/ })).toHaveAttribute(
       "href",
       "/settings/migration"
     )

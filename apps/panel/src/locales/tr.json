@@ -2401,7 +2401,7 @@
       "security": "Hesabınız ve iki adımlı doğrulama, ekip üyeleri ve davetler, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
       "einvoice": "Fatura programı, kesim anı ve seri, KDV, muhasebe",
-      "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri",
+      "migration": "Eski sitenizden ürün, yazı ve müşterileri getirin; eski adresleri yönlendirin",
       "subscription": "Paketiniz, limitler ve kullanım, ödeme durumu",
       "maintenance": "Vitrini geçici olarak kapatma, bakım sayfası ve atlatma bağlantısı"
     },
@@ -3234,17 +3234,17 @@
     },
     "migration": {
       "title": "Taşıma",
-      "subtitle": "Mağazanızı eski platformdan bu siteye taşıyın: katalog, müşteriler, geçmiş siparişler ve eski adreslerin 301 yönlendirmeleri.",
+      "subtitle": "Eski sitenizdeki ürünleri, yazıları ve müşterileri buraya getirin; eski adresler yeni sayfalara yönlendirilir.",
       "run": {
-        "title": "Taşımayı çalıştır",
-        "description": "Önce kuru çalıştırın: hiçbir şey yazılmaz, rapor ne olacağını söyler. Sonra uygulayın; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz.",
+        "title": "Aktarım",
+        "description": "Önce önizleyin: hiçbir şey kaydedilmez, ne olacağını rapor söyler. Yeniden çalıştırırsanız yalnız yeni kayıtlar eklenir; daha önce taşınan ürünler, yazılar ve sayfalar değişmez, alınamamış ürün görselleri yeniden denenir.",
         "source": "Kaynak",
         "sources": {
           "shopify": "Shopify",
           "wordpress": "WordPress / WooCommerce",
           "feed": "Ürün akışı (Ticimax, ikas, IdeaSoft, T-Soft)",
-          "customers": "Müşteri listesi (xlsx/CSV)",
-          "bundle": "Geçiş paketi (JSON)"
+          "customers": "Müşteri listesi (Excel ya da CSV)",
+          "bundle": "Ekibimizin hazırladığı geçiş dosyası"
         },
         "hints": {
           "shopify": "Mağazanız Shopify'da: bağlı uygulamanızla ürünler, koleksiyonlar, müşteriler, siparişler ve sayfalar okunur.",
@@ -3256,29 +3256,29 @@
         "feedUrl": "Akış adresi",
         "file": "Dosya",
         "parcel": {
-          "title": "Varsayılan paket",
+          "title": "Ölçüsü olmayan ürünler için paket",
           "hint": "İsteğe bağlı. Ağırlığı ya da ölçüsü olmayan ürünlere bu değerler yazılır; boş bırakırsanız ürünler kaynaktaki durumlarıyla ölçüsüz gelir ve kargo ücreti mağazanın varsayılan paketine göre hesaplanır.",
           "weight": "Ağırlık (g)",
           "length": "Uzunluk (cm)",
           "width": "Genişlik (cm)",
           "height": "Yükseklik (cm)"
         },
-        "check": "Kuru çalıştır",
-        "apply": "Uygula",
-        "confirmTitle": "Taşıma uygulansın mı?",
-        "confirmText": "Kaynaktaki kayıtlar bu mağazaya yazılır. Yeniden çalıştırmak hiçbir şeyi iki kez yazmaz.",
-        "running": "Çalışıyor… %{{progress}}",
-        "failed": "Taşıma durdu: {{reason}}",
-        "planned": "Kuru çalıştırma bitti: ne olacağı aşağıda.",
-        "applied": "Taşıma uygulandı.",
+        "check": "Önizle",
+        "apply": "Aktarmayı başlat",
+        "confirmTitle": "Aktarım başlasın mı?",
+        "confirmText": "Kaynaktaki yeni kayıtlar bu mağazaya eklenir. Daha önce taşınan ürünler, yazılar ve sayfalar değişmez; alınamamış ürün görselleri yeniden denenir.",
+        "running": "Aktarılıyor… %{{progress}}",
+        "failed": "Aktarım durdu: {{reason}}",
+        "planned": "Önizleme hazır: hiçbir şey kaydedilmedi, ne olacağı aşağıda.",
+        "applied": "Aktarım bitti.",
         "report": "Raporu indir",
         "kinds": {
           "category": "Kategoriler",
           "brand": "Markalar",
           "product": "Ürünler",
-          "image": "Görseller",
+          "image": "Ürün görselleri",
           "customer": "Müşteriler",
-          "consent": "İleti izinleri",
+          "consent": "Kampanya e-postası izinleri",
           "order": "Geçmiş siparişler",
           "review": "Yorumlar",
           "post_category": "Blog kategorileri",
@@ -3291,19 +3291,17 @@
           "read": "Kaynakta",
           "created": "Eklenen",
           "plannedCreated": "Eklenecek",
-          "found": "Var olan",
-          "skipped": "Atlanan"
+          "found": "Zaten var",
+          "skipped": "Aktarılamayan"
         },
-        "refreshConfirmTitle": "Açıklamalar yenilensin mi?",
-        "refreshConfirmText": "Bu dosyanın daha önce taşıdığı ürünlerin açıklaması dosyadakiyle değiştirilir; panelde sonradan yaptığınız açıklama değişiklikleri de yerini dosyadakine bırakır. Başka hiçbir alan değişmez.",
         "descriptions": {
           "applied": "Açıklamalar yenilendi.",
-          "planned": "Kuru çalıştırma bitti: yenilenecek açıklamalar aşağıda.",
+          "planned": "Önizleme hazır: yenilenecek açıklamalar aşağıda.",
           "refreshed": "Yenilenen açıklamalar",
           "plannedRefreshed": "Yenilenecek açıklamalar",
           "same": "Zaten aynı olanlar",
           "notMoved": "Önceki bir çalıştırmada taşınmamış ürünler",
-          "notMovedHint": "Bunlar için önce kutuyu işaretlemeden bir taşıma uygulayın.",
+          "notMovedHint": "Bunlar henüz taşınmadı; önce Aktarım ile taşıyın.",
           "failed": "Yenilenemeyenler",
           "withDocument": "Biçimli açıklamaya sahip olanlar",
           "documents_one": "{{formatted}} ürünün açıklaması biçimiyle taşındı",
@@ -3317,15 +3315,17 @@
           "plannedFacts_other": "Açıklamalardan {{formatted}} özellik değeri alanlara yazılacak",
           "factsLeft_one": "{{formatted}} satır kararınızı bekliyor: Ürünler'de ürünleri seçip “Açıklamadaki özellikleri aktar”.",
           "factsLeft_other": "{{formatted}} satır kararınızı bekliyor: Ürünler'de ürünleri seçip “Açıklamadaki özellikleri aktar”."
-        }
+        },
+        "advanced": "Gelişmiş",
+        "advancedHint": "Çoğu mağazada gerekmez"
       },
       "shopify": {
         "connected": "{{shop}} bağlı",
         "notConnected": "Shopify mağazası bağlı değil.",
         "steps": "Shopify Dev Dashboard'da bir uygulama açın, yalnızca okuma kapsamları verin (ürünler, müşteriler, siparişler, sayfalar), mağazanıza yükleyin ve bilgilerini buraya girin.",
         "shopDomain": "Mağaza adresi",
-        "clientId": "Client ID",
-        "clientSecret": "Client secret",
+        "clientId": "Uygulama kimliği (Client ID)",
+        "clientSecret": "Uygulama anahtarı (Client secret)",
         "connect": "Bağla",
         "reconnect": "Yeniden bağla",
         "saved": "Shopify mağazası bağlandı."
@@ -3333,8 +3333,8 @@
       "wordpress": {
         "file": "Dışa aktarma dosyası",
         "fileHint": "XML ya da onu tutan zip, en çok 50 MB. Tüm içerik seçilmeli: ürünler, varyasyonlar ve görseller ayrı dışa aktarılırsa birbirini bulamaz.",
-        "categoryBase": "Kategori adres öneki",
-        "categoryBaseHint": "Eski sitede kategori adreslerinin başındaki yol, ör. /urun-kategori/; kategoriler kökteyse /. Boş bırakırsanız sitenin kendi bağlantılarından okunur; raporda kategori adresleri yanlış görünürse doldurun.",
+        "categoryBase": "Eski kategori adresleri",
+        "categoryBaseHint": "Eski sitede kategori adreslerinin başındaki yol, ör. /urun-kategori/; kategoriler kökteyse /. Boş bırakırsanız sitenin kendi bağlantılarından bulunur; önizlemede kategori adresleri yanlış görünürse doldurun.",
         "parcelNote": "WooCommerce'te çoğu mağaza ürünlere ağırlık ve ölçü girmez. Bu ürünler yine de kaynaktaki durumlarıyla gelir; kargo ücreti Ayarlar > Kargo'daki varsayılan pakete göre hesaplanır. Burada bir paket verirseniz ürünlerin kendi ölçüsü olarak yazılır.",
         "errors": {
           "fileRequired": "Dışa aktarma dosyasını seçin.",
@@ -3358,7 +3358,7 @@
             "values": "Değer"
           },
           "addressOnly": "Yalnızca eski adresi tutulan sayfalar",
-          "addressOnlyHint": "Yasal metinler, sepet ve hesap gibi sistem sayfaları ve ön sayfa içerik sayfası olmaz. Uygulamadan sonra eski adreslerine Eski adresler kartında karar verin, ör. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
+          "addressOnlyHint": "Yasal metinler, sepet ve hesap gibi sistem sayfaları ve ön sayfa içerik sayfası olmaz. Aktarımdan sonra eski adreslerine Eski adresler ve yönlendirmeler kartında karar verin, ör. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
           "notMoved": "Raporda, taşınmadı",
           "kinds": {
             "coupons": "Kuponlar",
@@ -3372,17 +3372,15 @@
             "product_tags": "Vitrinde ürün etiketi sayfası yok.",
             "blog_comments": "Vitrinde blog yorumu yok."
           }
-        },
-        "refresh": "Yalnız açıklamaları yenile",
-        "refreshHint": "Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması bu dosyadan başlık, liste ve tablolarıyla yeniden yazılır. Fiyat, stok, durum ve SEO alanlarına dokunulmaz, yeni kayıt eklenmez. Yalnızca uygulanır."
+        }
       },
       "runs": {
-        "title": "Geçmiş çalıştırmalar",
-        "description": "Her kuru çalıştırma ve uygulama, kaynağıyla.",
-        "empty": "Henüz çalıştırma yok.",
+        "title": "Geçmiş aktarımlar",
+        "description": "Her önizleme ve aktarım, kaynağıyla.",
+        "empty": "Henüz aktarım yok.",
         "modes": {
-          "check": "Kuru",
-          "apply": "Uygulama"
+          "check": "Önizleme",
+          "apply": "Aktarım"
         },
         "statuses": {
           "running": "Sürüyor",
@@ -3391,25 +3389,25 @@
           "interrupted": "Yarıda kaldı"
         },
         "summary": "{{products}} ürün, {{customers}} müşteri",
-        "restart": "Yeniden başlat",
-        "restarted": "Aktarım aynı dosyadan yeniden başlatıldı.",
-        "restartedNote": "yeniden başlatıldı"
+        "restart": "Kaldığı yerden sürdür",
+        "restarted": "Aktarım aynı dosyadan sürdürülüyor.",
+        "restartedNote": "sürdürüldü"
       },
       "addresses": {
-        "title": "Eski adresler",
-        "description": "Eski sitenin adresleri yeni sayfalara 301 ile gider; eşleşmeyenler için siz karar verirsiniz. Search Console'daki en çok trafik alan 100 adresin hepsi yanıt verince kesime hazırsınız.",
-        "ready": "Kesime hazır",
-        "notReady": "Kesime hazır değil",
+        "title": "Eski adresler ve yönlendirmeler",
+        "description": "Eski adresleri yeni sayfalara yönlendirin; en çok trafik alan 100 adresin hepsi yanıt verince alan adını bağlamaya hazırsınız.",
+        "ready": "Alan adını bağlamaya hazır",
+        "notReady": "Alan adını bağlamaya henüz hazır değil",
         "noTraffic": "Search Console verisi yok: en çok trafik alan sayfaları yükleyin.",
         "unanswered": "En çok trafik alan adreslerden {{count}} tanesi henüz yanıt vermiyor.",
-        "categoryStyle": "Eski sitenin {{total}} kategori adresinden {{kept}} tanesi “{{style}}” kategori adres biçimiyle aynen korunur (şu anki biçimde {{now}}). Biçimi değiştirirseniz diğer kategori adresleri 301 ile yenilerine gider.",
+        "categoryStyle": "Eski sitenin {{total}} kategori adresinden {{kept}} tanesi “{{style}}” kategori adres biçimiyle aynen korunur (şu anki biçimde {{now}}). Biçimi değiştirirseniz diğer kategori adresleri yenilerine yönlendirilir (301).",
         "categoryStyleLink": "Adres biçimini aç",
         "counts": {
           "total": "Adres",
           "matched": "Eşleşen",
           "decided": "Karar verilen",
           "undecided": "Karar bekleyen",
-          "unsupported": "Sorgu dizeli"
+          "unsupported": "Soru işaretli adresler"
         },
         "sitemap": "Site haritası adresi",
         "readSitemap": "Haritayı oku",
@@ -3419,14 +3417,14 @@
         "sitemapStarted": "Site haritası okunuyor; bitince adresler listeye eklenir.",
         "apply": "Kararları uygula",
         "applyConfirmTitle": "Adres kararları uygulansın mı?",
-        "applyConfirmText": "Eşleşen eski adresler kayıtlarının yeni adresine, kararlarınız 301 ve 410 kuralı olarak yazılır.",
+        "applyConfirmText": "Eşleşen eski adresler kayıtlarının yeni sayfasına yönlendirilir; kararlarınız yönlendirme (301) ve kaldırıldı (410) kuralı olarak yazılır.",
         "applyStarted": "Kararlar uygulanıyor; rapor işler sayfasında.",
         "filters": {
           "all": "Tümü",
           "undecided": "Karar bekleyen",
           "matched": "Eşleşen",
           "decided": "Karar verilen",
-          "unsupported": "Sorgu dizeli"
+          "unsupported": "Soru işaretli adresler"
         },
         "columns": {
           "address": "Eski adres",
@@ -3436,21 +3434,21 @@
         },
         "states": {
           "live": "Sayfa",
-          "redirected": "301",
-          "gone": "410",
-          "not_found": "404"
+          "redirected": "Yönlendiriliyor (301)",
+          "gone": "Kaldırıldı (410)",
+          "not_found": "Bulunamıyor (404)"
         },
         "actions": {
           "covered": "Yanıt veriyor",
-          "reserve": "Kaydın adresine 301",
-          "redirect": "301 kuralı",
-          "gone": "410",
+          "reserve": "Yeni sayfasına yönlendirilir (301)",
+          "redirect": "Seçilen sayfaya yönlendirilir (301)",
+          "gone": "Kaldırıldı olarak bildirilir (410)",
           "undecided": "Karar bekliyor",
-          "unsupported": "Sunucu kuralı gerekir"
+          "unsupported": "Buradan yönlendirilemez"
         },
         "decide": {
-          "redirect": "Yönlendir",
-          "gone": "410 ver",
+          "redirect": "Yönlendir (301)",
+          "gone": "Kaldırıldı (410)",
           "auto": "Otomatik",
           "target": "Hedef yol",
           "save": "Kaydet",
@@ -3460,13 +3458,13 @@
         "upload": "Yükle"
       },
       "cutover": {
-        "title": "Kesim",
-        "description": "Alan adınızı yeni siteye yönlendirdiğiniz gün işaretleyin: 30 gün boyunca 404'ler izlenir, yeni olanlar eski adreslere eklenir ve zil çalar.",
-        "mark": "Kesim yapıldı",
-        "confirmTitle": "Kesim yapıldı mı?",
-        "confirmText": "Alan adı yeni siteyi gösteriyorsa işaretleyin; 404 izlemesi bugünden başlar.",
-        "watching": "{{date}} tarihinde kesim yapıldı; 404'ler {{until}} tarihine kadar izleniyor.",
-        "none": "Henüz kesim yapılmadı."
+        "title": "Alan adı geçişi",
+        "description": "Alan adınızı yeni siteye bağladığınız gün işaretleyin; 30 gün boyunca bulunamayan sayfalar (404) izlenir.",
+        "mark": "Alan adımı yeni siteye bağladım",
+        "confirmTitle": "Alan adı yeni siteye bağlandı mı?",
+        "confirmText": "Alan adınız yeni siteyi gösteriyorsa işaretleyin. Bulunamayan sayfalar (404) bugünden başlayarak 30 gün izlenir; yeni olanlar eski adreslere eklenir ve zil çalar.",
+        "watching": "Alan adı {{date}} tarihinde bağlandı; bulunamayan sayfalar (404) {{until}} tarihine kadar izleniyor.",
+        "none": "Alan adı henüz bağlanmadı."
       },
       "links": {
         "title": "Metinlerdeki eski bağlantılar",
@@ -3475,18 +3473,18 @@
         "apply": "Bağlantıları düzelt",
         "confirmTitle": "Bağlantılar düzeltilsin mi?",
         "confirmText": "Eski adreslere giden bağlantılar, yönlendirmelerinin gösterdiği sayfaların adresleriyle değiştirilir. Karşılığı olmayanlar olduğu gibi kalır ve raporda listelenir.",
-        "none": "Henüz çalıştırılmadı. Taşıma bunu kendisi yapar; daha önce taşınan metinler için buradan çalıştırın.",
+        "none": "Henüz çalıştırılmadı. Aktarım bunu kendisi yapar; daha önce taşınan metinler için buradan çalıştırın.",
         "running": "Bağlantılar okunuyor…",
         "checked": "{{date}} kontrolü: {{documents}} metinde {{changed}} bağlantı düzeltilecek, {{unresolved}} bağlantının karşılığı yok.",
         "applied": "{{date}}: {{documents}} metinde {{changed}} bağlantı düzeltildi, {{unresolved}} bağlantının karşılığı yok.",
         "failed": "Son çalıştırma tamamlanamadı. Yeniden deneyin.",
         "report": "Raporu indir",
         "downloadFailed": "Rapor indirilemedi.",
-        "hint": "Karşılığı olmayan bağlantılar için eski adreslerde karar verip uygulayın ya da metni düzenleyin, sonra yeniden çalıştırın."
+        "hint": "Karşılığı olmayan bağlantılar için Eski adresler ve yönlendirmeler kartında karar verip uygulayın ya da metni düzenleyin, sonra yeniden çalıştırın."
       },
       "invites": {
         "title": "Müşteri davetleri",
-        "description": "Şifreler taşınamaz: taşınan müşterilere hesaplarını açmaları için e-posta gider. Günlük e-posta sınırının yarısı kadarı her gün gönderilir; siparişler kalan payı kullanır.",
+        "description": "Şifreler taşınamaz; taşınan müşterilere hesaplarını açmaları için her gün bir kısmına e-posta gider.",
         "start": "Davetleri başlat",
         "confirmTitle": "Davetler başlasın mı?",
         "confirmText": "Taşınan ve eski kaydını henüz almamış her müşteriye bir kez e-posta gider; bağlantıdaki kişisel anahtar 60 gün geçerlidir.",
@@ -3497,6 +3495,28 @@
           "waiting": "Bekleyen",
           "today": "Bugün"
         }
+      },
+      "stepTitle": "{{step}}. {{title}}",
+      "after": {
+        "title": "Taşımadan sonra",
+        "description": "Aktarım bitince bu üç adımı sırayla yapın."
+      },
+      "fix": {
+        "title": "Tamamlama işlemleri",
+        "description": "Taşınmış kayıtların yalnız bir parçasını yeniden ele alır; başka hiçbir şeye dokunmaz."
+      },
+      "refresh": {
+        "title": "Ürün açıklamalarını yeniden al",
+        "description": "Daha önce taşınan ürünlerin açıklamasını WordPress dosyasındakiyle değiştirir; panelde yaptığınız açıklama değişiklikleri gider.",
+        "wordpressOnly": "Yalnız WordPress / WooCommerce'ten taşınan ürünler için. Fiyat, stok, durum, SEO ve görsellere dokunmaz, yeni ürün eklemez.",
+        "start": "Başlat",
+        "dialogText": "Dışa aktarma dosyasını yeniden seçin: her aktarım bittiğinde dosya silinir.",
+        "changes": "Değişecek:",
+        "changesText": "bu dosyanın daha önce taşıdığı ürünlerin açıklaması, başlık, liste ve tablolarıyla. Panelde sonradan yaptığınız açıklama değişiklikleri de gider.",
+        "keeps": "Değişmeyecek:",
+        "keepsText": "fiyat, stok, durum, SEO alanları, görseller ve diğer ürünler.",
+        "fileHint": "WordPress'te Araçlar > Dışa aktar > Tüm içerik; XML ya da onu tutan zip, en çok 50 MB.",
+        "confirm": "Açıklamaları değiştir"
       }
     },
     "maintenance": {
@@ -8613,8 +8633,8 @@
       "description": "Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin."
     },
     "migrationNotFound": {
-      "title": "Kesimden sonra {{count}} adres 404 verdi",
-      "description": "Taşıma > Eski adreslerden 301 ya da 410 kararı verin."
+      "title": "Alan adı geçişinden sonra {{count}} adres bulunamadı (404)",
+      "description": "Taşıma > Eski adresler ve yönlendirmeler'den yönlendirme ya da kaldırıldı kararı verin."
     },
     "contactMessage": {
       "title": "Yeni iletişim mesajı: {{subject}}",

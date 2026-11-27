@@ -21,7 +21,11 @@ import type {
 } from "@/features/settings/api/migration"
 import { NO_PARCEL, readParcel } from "@/features/settings/components/migration/parcel"
 import type { ParcelText } from "@/features/settings/components/migration/parcel"
-import { ParcelFields, RunButtons } from "@/features/settings/components/migration/run-controls"
+import {
+  AdvancedOptions,
+  ParcelFields,
+  RunButtons,
+} from "@/features/settings/components/migration/run-controls"
 import { RunResult } from "@/features/settings/components/migration/run-result"
 import { RecentRuns } from "@/features/settings/components/migration/runs-card"
 import { ShopifyConnection } from "@/features/settings/components/migration/shopify-connection"
@@ -29,13 +33,8 @@ import { WordpressSource } from "@/features/settings/components/migration/wordpr
 import { errorText } from "@/lib/errors"
 
 const R = "settings.migration.run"
-const SOURCES: readonly MigrationSourceKind[] = [
-  "shopify",
-  "wordpress",
-  "feed",
-  "customers",
-  "bundle",
-]
+// The bundle our team prepares is offered only from its own link (`?kaynak=paket`)
+const SOURCES: readonly MigrationSourceKind[] = ["shopify", "wordpress", "feed", "customers"]
 // Sources that bring products, and so may need a parcel (WordPress asks for its own)
 const WITH_PRODUCTS = new Set<MigrationSourceKind>(["shopify", "feed", "bundle"])
 const ACCEPT: Partial<Record<MigrationSourceKind, string>> = {
@@ -43,25 +42,30 @@ const ACCEPT: Partial<Record<MigrationSourceKind, string>> = {
   bundle: ".json,application/json",
 }
 
+interface RunCardProps {
+  className?: string
+  /** The team's bundle among the sources (its link, `?kaynak=paket`). */
+  withBundle?: boolean
+}
+
 /**
  * The migration's source and its run (F14, adr/0042 §9): the source chosen,
  * what it needs (a connected store, a feed's address, a file, a WordPress
  * export with its options), the owner's parcel for products without
  * measurements; a check first, then applying, which is confirmed and
- * proved again. The run's counts and report follow.
+ * proved again. The run's counts and report follow. A run again adds only
+ * what is new: what moved before stays as it is.
  */
-export function RunCard({ className }: { className?: string }) {
+export function RunCard({ className, withBundle = false }: RunCardProps) {
   const { t } = useTranslation()
   const start = useStartMigration()
-  const [kind, setKind] = useState<MigrationSourceKind>("shopify")
+  const [kind, setKind] = useState<MigrationSourceKind>(withBundle ? "bundle" : "shopify")
   const [url, setUrl] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [parcel, setParcel] = useState<ParcelText>(NO_PARCEL)
   const [jobId, setJobId] = useState<string | null>(null)
   // A run to apply, waiting for the owner's word
   const [applying, setApplying] = useState<StartMigration | null>(null)
-  // Kept while the dialog closes, so its words do not change on the way out
-  const [refreshAsked, setRefreshAsked] = useState(false)
   const job = useQuery(migrationJobQuery(jobId))
   const running = job.data?.status === "queued" || job.data?.status === "running"
   const busy = running || start.isPending
@@ -82,7 +86,6 @@ export function RunCard({ className }: { className?: string }) {
   }
   const request = (input: StartMigration) => {
     if (input.mode === "apply") {
-      setRefreshAsked(input.refresh === true)
       setApplying(input)
     } else {
       go(input)
@@ -114,7 +117,7 @@ export function RunCard({ className }: { className?: string }) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {SOURCES.map((source) => (
+                {(withBundle ? [...SOURCES, "bundle" as const] : SOURCES).map((source) => (
                   <SelectItem key={source} value={source}>
                     {t(`${R}.sources.${source}`)}
                   </SelectItem>
@@ -160,14 +163,16 @@ export function RunCard({ className }: { className?: string }) {
                 </Field>
               ) : null}
               {WITH_PRODUCTS.has(kind) ? (
-                <ParcelFields
-                  inputProps={(field) => ({
-                    value: parcel[field],
-                    onChange: (event) => {
-                      setParcel({ ...parcel, [field]: event.target.value })
-                    },
-                  })}
-                />
+                <AdvancedOptions>
+                  <ParcelFields
+                    inputProps={(field) => ({
+                      value: parcel[field],
+                      onChange: (event) => {
+                        setParcel({ ...parcel, [field]: event.target.value })
+                      },
+                    })}
+                  />
+                </AdvancedOptions>
               ) : null}
               <RunButtons
                 disabled={!ready || busy}
@@ -199,8 +204,8 @@ export function RunCard({ className }: { className?: string }) {
             setApplying(null)
           }
         }}
-        title={t(refreshAsked ? `${R}.refreshConfirmTitle` : `${R}.confirmTitle`)}
-        description={t(refreshAsked ? `${R}.refreshConfirmText` : `${R}.confirmText`)}
+        title={t(`${R}.confirmTitle`)}
+        description={t(`${R}.confirmText`)}
         confirmLabel={t(`${R}.apply`)}
         onConfirm={() => {
           setApplying(null)

@@ -71,7 +71,7 @@ describe("Settings > Migration: the WordPress source", () => {
     const user = userEvent.setup({ applyAccept: false })
     render(<WordpressSource disabled={false} pending={null} onRun={onRun} />)
     const input = screen.getByLabelText("Dışa aktarma dosyası")
-    const check = screen.getByRole("button", { name: "Kuru çalıştır" })
+    const check = screen.getByRole("button", { name: "Önizle" })
     expect(check).toBeDisabled()
 
     await user.upload(input, exportFile("katalog.pdf", undefined, "application/pdf"))
@@ -89,17 +89,24 @@ describe("Settings > Migration: the WordPress source", () => {
     })
   })
 
+  it("no longer offers the description refresh in the run's form (its own card now)", () => {
+    render(<WordpressSource disabled={false} pending={null} onRun={vi.fn()} />)
+    expect(screen.queryByRole("checkbox")).toBeNull()
+  })
+
   it("asks for an address base of one segment and a parcel of all four values", async () => {
     const onRun = vi.fn()
     render(<WordpressSource disabled={false} pending={null} onRun={onRun} />)
     await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), exportFile("site.xml"))
-    await userEvent.type(screen.getByLabelText("Kategori adres öneki"), "/urun/kategori/alt")
+    await userEvent.type(screen.getByLabelText("Eski kategori adresleri"), "/urun/kategori/alt")
     await userEvent.type(screen.getByLabelText("Ağırlık (g)"), "500")
-    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
+    await userEvent.click(screen.getByRole("button", { name: "Önizle" }))
 
     expect(await screen.findByText(/Tek bölümlük bir yol girin/)).toBeVisible()
     expect(screen.getByText(/dört değerini de sıfırdan büyük girin/)).toBeVisible()
     expect(onRun).not.toHaveBeenCalled()
+    // A refused option opens "Gelişmiş" for the owner to see it
+    expect(screen.getByText("Gelişmiş").closest("details")).toHaveAttribute("open")
     // Products without measurements still come as the source has them (adr/0054): the form says so
     expect(screen.getByText(/kaynaktaki durumlarıyla gelir/)).toBeVisible()
   })
@@ -109,11 +116,15 @@ describe("Settings > Migration: the WordPress source", () => {
     expect(screen.getByText(/Araçlar > Dışa aktar > Tüm içerik/)).toBeVisible()
     const file = exportFile("site.WordPress.2026-11-02.xml")
     await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), file)
-    await userEvent.type(screen.getByLabelText("Kategori adres öneki"), "/urun-kategori/")
+    // The address base and the parcel are under "Gelişmiş", closed at first
+    const advanced = screen.getByText("Gelişmiş").closest("details") as HTMLElement
+    expect(advanced).not.toHaveAttribute("open")
+    await userEvent.click(screen.getByText("Gelişmiş"))
+    await userEvent.type(screen.getByLabelText("Eski kategori adresleri"), "/urun-kategori/")
     for (const [label, value] of PARCEL) {
       await userEvent.type(screen.getByLabelText(label), value)
     }
-    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
+    await userEvent.click(screen.getByRole("button", { name: "Önizle" }))
 
     await waitFor(() => {
       expect(uploads).toHaveBeenCalledTimes(1)
@@ -128,7 +139,7 @@ describe("Settings > Migration: the WordPress source", () => {
       headers: { "content-type": "application/xml" },
     })
     expect(init.body).toBe(file)
-    expect(await screen.findByText(/Çalışıyor… %10/)).toBeInTheDocument()
+    expect(await screen.findByText(/Aktarılıyor… %10/)).toBeInTheDocument()
   })
 
   it("applies a zip once confirmed, typed as the server takes it whatever the browser calls it", async () => {
@@ -136,10 +147,10 @@ describe("Settings > Migration: the WordPress source", () => {
     // Windows names a zip so; the server's CSRF rule takes application/zip
     const file = exportFile("site.zip", undefined, "application/x-zip-compressed")
     await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), file)
-    await userEvent.click(screen.getByRole("button", { name: "Uygula" }))
+    await userEvent.click(screen.getByRole("button", { name: "Aktarmayı başlat" }))
     expect(uploads).not.toHaveBeenCalled()
     const confirm = await screen.findByRole("alertdialog")
-    await userEvent.click(within(confirm).getByRole("button", { name: "Uygula" }))
+    await userEvent.click(within(confirm).getByRole("button", { name: "Aktarmayı başlat" }))
 
     await waitFor(() => {
       expect(uploads).toHaveBeenCalledTimes(1)
@@ -149,53 +160,5 @@ describe("Settings > Migration: the WordPress source", () => {
     expect(path).toBe("/admin/migrations?source=wordpress&mode=apply")
     expect(init.headers).toEqual({ "content-type": "application/zip" })
     expect(init.body).toBe(file)
-  })
-
-  // ADR-0055: the descriptions of products moved before, rewritten and nothing else
-  it("refreshes only the descriptions: applied alone, without the base or the parcel", async () => {
-    await chooseWordpress()
-    const file = exportFile("site.xml")
-    await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), file)
-    // Typed before the box is ticked: a refresh neither reads nor checks them
-    await userEvent.type(screen.getByLabelText("Kategori adres öneki"), "/urun/kategori/alt")
-    await userEvent.type(screen.getByLabelText("Ağırlık (g)"), "500")
-    const refresh = screen.getByRole("checkbox", { name: "Yalnız açıklamaları yenile" })
-    await userEvent.click(refresh)
-
-    expect(refresh).toBeChecked()
-    expect(screen.getByRole("button", { name: "Kuru çalıştır" })).toBeDisabled()
-    expect(screen.getByLabelText("Kategori adres öneki")).toBeDisabled()
-    expect(screen.getByLabelText("Ağırlık (g)")).toBeDisabled()
-    expect(screen.getByText(/Fiyat, stok, durum ve SEO alanlarına dokunulmaz/)).toBeVisible()
-
-    await userEvent.click(screen.getByRole("button", { name: "Uygula" }))
-    const confirm = await screen.findByRole("alertdialog")
-    expect(within(confirm).getByText("Açıklamalar yenilensin mi?")).toBeVisible()
-    await userEvent.click(within(confirm).getByRole("button", { name: "Uygula" }))
-
-    await waitFor(() => {
-      expect(uploads).toHaveBeenCalledTimes(1)
-    })
-    const [path, init] = uploads.mock.calls[0] as [string, RequestInit]
-    expect(path).toBe("/admin/migrations?source=wordpress&mode=apply&refresh=descriptions")
-    expect(init.body).toBe(file)
-    expect(screen.queryByText(/Tek bölümlük bir yol girin/)).toBeNull()
-  })
-
-  it("runs in full again once the box is cleared, the dry run back", async () => {
-    const onRun = vi.fn()
-    render(<WordpressSource disabled={false} pending={null} onRun={onRun} />)
-    await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), exportFile("site.xml"))
-    const refresh = screen.getByRole("checkbox", { name: "Yalnız açıklamaları yenile" })
-    await userEvent.click(refresh)
-    await userEvent.click(refresh)
-    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
-
-    await waitFor(() => {
-      expect(onRun).toHaveBeenCalledWith(
-        "check",
-        expect.objectContaining({ refresh: false, categoryBase: "", parcel: null })
-      )
-    })
   })
 })

@@ -92,7 +92,7 @@ describe("Settings > Migration: a WordPress run's report", () => {
 
     const pages = screen.getByText("Yalnızca eski adresi tutulan sayfalar")
     expect(pages).toHaveTextContent("2")
-    expect(screen.getByText(/Eski adresler kartında karar verin/)).toBeVisible()
+    expect(screen.getByText(/Eski adresler ve yönlendirmeler kartında karar verin/)).toBeVisible()
     const coupons = screen.getByText("Kuponlar").closest("li") as HTMLElement
     expect(within(coupons).getByText("1")).toBeVisible()
     expect(within(coupons).getByText("Raporda, taşınmadı")).toBeVisible()
@@ -148,7 +148,7 @@ describe("Settings > Migration: a WordPress run's report", () => {
     expect(line("Yenilenen açıklamalar")).toHaveTextContent("4")
     expect(line("Zaten aynı olanlar")).toHaveTextContent("1")
     expect(line("Önceki bir çalıştırmada taşınmamış ürünler")).toHaveTextContent(
-      /1.*kutuyu işaretlemeden/
+      /1.*önce Aktarım ile taşıyın/
     )
     expect(line("Biçimli açıklamaya sahip olanlar")).toHaveTextContent("4")
     // Nothing refused: no line for it

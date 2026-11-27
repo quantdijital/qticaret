@@ -3,30 +3,18 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
-import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import type { MigrationMode, Parcel } from "@/features/settings/api/migration"
-import {
-  CATEGORY_BASE,
-  MAX_WXR_BYTES,
-  WXR_ACCEPT,
-  isWxrName,
-} from "@/features/settings/api/migration-wordpress"
+import { CATEGORY_BASE, WXR_ACCEPT } from "@/features/settings/api/migration-wordpress"
+import { fileProblem } from "@/features/settings/components/migration/wxr-file"
 import { NO_PARCEL, readParcel } from "@/features/settings/components/migration/parcel"
-import { ParcelFields, RunButtons } from "@/features/settings/components/migration/run-controls"
+import {
+  AdvancedOptions,
+  ParcelFields,
+  RunButtons,
+} from "@/features/settings/components/migration/run-controls"
 
 const W = "settings.migration.wordpress"
-
-/** What is wrong with the chosen file, as an i18n key; nothing when it may be sent. */
-function fileProblem(file: File | null): string | null {
-  if (!file) {
-    return `${W}.errors.fileRequired`
-  }
-  if (!isWxrName(file.name)) {
-    return `${W}.errors.fileType`
-  }
-  return file.size > MAX_WXR_BYTES ? `${W}.errors.fileTooLarge` : null
-}
 
 const parcelText = z.string()
 const schema = z
@@ -39,7 +27,6 @@ const schema = z
           ctx.addIssue({ code: "custom", message: problem })
         }
       }),
-    refresh: z.boolean(),
     categoryBase: z.string(),
     parcel: z.object({
       weight: parcelText,
@@ -48,11 +35,7 @@ const schema = z
       height: parcelText,
     }),
   })
-  // A refresh writes descriptions only: the address base and the parcel are not read
   .superRefine((values, ctx) => {
-    if (values.refresh) {
-      return
-    }
     const base = values.categoryBase.trim()
     if (base.length > 64 || !CATEGORY_BASE.test(base)) {
       ctx.addIssue({ code: "custom", path: ["categoryBase"], message: `${W}.errors.categoryBase` })
@@ -63,14 +46,12 @@ const schema = z
   })
 type Values = z.infer<typeof schema>
 
-const EMPTY: Values = { file: null, refresh: false, categoryBase: "", parcel: NO_PARCEL }
+const EMPTY: Values = { file: null, categoryBase: "", parcel: NO_PARCEL }
 
 export interface WordpressRun {
   file: File
   categoryBase: string
   parcel: Parcel | null
-  /** Only the descriptions of products an earlier run moved, rewritten from this export (ADR-0055). */
-  refresh: boolean
 }
 
 interface WordpressSourceProps {
@@ -84,27 +65,21 @@ interface WordpressSourceProps {
  * (XML or a zip holding it, 50 MB), checked as it is chosen; the product
  * categories' old address base, read from the site's own links when left
  * empty; and the parcel, which most WooCommerce shops need, their products
- * carrying no measurements. "Refresh descriptions only" (ADR-0055) rewrites
- * the descriptions of products already moved and nothing else: applied
- * only, without the base or the parcel.
+ * carrying no measurements. The two are folded under "Gelişmiş": most
+ * shops leave them empty. Rewriting the descriptions of products already
+ * moved (ADR-0055) is its own card, `DescriptionRefreshCard`.
  */
 export function WordpressSource({ disabled, pending, onRun }: WordpressSourceProps) {
   const { t } = useTranslation()
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: EMPTY })
   const file = useWatch({ control: form.control, name: "file" })
-  const refresh = useWatch({ control: form.control, name: "refresh" })
   const { errors } = form.formState
   const errorOf = (message: string | undefined) => (message ? t(message) : undefined)
   const run = (mode: MigrationMode) =>
     void form.handleSubmit((values) => {
-      const parcel = values.refresh ? null : readParcel(values.parcel)
+      const parcel = readParcel(values.parcel)
       if (values.file && parcel !== "invalid") {
-        onRun(mode, {
-          file: values.file,
-          categoryBase: values.refresh ? "" : values.categoryBase.trim(),
-          parcel,
-          refresh: values.refresh,
-        })
+        onRun(mode, { file: values.file, categoryBase: values.categoryBase.trim(), parcel })
       }
     })()
   return (
@@ -135,33 +110,7 @@ export function WordpressSource({ disabled, pending, onRun }: WordpressSourcePro
           )}
         />
       </Field>
-      <Controller
-        control={form.control}
-        name="refresh"
-        render={({ field }) => (
-          <div className="flex items-start gap-3 rounded-md border px-3 py-2.5">
-            <Checkbox
-              id="wordpress-refresh"
-              className="mt-0.5"
-              checked={field.value}
-              aria-describedby="wordpress-refresh-hint"
-              onCheckedChange={(checked) => {
-                field.onChange(checked === true)
-              }}
-            />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <label htmlFor="wordpress-refresh" className="cursor-pointer text-sm font-medium">
-                {t(`${W}.refresh`)}
-              </label>
-              <p id="wordpress-refresh-hint" className="text-[13px] text-muted-foreground">
-                {t(`${W}.refreshHint`)}
-              </p>
-            </div>
-          </div>
-        )}
-      />
-      {/* What a full run reads; a refresh leaves them as they are */}
-      <fieldset disabled={refresh} className="flex flex-col gap-4 disabled:opacity-60">
+      <AdvancedOptions attention={Boolean(errors.categoryBase ?? errors.parcel)}>
         <Field
           label={t(`${W}.categoryBase`)}
           htmlFor="wordpress-category-base"
@@ -181,10 +130,9 @@ export function WordpressSource({ disabled, pending, onRun }: WordpressSourcePro
           note={t(`${W}.parcelNote`)}
           error={errorOf(errors.parcel?.message)}
         />
-      </fieldset>
+      </AdvancedOptions>
       <RunButtons
         disabled={disabled || file === null}
-        checkDisabled={refresh}
         pending={pending}
         onCheck={() => {
           run("check")

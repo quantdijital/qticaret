@@ -75,7 +75,7 @@ describe("Settings > Migration", () => {
 
   it("says the cutover is not ready and takes the owner's 301 for an address", async () => {
     renderWith(<AddressesCard />)
-    expect(await screen.findByText("Kesime hazır değil")).toBeInTheDocument()
+    expect(await screen.findByText("Alan adını bağlamaya henüz hazır değil")).toBeInTheDocument()
     expect(screen.getByText(/1 tanesi henüz yanıt vermiyor/)).toBeInTheDocument()
     const row = (await screen.findByText("/eski-kampanya")).closest("tr") as HTMLElement
     // An address that answers already takes no decision
@@ -83,7 +83,7 @@ describe("Settings > Migration", () => {
     expect(within(covered).queryByRole("combobox")).not.toBeInTheDocument()
 
     await userEvent.click(within(row).getByRole("combobox"))
-    await userEvent.click(await screen.findByRole("option", { name: "Yönlendir" }))
+    await userEvent.click(await screen.findByRole("option", { name: "Yönlendir (301)" }))
     await userEvent.type(within(row).getByRole("textbox"), "/urun/yeni")
     await userEvent.click(within(row).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
@@ -130,7 +130,7 @@ describe("Settings > Migration", () => {
 
   it("says nothing of the category URL style when the current one keeps the most", async () => {
     renderWith(<AddressesCard />)
-    expect(await screen.findByText("Kesime hazır değil")).toBeInTheDocument()
+    expect(await screen.findByText("Alan adını bağlamaya henüz hazır değil")).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Adres biçimini aç" })).toBeNull()
   })
 
@@ -139,6 +139,8 @@ describe("Settings > Migration", () => {
     await userEvent.click(await screen.findByRole("combobox", { name: "Kaynak" }))
     await userEvent.click(await screen.findByRole("option", { name: /Ürün akışı/ }))
     await userEvent.type(screen.getByLabelText("Akış adresi"), "https://eski.example/google.xml")
+    // The parcel is under "Gelişmiş": most shops leave it empty
+    await userEvent.click(screen.getByText("Gelişmiş"))
     for (const [label, value] of [
       ["Ağırlık (g)", "500"],
       ["Uzunluk (cm)", "30"],
@@ -147,7 +149,7 @@ describe("Settings > Migration", () => {
     ] as const) {
       await userEvent.type(screen.getByLabelText(label), value)
     }
-    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
+    await userEvent.click(screen.getByRole("button", { name: "Önizle" }))
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/migrations/feed", {
         method: "POST",
@@ -158,6 +160,6 @@ describe("Settings > Migration", () => {
         },
       })
     })
-    expect(await screen.findByText(/Çalışıyor… %40/)).toBeInTheDocument()
+    expect(await screen.findByText(/Aktarılıyor… %40/)).toBeInTheDocument()
   })
 })
