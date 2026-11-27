@@ -10974,11 +10974,13 @@
           },
           "count_word": {
             "label": "Unit word in the product count",
-            "hint": "Written beside the count on the page (24 tur). Empty: products. E.g. tur, oda, kurs."
+            "hint": "Written beside the count on the page (24 tur). Empty: products. E.g. tur, oda, kurs.",
+            "placeholder": "e.g. tur"
           },
           "all_title": {
             "label": "All products title",
-            "hint": "The all-products page's (/magaza) title; the breadcrumb and the browser tab show it too. Empty: Tüm ürünler. E.g. Tüm turlar."
+            "hint": "The all-products page's (/magaza) title; the breadcrumb and the browser tab show it too. Empty: Tüm ürünler. E.g. Tüm turlar.",
+            "placeholder": "e.g. Tüm turlar"
           },
           "words": "list grid view row breadcrumb trail category page all products count unit word title"
         },

@@ -100,6 +100,7 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
         <Input
           id={word.target}
           value={rawWord}
+          placeholder={t(`${P}.count_word.placeholder`)}
           maxLength={LISTING_COUNT_WORD_MAX}
           autoComplete="off"
           onChange={(event) => {
@@ -112,6 +113,7 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
         <Input
           id={all.target}
           value={rawTitle}
+          placeholder={t(`${P}.all_title.placeholder`)}
           maxLength={LISTING_ALL_TITLE_MAX}
           autoComplete="off"
           onChange={(event) => {

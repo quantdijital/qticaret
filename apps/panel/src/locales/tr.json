@@ -10974,11 +10974,13 @@
           },
           "count_word": {
             "label": "Ürün sayısında birim kelimesi",
-            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs."
+            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs.",
+            "placeholder": "ör. tur"
           },
           "all_title": {
             "label": "Tüm ürünler başlığı",
-            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar."
+            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar.",
+            "placeholder": "ör. Tüm turlar"
           },
           "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime başlık"
         },
