@@ -36,7 +36,8 @@ function ReviewText({ review }: { review: ReviewRow }) {
  * One customer review in the list: the stars, whether it carries a link or
  * the shop replied, the product, the text and photos. A waiting one is
  * approved or rejected in its row; an approved one opens its dialog from
- * its text, where the shop replies (docs/18, edit patterns).
+ * its text, where the shop replies (docs/18, edit patterns), and is hidden
+ * from its row; a hidden one is shown again from its row.
  */
 export function ReviewItem({
   review,
@@ -125,7 +126,25 @@ export function ReviewItem({
             {t(`${R}.reject`)}
           </Button>
         </div>
-      ) : null}
+      ) : (
+        // A customer's review is never edited or deleted by the shop: it is hidden or shown
+        // again (adr/0037 §4 Ek 2026-11-27)
+        <div className="flex shrink-0 sm:items-start">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            aria-label={t(review.status === "approved" ? `${R}.hideFor` : `${R}.showFor`, {
+              author: review.author_name,
+            })}
+            onClick={() => {
+              onModerate(review.status === "approved" ? "rejected" : "approved")
+            }}
+          >
+            {t(review.status === "approved" ? `${R}.hide` : `${R}.show`)}
+          </Button>
+        </div>
+      )}
     </li>
   )
 }

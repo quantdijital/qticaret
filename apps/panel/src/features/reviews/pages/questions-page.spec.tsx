@@ -25,6 +25,7 @@ const question: QuestionRow = {
   id: "pq_1",
   body: "Bu tava indüksiyonda çalışır mı?",
   author_name: "Ayşe Y.",
+  by_shop: false,
   status: "approved",
   has_link: false,
   created_at: "2026-10-28T10:00:00Z",

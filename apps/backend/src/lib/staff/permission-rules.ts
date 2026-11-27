@@ -256,6 +256,10 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
+  // The shop's own question added by hand, a question's words and the shop's answer edited;
+  // deleting one (and its "Geri al") is the admin's, as a contact message's is
+  { methods: ["POST"], path: "/admin/product-questions" },
+  { methods: ["POST"], path: "/admin/product-questions/:id/edit" },
   // The shop's reply under a review, as a question's answer
   { methods: ["POST", "DELETE"], path: "/admin/product-reviews/:id/reply" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's

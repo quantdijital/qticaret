@@ -1114,7 +1114,8 @@
         "refund": "Para iadesi",
         "legal_document": "Yasal metin",
         "vat_rate": "KDV oranı",
-        "message_template": "Müşteri mesajı"
+        "message_template": "Müşteri mesajı",
+        "product_question": "Ürün sorusu"
       }
     },
     "locations": {
@@ -4974,7 +4975,7 @@
     },
     "faq": {
       "title": "Sık sorulan sorular",
-      "description": "Ürün sayfasındaki Soru-Cevap bölümüne mağaza adına soru ve yanıt ekleyin. Eklenenler hemen yayımlanır; Yorumlar ve sorular › Sorular ekranından gizleyebilirsiniz.",
+      "description": "Ürün sayfasındaki Soru-Cevap bölümü: müşterilerin soruları ve mağaza adına eklediğiniz soru ve yanıtlar. Eklenenler hemen yayımlanır; bir soruya tıklayıp düzenleyebilir, gizleyebilir ya da silebilirsiniz.",
       "empty": "Yapay zekâ ürünün açıklamasından, kısa açıklamasından, özelliklerinden ve seçeneklerinden 3–5 soru ve yanıt önerir. Veride yanıtı olmayan soru yazılmaz.",
       "draft": "SSS taslağı",
       "hint": "Ekleyeceklerinizi işaretleyin; soru ve yanıtları eklemeden önce düzenleyebilirsiniz.",
@@ -4992,7 +4993,15 @@
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
       },
       "summary": "Ürün bilgilerinden soru ve yanıt taslağı",
-      "summaryOpen": "Taslak açık"
+      "summaryOpen": "Taslak açık",
+      "addOne": "Soru ekle",
+      "noAnswer": "Henüz yanıt yok",
+      "none": "Bu ürüne henüz soru yok.",
+      "listLabel": "Ürünün soruları",
+      "open": "Soruyu aç: {{question}}",
+      "more": "En yeni {{shown}} soru gösteriliyor ({{count}} soru). Tümü Yorumlar ve sorular › Sorular ekranında.",
+      "summaryCount_one": "{{count}} soru",
+      "summaryCount_other": "{{count}} soru"
     },
     "addonTemplates": {
       "title": "Ek seçenek grupları",
@@ -9336,6 +9345,49 @@
         "pending": "Bakılacak soru ya da cevap yok.",
         "approved": "Yayında soru yok.",
         "rejected": "Reddedilen soru yok."
+      },
+      "manage": {
+        "edit": "Düzenle",
+        "editFor": "Soruyu düzenle: {{question}}",
+        "addTitle": "Soru ekle",
+        "editTitle": "Soruyu düzenle",
+        "newDescription": "Mağaza adına eklenir ve ürün sayfasında hemen yayımlanır.",
+        "question": "Soru",
+        "answer": "Mağazanın yanıtı",
+        "questionPlaceholder": "Örn. Bıçak bulaşık makinesinde yıkanabilir mi?",
+        "answerPlaceholder": "Örn. Önermiyoruz; ılık suyla elde yıkayıp hemen kurulayın.",
+        "customerHint": "Müşterinin sorusu. Yalnız yazım hatası ya da kişisel bilgi (telefon, adres) için düzenleyin.",
+        "answerHint": "Boş bırakırsanız mağazanın yanıtı kaldırılır. Bekleyen soruya yazdığınız yanıt soruyu da yayımlar.",
+        "answerHintNew": "Soru yanıtıyla birlikte yayımlanır.",
+        "customerAnswers": "Müşteri yanıtları",
+        "customerAnswersHint": "Müşteri yanıtları değiştirilmez; Yorumlar ve sorular › Sorular ekranında onaylanır ya da reddedilir.",
+        "save": "Kaydet",
+        "add": "Ekle",
+        "hide": "Gizle",
+        "show": "Yayımla",
+        "delete": "Sil",
+        "added": "Soru ürün sayfasına eklendi.",
+        "saved": "Soru kaydedildi.",
+        "hidden": "Soru gizlendi; ürün sayfasında görünmüyor.",
+        "shown": "Soru yayımlandı.",
+        "deleted": "Soru silindi.",
+        "restored": "Soru geri alındı.",
+        "undo": "Geri al",
+        "deleteConfirm": {
+          "title": "Soru silinsin mi?",
+          "description": "Soru ve bütün yanıtları ürün sayfasından kaldırılır. Hemen ardından \"Geri al\" ile geri getirebilirsiniz.",
+          "action": "Soruyu sil"
+        },
+        "issues": {
+          "short": "En az 2 karakter yazın.",
+          "long": "En çok 1.000 karakter olabilir."
+        },
+        "state": {
+          "published": "Yayında",
+          "hidden": "Gizli",
+          "waiting": "Yanıt bekliyor"
+        },
+        "editedByShop": "Mağaza tarafından düzenlendi · {{when}}"
       }
     },
     "photos": {
@@ -9343,7 +9395,12 @@
       "alt": "{{author}} yorumundaki fotoğraf {{number}}",
       "title": "{{author}} yorumundaki fotoğraf",
       "position": "{{number}} / {{count}}"
-    }
+    },
+    "hide": "Gizle",
+    "show": "Yayımla",
+    "hideFor": "{{author}} yorumunu gizle",
+    "showFor": "{{author}} yorumunu yayımla",
+    "customerText": "Müşterinin yorumu ve puanı değiştirilemez ya da silinemez; yorumu listeden gizleyebilirsiniz."
   },
   "staff": {
     "roles": {
@@ -10189,6 +10246,7 @@
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
         "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
+        "newsletterLine": "Vitrinin metni: abone olarak ticari elektronik ileti gönderilmesini kabul edersiniz…",
         "faq": "Sık sorulan sorular",
         "related_products": "Benzer ürünler",
         "price_bands": "Fiyata göre alışveriş",
@@ -10427,6 +10485,14 @@
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
+        "consentLineHint": "Formun altındaki küçük satır: abone olmanın ticari ileti almayı kabul etmek olduğunu söylemeli ve mağazanızın adını anmalıdır; KVKK aydınlatma metni bağlantısı yanına kendiliğinden eklenir. Boş bırakırsanız vitrinin kısa metni kullanılır.",
+        "consentStyle": "Onay biçimi",
+        "consentStyleTerm": "İYS",
+        "consentStyleHint": "Onay kutusu: ziyaretçi abone olmak için kutuyu işaretler; alt bilgide kutu forma dokununca açılır. Tek satır: kutu yok, formun altında hep görünen küçük bir satır abone olmanın onay olduğunu söyler ve KVKK aydınlatma metnine bağlanır. İkisinde de abonelik, e-postadaki onay bağlantısı açılınca başlar ve kayda geçer.",
+        "consentStyles": {
+          "box": "Onay kutusu",
+          "line": "Tek satır"
+        },
         "joined": "Alt bilgiyle birleşik",
         "joinedTerm": "footer band",
         "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer.",
@@ -11713,8 +11779,8 @@
           "label": "Dev marka adı",
           "term": "wordmark",
           "hint": "Alt satırın altında mağaza adı çok büyük ve soluk yazılır; alt kenar onu keser.",
-          "off": "Kapal\u0131",
-          "on": "A\u00e7\u0131k"
+          "off": "Kapalı",
+          "on": "Açık"
         },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
@@ -12296,6 +12362,12 @@
             "term": "icon style",
             "boxed": "Yuvarlak kutulu",
             "inline": "Satır içi, küçük"
+          },
+          "consent_style": {
+            "label": "Onay biçimi",
+            "term": "İYS",
+            "box": "Onay kutusu",
+            "line": "Tek satır"
           }
         },
         "source": {

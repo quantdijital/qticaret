@@ -769,6 +769,12 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/price-lists/:id/discount": false,
   "POST /admin/product-answers/moderate": true,
   "POST /admin/product-questions/:id/answer": true,
+  // Owner 2026-11-27: the shop's own question added, a question edited by the day's staff;
+  // deleting one and bringing it back are the admin's
+  "POST /admin/product-questions": true,
+  "POST /admin/product-questions/:id/edit": true,
+  "DELETE /admin/product-questions/:id": false,
+  "POST /admin/product-questions/:id/restore": false,
   // adr/0047: answering the contact form is the day's work; deleting a message is not
   "POST /admin/contact-messages/:id": true,
   // F18: a draft's preview link, with the content it previews

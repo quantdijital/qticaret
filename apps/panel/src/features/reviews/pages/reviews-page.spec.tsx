@@ -188,4 +188,29 @@ describe("ReviewsPage", () => {
 
     expect(screen.queryByRole("button", { name: "Ayşe Y. yorumunu aç" })).not.toBeInTheDocument()
   })
+
+  // Owner 2026-11-27: a customer's review is never edited or deleted, only hidden or shown again
+  it("hides an approved review and shows a hidden one again, as the shop saw it", async () => {
+    searchMock.value = { status: "approved" }
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/product-reviews"
+          ? { reviews: [row("prev_1", { status: "approved" })], count: 1 }
+          : { moderated: 1, changed: [] }
+      )
+    )
+    renderPage()
+    await userEvent.click(await screen.findByRole("button", { name: "Ayşe Y. yorumunu gizle" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews/moderate", {
+        method: "POST",
+        body: {
+          reviews: [{ id: "prev_1", updated_at: "2026-10-28T10:05:00Z" }],
+          status: "rejected",
+        },
+      })
+    })
+    expect(screen.queryByRole("button", { name: /Sil/ })).not.toBeInTheDocument()
+  })
 })

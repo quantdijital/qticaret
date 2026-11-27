@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -19,6 +20,8 @@ import {
 import type { QuestionRow } from "@/features/reviews/api/questions"
 import type { ReviewStatus } from "@/features/reviews/api/reviews"
 import { AiButton } from "@/features/ai/components/ai-button"
+import { useCan } from "@/features/auth/api/staff"
+import { QuestionDialog } from "@/features/reviews/components/question-dialog"
 import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
@@ -62,7 +65,14 @@ function Decide({
   )
 }
 
-function QuestionCard({ question }: { question: QuestionRow }) {
+function QuestionCard({
+  question,
+  onOpen,
+}: {
+  question: QuestionRow
+  /** The question's dialog: edit, hide or show, delete; none for a role that only reads. */
+  onOpen: (() => void) | null
+}) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const [answer, setAnswer] = useState("")
@@ -115,15 +125,28 @@ function QuestionCard({ question }: { question: QuestionRow }) {
             ) : null}
           </p>
         </div>
-        {question.status === "pending" ? (
-          <Decide
-            label={t(`${Q}.decideQuestion`)}
-            busy={decideQuestion.isPending}
-            onDecide={(status) => {
-              decideQuestion.mutate(status)
-            }}
-          />
-        ) : null}
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {question.status === "pending" ? (
+            <Decide
+              label={t(`${Q}.decideQuestion`)}
+              busy={decideQuestion.isPending}
+              onDecide={(status) => {
+                decideQuestion.mutate(status)
+              }}
+            />
+          ) : null}
+          {onOpen ? (
+            <Button
+              size="sm"
+              variant="outline"
+              aria-label={t(`${Q}.manage.editFor`, { question: question.body })}
+              onClick={onOpen}
+            >
+              <Pencil />
+              {t(`${Q}.manage.edit`)}
+            </Button>
+          ) : null}
+        </div>
       </div>
       {question.answers.length > 0 ? (
         <ul className="flex flex-col gap-2 border-l-2 pl-4">
@@ -216,6 +239,10 @@ export function QuestionsPage() {
   const status: ReviewStatus = search.status ?? "pending"
   const list = useQuery(questionsQuery(status, 0))
   const rows = list.data?.questions ?? []
+  const canEdit = useCan("moderation")
+  const [opened, setOpened] = useState<QuestionRow | null>(null)
+  // The open question as the list reads it now (its answers change under it)
+  const shown = opened ? (rows.find((row) => row.id === opened.id) ?? opened) : null
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("reviews.title")} description={t(`${Q}.description`)} />
@@ -253,11 +280,31 @@ export function QuestionsPage() {
         ) : (
           <ul className="divide-y">
             {rows.map((question) => (
-              <QuestionCard key={question.id} question={question} />
+              <QuestionCard
+                key={question.id}
+                question={question}
+                onOpen={
+                  canEdit
+                    ? () => {
+                        setOpened(question)
+                      }
+                    : null
+                }
+              />
             ))}
           </ul>
         )}
       </section>
+      {shown ? (
+        <QuestionDialog
+          key={shown.id}
+          question={shown}
+          productId={shown.product.id}
+          onClose={() => {
+            setOpened(null)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

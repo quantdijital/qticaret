@@ -25,6 +25,7 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  NewsletterConsentStyle,
   NewsletterTone,
   NewsletterVariant,
   PageTextSwitch,
@@ -325,6 +326,8 @@ export interface NewsletterFields {
   joined?: boolean
   /** The boxed bands' ground (`split`, `image_card`, `strip`); absent: `plain`. */
   tone?: NewsletterTone
+  /** How the consent is asked, every variant's: the required box or one small line; absent: `box`. */
+  consent_style?: NewsletterConsentStyle
 }
 
 export interface NewsletterSection extends BodySectionBase, NewsletterFields {

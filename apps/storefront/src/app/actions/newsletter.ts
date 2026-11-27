@@ -7,18 +7,20 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 
 /**
- * The newsletter box's consent text, by version (adr/0038 §2): changed
- * whenever `footer.newsletter_text` changes, so the proof names the words.
+ * The newsletter box's consent text, by version (adr/0038 §2), by how the
+ * form asked for it: changed whenever `newsletter.text` or
+ * `newsletter.line` changes, so the proof names the words. `1`: the box
+ * ticked (its sentence the label); `line`: no box, the small line under
+ * the form saying that subscribing is consenting (the box's
+ * `consent_style`). Either way nothing is recorded until the address's
+ * owner opens the e-mailed link (double opt-in).
  */
-const NEWSLETTER_TEXT_VERSION = "bulten-1"
-
-/** What the form's consent box sends once ticked (the theme's `NewsletterForm`). */
-const CONSENT_GIVEN = "1"
+const NEWSLETTER_TEXT_VERSIONS = { "1": "bulten-1", line: "bulten-satir-1" } as const
 
 const Subscription = z.object({
   email: z.string().trim().toLowerCase().max(254).pipe(z.email()),
   // The box's `required` is only the browser's word: no tick, no subscription (İYS, adr/0038)
-  consent: z.literal(CONSENT_GIVEN),
+  consent: z.enum(["1", "line"]),
   challenge: z
     .string()
     .regex(/^[\w.-]{1,300}$/)
@@ -44,11 +46,11 @@ export async function subscribeNewsletter(
       challenge: null,
     }
   }
-  const { email } = parsed.data
+  const { email, consent } = parsed.data
   try {
     await storeCall("/store/newsletter", {
       method: "POST",
-      body: { email, text_version: NEWSLETTER_TEXT_VERSION },
+      body: { email, text_version: NEWSLETTER_TEXT_VERSIONS[consent] },
       ...gated(form),
     })
   } catch (error) {
