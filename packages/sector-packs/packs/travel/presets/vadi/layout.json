@@ -116,6 +116,37 @@
       "category_handles": ["macera", "plaj", "doga", "kultur", "balayi", "aile"]
     },
     {
+      "id": "vadikategoriler",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Popüler *kategoriler*",
+      "category_ids": [],
+      "category_handles": [
+        "kapadokya-turlari",
+        "ege-ve-akdeniz-turlari",
+        "doga-ve-trekking",
+        "kultur-turlari",
+        "gunubirlik-turlar",
+        "gemi-turlari",
+        "yurt-disi-turlar"
+      ],
+      "show_count": true,
+      "more": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_position": "head",
+        "autoplay": "on",
+        "autoplay_step": "card",
+        "loop": "on",
+        "play_button": "off"
+      }
+    },
+    {
       "id": "vadikalkislar",
       "type": "departures",
       "visible": true,
@@ -347,7 +378,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "accordion",
-      "title": "Gün gün yolculuk"
+      "title": "Yolculuk planı"
     },
     {
       "id": "vadibenzer",

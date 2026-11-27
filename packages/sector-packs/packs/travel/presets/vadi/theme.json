@@ -50,7 +50,7 @@
     "default_view": "grid",
     "view_switch": "show",
     "breadcrumb_current": "hide",
-    "crumbs_place": "beside",
+    "crumbs_place": "none",
     "count_word": "tur",
     "all_title": "Tüm turlar"
   },
