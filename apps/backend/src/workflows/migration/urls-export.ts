@@ -28,12 +28,13 @@ const ANSWER: Readonly<Record<AddressState["state"], string>> = {
  */
 export async function writeUrlExport(
   container: Container,
-  write: (chunk: string) => Promise<void> | void
+  write: (chunk: string) => Promise<void> | void,
+  stopped: () => boolean = () => false
 ): Promise<number> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   await write(CSV_BOM + toCsv([URL_EXPORT_HEADER], ";"))
   let written = 0
-  for (let skip = 0; ; skip += PAGE) {
+  for (let skip = 0; !stopped(); skip += PAGE) {
     const rows = await migration.listMigrationUrls(
       {},
       {
@@ -62,4 +63,5 @@ export async function writeUrlExport(
       return written
     }
   }
+  return written
 }

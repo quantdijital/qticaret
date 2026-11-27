@@ -11,8 +11,22 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   res.setHeader("content-type", "text/csv; charset=utf-8")
   res.setHeader("content-disposition", 'attachment; filename="yonlendirmeler.csv"')
   res.setHeader("cache-control", "no-store")
-  await writeUrlExport(req.scope, (chunk) => {
-    res.write(chunk)
+  // A client gone stops the walk; a slow one is waited for (its buffer drained)
+  let gone = false
+  req.on("close", () => {
+    gone = true
   })
+  await writeUrlExport(
+    req.scope,
+    async (chunk) => {
+      if (!res.write(chunk) && !gone) {
+        await new Promise<void>((resolve) => {
+          res.once("drain", resolve)
+          res.once("close", resolve)
+        })
+      }
+    },
+    () => gone
+  )
   res.end()
 }

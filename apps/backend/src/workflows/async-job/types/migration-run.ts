@@ -135,12 +135,32 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
     const { mode, defaults } = values
     const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
     const audit = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
-    const run = await migration.createMigrationRuns({
-      source: values.source,
-      mode,
-      job_id: job.id,
-      started_by: job.requested_by,
-    })
+    // A file holds the shop's customers: gone however the run ends, even before it begins
+    const dropSource = async () => {
+      if (
+        values.source === "bundle" ||
+        values.source === "customers" ||
+        values.source === "wordpress"
+      ) {
+        await container
+          .resolve(Modules.FILE)
+          .deleteFiles(values.source_file_id)
+          .catch((error: unknown) => {
+            logger.warn({ event: "migration.source_kept", jobId: job.id, err: errorSummary(error) })
+          })
+      }
+    }
+    const run = await migration
+      .createMigrationRuns({
+        source: values.source,
+        mode,
+        job_id: job.id,
+        started_by: job.requested_by,
+      })
+      .catch(async (error: unknown) => {
+        await dropSource()
+        throw error
+      })
     // The last progress, told again while a source works out of sight: the heartbeat
     let last = 0
     const report = (percent: number) => {
@@ -248,19 +268,7 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
         .catch(() => undefined)
       throw error
     } finally {
-      // A file holds the shop's customers: gone however the run ended
-      if (
-        values.source === "bundle" ||
-        values.source === "customers" ||
-        values.source === "wordpress"
-      ) {
-        await container
-          .resolve(Modules.FILE)
-          .deleteFiles(values.source_file_id)
-          .catch((error: unknown) => {
-            logger.warn({ event: "migration.source_kept", jobId: job.id, err: errorSummary(error) })
-          })
-      }
+      await dropSource()
     }
   },
 }

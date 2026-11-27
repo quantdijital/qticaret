@@ -68,7 +68,17 @@ export interface ProblemGroup {
   samples: string[]
 }
 
-const PERSONAL_KINDS: ReadonlySet<string> = new Set(["customer", "order", "review"])
+// Kinds whose source keys name no person; any other (customers, orders, reviews, a kind added later) keeps none
+const SAMPLED_KINDS: ReadonlySet<string> = new Set([
+  "category",
+  "brand",
+  "product",
+  "image",
+  "post",
+  "page",
+  "post_category",
+  "post_tag",
+])
 // Groups and samples the summary keeps; the report file has every row
 export const MAX_GROUPS = 40
 export const MAX_SAMPLES = 10
@@ -79,7 +89,7 @@ export function groupProblems(problems: readonly ReportProblem[]): ProblemGroup[
     const id = `${problem.kind} ${problem.key}`
     const group = groups.get(id) ?? { kind: problem.kind, key: problem.key, count: 0, samples: [] }
     group.count += 1
-    if (!PERSONAL_KINDS.has(problem.kind) && group.samples.length < MAX_SAMPLES) {
+    if (SAMPLED_KINDS.has(problem.kind) && group.samples.length < MAX_SAMPLES) {
       group.samples.push(problem.source_key)
     }
     groups.set(id, group)

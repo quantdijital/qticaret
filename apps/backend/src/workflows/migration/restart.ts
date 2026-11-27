@@ -166,6 +166,8 @@ export const restartMigrationWorkflow = createWorkflow(
           ...("feed_url" in stored ? { feed_url: stored.feed_url } : {}),
           ...("category_base" in stored ? { category_base: stored.category_base } : {}),
           ...("refresh" in stored && stored.refresh.length > 0 ? { refresh: stored.refresh } : {}),
+          // What the owner chose to move, kept: a restart never takes more (customers left out stay out)
+          ...("kinds" in stored && stored.kinds.length > 0 ? { kinds: stored.kinds } : {}),
         }
         return start
       }),

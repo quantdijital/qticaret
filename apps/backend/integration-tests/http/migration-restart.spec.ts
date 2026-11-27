@@ -50,7 +50,14 @@ medusaIntegrationTestRunner({
       const job = await jobs().createAsyncJobs({
         type: "migration.run",
         status: "running",
-        input: { source: "bundle", source_file_id: upload.fileKey, mode, defaults: null },
+        // adr/0042 Ek 2026-11-27: the owner chose what to move; a restart keeps it
+        input: {
+          source: "bundle",
+          source_file_id: upload.fileKey,
+          mode,
+          defaults: null,
+          kinds: ["product"],
+        },
         requested_by: owner.userId,
         started_at: HOUR_AGO(),
         heartbeat_at: HOUR_AGO(),
@@ -120,7 +127,7 @@ medusaIntegrationTestRunner({
       expect(again.status).toBe("succeeded")
       const [newJob] = await jobs().listAsyncJobs({ id: again.id }, { select: ["input"] })
       const copy = (newJob?.input as { source_file_id: string; mode: string }).source_file_id
-      expect(newJob?.input).toMatchObject({ source: "bundle", mode: "check" })
+      expect(newJob?.input).toMatchObject({ source: "bundle", mode: "check", kinds: ["product"] })
       expect(copy).not.toBe(fileKey)
       expect(copy).toContain(MIGRATION_FILE_PREFIX)
       // Neither file is kept: the old one went with the restart, the copy with its run
