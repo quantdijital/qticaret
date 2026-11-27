@@ -119,6 +119,9 @@ export function answer(
   if (url.endsWith("/attributes")) {
     return attributes ?? { template: TEMPLATE, values: { steel: "N690", length: "18,5" } }
   }
+  if (url === "/admin/product-questions") {
+    return { questions: [], count: 0, limit: 50 }
+  }
   if (url === "/admin/attribute-templates") {
     return { attribute_templates: [TEMPLATE], count: 1 }
   }
