@@ -484,7 +484,7 @@
           "align": "start",
           "phone_columns": 1,
           "divider": false,
-          "layout": "2-1-1-1-1",
+          "layout": "2-1-1-1",
           "columns": [
             {
               "blocks": [
@@ -541,11 +541,7 @@
                   "email": true,
                   "hours": false,
                   "icon_style": "inline"
-                }
-              ]
-            },
-            {
-              "blocks": [
+                },
                 {
                   "id": "patikasoz",
                   "visible": true,
