@@ -72,7 +72,6 @@ export const NAV_GROUPS: NavGroup[] = [
     key: null,
     items: [
       fromMap("dashboard", LayoutDashboard, { exact: true }),
-      fromMap("reports", ChartColumnBig),
     ],
   },
   {
@@ -134,6 +133,11 @@ export const NAV_GROUPS: NavGroup[] = [
       fromMap("popups", AppWindow),
       fromMap("reviews", MessageSquareText),
     ],
+  },
+  {
+    // The reports on their own under Marketing, no heading (the owner, 2026-11-27)
+    key: null,
+    items: [fromMap("reports", ChartColumnBig)],
   },
 ]
 
