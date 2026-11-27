@@ -5,7 +5,6 @@ import {
   AA_LARGE,
   AA_TEXT,
   NEUTRAL,
-  NEUTRAL_CHROMA,
   WHITE,
   contrast,
   css,
@@ -17,11 +16,13 @@ import {
   textOn,
 } from "./color"
 import type { Brand, NeutralStep } from "./color"
+import { groundOf, tone } from "./ground"
+import type { Ground } from "./ground"
 import { sidebarVars } from "./sidebar"
 
 /**
  * The theme engine (docs/18 §5): from what the shop chose (brand colour,
- * sidebar, radius, density, mode) to every token the panel paints with.
+ * surface tone, sidebar, radius, density, mode) to every token the panel paints with.
  * Pure: no DOM here (see `apply.ts`).
  */
 
@@ -79,7 +80,7 @@ function primaryText(brand: Brand, fill: Oklch, surface: Oklch): Oklch {
   return standOut(brand, surface, AA_TEXT, fill.l)
 }
 
-function lightVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
+function lightVars(brand: Brand, g: Ground, n: Neutral, dark: Oklch): ThemeVariables {
   const primary = readableFill(brand, [0.4, 0.62], dark)
   const primaryCss = css(primary.color)
   return {
@@ -91,27 +92,25 @@ function lightVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
     "--popover-foreground": n(950),
     "--primary": primaryCss,
     "--primary-foreground": css(textOn(primary.color, dark)),
-    "--primary-text": css(
-      primaryText(brand, primary.color, oklch(NEUTRAL[100], NEUTRAL_CHROMA, brand.h))
-    ),
+    "--primary-text": css(primaryText(brand, primary.color, tone(g, NEUTRAL[100]))),
     "--secondary": n(100),
     "--secondary-foreground": n(900),
     "--muted": n(100),
     "--muted-foreground": n(600),
-    "--accent": css(oklch(0.955, Math.min(brand.c, 0.035), brand.h)),
-    "--accent-foreground": css(oklch(0.35, Math.min(brand.c, 0.12), brand.h)),
+    "--accent": css(tone(g, 0.955, g.accent)),
+    "--accent-foreground": css(tone(g, 0.35, g.accentText)),
     "--border": n(200),
     "--input": n(300),
     "--ring": primaryCss,
-    "--shadow-card": `0 1px 2px 0 ${cssAlpha(oklch(0.145, NEUTRAL_CHROMA, brand.h), 0.06)}`,
+    "--shadow-card": `0 1px 2px 0 ${cssAlpha(tone(g, 0.145), 0.06)}`,
   }
 }
 
-function darkVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
+function darkVars(brand: Brand, g: Ground, n: Neutral, dark: Oklch): ThemeVariables {
   // On a dark page the fill must also stand out from the page itself
   const primary = readableFill(brand, [0.58, 0.78], dark)
   const primaryCss = css(primary.color)
-  const surface = (l: number) => css(oklch(l, NEUTRAL_CHROMA, brand.h))
+  const surface = (l: number) => css(tone(g, l))
   return {
     "--background": surface(0.145),
     "--foreground": n(50),
@@ -121,13 +120,13 @@ function darkVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
     "--popover-foreground": n(50),
     "--primary": primaryCss,
     "--primary-foreground": css(textOn(primary.color, dark)),
-    "--primary-text": css(primaryText(brand, primary.color, oklch(0.24, NEUTRAL_CHROMA, brand.h))),
+    "--primary-text": css(primaryText(brand, primary.color, tone(g, 0.24))),
     "--secondary": surface(0.24),
     "--secondary-foreground": n(100),
     "--muted": surface(0.24),
     "--muted-foreground": n(400),
-    "--accent": css(oklch(0.29, Math.min(brand.c, 0.06), brand.h)),
-    "--accent-foreground": css(oklch(0.86, Math.min(brand.c, 0.1), brand.h)),
+    "--accent": css(tone(g, 0.29, g.accent)),
+    "--accent-foreground": css(tone(g, 0.86, g.accentText)),
     "--border": surface(0.27),
     "--input": surface(0.3),
     "--ring": primaryCss,
@@ -138,18 +137,19 @@ function darkVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
 /** Every token for one mode; `brandAdjusted` says whether the brand had to move for AA text. */
 export function resolveTheme(settings: AppearanceSettings, mode: ResolvedMode): ResolvedTheme {
   const brand = parseBrandColor(settings.brand_color)
-  const dark = oklch(NEUTRAL[950], NEUTRAL_CHROMA, brand.h)
-  const n: Neutral = (step) => css(oklch(NEUTRAL[step], NEUTRAL_CHROMA, brand.h))
-  const colors = mode === "light" ? lightVars(brand, n, dark) : darkVars(brand, n, dark)
+  const g = groundOf(settings.surface, brand, mode)
+  const dark = tone(g, NEUTRAL[950])
+  const n: Neutral = (step) => css(tone(g, NEUTRAL[step]))
+  const colors = mode === "light" ? lightVars(brand, g, n, dark) : darkVars(brand, g, n, dark)
   const density = DENSITY_PX[settings.density]
   return {
     mode,
     brandAdjusted: readableFill(brand, [0.4, 0.62], dark).adjusted,
     vars: {
       ...colors,
-      ...sidebarVars(settings.sidebar, brand, mode, dark),
+      ...sidebarVars(settings.sidebar, brand, g, mode, dark),
       ...statusVars(mode, dark),
-      ...chartVars(brand, mode),
+      ...chartVars(brand, g, mode),
       "--radius": `${String(RADIUS_PX[settings.radius])}px`,
       "--control-height": `${String(density.control)}px`,
       "--row-height": `${String(density.row)}px`,

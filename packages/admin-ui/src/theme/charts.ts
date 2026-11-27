@@ -1,5 +1,7 @@
-import { AA_LARGE, NEUTRAL_CHROMA, css, cssAlpha, oklch, standOut } from "./color"
+import { AA_LARGE, css, cssAlpha, oklch, standOut } from "./color"
 import type { Brand } from "./color"
+import { tone } from "./ground"
+import type { Ground } from "./ground"
 
 /**
  * Chart colours (docs/18 §5, dataviz method): the brand hue is the one
@@ -26,7 +28,7 @@ function categorical(hue: number, mode: Mode): string[] {
   return [45, 100, 180, 230].map((turn) => css(oklch(l, 0.13, (hue + turn) % 360)))
 }
 
-export function chartVars(brand: Brand, mode: Mode): Record<`--${string}`, string> {
+export function chartVars(brand: Brand, g: Ground, mode: Mode): Record<`--${string}`, string> {
   const card = oklch(CARD_L[mode], 0, brand.h)
   const start = mode === "light" ? Math.min(Math.max(brand.l, 0.45), 0.62) : Math.max(brand.l, 0.66)
   const series = standOut(brand, card, AA_LARGE, start)
@@ -35,8 +37,8 @@ export function chartVars(brand: Brand, mode: Mode): Record<`--${string}`, strin
   const vars: Record<`--${string}`, string> = {
     "--chart-1": css(series),
     "--chart-1-wash": cssAlpha(series, mode === "light" ? 0.12 : 0.2),
-    "--chart-muted": css(oklch(mode === "light" ? 0.8 : 0.45, NEUTRAL_CHROMA, brand.h)),
-    "--chart-grid": css(oklch(mode === "light" ? 0.94 : 0.26, NEUTRAL_CHROMA, brand.h)),
+    "--chart-muted": css(tone(g, mode === "light" ? 0.8 : 0.45)),
+    "--chart-grid": css(tone(g, mode === "light" ? 0.94 : 0.26)),
     // Canceled sits outside the ordered stages: a muted red, apart from any brand ramp
     "--chart-canceled": css(oklch(mode === "light" ? 0.68 : 0.56, 0.13, 25)),
   }

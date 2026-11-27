@@ -1,20 +1,13 @@
 import type { Oklch } from "culori"
 import type { ThemeSidebar } from "@qticaret/types"
-import {
-  AA_LARGE,
-  AA_TEXT,
-  NEUTRAL_CHROMA,
-  contrast,
-  css,
-  oklch,
-  readableFill,
-  standOut,
-  textOn,
-} from "./color"
+import { AA_LARGE, AA_TEXT, contrast, css, oklch, readableFill, standOut, textOn } from "./color"
 import type { Brand } from "./color"
+import { tone } from "./ground"
+import type { Ground } from "./ground"
 
 /**
- * The navigation's colours (docs/18 §5): ink, light, or the brand colour.
+ * The navigation's colours (docs/18 §5): ink, light, or the brand colour;
+ * ink and light are drawn in the surfaces' tone (`ground.ts`).
  * Every text colour is checked against its own surface, so a light brand
  * still gets a readable menu.
  */
@@ -31,57 +24,56 @@ interface SidebarColors {
 }
 
 /** A text colour on `bg`, lightness moved towards the far end until it reads at `ratio`. */
-function readableOn(bg: Oklch, start: number, ratio: number, h: number): Oklch {
+function readableOn(bg: Oklch, start: number, ratio: number, g: Ground): Oklch {
   const direction = bg.l > 0.5 ? -1 : 1
-  let color = oklch(start, NEUTRAL_CHROMA, h)
+  let color = tone(g, start)
   let steps = 0
   while (contrast(color, bg) < ratio && steps < 60) {
-    color = oklch(color.l + direction * 0.01, NEUTRAL_CHROMA, h)
+    color = tone(g, color.l + direction * 0.01)
     steps += 1
   }
   return color
 }
 
-// Ink: a dark navigation in both page modes, tinted with the brand hue
-function ink(brand: Brand, mode: Mode): SidebarColors {
-  const tint = Math.min(brand.c, 0.02)
-  const bg = oklch(mode === "light" ? 0.21 : 0.125, tint, brand.h)
-  const raised = oklch(bg.l + 0.07, tint, brand.h)
+// Ink: a dark navigation in both page modes, in the ground's tone
+function ink(brand: Brand, g: Ground, mode: Mode): SidebarColors {
+  const bg = tone(g, mode === "light" ? 0.21 : 0.125, g.ink)
+  const raised = tone(g, bg.l + 0.07, g.ink)
   return {
     bg,
-    fg: readableOn(bg, 0.92, AA_TEXT, brand.h),
-    muted: readableOn(bg, 0.68, AA_TEXT, brand.h),
+    fg: readableOn(bg, 0.92, AA_TEXT, g),
+    muted: readableOn(bg, 0.68, AA_TEXT, g),
     accent: raised,
     border: raised,
     primary: standOut(brand, bg, AA_LARGE, Math.max(brand.l, 0.72)),
   }
 }
 
-function light(brand: Brand, mode: Mode, dark: Oklch): SidebarColors {
+function light(brand: Brand, g: Ground, mode: Mode, dark: Oklch): SidebarColors {
   if (mode === "dark") {
-    const bg = oklch(0.17, NEUTRAL_CHROMA, brand.h)
+    const bg = tone(g, 0.17)
     return {
       bg,
-      fg: readableOn(bg, 0.94, AA_TEXT, brand.h),
-      muted: readableOn(bg, 0.7, AA_TEXT, brand.h),
-      accent: oklch(0.24, NEUTRAL_CHROMA, brand.h),
-      border: oklch(0.27, NEUTRAL_CHROMA, brand.h),
+      fg: readableOn(bg, 0.94, AA_TEXT, g),
+      muted: readableOn(bg, 0.7, AA_TEXT, g),
+      accent: tone(g, 0.24),
+      border: tone(g, 0.27),
       primary: standOut(brand, bg, AA_LARGE, Math.max(brand.l, 0.68)),
     }
   }
   const bg = oklch(1, 0, 0)
   return {
     bg,
-    fg: oklch(0.22, NEUTRAL_CHROMA, brand.h),
-    muted: readableOn(bg, 0.5, AA_TEXT, brand.h),
-    accent: oklch(0.955, Math.min(brand.c, 0.02), brand.h),
-    border: oklch(0.925, NEUTRAL_CHROMA, brand.h),
+    fg: tone(g, 0.22),
+    muted: readableOn(bg, 0.5, AA_TEXT, g),
+    accent: tone(g, 0.955, g.sidebarAccent),
+    border: tone(g, 0.925),
     primary: readableFill(brand, [0.4, 0.62], dark).color,
   }
 }
 
 // The brand colour as the surface: deep enough for white text
-function branded(brand: Brand, mode: Mode, dark: Oklch): SidebarColors {
+function branded(brand: Brand, g: Ground, mode: Mode, dark: Oklch): SidebarColors {
   const bg =
     mode === "light"
       ? readableFill(brand, [0.3, 0.46], dark).color
@@ -91,7 +83,7 @@ function branded(brand: Brand, mode: Mode, dark: Oklch): SidebarColors {
   return {
     bg,
     fg,
-    muted: readableOn(bg, fg.l > 0.5 ? 0.82 : 0.3, AA_TEXT, brand.h),
+    muted: readableOn(bg, fg.l > 0.5 ? 0.82 : 0.3, AA_TEXT, g),
     accent: raised,
     border: raised,
     primary: fg,
@@ -101,16 +93,17 @@ function branded(brand: Brand, mode: Mode, dark: Oklch): SidebarColors {
 export function sidebarVars(
   style: ThemeSidebar,
   brand: Brand,
+  g: Ground,
   mode: Mode,
   dark: Oklch
 ): Record<`--${string}`, string> {
   const colors =
     style === "dark"
-      ? ink(brand, mode)
+      ? ink(brand, g, mode)
       : style === "brand"
-        ? branded(brand, mode, dark)
-        : light(brand, mode, dark)
-  const accentText = readableOn(colors.accent, colors.fg.l, AA_TEXT, brand.h)
+        ? branded(brand, g, mode, dark)
+        : light(brand, g, mode, dark)
+  const accentText = readableOn(colors.accent, colors.fg.l, AA_TEXT, g)
   return {
     "--sidebar": css(colors.bg),
     "--sidebar-foreground": css(colors.fg),
