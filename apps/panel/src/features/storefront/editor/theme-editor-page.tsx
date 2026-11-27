@@ -43,7 +43,7 @@ export function ThemeEditorPage({
     )
   }
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+    <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 lg:gap-3 lg:px-4">
         <Button asChild variant="ghost" size="sm">
           <Link to="/storefront/menus">

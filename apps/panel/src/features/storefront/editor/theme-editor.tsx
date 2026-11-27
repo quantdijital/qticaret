@@ -234,7 +234,7 @@ export function ThemeEditor({
     // Flagged sections offered and marked by the shop's flags (adr/0077 §8)
     <SectionFlagsProvider>
       <GoneRecordsContext.Provider value={gone}>
-        <div className="flex h-dvh flex-col overflow-hidden bg-background">
+        <div className="relative flex h-dvh flex-col overflow-hidden bg-background">
           <EditorTopBar
             layout={shape}
             onExit={() => void exit()}
