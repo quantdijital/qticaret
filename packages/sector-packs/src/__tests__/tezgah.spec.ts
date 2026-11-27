@@ -154,6 +154,16 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
   it("draws the simple catalog header: a search icon, pictures in the menu, the free-shipping note", () => {
     const { header, footer } = read("tezgah").layout
     expect(header).toEqual([
+      // The catalog's strip as the top strip's own section, light (owner 2026-11-27, adr/0066 Ek):
+      // its note filled from the shop's details when read, not shown without a threshold
+      expect.objectContaining({
+        id: "ustserit",
+        type: "announcement_bar",
+        ...ALWAYS,
+        variant: "light",
+        lines: ["{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"],
+        link: { $href: "/kampanyalar" },
+      }),
       expect.objectContaining({
         id: "mainheader",
         type: "header_bar",
@@ -163,7 +173,8 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
         search_style: "icon",
         tools_place: "row",
         menu_images: "all",
-        // Filled from the shop's details when read; not shown without a threshold
+        top_strip: "separate",
+        // Kept as stored (its meaning unchanged); the strip above draws the note
         strip_note: "{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava",
         strip_note_link: { $href: "/kampanyalar" },
       }),

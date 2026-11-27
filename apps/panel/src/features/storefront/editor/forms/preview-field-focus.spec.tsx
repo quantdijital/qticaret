@@ -81,22 +81,14 @@ describe("a field named by the preview", () => {
     expect(document.activeElement?.id).toBe(button.target)
   })
 
-  it("lands on the catalog strip's note", () => {
-    const header = switchVariant(
-      {
-        id: "mainheader",
-        type: "header_bar",
-        visible: true,
-        starts_at: null,
-        ends_at: null,
-        variant: "standard",
-        sticky: true,
-        menu_images: "submenus",
-        search_style: "field",
-      },
-      "catalog"
-    ) as AnySection
-    openAt({ ...header, strip_note: "Kargo bedava" } as AnySection, "strip_note", "header")
+  it("lands on the light top strip's note, its first line", () => {
+    // The catalog header's strip note before the top strip was its own section (owner 2026-11-27)
+    const strip = {
+      ...newAnnouncementBar("ustserit01"),
+      variant: "light" as const,
+      lines: ["Kargo bedava"],
+    }
+    openAt(strip, "lines.0", "header")
     expect(document.activeElement).toHaveValue("Kargo bedava")
   })
 

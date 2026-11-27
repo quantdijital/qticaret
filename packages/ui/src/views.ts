@@ -165,6 +165,18 @@ export interface MiniCartView {
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */
+/** The top strip's design and parts (`ShopView.topStrip`). */
+export interface TopStripView {
+  /** `graphite` the dark bar; `light` the thin light strip. */
+  variant: "graphite" | "light"
+  /** The shop's top links (from 1024 px). */
+  links: boolean
+  /** The dark bar's phone (from 1024 px). */
+  phone: boolean
+  /** The light strip's "Hesabım". */
+  account: boolean
+}
+
 export interface ShopView {
   name: string
   logo: ImageView | null
@@ -184,6 +196,12 @@ export interface ShopView {
   announcementSettings?: AnnouncementSettings
   /** The bar's small button beside its lines (the shop's link and words); absent: none. */
   announcementLink?: LinkView
+  /**
+   * The top strip as the shop set it (owner's decision 2026-11-27): its
+   * design and which of its parts show. Absent: no strip section, nothing
+   * drawn above the header.
+   */
+  topStrip?: TopStripView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

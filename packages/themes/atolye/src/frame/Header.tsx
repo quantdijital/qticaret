@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Heart, UserRound } from "lucide-react"
 import { drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
@@ -13,17 +14,9 @@ import { SearchDrop } from "./SearchDrop"
 import { SearchDropOpener } from "./SearchDropOpener"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
-import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
+import { HeaderCatalog } from "./HeaderCatalog"
 import { HeaderInline } from "./HeaderInline"
 import { LABELLED, accountOf, searchOf } from "./header-words"
-
-/** The catalog header's strip and phone when the shop's bar is drawn as it (else null). */
-export function catalogOf(shop: ShopView) {
-  const catalog = shop.headerBar?.catalog
-  return catalog && drawnVariant("header_bar", shop.headerBar?.variant, ["catalog"]) === "catalog"
-    ? catalogParts(shop, catalog)
-    : null
-}
 
 /** The header bar's variants this theme draws (`drawnVariant`). */
 export const HEADER_VARIANTS = ["standard", "centered", "catalog", "inline"] as const
@@ -57,6 +50,7 @@ export function Header({
   t,
   searchSuggest,
   changeCartLine,
+  strip,
 }: {
   shop: ShopView
   t: Translate
@@ -64,6 +58,8 @@ export function Header({
   searchSuggest?: string | undefined
   /** The cart drawer's quantity and remove buttons; none: its lines read only. */
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
+  /** The shop's light top strip, drawn at the header's top (`TopStrip`); none: nothing. */
+  strip?: ReactNode
 }) {
   // The design's header bar (adr/0049 Ek 2026-11-14 §5): `catalog` is its own drawing (N14),
   // `centered` and `standard` are drawn here, a variant this theme lacks falls to the
@@ -79,6 +75,7 @@ export function Header({
         t={t}
         searchSuggest={searchSuggest}
         changeCartLine={changeCartLine}
+        strip={strip}
       />
     )
   }
@@ -90,6 +87,7 @@ export function Header({
         sticky={sticky}
         searchSuggest={searchSuggest}
         changeCartLine={changeCartLine}
+        strip={strip}
       />
     )
   }
@@ -201,6 +199,7 @@ export function Header({
       )}
       data-variant={variant === "catalog" ? "standard" : variant}
     >
+      {strip}
       {centered ? (
         <Container
           data-gf-head-row=""

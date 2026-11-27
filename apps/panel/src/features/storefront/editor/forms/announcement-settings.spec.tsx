@@ -101,9 +101,8 @@ describe("the announcement bar's settings", () => {
   it("offer where the lines sit and the bar's size alone in Stil, open, even for one line", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
-    await openTab(user, "style")
-    // "Yazı ve zemin" is the tab's one group: open, with no header to fold it
-    expect(screen.queryByRole("button", { name: "Yazı ve zemin" })).toBeNull()
+    // Stil holds the strip's design (owner 2026-11-27) and "Yazı ve zemin", each its group
+    await openGroup(user, "Yazı ve zemin")
     expect(screen.getByRole("group", { name: "Yazı ve zemin" })).toBeInTheDocument()
     const align = field("align")
     const size = field("size")
@@ -142,7 +141,7 @@ describe("the announcement bar's settings", () => {
   it("offer the ground's colour, the dark one as today, and the bar's button", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
-    await openTab(user, "style")
+    await openGroup(user, "Yazı ve zemin")
     const tone = field("tone")
     if (!tone) throw new Error("no tone field")
     expect(within(tone).getByRole("radio", { name: "Koyu" })).toHaveAttribute(

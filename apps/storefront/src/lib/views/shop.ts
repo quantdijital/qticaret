@@ -35,6 +35,7 @@ import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
 import { currentLayout, currentMenus, isEditorSession, layoutLink } from "./layout"
 import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
+import { topStripOf } from "./top-strip"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
@@ -154,7 +155,17 @@ export async function shopView(): Promise<ShopView> {
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
   // The bar's small button (its link's own words); none: not drawn
-  const announcementLink = bar?.type === "announcement_bar" ? layoutLink(bar.link ?? null, t) : null
+  // The light strip's note is its link, named by its own words (the catalog strip's before it)
+  const note =
+    bar?.type === "announcement_bar" ? bar.lines.find((line) => line.length > 0) : undefined
+  const announcementLink =
+    bar?.type !== "announcement_bar"
+      ? null
+      : bar.variant === "light"
+        ? note && bar.link
+          ? layoutLink({ ...bar.link, label: note }, t)
+          : null
+        : layoutLink(bar.link ?? null, t)
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
@@ -199,6 +210,8 @@ export async function shopView(): Promise<ShopView> {
       layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
     ...(announcementMark ? { announcementMark } : {}),
+    // The top strip's design and parts (owner 2026-11-27); no strip section: none above the header
+    ...(bar?.type === "announcement_bar" ? { topStrip: topStripOf(bar) } : {}),
     ...(announcementLink ? { announcementLink } : {}),
     ...(editing ? { editor: true as const } : {}),
     marquee: headerMarquee(layout.header, t),

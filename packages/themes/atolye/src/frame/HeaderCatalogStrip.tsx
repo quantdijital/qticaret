@@ -1,5 +1,5 @@
 import { UserRound } from "lucide-react"
-import { fieldMark } from "@qticaret/ui"
+import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, LinkView } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 
@@ -7,8 +7,9 @@ import { Container } from "../parts/Container"
 const NOTE = "mr-auto min-w-0 truncate pr-3 text-text"
 
 /**
- * The catalog header's thin strip from 1024 px (adr/0049 Ek 2026-11-14
- * N14, Ek 2026-11-15): the shop's note at its start (a link when it goes
+ * The light top strip from 1024 px (adr/0049 Ek 2026-11-14 N14, Ek
+ * 2026-11-15; the catalog header's own until the top strip became its own
+ * section, owner 2026-11-27, `TopStrip`), drawn at the top of the header: the shop's note at its start (a link when it goes
  * somewhere), the shop's top links while they stand here, "Hesabım" at its
  * end. Without a note the links open the strip and "Hesabım" closes it, as
  * drawn before the note; with one, the links stand right before "Hesabım".
@@ -18,19 +19,26 @@ export function HeaderCatalogStrip({
   note,
   links,
   account,
-  marks,
+  mark,
   words,
 }: {
   note: NonNullable<HeaderCatalogView["stripNote"]> | null
   links: readonly LinkView[]
   /** "Hesabım" written at the end; null: not here. */
   account: string | null
-  /** The live editor's field marks (adr/0065 §9). */
-  marks: boolean | undefined
+  /**
+   * The strip section's id in the live editor's preview (adr/0065 §9): the
+   * strip carries its section mark and the note its line's field mark.
+   */
+  mark?: string | undefined
   words: { links: string }
 }) {
   return (
-    <div data-gf-strip="" className="hidden border-b border-rule bg-paper-2 text-xs lg:block">
+    <div
+      data-gf-strip=""
+      {...sectionMark(mark)}
+      className="hidden border-b border-rule bg-paper-2 text-xs lg:block"
+    >
       <Container className="flex min-h-9 items-center">
         {note &&
           (note.path ? (
@@ -38,12 +46,12 @@ export function HeaderCatalogStrip({
               href={note.path}
               // Underlined as the page's links are: it reads as one; 36 px tall as the strip's others
               className={`${NOTE} leading-9 underline pointer-coarse:leading-11`}
-              {...fieldMark(marks, "strip_note")}
+              {...fieldMark(mark !== undefined, "lines.0")}
             >
               {note.text}
             </a>
           ) : (
-            <p className={NOTE} {...fieldMark(marks, "strip_note")}>
+            <p className={NOTE} {...fieldMark(mark !== undefined, "lines.0")}>
               {note.text}
             </p>
           ))}

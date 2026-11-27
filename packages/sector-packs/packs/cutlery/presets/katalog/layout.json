@@ -3,6 +3,7 @@
     {
       "id": "mainheader",
       "type": "header_bar",
+      "top_strip": "separate",
       "visible": true,
       "starts_at": null,
       "ends_at": null,

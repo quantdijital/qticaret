@@ -210,6 +210,13 @@ const headerCommon = {
    * stores as it did; read by that variant only.
    */
   over_cover: z.boolean().optional(),
+  /**
+   * The design's top strip is its own section (owner's decision 2026-11-27):
+   * written on every bar read since, so a design is read into it once
+   * (`withSeparateTopStrip`). Absent: a design from before, whose header drew
+   * a strip of its own.
+   */
+  top_strip: z.literal("separate").optional(),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

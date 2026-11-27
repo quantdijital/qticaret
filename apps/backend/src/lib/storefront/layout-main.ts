@@ -46,6 +46,8 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   menu_images: "submenus",
   search_style: "field",
   tool_labels: "show",
+  // A design without a header bar is read into the separate top strip first
+  top_strip: "separate",
 })
 
 const FOOTER_BAR: FooterBar = {

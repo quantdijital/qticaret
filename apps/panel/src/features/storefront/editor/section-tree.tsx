@@ -11,8 +11,6 @@ import {
   newHeaderMarquee,
   newSectionId,
 } from "@/features/storefront/layout/sections"
-import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
-import { anyPageMarqueesFull } from "@/features/storefront/layout/page-layouts"
 import { ContentPageSections } from "./content-page-sections"
 import type { EditorPage } from "./editor-page"
 import { footerAbove, footerTypesLeft } from "@/features/storefront/layout/footer-group"
@@ -24,6 +22,7 @@ import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionList } from "./section-list"
 import { SectionRow } from "./section-row"
+import { TopStripGroup } from "./top-strip-group"
 import { AddRow, ElsewhereRow, ThemeRow, TreeGroup } from "./tree-rows"
 
 const T = "storefront.editor.tree"
@@ -66,8 +65,8 @@ interface SectionTreeProps {
 }
 
 /**
- * The page's parts as the storefront draws them, top to bottom: the
- * header, the chosen page's own sections, the footer; then the theme's
+ * The page's parts as the storefront draws them, top to bottom: the top
+ * strip (`TopStripGroup`), the header, the chosen page's own sections, the footer; then the theme's
  * own settings, the stock line and colour names every page shares and
  * the storefront's preferences (the trust badges are edited in each trust strip section). The menus, the logo and the contact details are edited
  * on their own screens, linked from where they show.
@@ -125,11 +124,6 @@ export function SectionTree({
     dispatch({ type: "add", group: "header", section })
     onOpen(id)
   }
-  // The header draws its bar first, its strip under it (adr/0049 Ek 2026-11-14 §4.1)
-  const bar = doc.header.find((section) => section.type === "announcement_bar")
-  const strip = doc.header.find((section) => section.type === "marquee")
-  // A strip in the header shows on every page: not while a page already has its two
-  const stripFull = anyPageMarqueesFull(doc)
   // The footer group's sections above its bar, in their order (adr/0070 §4); the bar stays last
   const above = footerAbove(doc)
   // The free rows footer opens its rows and blocks under its line (adr/0070 §7)
@@ -143,7 +137,10 @@ export function SectionTree({
       <li className="rounded-md border border-dashed">
         <ThemeRow
           icon={SECTION_ICONS[type]}
-          label={t(`storefront.editor.types.${type}.name`)}
+          label={
+            // Under its group's own name: the header's row says what it sets (owner 2026-11-27)
+            type === "header_bar" ? t(`${T}.headerBar`) : t(`storefront.editor.types.${type}.name`)
+          }
           problem={problems.has(section.id)}
           onClick={() => {
             onOpen(section.id)
@@ -154,33 +151,9 @@ export function SectionTree({
   }
   return (
     <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
+      <TopStripGroup doc={doc} dispatch={dispatch} row={row} onAdd={add} />
       <TreeGroup title={t(`${T}.header`)}>
         <ul className="flex flex-col gap-0.5">
-          {bar ? (
-            row(bar)
-          ) : (
-            <AddRow
-              label={t(`${T}.addAnnouncement`)}
-              onClick={() => {
-                add("announcement")
-              }}
-            />
-          )}
-          {strip ? (
-            row(strip)
-          ) : (
-            <AddRow
-              label={t(`${T}.addMarquee`)}
-              full={
-                stripFull
-                  ? t("storefront.editor.marquee.full", { max: MARQUEE_LIMITS.perPage })
-                  : null
-              }
-              onClick={() => {
-                add("marquee")
-              }}
-            />
-          )}
           {mainRow("header_bar")}
           <ElsewhereRow
             icon={Store}

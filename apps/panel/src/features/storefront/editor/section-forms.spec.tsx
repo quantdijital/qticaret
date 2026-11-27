@@ -272,7 +272,7 @@ describe("the section forms", HEAVY, () => {
   })
 
   it("asks for a written line in the announcement bar before saving it", async () => {
-    await open("Kargo bedava")
+    await open("Koyu şerit")
 
     await user.click(screen.getByRole("button", { name: "Duyuru ekle" }))
     expect(screen.getByRole("alert")).toHaveTextContent("Bu satırı yazın ya da kaldırın.")

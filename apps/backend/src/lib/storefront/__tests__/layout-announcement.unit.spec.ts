@@ -23,6 +23,8 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
 
     expect(doc.header[0]).toEqual({
       ...bar(),
+      // The dark bar, the top strip's design before it had any (owner 2026-11-27)
+      variant: "graphite",
       visible: true,
       starts_at: null,
       ends_at: null,

@@ -32,6 +32,7 @@ import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js
 import type { StorePhotoCollageSection } from "./section-collage.js"
 import type { ReviewsProductImage } from "./section-reviews.js"
 import type {
+  AnnouncementBarVariant,
   CardVariant,
   FaqVariant,
   ProgramPlace,
@@ -350,6 +351,17 @@ export type StoreAnnouncementBar = {
    * absent or null (today's): none.
    */
   link?: StoreLayoutLink | null
+  /**
+   * Its design (owner's decision 2026-11-27): `graphite` the dark bar,
+   * `light` the thin light strip; absent (a backend before it): `graphite`.
+   */
+  variant?: AnnouncementBarVariant
+  /** The top links off (false); absent: shown. */
+  links?: boolean
+  /** The dark bar's phone off (false); absent: shown. */
+  phone?: boolean
+  /** The light strip's "Hesabım" (true); absent: not written. */
+  account?: boolean
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {

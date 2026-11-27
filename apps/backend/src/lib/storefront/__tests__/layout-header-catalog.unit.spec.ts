@@ -47,7 +47,7 @@ const DEFAULTS = {
 describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () => {
   it("reads a bar switched to it with every setting's default", () => {
     const doc = layoutDocument.parse({ header: [catalog()] })
-    expect(doc.header[0]).toMatchObject({ variant: "catalog", sticky: true, ...DEFAULTS })
+    expect(doc.header.at(-1)).toMatchObject({ variant: "catalog", sticky: true, ...DEFAULTS })
   })
 
   it("keeps what the shop set and refuses a step off its list or too long words", () => {
@@ -65,10 +65,10 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       top_links: "bar",
       search_width: "narrow",
     }
-    expect(layoutDocument.parse({ header: [catalog(set)] }).header[0]).toMatchObject(set)
+    expect(layoutDocument.parse({ header: [catalog(set)] }).header.at(-1)).toMatchObject(set)
     // The light tint's old name reads, and is written again, as the dictionary's (bilesen-denetimi (b) 5)
     expect(
-      layoutDocument.parse({ header: [catalog({ menu_ground: "light" })] }).header[0]
+      layoutDocument.parse({ header: [catalog({ menu_ground: "light" })] }).header.at(-1)
     ).toMatchObject({ menu_ground: "well" })
     expect(issues({ header: [catalog({ menu_ground: "red" })] })).toContain(
       "storefront_layout.section_invalid"
@@ -84,10 +84,10 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
     const stored = readStoredLayout({
       header: [{ ...catalog({ phone: false }), variant: "shrinking" }],
     })
-    expect(stored.header[0]).toEqual(expect.objectContaining({ variant: "standard" }))
-    expect(stored.header[0]).not.toHaveProperty("phone")
+    expect(stored.header.at(-1)).toEqual(expect.objectContaining({ variant: "standard" }))
+    expect(stored.header.at(-1)).not.toHaveProperty("phone")
     const kept = readStoredLayout({ header: [catalog({ phone: false })] })
-    expect(kept.header[0]).toMatchObject({ variant: "catalog", phone: false })
+    expect(kept.header.at(-1)).toMatchObject({ variant: "catalog", phone: false })
   })
 
   it("names its highlighted link for the save's checks and the reading", () => {
@@ -133,7 +133,7 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
     const stored = readStoredLayout({
       header: [catalog({ tools_place: "floating", top_links: "bar", search_width: 3 })],
     })
-    expect(stored.header[0]).toMatchObject({
+    expect(stored.header.at(-1)).toMatchObject({
       variant: "catalog",
       tools_place: "bar",
       top_links: "bar",
@@ -145,13 +145,15 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
     const sale = { kind: "system", target: "sale", label: null } as const
 
     it("keeps a short plain line and its link, trimmed", () => {
-      const bar = layoutDocument.parse({
-        header: [catalog({ strip_note: "  Kargo 1500 TL üzeri bedava ", strip_note_link: sale })],
-      }).header[0]
+      const bar = layoutDocument
+        .parse({
+          header: [catalog({ strip_note: "  Kargo 1500 TL üzeri bedava ", strip_note_link: sale })],
+        })
+        .header.at(-1)
       expect(bar).toMatchObject({ strip_note: "Kargo 1500 TL üzeri bedava", strip_note_link: sale })
       // A bar stored before the note reads none (no migration)
       const stored = readStoredLayout({ header: [catalog({ phone: false })] })
-      expect(layoutDocument.parse(stored).header[0]).toMatchObject({
+      expect(layoutDocument.parse(stored).header.at(-1)).toMatchObject({
         strip_note: null,
         strip_note_link: null,
       })

@@ -170,7 +170,6 @@ export function HeaderGroups({
   return (
     <>
       {group("search", fields("search", { before: searchStyle }))}
-      {catalog ? group("topBar", fields("topBar")) : null}
       {group(
         "menu",
         fields("menu", {

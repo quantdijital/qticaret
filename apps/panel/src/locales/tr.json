@@ -9724,6 +9724,19 @@
         "pages": "Taslaktaki sayfalar",
         "pageLive": "{{title}} sayfasını da yayına al"
       },
+      "topStrip": {
+        "title": "Üst şerit",
+        "hide": "Üst şeridi gizle",
+        "show": "Üst şeridi göster",
+        "off": "Üst şerit gizli: üst bilginin üstünde hiçbir ekranda bir şey çizilmez.",
+        "add": "Üst şerit ekle",
+        "linksLabel": "Üst bağlantılar",
+        "linksHint": "“Üst” menünüzdeki bağlantılar, 1024 px ve üstünde.",
+        "phoneLabel": "Telefon",
+        "phoneHint": "Mağaza profilinizdeki telefon, 1024 px ve üstünde.",
+        "accountLabel": "“Hesabım” yazısı",
+        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır."
+      },
       "tree": {
         "label": "Sayfanın bölümleri",
         "header": "Üst bilgi",
@@ -9738,6 +9751,7 @@
           "product": "Ürün sayfalarına eklenmiş bölüm yok; ürünün kendi bilgileri görünür."
         },
         "logo": "Logo ve menü",
+        "headerBar": "Üst bilgi düzeni",
         "columns": "Bağlantı sütunları",
         "contact": "İletişim ve yasal bilgiler",
         "storeProfile": "Mağaza profili",
@@ -9794,8 +9808,8 @@
       },
       "types": {
         "announcement_bar": {
-          "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde ince bir şerit; birden çok duyuru yalnız ilki, sırayla ya da yan yana gösterilir."
+          "name": "Üst şerit",
+          "description": "Üst bilginin üstündeki ince şerit: duyurularınız, üst bağlantılarınız ve telefonunuz. Koyu ya da açık biçimde; üst bilgiden ayrıdır, gizlenince hiçbir şey çizilmez."
         },
         "hero": {
           "name": "Giriş",
@@ -9935,6 +9949,10 @@
           "strip": "Şerit",
           "lined": "Çizgili kutular",
           "card": "Yüzen kart"
+        },
+        "announcement_bar": {
+          "graphite": "Koyu şerit",
+          "light": "Açık şerit"
         },
         "header_bar": {
           "standard": "Solda logo",

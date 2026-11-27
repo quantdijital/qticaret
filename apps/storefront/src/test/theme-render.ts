@@ -1,7 +1,7 @@
 import { createElement } from "react"
 import type { ComponentType } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import type { ShopView, StorefrontTheme } from "@qticaret/ui"
+import type { HeaderCatalogView, ShopView, StorefrontTheme } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { DEFAULT_THEME, themeView } from "@/lib/views/theme"
 
@@ -48,6 +48,8 @@ export const shopFixture = (over: Partial<ShopView> = {}): ShopView => ({
   cartQuantity: 2,
   cart: null,
   announcements: [],
+  // The dark top strip with every part on: what a design from before the separate strip draws
+  topStrip: { variant: "graphite", links: true, phone: true, account: false },
   newsletter: null,
   topLinks: [{ label: "Hakkımızda", path: "/hakkimizda" }],
   footerGroups: [{ title: "Yardım", links: [{ label: "İletişim", path: "/iletisim" }] }],
@@ -73,3 +75,46 @@ export const shopFixture = (over: Partial<ShopView> = {}): ShopView => ({
   bottomNav: { current: "home" },
   ...over,
 })
+
+/**
+ * The top strip a catalog header's old settings read into (owner's
+ * decision 2026-11-27; the backend's `withSeparateTopStrip`): its own strip
+ * on, the light strip with its note, the links unless on the menu bar and
+ * "Hesabım" while the tools stand on it; off, the dark bar with what the
+ * header left it (the links, the phone), else none. The catalog specs draw
+ * the header with it, so each reads as the design it was saved as.
+ */
+export function catalogStrip(catalog: HeaderCatalogView): ShopOver {
+  const links = catalog.topLinksPlace !== "bar"
+  if (catalog.utilityBar) {
+    const note = catalog.stripNote ?? null
+    return {
+      topStrip: {
+        variant: "light",
+        links,
+        phone: true,
+        account: catalog.accountText && catalog.toolsPlace !== "row",
+      },
+      announcements: note ? [note.text] : [],
+      ...(note?.path ? { announcementLink: { label: note.text, path: note.path } } : {}),
+    }
+  }
+  return links || !catalog.phone
+    ? {
+        topStrip: { variant: "graphite", links, phone: !catalog.phone, account: false },
+        announcements: [],
+      }
+    : { noStrip: true }
+}
+
+/** A shop's fields over the fixture's; `noStrip`: no top strip section at all. */
+export type ShopOver = Partial<ShopView> & { noStrip?: true }
+
+/** The fixture shop with `over`, its top strip left out when `noStrip`. */
+export function shopOf({ noStrip, ...over }: ShopOver): ShopView {
+  const shop = shopFixture(over)
+  if (noStrip) {
+    delete shop.topStrip
+  }
+  return shop
+}

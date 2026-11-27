@@ -190,17 +190,18 @@ describe("the catalog header's groups", () => {
     expect(toggle(/^Simgeler ve iletişim/)).not.toHaveAccessibleName(/farklı/)
   })
 
-  it("takes a field picked in the preview to its group: the strip's note in Üst şerit", () => {
+  it("takes a field picked in the preview to its group: the Kategoriler button in Menü çubuğu", () => {
     const { pick } = renderPanel(catalog, "header")
-    // "İçerik" opens at its first group, the search; the strip stands closed
+    // "İçerik" opens at its first group, the search; the menu bar stands closed
     expect(toggle(/^Arama/)).toHaveAttribute("aria-expanded", "true")
-    expect(toggle(/^Üst şerit/)).toHaveAttribute("aria-expanded", "false")
-    const target = FIELD_IDS.header(catalog.id, "strip_note")
+    expect(toggle(/^Menü çubuğu/)).toHaveAttribute("aria-expanded", "false")
+    const target = FIELD_IDS.header(catalog.id, "categories_button")
     act(() => {
-      pick({ target, group: "topBar", nonce: 1 })
+      pick({ target, group: "menu", nonce: 1 })
     })
-    expect(toggle(/^Üst şerit/)).toHaveAttribute("aria-expanded", "true")
-    expect(document.getElementById(target)).toHaveFocus()
+    expect(toggle(/^Menü çubuğu/)).toHaveAttribute("aria-expanded", "true")
+    // The field or its control holds the focus
+    expect(document.getElementById(target)?.contains(document.activeElement)).toBe(true)
   })
 })
 

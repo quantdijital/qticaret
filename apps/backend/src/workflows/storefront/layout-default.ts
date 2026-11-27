@@ -31,10 +31,9 @@ export async function defaultLayout(container: Container): Promise<LayoutDocumen
     ? await Promise.all(hero.links.map((link) => linkFromHref(container, link)))
     : []
   return layoutDocument.parse({
-    header:
-      announcements.length > 0
-        ? [{ id: "duyurular", type: "announcement_bar", ...NOT_SCHEDULED, lines: announcements }]
-        : [],
+    // The top strip always (owner 2026-11-27): without lines it carries the top links and the
+    // phone, as the header drew them above itself before the strip was its own
+    header: [{ id: "duyurular", type: "announcement_bar", ...NOT_SCHEDULED, lines: announcements }],
     home: [
       {
         id: "girisbolumu",

@@ -203,7 +203,7 @@ export function SectionPanel({
               onChange={onChange}
             />
           ) : null}
-          {section.type === "announcement_bar" ? (
+          {section.type === "announcement_bar" && section.variant !== "light" ? (
             <>
               <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
               <AnnouncementStyle section={section} reveal={reveal} onChange={onChange} />

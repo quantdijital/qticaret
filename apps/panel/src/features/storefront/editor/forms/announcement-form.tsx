@@ -5,6 +5,7 @@ import { ListFooter, RowActions, RowCell } from "@/features/settings/components/
 import type { AnnouncementBar } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { AnnouncementMode } from "./announcement-settings"
+import { TopStripParts } from "./top-strip-parts"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { PREVIEW_IDS } from "./preview-fields"
@@ -69,7 +70,7 @@ export function AnnouncementForm({
                 index={index}
                 count={section.lines.length}
                 item={t(`${A}.line`, { number })}
-                removable={section.lines.length > 1}
+                removable
                 onMove={(to) => {
                   const next = section.lines.filter((_, at) => at !== index)
                   next.splice(to, 0, line)
@@ -91,7 +92,17 @@ export function AnnouncementForm({
           setLines([...section.lines, ""])
         }}
       />
-      <AnnouncementMode section={section} onChange={onChange} />
+      {section.variant === "light" ? (
+        <p className="text-xs text-muted-foreground">{t("storefront.editor.topStrip.lightNote")}</p>
+      ) : (
+        <AnnouncementMode section={section} onChange={onChange} />
+      )}
+      <TopStripParts
+        section={section}
+        onChange={(next) => {
+          onChange(next)
+        }}
+      />
     </div>
   )
 }

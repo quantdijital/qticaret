@@ -138,6 +138,14 @@ export function sectionLabel(
   section: AnySection,
   inFooter = false
 ): { name: string; detail: string | null } {
+  // The top strip by its design, its first line under it (owner 2026-11-27)
+  if (section.type === "announcement_bar") {
+    const line = ownTitle(section)?.trim() ?? ""
+    return {
+      name: t(`storefront.editor.variants.announcement_bar.${section.variant}`),
+      detail: line === "" ? null : line,
+    }
+  }
   const type = t(`storefront.editor.types.${kindOf(section, inFooter)}.name`)
   const own = ownTitle(section)?.trim()
   return own ? { name: own, detail: type } : { name: type, detail: null }

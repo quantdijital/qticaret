@@ -59,7 +59,10 @@ describe("the one-row header", () => {
   })
 
   it("keeps the top links out of a strip above it: they are in the menu sheet", () => {
-    const doc = page()
+    // As a one-row design stored before the strip was its own reads (owner 2026-11-27)
+    const doc = page({
+      topStrip: { variant: "graphite", links: false, phone: false, account: false },
+    })
     const header = doc.querySelector("[data-gf-head]")
     const before = [...doc.querySelectorAll('a[href="/hakkimizda"]')].filter(
       (link) => header?.contains(link) !== true

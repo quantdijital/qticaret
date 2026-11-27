@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { Heart, UserRound } from "lucide-react"
 import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, ShopView, Translate } from "@qticaret/ui"
@@ -8,7 +9,6 @@ import { BarLinks } from "./AisleMore"
 import { CartSheet } from "./CartSheet"
 import { cartSheetWords } from "./cart-sheet-words"
 import { CategoryMenu } from "./CategoryMenu"
-import { HeaderCatalogStrip } from "./HeaderCatalogStrip"
 import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
@@ -22,26 +22,9 @@ import { menuWords } from "./menu-words"
 /** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px; hovered, the menus' look. */
 const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
 
-/**
- * What the catalog header draws: the strip and what it holds (the shop's
- * note, its top links while they stand there, "Hesabım" beside the menu
- * bar's icons), whether it says the top links anywhere (the strip or the
- * menu bar's end, `links`: the bar above then leaves them out) and the
- * phone beside its search.
- */
-export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
-  const stripLinks = catalog.topLinksPlace !== "bar" && shop.topLinks.length > 0
-  const stripAccount = catalog.accountText && catalog.toolsPlace !== "row"
-  const stripNote = catalog.stripNote ?? null
-  return {
-    strip: catalog.utilityBar && (stripLinks || stripAccount || stripNote !== null),
-    stripLinks,
-    stripAccount,
-    stripNote,
-    links: shop.topLinks.length > 0 && (catalog.topLinksPlace === "bar" || catalog.utilityBar),
-    phone: catalog.phone && shop.contact.phone !== null && shop.contact.phoneHref !== null,
-  }
-}
+/** Whether the catalog header draws the shop's phone beside its search. */
+const phoneOf = (shop: ShopView, catalog: HeaderCatalogView) =>
+  catalog.phone && shop.contact.phone !== null && shop.contact.phoneHref !== null
 
 /** The narrow search (`search_width: narrow`): 35 rem at most, right after the wordmark. */
 const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
@@ -74,6 +57,7 @@ export function HeaderCatalog({
   t,
   searchSuggest,
   changeCartLine,
+  strip,
 }: {
   shop: ShopView
   catalog: HeaderCatalogView
@@ -81,6 +65,8 @@ export function HeaderCatalog({
   t: Translate
   searchSuggest?: string | undefined
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
+  /** The shop's light top strip, drawn at the header's top (`TopStrip`); none: nothing. */
+  strip?: ReactNode
 }) {
   const menu = menuWords(shop.categories, t)
   // The menus' small pictures (adr/0049 Ek 2026-11-15): the dropdowns and the sheet unless the
@@ -104,7 +90,7 @@ export function HeaderCatalog({
   }
   const icon = shop.headerBar?.searchStyle === "icon"
   const account = accountOf(shop, t)
-  const parts = catalogParts(shop, catalog)
+  const parts = { phone: phoneOf(shop, catalog) }
   const cart = {
     cart: shop.cart,
     count: shop.cartQuantity,
@@ -125,15 +111,7 @@ export function HeaderCatalog({
       )}
       data-variant="catalog"
     >
-      {parts.strip && (
-        <HeaderCatalogStrip
-          note={parts.stripNote}
-          links={parts.stripLinks ? shop.topLinks : []}
-          account={parts.stripAccount ? account : null}
-          marks={shop.editor}
-          words={{ links: t("nav.top_links") }}
-        />
-      )}
+      {strip}
       <Container
         data-gf-head-row=""
         className={cn(
