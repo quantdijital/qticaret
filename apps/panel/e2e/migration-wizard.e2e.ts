@@ -36,7 +36,7 @@ test.describe("migration", () => {
   test("keeps the old addresses on their own page", async ({ page, guard }) => {
     await page.goto("/settings/migration/addresses")
     await expect(
-      page.getByRole("heading", { name: "Eski adresler ve yönlendirmeler" })
+      page.getByRole("heading", { level: 1, name: "Eski adresler ve yönlendirmeler" })
     ).toBeVisible()
     await guard.assertHealthy()
   })
