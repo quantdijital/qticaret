@@ -259,7 +259,7 @@
       "columns": 4,
       "height": "medium",
       "lead": "on",
-      "links": 3
+      "links": 0
     },
     {
       "id": "raykapadokya",
@@ -370,8 +370,8 @@
       "slides": [
         {
           "image": {
-            "$image": "images/bant-ayder.webp",
-            "alt": "Sisli yamaçlar arasında Ayder yaylasının ahşap evleri"
+            "$image": "images/rota-oludeniz.webp",
+            "alt": "Yukarıdan bakışla Ölüdeniz lagünü, turkuaz su ve kumsal"
           },
           "mobile_image": null,
           "heading": "Yaz kalkışları açıldı",
