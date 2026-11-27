@@ -70,6 +70,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Vitrin performans ölçümü (Lighthouse, CWV, düzeltme listesi) | docs/21-vitrin-performans-olcumu.md |
 | Yapay zekâ çekirdeği uygulama planı (servisler, işler, PR sırası) | docs/22-yapay-zeka-uygulama-plani.md |
 | Yapay zekâ kredi satışı (kararlar, sağlayıcı şartları, sözleşme taslağı) | docs/23-yapay-zeka-kredi-satisi.md |
+| Canlıya alma listesi, entegrasyon durumu, gerçek sağlayıcı doğrulamaları (F16) | docs/25-canliya-alma-listesi.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 
 ## Ortak çalışma (iki geliştirici: Deniz, Oğuzhan)
