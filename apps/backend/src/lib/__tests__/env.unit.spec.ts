@@ -3,6 +3,7 @@ import {
   EnvValidationError,
   backendUrl,
   isLocalEnv,
+  panelUrl,
   parseEnv,
   s3Settings,
   sharedFileOrigins,
@@ -112,6 +113,17 @@ describe("parseEnv", () => {
     expect(backendUrl({ BACKEND_URL: undefined })).toBe("http://localhost:9000")
     expect(backendUrl({ BACKEND_URL: "https://api.example.com/x/" })).toBe(
       "https://api.example.com"
+    )
+  })
+
+  it("puts the panel on its dev server locally, on the backend's host once deployed", () => {
+    expect(panelUrl({ BACKEND_URL: undefined, NODE_ENV: "development" })).toBe(
+      "http://localhost:5173"
+    )
+    expect(panelUrl({ BACKEND_URL: undefined, NODE_ENV: "test" })).toBe("http://localhost:5173")
+    // adr/0022 §4: deployed, panel and backend share one origin
+    expect(panelUrl({ BACKEND_URL: "https://magaza.example.com/x/", NODE_ENV: "production" })).toBe(
+      "https://magaza.example.com"
     )
   })
 

@@ -55,6 +55,11 @@ export interface FakeGoogleOptions {
   email?: string
   /** The business's name and city on its Business Profile. */
   business?: { title?: string; city?: string; district?: string }
+  /**
+   * The Merchant Center account the Google account reaches; a random one
+   * unless fixed (a developer's runner, so the shop can name it again).
+   */
+  merchantId?: string
   /** Where refresh tokens and grants are kept between runs (a developer's runner). */
   stateFile?: string
 }
@@ -66,7 +71,8 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
     clientId: `${randomId(8)}.apps.googleusercontent.com`,
     clientSecret: randomId(),
   }
-  const merchantId = String(100_000_000 + Math.floor(Math.random() * 800_000_000))
+  const merchantId =
+    options.merchantId ?? String(100_000_000 + Math.floor(Math.random() * 800_000_000))
   const email = options.email ?? `magaza-${randomId(4).toLowerCase()}@example.com`
   const flow = oauthFlow(client, email, options.stateFile)
   const searchConsole: SearchConsoleState = {
@@ -91,6 +97,13 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
     replyRefusal: null as FakeBusinessProfile["replyRefusal"],
   } as FakeBusinessProfile
 
+  const merchantAccount = () => ({
+    name: `accounts/${merchantId}`,
+    accountId: merchantId,
+    accountName: "Örnek Mağaza",
+    languageCode: "tr",
+    timeZone: { id: "Europe/Istanbul" },
+  })
   const json = (res: ServerResponse, status: number, body: unknown) => {
     res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body))
   }
@@ -158,6 +171,11 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
       if (answerBusinessProfile(business, req.method ?? "GET", url, scope, json, res, body)) {
         return
       }
+      // Merchant API's accounts.list: the one account the Google account reaches
+      if (req.method === "GET" && url.pathname === "/accounts/v1/accounts") {
+        json(res, 200, { accounts: [merchantAccount()] })
+        return
+      }
       const account = /^\/(?:accounts|datasources|products)\/v1\/accounts\/(\d+)/.exec(
         url.pathname
       )?.[1]
@@ -166,7 +184,7 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
         return
       }
       if (req.method === "GET" && url.pathname === `/accounts/v1/accounts/${merchantId}`) {
-        json(res, 200, { name: `accounts/${merchantId}`, accountName: "Örnek Mağaza" })
+        json(res, 200, merchantAccount())
         return
       }
       if (
