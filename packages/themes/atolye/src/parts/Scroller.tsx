@@ -60,6 +60,9 @@ export function Scroller({
   const [held, setHeld] = useState(false)
   const loop = settings.loop === "on"
   const autoplay = settings.autoplay === "on"
+  // `play_button: off` (owner 2026-11-28): no pause on screen, the pointer and focus hold the
+  // row; the button stays for the keyboard, shown once it is reached (WCAG 2.2.2)
+  const playShown = settings.play_button !== "off"
 
   useEffect(() => {
     const element = track.current
@@ -200,12 +203,17 @@ export function Scroller({
         {!besideHead && arrows}
       </div>
       {(dots || autoplay) && (
-        <div className="flex min-h-11 items-center justify-center gap-1">
+        <div
+          className={cn(
+            "flex items-center justify-center gap-1",
+            (dots || playShown) && "min-h-11"
+          )}
+        >
           {/* The visitor's own word, whatever holds the row now (the pointer, focus) */}
           {autoplay && !reduced && !fits && (
             <button
               type="button"
-              className="gf-scroller-arrow"
+              className={cn("gf-scroller-arrow", !playShown && "sr-only focus-visible:not-sr-only")}
               aria-label={stopped ? words.play : words.pause}
               onClick={() => {
                 setStopped(!stopped)

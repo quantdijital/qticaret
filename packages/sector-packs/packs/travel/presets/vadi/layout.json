@@ -73,11 +73,13 @@
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
-        "autoplay": "off",
+        "autoplay": "on",
         "speed": "medium",
-        "loop": "off",
+        "loop": "on",
         "drag": "on",
-        "focus": "on"
+        "focus": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
       }
     },
     {
@@ -218,10 +220,12 @@
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
-        "autoplay": "off",
+        "autoplay": "on",
         "speed": "medium",
-        "loop": "off",
-        "drag": "on"
+        "loop": "on",
+        "drag": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
       },
       "product_image": "compact"
     },

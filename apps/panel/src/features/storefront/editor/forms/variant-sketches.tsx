@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import {
+  CategoriesCarousel,
   CategoriesCollage,
   CategoriesIcons,
   CategoriesLinked,
@@ -253,6 +254,7 @@ const SKETCHES: {
     collage: CategoriesCollage,
     panels: CategoriesPanels,
     icons: CategoriesIcons,
+    carousel: CategoriesCarousel,
   },
   header_bar: {
     standard: HeaderStandard,

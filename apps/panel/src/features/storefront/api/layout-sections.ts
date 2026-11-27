@@ -39,6 +39,7 @@ import type {
   CategoriesCollageFields,
   CategoriesPanelsFields,
   CategoriesIconsFields,
+  CategoriesCarouselFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { StoreHeroFull } from "@qticaret/types"
@@ -205,6 +206,7 @@ export type CategoriesSection = CategoriesBase &
     | CategoriesCollageFields
     | CategoriesPanelsFields
     | CategoriesIconsFields
+    | CategoriesCarouselFields
   )
 
 /**

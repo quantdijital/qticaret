@@ -17,6 +17,7 @@ export const CATEGORY_VARIANTS = [
   "collage",
   "panels",
   "icons",
+  "carousel",
 ] as const satisfies readonly CategoriesVariant[]
 
 /**

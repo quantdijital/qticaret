@@ -272,6 +272,16 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
                 : {}),
             }
           : {}),
+        // The sliding cards: their scroller, and a preset's handles once written
+        ...(section.variant === "carousel"
+          ? {
+              variant: section.variant,
+              scroller: section.scroller,
+              ...(section.category_handles && section.category_handles.length > 0
+                ? { category_handles: section.category_handles }
+                : {}),
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }

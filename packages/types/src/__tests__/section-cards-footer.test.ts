@@ -18,7 +18,14 @@ import { SECTION_VARIANTS, defaultVariant, variantOf } from "../store/section-va
 
 describe("the category cards' linked variant", () => {
   it("draws today's tiles by default, the linked cards on request", () => {
-    expect(SECTION_VARIANTS.categories).toEqual(["tiles", "linked", "collage", "panels", "icons"])
+    expect(SECTION_VARIANTS.categories).toEqual([
+      "tiles",
+      "linked",
+      "collage",
+      "panels",
+      "icons",
+      "carousel",
+    ])
     expect(defaultVariant("categories")).toBe("tiles")
     expect(variantOf("categories", "linked")).toBe("linked")
     expect(variantOf("categories", "collage")).toBe("collage")

@@ -9716,7 +9716,8 @@
           "linked": "Cards with subcategories",
           "collage": "Photo collage",
           "panels": "Photo panels",
-          "icons": "Icon row"
+          "icons": "Icon row",
+          "carousel": "Sliding cards"
         },
         "related_products": {
           "grid": "Grid",

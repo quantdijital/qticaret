@@ -14,6 +14,7 @@ import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type {
+  StoreCategoriesCarousel,
   StoreCategoriesCollage,
   StoreCategoriesIcons,
   StoreCategoriesLinked,
@@ -107,7 +108,8 @@ export interface StoreSectionLookPart {
  * backend before variants) or, as `linked` (adr/0049 Ek 2026-11-15), each
  * category a card with its first subcategories as links, or as `collage`,
  * photo-led cards filling each row, or as `panels`, frameless graphite
- * panels led by their photos. A reader takes a
+ * panels led by their photos, or as `carousel`, picture cards in one row
+ * that slides (with `scroller`). A reader takes a
  * variant it does not know as `tiles` and leaves the other's fields unread.
  */
 export type StoreCategoriesSection = {
@@ -125,6 +127,7 @@ export type StoreCategoriesSection = {
   | StoreCategoriesCollage
   | StoreCategoriesPanels
   | StoreCategoriesIcons
+  | StoreCategoriesCarousel
 )
 
 export type StoreLayoutSection = StoreSectionLookPart &

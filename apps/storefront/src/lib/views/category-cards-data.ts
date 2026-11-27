@@ -159,8 +159,9 @@ export async function cardedCategoriesView(
       const { cards, panels } = await panelsCategoriesView(section, t, home)
       return { cards, part: { variant: "panels", panels } }
     }
-    // The icon row is not carded: the section's view draws it before asking here
+    // The icon row and the sliding cards are not carded: the section's view draws them first
     case "icons":
+    case "carousel":
     case "tiles":
     case undefined:
       return null

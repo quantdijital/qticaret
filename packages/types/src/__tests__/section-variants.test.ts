@@ -31,6 +31,19 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
     expect(hasVariants("reviews")).toBe(true)
   })
 
+  it("keeps the categories' tiles first and adds the sliding cards last", () => {
+    expect(SECTION_VARIANTS.categories).toEqual([
+      "tiles",
+      "linked",
+      "collage",
+      "panels",
+      "icons",
+      "carousel",
+    ])
+    expect(variantOf("categories", "carousel")).toBe("carousel")
+    expect(variantOf("categories", undefined)).toBe("tiles")
+  })
+
   it("offers a choice only for a type with more than one variant", () => {
     expect(hasVariants("trust_badges")).toBe(true)
     // adr/0073 Ek 2026-11-24 (2): the FAQ is drawn two ways now; the help box one
