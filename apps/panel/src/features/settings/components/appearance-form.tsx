@@ -33,8 +33,9 @@ import type { AppearanceForm as FormValues } from "@/theme"
 const HEX = /^#[0-9a-f]{6}$/
 
 /**
- * The shop's choices (docs/18 §5): colours (brand, the surfaces' tone, mode, the menu's ground)
- * and layout (how the menu behaves, corners, density) side by side, the
+ * The shop's choices (docs/18 §5): colours (brand, the surfaces' tone, mode)
+ * and the menu and layout (the menu's ground and behaviour, corners,
+ * density) side by side, the two cards about one height, the
  * panel in miniature under them. Every change repaints this screen at
  * once; leaving without saving paints the stored values back.
  */
@@ -146,7 +147,8 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
           description={t("settings.appearance.colorsHint")}
           className={spanOf(6)}
         >
-          <div className="flex flex-col gap-6">
+          {/* Side by side the two cards are one height: what is left spreads between the choices */}
+          <div className="flex flex-1 flex-col justify-between gap-6">
             <BrandColorField
               control={form.control}
               setValue={form.setValue}
@@ -166,12 +168,6 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
               options={THEME_MODES}
               optionLabel={(option) => t(`settings.appearance.modeOptions.${option}`)}
             />
-            <ChoiceField
-              name="sidebar"
-              control={form.control}
-              options={THEME_SIDEBARS}
-              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
-            />
           </div>
         </SectionCard>
         <SectionCard
@@ -179,7 +175,13 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
           description={t("settings.appearance.layoutHint")}
           className={spanOf(6)}
         >
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-1 flex-col justify-between gap-6">
+            <ChoiceField
+              name="sidebar"
+              control={form.control}
+              options={THEME_SIDEBARS}
+              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
+            />
             <ChoiceField
               name="sidebar_mode"
               control={form.control}
