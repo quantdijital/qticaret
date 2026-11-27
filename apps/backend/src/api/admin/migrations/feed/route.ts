@@ -16,12 +16,13 @@ export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostFeedMigrationType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { mode, defaults, url } = req.validatedBody
+  const { mode, defaults, url, kinds } = req.validatedBody
   const { result } = await startMigrationWorkflow(req.scope).run({
     input: {
       source: "feed",
       source_file_id: null,
       feed_url: url,
+      ...(kinds?.length ? { kinds } : {}),
       mode,
       defaults,
       requested_by: req.auth_context.actor_id || null,

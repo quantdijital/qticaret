@@ -30,7 +30,7 @@ const PAGE = 20
  * themselves again.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const { mode, weight, length, width, height, source, category_base, refresh } =
+  const { mode, weight, length, width, height, source, category_base, refresh, kinds } =
     req.validatedQuery as AdminPostMigrationFileQueryType
   const parcel = [weight, length, width, height]
   if (parcel.some((value) => value !== undefined) && parcel.includes(undefined)) {
@@ -85,6 +85,7 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       source_file_id: upload.fileKey,
       category_base: wordpress ? (category_base ?? null) : null,
       ...(refresh ? { refresh: [refresh] } : {}),
+      ...(kinds?.length ? { kinds } : {}),
       mode,
       defaults,
       requested_by: req.auth_context.actor_id || null,
@@ -97,34 +98,32 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
 /**
  * `GET /admin/migrations`: the runs, newest first, with what each came to;
  * a failed one with its code (`interrupted`: stopped half-way, it can be
- * started again).
+ * started again). `job_id` names one job's run; its counts carry the live
+ * step while it runs (`_phase`: the kinds it takes, the one it is on, how far).
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetMigrationsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { offset } = req.validatedQuery
+  const { offset, job_id: jobId } = req.validatedQuery
   const [runs, count] = await req.scope
     .resolve<MigrationModuleService>(MIGRATION_MODULE)
-    .listAndCountMigrationRuns(
-      {},
-      {
-        skip: offset,
-        take: PAGE,
-        order: { created_at: "DESC" },
-        select: [
-          "id",
-          "source",
-          "mode",
-          "status",
-          "error_code",
-          "job_id",
-          "started_by",
-          "counts",
-          "created_at",
-          "finished_at",
-        ],
-      }
-    )
+    .listAndCountMigrationRuns(jobId ? { job_id: jobId } : {}, {
+      skip: offset,
+      take: PAGE,
+      order: { created_at: "DESC" },
+      select: [
+        "id",
+        "source",
+        "mode",
+        "status",
+        "error_code",
+        "job_id",
+        "started_by",
+        "counts",
+        "created_at",
+        "finished_at",
+      ],
+    })
   res.json({ runs, count, offset, limit: PAGE })
 }

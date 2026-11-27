@@ -8,6 +8,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import type { PackageDefaults } from "../../lib/migration/types"
 import { enqueueAsyncJobWorkflow } from "../async-job/enqueue-async-job"
+import type { RunKind } from "./kinds"
 
 export interface StartMigrationInput {
   source: "bundle" | "shopify" | "feed" | "customers" | "wordpress"
@@ -19,6 +20,8 @@ export interface StartMigrationInput {
   category_base?: string | null
   /** A WordPress export: what only is refreshed of what a run moved before (adr/0055). */
   refresh?: ("descriptions" | "post_images")[] | undefined
+  /** What to move (adr/0042 Ek 2026-11-27); none named, everything. */
+  kinds?: RunKind[] | undefined
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
@@ -53,6 +56,7 @@ export const startMigrationWorkflow = createWorkflow(
           ...(input.feed_url ? { feed_url: input.feed_url } : {}),
           ...(input.category_base ? { category_base: input.category_base } : {}),
           ...(input.refresh?.length ? { refresh: input.refresh } : {}),
+          ...(input.kinds?.length ? { kinds: input.kinds } : {}),
           mode: input.mode,
           defaults: input.defaults,
         },

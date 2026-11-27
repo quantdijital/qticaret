@@ -12,6 +12,7 @@ import { reportSheets } from "../../migration/report"
 import { runDescriptionRefresh } from "../../migration/descriptions"
 import { runPostImageRefresh } from "../../migration/post-images"
 import { linkCounts, migrationLinkSheet, settleMigratedLinks } from "../../migration/links"
+import { RUN_KINDS, addedKinds, groupProblems, withDependencies } from "../../migration/kinds"
 import { runMigration } from "../../migration/run"
 import type { JobType } from "./types"
 
@@ -44,6 +45,8 @@ const shared = {
     .strict()
     .nullable()
     .default(null),
+  // adr/0042 Ek 2026-11-27: what to move; none named, everything (what they need is added)
+  kinds: z.array(z.enum(RUN_KINDS)).max(RUN_KINDS.length).default([]),
 }
 
 const input = z.discriminatedUnion("source", [
@@ -153,23 +156,35 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       // adr/0055: a refresh run rewrites the moved products' descriptions and nothing else
       const refresh = values.source === "wordpress" ? values.refresh : []
       if (mode === "apply") {
-        await record("started", { run_id: run.id, ...(refresh.length > 0 ? { refresh } : {}) })
+        await record("started", {
+          run_id: run.id,
+          ...(refresh.length > 0 ? { refresh } : { kinds: withDependencies(values.kinds) }),
+        })
       }
+      const kinds = withDependencies(values.kinds)
       const { counts, productRows, problems } = refresh.includes("descriptions")
         ? await runDescriptionRefresh(container, source, run.id, mode, report)
         : refresh.includes("post_images")
           ? await runPostImageRefresh(container, source, run.id, mode, report)
-          : await runMigration(container, source, run.id, mode, defaults, {
-              progress: report,
-              origin: { job_id: job.id, actor_id: job.requested_by },
-              audit: (action, changes) =>
-                mode === "apply" ? record(action, changes) : Promise.resolve(),
-            })
+          : await runMigration(
+              container,
+              source,
+              run.id,
+              mode,
+              defaults,
+              {
+                progress: report,
+                origin: { job_id: job.id, actor_id: job.requested_by },
+                audit: (action, changes) =>
+                  mode === "apply" ? record(action, changes) : Promise.resolve(),
+              },
+              kinds
+            )
       // adr/0042 Ek 2026-11-05: the records' old paths answer at once, the moved texts' links
       // to the old site point here (a refresh rewrote descriptions from the source again)
       // Not the run's to fail: what moved stays, and the content link job can be run later
       const links =
-        mode === "apply"
+        mode === "apply" && (refresh.length > 0 || kinds.includes("url"))
           ? await settleMigratedLinks(container, source.id).catch((error: unknown) => {
               logger.warn({
                 event: "migration.links_failed",
@@ -205,7 +220,12 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
           mode,
           counts,
           ...(links ? { links: linkCounts(links) } : {}),
-          ...(refresh.length > 0 ? { refresh } : wordpress ? { wordpress } : {}),
+          ...(refresh.length > 0
+            ? { refresh }
+            : { kinds, added_kinds: addedKinds(values.kinds, kinds) }),
+          ...(refresh.length === 0 && wordpress ? { wordpress } : {}),
+          // adr/0042 Ek 2026-11-27: the problems by reason, for the panel; every row is in the report
+          problems: groupProblems(problems),
         },
       }
     } catch (error) {

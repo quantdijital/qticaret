@@ -83,6 +83,12 @@ export const MIGRATION_ROUTES = [
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetMigrations, {})],
   },
+  // adr/0042 Ek 2026-11-27: what moved and what each completion would take
+  {
+    matcher: "/admin/migrations/overview",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
   // A run that stopped half-way, started again from its stored file
   {
     matcher: "/admin/migrations/:id/restart",
