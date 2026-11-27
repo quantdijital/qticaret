@@ -70,8 +70,9 @@ export function pkcePair(): { verifier: string; challenge: string } {
 /**
  * The address the shop is sent to, to let the platform's client reach its
  * Merchant Center: offline access and the consent screen every time, so
- * Google hands over a refresh token again; with `include_granted_scopes`
- * the new token keeps what the shop allowed before.
+ * Google hands over a refresh token again. Only `GOOGLE_SCOPES`, without
+ * `include_granted_scopes`: a token from an earlier, wider grant (Google
+ * reviews' `business.manage`, removed 2026-11-27) is not carried over.
  */
 export function authorizationUrl(
   client: GoogleClient,
@@ -85,7 +86,6 @@ export function authorizationUrl(
     scope: GOOGLE_SCOPES.join(" "),
     access_type: "offline",
     prompt: "consent",
-    include_granted_scopes: "true",
     state: input.state,
     code_challenge: input.challenge,
     code_challenge_method: "S256",

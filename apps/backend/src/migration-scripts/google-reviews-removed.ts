@@ -170,11 +170,11 @@ export function retiredReviewsPorts(container: MedusaContainer): RetiredReviewsP
         {},
         { select: ["id", "document", "summary"] }
       )
-      const legacy = designs.length > 0 ? await legacySettings(container) : null
+      const legacy = designs.length > 0 ? await legacySettings(container) : undefined
       for (const row of designs) {
         const cleaned = withoutRetiredSections(row.document)
         count(cleaned.removed)
-        if (cleaned.removed > 0 && legacy) {
+        if (cleaned.removed > 0 && legacy !== undefined) {
           // The fingerprint as a save would take it today, so the look still matches its applies
           const read = readable(cleaned.document)
           const summary = summaryWithout(row.summary, cleaned.document)
