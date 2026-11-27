@@ -14609,11 +14609,11 @@
         }
       },
       "fake": {
-        "name": "Test service",
-        "description": "Shown in development only; connects to no real service.",
-        "rejected": "The test service refused the stored key.",
+        "name": "Vireo AI",
+        "description": "Text writing, image reading and background removal service.",
+        "rejected": "Vireo AI refused the stored key. Change the key or check for credit in your Vireo AI account.",
         "checks": {
-          "secret_invalid": "The test service did not accept the key."
+          "secret_invalid": "Vireo AI did not accept the key. Copy the key again and enter it."
         }
       },
       "platform": {
@@ -14628,7 +14628,7 @@
       "gemini": "On the free tier Google uses the content sent to improve its products; on the paid tier it does not.",
       "photoroom": "Data is processed in the USA; the image is deleted after the answer. Whether it trains models is not clear in the documents.",
       "bria": "Where data is processed and whether it trains models is not stated; Bria says it does not keep the input and holds the result at a temporary address for 3 days.",
-      "fake": "Data never leaves this computer.",
+      "fake": "Data is not kept after the answer and does not train models.",
       "platform": "Content goes to one of the AI services the platform works with; the platform does not keep it. The shop agreement names those services."
     },
     "data_detail": {
@@ -14638,7 +14638,7 @@
       "gemini": "Under Google's terms, content sent on the free tier is used to improve Google's products and may be read by people at Google; on the paid tier (billing on) it is not. Data may be processed in any country where Google has facilities. Only content published on your storefront is sent.",
       "photoroom": "Photoroom processes the image on its servers in the USA and deletes it after answering. Photoroom's pages differ on whether images are used to train models; we suggest reading its own terms before connecting. Only the image to edit leaves your shop.",
       "bria": "Bria says it does not keep the image sent and holds the result at a temporary address for 3 days. Its documents do not state the country where data is processed or whether it trains models; written confirmation is awaited. We suggest reading Bria's own terms before connecting. Only the image to edit leaves your shop.",
-      "fake": "A fake service for development: it writes its answer from the data itself and connects nowhere."
+      "fake": "Vireo AI does not keep the content sent once it has answered and does not use it to train models. Only content published on your storefront and the image to edit leave your shop."
     },
     "tasks": {
       "assistant": "Assistant",
