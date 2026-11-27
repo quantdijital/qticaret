@@ -141,6 +141,18 @@
     background: linear-gradient(to top, rgb(0 0 0 / 0.7), rgb(0 0 0 / 0) 60%);
     content: "";
   }
+  /*
+   * An item with no picture of its own (a link to the whole shop, not a
+   * category): the shop's own colour, not an empty grey frame that reads
+   * as a picture that failed to load (owner 2026-11-27)
+   */
+  .gf-mega-feature:not(:has(.gf-mega-img)) {
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+  .gf-mega-feature .gf-mega-picture:empty {
+    display: none;
+  }
   .gf-mega-feature-text {
     position: relative;
     z-index: 1;
@@ -174,8 +186,6 @@
     .gf-mega-head:hover .gf-menu-word,
     .gf-mega-link:hover {
       color: var(--color-text);
-      text-decoration: underline;
-      text-underline-offset: 0.2em;
     }
     .gf-mega-feature:hover .gf-mega-feature-all svg {
       transform: translateX(0.25rem);
