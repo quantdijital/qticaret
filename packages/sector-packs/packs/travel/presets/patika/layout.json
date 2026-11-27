@@ -60,8 +60,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-gol-gezgin.webp",
-        "alt": "Sırt çantalı bir gezgin, ormanla çevrili gölün üstündeki kayada oturmuş manzaraya bakıyor"
+        "$image": "images/kapak-kapadokya-balon.webp",
+        "alt": "Gün doğumunda Kapadokya vadileri ve peri bacaları üzerinde süzülen sıcak hava balonları"
       },
       "action": "both",
       "search_position": "overlap",
