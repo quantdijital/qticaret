@@ -25,7 +25,9 @@
     "text_position": "over_split",
     "rating_badge": true,
     "duration_row": true,
-    "per_person": false
+    "per_person": false,
+    "meta_place": "over",
+    "style": "plain"
   },
   "header": {
     "layout": "left",
@@ -48,7 +50,9 @@
     "default_view": "grid",
     "view_switch": "show",
     "breadcrumb_current": "hide",
-    "count_word": "tur"
+    "crumbs_place": "beside",
+    "count_word": "tur",
+    "all_title": "Tüm turlar"
   },
   "menu_style": "underline",
   "shadow": "float",
