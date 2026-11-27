@@ -371,14 +371,16 @@ describe("the theme's product page", () => {
       trustBadges: [
         { icon: "clock", title: "Hızlı gönderim", text: "Hafta içi her gün" },
         { icon: "award", title: "2 yıl garanti", text: "Marka garantili ürünler" },
+        // Two tiles: a lone one is not drawn under the buy form (owner 2026-11-27)
+        { icon: "card", title: "Güvenli ödeme", text: "256 bit SSL" },
       ],
       shipping: {
         facts: [
           { icon: "truck", title: "1–2 iş gününde kargoda", text: "Tahmini teslimat 2–5 iş günü" },
           {
             icon: "clock",
-            title: "Saat 15:00'e kadar verilen siparişler aynı gün kargoda",
-            text: null,
+            title: "Aynı gün kargo",
+            text: "Saat 15.00'e kadar verilen siparişlerde",
           },
         ],
         carriers: [],
@@ -388,7 +390,8 @@ describe("the theme's product page", () => {
     const card = /<section id="kargo-ve-teslimat"[\s\S]*?<\/section>/.exec(html)?.[0] ?? ""
     expect(card).toContain("1–2 iş gününde kargoda")
     expect(card).toContain("Tahmini teslimat 2–5 iş günü")
-    expect(card).toContain("Saat 15:00&#x27;e kadar verilen siparişler aynı gün kargoda")
+    expect(card).toContain("Aynı gün kargo")
+    expect(card).toContain("Saat 15.00&#x27;e kadar verilen siparişlerde")
     // The settings say it now: the shop's own clock line is not told beside them
     expect(html).not.toContain("Hızlı gönderim")
     expect(html).toContain("2 yıl garanti")

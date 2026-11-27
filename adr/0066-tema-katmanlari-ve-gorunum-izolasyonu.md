@@ -98,6 +98,8 @@ Sahip: alım formunun altında ("WhatsApp'tan sorun" düğmesinin altı) "Kargo 
 
 Karar: bu kutu grubu en az iki kutu varken çizilir; tek kutu kalınca orada hiçbir şey çizilmez (güvence ana sayfa şeridinde, alt bilgide ve sepette görünmeye devam eder). Kutular satırda ikişer dizilir; tek sayıda kutuda (3, 5…) son kutu satırın tamamını kaplar, böylece boş hücre kalmaz ve hiçbir güvence gizlenmez. Kartı olmayan ürünün "Teslimat ve iade" kutusu değişmedi. Bu, yayımlanmış bir çizimin sahip kararıyla yerinde değişmesidir (ayar değil): görünüm kilidinde yedi hazır görünümün ürün sayfası değişti (fikstürde tek güvence kutusu kalıyordu), `pnpm lock:presets` ile yeniden yazıldı. Ayrıntı: docs/tema/bilesen-standardi.md §7.
 
+Aynı gün, tutarlılık düzeltmesi (sahip isteği): ürün sayfasındaki "Kargo ve teslimat" kartında her bilgi kalın başlık ve altında kısa satırdır; aynı gün kargo saati tek düz cümleydi ("Saat 15.00'e kadar verilen siparişler aynı gün kargoda"). Artık başlık "Aynı gün kargo", altında "Saat 15.00'e kadar verilen siparişlerde" (saat mağazanın ayarından). Bölüm biçimi ve tema çizimi değişmedi, yalnız vitrinin hazırladığı metin; görünüm kilidi değişmedi.
+
 ## Açık kararlar
 
 1. Stil takımının basamak listesi ve adları (yol haritası 2).
