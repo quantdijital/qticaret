@@ -8,8 +8,15 @@ import { sdk } from "@/lib/sdk"
  * back, nor any part of one: only whether each is stored.
  */
 export type AccountState = "not_configured" | "connected" | "unverified" | "rejected" | "unreadable"
+/** `unconfirmed`: the provider refused nothing but cannot confirm the details (PTT). */
 export type AccountCheck =
-  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed" | "not_configured"
+  | "valid"
+  | "merchant_invalid"
+  | "secret_invalid"
+  | "unreachable"
+  | "failed"
+  | "unconfirmed"
+  | "not_configured"
 
 /**
  * One provider's account; the settings are the provider's own. Every

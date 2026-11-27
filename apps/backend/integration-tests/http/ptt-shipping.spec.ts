@@ -30,6 +30,11 @@ interface FulfillmentRow {
   data: Record<string, unknown>
 }
 
+interface Saved {
+  account: { state: string }
+  check: string
+}
+
 interface RangesView {
   ranges: { id: string; first: string; last: string; used: number; remaining: number }[]
   remaining: number
@@ -165,16 +170,30 @@ medusaIntegrationTestRunner({
 
     it("checks the account before saving, naming the field, and lists the option as PTT's", async () => {
       const badNumber = await connect(fake.account.password, "12345")
-      const wrong = await connect("yanlis-sifre")
-      const right = await connect()
+      fake.queue("gonderiSorgu2", "code:0:Kullanıcı adı veya şifre hatalı.")
+      const refused = await connect("yanlis-sifre")
+      // Real PTT answers a made-up account "not found", as it does a right one: never verified
+      const unknown = await post<Saved>("/admin/integrations/credentials/ptt", {
+        settings: { customer_id: fake.account.customerId, test_mode: false },
+        secrets: { password: "uydurma-sifre" },
+      })
+      const right = await post<Saved>("/admin/integrations/credentials/ptt", {
+        settings: { customer_id: fake.account.customerId, test_mode: false },
+        secrets: { password: fake.account.password },
+      })
+      const tested = await post<{ check: string }>("/admin/integrations/credentials/ptt/check", {})
       const { data } = await http.get<{ options: { id: string; carrier: string }[] }>(
         "/admin/shipping-setup/options",
         { headers: admin.headers }
       )
 
       expect(badNumber.data).toMatchObject({ message: "ptt.customer_id_invalid" })
-      expect(wrong.data).toMatchObject({ message: "ptt.secret_invalid" })
+      expect(refused.data).toMatchObject({ message: "ptt.secret_invalid" })
+      expect(unknown.status).toBe(200)
+      expect(unknown.data).toMatchObject({ check: "unconfirmed", account: { state: "unverified" } })
       expect(right.status).toBe(200)
+      expect(right.data).toMatchObject({ check: "unconfirmed", account: { state: "unverified" } })
+      expect(tested.data).toMatchObject({ check: "unconfirmed" })
       expect(data.options.find(({ id }) => id === optionId)).toMatchObject({ carrier: "ptt" })
     })
 

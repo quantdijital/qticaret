@@ -22,10 +22,13 @@ import { aiAccountChecker } from "../ai/account-check"
  * - `unreachable`: the network, a timeout, a 5xx or an open circuit; no
  *   verdict on the details, which may be saved as not checked yet.
  * - `failed`: the provider answered, but not as documented; nothing is saved.
+ * - `unconfirmed`: the provider answered and refused nothing, but its answer
+ *   would be the same for details it does not know (PTT): saved as not
+ *   verified, never as verified, and a working account may be replaced.
  */
 
 export type AccountCheck =
-  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed"
+  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed" | "unconfirmed"
 
 /** Failures that say nothing about the details: the provider was not heard from. */
 const notReached = (error: ProviderErrorShape): boolean =>
@@ -91,8 +94,9 @@ const CHECKERS = {
     }
     return credentials.tracking === credentials.shipping ? "secret_invalid" : "merchant_invalid"
   },
-  // A tracking query with the customer number and password; PTT's words for a wrong
-  // password are to confirm with a real account
+  // A tracking query with the customer number and password: PTT can refuse them
+  // (`secret_invalid`) but never confirms them, its "not found" is the same for a
+  // made-up account (`unconfirmed`, saved as not verified)
   ptt: async (account, signal) => {
     const credentials = pttCredentialsOf(account)
     return credentials ? pttApi().checkLogin(credentials, { signal }) : "secret_invalid"

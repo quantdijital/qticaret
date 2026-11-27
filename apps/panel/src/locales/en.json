@@ -1763,7 +1763,7 @@
         "customerIdHint": "9 or 10 digits.",
         "customerIdInvalid": "The customer number has 9 or 10 digits.",
         "password": "Web service password",
-        "keysHint": "When you save, PTT is asked a tracking query with these details to check them.",
+        "keysHint": "When you save, PTT is asked a tracking query with these details. PTT does not always refuse wrong details, so they are saved but show as \"Not verified\"; load a first parcel in test mode to try them.",
         "live": {
           "title": "Going live",
           "description": "In test mode parcels are loaded on PTT's test system; no branch accepts them."
@@ -1772,8 +1772,10 @@
         "testModeHint": "Turned off, parcels are loaded on your real PTT account. Test and live details may differ, so the password is asked again.",
         "checks": {
           "merchant_invalid": "PTT Kargo did not accept this customer number. Copy it again from what the PTT Başmüdürlük gave you.",
-          "secret_invalid": "PTT Kargo did not accept this customer number and password. Copy them again from what the PTT Başmüdürlük gave you."
+          "secret_invalid": "PTT Kargo did not accept this customer number and password. Copy them again from what the PTT Başmüdürlük gave you.",
+          "unconfirmed": "Saved, but not verified: PTT Kargo answers wrong details too without refusing them. Compare the customer number and password with what PTT gave you, and load a first parcel in test mode to try them."
         },
+        "unverified": "Not verified: PTT Kargo answers wrong details too without refusing them, so saving cannot tell whether the account is right. Compare the customer number and password with what PTT gave you; load a first parcel in test mode. If they are wrong, PTT refuses the parcel.",
         "rejected": "PTT Kargo no longer accepts the stored details; no parcel can be loaded. Enter the current password PTT gave you.",
         "ranges": {
           "title": "Barcode range",
@@ -1879,6 +1881,7 @@
       "notes": {
         "test_mode": "In test mode: no real money or parcels.",
         "unverified": "Saved, but the provider could not be asked; test the connection.",
+        "unconfirmed": "The account cannot be verified: the provider answers wrong details too without refusing them. If they are wrong, the first parcel is refused.",
         "rejected": "The provider refused the stored details; save the account again.",
         "unreadable": "The stored details cannot be read; enter the account again.",
         "search_console_not_granted": "Search Console access was not granted; connect Google again.",
@@ -1902,6 +1905,7 @@
       "tested": {
         "valid": "{{name}} connection works.",
         "unreachable": "{{name}} did not answer just now; try again shortly.",
+        "unconfirmed": "{{name}} answered and refused nothing, but does not confirm the details; the account stays not verified.",
         "merchant_invalid": "{{name}} refused the stored account details; save the account again.",
         "secret_invalid": "{{name}} refused the stored account details; save the account again.",
         "failed": "{{name}} gave an unexpected answer.",
