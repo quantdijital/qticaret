@@ -187,6 +187,11 @@ export interface ProductMainView {
    * `portrait` 3:4; absent: the square (the page as drawn before it).
    */
   imageRatio?: "landscape" | "portrait"
+  /**
+   * The shop's assurances under the buy form (its trust badges, or the
+   * delivery well) switched off; absent: shown, the page as before.
+   */
+  assurances?: false
   /** The steps the shop set (adr/0049 Ek 2026-11-14 §6); absent: the theme's own drawing. */
   look?: SectionLookView
 }

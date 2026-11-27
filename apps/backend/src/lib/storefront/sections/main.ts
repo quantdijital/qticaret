@@ -313,6 +313,8 @@ export const productMain = z
     variant: defaultVariant("product_main"),
     // Left out: square, as every block saved before it
     image_ratio: z.enum(PRODUCT_IMAGE_RATIOS, MAIN_ERROR).optional(),
+    // The shop's assurances under the buy form; left out: shown, as every block saved before it
+    assurances: z.boolean().optional(),
   })
   .strict()
 

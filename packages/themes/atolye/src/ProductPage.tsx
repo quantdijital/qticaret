@@ -192,7 +192,7 @@ export function ProductPage({
                   {view.withdrawalNote}
                 </p>
               )}
-              <Assurances view={view} t={t} />
+              {view.main?.assurances !== false && <Assurances view={view} t={t} />}
             </div>
           </div>
         </Container>

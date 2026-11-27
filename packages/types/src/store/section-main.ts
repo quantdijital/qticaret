@@ -130,6 +130,8 @@ export interface StoreMainSections {
     variant: ProductMainVariant
     /** The gallery's picture shape; left out: the square (an older backend, or the shop left it). */
     image_ratio?: ProductImageRatio
+    /** The shop's assurances under the buy form switched off; left out: shown. */
+    assurances?: false
     look?: SectionLook
   }
   category_main: {

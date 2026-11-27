@@ -166,6 +166,8 @@ export function mainSectionsOf<L>(
       ...(product.image_ratio && product.image_ratio !== "square"
         ? { image_ratio: product.image_ratio }
         : {}),
+      // Only once switched off: a block left alone shows the assurances as before
+      ...(product.assurances === false ? { assurances: false as const } : {}),
       ...lookOf(product),
     },
     category_main: {

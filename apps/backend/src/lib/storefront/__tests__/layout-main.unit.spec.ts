@@ -206,6 +206,25 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       }).success
     ).toBe(false)
   })
+  it("prints the assurances switch only once switched off, and refuses a non-boolean", () => {
+    const product = (extra: Record<string, unknown>) =>
+      mainSectionsOf(
+        withMainSections(
+          layoutDocument.parse({
+            product: [{ id: "mainproduct", type: "product_main", ...extra }],
+          }),
+          LEFT
+        )
+      ).product_main
+    expect(product({ assurances: false })).toMatchObject({ assurances: false })
+    expect(product({ assurances: true })).not.toHaveProperty("assurances")
+    expect(product({})).not.toHaveProperty("assurances")
+    expect(
+      layoutDocument.safeParse({
+        product: [{ id: "mainproduct", type: "product_main", assurances: "no" }],
+      }).success
+    ).toBe(false)
+  })
   it("prints the one-row header over the opening only once switched on, and refuses a non-boolean", () => {
     const header = (extra: Record<string, unknown>) =>
       mainSectionsOf(

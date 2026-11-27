@@ -145,6 +145,17 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     expect(shaped("wide")).not.toHaveProperty("imageRatio")
   })
 
+  it("hides the assurances only once the shop switched them off", () => {
+    const shown = (assurances: unknown) =>
+      productMainOf({
+        ...MAIN,
+        product_main: { ...MAIN.product_main, assurances } as StoreMainSections["product_main"],
+      })
+    expect(shown(false).assurances).toBe(false)
+    expect(shown(undefined)).not.toHaveProperty("assurances")
+    expect(shown(true)).not.toHaveProperty("assurances")
+  })
+
   it("gives the catalog header its settings, the link named and the tree only with its button", () => {
     const t = (key: string) => (key === "menu.system.sale" ? "Kampanyalar" : key)
     const tree = [{ label: "Bıçaklar", path: "/bicaklar", image: null, children: [] }]

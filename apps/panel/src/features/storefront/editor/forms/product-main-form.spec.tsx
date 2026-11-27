@@ -30,4 +30,22 @@ describe("the product block's form", () => {
     fireEvent.click(screen.getByText("Kare"))
     expect(shaped).toHaveBeenLastCalledWith(SECTION)
   })
+
+  it("shows the assurances by default, saves them off, and on again as no field", () => {
+    const onChange = draw(SECTION)
+    const toggle = screen.getByRole("switch", {
+      name: /Satın alma alanının altında güvenceleri göster/,
+    })
+    expect(toggle).toBeChecked()
+    fireEvent.click(toggle)
+    expect(onChange).toHaveBeenLastCalledWith({ ...SECTION, assurances: false })
+    cleanup()
+    const hidden = draw({ ...SECTION, assurances: false })
+    const off = screen.getByRole("switch", {
+      name: /Satın alma alanının altında güvenceleri göster/,
+    })
+    expect(off).not.toBeChecked()
+    fireEvent.click(off)
+    expect(hidden).toHaveBeenLastCalledWith(SECTION)
+  })
 })

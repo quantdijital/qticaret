@@ -366,6 +366,31 @@ describe("the theme's product page", () => {
     expect(html).toContain("WhatsApp&#x27;tan sor")
   })
 
+  it("leaves the assurances out of the buy column once the shop switched them off, the card kept", () => {
+    const shipping = {
+      facts: [{ icon: "truck" as const, title: "Ücretsiz kargo", text: "1.500,00 TL üzeri" }],
+      carriers: [],
+      links: [],
+    }
+    const badges = [
+      { icon: "card" as const, title: "Güvenli ödeme", text: "Kartınız bizde saklanmaz" },
+    ]
+    const hidden = page({
+      trustBadges: badges,
+      shipping,
+      main: { id: "mainproduct", variant: "standard", assurances: false },
+    })
+    expect(hidden).not.toContain("Güvenli ödeme")
+    expect(hidden).toContain("Kargo ve teslimat</h2>")
+    expect(hidden).toContain("WhatsApp&#x27;tan sor")
+    // Left alone: shown as before
+    expect(page({ trustBadges: badges, shipping })).toContain("Güvenli ödeme")
+    // Without the card the delivery well goes too
+    expect(
+      page({ main: { id: "mainproduct", variant: "standard", assurances: false } })
+    ).not.toContain(">Teslimat ve iade</h2>")
+  })
+
   it("says when it leaves, arrives and the same-day hour in the card, the shop's delivery line nowhere else (adr/0046 Ek 2026-11-06)", () => {
     const html = page({
       trustBadges: [

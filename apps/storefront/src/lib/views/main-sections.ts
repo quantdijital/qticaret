@@ -192,6 +192,8 @@ export const productMainOf = (main: Main): ProductMainView => {
     variant: variantOf("product_main", main?.product_main.variant),
     // The square is the page as before: no field
     ...(ratio === "square" ? {} : { imageRatio: ratio }),
+    // Shown unless the shop switched them off
+    ...(main?.product_main.assurances === false ? { assurances: false as const } : {}),
     ...withLook(main?.product_main.look),
   }
 }

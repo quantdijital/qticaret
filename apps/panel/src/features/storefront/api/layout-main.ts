@@ -135,6 +135,8 @@ export interface ProductMainSection extends MainBase {
   variant: ProductMainVariant
   /** The gallery's picture shape; left out: the square. */
   image_ratio?: ProductImageRatio
+  /** The shop's assurances under the buy form; left out: shown. */
+  assurances?: boolean
   look?: SectionLook
 }
 

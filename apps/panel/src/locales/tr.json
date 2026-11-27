@@ -12760,6 +12760,10 @@
           "square": "Kare",
           "landscape": "Yatay 4:3",
           "portrait": "Dikey 3:4"
+        },
+        "assurances": {
+          "label": "Satın alma alanının altında güvenceleri göster",
+          "hint": "Sepete ekle düğmesinin altındaki güven rozetleri (ör. güvenli ödeme, garanti). Kapalıyken yalnız ürün sayfasında gizlenir; ana sayfa, sepet ve alt bilgideki rozetler yerinde kalır."
         }
       }
     },
