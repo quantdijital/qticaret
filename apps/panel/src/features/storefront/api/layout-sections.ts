@@ -13,6 +13,7 @@ import type {
   MarqueeSettings,
   PostsPanelStep,
   ProductSource,
+  ProgramPlace,
   ProgramVariant,
   RelatedProductsVariant,
   ReviewsProductImage,
@@ -413,6 +414,8 @@ export interface RelatedProductsSection extends BodySectionBase {
 export interface ProgramSection extends BodySectionBase {
   type: "program"
   title: string | null
+  /** A tab beside the description (`tab`); absent: its own section (today's). */
+  place?: ProgramPlace
   /** The server fills `timeline` on reading. */
   variant: ProgramVariant
 }

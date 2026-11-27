@@ -253,6 +253,23 @@ export function productImageRatioOf(value: unknown): ProductImageRatio {
 }
 
 /**
+ * Where a product's program stands (`program.place`, adr/0078): under the
+ * product's own block as its own section (`section`, the default, as drawn
+ * before the setting) or as a tab beside the description and the specs
+ * (`tab`). Mirrored by the backend's `PROGRAM_PLACES`.
+ */
+export const PROGRAM_PLACES = ["section", "tab"] as const
+
+export type ProgramPlace = (typeof PROGRAM_PLACES)[number]
+
+/** The program's place as a reader takes it: absent or off the list, its own section. */
+export function programPlaceOf(value: unknown): ProgramPlace {
+  return (PROGRAM_PLACES as readonly unknown[]).includes(value)
+    ? (value as ProgramPlace)
+    : "section"
+}
+
+/**
  * How a header menu item's children open from 1024 px (adr/0049 Ek
  * 2026-11-26, adr/0066 §2 "tek davranış → bölüm ayarı"), every variant's
  * setting: `list` the dropdown under the item, one column of rows (the

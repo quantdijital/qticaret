@@ -12841,7 +12841,9 @@
         }
       },
       "program": {
-        "note": "Adımlar her ürünün kendi sayfasındaki Program kartından yazılır. Programı olmayan üründe bu bölüm görünmez."
+        "note": "Adımlar her ürünün kendi sayfasındaki Program kartından yazılır. Programı olmayan üründe bu bölüm görünmez.",
+        "inTabs": "Açıklama sekmelerinde göster",
+        "inTabsHint": "Açık: program ürün sayfasında Açıklama ve Ürün özellikleri ile yan yana son sekme olur, ayrı bölüm olarak çizilmez. Kapalı: açıklamanın altında kendi bölümü."
       },
       "productMain": {
         "image_ratio": {

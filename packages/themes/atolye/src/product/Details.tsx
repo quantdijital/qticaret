@@ -1,6 +1,7 @@
 import type { ProductPageView, SpecGroupView, Translate } from "@qticaret/ui"
 import { Beside } from "./Beside"
-import { InfoTabs } from "./InfoTabs"
+import { InfoTabs, type InfoTab } from "./InfoTabs"
+import { ProgramSteps } from "../sections/Program"
 import { PROSE_INLINE, PROSE_LISTS } from "./prose"
 import { ReadMore } from "./ReadMore"
 import { ShippingCard } from "./Shipping"
@@ -47,13 +48,15 @@ const lengthOf = (view: ProductPageView) =>
  * plain paragraphs. With only one of the two there are no tabs: that one
  * under its own heading. A shipped product's "Kargo ve Teslimat" card
  * stands beside them whichever tab is open (owner 2026-11-05), alone when
- * the product has neither.
+ * the product has neither. A program the shop put among them (`program.place:
+ * tab`, adr/0078) is the last tab, its steps drawn as its section's.
  */
 export function Details({ view, t }: { view: ProductPageView; t: Translate }) {
   const groups = groupsOf(view)
   const described = view.descriptionHtml !== null || view.description.length > 0
   const card = view.shipping ? <ShippingCard shipping={view.shipping} t={t} /> : null
-  if (!described && groups.length === 0) {
+  const program = view.program ?? null
+  if (!described && groups.length === 0 && !program) {
     return card ? <div className="max-w-xl">{card}</div> : null
   }
   const words = infoWords(t, view.unshipped === true)
@@ -75,32 +78,49 @@ export function Details({ view, t }: { view: ProductPageView; t: Translate }) {
     </ReadMore>
   ) : null
   const specs = groups.length > 0 ? <Specs groups={groups} /> : null
-  if (description && specs) {
-    return (
-      <InfoTabs
-        label={words.tabs}
-        aside={card}
-        tabs={[
+  // The shop's program as a third tab (`program.place: tab`), its steps as drawn below otherwise
+  const tabs: InfoTab[] = [
+    ...(description
+      ? [
           {
             id: "aciklama",
             headingId: "urun-aciklamasi",
             title: words.description,
             content: description,
           },
-          { id: "ozellikler", headingId: "urun-ozellikleri", title: words.specs, content: specs },
-        ]}
-      />
-    )
+        ]
+      : []),
+    ...(specs
+      ? [{ id: "ozellikler", headingId: "urun-ozellikleri", title: words.specs, content: specs }]
+      : []),
+    ...(program
+      ? [
+          {
+            id: "program",
+            headingId: "urun-programi",
+            title: program.title,
+            content: (
+              <div className="w-full max-w-4xl">
+                <ProgramSteps section={program} />
+              </div>
+            ),
+          },
+        ]
+      : []),
+  ]
+  const [only] = tabs
+  if (tabs.length > 1) {
+    return <InfoTabs label={words.tabs} aside={card} tabs={tabs} />
   }
-  const [heading, title] = description
-    ? ["urun-aciklamasi", words.description]
-    : ["urun-ozellikleri", words.specs]
+  if (!only) {
+    return null
+  }
   return (
-    <section aria-labelledby={heading} className="flex min-w-0 flex-col gap-5">
-      <h2 id={heading} className="text-section">
-        {title}
+    <section aria-labelledby={only.headingId} className="flex min-w-0 flex-col gap-5">
+      <h2 id={only.headingId} className="text-section">
+        {only.title}
       </h2>
-      <Beside aside={card}>{description ?? specs}</Beside>
+      <Beside aside={card}>{only.content}</Beside>
     </section>
   )
 }
