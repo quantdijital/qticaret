@@ -66,6 +66,8 @@ export async function migrationOverview(container: Container) {
   )
   return {
     last_run: last ?? null,
+    // Where records came from (`wordpress:eski-magaza.com`): which completions apply
+    sources: tallies.sources,
     kinds,
     missing: {
       images: unpictured("product"),

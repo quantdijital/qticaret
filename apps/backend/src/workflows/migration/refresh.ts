@@ -45,7 +45,11 @@ export type RefreshKind = (typeof REFRESH_KINDS)[number]
 /** What a Shopify store or a product feed may refresh: only their products' pictures. */
 export const ANY_SOURCE_REFRESH = ["images"] as const satisfies readonly RefreshKind[]
 
-interface Outcome { counts: RunCounts; productRows: SheetCell[][]; problems: ReportProblem[] }
+interface Outcome {
+  counts: RunCounts
+  productRows: SheetCell[][]
+  problems: ReportProblem[]
+}
 
 const allCounts = (): RunCounts =>
   Object.fromEntries(

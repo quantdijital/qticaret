@@ -15,6 +15,7 @@ interface Summary {
 
 interface Overview {
   last_run: { id: string; mode: string } | null
+  sources: string[]
   kinds: Record<string, { moved: number; problems: number }>
   missing: Record<string, number>
   addresses: { total: number; undecided: number }
@@ -69,6 +70,7 @@ medusaIntegrationTestRunner({
 
       const afterPosts = await overview()
       expect(afterPosts.last_run?.mode).toBe("apply")
+      expect(afterPosts.sources).toEqual([expect.stringMatching(/^wordpress/)])
       expect(afterPosts.kinds["post"]?.moved).toBeGreaterThan(0)
       expect(afterPosts.kinds["product"]).toBeUndefined()
 

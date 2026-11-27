@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { Modules } from "@medusajs/framework/utils"
 import { z } from "@medusajs/framework/zod"
+import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
 import { XLSX_MIME, writeXlsx } from "../../../lib/sheets"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
@@ -235,7 +236,10 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
             : { kinds, added_kinds: addedKinds(values.kinds, kinds) }),
           ...(refresh.length === 0 && wordpress ? { wordpress } : {}),
           // adr/0042 Ek 2026-11-27: the problems by reason, for the panel; every row is in the report
-          problems: groupProblems(problems),
+          problems: groupProblems(problems).map((group) => ({
+            ...group,
+            message: serverErrorMessage(group.key, "tr"),
+          })),
         },
       }
     } catch (error) {
