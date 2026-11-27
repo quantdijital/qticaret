@@ -20,9 +20,10 @@ export interface Crumb {
   onSelect: () => void
 }
 
-// A crumb is a quiet link; the keyboard shows its thin outline, a pointer none (docs/18)
+// A crumb is a quiet link, as tall as the back button beside it (a row's controls are level);
+// the keyboard shows its thin outline, a pointer none (docs/18)
 const CRUMB =
-  "min-w-0 max-w-[10rem] shrink truncate rounded-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none [html:not([data-input=pointer])_&:focus-visible]:outline-2 [html:not([data-input=pointer])_&:focus-visible]:outline-ring"
+  "inline-flex h-8 min-w-0 max-w-[10rem] shrink items-center rounded-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none [html:not([data-input=pointer])_&:focus-visible]:outline-2 [html:not([data-input=pointer])_&:focus-visible]:outline-ring"
 
 /**
  * A settings panel (a section's, or the theme's), named by its title: its
@@ -76,7 +77,7 @@ export function Panel({
             {crumbs.map((crumb) => (
               <li key={crumb.label} className="flex min-w-0 shrink items-center gap-1">
                 <button type="button" className={CRUMB} onClick={crumb.onSelect}>
-                  {crumb.label}
+                  <span className="truncate">{crumb.label}</span>
                 </button>
                 <ChevronRight
                   className="size-3.5 shrink-0 text-muted-foreground"
