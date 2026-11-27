@@ -263,7 +263,16 @@ class MigrationModuleService extends MedusaService({
            WHERE url.deleted_at IS NULL AND url.entity_id = item.target_id)`,
       []
     )) as { count: number }[]
-    return { items, unpictured, unaddressed: unaddressed?.count ?? 0 }
+    const sources = (await manager.execute(
+      `SELECT DISTINCT source FROM migration_item WHERE deleted_at IS NULL ORDER BY source`,
+      []
+    )) as { source: string }[]
+    return {
+      items,
+      unpictured,
+      unaddressed: unaddressed?.count ?? 0,
+      sources: sources.map((row) => row.source),
+    }
   }
 
   /** Which of a source's orders a run kept before, by their keys. */

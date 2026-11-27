@@ -18,7 +18,7 @@ export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostShopifyMigrationType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { mode, defaults, kinds } = req.validatedBody
+  const { mode, defaults, kinds, refresh } = req.validatedBody
   const account = await req.scope
     .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
     .read("shopify")
@@ -30,6 +30,7 @@ export async function POST(
       source: "shopify",
       source_file_id: null,
       ...(kinds?.length ? { kinds } : {}),
+      ...(refresh ? { refresh: [refresh] } : {}),
       mode,
       defaults,
       requested_by: req.auth_context.actor_id || null,

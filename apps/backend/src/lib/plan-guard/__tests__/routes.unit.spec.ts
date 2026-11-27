@@ -108,6 +108,7 @@ describe("every admin write route has a plan decision", () => {
       "catalog.description_facts",
       "catalog.import",
       "content.link_rewrite",
+      "migration.addresses",
       "migration.invites",
       "migration.run",
       "migration.sitemap",

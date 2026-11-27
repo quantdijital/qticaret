@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { CATEGORY_BASE, REFRESH_KINDS } from "../../../workflows/async-job/types/migration-run"
 import { RUN_KINDS } from "../../../workflows/migration/kinds"
+import { ANY_SOURCE_REFRESH } from "../../../workflows/migration/refresh"
 import { URL_FILTERS } from "../../../workflows/migration/urls-read"
 
 /** adr/0042 Ek 2026-11-27: what a run moves; none named, everything. */
@@ -59,6 +60,8 @@ export const AdminPostShopifyMigration = z
       .nullable()
       .default(null),
     kinds: runKinds.optional(),
+    // adr/0042 Ek 2026-11-27: a store's or a feed's one completion, its products' missing pictures
+    refresh: z.enum(ANY_SOURCE_REFRESH).optional(),
   })
   .strict()
 export type AdminPostShopifyMigrationType = z.infer<typeof AdminPostShopifyMigration>

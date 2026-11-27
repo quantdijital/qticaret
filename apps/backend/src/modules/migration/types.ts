@@ -58,4 +58,6 @@ export interface ItemTallies {
   unpictured: { kind: "product" | "post"; count: number }[]
   /** Moved records with an old address the inventory does not tie to them yet. */
   unaddressed: number
+  /** The sources runs moved records from (`wordpress:eski-magaza.com`). */
+  sources: string[]
 }

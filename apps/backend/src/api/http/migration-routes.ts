@@ -152,6 +152,21 @@ export const MIGRATION_ROUTES = [
       requireReauth(),
     ],
   },
+  // adr/0042 Ek 2026-11-27: the old addresses as a list, and their 301s made again
+  {
+    matcher: "/admin/migrations/urls/export",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
+  {
+    matcher: "/admin/migrations/urls/rebuild",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(z.object({}).strict()),
+      requireReauth(),
+    ],
+  },
   {
     matcher: "/admin/migrations/urls/apply",
     methods: ["POST" as const],
