@@ -34,6 +34,7 @@ import type { ReviewsProductImage } from "./section-reviews.js"
 import type {
   CardVariant,
   FaqVariant,
+  ProgramPlace,
   ProgramVariant,
   RelatedProductsVariant,
   ReviewsVariant,
@@ -331,6 +332,8 @@ export type StoreProductSection =
       /** A dated product's program (adr/0078); needs `catalog.booking` (`section-requires`). */
       type: "program"
       title: string | null
+      /** Its own section (`section`, absent) or a tab beside the description (`tab`). */
+      place?: ProgramPlace
       /** One this build does not know reads as `timeline`. */
       variant?: ProgramVariant
     })

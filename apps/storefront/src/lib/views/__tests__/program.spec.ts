@@ -8,7 +8,7 @@ import { StoreApiError } from "@/lib/store-api/errors"
 const server = vi.hoisted(() => ({ storeGet: vi.fn(), storePublicGet: vi.fn() }))
 vi.mock("@/lib/store-api/server", () => server)
 
-const { programSteps, programView } = await import("../program")
+const { programSteps, programTabOf, programView } = await import("../program")
 
 type ProgramSection = Extract<StoreProductSection, { type: "program" }>
 
@@ -89,5 +89,28 @@ describe("programView", () => {
     expect(await programView(section(), t, { id: "prod_3", categoryIds: [] })).toBeNull()
     server.storeGet.mockRejectedValue(new StoreApiError(404, null, null))
     expect(await programView(section(), t, { id: "prod_4", categoryIds: [] })).toBeNull()
+  })
+})
+
+// The program among the description's tabs (`place: tab`); its own section by default
+describe("the program's place", () => {
+  it("marks a tab only when the shop asks for one", async () => {
+    server.storeGet.mockResolvedValue({ program: PROGRAM })
+    const own = await programView(section(), t, { id: "prod_5", categoryIds: [] })
+    expect(own).not.toHaveProperty("place")
+    const tab = await programView(section({ place: "tab" }), t, { id: "prod_6", categoryIds: [] })
+    expect(tab).toMatchObject({ place: "tab" })
+  })
+
+  it("takes a tabbed program out of the sections, and leaves its own section where it was", async () => {
+    server.storeGet.mockResolvedValue({ program: PROGRAM })
+    const text = { id: "metin1", type: "rich_text" } as never
+    const own = await programView(section(), t, { id: "prod_7", categoryIds: [] })
+    const tab = await programView(section({ place: "tab" }), t, { id: "prod_8", categoryIds: [] })
+    if (!own || !tab) {
+      throw new Error("the program is drawn")
+    }
+    expect(programTabOf([own, text])).toEqual({ sections: [own, text], program: null })
+    expect(programTabOf([text, tab])).toEqual({ sections: [text], program: tab })
   })
 })

@@ -12501,7 +12501,9 @@
         }
       },
       "program": {
-        "note": "The steps are written in each product’s own Program card. A product without a program does not show this section."
+        "note": "The steps are written in each product’s own Program card. A product without a program does not show this section.",
+        "inTabs": "Show in the description tabs",
+        "inTabsHint": "On: the program is the last tab beside Description and Product details on the product page, not drawn as its own section. Off: its own section below the description."
       },
       "productMain": {
         "image_ratio": {

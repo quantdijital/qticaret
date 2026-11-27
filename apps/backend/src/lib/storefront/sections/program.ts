@@ -5,15 +5,24 @@ import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
 
 /**
+ * Where the program stands (`@qticaret/types`' `PROGRAM_PLACES`): its own
+ * section (`section`, absent: as drawn before the setting) or a tab beside
+ * the product's description and specs (`tab`).
+ */
+export const PROGRAM_PLACES = ["section", "tab"] as const
+
+/**
  * A dated product's program on its page (adr/0078): the steps staff wrote
  * on the product (`bookable.program`), drawn below the product's own
  * block. The section holds only its title and how it is drawn; a product
  * without a program shows nothing. Needs `catalog.booking` (`requires.ts`).
+ * `place`: its own section (absent) or a tab beside the description.
  */
 const common = {
   ...bodyFields,
   type: z.literal("program"),
   title,
+  place: z.enum(PROGRAM_PLACES).optional(),
 }
 
 /** The steps down a line, each open. */

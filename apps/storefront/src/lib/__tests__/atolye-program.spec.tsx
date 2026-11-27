@@ -3,10 +3,18 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { HomeSectionView, ProgramSectionView, ProgramStepView } from "@qticaret/ui"
+import { renderToStaticMarkup } from "react-dom/server"
+import type {
+  HomeSectionView,
+  ProductPageView,
+  ProgramSectionView,
+  ProgramStepView,
+} from "@qticaret/ui"
+import { t } from "@/lib/i18n"
 import { renderPage } from "@/test/theme-render"
 // The theme's own part: it exports pages, not this
 import { ProgramAccordion } from "../../../../../packages/themes/atolye/src/sections/ProgramAccordion"
+import { Details } from "../../../../../packages/themes/atolye/src/product/Details"
 
 /**
  * A dated product's program in the Grafit theme (adr/0078): `timeline`
@@ -69,6 +77,41 @@ describe("the program section, timeline", () => {
     // Nothing opens or closes: no buttons, nothing hidden
     expect(html).not.toContain("aria-expanded")
     expect(html).not.toContain(' hidden=""')
+  })
+})
+
+describe("the program among the description's tabs (place: tab)", () => {
+  const details = (extra: Partial<ProductPageView>) =>
+    renderToStaticMarkup(
+      <Details
+        view={
+          {
+            descriptionHtml: null,
+            description: ["Kapadokya turu."],
+            specs: [{ label: "Süre", value: "3 gün", highlight: false }],
+            specGroups: [],
+            shipping: null,
+            unshipped: true,
+            ...extra,
+          } as unknown as ProductPageView
+        }
+        t={t}
+      />
+    )
+
+  it("is the last tab after the description and the specs, its steps in its panel", () => {
+    const html = details({ program: program({ place: "tab", title: "Tur programı" }) })
+    const tabs = [...html.matchAll(/role="tab"[^>]*>([^<]*)</g)].map((match) => match[1])
+    expect(tabs).toHaveLength(3)
+    expect(tabs[2]).toBe("Tur programı")
+    expect(html).toContain('id="program"')
+    expect(html).toContain("Durak 3")
+  })
+
+  it("draws no third tab without a program, and a tab of its own beside a lone description", () => {
+    expect([...details({}).matchAll(/role="tab"/g)]).toHaveLength(2)
+    const lone = details({ specs: [], program: program({ place: "tab" }) })
+    expect([...lone.matchAll(/role="tab"/g)]).toHaveLength(2)
   })
 })
 

@@ -338,6 +338,7 @@
     {
       "id": "rotaprogram",
       "type": "program",
+      "place": "tab",
       "visible": true,
       "starts_at": null,
       "ends_at": null,

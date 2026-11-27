@@ -18,6 +18,7 @@ import type {
   CardSoldOutRow,
 } from "@qticaret/types"
 import type { HomeSectionView } from "./content-views"
+import type { ProgramSectionView } from "./program-views"
 import type { ProductVideoView } from "./video-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -310,6 +311,12 @@ export interface ProductPageView {
   maxQuantity?: number | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
+  /**
+   * The product's program as a tab beside the description and the specs
+   * (`program.place: tab`, adr/0078); then it is not among `sections`.
+   * Absent or null: no such tab (today's page).
+   */
+  program?: ProgramSectionView | null
   /** The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7); absent: today's. */
   main?: ProductMainView
   /**

@@ -1,4 +1,4 @@
-import type { ProgramTag, ProgramVariant } from "@qticaret/types"
+import type { ProgramPlace, ProgramTag, ProgramVariant } from "@qticaret/types"
 import type { ImageView } from "./views"
 
 /**
@@ -31,4 +31,6 @@ export interface ProgramSectionView {
    */
   variant: ProgramVariant
   steps: ProgramStepView[]
+  /** A tab beside the description (`tab`); absent: its own section. */
+  place?: ProgramPlace
 }
