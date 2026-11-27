@@ -76,8 +76,9 @@ medusaIntegrationTestRunner({
 
     it("answers the old site's own addresses with one 301, or a 410 where nothing fits", async () => {
       const applied = await wp.run("apply")
-      // The explicit entries: the subcategory's short path, the three pictures and the cover
-      expect(applied.job.result_summary).toMatchObject({ links: { short_paths: 1, files: 4 } })
+      // The explicit entries: the subcategory's short path, the three pictures, the cover and
+      // the picture in the post's text (adr/0042 Ek 2026-11-27)
+      expect(applied.job.result_summary).toMatchObject({ links: { short_paths: 1, files: 5 } })
       const category = await location("/mutfak/tavalar")
       expect(category).toMatch(/^\/kategori\//)
 
