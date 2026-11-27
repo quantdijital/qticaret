@@ -472,7 +472,7 @@
       "back_to_top_side": "right",
       "back_to_top_shape": "round",
       "back_to_top_mobile": true,
-      "ground": "page",
+      "ground": "well",
       "badge_style": "muted",
       "legal_place": "bottom_line",
       "bottom_badges": true,
