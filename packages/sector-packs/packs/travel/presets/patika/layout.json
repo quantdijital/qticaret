@@ -60,8 +60,8 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-kapadokya-balon.webp",
-        "alt": "Gün doğumunda Kapadokya vadileri ve peri bacaları üzerinde süzülen sıcak hava balonları"
+        "$image": "images/bant-oludeniz.webp",
+        "alt": "Çamların ve çiçekli dalların arasından Ölüdeniz lagünü ve kumsal"
       },
       "action": "both",
       "search_position": "overlap",
@@ -370,8 +370,8 @@
       "slides": [
         {
           "image": {
-            "$image": "images/rota-oludeniz.webp",
-            "alt": "Yukarıdan bakışla Ölüdeniz lagünü, turkuaz su ve kumsal"
+            "$image": "images/bant-yaz.webp",
+            "alt": "Yamaç paraşütünden Ölüdeniz lagünü, Belcekız kumsalı ve çam ormanları"
           },
           "mobile_image": null,
           "heading": "Yaz kalkışları açıldı",
@@ -472,7 +472,7 @@
       "back_to_top_side": "right",
       "back_to_top_shape": "round",
       "back_to_top_mobile": true,
-      "ground": "page",
+      "ground": "well",
       "badge_style": "muted",
       "legal_place": "bottom_line",
       "bottom_badges": true,
