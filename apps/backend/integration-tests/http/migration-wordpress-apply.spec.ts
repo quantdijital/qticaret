@@ -97,7 +97,14 @@ medusaIntegrationTestRunner({
       // Its three pictures stored here, the main one its thumbnail, the old alt text kept
       expect(pan?.images).toHaveLength(3)
       expect(pan?.thumbnail?.startsWith(wp.site())).toBe(false)
-      expect(wp.pictures.sort()).toEqual(["kapak.png", "kirmizi.png", "tava-yan.png", "tava.png"])
+      // And the picture in the post's text (adr/0042 Ek 2026-11-27)
+      expect(wp.pictures.sort()).toEqual([
+        "kapak.png",
+        "kirmizi.png",
+        "tava-yan.png",
+        "tava.png",
+        "x.png",
+      ])
       // The red variation's own picture shows with its variant only; the others with every one
       expect(
         pan?.images.map((image) => (image.variants ?? []).map((variant) => variant.sku).join())
@@ -248,7 +255,8 @@ medusaIntegrationTestRunner({
       })
       expect(await content.listContentEntries({ kind: "post" })).toHaveLength(1)
       expect(await content.listContentTerms({})).toHaveLength(3)
-      expect(wp.pictures).toHaveLength(4)
+      // The products' four files and the post's picture, each fetched once
+      expect(wp.pictures).toHaveLength(5)
     })
   },
 })

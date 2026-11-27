@@ -29,9 +29,10 @@ medusaIntegrationTestRunner({
 
       expect(applied.counts).toMatchObject({
         product: { created: 4, failed: 0 },
-        image: { read: 3, created: 0, skipped: 3 },
+        // The products' three and the picture in the post's text (adr/0042 Ek 2026-11-27)
+        image: { read: 4, created: 0, skipped: 4 },
       })
-      expect(items).toHaveLength(3)
+      expect(items).toHaveLength(4)
       expect(
         items.every(
           (item) => item.status === "skipped" && item.error_code === "migration.image_plan_limit"
