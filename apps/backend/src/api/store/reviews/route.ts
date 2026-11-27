@@ -54,7 +54,8 @@ export async function GET(
       page.shopIds.length === 0
         ? []
         : await service.listProductReviews(
-            { id: page.shopIds },
+            // Still approved and shown: the ids were read a moment ago
+            { id: page.shopIds, status: "approved", product_id: [...titles.keys()] },
             { select: FIELDS, order: { created_at: "DESC", id: "DESC" }, take: null }
           )
     count = page.count
