@@ -83,6 +83,7 @@ describe("theme section", () => {
         breadcrumb_current: "show",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {
@@ -338,6 +339,7 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
         breadcrumb_current: "show",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       // and before the search form (adr/0077): its defaults
       search_form: SEARCH_FORM_DEFAULTS,
@@ -352,6 +354,7 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
         breadcrumb_current: "hide",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       search_form: { ...SEARCH_FORM_DEFAULTS, category_style: "tabs" },
       section_spacing: "compact",

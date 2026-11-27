@@ -10636,7 +10636,11 @@
             "label": "Ürün sayısında birim kelimesi",
             "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs."
           },
-          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime"
+          "all_title": {
+            "label": "Tüm ürünler başlığı",
+            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar."
+          },
+          "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime başlık"
         },
         "searchFormTitle": "Arama kutusu",
         "searchFormHint": "Mağazanın tek arama kutusunun alanları: Arama kutusu bölümünde ve arama sayfasının üstünde aynı görünür.",

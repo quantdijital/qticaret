@@ -79,6 +79,7 @@ describe("themeSettings", () => {
         breadcrumb_current: "hide",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       search_form: {
         attribute_key: "gidilecek_yer",
@@ -157,6 +158,7 @@ describe("themeSettings", () => {
         breadcrumb_current: "show",
         crumbs_place: "above",
         count_word: null,
+        all_title: null,
       },
       // adr/0077 §1: every search box field on, no attribute, categories in a drop-down
       search_form: {

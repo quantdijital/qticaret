@@ -36,6 +36,7 @@ interface Frame {
       breadcrumb_current: string
       crumbs_place: string
       count_word: string | null
+      all_title: string | null
     }
     search_form: Record<string, unknown>
   }
@@ -63,6 +64,7 @@ const LISTING_PAGE = {
   breadcrumb_current: "show",
   crumbs_place: "above",
   count_word: null,
+  all_title: null,
 }
 
 /** The search box's fields at their defaults (adr/0077 §1). */
