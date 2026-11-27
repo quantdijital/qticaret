@@ -556,21 +556,7 @@
                         "content": [
                           {
                             "type": "text",
-                            "text": "Keşfet"
-                          },
-                          {
-                            "type": "hardBreak"
-                          },
-                          {
-                            "type": "text",
-                            "text": "Hayal et"
-                          },
-                          {
-                            "type": "hardBreak"
-                          },
-                          {
-                            "type": "text",
-                            "text": "Yola çık"
+                            "text": "Keşfet, hayal et, yola çık."
                           }
                         ]
                       }
