@@ -185,6 +185,11 @@
   .gf-pay [data-mark="amex"] img {
     height: 1.5rem;
   }
+  /* The drawn transfer mark is a wide wordmark: lower, and given the room to read */
+  .gf-pay [data-mark="bank_transfer"] img {
+    max-width: 7rem;
+    height: 0.9375rem;
+  }
   .gf-pay [data-mark="troy"] img,
   .gf-pay [data-mark="paytr"] img,
   .gf-pay [data-mark="iyzico"] img {

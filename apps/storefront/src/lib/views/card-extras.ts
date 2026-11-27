@@ -230,7 +230,7 @@ export function customerPhotos(
  */
 const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height: number }>> = {
   visa: { file: "visa.png", width: 208, height: 68 },
-  bank_transfer: { file: "havale.svg", width: 262, height: 64 },
+  bank_transfer: { file: "havale.svg", width: 268, height: 40 },
   mastercard: { file: "mastercard.svg", width: 41, height: 26 },
   troy: { file: "troy.svg", width: 298, height: 137 },
   amex: { file: "amex.svg", width: 24, height: 24 },
