@@ -3978,12 +3978,7 @@
         "valuesPlaceholder": "Type a value and press Enter: S, M, L",
         "removeValue": "Remove {{value}}",
         "remove": "Remove option",
-        "suggestions": [
-          "Size",
-          "Colour",
-          "Dimensions",
-          "Material"
-        ]
+        "suggestions": ["Size", "Colour", "Dimensions", "Material"]
       },
       "pricingCard": "Price and stock",
       "pricingHint": "Prices include VAT.",
