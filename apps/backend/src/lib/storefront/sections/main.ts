@@ -210,6 +210,13 @@ const headerCommon = {
    * stores as it did; read by that variant only.
    */
   over_cover: z.boolean().optional(),
+  /**
+   * The top strip above the header (the announcement bar's lines, the top
+   * links and the phone; the header's scrolling strip under it): false, none
+   * of it drawn on any width. Absent until switched off, so a bar saved
+   * before it reads and stores as it did, the strip drawn.
+   */
+  top_strip: z.boolean().optional(),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

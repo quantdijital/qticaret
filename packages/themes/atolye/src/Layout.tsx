@@ -32,7 +32,8 @@ import { WhatsAppClear } from "./frame/WhatsAppClear"
 /**
  * The frame every page shares (docs/tema/yon-2026-11-05.md § Frame): a
  * skip link, the graphite announcement bar, the shop's scrolling strip
- * when its header group has one (adr/0049 Ek 2026-11-14 §4.1), the sticky two-row header,
+ * when its header group has one (adr/0049 Ek 2026-11-14 §4.1), both
+ * away when the shop turned its top strip off, the sticky two-row header,
  * the page, the graphite mast footer, and under 1024 px the bottom bar.
  * The WhatsApp button stays away from the checkout and the cart, and
  * while the cookie question waits. `ScrollCue` tells the stylesheet
@@ -103,30 +104,34 @@ export function Layout({
     shop.bottomNav.current !== "cart" &&
     shop.cookieBanner?.due !== true
   // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
+  // The shop turned its top strip off: neither the bar above the header nor its scrolling strip
+  const topStrip = shop.headerBar?.topStripOff !== true
   const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
     <div className="flex min-h-dvh flex-col" {...marks}>
       <LayerMarks marks={layers}>
         {skip}
-        <Announcement
-          lines={shop.announcements}
-          settings={shop.announcementSettings}
-          button={shop.announcementLink}
-          mark={shop.announcementMark}
-          links={catalog?.links || inline ? [] : shop.topLinks}
-          contact={
-            catalog?.phone || inline
-              ? { ...shop.contact, phone: null, phoneHref: null }
-              : shop.contact
-          }
-          words={{
-            announcements: t("nav.announcements"),
-            links: t("nav.top_links"),
-            pause: t("nav.announcements_pause"),
-            play: t("nav.announcements_play"),
-          }}
-        />
-        {shop.marquee && (
+        {topStrip && (
+          <Announcement
+            lines={shop.announcements}
+            settings={shop.announcementSettings}
+            button={shop.announcementLink}
+            mark={shop.announcementMark}
+            links={catalog?.links || inline ? [] : shop.topLinks}
+            contact={
+              catalog?.phone || inline
+                ? { ...shop.contact, phone: null, phoneHref: null }
+                : shop.contact
+            }
+            words={{
+              announcements: t("nav.announcements"),
+              links: t("nav.top_links"),
+              pause: t("nav.announcements_pause"),
+              play: t("nav.announcements_play"),
+            }}
+          />
+        )}
+        {topStrip && shop.marquee && (
           <Marquee
             section={shop.marquee}
             t={t}

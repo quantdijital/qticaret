@@ -90,6 +90,8 @@ export function headerBarOf(
     ...(headerToolsStyleOf(bar.tools_style) === "plain" ? { toolsStyle: "plain" as const } : {}),
     // The one-row header over the opening only once chosen: a bar without it is the view it was
     ...(variant === "inline" && bar.over_cover === true ? { overCover: true as const } : {}),
+    // The top strip off only once switched off: a bar without it is the view it was
+    ...(bar.top_strip === false ? { topStripOff: true as const } : {}),
 
     // The wide panel only once chosen: a bar without it is the view it was (the list)
     ...(headerSubmenuStyleOf(bar.submenu_style) === "mega"

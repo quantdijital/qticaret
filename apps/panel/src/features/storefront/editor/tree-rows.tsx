@@ -8,17 +8,36 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 
 /** The page tree's own rows (`SectionTree`): its groups, the frame's parts edited elsewhere, the theme's panels. */
 
-export function TreeGroup({ title, children }: { title: string; children: ReactNode }) {
+export function TreeGroup({
+  title,
+  action,
+  children,
+}: {
+  title: string
+  /** A button on the heading's line (the top strip's eye). */
+  action?: ReactNode
+  children: ReactNode
+}) {
   // Named by its heading: a screen reader (and a test) can tell the header's rows from the page's
   const heading = useId()
+  const name = (
+    <h2
+      id={heading}
+      className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+    >
+      {title}
+    </h2>
+  )
   return (
     <div role="group" aria-labelledby={heading} className="flex flex-col gap-1">
-      <h2
-        id={heading}
-        className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
-      >
-        {title}
-      </h2>
+      {action ? (
+        <div className="flex items-center justify-between gap-2 pr-1">
+          {name}
+          {action}
+        </div>
+      ) : (
+        name
+      )}
       {children}
     </div>
   )

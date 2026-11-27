@@ -27,14 +27,19 @@ const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors durati
  * note, its top links while they stand there, "Hesabım" beside the menu
  * bar's icons), whether it says the top links anywhere (the strip or the
  * menu bar's end, `links`: the bar above then leaves them out) and the
- * phone beside its search.
+ * phone beside its search. The shop's top strip off (`topStripOff`) draws
+ * no strip here, as no bar above.
  */
 export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
   const stripLinks = catalog.topLinksPlace !== "bar" && shop.topLinks.length > 0
   const stripAccount = catalog.accountText && catalog.toolsPlace !== "row"
   const stripNote = catalog.stripNote ?? null
   return {
-    strip: catalog.utilityBar && (stripLinks || stripAccount || stripNote !== null),
+    // The shop's top strip off (`topStripOff`) takes this strip with it, as the bar above
+    strip:
+      shop.headerBar?.topStripOff !== true &&
+      catalog.utilityBar &&
+      (stripLinks || stripAccount || stripNote !== null),
     stripLinks,
     stripAccount,
     stripNote,

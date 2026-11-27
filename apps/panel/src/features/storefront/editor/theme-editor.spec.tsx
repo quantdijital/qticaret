@@ -70,7 +70,8 @@ describe("ThemeEditor", () => {
       "Blog yazıları",
     ])
     expect(within(tree).getByRole("button", { name: "Kargo bedava" })).toBeInTheDocument()
-    expect(within(tree).getAllByRole("link", { name: "Mağaza profili" })).toHaveLength(2)
+    // The logo, the top strip's phone and the footer's contact details
+    expect(within(tree).getAllByRole("link", { name: "Mağaza profili" })).toHaveLength(3)
     expect(await frame()).toHaveAttribute(
       "src",
       expect.stringMatching(/^http:\/\/localhost:8000\/onizleme\/sfl_1$/)

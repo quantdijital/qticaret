@@ -9724,6 +9724,14 @@
         "pages": "Taslaktaki sayfalar",
         "pageLive": "{{title}} sayfasını da yayına al"
       },
+      "topStrip": {
+        "title": "Üst şerit",
+        "hide": "Üst şeridi gizle",
+        "show": "Üst şeridi göster",
+        "off": "Üst şerit kapalı: duyurular, kayan yazı, üst bağlantılar ve telefon hiçbir ekranda çizilmez.",
+        "links": "Üst bağlantılar ve telefon",
+        "catalog": "Katalog üst bilgisinin ince şeridi"
+      },
       "tree": {
         "label": "Sayfanın bölümleri",
         "header": "Üst bilgi",
@@ -9738,6 +9746,7 @@
           "product": "Ürün sayfalarına eklenmiş bölüm yok; ürünün kendi bilgileri görünür."
         },
         "logo": "Logo ve menü",
+        "headerBar": "Üst bilgi düzeni",
         "columns": "Bağlantı sütunları",
         "contact": "İletişim ve yasal bilgiler",
         "storeProfile": "Mağaza profili",

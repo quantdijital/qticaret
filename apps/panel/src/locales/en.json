@@ -9724,6 +9724,14 @@
         "pages": "Pages in draft",
         "pageLive": "Also put the {{title}} page live"
       },
+      "topStrip": {
+        "title": "Top strip",
+        "hide": "Hide the top strip",
+        "show": "Show the top strip",
+        "off": "Top strip off: announcements, scrolling strip, top links and phone are drawn on no screen.",
+        "links": "Top links and phone",
+        "catalog": "Catalog header's thin strip"
+      },
       "tree": {
         "label": "The page's sections",
         "header": "Header",
@@ -9738,6 +9746,7 @@
           "product": "No sections added to the product pages; the product's own details show."
         },
         "logo": "Logo and menu",
+        "headerBar": "Header layout",
         "columns": "Link columns",
         "contact": "Contact and legal details",
         "storeProfile": "Store profile",

@@ -197,6 +197,7 @@ function headerBar(bar: Section | undefined, theme: Record<string, unknown>) {
     ...(bar["tools_style"] === undefined ? {} : { tools_style: bar["tools_style"] }),
     // Over the opening only once the preset says so (`mainSectionsOf`)
     ...(bar["over_cover"] === true ? { over_cover: true } : {}),
+    ...(bar["top_strip"] === false ? { top_strip: false } : {}),
 
     ...(bar["submenu_style"] === undefined ? {} : { submenu_style: bar["submenu_style"] }),
     ...(bar["variant"] === "catalog"
