@@ -17,6 +17,7 @@ import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ContactForm, FactsNote } from "./forms/page-text-fields"
 import { StripGalleryForm } from "./forms/strip-gallery-form"
+import { TopSliderForm } from "./forms/top-slider-form"
 import { StatsForm } from "./forms/stats-form"
 import { StepsForm } from "./forms/steps-form"
 import { SearchBoxForm } from "./forms/search-box-form"
@@ -70,6 +71,8 @@ function FormBody({ section, problems, onChange, badges, onBadges }: FormOfProps
   switch (section.type) {
     case "announcement_bar":
       return <AnnouncementForm section={section} {...props} />
+    case "top_slider":
+      return <TopSliderForm section={section} {...props} />
     case "hero":
       return <HeroForm section={section} {...props} />
     case "hero_slider":

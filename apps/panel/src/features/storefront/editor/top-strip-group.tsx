@@ -12,10 +12,11 @@ const S = "storefront.editor.topStrip"
 
 /**
  * The top strip in the tree (owner's decision 2026-11-27, adr/0066 Ek): its
- * own sections above the header, never the header's. The strip in one of
- * its designs (`announcement_bar`, dark bar or light strip) and the
- * scrolling strip, each opened, hidden and removed on its own row; the
- * heading's eye hides or shows both at once. No strip section: nothing is
+ * own sections above the header, never the header's. The image slider
+ * (`top_slider`), the text strip in one of its designs (`announcement_bar`,
+ * dark bar or light strip) and the scrolling strip, at most one of each,
+ * in that fixed order (the storefront draws them so), each opened, hidden
+ * and removed on its own row; the heading's eye hides or shows them all. No strip section: nothing is
  * drawn above the header, whatever the header's variant.
  */
 export function TopStripGroup({
@@ -33,11 +34,13 @@ export function TopStripGroup({
 }) {
   const { t } = useTranslation()
   // The header draws its bar first, its strip under it (adr/0049 Ek 2026-11-14 §4.1)
+  const slider = doc.header.find((section) => section.type === "top_slider")
   const bar = doc.header.find((section) => section.type === "announcement_bar")
   const strip = doc.header.find((section) => section.type === "marquee")
   // A strip in the header shows on every page: not while a page already has its two
   const stripFull = anyPageMarqueesFull(doc)
-  const parts = [bar, strip].filter((section) => section !== undefined)
+  // Top to bottom as the storefront draws them: the pictures, the text strip, the scrolling strip
+  const parts = [slider, bar, strip].filter((section) => section !== undefined)
   const on = parts.some((section) => section.visible)
   // Each part switched to the heading's state: one step each, as its own eye would
   const toggle =
@@ -69,7 +72,7 @@ export function TopStripGroup({
         {parts.map((section) => row(section))}
         <AddRow
           label={t(`${S}.add`)}
-          full={bar && (strip || stripFull) ? t(`${S}.full`) : null}
+          full={slider && bar && (strip || stripFull) ? t(`${S}.full`) : null}
           onClick={onAdd}
         />
       </ul>

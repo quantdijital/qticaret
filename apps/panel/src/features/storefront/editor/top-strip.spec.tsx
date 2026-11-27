@@ -64,14 +64,18 @@ describe("the top strip in the editor's tree (owner 2026-11-27)", () => {
     const strip = within(tree).getByRole("group", { name: "Üst şerit" })
     await user.click(within(strip).getByRole("button", { name: "Üst şeride ekle" }))
     const card = (name: string) => screen.getByRole("button", { name: new RegExp(`^${name}`) })
-    // A strip is there: its looks are changed in its settings, not added again
-    for (const name of ["Duyuru şeridi", "Açık şerit", "Kaydırıcı şerit"]) {
+    // A text strip is there: its other look is changed in its settings, not added again
+    for (const name of ["Duyuru şeridi", "Açık şerit"]) {
       expect(card(name)).toBeDisabled()
       expect(card(name)).toHaveTextContent("Zaten ekli")
     }
-    await user.click(card("Kayan yazı"))
-    // Added, its settings opened as a picked section's are
-    expect(await screen.findByRole("region", { name: "Kayan yazı" })).toBeVisible()
+    // The image slider is its own section: added empty, its form asking for a picture
+    await user.click(card("Kaydırıcı şerit"))
+    expect(await screen.findByRole("region", { name: "Görsel kaydırıcı" })).toBeVisible()
+    expect(screen.getByText(/Henüz görsel yok/)).toBeVisible()
+    expect(
+      screen.getAllByRole("button", { name: /Görsel ekle|Kitaplıktan seç/ }).length
+    ).toBeGreaterThan(0)
   })
 
   it("hides the whole strip from its heading's eye and shows it again", async () => {

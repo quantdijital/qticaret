@@ -26,3 +26,25 @@ describe("the top strip's links", () => {
     expect(headerLinked(header({ line_links: [shop] }))).toHaveLength(1)
   })
 })
+
+describe("the top image slider's links", () => {
+  it("holds each slide's link and is read for links only with one", () => {
+    const image = { url: "/static/a.webp", alt: "Kampanya" }
+    const doc = layoutDocument.parse({
+      header: [
+        {
+          id: "kaydirici01",
+          type: "top_slider",
+          slides: [{ image }, { image, link: category }],
+        },
+      ],
+    })
+    const [slider] = doc.header
+    expect(slider && linksOf(slider)).toEqual([category])
+    expect(headerLinked(doc)).toHaveLength(1)
+    const bare = layoutDocument.parse({
+      header: [{ id: "kaydirici01", type: "top_slider", slides: [{ image }] }],
+    })
+    expect(headerLinked(bare)).toEqual([])
+  })
+})

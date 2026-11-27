@@ -7,6 +7,8 @@ import {
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
+  TOP_SLIDER_SETTINGS,
+  TOP_SLIDER_SETTING_NAMES,
   newsletterHasNote,
 } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
@@ -107,6 +109,8 @@ const C = `${E}.heroCatalog`
 const PB = `${E}.priceBands`
 
 /** One entry: its label and term keys (`<label>Term` beside a flat label), its steps' names. */
+const T = "storefront.editor.topSlider"
+
 const entry = (
   section: AnySection,
   field: ContentField,
@@ -391,6 +395,19 @@ export function contentFields(section: AnySection): RegistryField[] {
     // The card's lift (adr/0077 §10 Ek); the strip and the lined boxes have none
     case "trust_badges":
       return iconFields(section, CONTENT_IDS.content)
+    // The top image slider's steps and switches (owner 2026-11-27), in its form
+    case "top_slider":
+      return TOP_SLIDER_SETTING_NAMES.map((name) => {
+        const steps: readonly string[] = TOP_SLIDER_SETTINGS[name]
+        return {
+          key: `top_slider.${name}`,
+          group: "content" as const,
+          label: `${T}.${name}.label`,
+          term: `${T}.${name}.term`,
+          options: steps.map((step) => `${T}.${name}.${step}`),
+          target: `${section.id}-top-slider-${name}`,
+        }
+      })
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":

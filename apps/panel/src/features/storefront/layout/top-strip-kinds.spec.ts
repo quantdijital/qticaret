@@ -1,29 +1,29 @@
 import { describe, expect, it } from "vitest"
-import { ANNOUNCEMENT_DEFAULTS } from "@qticaret/types"
+import { ANNOUNCEMENT_DEFAULTS, TOP_SLIDER_DEFAULTS } from "@qticaret/types"
 import { newTopStrip } from "./top-strip-kinds"
 
-const LINES = ["Kargo bedava", "Özenle paketlenir"]
-
-/** The top strip chooser's cards (owner 2026-11-27): each a strip set as its card shows. */
+/** The top strip chooser's cards (owner 2026-11-27): each its own design. */
 describe("a new top strip by its card", () => {
-  it("starts the dark and light strips as a new strip, one line to write", () => {
-    expect(newTopStrip("graphite", "serit00001", LINES)).toMatchObject({
+  it("starts the dark and light text strips as a new strip, one line to write", () => {
+    expect(newTopStrip("graphite", "serit00001")).toMatchObject({
+      type: "announcement_bar",
       variant: "graphite",
       lines: [""],
       ...ANNOUNCEMENT_DEFAULTS,
     })
-    expect(newTopStrip("light", "serit00001", LINES)).toMatchObject({ variant: "light" })
+    expect(newTopStrip("light", "serit00001")).toMatchObject({ variant: "light" })
   })
 
-  it("starts the slider turning its sample lines one at a time, sliding, with arrows", () => {
-    expect(newTopStrip("slider", "serit00001", LINES)).toMatchObject({
-      type: "announcement_bar",
-      variant: "graphite",
-      lines: LINES,
-      mode: "rotate",
-      transition: "slide",
-      arrows: "on",
+  it("starts the image slider empty, its own section, and the scrolling strip", () => {
+    expect(newTopStrip("slider", "kaydirici1")).toEqual({
+      id: "kaydirici1",
+      type: "top_slider",
+      visible: true,
+      starts_at: null,
+      ends_at: null,
+      slides: [],
+      ...TOP_SLIDER_DEFAULTS,
     })
-    expect(newTopStrip("marquee", "kayan00001", LINES)).toMatchObject({ type: "marquee" })
+    expect(newTopStrip("marquee", "kayan00001")).toMatchObject({ type: "marquee" })
   })
 })

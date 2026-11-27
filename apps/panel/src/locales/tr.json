@@ -9789,6 +9789,56 @@
         "pages": "Taslaktaki sayfalar",
         "pageLive": "{{title}} sayfasını da yayına al"
       },
+      "topSlider": {
+        "empty": "Henüz görsel yok: vitrinde bu şerit görsel ekleyince görünür.",
+        "slide": "{{number}}. görsel",
+        "image": "Görsel",
+        "imageHint": "Şeridin tam genişliğinde, seçtiğiniz yükseklikte kırpılır; geniş ve yatay bir görsel seçin (ör. 1920 × 120).",
+        "mobileImage": "Telefon görseli",
+        "mobileHint": "İsteğe bağlı: 640 pikselin altında bunun yerine gösterilir.",
+        "link": "Bağlantı",
+        "linkHint": "İsteğe bağlı: görsele tıklayınca gidilecek sayfa.",
+        "add": "Görsel ekle",
+        "addHint": "En çok {{max}} görsel; sırayla tek tek gösterilir.",
+        "full": "En çok {{max}} görsel eklenebilir.",
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "thin": "İnce",
+          "medium": "Orta",
+          "tall": "Yüksek",
+          "hint": "Geniş ekranda 48, 80 ya da 120 piksel; telefonda biraz daha alçak."
+        },
+        "interval": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı",
+          "hint": "Her görselin ekranda kalma süresi: 8, 6 ya da 4 saniye. Hareket azaltılmışsa kendiliğinden dönmez."
+        },
+        "transition": {
+          "label": "Geçiş biçimi",
+          "term": "transition",
+          "slide": "Kayarak",
+          "fade": "Solarak",
+          "hint": "Kayarak: yenisi yandan gelir. Solarak: yerinde solup yenisi belirir."
+        },
+        "arrows": {
+          "label": "Önceki / sonraki okları",
+          "term": "arrows",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Görselin iki yanında küçük oklar; ziyaretçi elle geçer."
+        },
+        "dots": {
+          "label": "Noktaları göster",
+          "term": "dots",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Görselin altında her görsel için bir nokta."
+        }
+      },
       "topStrip": {
         "title": "Üst şerit",
         "hide": "Üst şeridi gizle",
@@ -9800,7 +9850,7 @@
           "title": "Üst şeride ekle",
           "description": "Üst bilginin üstüne bir şerit ya da kayan yazı ekleyin. Şeridin tasarımını ve hareketini sonra ayarlarından değiştirebilirsiniz.",
           "taken": "Zaten ekli.",
-          "barTaken": "Zaten ekli: üst şeritte bir şerit var; tasarımını ve kaydırıcıyı onun ayarlarından değiştirin.",
+          "barTaken": "Zaten ekli: üst şeritte bir yazı şeridi var; koyu ya da açık tasarımını onun ayarlarından değiştirin.",
           "graphite": {
             "name": "Duyuru şeridi",
             "description": "Koyu şerit: duyurunuz, yanında küçük bir düğme, geniş ekranda üst bağlantılar ve telefon."
@@ -9811,7 +9861,7 @@
           },
           "slider": {
             "name": "Kaydırıcı şerit",
-            "description": "Duyurular tek tek kayarak değişir; okları ve her duyurunun kendi bağlantısı vardır."
+            "description": "Tam genişlikte görselleriniz, tek tek kayarak; oklu, her görsel isteğe bağlı bir bağlantı."
           },
           "marquee": {
             "name": "Kayan yazı",
@@ -9826,7 +9876,7 @@
         "phoneLabel": "Telefon",
         "phoneHint": "Mağaza profilinizdeki telefon, 1024 px ve üstünde.",
         "accountLabel": "“Hesabım” yazısı",
-        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır. Kaydırıcı (duyuruların tek tek dönmesi) koyu tasarımdadır: Stil'de tasarımı «Koyu şerit» yapın."
+        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır. Duyuruların sırayla dönmesi koyu tasarımdadır: Stil'de tasarımı «Koyu şerit» yapın."
       },
       "tree": {
         "label": "Sayfanın bölümleri",
@@ -9905,6 +9955,10 @@
         "none": "Aramanızla eşleşen bölüm yok."
       },
       "types": {
+        "top_slider": {
+          "name": "Görsel kaydırıcı",
+          "description": "Üst bilginin üstünde tam genişlikte görselleriniz, tek tek kayarak; her görsel isteğe bağlı bir bağlantı."
+        },
         "announcement_bar": {
           "name": "Üst şerit",
           "description": "Üst bilginin üstündeki ince şerit: duyurularınız, üst bağlantılarınız ve telefonunuz. Koyu ya da açık biçimde; üst bilgiden ayrıdır, gizlenince hiçbir şey çizilmez."
@@ -10537,14 +10591,14 @@
         "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
         "lineLink": "{{number}}. duyurunun bağlantısı",
         "addSecond": "İkinci duyuruyu ekle",
-        "sliderNeedsTwo": "Kaydırıcı için en az iki duyuru ekleyin.",
+        "sliderNeedsTwo": "Sırayla dönmesi için en az iki duyuru ekleyin.",
         "mode": {
           "label": "Birden çok duyuru",
           "term": "multiple",
           "first": "Yalnız ilki",
-          "rotate": "Kaydırıcı (tek tek döner)",
+          "rotate": "Sırayla döner",
           "inline": "Yan yana",
-          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Kaydırıcı: duyurular tek tek, seçtiğiniz sürede değişir; geçişi, okları ve durdurmayı Hareket bölümünden ayarlarsınız. Hareket azaltılmışsa kendiliğinden dönmez, oklar açıksa ziyaretçi elle geçer."
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla döner: duyurular tek tek, seçtiğiniz sürede değişir; geçişi, okları ve durdurmayı Hareket bölümünden ayarlarsınız. Hareket azaltılmışsa kendiliğinden dönmez, oklar açıksa ziyaretçi elle geçer."
         },
         "interval": {
           "label": "Geçiş süresi",
@@ -10618,6 +10672,7 @@
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin.",
         "linkLabel": "Dış adresin görünen yazısını girin.",
+        "altRequired": "Görseli anlatan kısa bir metin yazın (ör. Kış indirimi: tüm bıçaklarda %20).",
         "slidesRequired": "En az bir görsel ekleyin.",
         "productsRequired": "En az bir ürün seçin.",
         "productRequired": "Bir ürün seçin.",

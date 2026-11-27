@@ -14,6 +14,7 @@ import { newsletterImages } from "../../lib/storefront/sections/newsletter"
 import { richTextImages } from "../../lib/storefront/sections/rich-text"
 import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
+import { topSliderImages } from "../../lib/storefront/sections/top-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
 import { stripGalleryImages, stripRecord } from "../../lib/storefront/sections/strip-gallery"
 import { photoCollageImages } from "../../lib/storefront/sections/photo-collage"
@@ -40,6 +41,10 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   }
   if (section.type === "marquee") {
     return section.items.flatMap((item) => (item.link ? [item.link] : []))
+  }
+  // The top image slider's slides' links (owner 2026-11-27)
+  if (section.type === "top_slider") {
+    return section.slides.flatMap((slide) => (slide.link ? [slide.link] : []))
   }
   if (section.type === "hero") {
     // H17's quick links beside its buttons, and its slides' buttons and picture links
@@ -102,9 +107,10 @@ export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection
   // The strip and the bar always; the announcement bar (the only other) with a link
   doc.header.filter(
     (section) =>
-      section.type !== "announcement_bar" ||
-      Boolean(section.link) ||
-      lineLinksOf(section).some(Boolean)
+      (section.type !== "announcement_bar" && section.type !== "top_slider") ||
+      (section.type === "top_slider"
+        ? section.slides.some((slide) => slide.link)
+        : Boolean(section.link) || lineLinksOf(section).some(Boolean))
   )
 
 /** Every record a section names by id, as a link would point at it. */
@@ -335,7 +341,16 @@ export async function checkLayout(
   const footerImages = doc.footer.flatMap((section) =>
     section.type === "newsletter" ? newsletterImages(section) : []
   )
-  const images = [...sections.flatMap(imagesOf), ...footerImages, ...footerRowImages(blocks)]
+  // The top image slider's pictures (owner 2026-11-27), the shop's uploads as every other
+  const headerImages = doc.header.flatMap((section) =>
+    section.type === "top_slider" ? topSliderImages(section) : []
+  )
+  const images = [
+    ...sections.flatMap(imagesOf),
+    ...footerImages,
+    ...headerImages,
+    ...footerRowImages(blocks),
+  ]
   // A text's pictures already saved (`before`) or placed from what the page's text was
   // (`carried`): kept when still in the library, never a refusal, as its cards (adr/0073 Ek
   // 2026-11-19 (2) K2); a picture anywhere else, or new in a text, is checked as always
@@ -346,6 +361,7 @@ export async function checkLayout(
       return imagesOf(section).filter((url) => !text.has(url))
     }),
     ...footerImages,
+    ...headerImages,
     ...footerRowImages(blocks),
   ])
   const lenient = new Set(

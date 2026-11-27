@@ -5,6 +5,7 @@ import type { HomeSectionView } from "./content-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
+import type { TopSliderView } from "./top-slider-views"
 import type { NewsletterLookView } from "./newsletter-views"
 import type { ProductCardView } from "./product-views"
 
@@ -207,6 +208,11 @@ export interface ShopView {
    * drawn above the header.
    */
   topStrip?: TopStripView
+  /**
+   * The top image slider above the header (owner 2026-11-27): the shop's
+   * pictures one at a time; absent: none, or no slides yet.
+   */
+  topSlider?: TopSliderView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

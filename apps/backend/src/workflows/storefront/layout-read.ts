@@ -21,6 +21,8 @@ import { defaultLayout } from "./layout-default"
 import { headerLinked, imagesOf, linksOf } from "./layout-check"
 import { hydrateContext } from "./layout-context"
 import { fill, hydrateMarquee, hydrateSection } from "./layout-hydrate"
+import { hydrateTopSlider } from "./layout-hydrate-top"
+import { topSliderImages } from "../../lib/storefront/sections/top-slider"
 import { liveRecords } from "./layout-live"
 import type { StoreMenu } from "./menus-read"
 
@@ -109,6 +111,8 @@ export async function storeLayout(
       section.type === "newsletter" ? newsletterImages(section) : []
     ),
     ...footerRowImages(blocks),
+    // The top image slider's pictures with their sizes (owner 2026-11-27)
+    ...header.flatMap((section) => (section.type === "top_slider" ? topSliderImages(section) : [])),
   ]
   // The sale and best-seller rails and the price bands are the home page's
   const at = await hydrateContext(container, {
@@ -129,38 +133,42 @@ export async function storeLayout(
     header: header.map((section) =>
       section.type === "marquee"
         ? hydrateMarquee(section, at)
-        : {
-            id: section.id,
-            type: section.type,
-            variant: section.variant,
-            // The light strip's note as the catalog's was: one naming a detail the shop lacks is left out
-            lines:
-              section.variant === "light"
-                ? section.lines.flatMap((line) => fillShopTextWhole(line, values) ?? [])
-                : section.lines.map((line) => fillShopText(line, values)),
-            // How it shows more than one line (docs/tema/bilesen-denetimi (b) 6), as saved
-            mode: section.mode,
-            interval: section.interval,
-            pause_button: section.pause_button,
-            hover_pause: section.hover_pause,
-            // Where its lines sit and how big it is (adr/0049 Ek 2026-11-15)
-            align: section.align,
-            size: section.size,
-            tone: section.tone,
-            // How they turn like a slider (owner 2026-11-27)
-            transition: section.transition,
-            arrows: section.arrows,
-            // Each line's own link, only once the shop gave one (one to a removed record: words)
-            ...(section.variant === "graphite" && section.line_links?.some(Boolean)
-              ? { line_links: section.line_links.map((link) => (link ? resolve(link) : null)) }
-              : {}),
-            // The small button beside the lines, only once the shop gave one
-            ...(section.link ? { link: resolve(section.link) } : {}),
-            // Its parts off only once switched off; "Hesabım" only once on
-            ...(section.links === false ? { links: false } : {}),
-            ...(section.variant === "graphite" && section.phone === false ? { phone: false } : {}),
-            ...(section.variant === "light" && section.account === true ? { account: true } : {}),
-          }
+        : section.type === "top_slider"
+          ? hydrateTopSlider(section, at)
+          : {
+              id: section.id,
+              type: section.type,
+              variant: section.variant,
+              // The light strip's note as the catalog's was: one naming a detail the shop lacks is left out
+              lines:
+                section.variant === "light"
+                  ? section.lines.flatMap((line) => fillShopTextWhole(line, values) ?? [])
+                  : section.lines.map((line) => fillShopText(line, values)),
+              // How it shows more than one line (docs/tema/bilesen-denetimi (b) 6), as saved
+              mode: section.mode,
+              interval: section.interval,
+              pause_button: section.pause_button,
+              hover_pause: section.hover_pause,
+              // Where its lines sit and how big it is (adr/0049 Ek 2026-11-15)
+              align: section.align,
+              size: section.size,
+              tone: section.tone,
+              // How they turn like a slider (owner 2026-11-27)
+              transition: section.transition,
+              arrows: section.arrows,
+              // Each line's own link, only once the shop gave one (one to a removed record: words)
+              ...(section.variant === "graphite" && section.line_links?.some(Boolean)
+                ? { line_links: section.line_links.map((link) => (link ? resolve(link) : null)) }
+                : {}),
+              // The small button beside the lines, only once the shop gave one
+              ...(section.link ? { link: resolve(section.link) } : {}),
+              // Its parts off only once switched off; "Hesabım" only once on
+              ...(section.links === false ? { links: false } : {}),
+              ...(section.variant === "graphite" && section.phone === false
+                ? { phone: false }
+                : {}),
+              ...(section.variant === "light" && section.account === true ? { account: true } : {}),
+            }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),
     // The footer group in its order (adr/0070 §4): the box as a page's (adr/0049 Ek 2026-11-17

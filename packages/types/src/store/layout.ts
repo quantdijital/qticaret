@@ -9,6 +9,7 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
+import type { StoreTopSliderSection } from "./section-top-slider.js"
 import type { FaqSettings, StoreFaqItem } from "./section-faq.js"
 import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
@@ -334,7 +335,7 @@ export type StoreFooterSection =
   | Extract<StoreLayoutSection, { type: "rich_text" | "trust_badges" | "marquee" }>
 
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
-export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
+export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection | StoreTopSliderSection
 
 /**
  * The announcement bar: its lines in the shop's words and how it shows more

@@ -1,7 +1,7 @@
 import "server-only"
 import { announcementSettingsOf } from "@qticaret/types/section-announcement"
 import { headers } from "next/headers"
-import type { ContactView, ShopView, Translate } from "@qticaret/ui"
+import type { ContactView, ShopView, TopSliderView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
@@ -43,6 +43,7 @@ import { footerLogosOf } from "./footer-logo"
 import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
+import { topSliderView } from "./top-slider"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
 export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
@@ -220,6 +221,8 @@ export async function shopView(): Promise<ShopView> {
     ...(announcementLink ? { announcementLink } : {}),
     ...(lineLinks ? { announcementLineLinks: lineLinks } : {}),
     ...(editing ? { editor: true as const } : {}),
+    // The top image slider above it all (owner 2026-11-27); no slides yet: none
+    ...withTopSlider(topSliderView(layout.header, t)),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     // The catalog header's "Kategoriler" lists the top categories already read (no request),
@@ -270,3 +273,5 @@ export async function shopView(): Promise<ShopView> {
     ...(features?.natural_search === true ? { searchHint: t("search.natural_hint") } : {}),
   }
 }
+
+const withTopSlider = (view: TopSliderView | null) => (view ? { topSlider: view } : {})
