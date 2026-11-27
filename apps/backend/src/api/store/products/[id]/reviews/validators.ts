@@ -35,6 +35,11 @@ export type StoreGetReviewsType = z.infer<typeof StoreGetReviews>
  */
 export const StoreGetShopReviews = StoreGetReviews.extend({
   rating: z.coerce.number().int().min(1).max(5).optional(),
+  /**
+   * `google=1`: the shop's Google reviews mixed in by date (adr/0058 Ek
+   * 2026-11-27), under `google_reviews`; not with `rating`.
+   */
+  google: z.literal("1").optional(),
 })
 export type StoreGetShopReviewsType = z.infer<typeof StoreGetShopReviews>
 

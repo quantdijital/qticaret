@@ -32,6 +32,7 @@ const review = (
   comment: "Şam çeliği av bıçağı aldım. Kılıfı gerçek deri, dikişleri çok temiz.",
   created_at: "2026-11-02T09:00:00Z",
   reply: null,
+  url: null,
   ...over,
 })
 

@@ -434,7 +434,12 @@ export interface ReviewsPageView {
   count: number
   /** The shop's reviews in short, shop-wide (adr/0046 Ek 2026-11-05); none: `average` and `count` only. */
   summary?: ShopRatingView | null
-  reviews: (ReviewView & { product: ReviewedProductView | null })[]
+  /**
+   * The shop's reviews, newest first; on an unfiltered page mixed by date
+   * with its Google reviews (adr/0058 Ek 2026-11-27), each of those drawn
+   * in the same card with `google` where a review's product would be.
+   */
+  reviews: ReviewsPageItemView[]
   pagination: PaginationView
   /**
    * The star filter (adr/0037 Ek 2026-11-05): one number of stars at a
@@ -443,10 +448,24 @@ export interface ReviewsPageView {
    */
   filter?: ReviewFilterView | null
   /**
-   * The shop's Google reviews (adr/0058), apart from its own: on the first
-   * page only; none: no Google block. Never in structured data.
+   * The shop's Google reviews (adr/0058). With Google's reviews mixed into
+   * `reviews`, Google's own average, count and links beside the shop's
+   * (never added to them), its `reviews` empty; otherwise apart from the
+   * shop's on the first page only. None: nothing from Google. Never in
+   * structured data.
    */
   google?: GoogleReviewsView | null
+}
+
+/** One card of the reviews page: the shop's own review with its product, or a Google review. */
+export type ReviewsPageItemView = ReviewView & {
+  product: ReviewedProductView | null
+  /**
+   * A Google review (adr/0058 Ek 2026-11-27): the link out to the review
+   * on Google (or, when Google gave none, the place; null: no link), drawn
+   * where a review's product is, and its words for a screen reader.
+   */
+  google?: { url: string | null; label: string } | null
 }
 
 export type ReviewStars = 1 | 2 | 3 | 4 | 5

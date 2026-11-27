@@ -88,6 +88,11 @@ export interface StoreGoogleReview {
   created_at: string
   /** The owner's reply as Google shows it (one Google still moderates is not here). */
   reply: { comment: string; created_at: string | null } | null
+  /**
+   * The review itself on Google Maps (adr/0058 Ek 2026-11-27); null when
+   * Google gave no Maps id for it: link to the place (`maps_url`) instead.
+   */
+  url: string | null
 }
 
 /**

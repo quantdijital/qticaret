@@ -15,6 +15,7 @@ export const REVIEW_FIELDS = [
   "reply",
   "replied_at",
   "reply_state",
+  "maps_review_id",
   "hidden",
   "hidden_reason",
   "hidden_by",
@@ -32,6 +33,7 @@ const changed = (kept: ReviewRow, now: GoogleReviewInput): boolean =>
   kept.comment !== now.comment ||
   kept.reply !== now.reply ||
   kept.reply_state !== now.reply_state ||
+  kept.maps_review_id !== now.maps_review_id ||
   time(kept.written_at) !== time(now.written_at) ||
   time(kept.edited_at) !== time(now.edited_at) ||
   time(kept.replied_at) !== time(now.replied_at)

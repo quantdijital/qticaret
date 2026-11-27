@@ -53,6 +53,7 @@ Mağazanın yapacakları:
 - **Kaldırma:** "Bağlantıyı kaldır" konumu ve yorumları siler (Google bağlantısı kalır). Google bağlantısı kesilirse yorumlar da silinir.
 - **SEO:** Google yorumları hiçbir JSON-LD'ye girmez (docs/13 §5, Google'ın review snippet kuralları).
 - **Loglar (operatör için):** `google_reviews.reply_failed` (error: proje onaysız `RESOURCE_EXHAUSTED`/`http_429`; warn: mağazanın ret sebepleri), `google_reviews.reply_restore_failed` (error), `google_reviews.sync_failed` (error: API kapalı, proje onaysız, Google'a ulaşılamıyor; warn: mağazanın onaracağı `invalid_grant`, `reviews_scope`), `google_reviews.stale_purged` (error), `google_reviews.synced` (info).
+- **`/yorumlar` karışık liste (adr/0058 Ek 2026-11-27):** mağaza yorumları ve Google yorumları tek listede, tarihe göre, aynı kartta; Google kartında ürün yerine "Google'da gör" bağlantısı. Bağlantı yorumun kendisine gider: Google'ın cevabındaki (belgelenmemiş) `reviewReplyUrl`'den alınan Maps kimliği (`maps_review_id`) + konumun `mapsUri`'sindeki `cid`. Bunlar yoksa konumun Maps sayfasına. Google puanı ayrı kutuda, mağaza puanına katılmaz.
 
 ## Geliştirmede (sahte Google)
 

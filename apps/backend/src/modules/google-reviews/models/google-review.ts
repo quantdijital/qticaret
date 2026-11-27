@@ -39,6 +39,8 @@ export const GoogleReview = model
     replied_at: model.dateTime().nullable(),
     /** Google's moderation of the reply; null when Google gives none (shown). */
     reply_state: model.enum([...REPLY_STATES]).nullable(),
+    /** The review's id on Google Maps, for its own link (adr/0058 Ek 2026-11-27); null: Google gave none. */
+    maps_review_id: model.text().nullable(),
     hidden: model.boolean().default(false),
     /** Set with `hidden`, cleared when the review is put back. */
     hidden_reason: model.enum([...HIDE_REASONS]).nullable(),

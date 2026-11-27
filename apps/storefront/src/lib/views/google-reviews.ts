@@ -1,4 +1,9 @@
-import type { GoogleReviewView, GoogleReviewsView, Translate } from "@qticaret/ui"
+import type {
+  GoogleReviewView,
+  GoogleReviewsView,
+  ReviewsPageItemView,
+  Translate,
+} from "@qticaret/ui"
 import type { StoreGoogleReview, StoreGoogleReviews } from "@qticaret/types"
 
 /**
@@ -91,5 +96,78 @@ export function googleReviewsView(
     allUrl: httpsOf(answer.maps_url),
     writeUrl: httpsOf(answer.write_url),
     reviews,
+  }
+}
+
+/**
+ * A Google review as a card of the reviews page, mixed among the shop's
+ * (adr/0058 Ek 2026-11-27): the same card, the owner's reply signed with
+ * the shop's name, and where a review's product is, its link out to the
+ * review on Google (`url`), else to the place (`mapsUrl`). Null for one
+ * that cannot be shown (no date, stars out of range).
+ */
+export function googleReviewItem(
+  review: StoreGoogleReview,
+  mapsUrl: string | null,
+  shopName: string,
+  t: Translate
+): ReviewsPageItemView | null {
+  const view = reviewView(review, t)
+  if (!view) {
+    return null
+  }
+  return {
+    rating: view.rating,
+    title: null,
+    body: view.text ?? "",
+    author: view.author,
+    date: view.date.label,
+    verified: false,
+    reply: view.reply
+      ? {
+          text: view.reply.text,
+          author: shopName,
+          date: view.reply.date ?? { label: "", dateTime: "" },
+        }
+      : null,
+    product: null,
+    google: {
+      url: httpsOf(review.url) ?? httpsOf(mapsUrl),
+      label: t("reviews.google_view_label", { author: view.author }),
+    },
+  }
+}
+
+/** One card with when its review was written, for `byDate`. */
+export interface Dated<T> {
+  at: string | null
+  item: T
+}
+
+const timeOf = (at: string | null): number => {
+  const time = at ? new Date(at).getTime() : Number.NaN
+  return Number.isFinite(time) ? time : 0
+}
+
+/**
+ * Two lists, each newest first, as one (adr/0058 Ek 2026-11-27): by date,
+ * the shop's first on the same moment, as the backend cut the page.
+ */
+export function byDate<T>(shop: readonly Dated<T>[], google: readonly Dated<T>[]): T[] {
+  const out: T[] = []
+  let s = 0
+  let g = 0
+  for (;;) {
+    const a = shop[s]
+    const b = google[g]
+    if (a && (!b || timeOf(a.at) >= timeOf(b.at))) {
+      out.push(a.item)
+      s += 1
+    } else if (b) {
+      out.push(b.item)
+      g += 1
+    } else {
+      return out
+    }
   }
 }
