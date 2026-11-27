@@ -264,6 +264,19 @@ describe("review photos and marks", () => {
     ])
     expect(shopMarks(undefined, t)).toEqual([])
   })
+
+  it("gives every carrier its own mark, and a carrier without one its name", () => {
+    expect(shopMarks(["surat", "ptt", "dhlecommerce"], t)).toEqual([
+      {
+        key: "surat",
+        label: "Sürat Kargo",
+        logo: { src: "/marks/surat.png", width: 401, height: 71 },
+      },
+      { key: "ptt", label: "PTT Kargo", logo: { src: "/marks/ptt.png", width: 1010, height: 310 } },
+      // No file yet: the theme draws the name
+      { key: "dhlecommerce", label: "DHL eCommerce", logo: null },
+    ])
+  })
 })
 
 describe("the shop's reply under a review", () => {
