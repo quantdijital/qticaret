@@ -55,13 +55,15 @@ export function ListingPage({
   // A collection's picture is the page's largest: it alone loads first
   const banner = search ? null : (view.image ?? null)
   const bottom = view.sectionsBottom ?? []
-  // The trail on the title's line (`listing_page.crumbs_place`); absent: above it
+  // The trail on the title's line (`listing_page.crumbs_place`), not drawn, or (absent) above it;
+  // the page's BreadcrumbList data is the storefront's and stays either way (docs/13)
   const beside = view.crumbsPlace === "beside"
+  const above = !beside && view.crumbsPlace !== "none"
   return (
     <>
       <Container className="pt-4 lg:pt-6">
-        {!beside && <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />}
-        <header className={beside ? "flex flex-col gap-3" : "mt-4 flex flex-col gap-3 lg:mt-6"}>
+        {above && <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />}
+        <header className={above ? "mt-4 flex flex-col gap-3 lg:mt-6" : "flex flex-col gap-3"}>
           {beside ? (
             // The trail first to read, on the title's line flush right from 1024 px
             <div className="flex flex-col gap-4 lg:flex-row-reverse lg:items-baseline lg:justify-between lg:gap-8">

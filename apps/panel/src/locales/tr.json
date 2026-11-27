@@ -10630,8 +10630,13 @@
             "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
           },
           "crumbs_place": {
-            "label": "Yol izi başlıkla aynı satırda",
-            "hint": "Geniş ekranda yol izi (breadcrumb) başlığın satırında sağda, küçük ve soluk durur. Kapalı: başlığın üstünde ayrı satırda. Telefonda hep üsttedir."
+            "label": "Yol izinin yeri",
+            "hint": "Yol izi (breadcrumb) nerede dursun. Başlıkla aynı satırda: geniş ekranda başlığın satırında sağda, küçük ve soluk; telefonda üstte. Gösterme: sayfada görünmez, arama motorlarına giden yol izi verisi değişmez.",
+            "steps": {
+              "above": "Başlığın üstünde",
+              "beside": "Başlıkla aynı satırda",
+              "none": "Gösterme"
+            }
           },
           "count_word": {
             "label": "Ürün sayısında birim kelimesi",

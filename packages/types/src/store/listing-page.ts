@@ -30,9 +30,10 @@ export type ListingBreadcrumbCurrent = (typeof LISTING_BREADCRUMB_CURRENTS)[numb
 /**
  * Where the trail stands: on its own line above the title (`above`, the
  * default) or on the title's line, flush right, from 1024 px (`beside`);
- * narrower, above it either way.
+ * narrower, above it either way; or not drawn at all (`none`), the page's
+ * `BreadcrumbList` data kept as it is (docs/13).
  */
-export const LISTING_CRUMBS_PLACES = ["above", "beside"] as const
+export const LISTING_CRUMBS_PLACES = ["above", "beside", "none"] as const
 export type ListingCrumbsPlace = (typeof LISTING_CRUMBS_PLACES)[number]
 
 /**

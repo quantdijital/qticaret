@@ -12,7 +12,7 @@ export const LISTING_PAGE = {
   default_view: ["grid", "list"],
   view_switch: ["show", "hide"],
   breadcrumb_current: ["show", "hide"],
-  crumbs_place: ["above", "beside"],
+  crumbs_place: ["above", "beside", "none"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 /** The longest word after the count (`@qticaret/types`' `LISTING_COUNT_WORD_MAX`). */

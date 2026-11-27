@@ -10630,8 +10630,13 @@
             "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
           },
           "crumbs_place": {
-            "label": "Breadcrumb on the title's line",
-            "hint": "On wide screens the breadcrumb sits on the right of the title's line, small and quiet. Off: on its own line above the title. On phones it is always above."
+            "label": "Breadcrumb position",
+            "hint": "Where the breadcrumb stands. On the title's line: on wide screens on the right of the title's line, small and quiet; on phones above it. Hidden: not shown on the page; the breadcrumb data for search engines does not change.",
+            "steps": {
+              "above": "Above the title",
+              "beside": "On the title's line",
+              "none": "Hidden"
+            }
           },
           "count_word": {
             "label": "Unit word in the product count",
