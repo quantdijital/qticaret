@@ -3,6 +3,7 @@ import { createCartWorkflow, updateCartWorkflow } from "@medusajs/medusa/core-fl
 import type { AddressFields } from "../../modules/tr-address/validation"
 import { refusePlainDatedItems } from "../booking/cart/plain-items"
 import { assertNewCartWithinLimits } from "../checkout/purchase-limit"
+import { refuseSampleItems } from "../checkout/sample-items"
 import { assertTrAddresses } from "../tr-address/assert-tr-addresses"
 
 /**
@@ -29,6 +30,8 @@ createCartWorkflow.hooks.validate(async ({ input }, { container }) => {
     addresses.push(["billing_address", billing])
   }
   await assertTrAddresses(container, addresses)
+  // A sample product is never sold (owner, 2026-11-28)
+  await refuseSampleItems(container, input.items)
   // adr/0076 §5: a dated product's variant is added only through its booking route
   await refusePlainDatedItems(container, input.items)
   // S5: a product's most per order
