@@ -70,11 +70,13 @@ const Left = ({ text }: { text: string | null }) =>
  * when few, then the price and "İncele" at the row's end (on a phone
  * under the name, beside the date box, the row kept tight). `cards`: a card each, the tour's photograph in its well
  * with the date box on it, the name, the places left, the price and
- * "İncele". Its ground and alignment are the section's look (`Look`).
+ * "İncele"; on a phone one under another (`stack`) or swiped sideways in
+ * one row (`phone: scroll`). Its ground and alignment are the section's look (`Look`).
  */
 export function Departures({ section, t }: { section: Of<"departures">; t: Translate }) {
   const id = headingId(section.id)
   const cards = section.layout === "cards"
+  const swipe = cards && section.phone === "scroll"
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
@@ -102,7 +104,12 @@ export function Departures({ section, t }: { section: Of<"departures">; t: Trans
         {cards ? (
           <ul
             role="list"
-            className="grid gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-3"
+            className={cn(
+              "grid gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-3",
+              // `scroll`: below 768 px one row swiped sideways, the next card peeking (as the reviews' rail)
+              swipe &&
+                "gf-rail max-md:-mx-(--gutter) max-md:auto-cols-[82%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1"
+            )}
           >
             {section.rows.map((row) => (
               <li key={row.key} className="flex flex-col overflow-hidden rounded-tile gf-pane">

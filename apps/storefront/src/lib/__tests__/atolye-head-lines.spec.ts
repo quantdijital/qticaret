@@ -48,6 +48,7 @@ const departures = (lines: HeadLinesView = {}): HomeSectionView => {
     rows: [],
     open: "İncele",
     layout: "list",
+    phone: "stack",
     ...lines,
   }
   return view

@@ -12702,6 +12702,13 @@
           "hint": "Liste: tarih kutusu, tur adı, kalan yer ve fiyat satır satır. Kartlar: turun fotoğrafıyla.",
           "list": "Liste",
           "cards": "Kartlar"
+        },
+        "phone": {
+          "label": "Telefonda",
+          "term": "mobile",
+          "hint": "Dar ekranda kartlar alt alta mı dizilir, tek sırada yana mı kayar.",
+          "stack": "Alt alta",
+          "scroll": "Yana kaydır"
         }
       },
       "reviewsCard": {

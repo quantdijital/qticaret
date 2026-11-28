@@ -79,6 +79,7 @@ export type ContentField =
   | "collage_height"
   | "reviews_product_image"
   | "departures_layout"
+  | "departures_phone"
   | "action"
   | "search_position"
   | "show_trust"
@@ -377,6 +378,21 @@ export function contentFields(section: AnySection): RegistryField[] {
           ),
           term: `${E}.departures.layout.term`,
         },
+        // The cards' phone row, only while the cards are drawn (as its field)
+        ...(section.layout === "cards"
+          ? [
+              {
+                ...entry(
+                  section,
+                  "departures_phone",
+                  `${E}.departures.phone.label`,
+                  DEPARTURES_SETTINGS.phone.map((step) => `${E}.departures.phone.${step}`),
+                  "layout"
+                ),
+                term: `${E}.departures.phone.term`,
+              },
+            ]
+          : []),
       ]
     // The box's fields are the theme's (adr/0077 §1), not the section's
     case "search_box":

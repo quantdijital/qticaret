@@ -12702,6 +12702,13 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "On a narrow screen the cards stack or slide sideways in one row.",
+          "stack": "Stacked",
+          "scroll": "Slide sideways"
         }
       },
       "reviewsCard": {

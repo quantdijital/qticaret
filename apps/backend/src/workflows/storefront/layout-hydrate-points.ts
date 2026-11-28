@@ -107,6 +107,8 @@ export function hydrateDepartures(section: DeparturesSection, at: PointsContext)
     source: section.source,
     limit: section.limit,
     layout: section.layout,
+    // Only the cards swipe on a phone; the default (`stack`) is left out
+    ...(section.layout === "cards" && section.phone === "scroll" ? { phone: section.phone } : {}),
     ...printedHeadLines(section, at.fill),
   }
 }
