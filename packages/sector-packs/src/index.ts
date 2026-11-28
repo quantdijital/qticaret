@@ -52,6 +52,21 @@ export type {
   StorefrontPreset,
 } from "./preset-schema"
 export { PRESETS_DIR, readPreset } from "./preset-load"
+export {
+  SAMPLES_DIR,
+  SAMPLE_FORMAT,
+  SAMPLE_IMAGE_PATH,
+  SAMPLE_LIMITS,
+  sampleCatalogSchema,
+} from "./sample-schema"
+export type {
+  SampleBooking,
+  SampleCatalog,
+  SampleCatalogData,
+  SampleCategory,
+  SampleProduct,
+} from "./sample-schema"
+export { readSamples } from "./sample-load"
 export { SECTION_REQUIRES, checkPresetFlags } from "./section-requires"
 export {
   DEFAULT_PACKS_DIR,
