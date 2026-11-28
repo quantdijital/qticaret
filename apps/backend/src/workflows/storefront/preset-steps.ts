@@ -42,6 +42,13 @@ export interface ApplyPresetInput {
    * automatic save, when the draft holds anything new.
    */
   save_as?: string | null
+  /**
+   * Any pack this build has, applied here or not (the panel's gallery,
+   * owner's decision 2026-11-28: another sector's look, its records left
+   * out where the shop has none); unset, only `general` and the packs
+   * applied here (the provisioner's script).
+   */
+  any_pack?: boolean
 }
 
 /** A preset as the steps carry it: plain data (a step's result is stored as JSON). */
@@ -105,7 +112,7 @@ export const loadPresetStep = createStep(
     if (!preset || !pack) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_preset.unknown")
     }
-    if (input.pack !== GENERAL_PACK) {
+    if (input.pack !== GENERAL_PACK && input.any_pack !== true) {
       const [applied] = await container
         .resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
         .listSectorPackApplications({ pack: input.pack }, { select: ["id"], take: 1 })

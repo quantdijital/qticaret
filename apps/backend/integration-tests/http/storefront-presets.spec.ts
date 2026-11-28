@@ -170,17 +170,26 @@ medusaIntegrationTestRunner({
         throw new Error("no katalog preset")
       }
 
-      // Before the cutlery pack: its looks are neither listed nor applied
-      expect((await apply(LOOK.pack, LOOK.code)).status).toBe(400)
-      await withCutlery(container)
-      const gallery = await settle(
-        http.get<{ presets: { pack: string; code: string; in_draft: number | null }[] }>(
-          "/admin/storefront-presets",
-          asOwner
-        )
+      const listed = async () =>
+        (
+          await settle(
+            http.get<{ presets: { pack: string; code: string; own: boolean }[] }>(
+              "/admin/storefront-presets",
+              asOwner
+            )
+          )
+        ).data.presets
+      // Before the cutlery pack: its looks are listed as another sector's (owner, 2026-11-28)
+      expect(await listed()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pack: LOOK.pack, code: LOOK.code, own: false }),
+        ])
       )
-      expect(gallery.data.presets).toEqual(
-        expect.arrayContaining([expect.objectContaining({ pack: LOOK.pack, code: LOOK.code })])
+      await withCutlery(container)
+      expect(await listed()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pack: LOOK.pack, code: LOOK.code, own: true }),
+        ])
       )
 
       // The shop's own design, live, with its own trust badges, an announcement bar, a

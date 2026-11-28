@@ -258,8 +258,8 @@ medusaIntegrationTestRunner({
       const { staff } = await ownerWithDraft(false)
       const container = getContainer()
       const picturePath = `/admin/storefront-presets/${LOOK.pack}/${LOOK.code}/preview`
-      // A pack not applied here: neither card nor picture
-      expect((await staff.get(picturePath)).status).toBe(404)
+      // A pack not applied here: another sector's card, its picture served (owner, 2026-11-28)
+      expect((await staff.get(picturePath)).status).toBe(200)
       await withCutlery(container)
 
       const presets = await staff.get<{ presets: Record<string, unknown>[] }>(

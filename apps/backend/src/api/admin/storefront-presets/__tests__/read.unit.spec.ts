@@ -53,12 +53,18 @@ jest.mock("@qticaret/sector-packs", () => {
     readPack: (_dir: string, code: string) =>
       code === "bicak"
         ? refuse()
-        : { presets: code === "kahve" ? KAHVE : [preset(code, `${code}-1`)] },
+        : {
+            name: `${code} paketi`,
+            presets: code === "kahve" ? KAHVE : [preset(code, `${code}-1`)],
+          },
   }
 })
 jest.mock("node:fs", () => ({
   ...jest.requireActual<typeof Fs>("node:fs"),
   existsSync: () => true,
+  // The packs this build has: the shop's own and another sector's (`baska`)
+  readdirSync: () =>
+    ["kahve", "general", "baska", ".gizli"].map((name) => ({ name, isDirectory: () => true })),
 }))
 let mockRow: unknown = null
 jest.mock("../../../../workflows/storefront/layout-row", () => ({
@@ -86,12 +92,38 @@ describe("the preset gallery (adr/0063 §7)", () => {
         "general/general-1",
         "kahve/kahve-1",
         "kahve/kahve-2",
+        "baska/baska-1",
       ])
       expect(error).toHaveBeenCalledWith({
         event: "storefront_preset.pack_unreadable",
         pack: "bicak",
       })
       expect(JSON.stringify(error.mock.calls)).not.toMatch(/secret/)
+    } finally {
+      error.mockRestore()
+    }
+  })
+
+  it("lists the other sectors' looks after the shop's own, each with its sector (owner, 2026-11-28)", async () => {
+    const error = quiet()
+    try {
+      const gallery = await presetGallery(container)
+      const byCode = Object.fromEntries(gallery.map((each) => [each.code, each]))
+      expect(byCode["general-1"]).toMatchObject({
+        own: true,
+        sector: { code: "general", name: "general paketi" },
+      })
+      expect(byCode["kahve-1"]).toMatchObject({
+        own: true,
+        sector: { code: "kahve", name: "kahve paketi" },
+      })
+      expect(byCode["baska-1"]).toMatchObject({
+        own: false,
+        sector: { code: "baska", name: "baska paketi" },
+        preview_url: null,
+      })
+      // A folder no pack code names is never read as a pack
+      expect(gallery.some((each) => each.pack.startsWith("."))).toBe(false)
     } finally {
       error.mockRestore()
     }
@@ -169,6 +201,7 @@ describe("the preset gallery (adr/0063 §7)", () => {
         "general/general-1",
         "kahve/kahve-1",
         "kahve/kahve-2",
+        "baska/baska-1",
       ])
       expect(gallery.every((each) => each.in_draft === null && each.live === null)).toBe(true)
     } finally {
