@@ -4135,10 +4135,11 @@
       "actions": {
         "bookings": "{{start}}: participants",
         "bookingsShort": "Participants",
-        "edit": "{{start}}: edit",
-        "close": "{{start}}: close for sale",
-        "open": "{{start}}: open for sale",
-        "cancel": "{{start}}: cancel"
+        "more": "{{start}}: actions",
+        "editShort": "Edit",
+        "closeShort": "Close for sale",
+        "openShort": "Open for sale",
+        "cancelShort": "Cancel the departure"
       },
       "bookings": {
         "title": "Participants",
@@ -5165,7 +5166,20 @@
       "autoDay": "Day {{n}}",
       "autoStep": "Step {{n}}",
       "empty": "No steps yet. Add the days or the lessons one by one; an empty program does not show on the product page.",
-      "add": "Add a step",
+      "addOf": {
+        "day": "Add a day",
+        "step": "Add a step"
+      },
+      "unitsShort": {
+        "day": "Day",
+        "step": "Step"
+      },
+      "openAll": "Open all",
+      "closeAll": "Close all",
+      "untitled": "Untitled",
+      "tagCount_one": "{{count}} included",
+      "tagCount_other": "{{count}} included",
+      "addImage": "Add a picture",
       "limit": "A program holds at most {{max}} steps.",
       "label": "Label",
       "stepTitle": "Title",
@@ -5174,7 +5188,6 @@
       "bodyPlaceholder": "What happens in this step? A short text.",
       "image": "Picture",
       "imageHint": "Optional; from the media library.",
-      "noImage": "No picture",
       "tags": "Included",
       "tagNames": {
         "breakfast": "Breakfast",

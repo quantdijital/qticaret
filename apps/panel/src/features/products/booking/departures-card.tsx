@@ -3,6 +3,7 @@ import { CalendarPlus, ChevronDown, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { FieldHints } from "@qticaret/admin-ui/hooks/use-field-hints"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
@@ -108,31 +109,29 @@ function Departures({ productId, variants }: { productId: string; variants: Vari
         ) : null}
         {slots.isSuccess && list.length === 0 ? <EmptyState text={t(`${B}.empty`)} /> : null}
         {list.length > 0 ? (
-          <div data-scroll-area="x" className="overflow-x-auto overflow-y-hidden rounded-md border">
-            <SlotTable
-              slots={list}
-              zone={zone}
-              busy={update.isPending || cancelDeparture.isPending}
-              actions={{
-                onEdit: (slot) => {
-                  setOpen({ kind: "edit", slot })
-                },
-                onBookings: (slot) => {
-                  setOpen({ kind: "bookings", slot })
-                },
-                onStatus: setStatus,
-                ...(mayCancel
-                  ? {
-                      onCancel: (slot: BookingSlot) => {
-                        setOpen({ kind: "cancel", slot })
-                      },
-                    }
-                  : {}),
-              }}
-            />
-          </div>
+          <SlotTable
+            slots={list}
+            zone={zone}
+            busy={update.isPending || cancelDeparture.isPending}
+            actions={{
+              onEdit: (slot) => {
+                setOpen({ kind: "edit", slot })
+              },
+              onBookings: (slot) => {
+                setOpen({ kind: "bookings", slot })
+              },
+              onStatus: setStatus,
+              ...(mayCancel
+                ? {
+                    onCancel: (slot: BookingSlot) => {
+                      setOpen({ kind: "cancel", slot })
+                    },
+                  }
+                : {}),
+            }}
+          />
         ) : null}
-        <div className="flex flex-col gap-4 border-t pt-4">
+        <div className="flex flex-col gap-3 border-t pt-3">
           <Button
             type="button"
             variant="ghost"
@@ -207,5 +206,10 @@ export function DeparturesCard({ productId }: { productId: string }) {
   if (!flagOn || catalog.data?.booking_mode !== "departure") {
     return null
   }
-  return <Departures productId={productId} variants={variantNamesOf(catalog.data.variants)} />
+  return (
+    // The card's sentence and its fields' hints behind an (i) (the owner, 2026-11-28)
+    <FieldHints style="tip">
+      <Departures productId={productId} variants={variantNamesOf(catalog.data.variants)} />
+    </FieldHints>
+  )
 }

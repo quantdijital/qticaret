@@ -4135,10 +4135,11 @@
       "actions": {
         "bookings": "{{start}}: katılımcılar",
         "bookingsShort": "Katılımcılar",
-        "edit": "{{start}}: düzenle",
-        "close": "{{start}}: satışa kapat",
-        "open": "{{start}}: satışa aç",
-        "cancel": "{{start}}: iptal et"
+        "more": "{{start}}: işlemler",
+        "editShort": "Düzenle",
+        "closeShort": "Satışa kapat",
+        "openShort": "Satışa aç",
+        "cancelShort": "Kalkışı iptal et"
       },
       "bookings": {
         "title": "Katılımcılar",
@@ -5165,7 +5166,20 @@
       "autoDay": "{{n}}. Gün",
       "autoStep": "{{n}}. Adım",
       "empty": "Henüz adım yok. Gün gün akışı ya da ders sırasını adım adım ekleyin; boş program ürün sayfasında görünmez.",
-      "add": "Adım ekle",
+      "addOf": {
+        "day": "Gün ekle",
+        "step": "Adım ekle"
+      },
+      "unitsShort": {
+        "day": "Gün",
+        "step": "Adım"
+      },
+      "openAll": "Tümünü aç",
+      "closeAll": "Tümünü kapat",
+      "untitled": "Başlıksız",
+      "tagCount_one": "{{count}} dahil",
+      "tagCount_other": "{{count}} dahil",
+      "addImage": "Görsel ekle",
       "limit": "Program en çok {{max}} adım olabilir.",
       "label": "Etiket",
       "stepTitle": "Başlık",
@@ -5174,7 +5188,6 @@
       "bodyPlaceholder": "Bu adımda neler var? Kısa bir metin.",
       "image": "Görsel",
       "imageHint": "İsteğe bağlı; ortam kütüphanesinden.",
-      "noImage": "Görsel yok",
       "tags": "Dahil olanlar",
       "tagNames": {
         "breakfast": "Kahvaltı",

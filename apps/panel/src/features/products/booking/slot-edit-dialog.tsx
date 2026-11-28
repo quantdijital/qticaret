@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ChevronDown } from "lucide-react"
-import { useState } from "react"
+import { useId, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -8,6 +8,7 @@ import { parseCountInput } from "@qticaret/admin-ui/lib/money-input"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { HiddenHint, InfoTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
@@ -44,6 +45,7 @@ export function SlotEditDialog({
   const update = useUpdateSlot(productId)
   const [failure, setFailure] = useState<string | null>(null)
   const minimum = minCapacityOf(slot)
+  const pricesHintId = `${useId()}-prices`
   const [pricesOpen, setPricesOpen] = useState(Object.keys(slot.price_adjustments ?? {}).length > 0)
   const form = useForm<SlotEditDraft>({
     resolver: zodResolver(slotEditSchema(minimum)),
@@ -106,22 +108,26 @@ export function SlotEditDialog({
         </Field>
         {variants.length > 0 ? (
           <div className="flex flex-col gap-3 border-t pt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="self-start"
-              aria-expanded={pricesOpen}
-              onClick={() => {
-                setPricesOpen((open) => !open)
-              }}
-            >
-              <ChevronDown className={cn("transition-transform", pricesOpen && "rotate-180")} />
-              {t(`${B}.prices`)}
-            </Button>
+            {/* What the difference is, behind an (i) beside its toggle (the owner, 2026-11-28) */}
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-expanded={pricesOpen}
+                aria-describedby={pricesHintId}
+                onClick={() => {
+                  setPricesOpen((open) => !open)
+                }}
+              >
+                <ChevronDown className={cn("transition-transform", pricesOpen && "rotate-180")} />
+                {t(`${B}.prices`)}
+              </Button>
+              <InfoTip name={t(`${B}.prices`)} hint={t(`${B}.pricesHint`)} hintId={pricesHintId} />
+              <HiddenHint id={pricesHintId}>{t(`${B}.pricesHint`)}</HiddenHint>
+            </div>
             {pricesOpen ? (
               <>
-                <p className="text-[13px] text-muted-foreground">{t(`${B}.pricesHint`)}</p>
                 {variants.map((variant) => {
                   const message = errors.adjustments?.[variant.id]?.message
                   return (
