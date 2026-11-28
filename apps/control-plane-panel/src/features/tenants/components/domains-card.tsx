@@ -14,9 +14,10 @@ import { VerificationBadge } from "./verification-badge"
 
 /**
  * The host names the shop answers on (adr/0061 §2): its subdomain on the
- * platform, always there, and its own domains, waiting for their DNS
- * check (F16.7); the primary one marked. A row opens the domain; owner
- * and operator add, remove and choose the primary one.
+ * platform, always there, and its own domains with their DNS check
+ * (F16.7); the primary one marked. A row opens the domain (its records
+ * to publish, "Doğrula"); a domain just added opens itself. Owner and
+ * operator add, check, remove and choose the primary one.
  */
 export function DomainsCard({ shop }: { shop: TenantDetail }) {
   const { t } = useTranslation()
@@ -24,6 +25,18 @@ export function DomainsCard({ shop }: { shop: TenantDetail }) {
   const writable = canManageShops(me?.role)
   const walk = useRecordWalk(shop.domains, (domain) => domain.id)
   const [adding, setAdding] = useState(false)
+  // The new domain's window opens at once; the list's copy (its records to publish) replaces
+  // this one when the shop is read again
+  const showAdded = (domain: { id: string; hostname: string }) => {
+    walk.show({
+      ...domain,
+      kind: "custom",
+      verification: "pending",
+      is_primary: false,
+      dns: null,
+      created_at: new Date().toISOString(),
+    })
+  }
   const columns: Column<Domain>[] = [
     {
       key: "host",
@@ -84,7 +97,12 @@ export function DomainsCard({ shop }: { shop: TenantDetail }) {
         empty={t("domains.empty")}
       />
       {writable ? (
-        <AddDomainDialog tenantId={shop.tenant.id} open={adding} onOpenChange={setAdding} />
+        <AddDomainDialog
+          tenantId={shop.tenant.id}
+          open={adding}
+          onOpenChange={setAdding}
+          onAdded={showAdded}
+        />
       ) : null}
       <DomainDialog
         tenantId={shop.tenant.id}

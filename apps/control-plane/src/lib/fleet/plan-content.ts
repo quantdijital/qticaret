@@ -10,6 +10,7 @@ import type {
   LimitKey,
   PlanBillingSummary,
   PlanDocument,
+  PlanDomains,
   PlanLimits,
   TenantStatus,
 } from "@qticaret/types/control-plane"
@@ -94,6 +95,8 @@ export interface PlanContentInput {
   flagOverrides: readonly FlagOverrideLike[]
   /** The billing summary (Ek C16); the neutral one when not given. */
   billing?: PlanBillingSummary | undefined
+  /** The shop's proved hosts (F16.7); left out of the document without a proved own domain. */
+  domains?: PlanDomains | undefined
   now: Date
   nodeEnv: string | undefined
 }
@@ -119,7 +122,30 @@ export function planContent(input: PlanContentInput): PlanContent {
     limits,
     platform_flags: Object.fromEntries(flags.map((flag) => [flag.key, flag.value])),
     billing: { ...(input.billing ?? NEUTRAL_BILLING) },
+    ...(input.domains ? { domains: { ...input.domains, hosts: [...input.domains.hosts] } } : {}),
   }
+}
+
+/**
+ * The document's hosts (F16.7): the proved ones, the primary among them.
+ * Undefined while the shop has no proved domain of its own: its document
+ * stays as it was, and a shop not yet knowing the field never meets it.
+ */
+export function planDomainsOf(
+  domains: readonly { hostname: string; kind: string; verified: boolean; is_primary: boolean }[]
+): PlanDomains | undefined {
+  const proved = domains.filter((domain) => domain.verified)
+  if (!proved.some((domain) => domain.kind === "custom")) {
+    return undefined
+  }
+  const primary =
+    proved.find((domain) => domain.is_primary) ??
+    proved.find((domain) => domain.kind === "platform_subdomain") ??
+    proved[0]
+  if (!primary) {
+    return undefined
+  }
+  return { primary: primary.hostname, hosts: proved.map((domain) => domain.hostname).sort() }
 }
 
 /** SHA-256 of the content's canonical JSON: the same content, the same hash. */

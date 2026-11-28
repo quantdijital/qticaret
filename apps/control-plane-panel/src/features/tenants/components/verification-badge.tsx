@@ -5,11 +5,12 @@ import type { Domain } from "@/features/tenants/api"
 
 const TONES: Record<Domain["verification"], StatusTone> = {
   pending: "warning",
-  verified: "success",
+  verified: "info",
+  active: "success",
   failed: "danger",
 }
 
-/** A domain's DNS check: pending until F16.7 verifies it. */
+/** A domain's DNS check (F16.7): pending, verified (proved), active (also pointing here), failed. */
 export function VerificationBadge({ domain }: { domain: Domain }) {
   const { t } = useTranslation()
   return (

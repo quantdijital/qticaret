@@ -187,6 +187,22 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...valid, PLATFORM_DOMAIN: "localhost" })).toBeTruthy()
   })
 
+  it("takes where custom domains point, refusing a URL or a name for an address (F16.7)", () => {
+    expect(
+      parseEnv({
+        ...valid,
+        CP_DOMAIN_CNAME_TARGET: "edge.quantticaret.com",
+        CP_DOMAIN_A_TARGETS: "203.0.113.7, 2001:db8::1",
+      })
+    ).toMatchObject({ CP_DOMAIN_CNAME_TARGET: "edge.quantticaret.com" })
+    expect(problems({ ...valid, CP_DOMAIN_CNAME_TARGET: "https://edge.example.com" })).toContain(
+      "CP_DOMAIN_CNAME_TARGET"
+    )
+    expect(problems({ ...valid, CP_DOMAIN_A_TARGETS: "edge.example.com" })).toContain(
+      "CP_DOMAIN_A_TARGETS"
+    )
+  })
+
   it("keeps the local provisioner to this machine and the fake one to tests (Ek C10)", () => {
     const admin = "postgres://postgres:pw@localhost:55432/postgres"
     expect(

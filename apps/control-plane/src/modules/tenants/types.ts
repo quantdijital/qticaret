@@ -2,6 +2,7 @@ import type { TenantStatus } from "@qticaret/types/control-plane"
 import type {
   CompanyKind,
   ContactRole,
+  DomainCheckError,
   DomainKind,
   DomainVerification,
 } from "../../lib/tenants/kinds"
@@ -70,6 +71,12 @@ export interface DomainRecord {
   kind: DomainKind
   verification: DomainVerification
   is_primary: boolean
+  verification_token: string | null
+  verification_error: DomainCheckError | null
+  verified_at: Date | null
+  last_checked_at: Date | null
+  next_check_at: Date | null
+  check_attempts: number
   created_at: Date
 }
 
@@ -115,6 +122,12 @@ export const DOMAIN_FIELDS = [
   "kind",
   "verification",
   "is_primary",
+  "verification_token",
+  "verification_error",
+  "verified_at",
+  "last_checked_at",
+  "next_check_at",
+  "check_attempts",
   "created_at",
 ] as const
 

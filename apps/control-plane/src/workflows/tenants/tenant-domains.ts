@@ -2,7 +2,8 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { omit } from "../../lib/omit"
-import { MAX_CUSTOM_DOMAINS } from "../../lib/tenants/kinds"
+import { newVerificationToken } from "../../lib/domains/verification"
+import { MAX_CUSTOM_DOMAINS, isVerifiedDomain } from "../../lib/tenants/kinds"
 import type { DomainRecord } from "../../modules/tenants/types"
 import { tenantsIn } from "../modules"
 import { undoableStep } from "../undoable"
@@ -42,7 +43,14 @@ const addDomainStep = undoableStep(
     }
     await service.refuseTakenHost(input.hostname)
     const [made] = await service.createTenantDomains([
-      { tenant_id: input.tenant_id, hostname: input.hostname, kind: "custom" },
+      {
+        tenant_id: input.tenant_id,
+        hostname: input.hostname,
+        kind: "custom",
+        // Its proof: the TXT record the owner publishes (lib/domains); the job checks soon
+        verification_token: newVerificationToken(),
+        next_check_at: new Date(Date.now() + 60_000),
+      },
     ])
     return { output: { id: made?.id ?? "" }, undo: made?.id ?? "" }
   },
@@ -53,7 +61,7 @@ const addDomainStep = undoableStep(
   }
 )
 
-/** A custom domain recorded, its DNS check pending (F16.7). */
+/** A custom domain recorded with its token, its DNS check pending (F16.7). */
 export const addDomainWorkflow = createWorkflow(
   { name: "cp-tenant-add-domain", store: false },
   (input: WorkflowData<{ tenant_id: string; hostname: string }>) =>
@@ -117,7 +125,7 @@ const primaryStep = undoableStep(
   async (input: DomainInput, container) => {
     const { all, domain } = await domainOf(container, input.tenant_id, input.domain_id)
     // An unverified domain as the canonical address would break the storefront's links
-    if (domain.verification !== "verified") {
+    if (!isVerifiedDomain(domain.verification)) {
       throw refused("cp.domain_unverified")
     }
     await markPrimary(container, input.tenant_id, domain.id)

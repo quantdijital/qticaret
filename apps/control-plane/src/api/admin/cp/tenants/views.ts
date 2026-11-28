@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { platformFlags } from "@qticaret/types/control-plane"
+import { domainView } from "../../../../lib/domains/view"
 import { effectiveFlags } from "../../../../lib/fleet/plan-content"
 import { tenantVersionOf } from "../../../../lib/fleet/release-views"
 import { effectiveLimits } from "../../../../lib/plans/limits"
@@ -116,7 +117,8 @@ export async function tenantDetail(
           }
         : bare(contact)
     ),
-    domains: domains.map(bare),
+    // F16.7: a custom domain with the DNS records its owner is to publish
+    domains: domains.map((domain) => domainView(bare(domain))),
     notes: notes.map((note) => ({
       ...bare(note),
       author: note.author_id ? (names[note.author_id] ?? null) : null,

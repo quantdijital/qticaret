@@ -3,7 +3,7 @@ import type { LimitKey } from "@qticaret/types/control-plane"
 import { api } from "@/lib/api"
 import { withStepUp } from "@/lib/step-up"
 import { TENANTS_KEY, tenantKey, tenantPath } from "./api"
-import type { CompanyKind, ContactRole } from "./api"
+import type { CompanyKind, ContactRole, Domain } from "./api"
 
 /** A change to one shop: its page and the list are read again once it settles. */
 function useShopChange<I, O>(id: string, call: (input: I) => Promise<O>) {
@@ -78,16 +78,37 @@ export const useRemoveContact = (id: string) =>
   )
 
 export const useAddDomain = (id: string) =>
-  useShopChange(id, (hostname: string) => post(tenantPath(id, "/domains"), { hostname }))
-
-export const useRemoveDomain = (id: string) =>
-  useShopChange(id, (domainId: string) =>
-    api(tenantPath(id, `/domains/${encodeURIComponent(domainId)}`), { method: "DELETE" })
+  useShopChange(id, (hostname: string) =>
+    post<{ domain: { id: string; hostname: string } }>(tenantPath(id, "/domains"), { hostname })
   )
 
+/** A domain removed: a live storefront's address may go, so a step-up (F16.7). */
+export const useRemoveDomain = (id: string) =>
+  useShopChange(id, (domainId: string) =>
+    withStepUp((headers) =>
+      api(tenantPath(id, `/domains/${encodeURIComponent(domainId)}`), {
+        method: "DELETE",
+        headers,
+      })
+    )
+  )
+
+/** The storefront's canonical address moved: a step-up (F16.7). */
 export const usePrimaryDomain = (id: string) =>
   useShopChange(id, (domainId: string) =>
-    post(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/primary`), {})
+    withStepUp((headers) =>
+      post(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/primary`), {}, headers)
+    )
+  )
+
+export interface DomainCheck {
+  domain: { id: string; verification: Domain["verification"]; verification_error: string | null }
+}
+
+/** "Doğrula": the domain's DNS asked now (F16.7). */
+export const useCheckDomain = (id: string) =>
+  useShopChange(id, (domainId: string) =>
+    post<DomainCheck>(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/check`), {})
   )
 
 export const useSaveNote = (id: string) =>

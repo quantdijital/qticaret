@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { parseTenantApiHosts } from "./fleet/push-target"
+import { parseRoutingTarget } from "./domains/verification"
 import { publicDomainProblem } from "./tenants/hostname"
 import { localAdminUrlProblem } from "./provisioning/local/admin-url"
 import { localControlPlaneUrlProblem } from "./provisioning/local/control-plane-url"
@@ -23,6 +24,15 @@ import { EscrowError, parseAgeRecipients } from "@qticaret/server-kit/escrow"
  */
 
 export { EnvValidationError, isLocalEnv }
+
+function routingTargetValid(cname?: string, addresses?: string): boolean {
+  try {
+    parseRoutingTarget(cname, addresses)
+    return true
+  } catch {
+    return false
+  }
+}
 
 const envSchema = z.object({
   // No default: an unset NODE_ENV must not quietly mean "development"
@@ -63,6 +73,20 @@ const envSchema = z.object({
       /^(?=.{1,200}$)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/,
       "must be a lower-case host name"
     ),
+  // F16.7: where a shop's own domain is to point (shown to its owner, and a
+  // domain pointing there is `active`): the edge's host for a CNAME and its
+  // addresses for an apex's A/AAAA records, comma-separated. Unset until the
+  // server exists (F16): domains are proved, never `active`
+  CP_DOMAIN_CNAME_TARGET: z
+    .string()
+    .max(253)
+    .refine((value) => routingTargetValid(value, undefined), "must be a host name")
+    .optional(),
+  CP_DOMAIN_A_TARGETS: z
+    .string()
+    .max(1000)
+    .refine((value) => routingTargetValid(undefined, value), "must list IP addresses")
+    .optional(),
   // The control plane's panel (apps/control-plane-panel): invitation links
   CP_PANEL_URL: z.url({ protocol: /^https?$/, error: "must be an http(s) URL" }),
   // E-mail (adr/0061 Ek C4): Mailpit on a developer's machine; unset, nothing

@@ -477,7 +477,7 @@
     "title": "Domains",
     "text": "The addresses the shop answers on; the primary one is the storefront's address.",
     "add": "Add domain",
-    "addText": "The shop's own domain is recorded; its DNS check is done at launch.",
+    "addText": "Once saved, the TXT record to add to DNS is shown; it is checked automatically.",
     "addSubmit": "Add",
     "hostname": "Domain",
     "empty": "No domain.",
@@ -493,7 +493,8 @@
     "states": {
       "pending": "Awaiting verification",
       "verified": "Verified",
-      "failed": "Not verified"
+      "failed": "Not verified",
+      "active": "Active"
     },
     "primary": "Primary",
     "isPrimary": "The storefront's primary address",
@@ -511,6 +512,36 @@
       "title": "Remove domain",
       "text": "{{host}} is taken off the shop's addresses.",
       "action": "Remove"
+    },
+    "failedText": "It could not be verified within a week. If the record is in place, press Verify.",
+    "check": "Verify",
+    "checking": "Checking…",
+    "checkProved": "Domain verified.",
+    "checkNotYet": "Not verified yet; the reason is in the window.",
+    "lastChecked": "Last check",
+    "never": "Not checked yet",
+    "ssl": "SSL",
+    "sslLater": "Issued once the server is set up",
+    "dns": {
+      "title": "DNS records",
+      "txtText": "To show you own the domain, add this TXT record to your domain's DNS settings.",
+      "cnameText": "Then add this CNAME record to point the address at the platform.",
+      "aText": "Then add these A records to point the address at the platform.",
+      "routingLater": "The routing record appears here once the server is set up; for now the TXT record is enough.",
+      "type": "Type",
+      "name": "Name",
+      "value": "Value",
+      "copy": "Copy {{what}}",
+      "copied": "Copied."
+    },
+    "reasons": {
+      "txt_missing": "No TXT record found. If it was just added, DNS may take a few hours to spread.",
+      "txt_mismatch": "There is a TXT record but its value differs; enter the value above exactly.",
+      "dns_unavailable": "DNS did not answer; it will be tried again automatically.",
+      "expired": "It could not be verified within a week; automatic checks stopped.",
+      "txt_lost": "The TXT record was removed from DNS. The domain stays verified; adding it back is advised.",
+      "routing_missing": "The address does not point at the platform yet.",
+      "routing_mismatch": "The address points elsewhere; check the routing record."
     }
   },
   "plan": {
