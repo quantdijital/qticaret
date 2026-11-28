@@ -121,6 +121,9 @@ describe("staff roles", () => {
     ["GET", "/admin/storefront%2Dpresets/general/sade/preview"],
     ["POST", "/admin/storefront-presets/general/sade/apply"],
     ["POST", "/admin/Storefront-Presets/general/sade/apply"],
+    // The support switch, its sessions and history (adr/0061 Ek "Destek erişimi")
+    ["GET", "/admin/support-access"],
+    ["POST", "/admin/support-access/sessions/sgr_x/end"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
@@ -897,6 +900,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-layout/revisions/:revision/restore": false,
   // adr/0063 §7: a preset into the draft, as a draft's save
   "POST /admin/storefront-presets/:pack/:code/apply": false,
+  "POST /admin/support-access/sessions/:grant_id/end": false,
   // The sample catalogue (owner, 2026-11-28): owner and admin
   "POST /admin/sample-catalog/load": false,
   "POST /admin/sample-catalog/remove": false,

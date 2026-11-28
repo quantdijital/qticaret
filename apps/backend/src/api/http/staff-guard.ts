@@ -14,7 +14,9 @@ import type { SecuritySettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
+import { isSupportActor } from "../../lib/support-access/session"
 import { rejectRequest } from "./reject"
+import { guardSupportRequest } from "./support-guard"
 import { decodedSegment, routePath, routePathKeepingCase } from "./request-path"
 
 const userOf = (req: MedusaRequest): string | undefined => {
@@ -70,10 +72,15 @@ export async function apiKeyTypeOf(req: MedusaRequest): Promise<string | undefin
 
 /**
  * The signed-in staff member's role: undefined for anyone else (a key,
- * nobody), null for a user without one.
+ * nobody), null for a user without one; `owner` for a support session.
  */
 export async function staffRoleOf(req: MedusaRequest): Promise<StaffRole | null | undefined> {
   const userId = userOf(req)
+  if (isSupportActor(userId)) {
+    // A support session (adr/0061 Ek "Destek erişimi", Karar 5): the owner's reach inside a
+    // route; what it may not call at all the support guard refused before the route
+    return "owner"
+  }
   return userId
     ? req.scope.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId)
     : undefined
@@ -91,6 +98,10 @@ export async function guardStaffRoles(
   res: MedusaResponse,
   next: MedusaNextFunction
 ): Promise<void> {
+  // A support session is held to its record and its own list, never to a role (Karar 4–5)
+  if (await guardSupportRequest(req, res, next)) {
+    return
+  }
   const role = await staffRoleOf(req)
   if (role === undefined) {
     next()

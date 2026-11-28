@@ -81,6 +81,7 @@ import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
 import { CONTROL_PLANE_ROUTES } from "./http/control-plane-routes"
+import { SUPPORT_ROUTES } from "./http/support-routes"
 import { BIRFATURA_ROUTES } from "./http/birfatura-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
@@ -381,6 +382,8 @@ export default defineMiddlewares({
     ...ALERT_ROUTES,
     // adr/0061 Ek C9: the control plane's signed plan document push
     ...CONTROL_PLANE_ROUTES,
+    // adr/0061 Ek "Destek erişimi": the platform's support sessions
+    ...SUPPORT_ROUTES,
     // adr/0072 §3: BirFatura pulling the shop's orders and writing invoices back
     ...BIRFATURA_ROUTES,
     // adr/0061 Ek C14: Settings > Abonelik's reading

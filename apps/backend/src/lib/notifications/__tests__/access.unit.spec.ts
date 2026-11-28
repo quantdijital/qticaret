@@ -140,7 +140,7 @@ describe("every alert kind is named, open or closed (adr/0020)", () => {
 describe("which roles get which alerts (adr/0040)", () => {
   const closedTo: Record<string, readonly string[]> = {
     owner: [],
-    admin: ["migration.not_found_seen"],
+    admin: ["migration.not_found_seen", "support_access.started"],
     operations: Object.keys(ALERT_ACCESS),
     readonly: Object.keys(ALERT_ACCESS),
   }

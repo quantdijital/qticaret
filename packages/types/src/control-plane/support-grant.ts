@@ -36,10 +36,12 @@ export const SUPPORT_REASON_MAX = 500
 export const SUPPORT_OPERATOR_NAME_MAX = 100
 
 // Control and invisible format characters never reach a shop's panel or e-mail
-const PLAIN_LINE = /^[^\p{Cc}\p{Cf}  ]*$/u
+const PLAIN_LINE = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
 
 /** The grant's id: its single-use nonce, 16 random bytes and more in base64url. */
-export const supportGrantIdSchema = z.string().regex(/^sgr_[A-Za-z0-9_-]{22,64}$/, "must be a grant id")
+export const supportGrantIdSchema = z
+  .string()
+  .regex(/^sgr_[A-Za-z0-9_-]{22,64}$/, "must be a grant id")
 
 /** The session's actor id in the shop: `qtsup_` and the grant's random part. */
 export const SUPPORT_ACTOR_PREFIX = "qtsup_"
@@ -86,7 +88,11 @@ export const SUPPORT_GRANT_MAX_CHARS = 4096
 
 /** Its body at `POST /auth/support-access`. */
 export const supportAccessRequestSchema = z.strictObject({
-  grant: z.string().min(16).max(SUPPORT_GRANT_MAX_CHARS).regex(/^[A-Za-z0-9_-]+$/),
+  grant: z
+    .string()
+    .min(16)
+    .max(SUPPORT_GRANT_MAX_CHARS)
+    .regex(/^[A-Za-z0-9_-]+$/),
 })
 export type SupportAccessRequest = z.infer<typeof supportAccessRequestSchema>
 
