@@ -5,6 +5,9 @@ import { templateSourceOf } from "../../../lib/catalog/addons"
 import { ValidationError } from "../../../lib/errors"
 import { BRANDS_MODULE } from "../../../modules/brands"
 import type BrandsModuleService from "../../../modules/brands/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
+import { CATALOG_BOOKING, NON_PHYSICAL_PRODUCTS } from "../../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { requireAddonsFlag } from "../../addon-templates/usage"
 import type { BulkChange } from "./change"
 import type { PlanContext } from "./plan-result"
@@ -91,6 +94,22 @@ async function addonTemplatesContext(
   return { locationId: null, addonTemplates: templates }
 }
 
+// A kind change's flags, read once; the reserved range mode is refused for the run (adr/0076 §11)
+async function kindContext(
+  container: MedusaContainer,
+  change: Extract<BulkChange, { action: "kind" }>
+): Promise<PlanContext> {
+  if (change.booking_mode === "range") {
+    throw new ValidationError("catalog.booking_range_unavailable", { field: "booking_mode" })
+  }
+  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const [nonPhysical, booking] = await Promise.all([
+    settings.isFeatureEnabled(NON_PHYSICAL_PRODUCTS),
+    settings.isFeatureEnabled(CATALOG_BOOKING),
+  ])
+  return { locationId: null, features: { nonPhysical, booking } }
+}
+
 /**
  * What a run needs of the shop before it plans a product: the change's
  * category, brand, tag or add-on template checked once (unknown: refused
@@ -132,6 +151,8 @@ export async function planContext(
       return { locationId: null, now: new Date() }
     case "addon_template":
       return addonTemplatesContext(container, change)
+    case "kind":
+      return kindContext(container, change)
     case "stock": {
       const { data } = await query.graph({ entity: "store", fields: ["default_location_id"] })
       const locationId = (data[0] as { default_location_id?: string | null } | undefined)

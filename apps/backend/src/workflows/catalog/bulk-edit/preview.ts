@@ -5,6 +5,7 @@ import { publishGate } from "../../seo/advisor/publish-gate"
 import type { BulkChange } from "./change"
 import { planContext } from "./context"
 import { planBulkChange } from "./plan"
+import { endsBooking } from "./plan-kind"
 import { bulkProducts } from "./products"
 import { problemOf } from "./report"
 import type { BulkOutcome, BulkProblem } from "./report"
@@ -16,6 +17,11 @@ export interface BulkPreview {
   unchanged: number
   skipped: number
   problems: BulkProblem[]
+  /**
+   * A kind change's: the dated products it takes off dated sale, for the
+   * warning the product page asks before the same (adr/0076 Ek D2).
+   */
+  booking_off?: number
 }
 
 // Products read with their variants at a time
@@ -44,6 +50,7 @@ export async function previewBulkEdit(
     unchanged: 0,
     skipped: 0,
     problems: [],
+    ...(change.action === "kind" ? { booking_off: 0 } : {}),
   }
   const count = (
     product: { handle: string; title: string | null },
@@ -82,6 +89,9 @@ export async function previewBulkEdit(
         count(product, "skipped", "seo.publish_gate_blocked")
       } else {
         count(product, "changed", null)
+        if (preview.booking_off !== undefined && endsBooking(plan)) {
+          preview.booking_off += 1
+        }
       }
     }
   }
