@@ -1,7 +1,6 @@
 import { Eye } from "lucide-react"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -10,26 +9,19 @@ import { DesignThumb } from "./design-thumb"
 import { hasNewVersion, shownMember } from "./families"
 import type { PresetFamily } from "./families"
 import { LookFacts } from "./look-facts"
+import { LookState } from "./look-state"
 import { thumbColors } from "./thumb-colors"
 
 const G = "storefront.gallery"
 
-/** A look's state in badges: its tone, whether it is live or in the draft, a newer version. */
+/** A look's one state (live, else in the draft) and a newer version; its tone shows in its picture. */
 export function PresetBadges({ preset }: { preset: Preset }) {
-  const { t } = useTranslation()
   return (
-    <div className="flex flex-wrap gap-1.5">
-      <StatusBadge tone="neutral">{t(`${G}.tone.${preset.tone}`)}</StatusBadge>
-      {preset.live !== null ? (
-        <StatusBadge tone="success">{t(`${G}.badge.live`)}</StatusBadge>
-      ) : null}
-      {preset.in_draft !== null ? (
-        <StatusBadge tone="info">{t(`${G}.badge.draft`)}</StatusBadge>
-      ) : null}
-      {hasNewVersion(preset) ? (
-        <StatusBadge tone="warning">{t(`${G}.badge.newVersion`)}</StatusBadge>
-      ) : null}
-    </div>
+    <LookState
+      live={preset.live !== null}
+      inDraft={preset.in_draft !== null}
+      newer={hasNewVersion(preset)}
+    />
   )
 }
 
@@ -79,19 +71,17 @@ export function PresetCard({ family, onPreview, onApply, busy }: PresetCardProps
   return (
     <article
       aria-labelledby={`${ids}-title`}
-      className="flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-3 shadow-card"
+      className="flex min-w-0 flex-col gap-2.5 rounded-lg border bg-card p-2.5 shadow-card"
     >
       <PresetPicture preset={preset} />
-      <div className="flex flex-1 flex-col gap-2 px-1">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <h3 id={`${ids}-title`} className="text-[15px] leading-6 font-semibold">
+      <div className="flex flex-1 flex-col gap-1.5 px-0.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 id={`${ids}-title`} className="text-sm leading-6 font-semibold">
             {family.name}
           </h3>
           <PresetBadges preset={preset} />
         </div>
-        <p className="line-clamp-3 text-[13px] leading-5 text-muted-foreground">
-          {preset.description}
-        </p>
+        <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">{preset.description}</p>
         <LookFacts summary={preset.summary} />
         {family.members.length > 1 ? (
           <RadioGroup
@@ -128,7 +118,7 @@ export function PresetCard({ family, onPreview, onApply, busy }: PresetCardProps
           </RadioGroup>
         ) : null}
       </div>
-      <div className="mt-auto flex flex-wrap gap-2 px-1 pb-1">
+      <div className="mt-auto flex flex-wrap justify-end gap-2 px-0.5">
         <Button
           type="button"
           variant="ghost"

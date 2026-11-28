@@ -1,88 +1,47 @@
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { DesignSummary } from "./api"
+import { Block } from "./thumb-blocks"
+import type { Shape } from "./thumb-blocks"
 import { thumbColors } from "./thumb-colors"
-import type { ThumbColors } from "./thumb-colors"
 
 /**
- * A look drawn from its summary (adr/0064 K1 a): no picture of it is
- * taken, so the card sketches what it holds: the page colour, a header
- * bar with the main colour, the home page's first sections as blocks of
- * their kind, the footer. Decorative: the card names the look beside it.
+ * A look drawn from its own summary (adr/0064 K1 a), for a look with no
+ * picture (a saved one, the draft): its page colour, a header in its main
+ * colour, the home page's first sections in their order, each kind its own
+ * shape (`thumb-blocks`), and a footer as deep as its sections. Two looks
+ * with other colours, sections or order draw apart. Decorative: the card
+ * names the look beside it.
  */
 
-type Shape = "hero" | "cards" | "tiles" | "strip" | "text"
-
+// Each home section type's shape; one not listed draws as text
 const SHAPES: Record<string, Shape> = {
   hero: "hero",
-  hero_slider: "hero",
-  banner: "hero",
+  hero_slider: "slider",
   featured_product: "hero",
+  banner: "banner",
   products: "cards",
   related_products: "cards",
-  program: "text",
   posts: "cards",
   categories: "tiles",
   brands: "tiles",
   strip_gallery: "tiles",
-  trust_badges: "strip",
-  marquee: "strip",
-  price_bands: "strip",
-  stats: "strip",
-  search_box: "strip",
-  steps: "text",
-  photo_collage: "cards",
-  departures: "strip",
+  departures: "list",
+  stats: "figures",
+  price_bands: "figures",
+  steps: "steps",
+  reviews: "quotes",
+  testimonials: "quotes",
+  trust_badges: "band",
+  marquee: "band",
+  search_box: "search",
+  photo_collage: "collage",
+  program: "text",
+  faq: "text",
+  rich_text: "text",
 }
 
-// How much of the page each kind takes, as a share of the room
-const WEIGHT: Record<Shape, number> = { hero: 5, cards: 4, tiles: 3, strip: 1, text: 2 }
 // The sketch has room for this many sections; the rest run off the page as a store's do
 const SHOWN = 6
-
-function Block({ shape, colors }: { shape: Shape; colors: ThumbColors }) {
-  const grow = { flexGrow: WEIGHT[shape] }
-  if (shape === "hero") {
-    return (
-      <div
-        className="flex min-h-0 basis-0 items-end rounded-[3%] p-[3%]"
-        style={{ ...grow, backgroundColor: colors.well }}
-      >
-        <span
-          className="block h-[18%] max-h-2 min-h-1 w-[22%] rounded-full"
-          style={{ backgroundColor: colors.primary }}
-        />
-      </div>
-    )
-  }
-  if (shape === "strip") {
-    return (
-      <div
-        className="min-h-[2px] basis-0 rounded-full opacity-60"
-        style={{ ...grow, backgroundColor: colors.accent }}
-      />
-    )
-  }
-  if (shape === "text") {
-    return (
-      <div className="flex min-h-0 basis-0 flex-col justify-center gap-[6%]" style={grow}>
-        <span className="block h-[2px] w-2/3 opacity-40" style={{ backgroundColor: colors.ink }} />
-        <span className="block h-[2px] w-1/2 opacity-25" style={{ backgroundColor: colors.ink }} />
-      </div>
-    )
-  }
-  const count = shape === "cards" ? 4 : 3
-  return (
-    <div className="flex min-h-0 basis-0 gap-[3%]" style={grow}>
-      {Array.from({ length: count }, (_, index) => (
-        <span
-          key={index}
-          className="block flex-1 rounded-[6%]"
-          style={{ backgroundColor: colors.well }}
-        />
-      ))}
-    </div>
-  )
-}
 
 export function DesignThumb({
   summary,
@@ -92,50 +51,58 @@ export function DesignThumb({
   className?: string | undefined
 }) {
   const colors = thumbColors(summary.colors)
-  const shapes = summary.home_types.slice(0, SHOWN).map((type) => SHAPES[type] ?? "text")
+  const shapes: Shape[] = summary.home_types.slice(0, SHOWN).map((type) => SHAPES[type] ?? "text")
+  const footer = Math.min(summary.sections.footer, 3)
   return (
     <div
       aria-hidden
       data-design-thumb=""
       className={cn(
-        "flex aspect-[16/10] w-full flex-col gap-[3%] overflow-hidden rounded-md border",
+        "flex aspect-[16/10] w-full flex-col gap-[2.5%] overflow-hidden rounded-md border",
         className
       )}
       style={{ backgroundColor: colors.page }}
     >
-      <div className="flex shrink-0 flex-col">
-        <span className="block h-1 w-full" style={{ backgroundColor: colors.stage }} />
-        <div className="flex items-center gap-[4%] px-[5%] py-[2.5%]">
+      {summary.sections.header > 0 ? (
+        <div className="flex shrink-0 items-center gap-[3%] px-[5%] pt-[2.5%]">
+          <span className="block size-2 rounded-full" style={{ backgroundColor: colors.primary }} />
           <span
-            className="block size-2.5 rounded-full"
-            style={{ backgroundColor: colors.primary }}
+            className="block h-[3px] w-[12%]"
+            style={{ backgroundColor: colors.ink, opacity: 0.6 }}
           />
           <span
-            className="block h-[3px] w-[10%] opacity-50"
+            className="ml-auto block h-[2px] w-[7%] opacity-40"
             style={{ backgroundColor: colors.ink }}
           />
           <span
-            className="block h-[3px] w-[8%] opacity-50"
+            className="block h-[2px] w-[7%] opacity-40"
             style={{ backgroundColor: colors.ink }}
           />
           <span
-            className="block h-[3px] w-[9%] opacity-50"
+            className="block h-[2px] w-[7%] opacity-40"
             style={{ backgroundColor: colors.ink }}
           />
           <span
-            className="ml-auto block h-2 w-[14%] rounded-full"
+            className="ml-auto block h-2 w-[12%] rounded-full"
             style={{ backgroundColor: colors.primary }}
           />
         </div>
-      </div>
+      ) : null}
       <div className="flex min-h-0 flex-1 flex-col gap-[3%] px-[5%]">
-        {shapes.length === 0 ? <Block shape="hero" colors={colors} /> : null}
+        {shapes.length === 0 ? <Block shape="text" colors={colors} /> : null}
         {shapes.map((shape, index) => (
           <Block key={index} shape={shape} colors={colors} />
         ))}
       </div>
-      {summary.sections.footer > 0 ? (
-        <span className="block h-[9%] w-full shrink-0" style={{ backgroundColor: colors.stage }} />
+      {footer > 0 ? (
+        <div
+          className="flex shrink-0 items-start gap-[6%] px-[5%] pt-[2%]"
+          style={{ height: `${String(6 + footer * 3)}%`, backgroundColor: colors.stage }}
+        >
+          {Array.from({ length: footer + 1 }, (_, index) => (
+            <span key={index} className="block h-[2px] w-[10%] bg-white/40" />
+          ))}
+        </div>
       ) : null}
     </div>
   )

@@ -13094,7 +13094,6 @@
     "gallery": {
       "title": "Looks",
       "description": "Choose your store's look, save it and come back to it any time. Changes stay hidden from visitors until you publish.",
-      "openEditor": "Open theme editor",
       "noAccess": "Only the shop owner can open the looks.",
       "thumbAlt": "Thumbnail of the {{name}} look",
       "sections_one": "{{count}} section",
@@ -13102,17 +13101,19 @@
       "from": "From {{name}}",
       "current": {
         "title": "Current look",
-        "liveLabel": "Live",
-        "live": "{{name}} · published {{date}}",
-        "neverLive": "Not published yet; visitors see the default look.",
-        "draftLabel": "Draft",
         "draftEdited": "{{name}}, edited",
         "draftChanged": "The draft has unpublished changes",
-        "draftSame": "The draft matches what is live",
         "newVersion": "This ready-made look has a new version. Apply it again to bring the new version into the draft.",
         "edit": "Edit",
         "save": "Save this look",
-        "full": "Saved looks are full; delete one to save another."
+        "full": "Saved looks are full; delete one to save another.",
+        "about": "The draft is the look you work on in the theme editor. Visitors see the live look until you press Publish.",
+        "notLive": "Not published yet",
+        "defaultShown": "Visitors see the default look.",
+        "liveIs": "Live: {{name}} · {{date}}",
+        "since": "since {{date}}",
+        "previewDraft": "Preview the draft in a new tab",
+        "saveShort": "Save"
       },
       "saved": {
         "title": "My saved looks ({{count}}/{{max}})",
@@ -13120,10 +13121,13 @@
         "autoNote": "The last {{max}} automatic saves are kept; they don't count toward the saved-look limit.",
         "empty": "You have no saved looks yet. Save the current look to come back to it any time.",
         "emptyAction": "Save the current look",
-        "unavailable": "Saved looks could not be loaded."
+        "unavailable": "Saved looks could not be loaded.",
+        "about": "Save your look by name and bring it back into the draft at any time. When a look goes into the draft, the draft before it is saved automatically; the last {{max}} automatic saves are kept.",
+        "namedEmpty": "No look saved by name yet.",
+        "autoTitle": "Automatic saves ({{count}})",
+        "autoLatest": "Newest: {{date}}"
       },
       "auto": {
-        "badge": "Automatic",
         "name": "{{source}}, {{date}}",
         "nameEdited": "{{source}}, {{date}}, edited",
         "own": "Your own design"
@@ -13133,10 +13137,6 @@
         "draft": "In draft",
         "edited": "edited",
         "newVersion": "New version"
-      },
-      "tone": {
-        "light": "Light",
-        "dark": "Dark"
       },
       "card": {
         "apply": "Load into draft",

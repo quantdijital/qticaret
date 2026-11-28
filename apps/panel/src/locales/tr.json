@@ -13094,7 +13094,6 @@
     "gallery": {
       "title": "Görünümler",
       "description": "Mağazanızın görünümünü seçin, kaydedin ve istediğiniz zaman geri dönün. Değişiklikler siz yayınlayana kadar ziyaretçilere görünmez.",
-      "openEditor": "Tema düzenleyiciyi aç",
       "noAccess": "Görünümleri yalnız mağaza sahibi açabilir.",
       "thumbAlt": "{{name}} görünümünün küçük resmi",
       "sections_one": "{{count}} bölüm",
@@ -13102,17 +13101,19 @@
       "from": "{{name}} görünümünden",
       "current": {
         "title": "Şu anki görünüm",
-        "liveLabel": "Yayında",
-        "live": "{{name}} · {{date}} tarihinde yayınlandı",
-        "neverLive": "Henüz yayınlanmadı; ziyaretçiler varsayılan görünümü görüyor.",
-        "draftLabel": "Taslak",
         "draftEdited": "{{name}}, düzenlenmiş",
         "draftChanged": "Taslakta yayınlanmamış değişiklik var",
-        "draftSame": "Taslak yayındakiyle aynı",
         "newVersion": "Bu hazır görünümün yeni sürümü var. Yeniden uygularsanız taslağa yeni sürüm gelir.",
         "edit": "Düzenle",
         "save": "Bu görünümü kaydet",
-        "full": "Adlı kayıtlar dolu; yenisi için birini silin."
+        "full": "Adlı kayıtlar dolu; yenisi için birini silin.",
+        "about": "Taslak, tema düzenleyicide üzerinde çalıştığınız görünümdür. Yayınla'ya basana kadar ziyaretçiler yayındaki görünümü görür.",
+        "notLive": "Henüz yayınlanmadı",
+        "defaultShown": "Ziyaretçiler varsayılan görünümü görüyor.",
+        "liveIs": "Yayında: {{name}} · {{date}}",
+        "since": "{{date}} tarihinden beri",
+        "previewDraft": "Taslağı yeni sekmede önizle",
+        "saveShort": "Kaydet"
       },
       "saved": {
         "title": "Kayıtlı görünümlerim ({{count}}/{{max}})",
@@ -13120,10 +13121,13 @@
         "autoNote": "Otomatik kayıtların son {{max}} tanesi tutulur; adlı kayıt sınırına sayılmaz.",
         "empty": "Henüz kayıtlı görünümünüz yok. Şu anki görünümü kaydederek istediğiniz zaman geri dönebilirsiniz.",
         "emptyAction": "Şu anki görünümü kaydet",
-        "unavailable": "Kayıtlı görünümler yüklenemedi."
+        "unavailable": "Kayıtlı görünümler yüklenemedi.",
+        "about": "Görünümünüzü adıyla kaydedip istediğiniz zaman taslağa geri alabilirsiniz. Bir görünüm taslağa alınırken önceki taslak otomatik kaydedilir; son {{max}} otomatik kayıt tutulur.",
+        "namedEmpty": "Henüz adıyla kaydettiğiniz bir görünüm yok.",
+        "autoTitle": "Otomatik kayıtlar ({{count}})",
+        "autoLatest": "En yenisi: {{date}}"
       },
       "auto": {
-        "badge": "Otomatik",
         "name": "{{source}}, {{date}}",
         "nameEdited": "{{source}}, {{date}}, düzenlenmiş",
         "own": "Kendi tasarımınız"
@@ -13133,10 +13137,6 @@
         "draft": "Taslakta",
         "edited": "düzenlenmiş",
         "newVersion": "Yeni sürüm var"
-      },
-      "tone": {
-        "light": "Açık",
-        "dark": "Koyu"
       },
       "card": {
         "apply": "Taslağa al",
