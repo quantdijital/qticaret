@@ -12,22 +12,32 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { Label } from "@qticaret/admin-ui/ui/label"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 import type { Domain } from "@/features/tenants/api"
-import { useAddDomain, usePrimaryDomain, useRemoveDomain } from "@/features/tenants/mutations"
+import { isVerified } from "@/features/tenants/api"
+import {
+  useAddDomain,
+  useCheckDomain,
+  usePrimaryDomain,
+  useRemoveDomain,
+} from "@/features/tenants/mutations"
 import { errorText } from "@/lib/errors"
+import { DomainDnsPanel } from "./domain-dns"
 import { VerificationBadge } from "./verification-badge"
 
 // Two labels at least, letters, digits and hyphens; the control plane checks again
 const HOSTNAME = /^(?=.{4,253}$)(?:(?!-)[a-z0-9-]{1,63}(?<!-)\.)+[a-z][a-z0-9-]*$/
 
-/** The shop's own domain recorded (owner, operator): its DNS check waits for F16.7. */
+/** The shop's own domain recorded (owner, operator); its DNS records then show on its row. */
 export function AddDomainDialog({
   tenantId,
   open,
   onOpenChange,
+  onAdded,
 }: {
   tenantId: string
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** The recorded domain: its window opens with the records to publish. */
+  onAdded?: (domain: { id: string; hostname: string }) => void
 }) {
   const { t } = useTranslation()
   const add = useAddDomain(tenantId)
@@ -55,9 +65,10 @@ export function AddDomainDialog({
       onSubmit={() => {
         setFailure(null)
         add.mutate(typed, {
-          onSuccess: () => {
+          onSuccess: (answer) => {
             toast.success(t("domains.added"))
             close(false)
+            onAdded?.(answer.domain)
           },
           onError: (error) => {
             setFailure(errorText(t, error))
@@ -90,10 +101,12 @@ export function AddDomainDialog({
 }
 
 /**
- * One domain, opened from the list: its kind, state and date; "Birincil
- * yap" for a verified one (an unverified address as the canonical one
- * would break the storefront's links: said, not offered), "Kaldır" for the
- * shop's own (the platform's subdomain stays).
+ * One domain, opened from the list: its kind, state and date; for the
+ * shop's own, the DNS records to publish and "Doğrula" (DNS asked now);
+ * "Birincil yap" for a verified one (an unverified address as the
+ * canonical one would break the storefront's links: said, not offered),
+ * "Kaldır" for the shop's own (the platform's subdomain stays). Both are
+ * proved again (step-up).
  */
 export function DomainDialog({
   tenantId,
@@ -111,6 +124,7 @@ export function DomainDialog({
   const { t } = useTranslation()
   const primary = usePrimaryDomain(tenantId)
   const remove = useRemoveDomain(tenantId)
+  const check = useCheckDomain(tenantId)
   const [asking, setAsking] = useState(false)
   const fail = (error: unknown) => toast.error(errorText(t, error))
   const facts: [string, React.ReactNode][] = domain
@@ -134,9 +148,30 @@ export function DomainDialog({
             {t("domains.remove")}
           </Button>
         ) : null}
+        {domain.kind === "custom" ? (
+          <Button
+            variant={isVerified(domain) ? "outline" : "default"}
+            disabled={check.isPending}
+            onClick={() => {
+              check.mutate(domain.id, {
+                onSuccess: (answer) => {
+                  const state = answer.domain.verification
+                  if (state === "verified" || state === "active") {
+                    toast.success(t("domains.checkProved"))
+                  } else {
+                    toast.info(t("domains.checkNotYet"))
+                  }
+                },
+                onError: fail,
+              })
+            }}
+          >
+            {check.isPending ? t("domains.checking") : t("domains.check")}
+          </Button>
+        ) : null}
         {domain.is_primary ? null : (
           <Button
-            disabled={domain.verification !== "verified" || primary.isPending}
+            disabled={!isVerified(domain) || primary.isPending}
             onClick={() => {
               primary.mutate(domain.id, {
                 onSuccess: () => toast.success(t("domains.primarySaved")),
@@ -178,8 +213,13 @@ export function DomainDialog({
               </div>
             ))}
           </dl>
-          {domain?.kind === "custom" && domain.verification !== "verified" ? (
-            <p className="text-[13px] text-muted-foreground">{t("domains.pendingText")}</p>
+          {domain?.kind === "custom" && !isVerified(domain) ? (
+            <p className="text-[13px] text-muted-foreground">
+              {t(domain.verification === "failed" ? "domains.failedText" : "domains.pendingText")}
+            </p>
+          ) : null}
+          {domain?.kind === "custom" && domain.dns ? (
+            <DomainDnsPanel domain={domain} dns={domain.dns} />
           ) : null}
           {domain?.kind === "platform_subdomain" ? (
             <p className="text-[13px] text-muted-foreground">{t("domains.platformText")}</p>

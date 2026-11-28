@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { HealthTarget } from "../../modules/fleet/models/health"
 import type { TenantRecord } from "../../modules/tenants/types"
+import { isVerifiedDomain } from "../tenants/kinds"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import { fleetIn, tenantsIn } from "../../workflows/modules"
 import { eachBounded } from "./bounded"
@@ -101,7 +102,7 @@ async function probeJob(
   const base = job.tenant.storefront_url ?? ""
   const domains = await tenantsIn(container).domainsOf(job.tenant.id)
   const verified = domains
-    .filter((domain) => domain.verification === "verified")
+    .filter((domain) => isVerifiedDomain(domain.verification))
     .map((domain) => domain.hostname)
   const sites = storefrontPolicy(verified)
   const problem = storefrontTargetProblem(base, sites)

@@ -243,14 +243,22 @@ medusaIntegrationTestRunner({
         message: "cp.domain_taken",
       })
       expect((await call.post(path, { hostname: "magaza.localhost" }, owner)).status).toBe(400)
-      expect((await call.post(`${path}/${domainId}/primary`, {}, operator)).data).toMatchObject({
+      expect(
+        (await call.post(`${path}/${domainId}/primary`, {}, operator, await proved(http, operator)))
+          .data
+      ).toMatchObject({
         message: "cp.domain_unverified",
       })
-      expect((await call.delete(`${path}/${platform?.id ?? ""}`, operator)).data).toMatchObject({
+      const sure = await proved(http, operator)
+      expect(
+        (await call.delete(`${path}/${platform?.id ?? ""}`, operator, sure)).data
+      ).toMatchObject({
         message: "cp.domain_platform_kept",
       })
       expect((await call.delete(`${path}/${domainId}`, readonly)).status).toBe(403)
-      expect((await call.delete(`${path}/${domainId}`, operator)).status).toBe(200)
+      // F16.7: removing an address is proved again
+      expect((await call.delete(`${path}/${domainId}`, operator)).status).toBe(428)
+      expect((await call.delete(`${path}/${domainId}`, operator, sure)).status).toBe(200)
       expect((await detail(id)).domains).toHaveLength(1)
     })
 

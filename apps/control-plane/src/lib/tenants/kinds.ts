@@ -10,9 +10,36 @@ export type ContactRole = (typeof CONTACT_ROLES)[number]
 export const DOMAIN_KINDS = ["platform_subdomain", "custom"] as const
 export type DomainKind = (typeof DOMAIN_KINDS)[number]
 
-/** A custom domain waits for its DNS check (F16.7); the platform's subdomain is verified. */
-export const DOMAIN_VERIFICATIONS = ["pending", "verified", "failed"] as const
+/**
+ * A custom domain's DNS check (F16.7): `pending` until its TXT record
+ * proves the shop holds it, then `verified`, and `active` once it also
+ * points at the platform; `failed` when no proof came in time. The
+ * platform's subdomain is `verified` by definition.
+ */
+export const DOMAIN_VERIFICATIONS = ["pending", "verified", "active", "failed"] as const
 export type DomainVerification = (typeof DOMAIN_VERIFICATIONS)[number]
+
+/** Whether the shop's hold on the domain is proven (it may be primary, the shop may use it). */
+export const isVerifiedDomain = (verification: DomainVerification): boolean =>
+  verification === "verified" || verification === "active"
+
+/**
+ * Why the last check did not prove or route a domain, as the panel says
+ * it: no TXT record, a TXT record with another token, DNS not answering
+ * in time, no proof within the domain's time (`expired`), the proof since
+ * removed from DNS (`txt_lost`, a warning: the domain stays verified), the
+ * address not pointing at the platform yet.
+ */
+export const DOMAIN_CHECK_ERRORS = [
+  "txt_missing",
+  "txt_mismatch",
+  "dns_unavailable",
+  "expired",
+  "txt_lost",
+  "routing_missing",
+  "routing_mismatch",
+] as const
+export type DomainCheckError = (typeof DOMAIN_CHECK_ERRORS)[number]
 
 export const NOTE_MAX = 2000
 
@@ -23,3 +50,8 @@ export const NOTE_MAX = 2000
  */
 export const MAX_CONTACTS = 50
 export const MAX_CUSTOM_DOMAINS = 50
+/**
+ * Their names together (F16.7 review L4): the proved ones travel in the
+ * signed plan document, held to 16 KiB; this keeps room for the rest.
+ */
+export const MAX_CUSTOM_DOMAIN_CHARS = 4000

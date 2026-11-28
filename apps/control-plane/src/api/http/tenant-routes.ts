@@ -109,6 +109,15 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(`${T}/:id/contacts/:contact_id`, PostContact),
   body(`${T}/:id/domains`, PostDomain),
   body(`${T}/:id/domains/:domain_id/primary`, NoBody),
+  {
+    matcher: `${T}/:id/domains/:domain_id/check`,
+    methods: ["POST"],
+    // F16.7 review L1: a check holds the request for DNS; bounded per staff member
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.domain_check, { identity: userIdOf }),
+      validateAndTransformBody(NoBody),
+    ],
+  },
   body(`${T}/:id/notes`, PostNote),
   body(`${T}/:id/notes/:note_id`, PostNoteUpdate),
   body(`${T}/:id/plan`, PostTenantPlan),
