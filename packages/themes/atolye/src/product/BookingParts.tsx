@@ -14,7 +14,7 @@ const DEPARTURE =
   "flex min-h-14 cursor-pointer flex-col justify-center gap-0.5 rounded-inner gf-pill px-4 py-2 text-sm transition-colors duration-(--dur-micro) has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus has-[:disabled]:cursor-not-allowed has-[:disabled]:text-text-3"
 
 const STEP =
-  "flex size-11 shrink-0 items-center justify-center rounded-button bg-paper-2 text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
+  "flex size-11 shrink-0 items-center justify-center rounded-button bg-paper text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
 
 /** A departure's state in words: closed, full, the last few places, or how many. */
 export function departureState(
@@ -151,7 +151,7 @@ export function Counts({
           return (
             <li
               key={category.variantId}
-              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-inner bg-field px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-inner bg-paper-2 px-3 py-2"
             >
               <div className="flex min-w-0 flex-1 basis-20 flex-col">
                 <span className="text-sm font-semibold">{category.title}</span>
