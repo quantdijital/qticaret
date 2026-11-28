@@ -13166,7 +13166,8 @@
         "applyOf": "‘{{name}}’ görünümünü taslağa uygula",
         "colors": "Renk takımı",
         "noPreview": "Bu görünümün resmi henüz yok; şema gösteriliyor.",
-        "frameShop": "Üst ve alt bilgiden bu görünümün tanımlamadığı kısım sizinki olarak kalır."
+        "frameShop": "Üst ve alt bilgiden bu görünümün tanımlamadığı kısım sizinki olarak kalır.",
+        "sectorOf": "{{sector}} için hazırlandı"
       },
       "apply": {
         "title": "‘{{name}}’ taslağa uygulansın mı?",
@@ -13187,7 +13188,23 @@
           "label": "Şimdiki görünümü adıyla da kaydet",
           "full": "Adlı kayıtlar dolu ({{max}}/{{max}}). Otomatik kayıt yine alınır."
         },
-        "confirm": "Taslağa uygula ve düzenle"
+        "confirm": "Taslağa uygula ve düzenle",
+        "madeFor": "Bu görünüm {{sector}} mağazası için hazırlandı.",
+        "styleOnly": "Yalnız stil değişir: bölümleriniz, üst ve alt bilginiz olduğu gibi kalır.",
+        "scope": {
+          "label": "Görünümden ne alınsın",
+          "style": "Yalnız stilini al",
+          "styleHint": "Renkler, yazı tipleri, köşeler, kart biçimi ve stil takımı taslağa gelir; bölümleriniz olduğu gibi kalır.",
+          "full": "Düzeniyle birlikte al",
+          "fullHint": "Stil ve bölümler gelir; bu mağazada karşılığı olmayan bölümler eklenmez."
+        },
+        "fit": {
+          "loading": "Bu mağazada karşılığı olmayan bölümler denetleniyor…",
+          "unknown": "Bölümler denetlenemedi; eklenmeyenler uygulamadan sonra düzenleyicide yazılır.",
+          "none": "Bütün bölümlerin bu mağazada karşılığı var.",
+          "left_one": "{{count}} bölüm bu mağazada karşılığı olmadığı için eklenmeyecek: {{names}}.",
+          "left_other": "{{count}} bölüm bu mağazada karşılığı olmadığı için eklenmeyecek: {{names}}."
+        }
       },
       "save": {
         "title": "Görünümü kaydet",
@@ -13216,14 +13233,21 @@
         "textKept": "{{name}} sayfasının kendi metni korundu; görünüm yalnız düzeni değiştirdi.",
         "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu.",
         "featureOff_one": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
-        "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı."
+        "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
+        "styleApplied": "‘{{name}}’ görünümünün stili taslağa uygulandı; bölümleriniz olduğu gibi kaldı."
       },
       "history": {
         "lead": "Daha eski yayınlar:",
         "link": "Tema düzenleyici › Görünümler › Yayın geçmişi"
       },
       "pages_one": "{{count}} sayfa",
-      "pages_other": "{{count}} sayfa"
+      "pages_other": "{{count}} sayfa",
+      "others": {
+        "title": "Diğer sektörler",
+        "summary_one": "{{sectors}} · {{count}} görünüm",
+        "summary_other": "{{sectors}} · {{count}} görünüm",
+        "description": "Başka sektörler için hazırlanmış görünümler. Yalnız stilini (renkler, yazı tipleri, köşeler, kart biçimi) alabilir ya da bölümleriyle birlikte uygulayabilirsiniz; bu mağazada karşılığı olmayan bölümler eklenmez."
+      }
     },
     "pages": {
       "description": "Hakkımızda, İletişim gibi mağazanın kendi sayfaları. Bir sayfaya tıklayınca tema düzenleyicide açılır; metni, bölümleri ve ayarları orada düzenlenir.",

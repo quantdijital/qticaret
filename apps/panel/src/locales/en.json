@@ -13166,7 +13166,8 @@
         "applyOf": "Apply ‘{{name}}’ to the draft",
         "colors": "Colour set",
         "noPreview": "This look has no picture yet; a sketch is shown.",
-        "frameShop": "Whatever of the header and footer this look doesn't define stays yours."
+        "frameShop": "Whatever of the header and footer this look doesn't define stays yours.",
+        "sectorOf": "Made for {{sector}}"
       },
       "apply": {
         "title": "Apply ‘{{name}}’ to the draft?",
@@ -13187,7 +13188,23 @@
           "label": "Also save the current look with a name",
           "full": "Saved looks are full ({{max}}/{{max}}). An automatic save is still made."
         },
-        "confirm": "Apply to draft and edit"
+        "confirm": "Apply to draft and edit",
+        "madeFor": "This look was made for a {{sector}} shop.",
+        "styleOnly": "Only the style changes: your sections, header and footer stay as they are.",
+        "scope": {
+          "label": "What to take from the look",
+          "style": "Take its style only",
+          "styleHint": "Colours, fonts, corners, card style and the style kit come into the draft; your sections stay as they are.",
+          "full": "Take it with its layout",
+          "fullHint": "The style and the sections come in; sections with nothing to show in this shop are left out."
+        },
+        "fit": {
+          "loading": "Checking which sections have nothing to show in this shop…",
+          "unknown": "The sections could not be checked; the editor lists any left out after applying.",
+          "none": "Every section has something to show in this shop.",
+          "left_one": "{{count}} section will be left out, having nothing to show in this shop: {{names}}.",
+          "left_other": "{{count}} sections will be left out, having nothing to show in this shop: {{names}}."
+        }
       },
       "save": {
         "title": "Save look",
@@ -13216,14 +13233,21 @@
         "textKept": "The {{name}} page kept its own text; the look changed only its layout.",
         "keptPages": "The layouts you set up on your pages were kept.",
         "featureOff_one": "{{count}} section was not added: {{capabilities}} is off in this shop.",
-        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop."
+        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop.",
+        "styleApplied": "The style of ‘{{name}}’ was applied to the draft; your sections stay as they were."
       },
       "history": {
         "lead": "Older publications:",
         "link": "Theme editor › Looks › Publication history"
       },
       "pages_one": "{{count}} page",
-      "pages_other": "{{count}} pages"
+      "pages_other": "{{count}} pages",
+      "others": {
+        "title": "Other sectors",
+        "summary_one": "{{sectors}} · {{count}} look",
+        "summary_other": "{{sectors}} · {{count}} looks",
+        "description": "Looks made for other sectors. Take their style alone (colours, fonts, corners, card style) or apply them with their sections; sections with nothing to show in this shop are left out."
+      }
     },
     "pages": {
       "description": "The shop's own pages, such as About us and Contact. Click one to open it in the theme editor, where its text, sections and settings are edited.",

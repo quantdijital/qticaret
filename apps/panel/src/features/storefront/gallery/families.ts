@@ -33,6 +33,40 @@ export function presetFamilies(presets: readonly PresetCard[]): PresetFamily[] {
   })
 }
 
+/** Another sector's families, under its name (owner, 2026-11-28). */
+export interface SectorFamilies {
+  code: string
+  name: string
+  families: PresetFamily[]
+}
+
+/**
+ * The gallery's runs: the shop's own sector's families first, then each
+ * other sector's under its name, in the order the server lists them.
+ */
+export function sectorRuns(families: readonly PresetFamily[]): {
+  own: PresetFamily[]
+  others: SectorFamilies[]
+} {
+  const own: PresetFamily[] = []
+  const others = new Map<string, SectorFamilies>()
+  for (const family of families) {
+    const first = family.members[0]
+    if (!first || first.own) {
+      own.push(family)
+      continue
+    }
+    const run = others.get(first.sector.code) ?? {
+      code: first.sector.code,
+      name: first.sector.name,
+      families: [],
+    }
+    run.families.push(family)
+    others.set(run.code, run)
+  }
+  return { own, others: [...others.values()] }
+}
+
 /** The same look, at any version. */
 export const isLook = (preset: PresetRef, ref: PresetRef | null) =>
   ref !== null && ref.pack === preset.pack && ref.code === preset.code

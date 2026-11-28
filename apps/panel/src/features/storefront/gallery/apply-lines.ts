@@ -1,12 +1,21 @@
-import type { ApplyTarget } from "./api"
+import type { ApplyScope, ApplyTarget } from "./api"
 
-/** The lines that say what applying the look does and leaves alone (PLAN §4.3). */
+/**
+ * The lines that say what applying the look does and leaves alone (PLAN
+ * §4.3). Its style alone (owner, 2026-11-28): the sections, header,
+ * footer and menus all stay, a menu change waiting in the draft too.
+ */
 export function applyLines(
   target: ApplyTarget,
   draftChanged: boolean,
-  pendingMenus: boolean
+  pendingMenus: boolean,
+  scope: ApplyScope = "full"
 ): string[] {
   const lines = ["vitrin", draftChanged ? "draftChanged" : "autoSave"]
+  if (target.kind === "preset" && scope === "style") {
+    lines.push("styleOnly", "menusKept", "shopData")
+    return lines
+  }
   if (target.kind === "preset") {
     const { has_header: header, has_footer: footer } = target.preset
     if (header && footer) {

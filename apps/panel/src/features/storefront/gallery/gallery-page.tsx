@@ -16,8 +16,8 @@ import type { ApplyTarget, PresetCard as Preset } from "./api"
 import { ApplyDialog } from "./apply-dialog"
 import { CurrentLookCard } from "./current-look-card"
 import { lookSource, suggestedName } from "./design-name"
-import { presetFamilies } from "./families"
-import { CardsLoading, GRID, GallerySection } from "./gallery-section"
+import { presetFamilies, sectorRuns } from "./families"
+import { CardsLoading, FoldedSection, GRID, GallerySection, SectorRun } from "./gallery-section"
 import { SaveDesignDialog } from "./name-dialog"
 import { PresetCard } from "./preset-card"
 import { PresetPreviewDialog } from "./preset-preview-dialog"
@@ -53,7 +53,7 @@ export function GalleryPage() {
   const [applying, setApplying] = useState<ApplyTarget | null>(null)
   const [previewing, setPreviewing] = useState<Preset | null>(null)
   const [saving, setSaving] = useState(false)
-  const families = useMemo(() => presetFamilies(presets.data ?? []), [presets.data])
+  const runs = useMemo(() => sectorRuns(presetFamilies(presets.data ?? [])), [presets.data])
 
   const gallery = designs.data
   const saved = gallery?.designs.filter((each) => each.kind === "saved").length ?? 0
@@ -89,7 +89,7 @@ export function GalleryPage() {
             <CardsLoading count={3} />
           ) : (
             <div className={GRID}>
-              {families.map((family) => (
+              {runs.own.map((family) => (
                 <PresetCard
                   key={family.key}
                   family={family}
@@ -101,6 +101,37 @@ export function GalleryPage() {
             </div>
           )}
         </GallerySection>
+        {runs.others.length > 0 ? (
+          <FoldedSection
+            defaultOpen={runs.others.some((run) =>
+              run.families.some((family) =>
+                family.members.some((each) => each.in_draft !== null || each.live !== null)
+              )
+            )}
+            title={t(`${G}.others.title`)}
+            summary={t(`${G}.others.summary`, {
+              sectors: runs.others.map((run) => run.name).join(", "),
+              count: runs.others.reduce((sum, run) => sum + run.families.length, 0),
+            })}
+          >
+            <p className="text-[13px] text-muted-foreground">{t(`${G}.others.description`)}</p>
+            {runs.others.map((run) => (
+              <SectorRun key={run.code} name={run.name}>
+                <div className={GRID}>
+                  {run.families.map((family) => (
+                    <PresetCard
+                      key={family.key}
+                      family={family}
+                      busy={busy}
+                      onPreview={setPreviewing}
+                      onApply={applyPreset}
+                    />
+                  ))}
+                </div>
+              </SectorRun>
+            ))}
+          </FoldedSection>
+        ) : null}
         <SavedLooks
           designs={designs}
           savedCount={saved}

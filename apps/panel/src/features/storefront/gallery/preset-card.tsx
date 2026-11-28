@@ -76,9 +76,17 @@ export function PresetCard({ family, onPreview, onApply, busy }: PresetCardProps
       <PresetPicture preset={preset} />
       <div className="flex flex-1 flex-col gap-1.5 px-0.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 id={`${ids}-title`} className="text-sm leading-6 font-semibold">
-            {family.name}
-          </h3>
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <h3 id={`${ids}-title`} className="text-sm leading-6 font-semibold">
+              {family.name}
+            </h3>
+            <span
+              title={t(`${G}.presets.sectorOf`, { sector: preset.sector.name })}
+              className="rounded-sm border px-1.5 text-[11px] leading-4 text-muted-foreground"
+            >
+              {preset.sector.name}
+            </span>
+          </div>
           <PresetBadges preset={preset} />
         </div>
         <p className="line-clamp-2 text-xs leading-5 text-muted-foreground">{preset.description}</p>

@@ -194,6 +194,29 @@ describe("GalleryPage", () => {
     expect(screen.getByText("Adlı kayıtlar dolu; yenisi için birini silin.")).toBeInTheDocument()
   })
 
+  it("folds the other sectors' looks under their names, below the shop's own (owner, 2026-11-28)", async () => {
+    const cutlery = { code: "cutlery", name: "Bıçak ve çatal-bıçak" }
+    serve(gallery([]), [
+      ...PRESETS,
+      preset("katalog", { pack: "cutlery", name: "Katalog", own: false, sector: cutlery }),
+    ])
+    const user = userEvent.setup()
+    renderPage()
+
+    const toggle = await screen.findByRole("button", { name: "Diğer sektörler" })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(screen.getByText("Bıçak ve çatal-bıçak · 1 görünüm")).toBeVisible()
+    expect(screen.queryByRole("heading", { name: "Katalog" })).toBeNull()
+    // The shop's own looks carry their sector's tag too
+    expect(within(section("Hazır görünümler")).getAllByText("Genel")[0]).toBeVisible()
+
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute("aria-expanded", "true")
+    const run = screen.getByRole("region", { name: "Bıçak ve çatal-bıçak" })
+    expect(within(run).getByRole("heading", { name: "Katalog" })).toBeVisible()
+    expect(within(run).getByTitle("Bıçak ve çatal-bıçak için hazırlandı")).toBeVisible()
+  })
+
   it("asks before a look goes into the draft, with the draft's unpublished changes named", async () => {
     const draft: DesignCard = design("sfd_1")
     const full = gallery([draft])

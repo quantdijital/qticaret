@@ -72,3 +72,16 @@ describe("the apply's note on content pages (adr/0073 Ek 2026-11-19 (2) K6)", ()
     expect(screen.queryByText(/taslak olarak açıldı/)).toBeNull()
   })
 })
+
+describe("the note of a look's style taken alone (owner, 2026-11-28)", () => {
+  it("says only the style came in and the sections stayed", () => {
+    show(report({ name: "Tezgâh", scope: "style" }))
+
+    expect(
+      screen.getByText(
+        "‘Tezgâh’ görünümünün stili taslağa uygulandı; bölümleriniz olduğu gibi kaldı."
+      )
+    ).toBeInTheDocument()
+    expect(screen.queryByText("‘Tezgâh’ taslağa uygulandı.")).toBeNull()
+  })
+})

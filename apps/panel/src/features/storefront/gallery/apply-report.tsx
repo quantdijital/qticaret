@@ -70,7 +70,11 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
       <div className="flex items-start gap-2">
         <CircleCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
         <div className="flex flex-col gap-1">
-          <p className="font-medium">{t(`${R}.applied`, { name: report.name })}</p>
+          <p className="font-medium">
+            {t(report.scope === "style" ? `${R}.styleApplied` : `${R}.applied`, {
+              name: report.name,
+            })}
+          </p>
           {report.auto_saved ? (
             <p>
               {report.saved_name
