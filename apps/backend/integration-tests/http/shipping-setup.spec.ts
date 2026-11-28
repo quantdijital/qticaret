@@ -1,10 +1,10 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -27,8 +27,8 @@ interface ShopOption {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let storefront: Storefront
 
     const send = <T>(method: "post" | "delete", path: string, body?: unknown) =>
@@ -63,19 +63,19 @@ medusaIntegrationTestRunner({
     }
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
       storefront = await createStorefront(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
     })
 
     it("adds, reprices and removes a flat option the shop ships itself", async () => {
@@ -101,6 +101,35 @@ medusaIntegrationTestRunner({
       })
       expect(changed).toMatchObject({ name: "Hızlı Kargo (1 gün)", amount: "59.90" })
       expect(gone).toBeUndefined()
+    })
+
+    it("keeps the option the shipping fee choice prices, and only an option's id", async () => {
+      const created = await send<{ id: string }>("post", "/admin/shipping-setup/options", {
+        name: "Standart Kargo",
+        carrier: "manual",
+        pricing: { type: "flat", amount: 0 },
+      })
+      const kept = await send<{ values: { primary_option_id: string | null } }>(
+        "post",
+        "/admin/platform-settings/shipping",
+        { primary_option_id: created.data.id }
+      )
+      const odd = await send("post", "/admin/platform-settings/shipping", {
+        primary_option_id: "'; drop table shipping_option; --",
+      })
+      const cleared = await send<{ values: { primary_option_id: string | null } }>(
+        "post",
+        "/admin/platform-settings/shipping",
+        { primary_option_id: null }
+      )
+
+      expect(kept.data.values.primary_option_id).toBe(created.data.id)
+      expect(odd.status).toBe(400)
+      expect(cleared.data.values.primary_option_id).toBeNull()
+      expect((await options()).find(({ id }) => id === created.data.id)).toMatchObject({
+        pricing: "flat",
+        amount: "0.00",
+      })
     })
 
     it("adds an option at the shop's only warehouse when none was picked as the default", async () => {
@@ -134,7 +163,7 @@ medusaIntegrationTestRunner({
     })
 
     it("keeps an option orders still to ship need, and lets it go once they left", async () => {
-      const orderId = await geliverOrder(getContainer(), setup)
+      const orderId = await carrierOrder(getContainer(), setup)
 
       const kept = await send("delete", `/admin/shipping-setup/options/${setup.optionId}`)
       await shipOrder(http, setup, orderId)
@@ -145,10 +174,10 @@ medusaIntegrationTestRunner({
       expect((await options()).find(({ id }) => id === setup.optionId)).toBeUndefined()
     })
 
-    it("prices a Geliver option by the shop's table, and says when the parcel is past it", async () => {
+    it("prices an Aras option by the shop's table, and says when the parcel is past it", async () => {
       const created = await send<{ id: string }>("post", "/admin/shipping-setup/options", {
         name: "Standart",
-        carrier: "geliver",
+        carrier: "aras",
         pricing: { type: "table" },
       })
 
@@ -165,7 +194,7 @@ medusaIntegrationTestRunner({
       // The 1 desi parcel falls in the first band
       expect(priced.data.shipping_option.amount).toBe(49.9)
       expect((await options()).find(({ id }) => id === created.data.id)).toMatchObject({
-        carrier: "geliver",
+        carrier: "aras",
         pricing: "table",
         amount: null,
       })
@@ -202,10 +231,15 @@ medusaIntegrationTestRunner({
       expect(data.cart.shipping_methods).toEqual([expect.objectContaining({ amount: 0 })])
     })
 
-    it("refuses a quote for a parcel the shop ships itself, and days that do not add up", async () => {
-      const manualQuote = await send("post", "/admin/shipping-setup/options", {
+    it("refuses a table for a parcel the shop ships itself, a carrier's quote, and days that do not add up", async () => {
+      const manualTable = await send("post", "/admin/shipping-setup/options", {
         name: "Elden",
         carrier: "manual",
+        pricing: { type: "table" },
+      })
+      const quote = await send("post", "/admin/shipping-setup/options", {
+        name: "Aras",
+        carrier: "aras",
         pricing: { type: "quote", choice: "cheapest" },
       })
       const days = await send("post", "/admin/platform-settings/shipping", {
@@ -219,7 +253,8 @@ medusaIntegrationTestRunner({
         ],
       })
 
-      expect(manualQuote.data.message).toBe("shipping.manual_flat_only")
+      expect(manualTable.data.message).toBe("shipping.manual_flat_only")
+      expect(quote.status).toBe(400)
       expect(days.status).toBe(400)
       expect(JSON.stringify(days.data)).toMatch(/shipping\.days_order/)
       expect(JSON.stringify(bands.data)).toMatch(/shipping\.rate_table_order/)

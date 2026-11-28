@@ -11,7 +11,7 @@ import { useStoreUnits } from "@/features/products/use-units"
 import { PLATFORM_PARCEL, useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { formatMeasureInput, parseMeasureInput } from "@qticaret/admin-ui/lib/money-input"
 
 const P = "settings.shipping.parcel"
@@ -86,6 +86,7 @@ export function DefaultParcelCard({
   const { errors } = form.formState
   const error = FIELDS.map(({ name }) => errors[name]?.message).find(Boolean)
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         default_parcel: {
@@ -97,7 +98,7 @@ export function DefaultParcelCard({
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values, units), FULL_RESET)
+          settle(valuesOf(result.values, units))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

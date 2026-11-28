@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest"
-import type { StoreProduct } from "@qticaret/types"
+import type { StoreProduct, StoreVariant } from "@qticaret/types"
 import type { ShopMarkView, TrustBadgeView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import { deliveryFacts, productShipping, promisesFor, shippedPromises } from "../product-shipping"
+import {
+  deliveryFacts,
+  productShipping,
+  promisesFor,
+  shippedPromises,
+  shippingNoteOf,
+} from "../product-shipping"
+import { lowestPaidOf, ownShippingOf } from "../own-shipping"
 import type { ProductShippingInput } from "../product-shipping"
 
 /*
@@ -131,17 +138,14 @@ describe("the product's shipping card", () => {
       )
     expect(facts(15)).toEqual([
       { icon: "truck", title: "Aynı gün kargoda", text: "Tahmini teslimat 1–2 iş günü" },
-      {
-        icon: "clock",
-        title: "Saat 15.00'e kadar verilen siparişler aynı gün kargoda",
-        text: null,
-      },
+      // A title and its line under it, as every other fact of the card (owner 2026-11-27)
+      { icon: "clock", title: "Aynı gün kargo", text: "Saat 15.00'e kadar verilen siparişlerde" },
     ])
-    expect(facts(16)[1]?.title).toBe("Saat 16.00'ya kadar verilen siparişler aynı gün kargoda")
-    expect(facts(12)[1]?.title).toContain("12.00'ye kadar")
-    expect(facts(10)[1]?.title).toContain("10.00'a kadar")
-    expect(facts(19)[1]?.title).toContain("19.00'a kadar")
-    expect(facts(20)[1]?.title).toContain("20.00'ye kadar")
+    expect(facts(16)[1]?.text).toBe("Saat 16.00'ya kadar verilen siparişlerde")
+    expect(facts(12)[1]?.text).toContain("12.00'ye kadar")
+    expect(facts(10)[1]?.text).toContain("10.00'a kadar")
+    expect(facts(19)[1]?.text).toContain("19.00'a kadar")
+    expect(facts(20)[1]?.text).toContain("20.00'ye kadar")
     // One day to leave, said once
     expect(facts(14, { min: 1, max: 1 })[0]?.title).toBe("1 iş gününde kargoda")
   })
@@ -197,19 +201,37 @@ describe("a product's own shipping class (adr/0087 §3)", () => {
     expect(facts?.some((fact) => fact.text === "₺1.500 ve üzeri")).toBe(false)
   })
 
-  it("says a class's surcharge, beside the threshold", () => {
-    const facts = productShipping(
-      input({
-        product: product({ kind: "physical", shipping_class: "bulky" }),
-        classes: [{ key: "bulky", surcharge: 150 }],
-      })
-    )?.facts
+  const bulky = product({ kind: "physical", shipping_class: "bulky" })
+  const classes = [{ key: "bulky", surcharge: 150 }]
+
+  it("says a class's surcharge with the threshold that waives it, in one line", () => {
+    const facts = productShipping(input({ product: bulky, classes, lowestPaid: 899 }))?.facts
     expect(facts?.[0]).toEqual({
       icon: "truck",
       title: "Kargo ek ücreti",
-      text: "Bu ürün için kargoya 150,00 TL eklenir.",
+      text: "Bu ürün için kargoya 150,00 TL eklenir; 1.500,00 TL ve üzeri siparişlerde kargo ücretsiz.",
     })
-    expect(facts?.[1]).toEqual({ icon: "truck", title: "Ücretsiz kargo", text: "₺1.500 ve üzeri" })
+    // The threshold is said once, in that line
+    expect(facts?.some((fact) => fact.text === "₺1.500 ve üzeri")).toBe(false)
+    expect(facts?.[1]?.icon).toBe("clock")
+  })
+
+  it("says the surcharge alone when the shop gives no free shipping", () => {
+    const facts = productShipping(
+      input({ product: bulky, classes, threshold: null, lowestPaid: 9_999 })
+    )?.facts
+    expect(facts?.[0]?.text).toBe("Bu ürün için kargoya 150,00 TL eklenir.")
+  })
+
+  it("says the product ships free when its price alone reaches the threshold", () => {
+    for (const lowestPaid of [1500, 2400]) {
+      const facts = productShipping(input({ product: bulky, classes, lowestPaid }))?.facts
+      expect(facts?.[0]).toEqual({
+        icon: "truck",
+        title: "Ücretsiz kargo",
+        text: "Bu ürünün kargosu ücretsiz.",
+      })
+    }
   })
 
   it("says nothing of a class the shop no longer has", () => {
@@ -217,5 +239,77 @@ describe("a product's own shipping class (adr/0087 §3)", () => {
       input({ product: product({ kind: "physical", shipping_class: "gone" }) })
     )?.facts
     expect(facts?.[0]).toEqual({ icon: "truck", title: "Ücretsiz kargo", text: "₺1.500 ve üzeri" })
+  })
+})
+
+describe("the note beside the buy button (adr/0087 §3)", () => {
+  const bulky = product({ kind: "physical", shipping_class: "bulky" })
+  const classes = [{ key: "bulky", surcharge: 150 }]
+  const note = (over: Partial<Parameters<typeof shippingNoteOf>[0]> = {}) =>
+    shippingNoteOf({ product: product(), classes, threshold: 1500, lowestPaid: 899, t, ...over })
+
+  it("says the threshold for a Standard product, nothing without one", () => {
+    expect(note()).toBe("1.500,00 TL ve üzeri siparişlerde kargo ücretsiz.")
+    expect(note({ threshold: null })).toBeNull()
+    expect(note({ threshold: 0 })).toBeNull()
+  })
+
+  it("says the surcharge with the threshold, the surcharge alone without one", () => {
+    expect(note({ product: bulky })).toBe(
+      "Bu ürün için kargoya 150,00 TL eklenir; 1.500,00 TL ve üzeri siparişlerde kargo ücretsiz."
+    )
+    expect(note({ product: bulky, threshold: null })).toBe(
+      "Bu ürün için kargoya 150,00 TL eklenir."
+    )
+  })
+
+  it("says free for the free class and for a surcharged product priced past the threshold", () => {
+    expect(note({ product: product({ kind: "physical", shipping_class: "free" }) })).toBe(
+      "Bu ürünün kargosu ücretsiz."
+    )
+    expect(note({ product: bulky, lowestPaid: 1500 })).toBe("Bu ürünün kargosu ücretsiz.")
+    // An unknown price never claims free shipping
+    expect(note({ product: bulky, lowestPaid: null })).toContain("eklenir;")
+  })
+
+  it("says nothing for a product that is not shipped", () => {
+    expect(note({ product: product({ kind: "digital", shipping_class: "bulky" }) })).toBeNull()
+  })
+})
+
+describe("a product's own shipping, as checkout charges it (adr/0087 §2)", () => {
+  const withVariants = (...prices: (number | null)[]): StoreProduct => ({
+    ...product({ kind: "physical", shipping_class: "bulky" }),
+    variants: prices.map((price, index) => ({
+      id: `v${String(index)}`,
+      calculated_price: price === null ? null : { calculated_amount: price },
+    })) as unknown as StoreVariant[],
+  })
+
+  it("judges the threshold by the cheapest price the product is sold at", () => {
+    const displays = {}
+    const lowest = lowestPaidOf(withVariants(1400, 1600), displays)
+    expect(lowest).toBe(1400)
+    expect(
+      ownShippingOf({
+        product: withVariants(1400, 1600),
+        classes: [{ key: "bulky", surcharge: 150 }],
+        threshold: 1500,
+        lowestPaid: lowest,
+      })
+    ).toEqual({ kind: "surcharge", amount: 150, from: 1500 })
+    expect(lowestPaidOf(withVariants(), displays)).toBeNull()
+  })
+
+  it("is nothing for a Standard product or a class without a surcharge", () => {
+    const own = (key: string | null, surcharge = 0) =>
+      ownShippingOf({
+        product: product({ kind: "physical", shipping_class: key }),
+        classes: [{ key: "zero", surcharge }],
+        threshold: 1500,
+        lowestPaid: 100,
+      })
+    expect(own(null)).toBeNull()
+    expect(own("zero")).toBeNull()
   })
 })

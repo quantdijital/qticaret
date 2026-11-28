@@ -1,8 +1,8 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { createInventoryLevelsWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { fakeVkn, seededRandom, startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { fakeVkn, seededRandom, startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { EINVOICE_MODULE } from "../../src/modules/einvoice"
 import type EinvoiceModuleService from "../../src/modules/einvoice/service"
@@ -10,8 +10,8 @@ import { invoiceTotalsOf } from "../../src/workflows/einvoice/draft-source"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { eventually } from "../helpers/eventually"
-import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { carrierOrder, carrierShop, shipOrder } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -20,7 +20,7 @@ import { loadTrAddressFixture } from "../helpers/tr-address"
 jest.setTimeout(240 * 1000)
 
 const MINUTE = 60 * 1000
-const carrier = { title: "Geliver Kargo A.Ş.", tax_id: fakeVkn(seededRandom(61)) }
+const carrier = { title: "Örnek Kargo A.Ş.", tax_id: fakeVkn(seededRandom(61)) }
 
 interface InvoiceRow {
   id: string
@@ -39,8 +39,8 @@ interface InvoiceRow {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let customer: TestCustomer
     let sizes: { M: string; XL: string }
     let clock = Date.now()
@@ -117,7 +117,7 @@ medusaIntegrationTestRunner({
 
     /** An M the customer bought, paid, received; its sale written back as an e-Arşiv when asked. */
     const delivered = async (writeBack: boolean) => {
-      const orderId = await geliverOrder(getContainer(), setup, sizes.M)
+      const orderId = await carrierOrder(getContainer(), setup, sizes.M)
       await getContainer()
         .resolve(Modules.ORDER)
         .updateOrders(orderId, { customer_id: customer.id })
@@ -177,18 +177,18 @@ medusaIntegrationTestRunner({
     }
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
     beforeEach(async () => {
       await loadTrAddressFixture(getContainer())
-      setup = await geliverShop(http, getContainer(), fake)
+      setup = await carrierShop(http, getContainer(), fake)
       sizes = await shirt()
       customer = await registerCustomer(http, await createStorefront(getContainer()))
       await staff("/admin/platform-settings/seo", { canonical_host: "magaza.example.com" })
@@ -198,7 +198,7 @@ medusaIntegrationTestRunner({
       const saved = await staff("/admin/platform-settings/invoicing", {
         provider: "external",
         trigger,
-        carriers: { geliver: carrier, manual: carrier },
+        carriers: { aras: carrier, manual: carrier },
       })
       expect([saved.status, saved.data.message]).toEqual([200, undefined])
     }

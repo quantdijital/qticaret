@@ -8,8 +8,15 @@ import { sdk } from "@/lib/sdk"
  * back, nor any part of one: only whether each is stored.
  */
 export type AccountState = "not_configured" | "connected" | "unverified" | "rejected" | "unreadable"
+/** `unconfirmed`: the provider refused nothing but cannot confirm the details (PTT). */
 export type AccountCheck =
-  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed" | "not_configured"
+  | "valid"
+  | "merchant_invalid"
+  | "secret_invalid"
+  | "unreachable"
+  | "failed"
+  | "unconfirmed"
+  | "not_configured"
 
 /**
  * One provider's account; the settings are the provider's own. Every
@@ -29,8 +36,6 @@ export interface ProviderAccount<Settings = Record<string, unknown>> {
 
 export type PaytrAccount = ProviderAccount<{ merchant_id: string; test_mode: boolean }>
 export type IyzicoAccount = ProviderAccount<{ test_mode: boolean }>
-/** Geliver (F7, adr/0031): one API token; test shipments are a flag, not another account. */
-export type GeliverAccount = ProviderAccount<{ test_mode: boolean }>
 /** Aras Kargo on the shop's own contract (adr/0035). */
 export type ArasAccount = ProviderAccount<{
   test_mode: boolean
@@ -54,11 +59,19 @@ export type SmtpAccount = ProviderAccount<{
   from_name?: string
   rate_per_minute: number
 }>
+/** DHL eCommerce (formerly MNG Kargo) on the shop's own contract; the app keys are the platform's. */
+export type DhlEcomAccount = ProviderAccount<{ test_mode: boolean }>
+/** Sürat Kargo on the shop's own contract: no test service, so no mode. */
+export type SuratAccount = ProviderAccount<Record<string, never>>
+/** PTT Kargo on the shop's own contract: its customer number in the clear, test mode. */
+export type PttAccount = ProviderAccount<{ customer_id: string; test_mode: boolean }>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 
 interface AccountsResponse {
   key_configured: boolean
+  /** Providers this server cannot connect: the platform's own app with them is not set. */
+  unavailable?: string[]
   accounts: ProviderAccount[]
 }
 

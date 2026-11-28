@@ -2,7 +2,7 @@
 
 - **Durum:** Kabul edildi (2026-10-28 gece, otonom çalışma; kullanıcı 2026-10-28 öğlen onayladı).
 - **Tarih:** 2026-10-28
-- **İlgili:** F7.1–F7.8, F7.10, F7.14; ADR-0027 (sağlayıcı bilgileri panelden), ADR-0029 (kapıda ödeme), docs/entegrasyonlar/geliver.md
+- **İlgili:** F7.1–F7.8, F7.10, F7.14; ADR-0027 (sağlayıcı bilgileri panelden), ADR-0029 (kapıda ödeme), docs/entegrasyonlar/geliver.md  [2026-11-26: Geliver kaldırıldı, belge silindi; bkz. sondaki ek]
 
 ## Bağlam
 
@@ -92,4 +92,17 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
 - **Sipariş listesi:**
   - Kargoya verilmeden önce müşterinin seçtiği kargo ve etiket çıkıp çıkmayacağı gösterilir.
   - "Etiket hazır" siparişler seçilince etiketleri yeniden toplu yazdırılır; "Kargoya ver" yalnızca henüz verilmemişleri gönderir.
+
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+- **Karar (sahip, 2026-11-26):** "geliveri gizleme direkt kaldır bence projeden gereği yok ... diğerlerini de istedikçe ekleriz." Geliver gizlenmedi, projeden tamamen çıkarıldı. Mağazalar kendi sözleşmeleriyle doğrudan Aras ve Yurtiçi sağlayıcılarımızdan (ADR-0035) ya da "Kendi gönderimim"le (`shop_shop`, ADR-0087) gönderir. BasitKargo yapılmayacak; BirFatura ileride isteğe bağlı olarak kargoyu yönetebilir (ayrı iş, yapılmadı). Başka taşıyıcılar istendikçe eklenir.
+- **Kalan (artık Aras ve Yurtiçi için):** gönderi takip modeli, taşıyıcı durumunun Medusa gönderi/teslim durumuna eşlenmesi, etiketin özel depoda saklanması ve personel ucundan kısa ömürlü bağlantıyla açılması, sorgu işi (`shipment-tracking`), etiket boyutu ve baskı (yukarıdaki ek).
+- **Kaldırılan:** `fulfillment-geliver` sağlayıcısı, `lib/shipping/geliver`, `POST /hooks/geliver` web kancası, sahte Geliver sunucusu ve `pnpm dev:geliver`, `GELIVER_BASE_URL`, panelde Geliver hesap sayfası. "Teklif" ücret türü (taşıyıcıdan anlık fiyat, en uygun/en hızlı) de gitti: seçenekler sabit ücretle ya da mağazanın desi tablosuyla fiyatlanır. Taşıyıcıda açılan iade gönderisi (ADR-0032 §4) yalnız Geliver'deydi, o da kalktı.
+- **Eski veri:** tek seferlik Medusa migration betiği `apps/backend/src/migration-scripts/geliver-removed.ts` Geliver kargo seçeneklerini siler, sağlayıcının depolarla bağını koparır ve saklanan Geliver hesap bilgilerini siler. Geliver'le gönderilmiş eski siparişlerin gönderi ve takip verisi durur, salt okunur gösterilir (canlı çağrı yok); saklanan etiketler indirilebilir kalır.
+- Yukarıdaki Geliver'e özgü sonuçlar (bildirim imzası, durum kodu doğrulaması, kapıda ödeme mutabakatının Geliver alanına bağlanması) geçersizdir.
+
+## Ek 2026-11-26: Anlaşmalı iade kodu
+
+- **Karar (sahip, 2026-11-26):** Geliver'in kalkmasıyla onaylanan iadede müşteriye kod gösterilmiyordu. Aras ve Yurtiçi anlaşmalı mağazaya genellikle tek, sabit bir "anlaşmalı iade kodu" verir; mağaza onu bir kez girer, müşteri iadesi onaylanınca görür. Taşıyıcı API'sinden iade başına kod sonraya kaldı. Kodlar mağaza ayarıdır, gizli değildir: `returns.contracted_return` (`aras`, `yurtici`; BirFatura kargoyu yönetirken firmayı mağaza adlandırır: `other_carrier` + `other_code`, ikisi birlikte). Gösterilecek kod tek ve mağaza genelidir (`contractedReturnOf`): BirFatura kipinde onun firması; kendi anlaşmada ana kargo seçeneğinin (`shipping.primary_option_id`) firmasının kodu, yoksa kodu olan ilk firma (Aras, sonra Yurtiçi); bir firmanın anlaşmalı kodu, sipariş hangi yolla gitmiş olursa olsun her şubesinde geçer. Kod saklanmaz, gösterilirken okunur: talebin mevcut `return_code` alanı (eski Geliver talepleri için saklı kod kazanır) ve yeni `return_carrier` alanı, talep yalnız `approved` iken doldurulur; mağaza API'si (`GET /store/orders/:id/returns`, yalnız siparişin sahibine), personel uçları ve `return.approved` e-postası aynı kuralı kullanır. Kod girilmemişse eski metin kalır ve panel uyarır, engellemez. Migration yok. Yasal metinlerde (`docs/yasal-metinler.md` madde 17) taşıyıcı adı için belirteç yok; eklenmedi.
 

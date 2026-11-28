@@ -157,7 +157,7 @@ describe("shadow's none step in the stylesheet", () => {
 
   it("does the same for the dropdown, the suggestions and the filter sheet, in their layer", () => {
     const panels = stepFor(".gf-drop")
-    expect(panels?.selector).toBe(`${MARK} :is(.gf-drop, .gf-suggest)`)
+    expect(panels?.selector).toBe(`${MARK} :is(.gf-drop, .gf-mega, .gf-suggest)`)
     expect(panels?.layer).toBe("components")
     expect(panels?.body.trim()).toBe("box-shadow: none;")
     const sheet = stepFor(".gf-sheet")

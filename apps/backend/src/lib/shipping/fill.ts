@@ -1,12 +1,12 @@
-import { postcodeOf } from "./geliver/mappers"
-import type { AddressRow } from "./geliver/mappers"
+import { postcodeOf } from "./address"
+import type { AddressRow } from "./address"
 import { localPhone } from "./receiver"
 
 /**
  * A parcel's addresses with their gaps filled from what the shop already
  * knows (adr/0054, 2026-11-05 addendum: ship first, fill in by itself).
  * Nothing here refuses: a part still missing is the carrier rule's to
- * name (`./receiver`, `./geliver/mappers`), and only when the carrier
+ * name (`./receiver`), and only when the carrier
  * cannot do without it. Pure; the workflow reads the sources.
  */
 
@@ -106,26 +106,6 @@ export function filledReceiver(
     if (!own) {
       done.push("phone")
     }
-  }
-  const plate = common(address, known.place, done)
-  return { address, plate, filled: done }
-}
-
-/**
- * The sender (a warehouse): its address; a missing phone from the shop's
- * contact phone (Settings > Store); a missing postcode from the address
- * data. The warehouse's own phone is kept as it is written: Geliver's
- * stored copy is compared with it.
- */
-export function filledSender(
-  location: AddressRow | null | undefined,
-  known: { phone?: string | null | undefined; place?: PlaceFacts | null | undefined } = {}
-): FilledAddress {
-  const address = addressFieldsOf(location)
-  const done: string[] = []
-  if (!filled(address.phone) && filled(known.phone)) {
-    address.phone = filled(known.phone)
-    done.push("phone")
   }
   const plate = common(address, known.place, done)
   return { address, plate, filled: done }

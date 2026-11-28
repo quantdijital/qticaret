@@ -40,7 +40,7 @@
 
 ## Kurallar
 - Dış servisler testte **asla** gerçek çağrılmaz. `packages/testing` altında mock sunucular (msw veya küçük HTTP sunucu):
-  iyzico, PayTR, Geliver, e-fatura, SMS.
+  iyzico, PayTR, Aras, Yurtiçi, e-fatura, SMS. (Sahte Geliver 2026-11-26 Geliver'le birlikte kalktı; kargo testleri sahte Aras ve Yurtiçi'yle koşar.)
 - Sandbox testleri ayrı etiketli (`@sandbox`) ve CI'da manuel tetiklenir; secret gerektirir.
 - Her bug fix bir regresyon testiyle gelir.
 - Kapsam hedefleri: ödeme/kargo/fatura modülleri ≥ %80, diğerleri ≥ %60.

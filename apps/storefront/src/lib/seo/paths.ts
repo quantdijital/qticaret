@@ -82,6 +82,8 @@ const MARK_FILES = [
   "iyzico.svg",
   "mastercard.svg",
   "paytr.png",
+  "ptt.png",
+  "surat.png",
   "troy.svg",
   "visa.png",
   "yurtici.svg",

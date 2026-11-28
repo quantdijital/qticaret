@@ -7,7 +7,6 @@ import { ReviewReply } from "../parts/ReviewReply"
 import { Stars } from "../parts/Stars"
 import { Trail } from "../parts/Trail"
 import { Summary } from "../sections/Reviews"
-import { GoogleReviews } from "./GoogleReviews"
 
 type Review = ReviewsPageView["reviews"][number]
 
@@ -47,7 +46,9 @@ function Card({ review, t }: { review: Review; t: Translate }) {
     <li className="mb-(--gap-columns) flex min-w-0 break-inside-avoid flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6">
       <Stars rating={review.rating} label={t("reviews.stars", { rating: review.rating })} />
       {review.title && <h2 className="text-md tracking-[-0.01em]">{review.title}</h2>}
-      <p className="text-md leading-relaxed break-words text-text-2">{review.body}</p>
+      {review.body !== "" && (
+        <p className="text-md leading-relaxed break-words text-text-2">{review.body}</p>
+      )}
       {photos.length > 0 && (
         <ul aria-label={t("reviews.photos")} className="flex flex-wrap gap-2">
           {photos.map((photo, index) => (
@@ -97,9 +98,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
  * average set large, the stars, the count, the spread), the reviews in
  * two columns on the right, each card as tall as its own words (newest
  * first down each column), whole with its photos and the product it is
- * about; then the pages; then, on the first unfiltered page, the shop's
- * Google reviews in a section of their own (adr/0058). With the star
- * filter (adr/0037 Ek 2026-11-05) the summary's bars are its links, and
+ * about; then the pages. With the star filter (adr/0037 Ek 2026-11-05) the summary's bars are its links, and
  * the stars shown stand above the reviews as a dark pill that takes them
  * off. Nothing is written for the shop.
  */
@@ -113,7 +112,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
       <h1>{view.title}</h1>
       <div className="grid gap-(--gap-columns) lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-(--gf-stick-top)">
+          <div className="flex flex-col gap-(--gap-columns) lg:sticky lg:top-(--gf-stick-top)">
             {summary ? (
               <Summary summary={summary} t={t} filter={filter} />
             ) : (
@@ -150,7 +149,6 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         </div>
       </div>
       <Pager pagination={view.pagination} t={t} />
-      {view.google && <GoogleReviews google={view.google} t={t} />}
     </Container>
   )
 }

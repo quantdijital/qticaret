@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { HiddenHint } from "@qticaret/admin-ui/patterns/info-tip"
+import { Plus } from "lucide-react"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import {
   ANNOUNCEMENT_DEFAULTS,
@@ -14,10 +16,51 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { announcementOffers } from "./announcement-registry"
 import { AlignSketch, SizeSketch } from "./announcement-sketches"
-import { LinkField } from "./link-field"
 import { StepChoice } from "./step-choice"
 
 const A = "storefront.editor.announcement"
+
+/** The bar's two on/off settings, each drawn as a switch (bilesen-standardi §3). */
+type OnOff = "hover_pause" | "arrows"
+
+/** One on/off setting: its name with the term small, its hint behind the name. */
+function SwitchOf({
+  section,
+  setting,
+  onChange,
+}: {
+  section: AnnouncementBar
+  setting: OnOff
+  onChange: (section: AnnouncementBar) => void
+}) {
+  const { t } = useTranslation()
+  const id = FIELD_IDS.announcement(section.id, setting)
+  return (
+    <div id={id} className="flex items-start justify-between gap-4">
+      <HintedName
+        name={t(`${A}.${setting}.label`)}
+        hint={t(`${A}.${setting}.hint`)}
+        hintId={`${id}-hint`}
+      >
+        <label htmlFor={`${id}-input`} className="text-sm font-medium">
+          {t(`${A}.${setting}.label`)}{" "}
+          <small className="text-[11px] font-normal text-muted-foreground">
+            {t(`${A}.${setting}.term`)}
+          </small>
+        </label>
+      </HintedName>
+      <HiddenHint id={`${id}-hint`}>{t(`${A}.${setting}.hint`)}</HiddenHint>
+      <Switch
+        id={`${id}-input`}
+        aria-describedby={`${id}-hint`}
+        checked={announcementSettingsOf(section)[setting] === "on"}
+        onCheckedChange={(checked) => {
+          onChange({ ...section, [setting]: checked ? "on" : "off" })
+        }}
+      />
+    </div>
+  )
+}
 
 /** One step setting side by side, its name with the term small, "Varsayılana dön" once changed. */
 function StepsOf({
@@ -26,7 +69,7 @@ function StepsOf({
   onChange,
 }: {
   section: AnnouncementBar
-  setting: Exclude<AnnouncementSetting, "hover_pause">
+  setting: Exclude<AnnouncementSetting, OnOff>
   onChange: (section: AnnouncementBar) => void
 }) {
   const { t } = useTranslation()
@@ -63,14 +106,38 @@ export function AnnouncementMode({
   section: AnnouncementBar
   onChange: (section: AnnouncementBar) => void
 }) {
-  return announcementOffers(section, "mode") ? (
-    <StepsOf section={section} setting="mode" onChange={onChange} />
-  ) : null
+  const { t } = useTranslation()
+  if (!announcementOffers(section, "mode")) {
+    return null
+  }
+  // One line shows alone whatever the choice: say what the slider needs, never refuse it
+  return (
+    <div className="flex flex-col gap-2">
+      <StepsOf section={section} setting="mode" onChange={onChange} />
+      {section.lines.length < 2 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs text-muted-foreground">{t(`${A}.sliderNeedsTwo`)}</p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              onChange({ ...section, lines: [...section.lines, ""] })
+            }}
+          >
+            <Plus />
+            {t(`${A}.addSecond`)}
+          </Button>
+        </div>
+      )}
+    </div>
+  )
 }
 
 /**
  * How the lines take turns (bilesen-standardi §4.5, all in the open
- * "Hareket" group): how long each stays, when the pause button shows (never
+ * "Hareket" group): how long each stays, whether they fade or slide, the
+ * slider's arrows (owner 2026-11-27), when the pause button shows (never
  * taken away) and whether the pointer stops them. Only while they turn.
  */
 export function AnnouncementMotion({
@@ -86,35 +153,14 @@ export function AnnouncementMotion({
   if (!announcementOffers(section, "interval")) {
     return null
   }
-  const id = FIELD_IDS.announcement(section.id, "hover_pause")
   return (
     <PanelGroup name="motion" title={t("storefront.editor.panel.motion")} reveal={reveal("motion")}>
       <div className="flex flex-col gap-5">
         <StepsOf section={section} setting="interval" onChange={onChange} />
+        <StepsOf section={section} setting="transition" onChange={onChange} />
+        <SwitchOf section={section} setting="arrows" onChange={onChange} />
         <StepsOf section={section} setting="pause_button" onChange={onChange} />
-        <div id={id} className="flex items-start justify-between gap-4">
-          <HintedName
-            name={t(`${A}.hover_pause.label`)}
-            hint={t(`${A}.hover_pause.hint`)}
-            hintId={`${id}-hint`}
-          >
-            <label htmlFor={`${id}-input`} className="text-sm font-medium">
-              {t(`${A}.hover_pause.label`)}{" "}
-              <small className="text-[11px] font-normal text-muted-foreground">
-                {t(`${A}.hover_pause.term`)}
-              </small>
-            </label>
-          </HintedName>
-          <HiddenHint id={`${id}-hint`}>{t(`${A}.hover_pause.hint`)}</HiddenHint>
-          <Switch
-            id={`${id}-input`}
-            aria-describedby={`${id}-hint`}
-            checked={announcementSettingsOf(section).hover_pause === "on"}
-            onCheckedChange={(checked) => {
-              onChange({ ...section, hover_pause: checked ? "on" : "off" })
-            }}
-          />
-        </div>
+        <SwitchOf section={section} setting="hover_pause" onChange={onChange} />
       </div>
     </PanelGroup>
   )
@@ -146,15 +192,6 @@ export function AnnouncementStyle({
         <StepsOf section={section} setting="align" onChange={onChange} />
         <StepsOf section={section} setting="size" onChange={onChange} />
         <StepsOf section={section} setting="tone" onChange={onChange} />
-        <LinkField
-          id={`${section.id}-announcement-link`}
-          label={t("storefront.editor.announcement.link.label")}
-          hint={t("storefront.editor.announcement.link.hint")}
-          link={section.link ?? null}
-          onChange={(link) => {
-            onChange({ ...section, link })
-          }}
-        />
       </div>
     </PanelGroup>
   )

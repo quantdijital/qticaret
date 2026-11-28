@@ -1,4 +1,4 @@
-import type { Reply } from "../geliver/routes"
+import type { Reply } from "../fake-routes"
 
 /** Paraşüt's JSON:API shapes as the fake keeps and serves them (API v4). */
 

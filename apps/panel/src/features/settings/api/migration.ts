@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import { z } from "zod"
 import type { AsyncJob } from "@/features/settings/api/activity"
 import { wordpressUploadPath, wxrContentType } from "@/features/settings/api/migration-wordpress"
+import type { WordpressRefresh } from "@/features/settings/api/migration-wordpress"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -130,8 +131,8 @@ export interface StartMigration {
   url?: string
   /** A WordPress export's product category address base; empty, the server reads it. */
   categoryBase?: string
-  /** A WordPress export: only refresh the descriptions of products moved before (ADR-0055). */
-  refresh?: boolean
+  /** A WordPress export: only refresh this of what an earlier run moved (ADR-0055). */
+  refresh?: WordpressRefresh | null
 }
 
 /** Starts a check or a run from the chosen source; applying asks the owner to prove it again. */
@@ -147,7 +148,7 @@ export function useStartMigration() {
               input.mode,
               input.parcel,
               input.categoryBase ?? "",
-              input.refresh === true
+              input.refresh ?? null
             ),
             file,
             extra.headers,

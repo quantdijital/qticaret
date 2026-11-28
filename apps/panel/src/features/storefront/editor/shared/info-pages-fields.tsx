@@ -6,7 +6,7 @@ import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { infoPagesSchema, useSaveStorefront } from "@/features/settings/storefront"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { rolePageId } from "../page-roles"
 import { useContentPages } from "../use-content-pages"
 import type { ContentPageOption } from "../use-content-pages"
@@ -43,8 +43,9 @@ export function InfoPagesFields({ saved }: { saved: StorefrontSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save({ payment_page_id: next.payment, shipping_page_id: next.shipping }, (stored) => {
-      form.reset(valuesOf(stored, pages), FULL_RESET)
+      settle(valuesOf(stored, pages))
     })
   })
   const none = t(`${C}.none`)

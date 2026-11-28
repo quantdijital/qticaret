@@ -1,14 +1,26 @@
 import { useQuery } from "@tanstack/react-query"
-import { getRouteApi } from "@tanstack/react-router"
+import { Navigate, getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { useOfferedCarriers } from "@/features/settings/api/carriers"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { ArasAccount, GeliverAccount, YurticiAccount } from "@/features/settings/api/payments"
+import type {
+  ArasAccount,
+  DhlEcomAccount,
+  PttAccount,
+  SuratAccount,
+  YurticiAccount,
+} from "@/features/settings/api/payments"
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
+import { DhlEcomSettings } from "@/features/settings/components/dhlecommerce-settings"
 import { CarrierInvoiceCard } from "@/features/settings/components/carrier-invoice-card"
-import { GeliverSettings } from "@/features/settings/components/geliver-settings"
+import { ReturnCodeCard } from "@/features/settings/components/return-code-card"
+import { PttBarcodeCard } from "@/features/settings/components/ptt-barcode-card"
+import { PttChecklist } from "@/features/settings/components/ptt-checklist"
+import { PttSettings } from "@/features/settings/components/ptt-settings"
+import { SuratSettings } from "@/features/settings/components/surat-settings"
 import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
 import { isCarrier } from "@/features/settings/shipping-carriers"
@@ -19,7 +31,8 @@ const S = "settings.shipping"
 
 /**
  * Settings > Shipping > one carrier: its state by the title, its settings
- * below, then the name and tax id its parcels' e-Arşiv invoices carry.
+ * below, the contracted return code returns are sent back with, then the
+ * name and tax id its parcels' e-Arşiv invoices carry.
  */
 export function ShippingCarrierPage() {
   const { t } = useTranslation()
@@ -27,6 +40,11 @@ export function ShippingCarrierPage() {
   const query = useQuery(providerAccountsQuery())
   const name = t(`${S}.carriers.${carrier}.name`)
   const account = query.data?.accounts.find((each) => each.provider === carrier)
+  const offered = useOfferedCarriers()
+  // A carrier suspended on this server opens the list, as an unknown one does
+  if (offered && !offered.includes(carrier)) {
+    return <Navigate to="/settings/shipping" replace />
+  }
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -37,7 +55,7 @@ export function ShippingCarrierPage() {
       />
       {query.isError ? (
         <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-      ) : !query.data ? (
+      ) : !query.data || !offered ? (
         <LoadingRows rows={4} />
       ) : carrier === "aras" ? (
         <ArasSettings
@@ -45,20 +63,45 @@ export function ShippingCarrierPage() {
           account={account as ArasAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
-      ) : carrier === "yurtici" ? (
+      ) : carrier === "dhlecommerce" ? (
+        <DhlEcomSettings
+          key={accountKey(account)}
+          account={account as DhlEcomAccount | undefined}
+          keyConfigured={query.data.key_configured}
+          available={!(query.data.unavailable ?? []).includes("dhlecommerce")}
+        />
+      ) : carrier === "surat" ? (
+        <SuratSettings
+          key={accountKey(account)}
+          account={account as SuratAccount | undefined}
+          keyConfigured={query.data.key_configured}
+        />
+      ) : carrier === "ptt" ? (
+        <PttSettings
+          key={accountKey(account)}
+          account={account as PttAccount | undefined}
+          keyConfigured={query.data.key_configured}
+        />
+      ) : (
         <YurticiSettings
           key={accountKey(account)}
           account={account as YurticiAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
-      ) : (
-        <GeliverSettings
-          key={accountKey(account)}
-          account={account as GeliverAccount | undefined}
-          keyConfigured={query.data.key_configured}
-        />
       )}
-      {isCarrier(carrier) ? <CarrierInvoiceCard carrier={carrier} /> : null}
+      {/* PTT: the barcode range no parcel goes without, and what to ask PTT for */}
+      {carrier === "ptt" && query.data ? (
+        <>
+          <PttBarcodeCard />
+          <PttChecklist />
+        </>
+      ) : null}
+      {isCarrier(carrier) ? (
+        <>
+          <ReturnCodeCard target={carrier} />
+          <CarrierInvoiceCard carrier={carrier} />
+        </>
+      ) : null}
     </div>
   )
 }

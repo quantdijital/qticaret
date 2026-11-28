@@ -345,9 +345,18 @@ export interface OrderPageView {
   returnShippingNote?: string | null
   /**
    * Return requests already made, in words; `refused`: the units refused at
-   * receipt and why, a line each ("… 1 adet ambalajı açılmış…").
+   * receipt and why, a line each ("… 1 adet ambalajı açılmış…"); `codeText`:
+   * where to hand the parcel in with the shop's contracted return code, in
+   * place of the bare `code` when given.
    */
-  returns: { kind: string; status: string; date: string; code: string | null; refused?: string[] }[]
+  returns: {
+    kind: string
+    status: string
+    date: string
+    code: string | null
+    codeText?: string | null
+    refused?: string[]
+  }[]
   /** The parcels that left, in words: carrier, tracking and where they are. */
   shipments: {
     carrier: string | null

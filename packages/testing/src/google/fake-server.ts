@@ -2,9 +2,6 @@ import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
-import { businessProfileData } from "./business-data"
-import { answerBusinessProfile, letterPhoto } from "./business-profile"
-import type { FakeBusinessProfile } from "./business-profile"
 import { approvalOf, consentPage } from "./consent-page"
 import { oauthFlow } from "./oauth-flow"
 import type { OauthClient } from "./oauth-flow"
@@ -15,8 +12,7 @@ import type { SearchConsoleState } from "./search-console"
  * A stand-in for Google (F10 M13): the OAuth web server flow with PKCE
  * (`/o/oauth2/v2/auth` as a page for a browser, `/token`, `/revoke`), the
  * Merchant API calls the shop makes (`accounts/v1`, `datasources/v1`,
- * `products/v1`), Search Console and CrUX (F10.11) and Business Profile's
- * accounts, locations and reviews (adr/0058). It keeps what it was sent,
+ * `products/v1`) and Search Console and CrUX (F10.11). It keeps what it was sent,
  * and checks what Google checks: the client, the code's verifier and
  * redirect, the bearer token and its scopes, the data source.
  */
@@ -33,8 +29,6 @@ export interface FakeGoogle extends SearchConsoleState {
   inserts: { count: number }
   dataSources: string[]
   revoked: string[]
-  /** Business Profile (adr/0058): its accounts, locations and reviews, as tests change them. */
-  business: FakeBusinessProfile
   /**
    * Plays the consent screen: the address Google sends the browser back to.
    * `scopes`: what the shop allows (all asked for, unless a test says less).
@@ -53,8 +47,11 @@ export interface FakeGoogleOptions {
   /** The platform's OAuth client; a random one unless fixed (a developer's `.env` keeps it). */
   client?: OauthClient
   email?: string
-  /** The business's name and city on its Business Profile. */
-  business?: { title?: string; city?: string; district?: string }
+  /**
+   * The Merchant Center account the Google account reaches; a random one
+   * unless fixed (a developer's runner, so the shop can name it again).
+   */
+  merchantId?: string
   /** Where refresh tokens and grants are kept between runs (a developer's runner). */
   stateFile?: string
 }
@@ -66,7 +63,8 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
     clientId: `${randomId(8)}.apps.googleusercontent.com`,
     clientSecret: randomId(),
   }
-  const merchantId = String(100_000_000 + Math.floor(Math.random() * 800_000_000))
+  const merchantId =
+    options.merchantId ?? String(100_000_000 + Math.floor(Math.random() * 800_000_000))
   const email = options.email ?? `magaza-${randomId(4).toLowerCase()}@example.com`
   const flow = oauthFlow(client, email, options.stateFile)
   const searchConsole: SearchConsoleState = {
@@ -82,15 +80,14 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
   const inserts = { count: 0 }
   const dataSources: string[] = []
   const sockets = new Set<Socket>()
-  // Filled once the port is known: the reviewers' photos are served here
-  const business = {
-    approved: true,
-    reviewPages: { count: 0 },
-    replyCalls: [] as FakeBusinessProfile["replyCalls"],
-    replyState: "APPROVED",
-    replyRefusal: null as FakeBusinessProfile["replyRefusal"],
-  } as FakeBusinessProfile
 
+  const merchantAccount = () => ({
+    name: `accounts/${merchantId}`,
+    accountId: merchantId,
+    accountName: "Örnek Mağaza",
+    languageCode: "tr",
+    timeZone: { id: "Europe/Istanbul" },
+  })
   const json = (res: ServerResponse, status: number, body: unknown) => {
     res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body))
   }
@@ -123,16 +120,6 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
         res.writeHead(303, { location: back }).end()
         return
       }
-      if (req.method === "GET" && url.pathname.startsWith("/a/")) {
-        const id = url.pathname.slice(3).split("=")[0] ?? ""
-        const review = [...business.reviews.values()]
-          .flat()
-          .find((each) => each.reviewer.profilePhotoUrl?.includes(`/a/${id}=`))
-        res
-          .writeHead(review ? 200 : 404, { "content-type": "image/svg+xml" })
-          .end(review ? letterPhoto(id, review.reviewer.displayName) : "")
-        return
-      }
       if (req.method === "POST" && url.pathname === "/token") {
         const answer = flow.token(new URLSearchParams(body))
         json(res, answer.status, answer.body)
@@ -155,7 +142,9 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
       if (answerSearchConsole(searchConsole, req.method ?? "GET", url, body, scope, json, res)) {
         return
       }
-      if (answerBusinessProfile(business, req.method ?? "GET", url, scope, json, res, body)) {
+      // Merchant API's accounts.list: the one account the Google account reaches
+      if (req.method === "GET" && url.pathname === "/accounts/v1/accounts") {
+        json(res, 200, { accounts: [merchantAccount()] })
         return
       }
       const account = /^\/(?:accounts|datasources|products)\/v1\/accounts\/(\d+)/.exec(
@@ -166,7 +155,7 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
         return
       }
       if (req.method === "GET" && url.pathname === `/accounts/v1/accounts/${merchantId}`) {
-        json(res, 200, { name: `accounts/${merchantId}`, accountName: "Örnek Mağaza" })
+        json(res, 200, merchantAccount())
         return
       }
       if (
@@ -224,7 +213,6 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
   await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
   const url = `http://127.0.0.1:${String(address.port)}`
-  Object.assign(business, businessProfileData({ ...options.business, photoBase: url }))
 
   return Object.assign(searchConsole, {
     url,
@@ -235,7 +223,6 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
     inserts,
     dataSources,
     revoked: flow.revoked,
-    business,
     consent: (authorizationUrl: string, answer?: "allow" | "deny", scopes?: string[]) =>
       Promise.resolve(flow.consent(authorizationUrl, answer, scopes)),
     close: async () => {

@@ -9,7 +9,7 @@ import { trustCardSettingsOf } from "@qticaret/types/section-trust"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, PageTextSectionView, Translate } from "@qticaret/ui"
 import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
-import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
+import { reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
 import { cardedCategoriesView } from "./category-cards-data"
@@ -17,11 +17,10 @@ import { carouselCategoriesView } from "./category-carousel"
 import { iconCategoriesView } from "./category-icons"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
-import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
-import { newsletterLookOf } from "./newsletter"
+import { consentStyleOf, consentWordsKey, newsletterLookOf } from "./newsletter"
 import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postsView } from "./posts-section"
@@ -160,13 +159,6 @@ async function sectionView(
           }
         : null
     }
-    case "google_rating":
-      // Google's figures and excerpts at each request; nothing to show, no section
-      return googleRatingView(
-        section,
-        await googleRatingReviews(section.excerpts, EXCERPT_MIN_RATING),
-        t
-      )
     case "rich_text":
       return richTextView(section)
     case "faq":
@@ -201,7 +193,10 @@ async function sectionView(
         type: "newsletter",
         title: section.title ?? t("newsletter.title"),
         text:
-          section.text ?? t("newsletter.text", { shop: identity.company_title ?? site.shop.name }),
+          section.text ??
+          t(consentWordsKey(consentStyleOf(section)), {
+            shop: identity.company_title ?? site.shop.name,
+          }),
         privacyPath: notice ? legalPath("privacy_notice") : null,
         ...newsletterLookOf(section, t, "page"),
       }

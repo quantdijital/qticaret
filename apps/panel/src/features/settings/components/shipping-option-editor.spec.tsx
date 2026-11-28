@@ -55,7 +55,7 @@ describe("shipping options, edited in their rows (F7.8)", () => {
     expect(screen.getByLabelText(/^Ad/)).toHaveValue("Standart kargo")
     expect(screen.queryByRole("combobox", { name: "Ücret" })).not.toBeInTheDocument()
     await userEvent.type(screen.getByLabelText(/^Tutar/), "49,90")
-    await userEvent.click(screen.getByRole("button", { name: "Seçenek ekle" }))
+    await userEvent.click(screen.getByRole("button", { name: "Ek seçenek ekle" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/shipping-setup/options", {
@@ -69,19 +69,20 @@ describe("shipping options, edited in their rows (F7.8)", () => {
     })
   })
 
-  it("starts a Geliver option on its cheapest quote, with no amount asked", async () => {
-    wrap(<ShippingOptionEditor carrier="geliver" onDone={vi.fn()} />)
+  it("starts a contract carrier's option on a flat price, its table one pick away", async () => {
+    wrap(<ShippingOptionEditor carrier="yurtici" onDone={vi.fn()} />)
 
-    expect(screen.queryByLabelText(/^Tutar/)).not.toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "Seçenek ekle" }))
+    expect(screen.getByRole("combobox", { name: "Ücret" })).toHaveTextContent("Sabit ücret")
+    await userEvent.type(screen.getByLabelText(/^Tutar/), "79")
+    await userEvent.click(screen.getByRole("button", { name: "Ek seçenek ekle" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/shipping-setup/options", {
         method: "POST",
         body: {
           name: "Standart kargo",
-          carrier: "geliver",
-          pricing: { type: "quote", choice: "cheapest" },
+          carrier: "yurtici",
+          pricing: { type: "flat", amount: 79 },
         },
       })
     })
@@ -91,8 +92,11 @@ describe("shipping options, edited in their rows (F7.8)", () => {
     fetchMock.mockImplementation((url: string) =>
       Promise.resolve(url.endsWith("/options") ? { options: [FAST] } : {})
     )
-    wrap(<ShippingOptionsCard />)
+    wrap(<ShippingOptionsCard options={[FAST]} custom={false} />)
 
+    // Folded to a line: the extra options and their prices
+    expect(screen.getByText(/Hızlı Kargo · ₺150,00/)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: "Ek kargo seçenekleri" }))
     await userEvent.click(
       await screen.findByRole("button", { name: "Hızlı Kargo seçeneğini düzenle" })
     )

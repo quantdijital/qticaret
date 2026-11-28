@@ -7,7 +7,7 @@ import { Label } from "@qticaret/admin-ui/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { AppearanceForm as FormValues } from "@/theme"
 
-type ChoiceName = "radius" | "density" | "mode" | "sidebar" | "sidebar_mode"
+type ChoiceName = "radius" | "density" | "mode" | "sidebar" | "sidebar_mode" | "surface"
 
 /**
  * One of the look's choices: its name and what it changes, then the options
@@ -101,6 +101,7 @@ export function BrandColorField({
                 className="size-9 shrink-0 cursor-pointer rounded-md border bg-transparent p-0.5"
               />
               <Input
+                placeholder={t("settings.placeholders.brandColor")}
                 id="brand-color"
                 value={field.value}
                 onChange={(event) => {

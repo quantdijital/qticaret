@@ -1,8 +1,11 @@
+import type { NewsletterConsentStyle } from "@qticaret/types"
 import type { Translate } from "@qticaret/ui"
 
 export interface NewsletterWords {
-  /** The shop's consent sentence (İYS): the box's label, never ticked for the visitor. */
+  /** The shop's consent sentence (İYS): the box's label, never ticked for the visitor, or the small line under the form. */
   consent: string
+  /** `box`: the required consent box (as it was); `line`: one small line, subscribing is consenting. */
+  style: NewsletterConsentStyle
   privacyLink: string
   email: string
   /** An example address inside the field, under the label. */
@@ -22,8 +25,13 @@ const NEWSLETTER_ERRORS = [
 ]
 
 /** A newsletter form's words: the consent sentence as the shop wrote it, the rest the storefront's. */
-export const newsletterWords = (t: Translate, consent: string): NewsletterWords => ({
+export const newsletterWords = (
+  t: Translate,
+  consent: string,
+  style: NewsletterConsentStyle = "box"
+): NewsletterWords => ({
   consent,
+  style,
   privacyLink: t("newsletter.privacy_link"),
   email: t("newsletter.email"),
   placeholder: t("placeholder.email"),

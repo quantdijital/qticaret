@@ -26,6 +26,8 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   "content/PostCard.tsx": [1, 0],
   "content/ReviewsPage.tsx": [1, 1],
   "frame/CartSheetLine.tsx": [0, 1],
+  // S3: the drawer's suggestions, a row's thumbnail as its lines'
+  "frame/CartSheetSuggestions.tsx": [0, 1],
   "frame/MenuParts.tsx": [0, 1],
   "frame/NewsletterBox.tsx": [1, 0],
   "frame/QuickViewGallery.tsx": [2, 0],
@@ -37,6 +39,7 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   "parts/FramedCard.tsx": [1, 0],
   "parts/ProductCard.tsx": [1, 0],
   // adr/0077 tour card: the photo-over card keeps its photograph's well
+  "parts/card-glass.tsx": [1, 0],
   "parts/card-over.tsx": [1, 0],
   "payment-link/LinkLines.tsx": [0, 1],
   "product/Gallery.tsx": [1, 0],
@@ -96,7 +99,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     }
     expect(found).toEqual(WELLS)
     const total = Object.values(WELLS).reduce((sum, [a, b]) => sum + a + b, 0)
-    expect(total).toBe(42)
+    expect(total).toBe(44)
   })
 
   it("leaves the same tones on what is not a photograph's ground", () => {
@@ -118,7 +121,6 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     expect(atolyeCss("sections/Guides.tsx")).toContain(
       "flex-col overflow-hidden rounded-tile gf-pane"
     )
-    expect(atolyeCss("content/GoogleReviews.tsx")).toContain("rounded-full bg-paper-3 object-cover")
     expect(atolyeCss("sections/Spotlight.tsx")).toContain(
       "overflow-hidden rounded-media bg-stage-2"
     )

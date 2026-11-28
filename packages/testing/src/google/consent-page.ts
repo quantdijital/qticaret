@@ -14,8 +14,6 @@ const SCOPE_WORDS: Record<string, string> = {
     "Ürün listelerinizi ve hesaplarınızı Google Alışveriş için yönetme",
   "https://www.googleapis.com/auth/webmasters":
     "Doğrulanmış siteleriniz için Search Console verilerini görüntüleme ve yönetme",
-  "https://www.googleapis.com/auth/business.manage":
-    "Google'daki işletmelerinizi görme, düzenleme, oluşturma ve silme",
 }
 
 const escape = (value: string): string =>

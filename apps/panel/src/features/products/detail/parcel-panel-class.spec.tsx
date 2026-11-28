@@ -19,7 +19,10 @@ const PRODUCT = {
   height: null,
 } as unknown as ProductDetail
 
-function answer(shippingClass: string | null) {
+function answer(
+  shippingClass: string | null,
+  classes = [{ key: "bulky", name: "Büyük ürün", surcharge: 15_000 }]
+) {
   fetchMock.mockImplementation((url: string, init?: { body?: Record<string, unknown> }) => {
     if (url.includes("/catalog")) {
       return Promise.resolve({ shipping_class: shippingClass, ...init?.body })
@@ -28,7 +31,7 @@ function answer(shippingClass: string | null) {
       return Promise.resolve({
         section: "shipping",
         version: 1,
-        values: { shipping_classes: [{ key: "bulky", name: "Büyük ürün", surcharge: 15_000 }] },
+        values: { shipping_classes: classes },
       })
     }
     if (url.endsWith("/platform-settings/store")) {
@@ -67,9 +70,11 @@ describe("ParcelPanel: the product's shipping class (adr/0087 §4)", () => {
     renderPanel()
 
     expect(await screen.findByText(/kargosuna ₺150,00 eklenir/)).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("combobox", { name: "Kargo sınıfı" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Ücretsiz kargo" }))
+    expect(screen.getByRole("combobox", { name: "Kargo sınıfı" })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("switch", { name: "Bu ürünün kargosu ücretsiz" }))
     expect(screen.getByText(/kargo ücretine eklenmez/)).toBeInTheDocument()
+    // Free: no class to pick beside it
+    expect(screen.queryByRole("combobox", { name: "Kargo sınıfı" })).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
@@ -90,11 +95,19 @@ describe("ParcelPanel: the product's shipping class (adr/0087 §4)", () => {
     answer("free")
     renderPanel()
     expect(await screen.findByText(/kargo ücretine eklenmez/)).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("combobox", { name: "Kargo sınıfı" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Standart" }))
+    await userEvent.click(screen.getByRole("switch", { name: "Bu ürünün kargosu ücretsiz" }))
+    expect(screen.getByRole("combobox", { name: "Kargo sınıfı" })).toHaveTextContent("Standart")
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
       expect(catalogSaves()[0]?.[1]).toMatchObject({ body: { shipping_class: null } })
     })
+  })
+
+  it("shows only the switch while the shop has no classes of its own", async () => {
+    answer(null, [])
+    renderPanel()
+    const free = await screen.findByRole("switch", { name: "Bu ürünün kargosu ücretsiz" })
+    expect(free).not.toBeChecked()
+    expect(screen.queryByRole("combobox", { name: "Kargo sınıfı" })).not.toBeInTheDocument()
   })
 })

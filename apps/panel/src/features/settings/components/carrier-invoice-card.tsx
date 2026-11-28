@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
@@ -44,6 +44,7 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
   })
   const { errors } = form.formState
   const submit = form.handleSubmit(async (next) => {
+    const settle = beginSave(form)
     // The section keeps every carrier's in one map, sent whole: the others go back as
     // stored now, read again first, so one saved meanwhile elsewhere is not undone
     const fresh = await client
@@ -59,7 +60,7 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
       { carriers },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values, carrier), FULL_RESET)
+          settle(valuesOf(result.values, carrier))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -83,7 +84,12 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
           htmlFor={`carrier-${carrier}-title`}
           error={errors.title?.message ? t(errors.title.message) : undefined}
         >
-          <Input id={`carrier-${carrier}-title`} maxLength={200} {...form.register("title")} />
+          <Input
+            id={`carrier-${carrier}-title`}
+            maxLength={200}
+            placeholder={t(`${C}.titlePlaceholder`)}
+            {...form.register("title")}
+          />
         </Field>
         <Field
           label={t(`${C}.taxId`)}
@@ -94,6 +100,7 @@ function IdentityForm({ saved, carrier }: { saved: InvoicingSettings; carrier: I
             id={`carrier-${carrier}-tax`}
             inputMode="numeric"
             maxLength={11}
+            placeholder={t("common.placeholder.taxNumber")}
             {...form.register("tax_id")}
           />
         </Field>

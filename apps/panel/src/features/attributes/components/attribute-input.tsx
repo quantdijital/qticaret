@@ -199,6 +199,7 @@ export function AttributeInput({
         />
       ) : (
         <Input
+          placeholder={t("attributes.placeholders.value")}
           id={id}
           value={typeof value === "string" ? value : ""}
           onChange={(event) => {

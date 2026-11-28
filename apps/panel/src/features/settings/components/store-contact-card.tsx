@@ -11,7 +11,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { LegalSettings, StoreSettings } from "@/features/settings/api/sections"
 import { displayTrPhone, errorLine, isHttpsUrl, phoneSchema } from "@/features/settings/storefront"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const C = "settings.store.contact"
 const E = "settings.store.errors"
@@ -75,6 +75,7 @@ export function StoreContactCard({
   const { dirtyFields, errors } = form.formState
 
   const submit = form.handleSubmit(async (next) => {
+    const settle = beginSave(form)
     try {
       const storeSaved = STORE_FIELDS.some((field) => dirtyFields[field])
         ? await saveStore.mutateAsync({
@@ -88,7 +89,7 @@ export function StoreContactCard({
         ? await saveLegal.mutateAsync({ address: orNone(next.address) })
         : null
       // What the server stored: phones as it writes them, text trimmed
-      form.reset(valuesOf(storeSaved?.values ?? store, legalSaved?.values ?? legal), FULL_RESET)
+      settle(valuesOf(storeSaved?.values ?? store, legalSaved?.values ?? legal))
       toast.success(t("settings.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))
@@ -128,6 +129,7 @@ export function StoreContactCard({
       <div className="grid gap-5 sm:grid-cols-2">
         <Field {...email.props}>
           <Input
+            placeholder={t("common.placeholder.email")}
             id="store-contact_email"
             type="email"
             autoComplete="off"
@@ -167,6 +169,7 @@ export function StoreContactCard({
       </div>
       <Field {...address.props}>
         <Textarea
+          placeholder={t("settings.placeholders.storeAddress")}
           id="store-address"
           rows={2}
           maxLength={MAX_ADDRESS_LENGTH}

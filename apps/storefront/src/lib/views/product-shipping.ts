@@ -7,6 +7,9 @@ import type {
   TrustBadgeView,
 } from "@qticaret/ui"
 import type { StoreDelivery, StoreProduct, StoreShippingClass } from "@qticaret/types"
+import { ownShippingOf, ownShippingText } from "./own-shipping"
+
+export { FREE_SHIPPING_CLASS } from "./own-shipping"
 
 /**
  * The product page's "Kargo ve Teslimat" card (owner 2026-11-05: "bu ürün
@@ -73,8 +76,8 @@ export function deliveryFacts(delivery: StoreDelivery, t: Translate): TrustBadge
         leaves,
         {
           icon: "clock",
-          title: t("product.shipping_cutoff", { time: untilHour(hour) }),
-          text: null,
+          title: t("product.shipping_cutoff_title"),
+          text: t("product.shipping_cutoff", { time: untilHour(hour) }),
         },
       ]
 }
@@ -107,8 +110,30 @@ export const shippedPromises = (
 ): TrustBadgeView[] =>
   ships ? [...badges] : badges.filter((badge) => !DELIVERY_ICONS.has(badge.icon))
 
-/** The built-in class (adr/0087 §1): the product ships free. */
-export const FREE_SHIPPING_CLASS = "free"
+/**
+ * The short note beside "Sepete ekle" (adr/0087 §3), the card's own line
+ * in one sentence: the product's free or surcharged shipping, else the
+ * shop's threshold; null for a product not shipped or a shop without one.
+ */
+export function shippingNoteOf({
+  product,
+  classes = [],
+  threshold,
+  lowestPaid = null,
+  t,
+}: Pick<ProductShippingInput, "product" | "classes" | "threshold" | "lowestPaid" | "t">):
+  string | null {
+  if (!isShipped(product)) {
+    return null
+  }
+  const own = ownShippingOf({ product, classes, threshold, lowestPaid })
+  if (own) {
+    return ownShippingText(own, t)
+  }
+  return threshold !== null && threshold > 0
+    ? t("product.free_shipping_from", { amount: formatLira(threshold) })
+    : null
+}
 
 export interface ProductShippingInput {
   product: StoreProduct
@@ -116,6 +141,8 @@ export interface ProductShippingInput {
   classes?: readonly StoreShippingClass[]
   /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */
   threshold: number | null
+  /** The product's lowest KDV-included price (`lowestPaidOf`): at the threshold alone it ships free. */
+  lowestPaid?: number | null
   /** The shop's delivery settings (`delivery`); absent from an older backend: its own lines say it. */
   delivery?: StoreDelivery | null
   /** The shop's promises (its trust badges), in its order. */
@@ -133,6 +160,7 @@ export function productShipping({
   product,
   classes = [],
   threshold,
+  lowestPaid = null,
   delivery = null,
   badges,
   carriers,
@@ -152,29 +180,24 @@ export function productShipping({
       from !== null &&
       amountsIn(`${badge.title} ${badge.text ?? ""}`).includes(from)
   )
-  const shippingClass = product.product_extension?.shipping_class ?? null
-  const surcharge = classes.find((each) => each.key === shippingClass)?.surcharge ?? 0
-  // adr/0087 §3: this product's own shipping first; a surcharge is said, never a surprise
+  // adr/0087 §3: this product's own shipping first; a surcharge is said, never a surprise,
+  // and with the threshold beside it, since a basket past it pays none (§2.5)
+  const mine = ownShippingOf({ product, classes, threshold, lowestPaid })
   const own: TrustBadgeView[] =
-    shippingClass === FREE_SHIPPING_CLASS
-      ? [
+    mine === null
+      ? []
+      : [
           {
             icon: "truck",
-            title: t("product.shipping_free"),
-            text: t("product.shipping_free_product"),
+            title: t(
+              mine.kind === "free" ? "product.shipping_free" : "product.shipping_surcharge_title"
+            ),
+            text: ownShippingText(mine, t),
           },
         ]
-      : surcharge > 0
-        ? [
-            {
-              icon: "truck",
-              title: t("product.shipping_surcharge_title"),
-              text: t("product.shipping_surcharge", { amount: formatLira(surcharge) }),
-            },
-          ]
-        : []
+  // The threshold line only for a Standard product: the own line says it otherwise
   const free: TrustBadgeView[] =
-    shippingClass === FREE_SHIPPING_CLASS
+    mine !== null
       ? []
       : named
         ? [named]

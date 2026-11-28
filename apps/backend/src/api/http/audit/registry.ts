@@ -9,13 +9,13 @@ import { CHARGEBACK_RESOURCES } from "./resources/chargebacks"
 import { CONTENT_RESOURCES } from "./resources/content"
 import { CONTENT_AUTHOR_RESOURCES } from "./resources/content-authors"
 import { GIFT_CARD_RESOURCES } from "./resources/gift-cards"
-import { GOOGLE_REVIEW_RESOURCES } from "./resources/google-reviews"
 import { INTEGRATION_RESOURCES } from "./resources/integrations"
 import { LEGAL_RESOURCES } from "./resources/legal"
 import { ORDER_RESOURCES } from "./resources/orders"
 import { MEDIA_RESOURCES } from "./resources/media"
 import { MESSAGING_RESOURCES } from "./resources/messaging"
 import { PRICE_RESOURCES } from "./resources/prices"
+import { PRODUCT_QUESTION_RESOURCES } from "./resources/product-questions"
 import { PRODUCT_REVIEW_RESOURCES } from "./resources/product-reviews"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
 import { REDIRECT_RESOURCES } from "./resources/redirects"
@@ -61,8 +61,8 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...STAFF_RESOURCES,
   ...LEGAL_RESOURCES,
   ...TAX_RESOURCES,
-  ...GOOGLE_REVIEW_RESOURCES,
   ...PRODUCT_REVIEW_RESOURCES,
+  ...PRODUCT_QUESTION_RESOURCES,
   ...MESSAGING_RESOURCES,
   ...STOREFRONT_LAYOUT_RESOURCES,
   ...STOREFRONT_DESIGN_RESOURCES,

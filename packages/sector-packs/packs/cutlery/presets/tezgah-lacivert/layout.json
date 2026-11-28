@@ -1,8 +1,19 @@
 {
   "header": [
     {
+      "id": "ustserit",
+      "type": "announcement_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "light",
+      "lines": ["{ücretsiz_kargo_eşiği} üzeri siparişlerde kargo bedava"],
+      "link": { "$href": "/kampanyalar" }
+    },
+    {
       "id": "mainheader",
       "type": "header_bar",
+      "top_strip": "separate",
       "visible": true,
       "starts_at": null,
       "ends_at": null,

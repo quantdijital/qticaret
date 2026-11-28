@@ -37,6 +37,25 @@ describe("integration overview rules", () => {
       notes: [{ code: "rejected" }],
       test: "account",
     })
+    expect(accountRow("shipping", status("aras", "unverified"))).toMatchObject({
+      state: "attention",
+      notes: [{ code: "unverified" }],
+    })
+  })
+
+  it("notes PTT's account as never confirmed, not as something to fix", () => {
+    // PTT answers a made-up account as it does a right one: "not verified" is all it gets
+    expect(accountRow("shipping", status("ptt", "unverified", { test_mode: true }))).toEqual({
+      id: "ptt",
+      group: "shipping",
+      state: "connected",
+      notes: [{ code: "test_mode" }, { code: "unconfirmed" }],
+      test: "account",
+    })
+    expect(accountRow("shipping", status("ptt", "rejected"))).toMatchObject({
+      state: "attention",
+      notes: [{ code: "rejected" }],
+    })
   })
 
   it("says what Google still needs once the platform opens it: Search Console's site, Merchant Center", () => {

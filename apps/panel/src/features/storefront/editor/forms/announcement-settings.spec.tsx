@@ -61,10 +61,19 @@ const field = (setting: AnnouncementSetting) =>
 
 /** docs/tema/bilesen-denetimi (b) 6: how several announcements show and turn. */
 describe("the announcement bar's settings", () => {
-  it("start as the first line alone, offered only once there are several lines", () => {
-    renderPanel(bar({ lines: ["Kargo bedava"] }))
-    expect(field("mode")).toBeNull()
+  it("offer the slider from the first line on, saying it needs two, never refusing it", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
+    expect(field("mode")).not.toBeNull()
     expect(screen.queryByRole("button", { name: "Hareket" })).toBeNull()
+    expect(screen.getByText("Sırayla dönmesi için en az iki duyuru ekleyin.")).toBeInTheDocument()
+    await user.click(screen.getByRole("radio", { name: /Sırayla döner/ }))
+    expect(changes.at(-1)).toMatchObject({ mode: "rotate", lines: ["Kargo bedava"] })
+    // The turning's settings come with the choice, a second line one click away
+    expect(field("interval")).not.toBeNull()
+    await user.click(screen.getByRole("button", { name: "İkinci duyuruyu ekle" }))
+    expect(changes.at(-1)).toMatchObject({ lines: ["Kargo bedava", ""] })
+    expect(screen.queryByText("Sırayla dönmesi için en az iki duyuru ekleyin.")).toBeNull()
   })
 
   it("show the turning's settings in Stil › Hareket once the lines take turns", async () => {
@@ -76,10 +85,10 @@ describe("the announcement bar's settings", () => {
       within(mode)
         .getAllByRole("radio")
         .map((radio) => radio.textContent)
-    ).toEqual(["Yalnız ilki", "Sırayla dönsün", "Yan yana"])
+    ).toEqual(["Yalnız ilki", "Sırayla döner", "Yan yana"])
     expect(field("interval")).toBeNull()
 
-    await user.click(screen.getByRole("radio", { name: /Sırayla dönsün/ }))
+    await user.click(screen.getByRole("radio", { name: /Sırayla döner/ }))
     expect(changes.at(-1)).toMatchObject({ mode: "rotate" })
     // The group comes in "Stil", closed as every group but the variant
     expect(field("interval")).not.toBeNull()
@@ -98,12 +107,54 @@ describe("the announcement bar's settings", () => {
     expect(changes.at(-1)).toMatchObject({ hover_pause: "off" })
   })
 
+  it("make the turning lines a slider: sliding, with arrows, fading and none as today", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel(bar({ mode: "rotate" }))
+    await openTab(user, "style")
+    await openGroup(user, "Hareket")
+    const transition = field("transition")
+    if (!transition) throw new Error("no transition field")
+    expect(within(transition).getByRole("radio", { name: "Solarak" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    )
+    await user.click(within(transition).getByRole("radio", { name: "Kayarak" }))
+    expect(changes.at(-1)).toMatchObject({ transition: "slide", arrows: "off" })
+    const arrows = screen.getByRole("switch", { name: /Önceki \/ sonraki okları/ })
+    expect(arrows).not.toBeChecked()
+    await user.click(arrows)
+    expect(changes.at(-1)).toMatchObject({ transition: "slide", arrows: "on" })
+  })
+
+  it("give each line of the dark bar its own link, moved and removed with its line", async () => {
+    const user = userEvent.setup()
+    const shop = { kind: "system" as const, target: "shop" as const, label: "Mağaza" }
+    const changes = renderPanel(bar({ line_links: [shop, null] }))
+    expect(screen.getByText("1. duyurunun bağlantısı")).toBeInTheDocument()
+    expect(screen.getByText("2. duyurunun bağlantısı")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "1. duyuru: aşağı taşı" }))
+    expect(changes.at(-1)).toMatchObject({
+      lines: ["Aynı gün kargo", "Kargo bedava"],
+      line_links: [null, shop],
+    })
+    await user.click(screen.getByRole("button", { name: "2. duyuru: kaldır" }))
+    expect(changes.at(-1)?.type === "announcement_bar" && changes.at(-1)).toEqual(
+      expect.objectContaining({ lines: ["Aynı gün kargo"] })
+    )
+    expect(changes.at(-1)).not.toHaveProperty("line_links")
+  })
+
+  it("leave the light strip's note to its one link, pointing to the dark design's slider", () => {
+    renderPanel(bar({ variant: "light" }))
+    expect(screen.queryByText("1. duyurunun bağlantısı")).toBeNull()
+    expect(screen.getByText(/sırayla dönmesi koyu tasarımdadır/)).toBeInTheDocument()
+  })
+
   it("offer where the lines sit and the bar's size alone in Stil, open, even for one line", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
-    await openTab(user, "style")
-    // "Yazı ve zemin" is the tab's one group: open, with no header to fold it
-    expect(screen.queryByRole("button", { name: "Yazı ve zemin" })).toBeNull()
+    // Stil holds the strip's design (owner 2026-11-27) and "Yazı ve zemin", each its group
+    await openGroup(user, "Yazı ve zemin")
     expect(screen.getByRole("group", { name: "Yazı ve zemin" })).toBeInTheDocument()
     const align = field("align")
     const size = field("size")
@@ -142,7 +193,7 @@ describe("the announcement bar's settings", () => {
   it("offer the ground's colour, the dark one as today, and the bar's button", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(bar({ lines: ["Kargo bedava"] }))
-    await openTab(user, "style")
+    await openGroup(user, "Yazı ve zemin")
     const tone = field("tone")
     if (!tone) throw new Error("no tone field")
     expect(within(tone).getByRole("radio", { name: "Koyu" })).toHaveAttribute(
@@ -168,6 +219,7 @@ describe("the announcement bar's settings", () => {
       )
 
     expect(keys(bar(), "birden çok")).toContain("announcement.mode")
+    expect(keys(bar({ lines: ["Kargo bedava"] }), "sırayla")).toContain("announcement.mode")
     expect(keys(bar({ lines: ["Kargo bedava"] }), "hizalama")).toContain("announcement.align")
     expect(keys(bar(), "Büyük")).toContain("announcement.size")
     expect(keys(bar(), "interval")).not.toContain("announcement.interval")
@@ -178,5 +230,8 @@ describe("the announcement bar's settings", () => {
         (each) => each.key === "announcement.hover_pause"
       )?.group
     ).toBe("motion")
+    expect(keys(bar({ mode: "rotate" }), "kayarak")).toContain("announcement.transition")
+    expect(keys(bar({ mode: "rotate" }), "oklar")).toContain("announcement.arrows")
+    expect(keys(bar({ mode: "first" }), "kayarak")).not.toContain("announcement.transition")
   })
 })

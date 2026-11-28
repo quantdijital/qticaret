@@ -50,12 +50,13 @@ describe("ShippingClassesCard (adr/0087 §4)", () => {
     fetchMock.mockReset()
   })
 
-  it("shows the locked free class first and each class's products, and adds one in place", async () => {
+  it("lists the shop's own classes with their products, not the built-in free one, and adds one in place", async () => {
     renderCard({ free: 4, bulky: 12 })
 
-    expect(screen.getByText("Ücretsiz kargo")).toBeInTheDocument()
-    expect(await screen.findByText("4 ürün")).toBeInTheDocument()
-    expect(screen.getByText("12 ürün")).toBeInTheDocument()
+    // The free class is the product's switch, not a locked row here (the owner, 2026-11-26)
+    expect(await screen.findByText("12 ürün")).toBeInTheDocument()
+    expect(screen.queryByText("4 ürün")).not.toBeInTheDocument()
+    expect(screen.queryByText("Ücretsiz kargo")).not.toBeInTheDocument()
     expect(screen.getByRole("textbox", { name: "1. sınıfın adı" })).toHaveValue("Büyük ürün")
 
     await userEvent.click(screen.getByRole("button", { name: "Sınıf ekle" }))

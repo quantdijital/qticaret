@@ -128,26 +128,15 @@ async function eraseContributions(container: Container, customerId: string) {
   const reviews = container.resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
   const qa = container.resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
   const byCustomer = { customer_id: customerId }
-  const [written, asked, answered] = await Promise.all([
-    reviews.listProductReviews(byCustomer, { select: ["id"] }),
-    qa.listProductQuestions(byCustomer, { select: ["id"] }),
-    qa.listProductAnswers(byCustomer, { select: ["id"] }),
-  ])
+  const written = await reviews.listProductReviews(byCustomer, { select: ["id"] })
   if (written.length > 0) {
     await reviews.updateProductReviews(
       written.map((row) => ({ id: row.id, author_name: ERASED_AUTHOR }))
     )
   }
-  if (asked.length > 0) {
-    await qa.updateProductQuestions(
-      asked.map((row) => ({ id: row.id, author_name: ERASED_AUTHOR }))
-    )
-  }
-  if (answered.length > 0) {
-    await qa.updateProductAnswers(
-      answered.map((row) => ({ id: row.id, author_name: ERASED_AUTHOR }))
-    )
-  }
+  // Deleted questions and answers too: the shop may bring one back ("Geri al",
+  // adr/0037 Ek 2026-11-27), and it must come back under the placeholder
+  await qa.eraseAuthor({ customer_id: customerId, name: ERASED_AUTHOR })
   const alerts = container.resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE)
   const saved = container.resolve<WishlistModuleService>(WISHLIST_MODULE)
   const [waiting, kept] = await Promise.all([

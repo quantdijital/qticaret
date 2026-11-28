@@ -53,13 +53,16 @@ describe("the calendar's month loader", () => {
 
   it.each([429, 502])("holds a %i for 30 seconds before asking again", async (status) => {
     const address = `/api/search/calendar?month=2027-04&kisi=${String(status % 20)}`
+    // The clock stands still while the month fails: under load the failure's own
+    // Date.now() came a few milliseconds after start and the hold had not run out
     const start = Date.now()
+    const clock = vi.spyOn(Date, "now").mockReturnValue(start)
     statuses.push(status)
     await expect(loadMonth(address, signal())).rejects.toThrow()
     expect(keptMonth(address)).toBeNull()
     await expect(loadMonth(address, signal())).rejects.toThrow()
     expect(asked).toEqual([address])
-    vi.spyOn(Date, "now").mockReturnValue(start + FAILED_HOLD_MS + 1)
+    clock.mockReturnValue(start + FAILED_HOLD_MS + 1)
     expect(keptMonth(address)).toBeUndefined()
     await loadMonth(address, signal())
     expect(asked).toEqual([address, address])

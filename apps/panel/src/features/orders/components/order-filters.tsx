@@ -8,6 +8,7 @@ import {
   SHIPPING_FILTERS,
 } from "@/features/orders/api/orders"
 import { choicesOf, choicesText } from "@/features/orders/search"
+import { useCarrierShown } from "@/features/settings/api/carriers"
 import type { OrderListSearch } from "@/features/orders/search"
 
 /**
@@ -54,6 +55,7 @@ export function useOrderFilters(
   onClear: () => void
 } {
   const { t } = useTranslation()
+  const shown = useCarrierShown()
   const F = "orders.filters"
   const choices = (options: readonly string[], words: string) =>
     options.map((value) => ({ value, label: t(`${F}.${words}.${value}`) }))
@@ -81,7 +83,8 @@ export function useOrderFilters(
         key: "carrier",
         label: t(`${F}.carrier`),
         kind: "multi",
-        options: choices(CARRIER_FILTERS, "carriers"),
+        // A carrier suspended on this server is not a choice (adr/0027 Ek 2026-11-26)
+        options: choices(CARRIER_FILTERS.filter(shown), "carriers"),
       },
       { key: "days", label: t(`${F}.days`), kind: "days", hint: t(`${F}.daysHint`) },
       ...(extra?.filters ?? []),

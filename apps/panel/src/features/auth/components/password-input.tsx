@@ -16,7 +16,12 @@ export function PasswordInput({ className, ...props }: Omit<ComponentProps<"inpu
   const [shown, setShown] = useState(false)
   return (
     <div className="relative">
-      <Input {...props} type={shown ? "text" : "password"} className={cn("pr-10", className)} />
+      <Input
+        // placeholder-exempt: a password has no example
+        {...props}
+        type={shown ? "text" : "password"}
+        className={cn("pr-10", className)}
+      />
       <Button
         type="button"
         variant="ghost"

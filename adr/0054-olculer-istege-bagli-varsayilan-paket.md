@@ -147,3 +147,7 @@ Aras'ın `SetOrder` belgesi herkese açık değil (servis tanımında her alan `
 ### Hata mesajları
 
 `shipping.address_incomplete` ve `shipping.sender_address_incomplete` genel yedek olarak kalır. Taşıyıcı kuralları artık eksik parçayı kendi anahtarıyla söyler (`shipping.receiver_*`, `shipping.sender_*`). Her mesaj nereden düzeltileceğini yazar: sipariş sayfası, Ayarlar > Depolar, Ayarlar > Mağaza ya da Geliver paneli. `shipping.location_unknown` silindi.
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+Geliver projeden çıkarıldı (ADR-0031 ek). Yukarıdaki Geliver'e özgü kurallar (`geliver-sender.ts`, `shipping.no_offer`, hesap göndericisi, sahte Geliver) tarihseldir; ölçü ve alıcı kuralları Aras ve Yurtiçi için geçerlidir.

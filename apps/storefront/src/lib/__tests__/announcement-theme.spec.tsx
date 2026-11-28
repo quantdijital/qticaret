@@ -34,7 +34,14 @@ const frame = (over: Partial<AnnouncementSettings> | null) =>
       ...(over ? { announcementSettings: settings(over) } : {}),
     })
   )
-const words = { announcements: "Duyurular", pause: "Duyuruları durdur", play: "Duyuruları oynat" }
+const words = {
+  announcements: "Duyurular",
+  pause: "Duyuruları durdur",
+  play: "Duyuruları oynat",
+  previous: "Önceki duyuru",
+  next: "Sonraki duyuru",
+  slides: ["1 / 3", "2 / 3", "3 / 3"],
+}
 
 describe("the announcement bar's lines as the server prints them", () => {
   it("shows the first alone by default, and from a storefront without the settings", () => {
@@ -74,6 +81,39 @@ describe("the announcement bar's lines as the server prints them", () => {
     expect(html).toMatch(/<li data-active=""[^>]*>Kargo bedava<\/li>/)
     expect(html).toMatch(/<li aria-hidden="true"[^>]*>Aynı gün kargo<\/li>/)
     expect(html).toContain('aria-label="Duyuruları durdur"')
+    // Fading as before: no slider's parts unless asked
+    expect(html).not.toContain("data-transition")
+    expect(html).not.toContain("aria-roledescription")
+  })
+
+  it("draws the slider's arrows and each line's place only when asked, and lines' links", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({
+        announcements: LINES,
+        announcementSettings: settings({ mode: "rotate", transition: "slide", arrows: "on" }),
+        announcementLineLinks: [null, { path: "/kargo", label: "Aynı gün kargo" }, null],
+      })
+    )
+    expect(html).toContain('aria-roledescription="carousel"')
+    expect(html).toContain('aria-label="Önceki duyuru"')
+    expect(html).toContain('aria-label="Sonraki duyuru"')
+    expect(html).toContain('aria-label="2 / 3"')
+    expect(html).toContain('data-transition="slide"')
+    expect(html).toMatch(/<a href="\/kargo"[^>]*>Aynı gün kargo<\/a>/)
+    // No movement before the first step: nothing slides on the first paint
+    expect(html).not.toContain("data-move")
+  })
+
+  it("links the first line alone too when the lines do not turn", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({
+        announcements: LINES,
+        announcementLineLinks: [{ path: "/kampanya", label: "Kargo bedava" }, null, null],
+      })
+    )
+    expect(html).toMatch(/<a href="\/kampanya"[^>]*>Kargo bedava<\/a>/)
   })
 })
 
@@ -112,6 +152,11 @@ describe("the announcement bar's turning", () => {
       root.render(<AnnouncementTurns lines={LINES} settings={settings(over)} words={words} />)
     })
   }
+  const press = (name: string) => {
+    act(() => {
+      host.querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`)?.click()
+    })
+  }
   const shown = () => host.querySelector("[data-active]")?.textContent
   const wait = (ms: number) => {
     act(() => {
@@ -125,7 +170,9 @@ describe("the announcement bar's turning", () => {
     expect(host.querySelector("ul")?.getAttribute("aria-live")).toBe("off")
     wait(ANNOUNCEMENT_INTERVAL.fast)
     expect(shown()).toBe("Aynı gün kargo")
-    wait(ANNOUNCEMENT_INTERVAL.fast * 2)
+    // Each line its own full interval (the time starts again with every line)
+    wait(ANNOUNCEMENT_INTERVAL.fast)
+    wait(ANNOUNCEMENT_INTERVAL.fast)
     expect(shown()).toBe("Kargo bedava")
   })
 
@@ -165,6 +212,43 @@ describe("the announcement bar's turning", () => {
     draw()
     wait(ANNOUNCEMENT_INTERVAL.slow * 3)
     expect(shown()).toBe("Kargo bedava")
+  })
+
+  it("steps by its arrows both ways, looping, and starts the line's time again", () => {
+    draw({ arrows: "on", interval: "fast" })
+    press("Önceki duyuru")
+    expect(shown()).toBe("30 gün iade")
+    press("Sonraki duyuru")
+    expect(shown()).toBe("Kargo bedava")
+    // The click left focus elsewhere: the turning goes on, a full interval after the step
+    wait(ANNOUNCEMENT_INTERVAL.fast - 1)
+    expect(shown()).toBe("Kargo bedava")
+    wait(1)
+    expect(shown()).toBe("Aynı gün kargo")
+  })
+
+  it("steps by its arrows under reduced motion, never by itself", () => {
+    reduced = true
+    draw({ arrows: "on" })
+    press("Sonraki duyuru")
+    expect(shown()).toBe("Aynı gün kargo")
+    wait(ANNOUNCEMENT_INTERVAL.slow * 3)
+    expect(shown()).toBe("Aynı gün kargo")
+  })
+
+  it("slides the next line in and the last out, backwards on a step back", () => {
+    draw({ transition: "slide", arrows: "on" })
+    const list = () => host.querySelector("ul")
+    const moving = (move: string) => host.querySelector(`[data-move="${move}"]`)?.textContent
+    expect(moving("in")).toBeUndefined()
+    press("Sonraki duyuru")
+    expect(moving("in")).toBe("Aynı gün kargo")
+    expect(moving("out")).toBe("Kargo bedava")
+    expect(list()?.hasAttribute("data-back")).toBe(false)
+    press("Önceki duyuru")
+    expect(moving("in")).toBe("Kargo bedava")
+    expect(moving("out")).toBe("Aynı gün kargo")
+    expect(list()?.hasAttribute("data-back")).toBe(true)
   })
 
   it("hides a hover-only pause button until the pointer or focus comes", () => {

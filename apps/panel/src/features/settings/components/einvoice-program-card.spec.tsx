@@ -25,6 +25,15 @@ const parasut = (available: boolean) => ({
 })
 
 let client: QueryClient
+let manager = "own"
+
+/** Every read answered: Settings > Shipping's choice, Paraşüt's state for the rest. */
+const answer = (available: boolean) => (url: string) =>
+  Promise.resolve(
+    url.includes("platform-settings/shipping")
+      ? { section: "shipping", values: { manager }, version: 1 }
+      : parasut(available)
+  )
 
 const renderCard = (provider: string) => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -49,7 +58,8 @@ const options = async () => {
 describe("EinvoiceProgramCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    fetchMock.mockResolvedValue(parasut(true))
+    manager = "own"
+    fetchMock.mockImplementation(answer(true))
   })
 
   it("reads a program the panel does not offer as none", () => {
@@ -93,7 +103,7 @@ describe("EinvoiceProgramCard", () => {
   })
 
   it("does not offer Paraşüt while the platform has not opened it (docs/06 principle 10)", async () => {
-    fetchMock.mockResolvedValue(parasut(false))
+    fetchMock.mockImplementation(answer(false))
     renderCard("none")
     await settled()
 
@@ -101,9 +111,17 @@ describe("EinvoiceProgramCard", () => {
   })
 
   it("keeps a shop already on Paraşüt seeing its choice", () => {
-    fetchMock.mockResolvedValue(parasut(false))
+    fetchMock.mockImplementation(answer(false))
     renderCard("parasut")
 
     expect(screen.getByRole("combobox", { name: "Faturayı kesen" })).toHaveTextContent("Paraşüt")
+  })
+
+  it("shows the moment read only while BirFatura ships the parcels (adr/0072 Ek 2026-11-26)", async () => {
+    manager = "birfatura"
+    renderCard("birfatura")
+
+    expect(await screen.findByText(/BirFatura kargoyu yönettiği için sipariş/)).toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "Kesim anı" })).toBeDisabled()
   })
 })

@@ -11,7 +11,7 @@ import type { Env } from "../env"
 
 export const GOOGLE_PROVIDER = "google"
 
-/** Where Google sends the shop back: the backend, on the panel's own host (adr/0022 §4). */
+/** Where Google sends the shop back: the backend, reached through the panel's origin (adr/0022 §4). */
 export const GOOGLE_CALLBACK_PATH = "/google/callback"
 
 /**
@@ -30,22 +30,11 @@ export const GOOGLE_SCOPES = [
 export const SEARCH_CONSOLE_SCOPE = "https://www.googleapis.com/auth/webmasters"
 
 /**
- * Business Profile's scope, for the shop's Google reviews (adr/0058): asked
- * only when the shop connects its reviews, on top of what it allowed
- * before (incremental authorization), not of every shop that connects.
+ * The panel page Google's callback returns to (adr/0022 §4): a path, never
+ * an address, so the browser stays on the origin the callback came in on
+ * (the panel's) and no redirect leaves it.
  */
-export const BUSINESS_PROFILE_SCOPE = "https://www.googleapis.com/auth/business.manage"
-
-/** A `state` started from the panel's Google reviews: the callback goes back there. */
-export const REVIEWS_STATE_PREFIX = "r."
-
-/** The panel page Google's callback returns to, by the state's prefix (adr/0022 §4). */
-export const panelPathOfState = (state: string | undefined): string =>
-  state?.startsWith(REVIEWS_STATE_PREFIX) ? "/reviews/google" : "/settings/marketing"
-
-/** Whether the scopes Google granted (space-separated, as kept) include one. */
-export const hasScope = (granted: unknown, scope: string): boolean =>
-  typeof granted === "string" && granted.split(" ").includes(scope)
+export const GOOGLE_PANEL_PATH = "/settings/marketing"
 
 export interface GoogleClient {
   clientId: string
@@ -69,9 +58,6 @@ export function googleHosts(env: Env = parseEnv()) {
     webmasters: fake ?? "https://www.googleapis.com",
     searchConsole: fake ?? "https://searchconsole.googleapis.com",
     crux: fake ?? "https://chromeuxreport.googleapis.com",
-    accountManagement: fake ?? "https://mybusinessaccountmanagement.googleapis.com",
-    businessInformation: fake ?? "https://mybusinessbusinessinformation.googleapis.com",
-    myBusiness: fake ?? "https://mybusiness.googleapis.com",
   }
 }
 
@@ -84,23 +70,22 @@ export function pkcePair(): { verifier: string; challenge: string } {
 /**
  * The address the shop is sent to, to let the platform's client reach its
  * Merchant Center: offline access and the consent screen every time, so
- * Google hands over a refresh token again. `extraScopes` are asked on top
- * (Business Profile's); with `include_granted_scopes` the new token keeps
- * what the shop allowed before.
+ * Google hands over a refresh token again. Only `GOOGLE_SCOPES`, without
+ * `include_granted_scopes`: a token from an earlier, wider grant (Google
+ * reviews' `business.manage`, removed 2026-11-27) is not carried over.
  */
 export function authorizationUrl(
   client: GoogleClient,
-  input: { state: string; challenge: string; redirectUri: string; extraScopes?: readonly string[] },
+  input: { state: string; challenge: string; redirectUri: string },
   accountsHost: string = googleHosts().accounts
 ): string {
   const query = new URLSearchParams({
     client_id: client.clientId,
     redirect_uri: input.redirectUri,
     response_type: "code",
-    scope: [...GOOGLE_SCOPES, ...(input.extraScopes ?? [])].join(" "),
+    scope: GOOGLE_SCOPES.join(" "),
     access_type: "offline",
     prompt: "consent",
-    include_granted_scopes: "true",
     state: input.state,
     code_challenge: input.challenge,
     code_challenge_method: "S256",

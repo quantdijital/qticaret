@@ -12,9 +12,11 @@ import type { StructuredLogger } from "./logging"
 export const FAKE_PROVIDER_ADDRESSES = {
   PAYTR_BASE_URL: "PayTR",
   IYZICO_BASE_URL: "iyzico",
-  GELIVER_BASE_URL: "Geliver",
   ARAS_BASE_URL: "Aras",
   YURTICI_BASE_URL: "Yurtiçi",
+  DHL_ECOMMERCE_BASE_URL: "DHL eCommerce",
+  SURAT_BASE_URL: "Sürat Kargo",
+  PTT_BASE_URL: "PTT Kargo",
   NETGSM_BASE_URL: "Netgsm",
   PARASUT_BASE_URL: "Paraşüt",
   BIRFATURA_BASE_URL: "BirFatura",

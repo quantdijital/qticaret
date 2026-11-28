@@ -106,7 +106,7 @@ describe("a section the preview does not draw (adr/0065)", () => {
   it("says a new, still empty section shows once filled in, not that it was not found", async () => {
     const { fromFrame, selected } = await liveEditor()
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Sık sorulan sorular/ }))
     await pass(0)
     const added = selected().at(-1)

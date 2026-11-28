@@ -19,7 +19,11 @@ import type { AccountState } from "@/features/settings/api/payments"
 
 const A = "settings.payments.account"
 
-/** Why nothing can be saved, or why the stored account no longer works. */
+/**
+ * Why nothing can be saved, why the stored account no longer works, or, for
+ * a provider that words it (`<ns>.<provider>.unverified`: PTT, which never
+ * confirms an account), why it shows as not verified.
+ */
 export function AccountAlert({
   provider,
   state,
@@ -32,7 +36,7 @@ export function AccountAlert({
   /** Where the provider's own texts live (payment or shipping settings). */
   ns?: string
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   if (!keyConfigured) {
     return (
       <Alert variant="destructive">
@@ -49,6 +53,14 @@ export function AccountAlert({
       </Alert>
     )
   }
+  const unverified = `${ns}.${provider}.unverified`
+  if (state === "unverified" && i18n.exists(unverified)) {
+    return (
+      <Alert>
+        <AlertDescription>{t(unverified)}</AlertDescription>
+      </Alert>
+    )
+  }
   return null
 }
 
@@ -62,6 +74,7 @@ export function SecretField({
   registration,
   optional = false,
   hint,
+  example,
 }: {
   id: string
   label: string
@@ -74,6 +87,8 @@ export function SecretField({
   optional?: boolean
   /** Shown in place of the usual hint while nothing is stored. */
   hint?: string
+  /** An example of the value while nothing is stored (a customer number's shape); none for a password. */
+  example?: string
 }) {
   const { t } = useTranslation()
   return (
@@ -88,7 +103,7 @@ export function SecretField({
         id={id}
         type="password"
         spellCheck={false}
-        placeholder={kept ? "••••••••••••" : ""}
+        placeholder={kept ? "••••••••••••" : (example ?? "")}
         {...NOT_A_LOGIN}
         {...registration}
       />

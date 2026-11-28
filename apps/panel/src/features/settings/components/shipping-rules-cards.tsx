@@ -12,7 +12,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import {
   formatMoneyInput,
   parseDecimalInput,
@@ -69,6 +69,7 @@ export function RatesCard({
   const rows = useFieldArray({ control: form.control, name: "rows" })
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         rate_table: next.rows.map((row) => ({
@@ -80,7 +81,7 @@ export function RatesCard({
       },
       {
         onSuccess: (result) => {
-          form.reset(ratesOf(result.values), FULL_RESET)
+          settle(ratesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

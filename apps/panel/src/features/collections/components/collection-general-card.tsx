@@ -12,7 +12,7 @@ import {
 import type { Collection } from "@/features/collections/api/collections"
 import { COLLECTION_PATH_PREFIX } from "@/features/collections/paths"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { isValidSlug } from "@/lib/slug"
 
 const C = "collections"
@@ -43,6 +43,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
   const { errors } = form.formState
 
   const submit = form.handleSubmit(async (values) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     try {
       if (dirtyFields.title || dirtyFields.handle) {
@@ -54,7 +55,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
       if (dirtyFields.is_active) {
         await details.mutateAsync({ is_active: values.is_active })
       }
-      form.reset(values, FULL_RESET)
+      settle(values)
       toast.success(t(`${C}.saved`))
     } catch (failure) {
       toast.error(errorText(t, failure))
@@ -78,6 +79,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
         error={errors.title ? t(`${C}.nameRequired`) : undefined}
       >
         <Input
+          placeholder={t("collections.placeholders.name")}
           id="collection-title"
           maxLength={200}
           {...form.register("title", { validate: (text) => text.trim().length > 0 })}
@@ -94,6 +96,7 @@ export function CollectionGeneralCard({ collection }: { collection: Collection }
             {COLLECTION_PATH_PREFIX}
           </span>
           <Input
+            placeholder={t("collections.placeholders.handle")}
             id="collection-handle"
             spellCheck={false}
             className="border-0 pl-0 font-mono text-[13px] shadow-none"

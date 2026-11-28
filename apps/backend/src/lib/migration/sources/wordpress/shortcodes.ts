@@ -4,8 +4,11 @@
  * `[col]`, `[ux_text]`) give up their tags and keep what they hold; a
  * question-and-answer item (`[sss_item soru="…"]`, `[accordion-item
  * title="…"]`) keeps its question as a heading; product grids, galleries,
- * blocks and embeds are dropped and counted. Never run: a tag is only
- * ever taken out or swapped for a heading's markup of its quoted text.
+ * blocks and embeds are dropped and counted. A gallery naming its media
+ * library uploads (`[gallery ids="1,2"]`, Flatsome's `[ux_image id="3"]`)
+ * becomes their pictures when the caller keeps pictures (`galleries`).
+ * Never run: a tag is only ever taken out or swapped for a heading's
+ * markup of its quoted text or a picture's tag naming an upload by its id.
  */
 
 // A shortcode's tag: a lowercase name, so "[Not]" or "[1]" in a sentence stay text
@@ -26,6 +29,27 @@ const OPAQUE: ReadonlySet<string> = new Set(["embed", "video", "audio", "playlis
 // What draws something from the old site's data: a product grid, a gallery, a saved block
 const WIDGET =
   /(^|_)(products?|product_categories|gallery|block|slider|banner|map|image|form|countdown|portfolio)(_|$)|contact-form/
+
+// Galleries naming uploads by id, and the attribute that names them
+const GALLERIES: Readonly<Record<string, string>> = {
+  gallery: "ids",
+  ux_image: "id",
+  ux_gallery: "ids",
+}
+const MAX_GALLERY = 100
+
+/** A gallery's uploads as picture tags the body reader resolves by id; none for no ids. */
+function galleryOf(name: string, rest: string): string | null {
+  const attribute = GALLERIES[name]
+  const ids = attribute
+    ? (attributesOf(rest).get(attribute) ?? "")
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => /^\d{1,12}$/.test(id))
+        .slice(0, MAX_GALLERY)
+    : []
+  return ids.length > 0 ? ids.map((id) => `<p><img class="wp-image-${id}"></p>`).join("") : null
+}
 
 export interface Expanded {
   html: string
@@ -52,7 +76,10 @@ const escaped = (text: string) =>
     .replace(/>/g, "&gt;")
 
 /** The text without its shortcodes, their contents kept but for the opaque ones. */
-export function expandShortcodes(text: string): Expanded {
+export function expandShortcodes(
+  text: string,
+  { galleries = false }: { galleries?: boolean } = {}
+): Expanded {
   const parts: string[] = []
   let widgets = 0
   let at = 0
@@ -78,6 +105,11 @@ export function expandShortcodes(text: string): Expanded {
       if (question) {
         parts.push(`<h3>${escaped(question.trim())}</h3>`)
       }
+      continue
+    }
+    const gallery = galleries ? galleryOf(name, rest) : null
+    if (gallery) {
+      parts.push(gallery)
       continue
     }
     if (WIDGET.test(name)) {

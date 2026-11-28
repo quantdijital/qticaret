@@ -3,12 +3,15 @@ import type { CredentialProviderName } from "../../../modules/integration-creden
 import { createHealthMonitor } from "./health"
 import type { IntegrationHealthCheck } from "./health"
 import { arasHealthCheck } from "./aras-check"
-import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { netgsmHealthCheck } from "./netgsm-check"
 import { yurticiHealthCheck } from "./yurtici-check"
+import { dhlEcomHealthCheck } from "./dhlecommerce-check"
+import { suratHealthCheck } from "./surat-check"
+import { pttHealthCheck } from "./ptt-check"
 import { registerProcessCache } from "../../cache/process-caches"
+import { isSuspended } from "../suspended"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
 export type {
@@ -20,11 +23,13 @@ export type {
   IntegrationHealthCheck,
 } from "./health"
 export { arasHealthCheck } from "./aras-check"
-export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
 export { netgsmHealthCheck } from "./netgsm-check"
 export { yurticiHealthCheck } from "./yurtici-check"
+export { dhlEcomHealthCheck } from "./dhlecommerce-check"
+export { suratHealthCheck } from "./surat-check"
+export { pttHealthCheck } from "./ptt-check"
 
 /** The shop's stored provider accounts (adr/0027), as the checks read them. */
 export interface AccountSource {
@@ -37,14 +42,17 @@ export interface AccountSource {
  * services (Redis, the database) are operations' to watch, not the shop's.
  */
 export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthCheck[] {
+  // A suspended carrier is no shop's integration (`lib/integrations/suspended.ts`)
   return [
     paytrHealthCheck(() => accounts.read("paytr")),
     iyzicoHealthCheck(() => accounts.read("iyzico")),
-    geliverHealthCheck(() => accounts.read("geliver")),
     arasHealthCheck(() => accounts.read("aras")),
     yurticiHealthCheck(() => accounts.read("yurtici")),
+    dhlEcomHealthCheck(() => accounts.read("dhlecommerce")),
+    suratHealthCheck(() => accounts.read("surat")),
+    pttHealthCheck(() => accounts.read("ptt")),
     netgsmHealthCheck(() => accounts.read("netgsm")),
-  ]
+  ].filter((check) => !isSuspended(check.id))
 }
 
 let monitor: ReturnType<typeof createHealthMonitor> | undefined

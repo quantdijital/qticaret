@@ -25,21 +25,25 @@ export const isHeaderCatalogStep = (field: string): field is HeaderCatalogStepFi
   field in HEADER_CATALOG_STEPS
 
 /**
+ * The catalog settings of the strip the header drew above itself until the
+ * top strip became its own section (owner's decision 2026-11-27, adr/0066
+ * Ek): kept as stored, read once into the strip section, never offered.
+ */
+const STRIP_FIELDS: ReadonlySet<keyof HeaderCatalogFields> = new Set([
+  "utility_bar",
+  "strip_note",
+  "strip_note_link",
+  "account_text",
+])
+
+/**
  * Whether the panel offers a catalog setting as the bar stands
- * (bilesen-standardi §0, "geniş düşün, az göster"): the strip's written
- * "Hesabım" only while the tools stand on the menu bar (in the top row
- * they carry it), the strip's note and its link only while the strip is
- * on. The strip itself is always offered: its note may be all it holds.
+ * (bilesen-standardi §0, "geniş düşün, az göster"): never one of the old
+ * strip's (`STRIP_FIELDS`); the rest always.
  */
 export function headerCatalogOffers(
-  section: Pick<HeaderCatalogFields, "tools_place" | "utility_bar">,
+  _section: Pick<HeaderCatalogFields, "tools_place" | "utility_bar">,
   field: keyof HeaderCatalogFields
 ): boolean {
-  if (field === "account_text") {
-    return section.tools_place !== "row"
-  }
-  if (field === "strip_note" || field === "strip_note_link") {
-    return section.utility_bar
-  }
-  return true
+  return !STRIP_FIELDS.has(field)
 }

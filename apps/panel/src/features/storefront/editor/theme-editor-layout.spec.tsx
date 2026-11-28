@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -47,72 +47,66 @@ describe("the theme editor's layout", () => {
     Reflect.deleteProperty(window, "matchMedia")
   })
 
-  it("shows the parts, the open part's settings and the preview side by side on a wide screen", async () => {
-    windowOf(1440)
-    renderEditor()
-    const tree = await opened()
-    await frame()
-    // Nothing open: the preview takes the settings' room
-    expect(screen.queryByRole("region")).toBeNull()
+  it.each([1440, 1100])(
+    "swaps one side panel's content between the parts and a part's settings at %i px",
+    async (width) => {
+      windowOf(width)
+      renderEditor()
+      const tree = await opened()
+      await frame()
+      // Nothing open: the list alone
+      expect(screen.queryByRole("region")).toBeNull()
 
-    await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
-    expect(settings()).toBeVisible()
-    expect(tree).toBeVisible()
-    expect(within(tree).getByRole("button", { name: "Giriş" })).toHaveAttribute(
-      "aria-current",
-      "true"
-    )
-    // The list is beside it: no drawer, a way back instead, no edit-or-preview switch
-    expect(screen.queryByRole("button", { name: "Bölümler" })).toBeNull()
-    expect(screen.queryByRole("radio", { name: "Önizle" })).toBeNull()
-    await userEvent.click(screen.getByRole("button", { name: "Bölümlere dön" }))
-    expect(screen.queryByRole("region")).toBeNull()
-  })
+      await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
+      expect(settings()).toBeVisible()
+      // The keyboard lands on its title, not on the back button and its hint
+      expect(screen.getByRole("heading", { name: "Giriş" })).toHaveFocus()
+      // The list makes room: one side panel, not one beside another, and no drawer
+      expect(tree).not.toBeVisible()
+      expect(screen.queryByRole("button", { name: "Bölümler" })).toBeNull()
+      expect(screen.queryByRole("radio", { name: "Önizle" })).toBeNull()
+      // The way back names where it leads, the breadcrumb where the panel stands
+      const trail = screen.getByRole("navigation", { name: "Konum" })
+      expect(trail).toHaveTextContent("Ana sayfaGiriş")
 
-  it("puts the parts in a drawer beside the open settings on a laptop", async () => {
+      await userEvent.click(screen.getByRole("button", { name: "Bölümlere dön" }))
+      expect(screen.queryByRole("region")).toBeNull()
+      expect(tree).toBeVisible()
+      // The section just left stays marked, the keyboard back on it
+      expect(within(tree).getByRole("button", { name: "Giriş" })).toHaveAttribute(
+        "aria-current",
+        "true"
+      )
+      expect(within(tree).getByRole("button", { name: "Giriş" })).toHaveFocus()
+    }
+  )
+
+  it("goes back by the breadcrumb or one step with Escape, keeping the list's search", async () => {
     windowOf(1100)
     renderEditor()
-    const tree = await opened()
-    await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
+    await opened()
+    const search = screen.getByRole("searchbox", { name: "Ayarlarda ara" })
+    await userEvent.type(search, "blog limit")
+    const hit = () =>
+      within(screen.getByRole("list", { name: "Arama sonuçları" })).getByRole("button", {
+        name: /Gösterilecek sayı/,
+      })
+    await userEvent.click(hit())
+    expect(search).not.toBeVisible()
 
-    // The settings take the list's place; the list opens over them
-    expect(settings()).toBeVisible()
-    expect(screen.queryByRole("navigation", { name: "Sayfanın bölümleri" })).toBeNull()
-    await userEvent.click(screen.getByRole("button", { name: "Bölümler" }))
-    const drawer = await screen.findByRole("dialog", { name: "Sayfanın bölümleri" })
-    const list = within(drawer).getByRole("navigation", { name: "Sayfanın bölümleri" })
-    // A row's own buttons work in the drawer, which stays open
-    await userEvent.click(
-      within(list).getByRole("button", { name: "Blog yazıları bölümünü gizle" })
-    )
-    expect(drawer).toBeVisible()
+    // The breadcrumb's first step is the page's parts, the search as it was left
+    const trail = screen.getByRole("navigation", { name: "Konum" })
+    await userEvent.click(within(trail).getByRole("button", { name: "Ana sayfa" }))
+    expect(search).toBeVisible()
+    expect(search).toHaveValue("blog limit")
 
-    // Another part picked: its settings open, the drawer closes
-    await userEvent.click(within(list).getByRole("button", { name: "Tema ayarları" }))
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull()
-    })
-    expect(screen.getByRole("region", { name: "Tema ayarları" })).toBeVisible()
-  })
-
-  it("clears the drawer's settings search on Escape before it closes the drawer", async () => {
-    windowOf(1100)
-    renderEditor()
-    const tree = await opened()
-    await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
-    await userEvent.click(screen.getByRole("button", { name: "Bölümler" }))
-    const drawer = await screen.findByRole("dialog", { name: "Sayfanın bölümleri" })
-    const search = within(drawer).getByRole("searchbox", { name: "Ayarlarda ara" })
-    await userEvent.type(search, "margin")
-
+    // Escape takes the panel up a step; at the list it leaves the search be
+    await userEvent.click(hit())
+    expect(screen.getByRole("region", { name: "Blog yazıları" })).toBeVisible()
     await userEvent.keyboard("{Escape}")
-    expect(search).toHaveValue("")
-    expect(drawer).toBeVisible()
-
-    await userEvent.keyboard("{Escape}")
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).toBeNull()
-    })
+    expect(screen.queryByRole("region")).toBeNull()
+    expect(search).toBeVisible()
+    expect(search).toHaveValue("blog limit")
   })
 
   it("switches between the settings and the preview on a phone, keeping both", async () => {

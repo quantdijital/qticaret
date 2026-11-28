@@ -12,7 +12,7 @@ const fetchMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 // The AI drafts have their own spec (ai-review-drafts.spec.tsx)
 vi.mock("@/features/ai/components/ai-button", () => ({ AiButton: () => null }))
-// The section tabs read the Google reviews status: not what this page is about
+// The section tabs are router links: not what this page is about
 vi.mock("@/features/reviews/components/reviews-nav", () => ({ ReviewsNav: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
@@ -25,6 +25,7 @@ const question: QuestionRow = {
   id: "pq_1",
   body: "Bu tava indüksiyonda çalışır mı?",
   author_name: "Ayşe Y.",
+  by_shop: false,
   status: "approved",
   has_link: false,
   created_at: "2026-10-28T10:00:00Z",

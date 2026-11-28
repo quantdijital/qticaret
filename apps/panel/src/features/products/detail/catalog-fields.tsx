@@ -204,6 +204,7 @@ export function CatalogFields({
         >
           {/* Counted as a reader counts letters (the server's rule), not by the input's UTF-16 units */}
           <Input
+            placeholder={t("products.placeholders.badge")}
             id="catalog-badge"
             aria-invalid={badgeError}
             {...form.register("badge", {

@@ -29,6 +29,7 @@ import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
 import { varyOnPublishableKey } from "../../../lib/http/vary"
 import { turnstilePublic } from "../../../lib/security/turnstile/public"
 import { kurus, toMedusaAmount } from "../../../lib/money"
+import { standaloneThreshold } from "../../../lib/promotions/free-shipping"
 
 /**
  * GET /store/storefront (F18 D3, docs/19 §4): the storefront's frame as the
@@ -139,7 +140,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     // The theme's choices (F18 D11, adr/0053) as the published design holds them, else the
     // theme section with the old main colour (adr/0063 §3); its version stays inside
     theme: shared.theme,
-    free_shipping_threshold: promotions.free_shipping_threshold,
+    // Only a total that frees shipping by itself is said (a coupon-and-total one is not)
+    free_shipping_threshold: standaloneThreshold(promotions),
     // The product page's "Kargo ve Teslimat" card says these (adr/0046 Ek 2026-11-06)
     delivery: storefrontDelivery(shipping, marketing),
     // adr/0087 §3: the shop's own shipping classes, a surcharge in lira each; a product's

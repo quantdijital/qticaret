@@ -12,6 +12,8 @@ const VERDICTS: Readonly<Record<AccountCheck, Verification | null>> = {
   secret_invalid: "rejected",
   unreachable: null,
   failed: null,
+  // The provider answered without proving the details: a "verified" kept before must not stand
+  unconfirmed: "unverified",
 }
 
 /**

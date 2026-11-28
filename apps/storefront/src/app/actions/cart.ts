@@ -26,6 +26,9 @@ const RESTRICTED_CODE_REFUSALS: ReadonlySet<string> = new Set([
   "promotions.customer_group_login",
   "promotions.customer_group_only",
   "promotions.first_order_only",
+  // A free shipping code the shop's condition does not take now (Kargo ücreti, "Koşul")
+  "promotions.free_shipping_code_below_total",
+  "promotions.free_shipping_code_off",
 ])
 
 const AddToCart = z.object({

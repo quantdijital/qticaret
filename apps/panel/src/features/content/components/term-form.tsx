@@ -10,7 +10,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { TERM_PREFIX, useUpdateTerm } from "@/features/content/api/terms"
 import type { Term, TermInput } from "@/features/content/api/terms"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { toSlug } from "@/lib/slug"
 
 const T = "content.terms"
@@ -58,13 +58,14 @@ export function TermForm({
     onDirtyChange?.(isDirty)
   }, [isDirty, onDirtyChange])
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     if (values.name.trim() === "") {
       form.setError("name", { message: t(`${T}.nameRequired`) })
       return
     }
     update.mutate(bodyOf(values, dirtyFields), {
       onSuccess: (result) => {
-        form.reset(valuesOf(result.term), FULL_RESET)
+        settle(valuesOf(result.term))
         toast.success(t("content.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),
@@ -85,7 +86,12 @@ export function TermForm({
         error={form.formState.errors.name?.message}
         required
       >
-        <Input id={id("name")} maxLength={120} {...form.register("name")} />
+        <Input
+          placeholder={t("content.placeholders.term")}
+          id={id("name")}
+          maxLength={120}
+          {...form.register("name")}
+        />
       </Field>
       <Field label={t(`${T}.fields.handle`)} htmlFor={id("handle")} hint={t(`${T}.handleHint`)}>
         <div className="flex items-center rounded-md border">

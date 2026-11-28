@@ -1,6 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 import { base, shopText } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { VARIANT_ERROR, defaultVariant } from "./variants"
+import type { SectionVariant, VariantBranch } from "./variants"
 
 /**
  * The announcement bar's settings (docs/tema/bilesen-denetimi (b) 6): how
@@ -19,6 +21,8 @@ export const ANNOUNCEMENT_SETTINGS = {
   align: ["auto", "left", "center", "right"],
   size: ["small", "medium", "large"],
   tone: ["graphite", "primary"],
+  transition: ["fade", "slide"],
+  arrows: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -33,9 +37,14 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   align: "auto",
   size: "medium",
   tone: "graphite",
+  transition: "fade",
+  arrows: "off",
 }
 
 export const ANNOUNCEMENT_SETTING_NAMES = Object.keys(ANNOUNCEMENT_SETTINGS) as Setting[]
+
+/** The bar's most lines, and so its most line links. */
+export const LINE_LIMIT = 5
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
 
@@ -47,22 +56,67 @@ const setting = <S extends Setting>(name: S) => {
     .default(ANNOUNCEMENT_DEFAULTS[name])
 }
 
-/** The header's announcement bar: one to five lines of the shop's words, and how they show. */
-export const announcementBar = z
+/**
+ * The top strip above the header (owner's decision 2026-11-27, adr/0066
+ * Ek): up to five lines of the shop's words and how they show, in one of
+ * two designs. `graphite`, the dark bar drawn before variants: the lines,
+ * their small button and from 1024 px the top links and the phone at its
+ * end. `light`, the thin light strip the catalog header drew of its own:
+ * the first line as a note (a link when `link` goes somewhere), the top
+ * links and, when asked, "Hesabım". The dark bar's lines may each link
+ * somewhere (`line_links`, owner 2026-11-27: the strip as a slider). No
+ * lines: only the links and the phone, from 1024 px. `links` and `phone`
+ * off are written `false`; absent: shown, as every bar saved before them.
+ * `account` is written once switched on.
+ */
+const common = {
+  ...base,
+  type: z.literal("announcement_bar"),
+  lines: z.array(shopText(120)).max(LINE_LIMIT),
+  mode: setting("mode"),
+  interval: setting("interval"),
+  pause_button: setting("pause_button"),
+  hover_pause: setting("hover_pause"),
+  align: setting("align"),
+  size: setting("size"),
+  tone: setting("tone"),
+  transition: setting("transition"),
+  arrows: setting("arrows"),
+  // The small button beside the lines; absent until written, so a bar saved before it prints as it did
+  link: storefrontLink.nullable().optional(),
+  /** The shop's top links in the strip (from 1024 px). */
+  links: z.boolean().optional(),
+}
+
+const graphite = z
   .object({
-    ...base,
-    type: z.literal("announcement_bar"),
-    lines: z.array(shopText(120)).min(1).max(5),
-    mode: setting("mode"),
-    interval: setting("interval"),
-    pause_button: setting("pause_button"),
-    hover_pause: setting("hover_pause"),
-    align: setting("align"),
-    size: setting("size"),
-    tone: setting("tone"),
-    // The small button beside the lines; absent until written, so a bar saved before it prints as it did
-    link: storefrontLink.nullable().optional(),
+    ...common,
+    variant: defaultVariant("announcement_bar"),
+    /** The shop's phone at the bar's end (from 1024 px). */
+    phone: z.boolean().optional(),
+    /**
+     * Each line's own link, by its place among `lines` (null: that line is
+     * words only). Absent until written, so a bar saved before it prints as
+     * it did; the light strip's note keeps `link`.
+     */
+    line_links: z.array(storefrontLink.nullable()).max(LINE_LIMIT).optional(),
   })
   .strict()
+
+const light = z
+  .object({
+    ...common,
+    variant: z.literal("light"),
+    /** "Hesabım" written at the strip's end. */
+    account: z.boolean().optional(),
+  })
+  .strict()
+
+export const ANNOUNCEMENT_BRANCHES: Readonly<
+  Record<SectionVariant<"announcement_bar">, VariantBranch>
+> = { graphite, light }
+
+/** The header group's top strip in either design. */
+export const announcementBar = z.discriminatedUnion("variant", [graphite, light], VARIANT_ERROR)
 
 export type AnnouncementBar = z.infer<typeof announcementBar>

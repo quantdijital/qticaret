@@ -134,7 +134,12 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
         error={errors.address_2}
         className="sm:col-span-2"
       >
-        <Input id={id("address_2")} maxLength={200} {...neighborhood.field} />
+        <Input
+          placeholder={t("common.placeholder.neighborhood")}
+          id={id("address_2")}
+          maxLength={200}
+          {...neighborhood.field}
+        />
       </Field>
       <Field
         label={t("address.line")}
@@ -145,6 +150,7 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
         required
       >
         <Input
+          placeholder={t("common.placeholder.addressLine")}
           id={id("address_1")}
           autoComplete="street-address"
           maxLength={200}
@@ -153,6 +159,7 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
       </Field>
       <Field label={t("address.postalCode")} htmlFor={id("postal_code")} error={errors.postal_code}>
         <Input
+          placeholder={t("common.placeholder.postalCode")}
           id={id("postal_code")}
           inputMode="numeric"
           maxLength={5}
@@ -161,7 +168,14 @@ export function TrAddressFields<T extends FieldValues & TrAddressValues>({
         />
       </Field>
       <Field label={t("address.phone")} htmlFor={id("phone")} error={errors.phone}>
-        <Input id={id("phone")} type="tel" autoComplete="tel" maxLength={30} {...phone.field} />
+        <Input
+          placeholder={t("common.placeholder.phone")}
+          id={id("phone")}
+          type="tel"
+          autoComplete="tel"
+          maxLength={30}
+          {...phone.field}
+        />
       </Field>
     </div>
   )

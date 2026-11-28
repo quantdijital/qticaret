@@ -16,6 +16,14 @@ export type ThemeMode = (typeof THEME_MODES)[number]
 export const THEME_SIDEBARS = ["dark", "light", "brand"] as const
 export type ThemeSidebar = (typeof THEME_SIDEBARS)[number]
 
+/**
+ * The tone of the page, cards and menus: a trace of the brand hue (the
+ * panel's first look), plain grey, or a fixed warm or cool grey. The
+ * brand colour stays on buttons, links and charts whichever is chosen.
+ */
+export const THEME_SURFACES = ["brand", "neutral", "warm", "cool"] as const
+export type ThemeSurface = (typeof THEME_SURFACES)[number]
+
 /** The menu open with its labels, icons only, or icons that open it while pointed at. */
 export const SIDEBAR_MODES = ["expanded", "collapsed", "auto"] as const
 export type SidebarMode = (typeof SIDEBAR_MODES)[number]
@@ -30,6 +38,8 @@ export interface AppearanceSettings {
   sidebar: ThemeSidebar
   /** How the menu behaves on a wide screen; a phone always opens it as a sheet. */
   sidebar_mode: SidebarMode
+  /** The surfaces' tone; a row saved before it existed reads `brand`. */
+  surface: ThemeSurface
   logo_light_url: string | null
   logo_dark_url: string | null
   /** The storefront's site icon (a PNG from the media library); none: the storefront's own. */
@@ -45,6 +55,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   mode: "system",
   sidebar: "dark",
   sidebar_mode: "expanded",
+  surface: "brand",
   logo_light_url: null,
   logo_dark_url: null,
   favicon_url: null,

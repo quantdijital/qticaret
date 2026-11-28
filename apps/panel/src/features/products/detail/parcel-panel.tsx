@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { useRevealTarget } from "@qticaret/admin-ui/hooks/use-section-open"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { parseMeasureInput } from "@qticaret/admin-ui/lib/money-input"
 import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
@@ -71,6 +71,7 @@ export function ParcelPanel({ product }: { product: ProductDetail }) {
   const entered = MEASURES.some(({ name }) => Boolean(saved[name]))
 
   const submit = form.handleSubmit(async (values) => {
+    const settle = beginSave(form)
     const body = Object.fromEntries(
       MEASURES.map(({ name }) => [name, parseMeasureInput(values[name]) ?? null])
     ) as Record<MeasureName, number | null>
@@ -85,7 +86,7 @@ export function ParcelPanel({ product }: { product: ProductDetail }) {
       if (measuresChanged || !classChanged) {
         await update.mutateAsync(body)
       }
-      form.reset(values, FULL_RESET)
+      settle(values)
       toast.success(t("products.detail.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))

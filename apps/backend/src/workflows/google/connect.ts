@@ -4,13 +4,11 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-import { backendUrl } from "../../lib/env"
+import { panelUrl } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { googleApi } from "../../lib/google/client"
 import {
-  BUSINESS_PROFILE_SCOPE,
   GOOGLE_CALLBACK_PATH,
-  REVIEWS_STATE_PREFIX,
   authorizationUrl,
   googleClientOf,
   pkcePair,
@@ -22,7 +20,14 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import type { CredentialDraft } from "../../modules/integration-credentials/types"
 
-const redirectUri = () => `${backendUrl()}${GOOGLE_CALLBACK_PATH}`
+/**
+ * Google sends the staff member back to the panel's own origin, where their
+ * session lives (adr/0022 §4): deployed it is the backend's host, so nothing
+ * changes there; on a developer's machine it is the panel's dev server, whose
+ * proxy hands `/google` to the backend with the session cookie. Built from
+ * the configuration, never from the request's Host header.
+ */
+const redirectUri = () => `${panelUrl()}${GOOGLE_CALLBACK_PATH}`
 
 const requireClient = () => {
   const client = googleClientOf()
@@ -39,26 +44,18 @@ const requireClient = () => {
  */
 interface StartInput {
   user_id: string
-  /** `reviews`: Business Profile's scope asked on top, back to the panel's Google reviews (adr/0058). */
-  purpose?: "reviews"
 }
 
 const startGoogleConnectStep = createStep(
   "google-start-connect",
   async (input: StartInput, { container }) => {
     const client = requireClient()
-    const reviews = input.purpose === "reviews"
     const { verifier, challenge } = pkcePair()
     const state = await container
       .resolve<GoogleMerchantModuleService>(GOOGLE_MERCHANT_MODULE)
-      .startState(input.user_id, verifier, reviews ? REVIEWS_STATE_PREFIX : "")
+      .startState(input.user_id, verifier)
     return new StepResponse({
-      url: authorizationUrl(client, {
-        state,
-        challenge,
-        redirectUri: redirectUri(),
-        ...(reviews ? { extraScopes: [BUSINESS_PROFILE_SCOPE] } : {}),
-      }),
+      url: authorizationUrl(client, { state, challenge, redirectUri: redirectUri() }),
     })
   }
 )

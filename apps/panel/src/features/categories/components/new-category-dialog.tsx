@@ -109,6 +109,7 @@ export function NewCategoryDialog({
               required
             >
               <Input
+                placeholder={t("categories.placeholders.name")}
                 id="category-new-name"
                 value={name}
                 autoFocus

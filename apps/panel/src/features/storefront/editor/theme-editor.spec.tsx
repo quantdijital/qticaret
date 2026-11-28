@@ -69,7 +69,8 @@ describe("ThemeEditor", () => {
       "Ürün listesi",
       "Blog yazıları",
     ])
-    expect(within(tree).getByRole("button", { name: "Kargo bedava" })).toBeInTheDocument()
+    // The top strip by its design, its first line beside it (owner 2026-11-27)
+    expect(within(tree).getByRole("button", { name: "Koyu şerit" })).toBeInTheDocument()
     expect(within(tree).getAllByRole("link", { name: "Mağaza profili" })).toHaveLength(2)
     expect(await frame()).toHaveAttribute(
       "src",
@@ -233,7 +234,7 @@ describe("ThemeEditor", () => {
       expect(postsTo(fetchMock, `${PATH}/revisions/1/restore`)).toHaveLength(1)
     })
     // The restored version has no announcement bar
-    expect(await within(tree).findByRole("button", { name: "Duyuru şeridi ekle" })).toBeVisible()
+    expect(await within(tree).findByRole("button", { name: "Üst şeride ekle" })).toBeVisible()
     // The draft it replaced was kept: the toast says so
     await waitFor(() => {
       expect(vi.mocked(toast.success)).toHaveBeenCalledWith("1. yayın taslağa yüklendi.", {
@@ -337,7 +338,7 @@ describe("ThemeEditor", () => {
     await opened()
 
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Görsel bant/ }))
 
     expect(await screen.findByRole("heading", { name: "Görsel bant" })).toBeVisible()

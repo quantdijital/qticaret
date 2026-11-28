@@ -237,6 +237,45 @@ medusaIntegrationTestRunner({
       expect(by("return.refunded")?.text).toContain("İade tutarı: ₺42,50")
     })
 
+    it("tells the shopper the shop's contracted return code on approval (adr/0031 Ek 2026-11-26)", async () => {
+      const orderId = await order()
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["items.id"], filters: { id: orderId } })
+      const lineId = (data[0] as { items: { id: string }[] }).items[0]?.id ?? ""
+      await getContainer()
+        .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+        .saveSection("returns", { contracted_return: { yurtici: "YK-7788" } }, null)
+      const requests = getContainer().resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+      const request = await requests.createReturnRequests({
+        order_id: orderId,
+        customer_id: null,
+        kind: "return",
+        reason: "changed_mind",
+        note: null,
+        items: [{ line_item_id: lineId, quantity: 1 }] as unknown as Record<string, unknown>,
+      })
+      await requests.updateReturnRequests({ id: request.id, status: "approved" })
+      await getContainer()
+        .resolve(Modules.EVENT_BUS)
+        .emit({
+          name: RETURN_REQUEST_APPROVED,
+          data: { id: request.id, order_id: orderId, kind: "return" },
+        })
+      const [mail] = await eventually(
+        () =>
+          Promise.resolve(sentTo(SHOPPER).filter(({ template }) => template === "return.approved")),
+        (found) => found.length > 0
+      )
+      await getContainer()
+        .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+        .saveSection("returns", { contracted_return: { yurtici: null } }, null)
+
+      expect(mail?.text).toContain(
+        "İade paketinizi Yurtiçi Kargo şubesine verin ve gönderirken 'YK-7788' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz."
+      )
+    })
+
     it("sends a customer's reset link to the storefront's page, and nothing without a domain", async () => {
       const customer = await registerCustomer(http, await createStorefront(getContainer()))
       const reset = () =>

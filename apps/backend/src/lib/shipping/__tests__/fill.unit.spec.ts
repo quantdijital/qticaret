@@ -1,4 +1,4 @@
-import { addressFieldsOf, filledReceiver, filledSender } from "../fill"
+import { addressFieldsOf, filledReceiver } from "../fill"
 
 const shipping = {
   id: "oaddr_1",
@@ -72,23 +72,5 @@ describe("filledReceiver (adr/0054, 2026-11-05: ship first, fill in by itself)",
         { place: { postal_code: null, plate: "34" } }
       )
     ).toMatchObject({ address: { postal_code: null }, plate: "34" })
-  })
-})
-
-describe("filledSender", () => {
-  it("takes the shop's contact phone and the data's postcode for a warehouse without them", () => {
-    const { address, filled } = filledSender(
-      { ...shipping, phone: "", postal_code: null },
-      { phone: "+905321234567", place: { postal_code: "34710", plate: "34" } }
-    )
-
-    expect(address).toMatchObject({ phone: "+905321234567", postal_code: "34710" })
-    expect(filled).toEqual(["phone", "postal_code"])
-  })
-
-  it("keeps the warehouse's own phone as written: Geliver's stored copy is compared with it", () => {
-    expect(filledSender(shipping, { phone: "+905559998877" }).address.phone).toBe(
-      "+90 532 123 45 67"
-    )
   })
 })

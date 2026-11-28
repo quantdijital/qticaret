@@ -123,6 +123,9 @@ export const VARIANT_FIELDS: {
     carousel: { scroller: SCROLLER_DEFAULTS },
   },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS, inline: {} },
+  // The top strip (owner 2026-11-27): the dark bar's phone and the light strip's "Hesabım" start
+  // as each design drew them (absent: the phone shown, "Hesabım" not)
+  announcement_bar: { graphite: {}, light: {} },
   // Ek 2026-11-17: the strip on, no line about the shop, the steel well, the marks on cards
   // adr/0070: the free rows footer's ground and marks; its rows are the backend's starting row
   footer_bar: {
@@ -182,6 +185,8 @@ const OPTIONAL_FIELDS: {
   },
   // The carousel cards' product picture (adr/0077 §10 Ek): the grid holds none
   reviews: { carousel: ["product_image"] },
+  // Each design's own part, dropped with it
+  announcement_bar: { graphite: ["phone"], light: ["account"] },
 }
 
 /**

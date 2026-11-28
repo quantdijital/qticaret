@@ -13,6 +13,7 @@ import {
 } from "@/lib/store-api/requests"
 import { ratingBars, reviewPhotos, reviewReply, withCardFacts } from "./card-extras"
 import { productCards, variantIdsOf } from "./product"
+import { productsInOrder } from "./section-data"
 import { cardOptions } from "./theme-settings"
 
 const DATE = new Intl.DateTimeFormat("tr-TR", {
@@ -80,7 +81,7 @@ export async function questionsView(productId: string, t: Translate): Promise<Qu
 }
 
 /** Up to four other products of the product's first category. */
-export async function relatedOf(product: StoreProduct): Promise<ProductCardView[]> {
+async function categoryOthers(product: StoreProduct): Promise<StoreProduct[]> {
   const categoryId = product.categories?.[0]?.id
   if (!categoryId) {
     return []
@@ -89,7 +90,26 @@ export async function relatedOf(product: StoreProduct): Promise<ProductCardView[
     products: [],
     count: 0,
   })
-  const others = products.filter((each) => each.id !== product.id).slice(0, 4)
+  return products.filter((each) => each.id !== product.id).slice(0, 4)
+}
+
+/** The most of the shop's own linked products the fixed "similar products" shows (the theme's row). */
+export const LINKED_SHOWN = 8
+
+/**
+ * The fixed "similar products": the shop's own linked products in its
+ * order when it chose some still for sale (S3, at most eight), else up
+ * to four other products of the product's first category, as before.
+ */
+export async function relatedOf(
+  product: StoreProduct,
+  upsellIds: readonly string[] = []
+): Promise<ProductCardView[]> {
+  const linked =
+    upsellIds.length > 0
+      ? await orEmpty(() => productsInOrder(upsellIds.slice(0, LINKED_SHOWN)), [])
+      : []
+  const others = linked.length > 0 ? linked : await categoryOthers(product)
   if (others.length === 0) {
     return []
   }

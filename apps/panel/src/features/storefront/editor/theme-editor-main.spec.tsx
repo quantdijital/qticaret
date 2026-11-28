@@ -60,7 +60,7 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     const tree = await opened()
     await frame()
 
-    await user.click(within(tree).getByRole("button", { name: "Üst bilgi" }))
+    await user.click(within(tree).getByRole("button", { name: "Üst bilgi düzeni" }))
     await screen.findByRole("searchbox", { name: "Bu bölümün ayarlarında ara" })
     // Staying at the top is Gelişmiş's one group: open with no header
     await openTab(user, "advanced")

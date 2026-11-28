@@ -1,5 +1,4 @@
 import type { Resolution } from "@qticaret/types"
-import { formatLira } from "@qticaret/ui"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
@@ -18,6 +17,7 @@ import { currentCustomer } from "@/lib/account/auth"
 import { productAddonsOrNone } from "@/lib/cart/addons"
 import { productBooking } from "@/lib/booking/store"
 import { EMPTY_BOOKING, bookingViewOf } from "@/lib/views/booking"
+import { linkedProductIds } from "@/lib/store-api/extras"
 import { installmentSummaries } from "@/lib/store-api/installments"
 import { productTexts } from "@/lib/store-api/product-description"
 import { storefrontEnv } from "@/lib/env"
@@ -28,11 +28,12 @@ import { shopMarks } from "@/lib/views/card-extras"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { isVatExclusive, shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
+import { lowestPaidOf } from "@/lib/views/own-shipping"
 import {
-  FREE_SHIPPING_CLASS,
   isShipped,
   productShipping,
   promisesFor,
+  shippingNoteOf,
 } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
@@ -52,10 +53,12 @@ type Entity = Extract<Resolution, { type: "entity" }>
  */
 export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   // The description's and short description's documents as the backend renders them (adr/0055)
-  const [product, layout, texts] = await Promise.all([
+  // The shop's own "similar products" for it (S3): in place of its category's when it chose some
+  const [product, layout, texts, upsellIds] = await Promise.all([
     productById(page.entity_id),
     currentLayout(),
     productTexts(page.entity_id),
+    linkedProductIds("upsell", [page.entity_id]),
   ])
   const ownRail = showsOwnCategory(layout.product)
   const asked = priceDisplays(variantIdsOf([product]))
@@ -81,13 +84,14 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     storefrontSettings(),
     reviewsView(product.id, t),
     questionsView(product.id, t),
-    ownRail ? Promise.resolve([]) : relatedOf(product),
+    ownRail ? Promise.resolve([]) : relatedOf(product, upsellIds),
     currentCustomer(),
     sectionViews(layout.product, t, {
       product: {
         id: product.id,
         categoryIds: (product.categories ?? []).map((category) => category.id),
         unshipped: !isShipped(product),
+        upsellIds,
       },
     }),
     // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)
@@ -117,6 +121,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     return amount === null ? [] : [amount]
   })
   const lowest = amounts.length > 0 ? Math.min(...amounts) : null
+  // The KDV-included price the free shipping rule reads (a wholesaler's too)
+  const lowestPaid = lowestPaidOf(product, displays)
   const base = productPage({
     product,
     seo: page.seo,
@@ -152,20 +158,21 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         }
       : {}),
     signedIn: customer !== null,
-    // adr/0087 §3: a free-shipping product says so, not the threshold
-    shippingNote: !isShipped(product)
-      ? null
-      : product.product_extension?.shipping_class === FREE_SHIPPING_CLASS
-        ? t("product.shipping_free_product")
-        : free_shipping_threshold && free_shipping_threshold > 0
-          ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
-          : null,
+    // adr/0087 §3: a free or surcharged product says so, with the threshold that waives it
+    shippingNote: shippingNoteOf({
+      product,
+      classes: shipping_classes ?? [],
+      threshold: free_shipping_threshold,
+      lowestPaid,
+      t,
+    }),
     // "Kargo ve Teslimat" beside the specs (owner 2026-11-05): only what the shop set and wrote
     shipping: productShipping({
       product,
       // adr/0087 §3: a free or surcharged product's own shipping line
       classes: shipping_classes ?? [],
       threshold: free_shipping_threshold,
+      lowestPaid,
       // When it leaves and arrives, the same-day hour (adr/0046 Ek 2026-11-06)
       delivery: delivery ?? null,
       badges: shared.trust_badges,

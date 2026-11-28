@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, PanelLeft } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useContext, useId, useLayoutEffect, useState } from "react"
 import type { ReactNode } from "react"
@@ -14,17 +14,30 @@ import { Hint } from "./shared/hint"
 
 const P = "storefront.editor.panel"
 
+/** A step before the open panel in its breadcrumb: a press goes back to it. */
+export interface Crumb {
+  label: string
+  onSelect: () => void
+}
+
+// A crumb is a quiet link, as tall as the back button beside it (a row's controls are level);
+// the keyboard shows its thin outline, a pointer none (docs/18)
+const CRUMB =
+  "inline-flex h-8 min-w-0 max-w-[10rem] shrink items-center rounded-sm text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none [html:not([data-input=pointer])_&:focus-visible]:outline-2 [html:not([data-input=pointer])_&:focus-visible]:outline-ring"
+
 /**
  * A settings panel (a section's, or the theme's), named by its title: its
- * header held at the top while it scrolls, with the way to the page's
- * parts (back to the list beside it, or its drawer where the list is
- * folded away). The groups' titles stick right under the header.
+ * header held at the top while it scrolls, with the way back one step and
+ * the breadcrumb to where it stands ("Ana sayfa › Kayan bant"), each step
+ * a way back to it (the owner, 2026-11-27: one side panel whose content
+ * swaps). The groups' titles stick right under the header.
  */
 export function Panel({
   icon: Icon,
   title,
   onBack,
   back,
+  trail = [],
   children,
 }: {
   icon?: LucideIcon
@@ -32,11 +45,14 @@ export function Panel({
   onBack: () => void
   /** Where the back button goes, when not to the page's parts (a part's panel back to its section). */
   back?: string
+  /** The steps between the page's parts and this panel (a footer row's: the footer). */
+  trail?: readonly Crumb[]
   children: ReactNode
 }) {
   const { t } = useTranslation()
-  const { openSections } = useContext(EditorChromeContext)
+  const { root, toList } = useContext(EditorChromeContext)
   const id = useId()
+  const crumbs: Crumb[] = [...(root ? [{ label: root, onSelect: toList }] : []), ...trail]
   return (
     <div
       role="region"
@@ -45,36 +61,47 @@ export function Panel({
       className="flex flex-col [--editor-panel-head:3.25rem] [&_[data-highlight]]:rounded-md [&_[data-highlight]]:ring-2 [&_[data-highlight]]:ring-ring [&_[data-highlight]]:ring-offset-4 [&_[data-highlight]]:ring-offset-card"
     >
       <div className="sticky top-0 z-10 flex h-[var(--editor-panel-head)] shrink-0 items-center gap-2 border-b bg-card px-3">
-        {openSections ? (
+        <Hint label={back ?? t(`${P}.back`)} side="bottom" align="start">
           <Button
             type="button"
-            variant="outline"
-            size="sm"
-            aria-haspopup="dialog"
-            onClick={openSections}
+            variant="ghost"
+            size="icon-sm"
+            aria-label={back ?? t(`${P}.back`)}
+            onClick={onBack}
           >
-            <PanelLeft />
-            {t(`${P}.sections`)}
+            <ArrowLeft />
           </Button>
-        ) : (
-          <Hint label={back ?? t(`${P}.back`)} side="bottom" align="start">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={back ?? t(`${P}.back`)}
-              onClick={onBack}
-            >
-              <ArrowLeft />
-            </Button>
-          </Hint>
-        )}
-        {Icon ? (
-          <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-        ) : null}
-        <h2 id={id} className="min-w-0 flex-1 truncate text-sm font-semibold">
-          {title}
-        </h2>
+        </Hint>
+        <nav aria-label={t(`${P}.trail`)} className="flex min-w-0 flex-1 items-center">
+          <ol className="flex min-w-0 flex-1 items-center gap-1 text-sm">
+            {crumbs.map((crumb) => (
+              <li key={crumb.label} className="flex min-w-0 shrink items-center gap-1">
+                <button type="button" className={CRUMB} onClick={crumb.onSelect}>
+                  <span className="truncate">{crumb.label}</span>
+                </button>
+                <ChevronRight
+                  className="size-3.5 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </li>
+            ))}
+            <li aria-current="page" className="flex min-w-0 flex-1 items-center gap-1.5">
+              {Icon ? (
+                <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+              ) : null}
+              {/* Where the keyboard lands when the panel opens (`editor-shell.tsx`): not the
+                  back button, whose hint would take the first Escape */}
+              <h2
+                id={id}
+                tabIndex={-1}
+                data-panel-title
+                className="min-w-0 truncate text-sm font-semibold outline-none"
+              >
+                {title}
+              </h2>
+            </li>
+          </ol>
+        </nav>
       </div>
       {/* Every field's help text as a small (i) beside its name (docs/18 §7.1) */}
       <FieldHints style="tip">{children}</FieldHints>

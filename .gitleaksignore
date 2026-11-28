@@ -54,3 +54,5 @@ apps/backend/integration-tests/http/turnstile.spec.ts:generic-api-key:57
 apps/storefront/src/app/actions/__tests__/account-turnstile.spec.ts:generic-api-key:138
 apps/storefront/src/lib/store-api/__tests__/gate.spec.ts:generic-api-key:83
 packages/ui/src/__tests__/gate.spec.ts:generic-api-key:138
+# backend Sürat spec: a made-up password ("Gizli-Sifre-12345") quoted back in a test sentence; now built from parts
+84c4d0d2bc5d31ac3cd702b3c8c2053c2fb44592:apps/backend/src/lib/shipping/surat/__tests__/surat.unit.spec.ts:generic-api-key:184

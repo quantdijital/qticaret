@@ -34,7 +34,7 @@ export interface BoardOrder {
   delivery: {
     name: string
     /** A carrier that issues a label; null: the shop's own delivery or collection. */
-    carrier: "geliver" | "aras" | "yurtici" | null
+    carrier: "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt" | null
     pickup: boolean
   } | null
   /** Lines made to the buyer's wish (adr/0052): how many, and whether one is outside withdrawal. */
@@ -81,7 +81,7 @@ export const PAYMENT_METHODS = ["card", "bank_transfer", "cod", "payment_link"] 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
 /** Who carries it, by the delivery chosen: a carrier, or the shop's own delivery and collection. */
-export const CARRIER_FILTERS = ["aras", "yurtici", "geliver", "own"] as const
+export const CARRIER_FILTERS = ["aras", "yurtici", "dhlecommerce", "surat", "ptt", "own"] as const
 export type CarrierFilter = (typeof CARRIER_FILTERS)[number]
 
 /** Whose orders a list shows (ADR-0068 Ek 2026-11-15 (2)): retail is the server's default. */

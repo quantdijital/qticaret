@@ -7,8 +7,11 @@ import {
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
+  TOP_SLIDER_SETTINGS,
+  TOP_SLIDER_SETTING_NAMES,
   newsletterHasNote,
 } from "@qticaret/types"
+import type { TopSliderSetting } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { heroFullFields } from "./hero-full-registry"
@@ -34,9 +37,6 @@ export type ContentField =
   | "show_count"
   | "list_limit"
   | "show_price"
-  | "excerpts"
-  | "excerpt_count"
-  | "profile_link"
   | "thumbs"
   | "thumbs_count"
   | "slider_height"
@@ -55,6 +55,7 @@ export type ContentField =
   | "show_note"
   | "joined"
   | "news_tone"
+  | "news_consent"
   | "image_side"
   | "outline"
   | "questions"
@@ -105,11 +106,21 @@ export const CONTENT_IDS = {
 const E = "storefront.editor"
 const F = `${E}.fields`
 const S = `${E}.slider`
-const G = `${E}.googleRating`
 const C = `${E}.heroCatalog`
 const PB = `${E}.priceBands`
 
 /** One entry: its label and term keys (`<label>Term` beside a flat label), its steps' names. */
+const T = "storefront.editor.topSlider"
+
+/** Where the top image slider's settings stand in its "Stil" tab (`top-slider-groups.tsx`). */
+const TOP_SLIDER_GROUPS: Readonly<Record<TopSliderSetting, FieldGroupName>> = {
+  height: "layout",
+  interval: "motion",
+  transition: "motion",
+  arrows: "controls",
+  dots: "controls",
+}
+
 const entry = (
   section: AnySection,
   field: ContentField,
@@ -305,12 +316,6 @@ export function contentFields(section: AnySection): RegistryField[] {
               : []),
           ]
         : heroFullFields(section, CONTENT_IDS.content)
-    case "google_rating":
-      return [
-        entry(section, "excerpts", `${G}.excerpts`),
-        ...(section.excerpts > 0 ? [entry(section, "excerpt_count", `${G}.count`)] : []),
-        entry(section, "profile_link", `${G}.profileLink`),
-      ]
     case "price_bands":
       return [
         entry(section, "thumbs", `${PB}.thumbs`, [], "thumbs"),
@@ -402,6 +407,19 @@ export function contentFields(section: AnySection): RegistryField[] {
     // The card's lift (adr/0077 §10 Ek); the strip and the lined boxes have none
     case "trust_badges":
       return iconFields(section, CONTENT_IDS.content)
+    // The top image slider's steps and switches (owner 2026-11-27), in its form
+    case "top_slider":
+      return TOP_SLIDER_SETTING_NAMES.map((name) => {
+        const steps: readonly string[] = TOP_SLIDER_SETTINGS[name]
+        return {
+          key: `top_slider.${name}`,
+          group: TOP_SLIDER_GROUPS[name],
+          label: `${T}.${name}.label`,
+          term: `${T}.${name}.term`,
+          options: steps.map((step) => `${T}.${name}.${step}`),
+          target: `${section.id}-top-slider-${name}`,
+        }
+      })
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":

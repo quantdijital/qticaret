@@ -5,7 +5,9 @@ import type { HomeSectionView } from "./content-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
+import type { TopSliderView } from "./top-slider-views"
 import type { NewsletterLookView } from "./newsletter-views"
+import type { ProductCardView } from "./product-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -128,6 +130,12 @@ export interface MiniCartView {
   lines: CartLineView[]
   subtotal: string
   freeShipping: FreeShippingView | null
+  /**
+   * The cart's shipping before an address, the shop's main option as the
+   * server priced it: "Ücretsiz", "90,00 TL". Absent or null: no row (the
+   * drawer's note says the checkout works it out).
+   */
+  shipping?: string | null
   /** A payment link's cart (adr/0051): its lines are fixed; the note, in words. */
   locked?: string | null
   /**
@@ -148,9 +156,28 @@ export interface MiniCartView {
    * off with the reason beside it. Null or left out: the button as ever.
    */
   checkoutBlocked?: CheckoutBlockedView | null
+  /**
+   * What the cart's products are bought with (S3, the shop's "Birlikte
+   * alınanlar"), a few, none already in the cart: drawn under the lines
+   * as small links ("Bunu da beğenebilirsiniz"). Null or left out: the
+   * drawer as ever.
+   */
+  suggestions?: { title: string; products: ProductCardView[] } | null
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */
+/** The top strip's design and parts (`ShopView.topStrip`). */
+export interface TopStripView {
+  /** `graphite` the dark bar; `light` the thin light strip. */
+  variant: "graphite" | "light"
+  /** The shop's top links (from 1024 px). */
+  links: boolean
+  /** The dark bar's phone (from 1024 px). */
+  phone: boolean
+  /** The light strip's "Hesabım". */
+  account: boolean
+}
+
 export interface ShopView {
   name: string
   logo: ImageView | null
@@ -177,6 +204,22 @@ export interface ShopView {
   announcementSettings?: AnnouncementSettings
   /** The bar's small button beside its lines (the shop's link and words); absent: none. */
   announcementLink?: LinkView
+  /**
+   * Each of the bar's lines' own link, by its place among `announcements`
+   * (null: words only); absent: none links (owner 2026-11-27).
+   */
+  announcementLineLinks?: (LinkView | null)[]
+  /**
+   * The top strip as the shop set it (owner's decision 2026-11-27): its
+   * design and which of its parts show. Absent: no strip section, nothing
+   * drawn above the header.
+   */
+  topStrip?: TopStripView
+  /**
+   * The top image slider above the header (owner 2026-11-27): the shop's
+   * pictures one at a time; absent: none, or no slides yet.
+   */
+  topSlider?: TopSliderView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

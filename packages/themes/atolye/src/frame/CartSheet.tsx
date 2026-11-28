@@ -8,6 +8,7 @@ import { CheckoutLink } from "../cart/CheckoutLink"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { answersCartAdded, mountCartTrigger } from "./cart-sheet-owner"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
+import { CartSheetSuggestions } from "./CartSheetSuggestions"
 import {
   CART_ADDED_EVENT,
   cartAddedMessage,
@@ -29,6 +30,8 @@ export interface CartSheetWords {
   browse: string
   continue: string
   subtotal: string
+  /** "Kargo": the row under the subtotal when the cart's shipping is known. */
+  shipping: string
   note: string
   viewCart: string
   checkout: string
@@ -128,6 +131,12 @@ export function CartSheetBody({
             words={words.line}
           />
         ))}
+        {/* S3: drawn only when the shop linked products to these; the drawer is otherwise as ever */}
+        {cart.suggestions && cart.suggestions.products.length > 0 && (
+          <li>
+            <CartSheetSuggestions suggestions={cart.suggestions} />
+          </li>
+        )}
       </ul>
       <div className="flex flex-col gap-3 bg-paper px-4 pt-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:px-6">
         {cart.locked && (
@@ -139,6 +148,12 @@ export function CartSheetBody({
           <span className="font-semibold">{words.subtotal}</span>
           <span className="tabular text-lg font-extrabold">{cart.subtotal}</span>
         </p>
+        {cart.shipping && (
+          <p className="flex items-baseline justify-between gap-4 text-sm">
+            <span>{words.shipping}</span>
+            <span className="tabular font-semibold">{cart.shipping}</span>
+          </p>
+        )}
         <p className="text-xs text-text-3">{cart.taxNote ?? cart.note ?? words.note}</p>
         <CheckoutLink
           id={`${id}-odeme-engeli`}

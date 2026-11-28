@@ -11,7 +11,8 @@
       "menu_images": "submenus",
       "submenu_style": "mega",
       "search_style": "icon",
-      "tool_labels": "hide"
+      "tool_labels": "hide",
+      "top_strip": "separate"
     }
   ],
   "home": [

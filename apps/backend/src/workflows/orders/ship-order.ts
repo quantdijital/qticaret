@@ -13,8 +13,8 @@ import {
 import { shipLockKey } from "../../lib/orders/locks"
 import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
 import { fillReceiverStep } from "../shipping/steps/fill-receiver"
-import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
+import { reservePttBarcodeStep } from "../shipping/steps/ptt-barcode"
 import { noteManualCarrierStep } from "../shipping/steps/manual-carrier"
 import { forgetLabelSourceStep, storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { trackShipmentStep } from "../shipping/steps/track"
@@ -46,11 +46,11 @@ export interface ShipOrderInput {
  * shipment undoes the packing and the order is never left half done. A
  * lock per order keeps two clicks from packing twice.
  *
- * With a carrier (Geliver from the warehouse's sender address, adr/0031;
- * the shop's own contract, adr/0035) packing opens the shipment there,
- * gets its label and keeps it privately; the order is handed over when
- * the carrier picks the parcel up (its tracking), not here: such a parcel
- * is not offered for shipping again (`orderState().pickup`).
+ * With a carrier (the shop's own contract, adr/0035) packing opens the
+ * shipment there, gets its label and keeps it privately; the order is
+ * handed over when the carrier picks the parcel up (its tracking), not
+ * here: such a parcel is not offered for shipping again
+ * (`orderState().pickup`).
  *
  * Packing takes the units out of the lines' stock reservations; a tracked
  * line holding none or too few (tracking turned on after the order, a
@@ -84,12 +84,6 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     fillReceiverStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
   )
 
-  const sender = when(
-    "shipping-geliver-sender",
-    { carrier, plan },
-    ({ carrier, plan }) => carrier.carrier === "geliver" && plan.fulfillment_id === null
-  ).then(() => ensureGeliverSenderStep({ location_id: carrier.location_id }))
-
   // Medusa packs only held stock: a tracked line without (enough of) a reservation is held first
   const filled = when(
     "orders-ship-fill-reservations",
@@ -105,11 +99,20 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     })
   )
 
+  // A PTT parcel's barcode from the shop's range, taken for good (docs/entegrasyonlar/ptt.md)
+  const ptt = when(
+    "shipping-ptt-barcode",
+    { carrier, plan },
+    ({ carrier, plan }) => carrier.carrier === "ptt" && plan.fulfillment_id === null
+  ).then(() =>
+    reservePttBarcodeStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
+  )
+
   const packed = when({ plan }, ({ plan }) => plan.fulfillment_id === null).then(() =>
     createOrderFulfillmentWorkflow.runAsStep({
       input: transform(
-        { input, plan, carrier, sender, receiver },
-        ({ input, plan, carrier, sender, receiver }) => ({
+        { input, plan, carrier, receiver, ptt },
+        ({ input, plan, carrier, receiver, ptt }) => ({
           order_id: input.order_id,
           items: plan.items,
           no_notification: !input.notify,
@@ -124,10 +127,11 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
             ? {
                 additional_data: {
                   [SHIP_ROUTE_MARK]: {
-                    sender_address_id: sender?.sender_address_id ?? null,
                     cash_on_delivery: carrier.cash_on_delivery,
                     receiver: receiver?.address ?? null,
                     plate: receiver?.plate ?? null,
+                    email: receiver?.email ?? null,
+                    barcode: ptt?.barcode ?? null,
                   },
                 },
               }

@@ -68,7 +68,6 @@ import { Route as AuthReportsProductsRouteImport } from './routes/_auth/reports/
 import { Route as AuthReportsSearchRouteImport } from './routes/_auth/reports/search'
 import { Route as AuthReportsStockRouteImport } from './routes/_auth/reports/stock'
 import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
-import { Route as AuthReviewsGoogleRouteImport } from './routes/_auth/reviews/google'
 import { Route as AuthReviewsQuestionsRouteImport } from './routes/_auth/reviews/questions'
 import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
 import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
@@ -420,11 +419,6 @@ const AuthReportsStockRoute = AuthReportsStockRouteImport.update({
 const AuthReviewsIndexRoute = AuthReviewsIndexRouteImport.update({
   id: '/reviews/',
   path: '/reviews/',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthReviewsGoogleRoute = AuthReviewsGoogleRouteImport.update({
-  id: '/reviews/google',
-  path: '/reviews/google',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthReviewsQuestionsRoute = AuthReviewsQuestionsRouteImport.update({
@@ -780,7 +774,6 @@ export interface FileRoutesByFullPath {
   '/reports/products': typeof AuthReportsProductsRoute
   '/reports/search': typeof AuthReportsSearchRoute
   '/reports/stock': typeof AuthReportsStockRoute
-  '/reviews/google': typeof AuthReviewsGoogleRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/seo/search': typeof AuthSeoSearchRoute
@@ -895,7 +888,6 @@ export interface FileRoutesByTo {
   '/reports/products': typeof AuthReportsProductsRoute
   '/reports/search': typeof AuthReportsSearchRoute
   '/reports/stock': typeof AuthReportsStockRoute
-  '/reviews/google': typeof AuthReviewsGoogleRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/seo/search': typeof AuthSeoSearchRoute
@@ -1015,7 +1007,6 @@ export interface FileRoutesById {
   '/_auth/reports/products': typeof AuthReportsProductsRoute
   '/_auth/reports/search': typeof AuthReportsSearchRoute
   '/_auth/reports/stock': typeof AuthReportsStockRoute
-  '/_auth/reviews/google': typeof AuthReviewsGoogleRoute
   '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
   '/_auth/seo/search': typeof AuthSeoSearchRoute
@@ -1134,7 +1125,6 @@ export interface FileRouteTypes {
     | '/reports/products'
     | '/reports/search'
     | '/reports/stock'
-    | '/reviews/google'
     | '/reviews/questions'
     | '/seo/redirects'
     | '/seo/search'
@@ -1249,7 +1239,6 @@ export interface FileRouteTypes {
     | '/reports/products'
     | '/reports/search'
     | '/reports/stock'
-    | '/reviews/google'
     | '/reviews/questions'
     | '/seo/redirects'
     | '/seo/search'
@@ -1368,7 +1357,6 @@ export interface FileRouteTypes {
     | '/_auth/reports/products'
     | '/_auth/reports/search'
     | '/_auth/reports/stock'
-    | '/_auth/reviews/google'
     | '/_auth/reviews/questions'
     | '/_auth/seo/redirects'
     | '/_auth/seo/search'
@@ -1864,13 +1852,6 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews/'
       preLoaderRoute: typeof AuthReviewsIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/reviews/google': {
-      id: '/_auth/reviews/google'
-      path: '/reviews/google'
-      fullPath: '/reviews/google'
-      preLoaderRoute: typeof AuthReviewsGoogleRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/reviews/questions': {
@@ -2411,7 +2392,6 @@ interface AuthRouteChildren {
   AuthPromotionsIdRoute: typeof AuthPromotionsIdRoute
   AuthPromotionsGiftCardsRoute: typeof AuthPromotionsGiftCardsRoute
   AuthPromotionsNewRoute: typeof AuthPromotionsNewRoute
-  AuthReviewsGoogleRoute: typeof AuthReviewsGoogleRoute
   AuthReviewsQuestionsRoute: typeof AuthReviewsQuestionsRoute
   AuthSeoRedirectsRoute: typeof AuthSeoRedirectsRoute
   AuthSeoSearchRoute: typeof AuthSeoSearchRoute
@@ -2479,7 +2459,6 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsIdRoute: AuthPromotionsIdRoute,
   AuthPromotionsGiftCardsRoute: AuthPromotionsGiftCardsRoute,
   AuthPromotionsNewRoute: AuthPromotionsNewRoute,
-  AuthReviewsGoogleRoute: AuthReviewsGoogleRoute,
   AuthReviewsQuestionsRoute: AuthReviewsQuestionsRoute,
   AuthSeoRedirectsRoute: AuthSeoRedirectsRoute,
   AuthSeoSearchRoute: AuthSeoSearchRoute,

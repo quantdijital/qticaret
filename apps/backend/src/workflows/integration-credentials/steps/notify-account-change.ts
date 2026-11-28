@@ -13,9 +13,11 @@ export interface NotifyAccountChangeInput {
 const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
-  geliver: "Geliver",
   aras: "Aras Kargo",
   yurtici: "Yurtiçi Kargo",
+  dhlecommerce: "DHL eCommerce",
+  surat: "Sürat Kargo",
+  ptt: "PTT Kargo",
   netgsm: "Netgsm",
   google: "Google",
   meta: "Meta",

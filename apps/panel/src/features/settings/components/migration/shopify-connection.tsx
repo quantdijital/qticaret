@@ -64,6 +64,7 @@ export function ShopifyConnection() {
         </Field>
         <Field label={t(`${S}.clientId`)} htmlFor="shopify-client">
           <Input
+            placeholder={t("settings.placeholders.shopifyClientId")}
             id="shopify-client"
             autoComplete="off"
             value={clientId}

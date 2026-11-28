@@ -1,8 +1,9 @@
 /**
  * The AI services the panel has words for (`ai.services.<id>`), as the
  * backend registry names them (`lib/ai/registry/services.ts`); `fake` is
- * the development-only one. A service the panel does not know still shows,
- * by its id.
+ * the development-only one, shown under a provider's name like the others
+ * (nothing in the panel says "fake" or "test"). A service the panel does
+ * not know still shows, by its id.
  */
 export const AI_SERVICE_IDS = [
   "deepseek",

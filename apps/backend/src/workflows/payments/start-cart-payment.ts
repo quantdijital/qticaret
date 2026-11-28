@@ -12,6 +12,7 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { repriceAddonLinesStep } from "../addons/checkout"
+import { assertFreeShippingConditionStep } from "../promotions/free-shipping-condition"
 import { assertWholesaleCartStep, checkWholesaleCartStep } from "../wholesale/checkout-start"
 import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
@@ -71,6 +72,8 @@ export const startCartPaymentWorkflow = createWorkflow(
     checkCartStockStep(input.cart_id)
     // The wholesale rules once more under the lock, as the completion reads them (review N2)
     assertWholesaleCartStep({ cart_id: input.cart_id })
+    // Free shipping only as the shop's condition allows it now (Kargo ücreti, "Koşul")
+    assertFreeShippingConditionStep({ cart_id: input.cart_id })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,

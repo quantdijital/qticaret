@@ -36,7 +36,8 @@ describe("a look's digest (adr/0064 Ek 2026-11-17 §1.3)", () => {
   })
 
   it("survives a trip through the database: stored as JSON and read again", () => {
-    const doc = baseDoc()
+    // As every design is stored: once read (its top strip its own section, owner 2026-11-27)
+    const doc = readStoredLayout(baseDoc())
     const again = readStoredLayout(JSON.parse(JSON.stringify(doc)))
     expect(designDigest(again)).toBe(designDigest(doc))
     expect(designDigest(doc)).toMatch(HEX64)

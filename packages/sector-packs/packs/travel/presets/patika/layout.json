@@ -16,7 +16,10 @@
       "align": "center",
       "size": "small",
       "tone": "primary",
-      "link": null
+      "link": null,
+      "variant": "graphite",
+      "links": false,
+      "phone": false
     },
     {
       "id": "mainheader",
@@ -33,7 +36,8 @@
         "$href": "/magaza",
         "label": "Tur planla"
       },
-      "tools_style": "plain"
+      "tools_style": "plain",
+      "top_strip": "separate"
     }
   ],
   "home": [

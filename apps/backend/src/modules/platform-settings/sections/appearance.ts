@@ -15,6 +15,8 @@ export interface AppearanceSettings {
   sidebar: "dark" | "light" | "brand"
   /** The menu on a wide screen: open, icons only, or icons that open while pointed at. */
   sidebar_mode: "expanded" | "collapsed" | "auto"
+  /** The page, cards and menus: a trace of the brand hue, grey, or a warm or cool grey. */
+  surface: "brand" | "neutral" | "warm" | "cool"
   logo_light_url: string | null
   logo_dark_url: string | null
   /** The storefront's site icon (a PNG from the media library); none: the storefront's own. */
@@ -54,6 +56,7 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     mode: z.enum(["light", "dark", "system"]),
     sidebar: z.enum(["dark", "light", "brand"]),
     sidebar_mode: z.enum(["expanded", "collapsed", "auto"]),
+    surface: z.enum(["brand", "neutral", "warm", "cool"]),
     logo_light_url: logoUrl,
     logo_dark_url: logoUrl,
     // A PNG or a cleaned SVG of the shop's uploads: `workflows/platform-settings/steps/brand-images.ts`
@@ -66,6 +69,8 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     mode: "system",
     sidebar: "dark",
     sidebar_mode: "expanded",
+    // The panel's first look: a row saved before the choice existed keeps it
+    surface: "brand",
     logo_light_url: null,
     logo_dark_url: null,
     favicon_url: null,

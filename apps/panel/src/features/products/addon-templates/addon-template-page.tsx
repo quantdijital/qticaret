@@ -73,6 +73,7 @@ function NameCard({ template, flagOn }: { template: AddonTemplate; flagOn: boole
         required
       >
         <Input
+          placeholder={t("products.placeholders.addonGroup")}
           id="addon-template-name"
           value={name}
           maxLength={ADDON_LIMITS.label}

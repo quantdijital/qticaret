@@ -100,7 +100,11 @@ export function AddressForm({
         error={message(errors.first_name?.message)}
         required
       >
-        <Input id={id("first")} {...form.register("first_name")} />
+        <Input
+          placeholder={t("common.placeholder.firstName")}
+          id={id("first")}
+          {...form.register("first_name")}
+        />
       </Field>
       <Field
         label={t(`${A}.lastName`)}
@@ -108,7 +112,11 @@ export function AddressForm({
         error={message(errors.last_name?.message)}
         required
       >
-        <Input id={id("last")} {...form.register("last_name")} />
+        <Input
+          placeholder={t("common.placeholder.lastName")}
+          id={id("last")}
+          {...form.register("last_name")}
+        />
       </Field>
       {kind === "billing" ? (
         <Field
@@ -116,7 +124,12 @@ export function AddressForm({
           htmlFor={id("company")}
           error={message(errors.company?.message)}
         >
-          <Input id={id("company")} maxLength={200} {...form.register("company")} />
+          <Input
+            placeholder={t("common.placeholder.company")}
+            id={id("company")}
+            maxLength={200}
+            {...form.register("company")}
+          />
         </Field>
       ) : null}
       <TrAddressFields

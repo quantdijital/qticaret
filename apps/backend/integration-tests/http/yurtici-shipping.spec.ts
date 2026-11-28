@@ -8,7 +8,7 @@ import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-car
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import type { PlaceOrderInput } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
-import { geliverProduct } from "../helpers/geliver"
+import { measuredProduct } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -139,7 +139,7 @@ medusaIntegrationTestRunner({
         pricing: { type: "flat", amount: 59.9 },
       })
       optionId = created.data.id
-      variantId = await geliverProduct(container, shop)
+      variantId = await measuredProduct(container, shop)
       fake.shipments.clear()
       fake.requests.length = 0
     })
@@ -217,7 +217,7 @@ medusaIntegrationTestRunner({
         fake.requests.filter((request) => request.operation === "createShipment")[index]?.body ?? ""
 
       const measured = await ship()
-      variantId = await geliverProduct(getContainer(), shop, false)
+      variantId = await measuredProduct(getContainer(), shop, false)
       const unmeasured = await ship()
 
       // 35 × 8 × 4 cm: 0.4 desi by volume, 0.45 kg apart

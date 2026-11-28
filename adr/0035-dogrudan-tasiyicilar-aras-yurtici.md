@@ -150,3 +150,27 @@ Mağaza sahibi Yurtiçi'nin "Web Servis Giden Kargo Teknik Döküman V3" belgesi
 - **Kapsam dışı kalan, başka dosya isteyen:** `return_requested` için ayrı bir Türkçe hata mesajı (`lib/errors/messages`), panelde ana hesabın "gönderici ödemeli" kullanıcısı olması gerektiğini söyleyen yardım metni.
 
 - **Güvenlik incelemesi 2026-11-03 (L1):** HTTP 5xx altında gelen SOAP fault artık `outcome_unknown` değil, servisin kesin reddi: HTTP istemcisi XML yanıttaki fault kodunu (`errorCode`, yoksa `faultcode`) `error_<kod>` olarak verir (`lib/clients/soap-fault.ts`); fault yoksa ya da ağ geçidi (502/504) yanıtıysa sonuç bilinmez kalır. Yurtiçi bu retten sonra gönderiyi geri çekmez; hesap kontrolünde yalnızca giriş fault'u (`error_936`, sahtenin verdiği kod; belge söylemiyor) `secret_invalid`, düz 500 "ulaşılamadı", başka fault "doğrulanamadı" olur.
+
+## Ek 2026-11-26: Geliver kaldırıldı
+
+Geliver projeden tamamen çıkarıldı (ADR-0031 ek). Taşıyıcı kaydında artık yalnız Aras ve Yurtiçi var; yukarıdaki "Geliver gibi" karşılaştırmaları ve §8'deki "Geliver'le iade açılır" seçeneği tarihseldir. Başka taşıyıcılar istendikçe aynı kayda eklenir.
+
+## Ek 2026-11-26: MNG, Sürat, PTT sıraya alındı
+
+Sahip, mevcut işten sonra MNG (DHL eCommerce Türkiye), Sürat ve PTT Kargo'nun da aynı kayda doğrudan taşıyıcı olarak eklenmesini onayladı; sıra MNG → Sürat → PTT. Araştırma: `docs/entegrasyonlar/dhlecommerce.md` (eski adı `mng.md`), `surat.md`, `ptt.md` (Aras özeti `aras.md`). Kodlamadan önce sahibe sorulacak kararlar o dosyalarda: MNG uygulama anahtarlarının yeri, PTT'de yalnız barkod aralığıyla çalışma, etiketi basmayan taşıyıcılarda kendi etiketimiz.
+
+## Ek 2026-11-26 (2): DHL eCommerce kodlandı
+
+MNG Kargo artık DHL eCommerce Türkiye; kullanıcıya görünen her yerde "DHL eCommerce" (sahip, 2026-11-26). Aynı kayda üçüncü taşıyıcı olarak eklendi (`dhlecommerce_dhlecommerce`, `CarrierName` `dhlecommerce`): Kargoya ver, etiket, takip, iptal, kapıda ödeme, anlaşmalı iade kodu, taşıyıcı süzgeçleri, faturadaki taşıyıcı ve ortak sözleşme test paketi (`carrier-contract.spec.ts`) onu da kapsar. Farkları ve sahibin kararları `docs/entegrasyonlar/dhlecommerce.md` "Uygulama (2026-11-26)"da: uygulama anahtarları platformun (adr/0027 Ek 2026-11-26), REST/JSON (SOAP değil; HTTP istemcisine `jsonFault`), üç aşamalı açılış yalnız "Kargoya ver"de, etiket bizim PDF'imiz ve artık **ortak** (`lib/shipping/label`; Yurtiçi de buradan çizilir, Sürat/PTT de kullanacak), DHL'in ZPL'i özel depoda yanında. §8'deki iade başına kod (DHL'in `createReturnOrder`'ı) hâlâ kapsam dışı.
+
+## Ek 2026-11-26 (3): Sürat Kargo kodlandı
+
+Dördüncü taşıyıcı (`surat_surat`, `CarrierName` `surat`), DHL eCommerce'in bağladığı her yere bağlandı (Kargoya ver, etiket, takip, iptal, kapıda ödeme, anlaşmalı iade kodu — seçim sırası Aras → Yurtiçi → DHL eCommerce → Sürat —, taşıyıcı süzgeçleri, faturadaki taşıyıcı, dışa aktarım, ortak sözleşme test paketi). Farklar `docs/entegrasyonlar/surat.md` "Uygulama (2026-11-26)"da: Sürat'ın test ortamı yok (hesapta test modu yok, geliştirmede sahte Sürat); iki kimlik çifti (gönderi için kullanıcı adı/şifre, takip/etiket/silme için isteğe bağlı cari kodu/web şifresi); açma ve silme yanıtı serbest metin olduğundan **bilinen başarı cümlelerinin izin listesi** (bilinmeyen her yanıt başarısızlık sayılır, açılmış olabilecek gönderi silinir); etiket Sürat'ın PDF'i (barkod yetkisi varsa), yoksa ortak etiketimiz (`lib/shipping/label`, barkod = bizim `OzelKargoTakipNo`); şube aldıktan sonra iptal `GonderiGeriCek` ile geri getirme isteğidir, gönderi siparişte kalır.
+
+## Ek 2026-11-26 (4): DHL eCommerce askıda
+
+Sahip kararıyla (2026-11-26) DHL eCommerce kodu ve testleriyle platformda durur, ama `CARRIER_DHLECOMMERCE_ENABLED=true` verilmedikçe hiçbir mağazaya görünmez ve kullanılamaz (adr/0027 Ek 2026-11-26 (2); `lib/integrations/suspended.ts`). Seçim sırası (Aras → Yurtiçi → DHL eCommerce → Sürat) askıdaki taşıyıcıyı atlar.
+
+## Ek 2026-11-26 (5): PTT Kargo kodlandı
+
+Beşinci taşıyıcı (`ptt_ptt`, `CarrierName` `ptt`), Sürat'ın bağladığı her yere bağlandı (Kargoya ver, etiket, takip, kabulden önce silme, kapıda ödeme = "ödeme şartlı gönderi" `OS`, anlaşmalı iade kodu — seçim sırası Aras → Yurtiçi → DHL eCommerce → Sürat → PTT, askıdaki atlanır —, taşıyıcı süzgeçleri, faturadaki taşıyıcı, dışa aktarım, ortak sözleşme test paketi). Farklar `docs/entegrasyonlar/ptt.md` "Uygulama (2026-11-26)"da: iki Axis2 SOAP servisi (yükleme 1.1, takip yalnız 1.2), alt alanlar tipler ad alanıyla nitelikli, https sabit; **barkod aralığı zorunlu** (sahip kararı): mağaza PTT'nin verdiği aralığı panelden girer, numara `ptt-barcode` modülünde satır kilidiyle bir kez verilir ve silme/iptal/hatadan sonra bile yeniden verilmez; numara sağlayıcıda değil ship workflow'unda alınır (modül izolasyonu) ve `qt_ship.barcode` ile sağlayıcıya geçer. Aralık yok ya da bitmişse "Kargoya ver" kendi mesajıyla durur; az kalınca panel uyarır. Etiket bizim ortak PDF'imiz (Code 128, 13 haneli barkod; PTT'nin istediği simgeleme doğrulanacak). Hesap: müşteri numarası (ayar, açık) + web servis şifresi (gizli) + test modu; kontrol bir takip sorgusuyla.

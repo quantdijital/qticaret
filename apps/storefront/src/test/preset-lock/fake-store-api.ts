@@ -250,6 +250,9 @@ export function storeAnswer(
       return priceDisplay(query)
     case "/store/card-facts":
       return cardFacts(query)
+    // S3: the fixed shop links no products; pages draw as they did before linked products
+    case "/store/linked-products":
+      return { product_ids: [] }
     case "/store/category-images":
       return { images: CATEGORY_IMAGES }
     case "/store/category-counts":
@@ -270,7 +273,6 @@ export function storeAnswer(
         rating: { average: 4.4, count: 5, distribution: { 1: 0, 2: 0, 3: 1, 4: 1, 5: 3 } },
       }
     case "/store/reviews/photos":
-    case "/store/google-reviews":
     case "/store/consents/cookies":
     case "/store/customers/me":
       throw notFound()

@@ -12,7 +12,8 @@
       "submenu_style": "mega",
       "search_style": "icon",
       "over_cover": true,
-      "tools_style": "plain"
+      "tools_style": "plain",
+      "top_strip": "separate"
     }
   ],
   "home": [

@@ -1,11 +1,12 @@
 import "server-only"
 import { announcementSettingsOf } from "@qticaret/types/section-announcement"
 import { headers } from "next/headers"
-import type { ContactView, ShopView, Translate } from "@qticaret/ui"
+import type { ContactView, ShopView, TopSliderView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
 import { headerCart } from "@/lib/cart/cart"
+import { cartShippingEstimate } from "@/lib/cart/shipping-estimate"
 import { cookieConsent, onCookiePreferencesPage } from "@/lib/legal/cookies"
 import { t } from "@/lib/i18n"
 import {
@@ -18,10 +19,12 @@ import {
 import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage, pathOf } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
-import { newsletterLookOf } from "./newsletter"
+import { consentStyleOf, consentWordsKey, newsletterLookOf } from "./newsletter"
 import { miniCartOf } from "./cart"
+import { drawerSuggestions, withSuggestions } from "./cart-cross-sells"
 import { wholesaleCheckoutBlocked } from "./cart-wholesale"
-import { freeShippingProductsOf, linePicturesOf, productPathsOf } from "./line-paths"
+import { linePicturesOf, productPathsOf, shippingClassesOf } from "./line-paths"
+import { drawerShippingOf } from "./shipping-estimate"
 import { imageView } from "./image"
 import { navigation, subcategoryLinks, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
@@ -32,6 +35,7 @@ import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
 import { currentLayout, currentMenus, isEditorSession, layoutLink } from "./layout"
 import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
+import { topStripOf } from "./top-strip"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
@@ -39,6 +43,7 @@ import { footerLogosOf, headerLogoOnDarkOf } from "./footer-logo"
 import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
+import { topSliderView } from "./top-slider"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
 export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
@@ -59,7 +64,7 @@ function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): Shop
   return section
     ? {
         title: section.title ?? t("newsletter.title"),
-        text: section.text ?? t("newsletter.text", { shop }),
+        text: section.text ?? t(consentWordsKey(consentStyleOf(section)), { shop }),
         // How it is drawn in the footer (adr/0049 Ek 2026-11-17 e-bülten)
         ...newsletterLookOf(section, t, "footer"),
         // Its band on the free rows footer's ground (adr/0070 §4 Ek)
@@ -75,7 +80,7 @@ export async function shopView(): Promise<ShopView> {
   const [
     site,
     categories,
-    { storefront: frame, free_shipping_threshold, marks, features },
+    { storefront: frame, free_shipping_threshold, shipping_classes, marks, features },
     identity,
     cart,
     cookies,
@@ -109,17 +114,22 @@ export async function shopView(): Promise<ShopView> {
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
   // A wholesaler's drawer is without KDV (ADR-0068 §5); asked only with lines to show
-  const [paths, linePaths, linePictures, wholesale, freeProducts] = await Promise.all([
-    pathsOf(
-      "product_category",
-      categories.map((category) => category.id)
-    ),
-    productPathsOf(cart?.items ?? []),
-    linePicturesOf(cart?.items ?? []),
-    customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
-    // adr/0087 §3: a cart of free-shipping products says so instead of the meter
-    freeShippingProductsOf(cart?.items ?? []),
-  ])
+  const [paths, linePaths, linePictures, wholesale, lineClasses, suggestions, estimate] =
+    await Promise.all([
+      pathsOf(
+        "product_category",
+        categories.map((category) => category.id)
+      ),
+      productPathsOf(cart?.items ?? []),
+      linePicturesOf(cart?.items ?? []),
+      customer && (cart?.items.length ?? 0) > 0 ? currentWholesale() : RETAIL,
+      // adr/0087 §3: the lines' shipping classes, for the meter and the lines' notes
+      shippingClassesOf(cart?.items ?? []),
+      // S3: what the cart's products are bought with, under the drawer's lines
+      drawerSuggestions(cart, t),
+      // The drawer's shipping row: the server's estimate, asked only with lines to show
+      cart && cart.items.length > 0 ? cartShippingEstimate(cart.id) : Promise.resolve(null),
+    ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
   // Each top entry without the shop's own picture shows its newest product's photo;
   // each category's page its product count (the dropdown's and the sheet's badges)
@@ -146,7 +156,22 @@ export async function shopView(): Promise<ShopView> {
   const [bar] = bars
   const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
   // The bar's small button (its link's own words); none: not drawn
-  const announcementLink = bar?.type === "announcement_bar" ? layoutLink(bar.link ?? null, t) : null
+  // The light strip's note is its link, named by its own words (the catalog strip's before it)
+  const note =
+    bar?.type === "announcement_bar" ? bar.lines.find((line) => line.length > 0) : undefined
+  const announcementLink =
+    bar?.type !== "announcement_bar"
+      ? null
+      : bar.variant === "light"
+        ? note && bar.link
+          ? layoutLink({ ...bar.link, label: note }, t)
+          : null
+        : layoutLink(bar.link ?? null, t)
+  // The dark bar's lines' own links, by each line's place (owner 2026-11-27: a slider's)
+  const lineLinks =
+    bar?.type === "announcement_bar" && bar.variant !== "light" && bar.line_links?.some(Boolean)
+      ? bar.line_links.map((link) => layoutLink(link, t))
+      : null
   // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
   const trustBadges = sharedSettingsOf(layout, frame).trust_badges
   const contact = contactOf(identity, t)
@@ -165,16 +190,24 @@ export async function shopView(): Promise<ShopView> {
     logoOnDark: headerLogoOnDarkOf(site.shop),
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
-    cart: miniCartOf(
-      cart,
-      free_shipping_threshold,
-      t,
-      linePaths,
-      linePictures,
-      wholesale.active && wholesale.vatExclusive,
-      // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
-      wholesaleCheckoutBlocked(cart, wholesale, t),
-      freeProducts
+    cart: withSuggestions(
+      miniCartOf(
+        cart,
+        free_shipping_threshold,
+        t,
+        linePaths,
+        linePictures,
+        wholesale.active && wholesale.vatExclusive,
+        // Under a wholesaler's minimum units, "Ödemeye geç" off as on the cart page (ADR-0068 §8)
+        wholesaleCheckoutBlocked(cart, wholesale, t),
+        {
+          classes: lineClasses,
+          surcharges: shipping_classes ?? [],
+          threshold: free_shipping_threshold,
+        },
+        drawerShippingOf(estimate, t)
+      ),
+      suggestions
     ),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>
@@ -184,8 +217,13 @@ export async function shopView(): Promise<ShopView> {
       layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
     ...(announcementMark ? { announcementMark } : {}),
+    // The top strip's design and parts (owner 2026-11-27); no strip section: none above the header
+    ...(bar?.type === "announcement_bar" ? { topStrip: topStripOf(bar) } : {}),
     ...(announcementLink ? { announcementLink } : {}),
+    ...(lineLinks ? { announcementLineLinks: lineLinks } : {}),
     ...(editing ? { editor: true as const } : {}),
+    // The top image slider above it all (owner 2026-11-27); no slides yet: none
+    ...withTopSlider(topSliderView(layout.header, t)),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     // The catalog header's "Kategoriler" lists the top categories already read (no request),
@@ -236,3 +274,5 @@ export async function shopView(): Promise<ShopView> {
     ...(features?.natural_search === true ? { searchHint: t("search.natural_hint") } : {}),
   }
 }
+
+const withTopSlider = (view: TopSliderView | null) => (view ? { topSlider: view } : {})

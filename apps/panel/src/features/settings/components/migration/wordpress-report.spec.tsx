@@ -155,4 +155,27 @@ describe("Settings > Migration: a WordPress run's report", () => {
     expect(screen.queryByText("Yenilenemeyenler")).toBeNull()
     expect(screen.getByRole("button", { name: "Raporu indir" })).toBeVisible()
   })
+
+  // adr/0042 Ek 2026-11-27
+  it("shows a blog picture refresh as the posts and pictures it added", () => {
+    const added = {
+      post: counted({ read: 54, updated: 40, found: 2, skipped: 12 }),
+      image: counted({ read: 130, created: 120, found: 6, skipped: 4 }),
+    }
+    render(
+      <RunResult
+        job={job({ mode: "apply", refresh: ["post_images"], counts: added })}
+        source="wordpress"
+      />
+    )
+
+    expect(screen.getByText("Blog görselleri taşındı.")).toBeVisible()
+    expect(screen.queryByRole("table")).toBeNull()
+    const line = (label: string) => screen.getByText(label).closest("li") as HTMLElement
+    expect(line("Görselleri eklenen yazılar")).toHaveTextContent("40")
+    expect(line("Ortam kütüphanesine eklenen görseller")).toHaveTextContent("120")
+    expect(line("Görselleri zaten eklenmiş yazılar")).toHaveTextContent("2")
+    expect(line("İndirilemeyen görseller")).toHaveTextContent(/4.*raporda/)
+    expect(screen.queryByText("Görselleri eklenemeyen yazılar")).toBeNull()
+  })
 })

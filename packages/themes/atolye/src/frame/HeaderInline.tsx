@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { ArrowRight, Heart, UserRound } from "lucide-react"
 import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
@@ -42,12 +43,15 @@ export function HeaderInline({
   sticky,
   searchSuggest,
   changeCartLine,
+  strip,
 }: {
   shop: ShopView
   t: Translate
   sticky: boolean
   searchSuggest?: string | undefined
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
+  /** The shop's light top strip, drawn at the header's top (`TopStrip`); none: nothing. */
+  strip?: ReactNode
 }) {
   const pictures = shop.headerBar?.menuImages !== "off"
   const menu = menuWords(shop.categories, t)
@@ -68,6 +72,7 @@ export function HeaderInline({
       data-tools={plain ? "plain" : undefined}
       data-over-cover={shop.headerBar?.overCover ? "" : undefined}
     >
+      {strip}
       <Container
         data-gf-head-row=""
         className={

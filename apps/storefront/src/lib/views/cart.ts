@@ -7,7 +7,7 @@ import type {
   MiniCartView,
   Translate,
 } from "@qticaret/ui"
-import type { StoreProductAddon } from "@qticaret/types"
+import type { StoreProductAddon, StoreShippingClass } from "@qticaret/types"
 import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
 import { cartShips } from "@/lib/cart/ships"
@@ -16,6 +16,7 @@ import { addonFormOf, lineAddonsOf } from "./addons"
 import { lineBookingOf } from "./booking"
 import { lineNetOf, netTotalsOf } from "./cart-tax"
 import { lineImageOf, linePathOf } from "./line-paths"
+import { FREE_SHIPPING_CLASS } from "./own-shipping"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
 const kurus = (lira: number): number => Math.round(lira * 100)
@@ -49,38 +50,103 @@ export function freeShippingOf(
   }
 }
 
+/** What the cart's lines need to say their shipping (adr/0087 §3). */
+export interface LineShipping {
+  /** Each line product's class (`shippingClassesOf`); a Standard product is absent. */
+  classes: ReadonlyMap<string, string>
+  /** The shop's own classes (`shipping_classes`), their surcharges in lira. */
+  surcharges: readonly StoreShippingClass[]
+  /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */
+  threshold: number | null
+}
+
+export const NO_LINE_SHIPPING: LineShipping = {
+  classes: new Map(),
+  surcharges: [],
+  threshold: null,
+}
+
+interface ShippedLine {
+  product_id?: string | null
+  requires_shipping?: boolean | null
+}
+
+const travels = (line: ShippedLine): boolean => line.requires_shipping !== false
+
+const inFreeClass = (classes: ReadonlyMap<string, string>, line: ShippedLine): boolean =>
+  classes.get(line.product_id ?? "") === FREE_SHIPPING_CLASS
+
 /**
  * Whether every line that travels is of a free-shipping product (adr/0087
  * §3); false for a cart with none that travels.
  */
 export function allShipFree(
-  lines: readonly { product_id?: string | null; requires_shipping?: boolean | null }[],
-  free: ReadonlySet<string>
+  lines: readonly ShippedLine[],
+  classes: ReadonlyMap<string, string>
 ): boolean {
-  const shipped = lines.filter((line) => line.requires_shipping !== false)
-  return shipped.length > 0 && shipped.every((line) => free.has(line.product_id ?? ""))
+  const shipped = lines.filter(travels)
+  return shipped.length > 0 && shipped.every((line) => inFreeClass(classes, line))
 }
 
 /**
- * In a mixed cart, "Ücretsiz kargo" under each free-shipping product's line
- * (adr/0087 §3); none when the whole cart ships free (the meter says it).
+ * The line that carries the order's surcharge and its amount (adr/0087
+ * §2.4: the highest among the paid lines, once), judged by the cart's
+ * real `item_total`: none at or past the threshold (§2.5, the surcharge
+ * falls with the rest).
+ */
+export function surchargeLineOf(
+  cart: Pick<Cart, "items" | "item_total">,
+  shipping: LineShipping
+): { lineId: string; amount: number } | null {
+  const { threshold } = shipping
+  if (threshold !== null && threshold > 0 && kurus(cart.item_total) >= kurus(threshold)) {
+    return null
+  }
+  let found: { lineId: string; amount: number } | null = null
+  for (const line of cart.items) {
+    if (!travels(line) || inFreeClass(shipping.classes, line)) {
+      continue
+    }
+    const key = shipping.classes.get(line.product_id ?? "")
+    const amount = shipping.surcharges.find((each) => each.key === key)?.surcharge ?? 0
+    if (amount > 0 && (found === null || kurus(amount) > kurus(found.amount))) {
+      found = { lineId: line.id, amount }
+    }
+  }
+  return found
+}
+
+/**
+ * Under the lines, their own shipping (adr/0087 §3): "Ücretsiz kargo"
+ * under each free-shipping product's line in a mixed cart (none when the
+ * whole cart ships free: the meter says it), and the order's surcharge
+ * under the one line that brings it while the cart is under the threshold.
  */
 export function withShippingNotes(
   views: CartLineView[],
   cart: Cart | null,
-  free: ReadonlySet<string>,
+  shipping: LineShipping,
   t: Translate
 ): CartLineView[] {
   const items = cart?.items ?? []
-  if (free.size === 0 || allShipFree(items, free)) {
+  if (!cart || shipping.classes.size === 0) {
     return views
   }
+  const freeNotes = !allShipFree(items, shipping.classes)
+  const surcharge = surchargeLineOf(cart, shipping)
   const byLine = new Map(items.map((line) => [line.id, line]))
   return views.map((view) => {
     const item = byLine.get(view.id)
-    return item && item.requires_shipping !== false && free.has(item.product_id ?? "")
-      ? { ...view, shippingNote: t("cart.line_free_shipping") }
-      : view
+    if (freeNotes && item && travels(item) && inFreeClass(shipping.classes, item)) {
+      return { ...view, shippingNote: t("cart.line_free_shipping") }
+    }
+    if (surcharge?.lineId === view.id) {
+      return {
+        ...view,
+        shippingNote: t("cart.line_shipping_surcharge", { amount: formatLira(surcharge.amount) }),
+      }
+    }
+    return view
   })
 }
 
@@ -129,6 +195,8 @@ export function cartLinesOf(
  * free shipping still measured on the KDV-included amount, as the
  * backend's rule reads it. `checkoutBlocked`: why the cart cannot go to
  * the payment yet, as the cart page says it (`wholesaleCheckoutBlocked`).
+ * `lineShipping`: the lines' classes for their notes and the meter;
+ * `shipping`: the server's estimate in words (`drawerShippingOf`).
  */
 export function miniCartOf(
   cart: Cart | null,
@@ -138,7 +206,8 @@ export function miniCartOf(
   pictures: ReadonlyMap<string, ImageView> = new Map(),
   vatExcluded = false,
   checkoutBlocked: CheckoutBlockedView | null = null,
-  freeProducts: ReadonlySet<string> = new Set()
+  lineShipping: LineShipping = NO_LINE_SHIPPING,
+  shipping: string | null = null
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
@@ -146,13 +215,20 @@ export function miniCartOf(
   const net = vatExcluded ? netTotalsOf(cart) : null
   const ships = cartShips(cart.items)
   return {
-    lines: cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
+    lines: withShippingNotes(
+      cartLinesOf(cart, paths, pictures, net ? t("cart.line_vat_excluded") : null),
+      cart,
+      lineShipping,
+      t
+    ),
     subtotal: formatLira(net ? net.net / 100 : cart.item_total),
     // Nothing to ship (adr/0076 §6): no free shipping meter, no word of shipping
     freeShipping: ships
-      ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, freeProducts))
+      ? freeShippingOf(cart.item_total, threshold, t, allShipFree(cart.items, lineShipping.classes))
       : null,
     ...(ships ? {} : { note: t("cart.drawer_note_unshipped") }),
+    // The server's figure for its main option: a row, and the note no longer says checkout prices it
+    ...(ships && shipping ? { shipping, note: t("cart.drawer_note_shipping_known") } : {}),
     locked: lockedNoteOf(cart, t),
     ...(net ? { taxNote: t("cart.drawer_wholesale_note") } : {}),
     ...(checkoutBlocked ? { checkoutBlocked } : {}),

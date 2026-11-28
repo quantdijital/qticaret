@@ -9,6 +9,7 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
+import type { StoreTopSliderSection } from "./section-top-slider.js"
 import type { FaqSettings, StoreFaqItem } from "./section-faq.js"
 import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
@@ -33,6 +34,7 @@ import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js
 import type { StorePhotoCollageSection } from "./section-collage.js"
 import type { ReviewsProductImage } from "./section-reviews.js"
 import type {
+  AnnouncementBarVariant,
   CardVariant,
   FaqVariant,
   ProgramPlace,
@@ -141,7 +143,6 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
     | StorePostsSection
     | StoreReviewsSection
-    | StoreGoogleRatingSection
     | StoreRichTextSection
     | {
         id: string
@@ -205,22 +206,6 @@ export interface StoreMarqueeItem {
   text: string
   subtext: string | null
   link: StoreLayoutLink | null
-}
-
-/**
- * The home page's Google rating badge (adr/0058 Ek 2026-11-06): its
- * options only; the storefront reads Google's figures and the excerpts
- * from `GET /store/google-reviews` and draws nothing while there are none.
- */
-export interface StoreGoogleRatingSection {
-  id: string
-  type: "google_rating"
-  /** None: the storefront's own. */
-  title: string | null
-  /** Recent 4–5 star excerpts under the badge: 0 (none) to 3. */
-  excerpts: number
-  /** A link to the place on Google Maps beside the one to `/yorumlar`. */
-  profile_link: boolean
 }
 
 /**
@@ -353,7 +338,7 @@ export type StoreFooterSection =
   | Extract<StoreLayoutSection, { type: "rich_text" | "trust_badges" | "marquee" }>
 
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
-export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
+export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection | StoreTopSliderSection
 
 /**
  * The announcement bar: its lines in the shop's words and how it shows more
@@ -370,6 +355,22 @@ export type StoreAnnouncementBar = {
    * absent or null (today's): none.
    */
   link?: StoreLayoutLink | null
+  /**
+   * Its design (owner's decision 2026-11-27): `graphite` the dark bar,
+   * `light` the thin light strip; absent (a backend before it): `graphite`.
+   */
+  variant?: AnnouncementBarVariant
+  /** The top links off (false); absent: shown. */
+  links?: boolean
+  /** The dark bar's phone off (false); absent: shown. */
+  phone?: boolean
+  /** The light strip's "Hesabım" (true); absent: not written. */
+  account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only, or a link to a record since removed); absent: none.
+   */
+  line_links?: (StoreLayoutLink | null)[]
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {

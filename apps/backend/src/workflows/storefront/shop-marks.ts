@@ -2,6 +2,10 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { connectedCardProviders } from "../../lib/payments/card-providers"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { arasCredentialsOf } from "../../lib/shipping/aras/credentials"
+import { isSuspended } from "../../lib/integrations/suspended"
+import { dhlEcomCredentialsOf } from "../../lib/shipping/dhlecommerce/credentials"
+import { pttCredentialsOf } from "../../lib/shipping/ptt/credentials"
+import { suratCredentialsOf } from "../../lib/shipping/surat/credentials"
 import { yurticiCredentialsOf } from "../../lib/shipping/yurtici/credentials"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -19,8 +23,8 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 export type PaymentMark =
   "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
 
-/** The carriers whose contract the shop connected; an aggregator (Geliver) names none ahead. */
-export type CarrierMark = "aras" | "yurtici"
+/** The carriers whose contract the shop connected. */
+export type CarrierMark = "aras" | "yurtici" | "dhlecommerce" | "surat" | "ptt"
 
 export interface ShopMarks {
   payments: PaymentMark[]
@@ -39,13 +43,16 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
   const accounts = container.resolve<IntegrationCredentialsModuleService>(
     INTEGRATION_CREDENTIALS_MODULE
   )
-  const [cards, bank, codOn, cod, aras, yurtici] = await Promise.all([
+  const [cards, bank, codOn, cod, aras, yurtici, dhlecommerce, surat, ptt] = await Promise.all([
     connectedCardProviders(container),
     bankTransferSettings(container),
     settings.isFeatureEnabled(CASH_ON_DELIVERY),
     settings.getSection("cash_on_delivery") as unknown as Promise<CashOnDeliverySettings>,
     accounts.read("aras"),
     accounts.read("yurtici"),
+    accounts.read("dhlecommerce"),
+    accounts.read("surat"),
+    accounts.read("ptt"),
   ])
   const payments: PaymentMark[] = [
     ...(cards.length > 0 ? CARD_NETWORKS : []),
@@ -57,6 +64,10 @@ export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> 
   const carriers: CarrierMark[] = [
     ...(arasCredentialsOf(aras) ? (["aras"] as const) : []),
     ...(yurticiCredentialsOf(yurtici) ? (["yurtici"] as const) : []),
-  ]
+    ...(dhlEcomCredentialsOf(dhlecommerce) ? (["dhlecommerce"] as const) : []),
+    ...(suratCredentialsOf(surat) ? (["surat"] as const) : []),
+    ...(pttCredentialsOf(ptt) ? (["ptt"] as const) : []),
+    // A carrier suspended on this server ships nothing (`lib/integrations/suspended.ts`)
+  ].filter((carrier) => !isSuspended(carrier))
   return { payments, carriers }
 }

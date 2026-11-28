@@ -1,7 +1,16 @@
 import type { Context } from "@medusajs/framework/types"
-import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
+import {
+  InjectTransactionManager,
+  MedusaContext,
+  MedusaError,
+  MedusaService,
+} from "@medusajs/framework/utils"
 import { ProductAnswer } from "./models/product-answer"
 import { ProductQuestion } from "./models/product-question"
+import { editQuestion_, undoEdit_ } from "./editing"
+import type { QuestionEdit, QuestionEditUndo } from "./types"
+
+export type { QuestionEdit, QuestionEditUndo } from "./types"
 
 export type Moderation = "approved" | "rejected"
 
@@ -141,8 +150,118 @@ class ProductQaModuleService extends MedusaService({ ProductQuestion, ProductAns
     }
   }
 
+  /**
+   * The shop edits a question from the panel: its words (any author's: a
+   * typo, a phone number taken out) and the shop's own answer, written,
+   * replaced or removed (`answer: null`). A customer's answer is never
+   * rewritten here; it is approved or hidden. A waiting question the shop
+   * answers goes out with its answer (as `answerAsShop`); a hidden one
+   * stays hidden: hiding and showing are moderation's. Returns what the
+   * undo puts back.
+   */
   @InjectTransactionManager()
-  protected async recount_(
+  async editQuestion(
+    input: QuestionEdit,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<QuestionEditUndo> {
+    return editQuestion_(this, input, sharedContext)
+  }
+
+  /** An edit taken back (a failed workflow's compensation). */
+  @InjectTransactionManager()
+  async undoEdit(
+    undo: QuestionEditUndo,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    await undoEdit_(this, undo, sharedContext)
+  }
+
+  /**
+   * A question taken off with its answers (soft: "Geri al" brings them
+   * back). The question goes first, then its answers, so a restore knows
+   * them by the time (an answer the shop removed earlier stays removed).
+   */
+  @InjectTransactionManager()
+  async removeQuestion(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ id: string; product_id: string }> {
+    const question = await this.retrieveProductQuestion(
+      id,
+      { select: ["id", "product_id"] },
+      sharedContext
+    )
+    await this.softDeleteProductQuestions([id], {}, sharedContext)
+    const answers = await this.listProductAnswers(
+      { question_id: id },
+      { select: ["id"] },
+      sharedContext
+    )
+    if (answers.length > 0) {
+      await this.softDeleteProductAnswers(
+        answers.map((answer) => answer.id),
+        {},
+        sharedContext
+      )
+    }
+    return { id, product_id: question.product_id }
+  }
+
+  /** A removed question back, with the answers removed with it. */
+  @InjectTransactionManager()
+  async restoreQuestion(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ id: string; product_id: string }> {
+    const [question] = await this.listProductQuestions(
+      { id, deleted_at: { $ne: null } },
+      { take: 1, withDeleted: true, select: ["id", "product_id", "deleted_at"] },
+      sharedContext
+    )
+    if (!question?.deleted_at) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "questions.unknown")
+    }
+    const answers = await this.listProductAnswers(
+      { question_id: id, deleted_at: { $gte: question.deleted_at } },
+      { withDeleted: true, select: ["id"] },
+      sharedContext
+    )
+    await this.restoreProductQuestions([id], {}, sharedContext)
+    if (answers.length > 0) {
+      await this.restoreProductAnswers(
+        answers.map((answer) => answer.id),
+        {},
+        sharedContext
+      )
+    }
+    return { id, product_id: question.product_id }
+  }
+
+  /**
+   * A customer erased (KVKK, L9): every question and answer of theirs
+   * carries the placeholder name, deleted ones too, so "Geri al" never
+   * brings their name back. The generated update does not reach a deleted
+   * row (see wholesale's `clearDeletedAccounts`), so it is written here.
+   */
+  @InjectTransactionManager()
+  async eraseAuthor(
+    input: { customer_id: string; name: string },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const manager = sharedContext.transactionManager as {
+      execute: (sql: string, params: unknown[]) => Promise<unknown>
+    }
+    for (const table of ["product_question", "product_answer"] as const) {
+      await manager.execute(`update "${table}" set "author_name" = ? where "customer_id" = ?`, [
+        input.name,
+        input.customer_id,
+      ])
+    }
+  }
+
+  /** Each question's approved answers counted again (its `answer_count`). */
+  @InjectTransactionManager()
+  async recount_(
     questionIds: string[],
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {

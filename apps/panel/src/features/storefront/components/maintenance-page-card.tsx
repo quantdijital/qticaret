@@ -22,7 +22,7 @@ import {
 } from "@/features/storefront/maintenance"
 import type { MaintenanceParsed, MaintenanceValues } from "@/features/storefront/maintenance"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 import { MaintenancePathsField } from "./maintenance-paths"
 
 const P = "storefront.maintenance.page"
@@ -52,12 +52,13 @@ export function MaintenancePageCard({
   const message = useWatch({ control: form.control, name: "message" })
   const expected = useWatch({ control: form.control, name: "expected_at" })
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     // The switch saves itself: what this card sends keeps it as stored
     save.mutate(
       { ...maintenanceBodyOf(next), enabled: saved.enabled },
       {
         onSuccess: (stored) => {
-          form.reset(maintenanceValuesOf(stored.values), FULL_RESET)
+          settle(maintenanceValuesOf(stored.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -114,6 +115,7 @@ export function MaintenancePageCard({
               }}
             >
               <Textarea
+                placeholder={t("storefront.placeholders.maintenance")}
                 id="maintenance-message"
                 rows={4}
                 maxLength={L.message}

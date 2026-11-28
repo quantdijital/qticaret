@@ -1,12 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ProviderError, ValidationError } from "../../../lib/errors"
-import { logger } from "../../../lib/logging"
-import { geliverApi, geliverCredentialsOf } from "../../../lib/shipping/geliver"
-import { geliverStatusOf } from "../../../lib/shipping/geliver/status"
-import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
-import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
+import { ValidationError } from "../../../lib/errors"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 import type { ReturnKind } from "../../../modules/return-requests/states"
@@ -16,14 +11,13 @@ type Container = Pick<MedusaContainer, "resolve">
 const requests = (container: Container) =>
   container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
 
-/** An approved request as its cancel needs it: what Medusa and the carrier opened for it. */
+/** An approved request as its cancel needs it: what Medusa opened for it. */
 export interface CancellableRequest {
   id: string
   order_id: string
   kind: ReturnKind
   return_id: string | null
   exchange_id: string | null
-  return_shipment_id: string | null
 }
 
 interface ReturnRow {
@@ -76,7 +70,6 @@ export async function cancellableRequest(
     kind: request.kind,
     return_id: request.return_id,
     exchange_id: request.exchange_id,
-    return_shipment_id: request.return_shipment_id,
   }
 }
 
@@ -84,60 +77,6 @@ export const readCancellableRequestStep = createStep(
   "returns-read-cancellable",
   async (input: { id: string }, { container }) =>
     new StepResponse(await cancellableRequest(container, input.id))
-)
-
-const geliverAccount = async (container: Container) =>
-  geliverCredentialsOf(
-    await container
-      .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-      .read("geliver")
-  )
-
-/**
- * Withdraws the carrier's return a cancelled request opened (adr/0032):
- * its code no longer takes a parcel. First of the cancel's changes: a
- * carrier that has the parcel already refuses it
- * (`returns.cancel_handed_over`) and nothing else changes. One withdrawn
- * already (a cancel tried before) is passed over, so a retry goes on.
- * Geliver cannot open a withdrawn return again: should a later step fail,
- * the request stays approved with a code that no longer works, and the
- * undo says so in the log for staff (`returns.carrier_return_withdrawn`);
- * cancelling again finishes it.
- */
-export const withdrawCarrierReturnStep = createStep(
-  "returns-withdraw-carrier-return",
-  async (input: { request_id: string; shipment_id: string | null }, { container }) => {
-    if (!input.shipment_id) {
-      return new StepResponse(false, null)
-    }
-    const account = await geliverAccount(container)
-    if (!account) {
-      throw new ValidationError("shipping.carrier_not_connected")
-    }
-    const api = geliverApi()
-    const { status } = geliverStatusOf(await api.shipment(account, input.shipment_id))
-    if (status === "canceled") {
-      return new StepResponse(false, null)
-    }
-    if (status !== "created") {
-      throw new ValidationError("returns.cancel_handed_over")
-    }
-    try {
-      await api.cancelShipment(account, input.shipment_id)
-    } catch (error) {
-      // Refused for good: the carrier has it; a timeout or an outage is tried again
-      if (error instanceof ProviderError && !error.retryable) {
-        throw new ValidationError("returns.cancel_handed_over")
-      }
-      throw error
-    }
-    return new StepResponse(true, { request_id: input.request_id, shipment_id: input.shipment_id })
-  },
-  (withdrawn) => {
-    if (withdrawn) {
-      logger.warn({ event: "returns.carrier_return_withdrawn", ...withdrawn })
-    }
-  }
 )
 
 /**

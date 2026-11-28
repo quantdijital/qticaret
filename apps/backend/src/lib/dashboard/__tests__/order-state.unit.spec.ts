@@ -53,7 +53,7 @@ describe("orderState", () => {
         fulfillments: [
           {
             id: "ful_1",
-            provider_id: "geliver_geliver",
+            provider_id: "aras_aras",
             items: [{ line_item_id: "item_a", quantity: 2 }],
           },
         ],

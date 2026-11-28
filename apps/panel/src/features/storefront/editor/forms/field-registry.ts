@@ -4,6 +4,7 @@ import {
   HEADER_SUBMENU_STYLES,
   HEADER_TOOL_LABELS,
   MARQUEE_SETTINGS,
+  NEWSLETTER_CONSENT_STYLES,
   NEWSLETTER_TONES,
 } from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
@@ -110,8 +111,8 @@ export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, F
   utility_bar: "topBar",
   strip_note: "topBar",
   strip_note_link: "topBar",
-  top_links: "topBar",
   categories_button: "menu",
+  top_links: "menu",
   menu_ground: "menu",
   highlight_link: "menu",
   phone: "icons",
@@ -271,6 +272,19 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The content's counts and switches (docs/tema/bilesen-denetimi O2)
   fields.push(...contentFields(section))
+  // How every newsletter box asks for the consent, beside its sentence under "İçerik"
+  if (section.type === "newsletter") {
+    fields.push({
+      key: "news_consent",
+      group: "content",
+      label: "storefront.editor.newsletter.consentStyle",
+      term: "storefront.editor.newsletter.consentStyleTerm",
+      options: NEWSLETTER_CONSENT_STYLES.map(
+        (style) => `storefront.editor.newsletter.consentStyles.${style}`
+      ),
+      target: CONTENT_IDS.content(id, "news_consent"),
+    })
+  }
   // A band's ground tone, under "Stil", on a page or in the footer
   if (isNewsletterBand(section)) {
     fields.push({

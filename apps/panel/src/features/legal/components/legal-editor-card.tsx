@@ -70,6 +70,7 @@ export function LegalEditorCard({
       <LeaveGuard when={dirty && !save.isPending} />
       <Field label={t(`${E}.titleLabel`)} htmlFor="legal-title">
         <Input
+          placeholder={t("settings.legal.editor.titlePlaceholder")}
           id="legal-title"
           maxLength={200}
           value={title ?? stored.title}

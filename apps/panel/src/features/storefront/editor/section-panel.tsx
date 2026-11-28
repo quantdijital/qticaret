@@ -21,6 +21,7 @@ import { SpacingGroup } from "./forms/look-fields"
 import { FrameGroup, OtherGroup } from "./forms/look-groups"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { AnnouncementMotion, AnnouncementStyle } from "./forms/announcement-settings"
+import { TopSliderGroups } from "./forms/top-slider-groups"
 import { FooterStyleGroup } from "./forms/footer-columns-fields"
 import { NewsletterBandGroup, NewsletterToneGroup } from "./forms/newsletter-band-group"
 import { isFooterBand, isNewsletterBand } from "./forms/newsletter-band"
@@ -203,7 +204,10 @@ export function SectionPanel({
               onChange={onChange}
             />
           ) : null}
-          {section.type === "announcement_bar" ? (
+          {section.type === "top_slider" ? (
+            <TopSliderGroups section={section} reveal={reveal} onChange={onChange} />
+          ) : null}
+          {section.type === "announcement_bar" && section.variant !== "light" ? (
             <>
               <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
               <AnnouncementStyle section={section} reveal={reveal} onChange={onChange} />

@@ -58,6 +58,8 @@ interface HeaderBarCommon extends MainBase {
   tools_style?: HeaderToolsStyle
   /** The one-row header over a full photograph opening; absent: on its own ground. */
   over_cover?: boolean
+  /** The top strip above the header (announcements, top links, phone, header marquee); false: off. */
+  top_strip?: boolean
 
   /** How a menu item's children open, on every variant (adr/0049 Ek 2026-11-26); absent: `list`. */
   submenu_style?: HeaderSubmenuStyle

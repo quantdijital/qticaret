@@ -251,7 +251,11 @@ describe("review photos and marks", () => {
   it("writes the ways to pay and carriers in the storefront's words", () => {
     expect(shopMarks(["visa", "bank_transfer", "aras"], t)).toEqual([
       { key: "visa", label: "Visa", logo: { src: "/marks/visa.png", width: 208, height: 68 } },
-      { key: "bank_transfer", label: "Havale / EFT", logo: null },
+      {
+        key: "bank_transfer",
+        label: "Havale / EFT",
+        logo: { src: "/marks/havale.svg", width: 268, height: 40 },
+      },
       {
         key: "aras",
         label: "Aras Kargo",
@@ -259,6 +263,19 @@ describe("review photos and marks", () => {
       },
     ])
     expect(shopMarks(undefined, t)).toEqual([])
+  })
+
+  it("gives every carrier its own mark, and a carrier without one its name", () => {
+    expect(shopMarks(["surat", "ptt", "dhlecommerce"], t)).toEqual([
+      {
+        key: "surat",
+        label: "Sürat Kargo",
+        logo: { src: "/marks/surat.png", width: 401, height: 71 },
+      },
+      { key: "ptt", label: "PTT Kargo", logo: { src: "/marks/ptt.png", width: 1010, height: 310 } },
+      // No file yet: the theme draws the name
+      { key: "dhlecommerce", label: "DHL eCommerce", logo: null },
+    ])
   })
 })
 

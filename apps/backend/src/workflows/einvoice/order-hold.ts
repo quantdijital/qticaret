@@ -7,7 +7,7 @@ import {
   testPaymentsInvoiced,
 } from "../../lib/invoicing"
 import type { InvoiceHold, InvoiceMoment, InvoiceOrderRow } from "../../lib/invoicing"
-import { HOLD_FIELDS, invoicingOf } from "./queue-invoices"
+import { HOLD_FIELDS, birfaturaShipsFor, invoicingOf } from "./queue-invoices"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -68,6 +68,7 @@ export async function orderSaleHold(
     moments: reached(order.fulfillments ?? []),
     fakeAllowed: fakeInvoicingAllowed(),
     testPaymentsInvoiced: testPaymentsInvoiced(settings.provider),
+    birfaturaShips: await birfaturaShipsFor(container, settings),
   })
   return reason
     ? {

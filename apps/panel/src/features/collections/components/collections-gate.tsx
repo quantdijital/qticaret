@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import { Layers } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { staffQuery } from "@/features/auth/api/staff"
@@ -12,7 +13,9 @@ import { COLLECTIONS_FLAG } from "@/features/collections/api/flag"
 /**
  * Its children while the shop has collections on; off, one sentence says
  * so (the records are kept) and the owner or admin is offered the switch
- * in Ayarlar > Özellikler. The API refuses collection writes while off.
+ * in Ayarlar > Özellikler, under the page's own heading so the screen
+ * still reads as the Koleksiyonlar page. The API refuses collection writes
+ * while off.
  */
 export function CollectionsGate({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
@@ -25,14 +28,17 @@ export function CollectionsGate({ children }: { children: ReactNode }) {
     return children
   }
   return (
-    <section className="flex flex-col items-center gap-3 rounded-lg border bg-card p-8 text-center shadow-card">
-      <Layers className="size-8 text-muted-foreground" aria-hidden="true" />
-      <p className="max-w-md text-sm text-muted-foreground">{t("collections.gate.off")}</p>
-      {staff.data?.can.settings ? (
-        <Button asChild variant="outline">
-          <Link to="/settings/features">{t("collections.gate.turnOn")}</Link>
-        </Button>
-      ) : null}
-    </section>
+    <div className="flex flex-col gap-6">
+      <PageHeader title={t("nav.collections")} />
+      <section className="flex flex-col items-center gap-3 rounded-lg border bg-card p-8 text-center shadow-card">
+        <Layers className="size-8 text-muted-foreground" aria-hidden="true" />
+        <p className="max-w-md text-sm text-muted-foreground">{t("collections.gate.off")}</p>
+        {staff.data?.can.settings ? (
+          <Button asChild variant="outline">
+            <Link to="/settings/features">{t("collections.gate.turnOn")}</Link>
+          </Button>
+        ) : null}
+      </section>
+    </div>
   )
 }

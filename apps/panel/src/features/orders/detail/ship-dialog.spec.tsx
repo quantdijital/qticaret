@@ -137,4 +137,22 @@ describe("ShipDialog (F7.10)", () => {
       }
     )
   })
+
+  it("says BirFatura makes the label and opens the tracking fields (adr/0072 Ek 2026-11-26)", () => {
+    render(
+      <ShipDialog
+        order={order}
+        items={[{ id: "line_1", quantity: 1 }]}
+        packed={false}
+        birfatura
+        open
+        busy={false}
+        onOpenChange={vi.fn()}
+        onConfirm={vi.fn()}
+      />
+    )
+
+    expect(screen.getByTestId("ship-birfatura")).toHaveTextContent(/BirFatura panelinde oluştur/)
+    expect(screen.getByLabelText("Takip numarası")).toBeVisible()
+  })
 })

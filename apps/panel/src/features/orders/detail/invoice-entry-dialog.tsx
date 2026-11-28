@@ -140,7 +140,12 @@ export function InvoiceEntryDialog({
                 htmlFor="invoice-number"
                 error={message(errors.number?.message)}
               >
-                <Input id="invoice-number" autoComplete="off" {...form.register("number")} />
+                <Input
+                  placeholder={t("orders.placeholders.invoiceNumber")}
+                  id="invoice-number"
+                  autoComplete="off"
+                  {...form.register("number")}
+                />
               </Field>
               <Field
                 label={t(`${I}.issuedOn`)}
@@ -174,7 +179,12 @@ export function InvoiceEntryDialog({
                 htmlFor="invoice-uuid"
                 error={message(errors.uuid?.message)}
               >
-                <Input id="invoice-uuid" autoComplete="off" {...form.register("uuid")} />
+                <Input
+                  placeholder={t("orders.placeholders.ettn")}
+                  id="invoice-uuid"
+                  autoComplete="off"
+                  {...form.register("uuid")}
+                />
               </Field>
             </>
           )}

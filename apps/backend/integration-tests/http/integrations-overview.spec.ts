@@ -58,14 +58,16 @@ medusaIntegrationTestRunner({
         "iyzico",
         "bank_transfer",
         "cash_on_delivery",
-        "geliver",
         "aras",
         "yurtici",
+        "surat",
+        "ptt",
         "netgsm",
         "meta",
         "ga4",
         "resend",
-        // No Google client in tests: a service the platform has not opened is not offered
+        // No Google client nor DHL eCommerce app in tests: a service the platform has not
+        // opened is not offered
         "feeds",
       ])
       expect(row("paytr")).toMatchObject({ state: "not_set_up", test: null, failures: [] })

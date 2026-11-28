@@ -86,6 +86,7 @@ export function AccountEditDialog({
                 error={message(errors.contact_name?.message)}
               >
                 <Input
+                  placeholder={t("common.placeholder.fullName")}
                   id="wholesale-edit-contact"
                   autoComplete="off"
                   {...form.register("contact_name")}
@@ -97,6 +98,7 @@ export function AccountEditDialog({
                 error={message(errors.company_name?.message)}
               >
                 <Input
+                  placeholder={t("common.placeholder.company")}
                   id="wholesale-edit-company"
                   autoComplete="off"
                   {...form.register("company_name")}

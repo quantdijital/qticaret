@@ -164,11 +164,12 @@ describe("return.canceled (order #691)", () => {
     expect(template.channels).toEqual(["email"])
     expect(mail?.subject).toBe("İade talebiniz iptal edildi (#1042)")
     expect(mail?.text).toContain("Örnek ürün")
-    expect(mail?.text).toContain("geri göndermenize gerek yok")
-    expect(mail?.text).toContain("kargo kodu artık geçerli değil")
+    expect(mail?.text).toContain("Lütfen ürünleri kargoya vermeyin.")
+    // The contracted return code stays valid shop-wide: never called invalid
+    expect(mail?.text).not.toContain("geçerli değil")
     expect(mail?.text).toContain("yeni talep oluşturabilirsiniz")
     // The code given on approval is not repeated
-    expect(mail?.text).not.toContain("GLV12345678")
+    expect(mail?.text).not.toContain("48213")
     const swap = template.email?.({ ...template.sample, kind: "exchange" }, brand)
     expect(swap?.subject).toBe("Değişim talebiniz iptal edildi (#1042)")
   })
@@ -187,5 +188,35 @@ describe("the shop's payment trouble e-mail (review 2026-11-17)", () => {
     expect(refund?.text).toContain("Sipariş")
     expect(refund?.text).not.toContain("Sepet")
     expect(payment?.text).toContain("Sepet")
+  })
+})
+
+describe("return.approved: the contracted return code (adr/0031 Ek 2026-11-26)", () => {
+  const template = MESSAGE_TEMPLATES["return.approved"]
+
+  it("names the carrier's branch, the code to say and that the shopper pays nothing", () => {
+    const mail = template.email?.(
+      { ...template.sample, returnCode: "998877", returnCarrier: "Yurtiçi Kargo" },
+      brand
+    )
+    expect(mail?.text).toContain("İade kargosu")
+    expect(mail?.text).toContain(
+      "İade paketinizi Yurtiçi Kargo şubesine verin ve gönderirken '998877' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz."
+    )
+  })
+
+  it("says an old request's own code alone, and the shop's word without any", () => {
+    const own = template.email?.(
+      { ...template.sample, returnCode: "GLV0042", returnCarrier: null },
+      brand
+    )
+    const none = template.email?.(
+      { ...template.sample, returnCode: null, returnCarrier: null },
+      brand
+    )
+    expect(own?.text).toContain("bu kodu söyleyin: GLV0042")
+    expect(own?.text).not.toContain("anlaşmalı")
+    expect(none?.text).toContain("mağaza sizinle iletişime geçecek")
+    expect(none?.text).not.toContain("İade kargosu")
   })
 })

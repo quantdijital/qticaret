@@ -1,8 +1,10 @@
 # Uygulama planı: BasitKargo ve BirFatura
 
+> **2026-11-26:** BasitKargo **yapılmayacak** (sahip); K1–K6 dilimleri düşürüldü, `docs/entegrasyonlar/basitkargo.md` silindi. Geliver de projeden kaldırıldı (ADR-0031 ek): aşağıdaki Geliver satırları yalnız boyut karşılaştırması olarak tarihseldir; bugün taşıyıcılar Aras ve Yurtiçi. BirFatura bölümü geçerli.
+
 > **2026-11-16:** BasitKargo için sahibin "gerek yok" notu var (teyit bekliyor); bu belgenin BasitKargo dilimleri askıda. BirFatura A yolu sahibin onayını bekliyor.
 
-> Durum: **öneri, kod yok** (2026-11-16). Sahibin isteği: "kargo entegrasyonunda https://basitkargo.com/api entegrasyonu, fatura tarafında https://birfatura.com/ entegrasyonlarını da yapmalıyız." Ayrıntılar: `docs/entegrasyonlar/basitkargo.md`, `docs/entegrasyonlar/birfatura.md`.
+> Durum: **öneri, kod yok** (2026-11-16). Sahibin isteği: "kargo entegrasyonunda https://basitkargo.com/api entegrasyonu, fatura tarafında https://birfatura.com/ entegrasyonlarını da yapmalıyız." Ayrıntılar: `docs/entegrasyonlar/birfatura.md` (BasitKargo belgesi 2026-11-26 silindi).
 
 ## Yol haritasındaki yeri
 

@@ -2,9 +2,9 @@ import { createContext, useSyncExternalStore } from "react"
 
 /**
  * How much of the editor fits side by side (the owner, 2026-11-03: the
- * editor was cramped): the page's parts, a part's settings and the preview
- * from 1280 px; the settings and the preview from 1024 px, the parts in a
- * drawer; one at a time below, switched from the top bar.
+ * editor was cramped; 2026-11-27: one side panel, not two): from 1024 px
+ * the side panel and the preview side by side, the same on a laptop and a
+ * wide screen; one at a time below, switched from the top bar.
  */
 export type EditorLayout = "wide" | "medium" | "narrow"
 
@@ -46,16 +46,23 @@ export function useEditorLayout(): EditorLayout {
 }
 
 /**
- * What a settings panel's header offers to reach the page's parts: going
- * back to the list beside it, or, where the list is in a drawer, opening it.
+ * Where a settings panel's way back leads (the owner, 2026-11-27: one side
+ * panel whose content swaps, as Shopify's): the page's parts, named as the
+ * first step of the panel's breadcrumb.
  */
 export interface EditorChrome {
-  openSections: (() => void) | null
+  /** The page whose parts the list shows ("Ana sayfa"). */
+  root: string
+  /** Back to the page's parts. */
+  toList: () => void
 }
 
-export const EditorChromeContext = createContext<EditorChrome>({ openSections: null })
+export const EditorChromeContext = createContext<EditorChrome>({
+  root: "",
+  toList: () => undefined,
+})
 
-/** The section whose settings are open: its row in the list is marked. */
+/** The section whose settings are open, or were last: its row in the list is marked. */
 export const OpenedSectionContext = createContext<string | null>(null)
 
 /**

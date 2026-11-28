@@ -76,8 +76,9 @@ medusaIntegrationTestRunner({
 
     it("answers the old site's own addresses with one 301, or a 410 where nothing fits", async () => {
       const applied = await wp.run("apply")
-      // The explicit entries: the subcategory's short path, the three pictures and the cover
-      expect(applied.job.result_summary).toMatchObject({ links: { short_paths: 1, files: 4 } })
+      // The explicit entries: the subcategory's short path, the three pictures, the cover and
+      // the picture in the post's text (adr/0042 Ek 2026-11-27)
+      expect(applied.job.result_summary).toMatchObject({ links: { short_paths: 1, files: 5 } })
       const category = await location("/mutfak/tavalar")
       expect(category).toMatch(/^\/kategori\//)
 
@@ -124,9 +125,15 @@ medusaIntegrationTestRunner({
       expect(await location("/wp-content/uploads/2026/01/tava-300x300.png")).toBe(picture)
       const [moved] = await getContainer()
         .resolve<ContentModuleService>(CONTENT_MODULE)
-        .listContentEntries({ handle: "tava-bakimi" }, { select: ["image_url"] })
+        .listContentEntries({ handle: "tava-bakimi" }, { select: ["image_url", "body"] })
       expect(await location("/wp-content/uploads/2026/01/kapak.png")).toBe(moved?.image_url)
-      expect((await resolve("/wp-content/uploads/2026/01/x.png")).type).toBe("gone")
+      // The picture in the post's text moved too (adr/0042 Ek 2026-11-27): its copy in the text
+      const inText = (
+        moved?.body as { content?: { type: string; attrs?: { src?: string } }[] }
+      ).content?.find((block) => block.type === "image")?.attrs?.src
+      expect(inText).toMatch(/^https?:\/\//)
+      expect(await location("/wp-content/uploads/2026/01/x.png")).toBe(inText)
+      expect((await resolve("/wp-content/uploads/2026/01/hic-tasinmadi.png")).type).toBe("gone")
 
       // WordPress's machinery is gone; WooCommerce's pages became the storefront's
       for (const raw of [

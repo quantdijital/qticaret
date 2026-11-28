@@ -52,17 +52,6 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["test_mode"],
     optional: [],
   },
-  // Geliver panel > API tokens (adr/0031). Test shipments use the same token: a flag per shipment
-  geliver: {
-    settings: z.object({ test_mode: z.boolean() }).strict(),
-    secrets: ["api_token"],
-    secret: z
-      .string()
-      .trim()
-      .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid"),
-    identity: [],
-    optional: [],
-  },
   // Aras Kargo's customer service account, given with the shop's contract (adr/0035)
   aras: {
     settings: z
@@ -99,6 +88,58 @@ export const CREDENTIAL_PROVIDERS = {
       .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
     identity: ["test_mode"],
     optional: ["cod_username", "cod_password"],
+  },
+  // DHL eCommerce (formerly MNG Kargo): the shop's customer number and its "Online Şube"
+  // password. The app keys are the platform's, from the server's environment (adr/0027 Ek
+  // 2026-11-26), unless the shop registered its own app at DHL's portal and writes its keys
+  // here (both or neither; the owner, 2026-11-26): then they are used in place of the
+  // platform's. Test and live accounts differ: switching asks for all of them again
+  dhlecommerce: {
+    settings: z.object({ test_mode: z.boolean() }).strict(),
+    secrets: ["customer_number", "password", "client_id", "client_secret"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["test_mode"],
+    optional: ["client_id", "client_secret"],
+  },
+  // Sürat Kargo's web service (docs/entegrasyonlar/surat.md): the login that opens parcels,
+  // and the cari kodu with its web password that tracks, labels and deletes them, when Sürat
+  // gave a second pair (both parts or neither; without it the first pair does all). Sürat has
+  // no test service: no mode. At least 3 characters: shorter values could not be masked in
+  // what Sürat quotes back (`providerText`)
+  surat: {
+    settings: z.object({}).strict(),
+    secrets: ["username", "password", "cari_code", "web_password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{3,128}$/, "integration_credentials.secret_invalid"),
+    identity: [],
+    optional: ["cari_code", "web_password"],
+  },
+  // PTT Kargo's web service (docs/entegrasyonlar/ptt.md): the customer number the Başmüdürlük
+  // gives with the contract (9 or 10 digits, shown) and its web service password. PTT's test
+  // services take another account: switching asks for the password again. The barcode range is
+  // not here: it lives in its own table, handed out once each (modules/ptt-barcode)
+  ptt: {
+    settings: z
+      .object({
+        customer_id: z
+          .string()
+          .trim()
+          .regex(/^\d{9,10}$/, "ptt.customer_id_invalid"),
+        test_mode: z.boolean(),
+      })
+      .strict(),
+    secrets: ["password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{3,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["customer_id", "test_mode"],
+    optional: [],
   },
   // Netgsm's SMS account (adr/0036): the shop's own, its sender name registered to its company
   netgsm: {

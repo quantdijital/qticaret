@@ -15,7 +15,7 @@ import {
 } from "@/features/settings/components/storefront-rows"
 import { errorLine } from "@/features/settings/storefront"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 const S = "settings.store.social"
 const E = "settings.store.errors"
@@ -67,11 +67,12 @@ export function SocialAccountsCard({
   const accounts = useFieldArray({ control: form.control, name: "accounts" })
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
+    const settle = beginSave(form)
     save.mutate(
       { same_as: next.accounts.map((account) => account.url) },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values), FULL_RESET)
+          settle(valuesOf(result.values))
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),

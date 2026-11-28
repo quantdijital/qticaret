@@ -35,6 +35,7 @@ export function GeneralCard({
           required
         >
           <Input
+            placeholder={t("bulkMessages.placeholders.name")}
             id="bulk-name"
             maxLength={LIMITS.name}
             aria-invalid={errors.name ? true : undefined}

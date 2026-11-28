@@ -81,6 +81,7 @@ export function NewBrandDialog({
               required
             >
               <Input
+                placeholder={t("brands.placeholders.name")}
                 id="brand-new-name"
                 value={name}
                 autoFocus

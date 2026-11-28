@@ -62,26 +62,28 @@ describe("OrdersPage", () => {
       Promise.resolve(
         path === "/admin/order-board/export"
           ? { async_job: { id: "job_1", status: "queued" } }
-          : path.startsWith("/admin/async-jobs/")
-            ? { async_job: { id: "job_1", status: "failed", error_message: null } }
-            : {
-                orders: [
-                  row({ addons: { lines: 1, non_withdrawable: true } }),
-                  row({ id: "order_2", display_id: 1043 }),
-                ],
-                count: 2,
-                counts: {
-                  all: 2,
-                  awaiting_payment: 0,
-                  to_ship: 2,
-                  shipped: 0,
-                  delivered: 0,
-                  canceled: 0,
-                },
-                offset: 0,
-                limit: 20,
-                limited: false,
-              }
+          : path === "/admin/shipping-setup/carriers"
+            ? { carriers: ["aras", "yurtici", "surat"] }
+            : path.startsWith("/admin/async-jobs/")
+              ? { async_job: { id: "job_1", status: "failed", error_message: null } }
+              : {
+                  orders: [
+                    row({ addons: { lines: 1, non_withdrawable: true } }),
+                    row({ id: "order_2", display_id: 1043 }),
+                  ],
+                  count: 2,
+                  counts: {
+                    all: 2,
+                    awaiting_payment: 0,
+                    to_ship: 2,
+                    shipped: 0,
+                    delivered: 0,
+                    canceled: 0,
+                  },
+                  offset: 0,
+                  limit: 20,
+                  limited: false,
+                }
       )
     )
   })

@@ -4,6 +4,8 @@ import { errorSummary, logger } from "../../lib/logging"
 import type { ProviderFailure } from "../../lib/clients/failure-log"
 import { shopEmailTransport } from "../../lib/messaging/email/shop-transport"
 import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../lib/google/oauth"
+import { unavailableProviders } from "../../lib/integrations/available"
+import { isSuspended } from "../../lib/integrations/suspended"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
 import type GoogleMerchantModuleService from "../../modules/google-merchant/service"
@@ -37,9 +39,11 @@ export interface IntegrationView extends IntegrationRow {
 const ACCOUNTS: [IntegrationGroup, CredentialStatus["provider"]][] = [
   ["payments", "paytr"],
   ["payments", "iyzico"],
-  ["shipping", "geliver"],
   ["shipping", "aras"],
   ["shipping", "yurtici"],
+  ["shipping", "dhlecommerce"],
+  ["shipping", "surat"],
+  ["shipping", "ptt"],
   ["messaging", "netgsm"],
   ["marketing", "meta"],
   ["marketing", "ga4"],
@@ -78,18 +82,26 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
     }
     return found
   }
+  const unavailable: string[] = unavailableProviders()
+  // A suspended carrier is no shop's integration (`lib/integrations/suspended.ts`)
+  const offered = ACCOUNTS.filter(([, id]) => !isSuspended(id))
   const google = account("google")
   const scopes = text(google.settings?.["scopes"]) ?? ""
 
   const listed: (IntegrationRow | null)[] = [
-    ...ACCOUNTS.filter(([group]) => group === "payments").map(([group, id]) =>
-      accountRow(group, account(id))
-    ),
+    ...offered
+      .filter(([group]) => group === "payments")
+      .map(([group, id]) => accountRow(group, account(id))),
     bankTransferRow(bank.enabled),
     cashOnDeliveryRow(cod),
-    ...ACCOUNTS.filter(([group]) => group !== "payments").map(([group, id]) =>
-      accountRow(group, account(id))
-    ),
+    ...offered
+      .filter(([group]) => group !== "payments")
+      .map(([group, id]) =>
+        // Not offered where the platform has no app for it, unless one is stored (adr/0027 Ek 2026-11-26)
+        unavailable.includes(id) && account(id).state === "not_configured"
+          ? null
+          : accountRow(group, account(id))
+      ),
     emailRow({
       sending: transport !== null,
       // The shop's own mail server has no domain to verify here (adr/0036 Ek 2026-11-10)

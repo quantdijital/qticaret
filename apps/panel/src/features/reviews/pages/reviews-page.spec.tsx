@@ -14,7 +14,7 @@ const navigateMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 // The AI drafts have their own spec (ai-review-drafts.spec.tsx)
 vi.mock("@/features/ai/components/ai-button", () => ({ AiButton: () => null }))
-// The section tabs read the Google reviews status: not what this page is about
+// The section tabs are router links: not what this page is about
 vi.mock("@/features/reviews/components/reviews-nav", () => ({ ReviewsNav: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // The page reads its tab from the address: the waiting ones unless a test says otherwise
@@ -187,5 +187,30 @@ describe("ReviewsPage", () => {
     await screen.findAllByText("Çok keskin, sapı rahat.")
 
     expect(screen.queryByRole("button", { name: "Ayşe Y. yorumunu aç" })).not.toBeInTheDocument()
+  })
+
+  // Owner 2026-11-27: a customer's review is never edited or deleted, only hidden or shown again
+  it("hides an approved review and shows a hidden one again, as the shop saw it", async () => {
+    searchMock.value = { status: "approved" }
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/product-reviews"
+          ? { reviews: [row("prev_1", { status: "approved" })], count: 1 }
+          : { moderated: 1, changed: [] }
+      )
+    )
+    renderPage()
+    await userEvent.click(await screen.findByRole("button", { name: "Ayşe Y. yorumunu gizle" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews/moderate", {
+        method: "POST",
+        body: {
+          reviews: [{ id: "prev_1", updated_at: "2026-10-28T10:05:00Z" }],
+          status: "rejected",
+        },
+      })
+    })
+    expect(screen.queryByRole("button", { name: /Sil/ })).not.toBeInTheDocument()
   })
 })

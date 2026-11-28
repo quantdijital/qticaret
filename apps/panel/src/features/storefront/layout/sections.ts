@@ -55,7 +55,6 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "brands",
   "posts",
   "reviews",
-  "google_rating",
   "rich_text",
   "faq",
   "stats",

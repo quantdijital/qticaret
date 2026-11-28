@@ -63,6 +63,7 @@ export function MetaSettings({
               required
             >
               <Input
+                placeholder={t("settings.placeholders.pixelId")}
                 id="meta-pixel-id"
                 inputMode="numeric"
                 autoComplete="off"
@@ -85,6 +86,7 @@ export function MetaSettings({
             error={message(errors.testEventCode?.message)}
           >
             <Input
+              placeholder={t("settings.placeholders.testEventCode")}
               id="meta-test-event-code"
               autoComplete="off"
               className="sm:w-64"

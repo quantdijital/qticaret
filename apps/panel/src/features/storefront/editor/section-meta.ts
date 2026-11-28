@@ -28,7 +28,6 @@ import {
   ScanSearch,
   Search,
   ShoppingBag,
-  Star,
   Tags,
   Text,
   Truck,
@@ -42,10 +41,16 @@ import type { AnySection, BodySectionType, MainSectionType } from "@/features/st
  * box is its own, so is a content page's text, adr/0073 Ek 2026-11-19 (2) K2).
  */
 export type SectionKind =
-  BodySectionType | MainSectionType | "announcement_bar" | "footer_newsletter" | "article"
+  | BodySectionType
+  | MainSectionType
+  | "announcement_bar"
+  | "top_slider"
+  | "footer_newsletter"
+  | "article"
 
 export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   announcement_bar: Megaphone,
+  top_slider: GalleryHorizontalEnd,
   hero: PanelTop,
   hero_slider: GalleryHorizontalEnd,
   banner: GalleryHorizontal,
@@ -61,7 +66,6 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   brands: Tags,
   posts: BookOpen,
   reviews: MessageSquareQuote,
-  google_rating: Star,
   rich_text: Text,
   article: FileText,
   contact: Contact,
@@ -104,7 +108,6 @@ function ownTitle(section: AnySection): string | null {
     case "brands":
     case "posts":
     case "reviews":
-    case "google_rating":
     case "rich_text":
     case "faq":
     case "related_products":
@@ -123,6 +126,8 @@ function ownTitle(section: AnySection): string | null {
       return section.lines.find((line) => line.trim() !== "") ?? null
     case "marquee":
       return section.items.find((item) => item.text.trim() !== "")?.text ?? null
+    case "top_slider":
+      return section.slides[0]?.image.alt ?? null
     case "trust_badges":
     case "contact":
     case "payment_facts":
@@ -141,6 +146,14 @@ export function sectionLabel(
   section: AnySection,
   inFooter = false
 ): { name: string; detail: string | null } {
+  // The top strip by its design, its first line under it (owner 2026-11-27)
+  if (section.type === "announcement_bar") {
+    const line = ownTitle(section)?.trim() ?? ""
+    return {
+      name: t(`storefront.editor.variants.announcement_bar.${section.variant}`),
+      detail: line === "" ? null : line,
+    }
+  }
   const type = t(`storefront.editor.types.${kindOf(section, inFooter)}.name`)
   const own = ownTitle(section)?.trim()
   return own ? { name: own, detail: type } : { name: type, detail: null }

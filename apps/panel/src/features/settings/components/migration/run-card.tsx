@@ -19,6 +19,7 @@ import type {
   MigrationSourceKind,
   StartMigration,
 } from "@/features/settings/api/migration"
+import type { WordpressRefresh } from "@/features/settings/api/migration-wordpress"
 import { NO_PARCEL, readParcel } from "@/features/settings/components/migration/parcel"
 import type { ParcelText } from "@/features/settings/components/migration/parcel"
 import { ParcelFields, RunButtons } from "@/features/settings/components/migration/run-controls"
@@ -61,7 +62,7 @@ export function RunCard({ className }: { className?: string }) {
   // A run to apply, waiting for the owner's word
   const [applying, setApplying] = useState<StartMigration | null>(null)
   // Kept while the dialog closes, so its words do not change on the way out
-  const [refreshAsked, setRefreshAsked] = useState(false)
+  const [refreshAsked, setRefreshAsked] = useState<WordpressRefresh | null>(null)
   const job = useQuery(migrationJobQuery(jobId))
   const running = job.data?.status === "queued" || job.data?.status === "running"
   const busy = running || start.isPending
@@ -82,7 +83,7 @@ export function RunCard({ className }: { className?: string }) {
   }
   const request = (input: StartMigration) => {
     if (input.mode === "apply") {
-      setRefreshAsked(input.refresh === true)
+      setRefreshAsked(input.refresh ?? null)
       setApplying(input)
     } else {
       go(input)
@@ -199,8 +200,20 @@ export function RunCard({ className }: { className?: string }) {
             setApplying(null)
           }
         }}
-        title={t(refreshAsked ? `${R}.refreshConfirmTitle` : `${R}.confirmTitle`)}
-        description={t(refreshAsked ? `${R}.refreshConfirmText` : `${R}.confirmText`)}
+        title={t(
+          refreshAsked === "post_images"
+            ? `${R}.postImagesConfirmTitle`
+            : refreshAsked
+              ? `${R}.refreshConfirmTitle`
+              : `${R}.confirmTitle`
+        )}
+        description={t(
+          refreshAsked === "post_images"
+            ? `${R}.postImagesConfirmText`
+            : refreshAsked
+              ? `${R}.refreshConfirmText`
+              : `${R}.confirmText`
+        )}
         confirmLabel={t(`${R}.apply`)}
         onConfirm={() => {
           setApplying(null)

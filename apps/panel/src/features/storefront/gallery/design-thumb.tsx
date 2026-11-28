@@ -27,7 +27,6 @@ const SHAPES: Record<string, Shape> = {
   trust_badges: "strip",
   marquee: "strip",
   price_bands: "strip",
-  google_rating: "strip",
   stats: "strip",
   search_box: "strip",
   steps: "text",

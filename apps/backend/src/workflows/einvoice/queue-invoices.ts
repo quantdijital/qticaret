@@ -10,6 +10,7 @@ import {
 } from "../../lib/invoicing"
 import type { InvoiceMoment, InvoiceOrderRow } from "../../lib/invoicing"
 import { errorSummary, logger } from "../../lib/logging"
+import { birfaturaShips } from "../../lib/shipping/manager"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -26,6 +27,12 @@ export type { InvoiceMoment, InvoiceOrderRow as OrderRow } from "../../lib/invoi
 type Container = Pick<MedusaContainer, "resolve">
 
 export type QueueOutcome = "queued" | "already" | "not_due" | "off"
+
+/** BirFatura's cargo module manages the parcels (adr/0072 Ek 2026-11-26); read only when it is the program. */
+export const birfaturaShipsFor = async (
+  container: Container,
+  settings: InvoicingSettings
+): Promise<boolean> => settings.provider === "birfatura" && (await birfaturaShips(container))
 
 export async function invoicingOf(container: Container): Promise<InvoicingSettings> {
   const section = await container
@@ -83,6 +90,7 @@ export async function queueSaleInvoice(
     moments: [moment],
     fakeAllowed,
     testPaymentsInvoiced: testPaymentsInvoiced(settings.provider),
+    birfaturaShips: await birfaturaShipsFor(container, settings),
   }
   const hold = saleInvoiceHold(facts)
   // A paid order still waiting may be gift cards alone, due once paid: its lines tell

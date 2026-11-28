@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { beginSave } from "@qticaret/admin-ui/lib/forms"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
 import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
@@ -58,6 +59,7 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
   })
 
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     save.mutate(
       {
         existing,
@@ -68,7 +70,7 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
       },
       {
         onSuccess: (id) => {
-          form.reset(values)
+          settle(values)
           toast.success(t(existing ? "promotions.saved" : "promotions.created"))
           if (!existing) {
             void navigate({ to: "/promotions/$id", params: { id }, ignoreBlocker: true })

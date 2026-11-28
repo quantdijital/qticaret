@@ -6,14 +6,9 @@ import {
 import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
-  AdminGetGoogleReviews,
   AdminPostGoogleMerchant,
-  AdminPostGoogleReview,
-  AdminPostGoogleReviewLocation,
-  AdminPostGoogleReviewReply,
   AdminPostSearchConsoleSite,
   GoogleCallbackQuery,
-  StoreGetGoogleReviews,
 } from "../admin/google/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
@@ -29,13 +24,7 @@ const googleCalls = rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {
 
 /** F10 M13 (adr/0038 §5): the shop's Google account, connected and used by staff only. */
 export const GOOGLE_ROUTES = [
-  ...[
-    "/admin/google",
-    "/admin/google/connect",
-    "/admin/seo/insights",
-    "/admin/google/reviews",
-    "/admin/google/reviews/connect",
-  ].map((matcher) => ({
+  ...["/admin/google", "/admin/google/connect", "/admin/seo/insights"].map((matcher) => ({
     matcher,
     middlewares: [requireUserActor],
   })),
@@ -43,53 +32,10 @@ export const GOOGLE_ROUTES = [
     "/admin/google/merchant/sync",
     "/admin/google/search-console/sites",
     "/admin/seo/insights/refresh",
-    // adr/0058: Business Profile's quota is the platform's project's, shared by every shop
-    "/admin/google/reviews/locations",
-    "/admin/google/reviews/sync",
   ].map((matcher) => ({
     matcher,
     middlewares: [requireUserActor, googleCalls],
   })),
-  {
-    matcher: "/admin/google/reviews/location",
-    methods: ["POST" as const],
-    middlewares: [
-      requireUserActor,
-      googleCalls,
-      validateAndTransformBody(AdminPostGoogleReviewLocation),
-    ],
-  },
-  {
-    matcher: "/admin/google/reviews/items",
-    methods: ["GET" as const],
-    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetGoogleReviews, {})],
-  },
-  {
-    matcher: "/admin/google/reviews/items/:id",
-    methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminPostGoogleReview)],
-  },
-  // adr/0058 Ek 2026-11-06: the shop's reply written at Google, within Google's budget
-  {
-    matcher: "/admin/google/reviews/items/:id/reply",
-    methods: ["POST" as const],
-    middlewares: [
-      requireUserActor,
-      googleCalls,
-      validateAndTransformBody(AdminPostGoogleReviewReply),
-    ],
-  },
-  {
-    matcher: "/admin/google/reviews/items/:id/reply",
-    methods: ["DELETE" as const],
-    middlewares: [requireUserActor, googleCalls],
-  },
-  // adr/0058: the storefront's Google reviews block, read by anyone
-  {
-    matcher: "/store/google-reviews",
-    methods: ["GET" as const],
-    middlewares: [validateAndTransformQuery(StoreGetGoogleReviews, {})],
-  },
   {
     matcher: "/admin/google/merchant",
     methods: ["POST" as const],

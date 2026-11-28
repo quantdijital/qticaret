@@ -25,7 +25,7 @@ repo/
 │   │   │   │   ├── integration-credentials/          # mağazanın sağlayıcı hesapları, şifreli, yalnız yazılır (F5, adr/0027)
 │   │   │   │   ├── payment-bank-transfer/
 │   │   │   │   ├── payment-cod/
-│   │   │   │   ├── fulfillment-geliver/  fulfillment-<tasiyici>/   # doğrudan taşıyıcı adaptörü (F7.14)
+│   │   │   │   ├── fulfillment-<tasiyici>/            # doğrudan taşıyıcı adaptörü: aras, yurtici (F7.14, adr/0035); shop = "Kendi gönderimim"
 │   │   │   │   ├── notification-sms/
 │   │   │   │   ├── notification-email/
 │   │   │   │   ├── einvoice/
@@ -117,7 +117,7 @@ repo/
 │   ├── themes/atolye/               # vitrin teması (tek ve varsayılan, yön "Grafit", design.md; adr/0057): yalnızca sunum
 │   ├── sector-packs/                # sektör paketleri, yalnız veri (adr/0061 F17.7, Ek C12): `packs/<kod>/` (manifest.json + attributes/categories/flags/seo.json); `src/` paketleri okuyan yükleyici (çalışma anında `packs/`'ten okur, `qt-compiled` ile derlenir); içeriği backend kendi Zod şemalarıyla denetler
 │   ├── config/                      # eslint, tsconfig, prettier
-│   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8, Geliver F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
+│   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8; Aras, Yurtiçi F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
 ├── infra/
 │   ├── docker/                      # Dockerfile'lar, compose (dev)
 │   ├── tenant/                      # tenant şablonu, provisioning scriptleri

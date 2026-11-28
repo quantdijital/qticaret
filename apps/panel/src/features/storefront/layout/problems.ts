@@ -28,6 +28,7 @@ export type Problem =
   | "textInvalid"
   | "tokenUnknown"
   | "linkLabel"
+  | "altRequired"
   | "slidesRequired"
   | "slidesTwo"
   | "stripsTwo"
@@ -96,10 +97,17 @@ type Found = [string, Problem | null]
 function fieldsOf(section: AnySection): Found[] {
   switch (section.type) {
     case "announcement_bar":
-      return section.lines.map((line, index): Found => [
-        `lines.${String(index)}`,
-        line.trim() === "" ? "required" : textProblem(line, L.line, true),
-      ])
+      return [
+        ...section.lines.map((line, index): Found => [
+          `lines.${String(index)}`,
+          line.trim() === "" ? "required" : textProblem(line, L.line, true),
+        ]),
+        // Each line's own link (owner 2026-11-27)
+        ...(section.line_links ?? []).map((link, index): Found => [
+          `line_links.${String(index)}`,
+          linkProblem(link),
+        ]),
+      ]
     case "hero":
       return [
         ["eyebrow", textProblem(section.eyebrow, L.eyebrow, true)],
@@ -160,6 +168,21 @@ function fieldsOf(section: AnySection): Found[] {
           ]
         }),
       ]
+    // The top image slider (owner 2026-11-27): each picture's words written
+    case "top_slider":
+      return section.slides.flatMap((slide, index): Found[] => {
+        const at = `slides.${String(index)}`
+        return [
+          [
+            `${at}.image`,
+            (slide.image.alt ?? "").trim() === ""
+              ? "altRequired"
+              : textProblem(slide.image.alt, L.alt),
+          ],
+          [`${at}.mobile_image`, textProblem(slide.mobile_image?.alt ?? null, L.alt)],
+          [`${at}.link`, linkProblem(slide.link)],
+        ]
+      })
     case "hero_slider":
       return [
         ["slides", section.slides.length < SLIDER_LIMITS.slides.min ? "slidesTwo" : null],
@@ -233,7 +256,6 @@ function fieldsOf(section: AnySection): Found[] {
       return postsProblems(section)
     case "brands":
     case "reviews":
-    case "google_rating":
     case "program":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":

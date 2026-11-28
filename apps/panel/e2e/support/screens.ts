@@ -15,8 +15,6 @@ export const SECTIONS = [
   "/inventory",
   "/reviews",
   "/reviews/questions",
-  // Google reviews (adr/0058): the connection, or the reviews it brought
-  "/reviews/google",
   "/customers/groups",
   // Wholesalers, their levels and orders (ADR-0068): the lists, or why they are closed while off
   "/wholesale",
@@ -73,9 +71,11 @@ export const SETTINGS = [
   "/settings/payments/bank_transfer",
   "/settings/payments/cash_on_delivery",
   "/settings/shipping",
-  "/settings/shipping/geliver",
   "/settings/shipping/aras",
   "/settings/shipping/yurtici",
+  // DHL eCommerce is suspended (adr/0027 Ek 2026-11-26 "askı"): its page sends to the carrier list
+  "/settings/shipping/surat",
+  "/settings/shipping/ptt",
   "/settings/notifications",
   "/settings/notifications?part=sms",
   // The messages the shop sends its customers, and the staff's own alerts

@@ -151,14 +151,24 @@ export function CustomerDialog({
             htmlFor={id("first")}
             error={message(errors.first_name?.message)}
           >
-            <Input id={id("first")} autoComplete="off" {...form.register("first_name")} />
+            <Input
+              placeholder={t("common.placeholder.firstName")}
+              id={id("first")}
+              autoComplete="off"
+              {...form.register("first_name")}
+            />
           </Field>
           <Field
             label={t(`${F}.lastName`)}
             htmlFor={id("last")}
             error={message(errors.last_name?.message)}
           >
-            <Input id={id("last")} autoComplete="off" {...form.register("last_name")} />
+            <Input
+              placeholder={t("common.placeholder.lastName")}
+              id={id("last")}
+              autoComplete="off"
+              {...form.register("last_name")}
+            />
           </Field>
           <Field
             label={t(`${F}.email`)}
@@ -168,6 +178,7 @@ export function CustomerDialog({
             required={guest}
           >
             <Input
+              placeholder={t("common.placeholder.email")}
               id={id("email")}
               type="email"
               autoComplete="off"
@@ -183,7 +194,13 @@ export function CustomerDialog({
             error={message(errors.phone?.message)}
             hint={t(`${F}.phoneHint`)}
           >
-            <Input id={id("phone")} type="tel" autoComplete="off" {...form.register("phone")} />
+            <Input
+              placeholder={t("common.placeholder.phone")}
+              id={id("phone")}
+              type="tel"
+              autoComplete="off"
+              {...form.register("phone")}
+            />
           </Field>
           <Field
             label={t(`${F}.company`)}
@@ -191,7 +208,12 @@ export function CustomerDialog({
             error={message(errors.company_name?.message)}
             className="sm:col-span-2"
           >
-            <Input id={id("company")} autoComplete="off" {...form.register("company_name")} />
+            <Input
+              placeholder={t("common.placeholder.company")}
+              id={id("company")}
+              autoComplete="off"
+              {...form.register("company_name")}
+            />
           </Field>
           {customer ? (
             <Field
@@ -201,7 +223,13 @@ export function CustomerDialog({
               hint={t(`${F}.noteHint`)}
               className="sm:col-span-2"
             >
-              <Textarea id={id("note")} rows={3} maxLength={2000} {...form.register("note")} />
+              <Textarea
+                placeholder={t("customers.placeholders.note")}
+                id={id("note")}
+                rows={3}
+                maxLength={2000}
+                {...form.register("note")}
+              />
             </Field>
           ) : null}
         </div>

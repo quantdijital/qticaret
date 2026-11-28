@@ -3,7 +3,6 @@ import { SLIDER_DEFAULTS } from "@qticaret/types"
 import { i18next } from "@/lib/i18n"
 import type {
   AnySection,
-  GoogleRatingSection,
   HeroSection,
   HeroSliderSection,
   PriceBandsSection,
@@ -47,9 +46,6 @@ describe("the content fields' register", () => {
   })
 
   it("follows the switches: a count only while it is on", () => {
-    const rating = newHomeSection("google_rating", "google0001") as GoogleRatingSection
-    expect(keys({ ...rating, excerpts: 0 })).toEqual(["content:excerpts", "content:profile_link"])
-    expect(keys({ ...rating, excerpts: 2 })).toContain("content:excerpt_count")
     const bands = newHomeSection("price_bands", "fiyat00001") as PriceBandsSection
     expect(keys({ ...bands, thumbs: 0 })).toEqual(["thumbs:thumbs"])
     expect(keys({ ...bands, thumbs: 3 })).toEqual(["thumbs:thumbs", "thumbs:thumbs_count"])
@@ -164,7 +160,6 @@ describe("the content fields' register", () => {
     const sections: AnySection[] = [
       newHomeSection("posts", "blog000001"),
       newBodySection("product", "related_products", "benzer0001"),
-      { ...(newHomeSection("google_rating", "google0001") as GoogleRatingSection), excerpts: 2 },
       { ...(newHomeSection("price_bands", "fiyat00001") as PriceBandsSection), thumbs: 2 },
       {
         ...(newHomeSection("hero_slider", "slayt00001") as HeroSliderSection),

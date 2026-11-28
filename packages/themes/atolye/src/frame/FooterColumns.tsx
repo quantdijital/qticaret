@@ -52,7 +52,7 @@ function Newsletter({
         joined={column}
         action={subscribe}
         privacyPath={shop.privacyPath}
-        words={newsletterWords(t, news.text)}
+        words={newsletterWords(t, news.text, news.consentStyle)}
         marks={Boolean(news.mark)}
         // The column is narrow: the field over its button when it would cut the example address
         className={column ? "gf-join-box" : ""}

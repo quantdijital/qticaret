@@ -1,4 +1,4 @@
-import type { NewsletterTone, NewsletterVariant } from "@qticaret/types"
+import type { NewsletterConsentStyle, NewsletterTone, NewsletterVariant } from "@qticaret/types"
 import type { ImageView } from "./views"
 
 /**
@@ -18,4 +18,6 @@ export interface NewsletterLookView {
   image: ImageView | null
   /** The boxed bands' ground: the theme's pane, or a wash of the shop's main colour (`tint`). */
   tone: NewsletterTone
+  /** How the consent is asked: the required box (as it was) or one small line under the form. */
+  consentStyle: NewsletterConsentStyle
 }

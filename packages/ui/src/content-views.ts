@@ -25,7 +25,6 @@ import type { HeroFullView } from "./hero-full-views"
 import type { ListingTextView } from "./listing-views"
 import type {
   FeaturedProductSectionView,
-  GoogleRatingSectionView,
   HeroSliderSectionView,
   ShopRatingView,
 } from "./home-views"
@@ -112,7 +111,6 @@ export type HomeSectionView = {
     }
   | PriceBandsSectionView
   | HeroSliderSectionView
-  | GoogleRatingSectionView
   | MarqueeSectionView
   | BannerSectionView
   | StripGallerySectionView
@@ -444,11 +442,6 @@ export interface ReviewsPageView {
    * without the shop-wide spread). `count` and `summary` stay shop-wide.
    */
   filter?: ReviewFilterView | null
-  /**
-   * The shop's Google reviews (adr/0058), apart from its own: on the first
-   * page only; none: no Google block. Never in structured data.
-   */
-  google?: GoogleReviewsView | null
 }
 
 export type ReviewStars = 1 | 2 | 3 | 4 | 5
@@ -470,45 +463,6 @@ export interface ReviewFilterView {
   activeLabel: string | null
   /** Every review again: `/yorumlar`. */
   clearPath: string
-}
-
-/** One Google review as Google gives it (adr/0058): the reviewer, the stars, the text, the reply. */
-export interface GoogleReviewView {
-  /** As Google shows the reviewer; an anonymous one in the storefront's words. */
-  author: string
-  /** Google's photo of the reviewer; null: the theme draws the name's first letter. */
-  photo: string | null
-  rating: number
-  /** "5 üzerinden 4 yıldız", for a screen reader. */
-  ratingLabel: string
-  /** Null for a rating without text. */
-  text: string | null
-  /** In words ("2 Kasım 2026") and for `<time>`. */
-  date: { label: string; dateTime: string }
-  /** The shop's reply as Google shows it, under the review. */
-  reply: { text: string; date: { label: string; dateTime: string } | null } | null
-}
-
-/**
- * The shop's Google reviews (adr/0058): Google's own average and count
- * (never worked out from the reviews shown), the newest reviews the shop
- * did not hide, and Google's pages to read them all and to write one. A
- * theme names Google as their source and links out with
- * `rel="noopener"`; it never puts them in structured data.
- */
-export interface GoogleReviewsView {
-  /** Google's average in words ("4,6"); null while Google has none. */
-  average: string | null
-  /** The same as a number, for the stars. */
-  rating: number | null
-  count: number
-  /** "Google'da 5 üzerinden 4,6, 126 yorum", for a screen reader. */
-  label: string
-  /** The place on Google Maps, every review there; null: no link. */
-  allUrl: string | null
-  /** Google's page to write a review; null: no link. */
-  writeUrl: string | null
-  reviews: GoogleReviewView[]
 }
 
 /** The product a review is about, at its page; its picture when it has one (adr/0046 Ek 2026-11-05). */

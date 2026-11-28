@@ -90,6 +90,7 @@ function GiftCardFields({
       </Field>
       <Field label={t("giftCards.note")} htmlFor="gift-card-note" hint={t("giftCards.noteHint")}>
         <Input
+          placeholder={t("giftCards.placeholders.note")}
           id="gift-card-note"
           maxLength={200}
           value={draft.note}

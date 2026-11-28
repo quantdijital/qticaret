@@ -27,9 +27,11 @@ export function settingsLinkOf(id: string) {
     case "bank_transfer":
     case "cash_on_delivery":
       return payment(id)
-    case "geliver":
     case "aras":
     case "yurtici":
+    case "dhlecommerce":
+    case "surat":
+    case "ptt":
       return carrier(id)
     case "meta":
     case "ga4":

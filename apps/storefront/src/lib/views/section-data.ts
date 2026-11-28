@@ -86,6 +86,8 @@ export interface ProductContext {
   categoryIds: readonly string[]
   /** Not shipped (dated, service, download, gift card): the rail's own title is a neutral one. */
   unshipped?: boolean
+  /** The shop's own linked products for it (S3), in its order: they fill its category's rail. */
+  upsellIds?: readonly string[]
 }
 
 /** At most `limit` of the items, the current product's own left out. */
@@ -107,6 +109,21 @@ export async function relatedProducts(
 ): Promise<StoreProduct[]> {
   switch (source.kind) {
     case "same_category": {
+      // The shop's own choice for this product before its category's (S3); none live: as before
+      const upsells = product.upsellIds ?? []
+      const linked =
+        upsells.length > 0
+          ? await productsInOrder(
+              othersThan(
+                upsells.map((id) => ({ id })),
+                product.id,
+                limit
+              ).map(({ id }) => id)
+            )
+          : []
+      if (linked.length > 0) {
+        return linked
+      }
       const categoryId = product.categoryIds[0]
       if (!categoryId) {
         return []

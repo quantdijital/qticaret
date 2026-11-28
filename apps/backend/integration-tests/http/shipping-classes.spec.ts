@@ -5,13 +5,13 @@ import {
   listShippingOptionsForCartWithPricingWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeGeliver } from "@qticaret/testing"
-import type { FakeGeliver } from "@qticaret/testing"
+import { startFakeAras } from "@qticaret/testing"
+import type { FakeAras } from "@qticaret/testing"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { completeWithSystemPayment } from "../helpers/checkout"
-import { geliverProduct, geliverShop } from "../helpers/geliver"
-import type { GeliverShop } from "../helpers/geliver"
+import { measuredProduct, carrierShop } from "../helpers/carrier"
+import type { CarrierShop } from "../helpers/carrier"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
@@ -35,8 +35,8 @@ interface PricedOption {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let fake: FakeGeliver
-    let setup: GeliverShop
+    let fake: FakeAras
+    let setup: CarrierShop
     let storefront: Storefront
     let tableOptionId: string
     let freeVariant: string
@@ -46,8 +46,6 @@ medusaIntegrationTestRunner({
       settle(http.post<T & { message?: string }>(path, body, { headers: setup.admin.headers }))
     const store = <T>(path: string, body: unknown) =>
       settle(http.post<T & { message?: string }>(path, body, { headers: storefront.headers }))
-    const quotesAsked = () =>
-      fake.requests.filter((request) => request.path.includes("priceList")).length
 
     const productOf = async (variantId: string) => {
       const { data } = await getContainer()
@@ -61,12 +59,12 @@ medusaIntegrationTestRunner({
       })
 
     beforeAll(async () => {
-      fake = await startFakeGeliver()
-      process.env["GELIVER_BASE_URL"] = fake.url
+      fake = await startFakeAras()
+      process.env["ARAS_BASE_URL"] = fake.url
     })
 
     afterAll(async () => {
-      delete process.env["GELIVER_BASE_URL"]
+      delete process.env["ARAS_BASE_URL"]
       await fake.close()
     })
 
@@ -74,7 +72,7 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       await loadTrAddressFixture(container)
       storefront = await createStorefront(container)
-      setup = await geliverShop(http, container, fake)
+      setup = await carrierShop(http, container, fake)
       // 10 TL a desi up to 10; the shop's own classes: bulky +150, heavy +250
       await post("/admin/platform-settings/shipping", {
         rate_table: [
@@ -95,7 +93,7 @@ medusaIntegrationTestRunner({
         })
       ).data.id
       freeVariant = setup.variantId
-      paidVariant = await geliverProduct(container, setup.shop)
+      paidVariant = await measuredProduct(container, setup.shop)
       expect((await classify(freeVariant, "free")).status).toBe(200)
       fake.requests.length = 0
     })
@@ -131,17 +129,17 @@ medusaIntegrationTestRunner({
       return {
         flat: amountOf(setup.shop.shippingOptionId),
         table: amountOf(tableOptionId),
-        geliver: amountOf(setup.optionId),
+        aras: amountOf(setup.optionId),
       }
     }
 
-    it("ships a basket of free products free with every option, Geliver not asked", async () => {
+    it("ships a basket of free products free with every option, no carrier asked", async () => {
       expect(await pricesOf(await cartOf([{ variant_id: freeVariant, quantity: 3 }]))).toEqual({
         flat: 0,
         table: 0,
-        geliver: 0,
+        aras: 0,
       })
-      expect(quotesAsked()).toBe(0)
+      expect(fake.requests).toHaveLength(0)
     })
 
     it("prices a mixed basket by the paid product alone, a flat amount in full", async () => {
@@ -149,8 +147,8 @@ medusaIntegrationTestRunner({
         { variant_id: freeVariant, quantity: 5 },
         { variant_id: paidVariant, quantity: 1 },
       ])
-      // The seed's standard option is 90 TL; the paid product is 1 desi: 10 TL, MNG 60
-      expect(await pricesOf(cartId)).toEqual({ flat: 90, table: 10, geliver: 60 })
+      // The seed's standard option is 90 TL, Aras's flat amount 60; the paid product is 1 desi: 10 TL
+      expect(await pricesOf(cartId)).toEqual({ flat: 90, table: 10, aras: 60 })
     })
 
     it("adds the highest surcharge once, and the new class reaches a cart already priced", async () => {
@@ -183,7 +181,7 @@ medusaIntegrationTestRunner({
         { variant_id: freeVariant, quantity: 1 },
         { variant_id: paidVariant, quantity: 1 },
       ])
-      expect(await pricesOf(cartId)).toEqual({ flat: 0, table: 0, geliver: 0 })
+      expect(await pricesOf(cartId)).toEqual({ flat: 0, table: 0, aras: 0 })
     })
 
     it("takes nothing a shopper sends, and refuses a class the shop does not have", async () => {

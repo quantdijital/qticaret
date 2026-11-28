@@ -3,8 +3,10 @@ import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import type { CarrierName } from "../../lib/shipping/carriers"
 import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
-import { geliverApi, geliverCredentialsOf, geliverStatusOf } from "../../lib/shipping/geliver"
 import { yurticiApi, yurticiCredentialsOf, yurticiStatusOf } from "../../lib/shipping/yurtici"
+import { dhlEcomApi, dhlEcomCredentialsOf, dhlEcomStatusOf } from "../../lib/shipping/dhlecommerce"
+import { suratApi, suratCredentialsOf, suratStatusOf } from "../../lib/shipping/surat"
+import { pttApi, pttCredentialsOf, pttStatusOf } from "../../lib/shipping/ptt"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -30,19 +32,6 @@ const credentials = (
   container
     .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
     .read(provider)
-
-const readGeliver: Reader = async (container, providerShipmentId) => {
-  const account = geliverCredentialsOf(await credentials(container, "geliver"))
-  if (!account) {
-    throw new ValidationError("shipping.carrier_not_connected")
-  }
-  const shipment = await geliverApi().shipment(account, providerShipmentId)
-  return {
-    ...geliverStatusOf(shipment),
-    tracking_number: shipment.trackingNumber ?? null,
-    tracking_url: shipment.trackingUrl ?? null,
-  }
-}
 
 const readAras: Reader = async (container, providerShipmentId) => {
   const account = arasCredentialsOf(await credentials(container, "aras"))
@@ -71,16 +60,54 @@ const readYurtici: Reader = async (container, providerShipmentId) => {
   )
 }
 
+// By our reference: DHL lists the order under it from the start, its shipment number after
+const readDhlEcom: Reader = async (container, providerShipmentId) => {
+  const account = dhlEcomCredentialsOf(await credentials(container, "dhlecommerce"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return dhlEcomStatusOf(
+    await dhlEcomApi().status(account, providerShipmentId),
+    parseEnv().DHL_ECOMMERCE_BASE_URL
+  )
+}
+
+// By our code (`WebSiparisKodu`): Sürat lists nothing until the branch has the parcel
+const readSurat: Reader = async (container, providerShipmentId) => {
+  const account = suratCredentialsOf(await credentials(container, "surat"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return suratStatusOf(
+    await suratApi().track(account, providerShipmentId),
+    parseEnv().SURAT_BASE_URL
+  )
+}
+
+// By the barcode: PTT lists nothing until a branch has accepted the parcel
+const readPtt: Reader = async (container, providerShipmentId) => {
+  const account = pttCredentialsOf(await credentials(container, "ptt"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return pttStatusOf(
+    await pttApi().track(account, providerShipmentId),
+    providerShipmentId,
+    parseEnv().PTT_BASE_URL
+  )
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
  * read at the call, the answer mapped to our statuses. With a fake Aras or
- * Yurtiçi set, the parcel's link opens the fake's own page; Geliver's link
- * is the one its answer gives.
+ * Yurtiçi set, the parcel's link opens the fake's own page.
  */
 const READERS: Record<CarrierName, Reader> = {
-  geliver: readGeliver,
   aras: readAras,
   yurtici: readYurtici,
+  dhlecommerce: readDhlEcom,
+  surat: readSurat,
+  ptt: readPtt,
 }
 
 export function carrierReader(provider: string): Reader {

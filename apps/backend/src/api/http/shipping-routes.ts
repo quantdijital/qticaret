@@ -6,9 +6,11 @@ import {
   AdminPostShippingOption,
   AdminPostShippingOptionUpdate,
 } from "../admin/shipping-setup/options/validators"
+import { AdminPostPttBarcodeRange } from "../admin/shipping-setup/ptt-barcodes/validators"
 import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess, orderActor } from "./order-access"
 import { rateLimit } from "./rate-limit"
+import { hideSuspendedCarrierOptions } from "./suspended-carriers"
 
 /**
  * `additional_data` under `qt_` is our workflows' own (the `qt_ship` mark
@@ -32,8 +34,7 @@ function refuseReservedAdditionalData(
 
 /**
  * F7 (adr/0031): our mark refused on Medusa's fulfillment routes; a
- * parcel's label, staff only (integration keys cannot fetch it);
- * Geliver's notifications, within the webhook budget.
+ * parcel's label, staff only (integration keys cannot fetch it).
  */
 export const SHIPPING_ROUTES = [
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
@@ -49,6 +50,21 @@ export const SHIPPING_ROUTES = [
       orderAccess,
       rateLimit(() => RATE_LIMIT_PROFILES.order_cancel, { identity: orderActor }),
     ],
+  },
+  // The cart's shipping before an address: reads only, its own budget per shopper
+  {
+    matcher: "/store/carts/:id/shipping-estimate",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.shipping_estimate)],
+  },
+  // A suspended carrier's options are not offered at checkout. No `methods`: the
+  // middleware wraps GET answers only
+  { matcher: "/store/shipping-options", middlewares: [hideSuspendedCarrierOptions] },
+  // The carriers this server offers (a suspended one left out), staff only
+  {
+    matcher: "/admin/shipping-setup/carriers",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
   },
   // F7.8: the shop's shipping options, staff only
   {
@@ -77,10 +93,21 @@ export const SHIPPING_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor],
   },
+  // PTT's barcode ranges (docs/entegrasyonlar/ptt.md): the shop's settings, staff only
   {
-    matcher: "/hooks/geliver",
+    matcher: "/admin/shipping-setup/ptt-barcodes",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/shipping-setup/ptt-barcodes",
     methods: ["POST" as const],
-    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPttBarcodeRange)],
+  },
+  {
+    matcher: "/admin/shipping-setup/ptt-barcodes/:id",
+    methods: ["DELETE" as const],
+    middlewares: [requireUserActor],
   },
   {
     matcher: "/admin/orders/:id/fulfillments/:fulfillment_id/label",

@@ -83,6 +83,7 @@ function PriceField({ line, name, listId }: { line: PriceListLine; name: string;
   return (
     <div className="relative w-32">
       <Input
+        placeholder={t("common.placeholder.price")}
         aria-label={t("priceLists.lines.priceOf", {
           name,
           currency: line.currency_code.toUpperCase(),

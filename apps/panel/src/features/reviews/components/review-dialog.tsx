@@ -10,7 +10,7 @@ import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { REVIEW_REPLY_MAX, useReviewReply } from "@/features/reviews/api/reviews"
 import type { ReviewRow } from "@/features/reviews/api/reviews"
 import { AiButton } from "@/features/ai/components/ai-button"
-import { Stars } from "@/features/reviews/components/google-review-item"
+import { Stars } from "@/features/reviews/components/stars"
 import { ReviewPhotos } from "@/features/reviews/components/review-photos"
 import { errorText } from "@/lib/errors"
 import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
@@ -18,9 +18,8 @@ import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 const R = "reviews.reply"
 
 /**
- * One approved customer review in the standard dialog, as a Google
- * review's: the review whole, the shop's public reply (plain text, 1,000
- * characters) sent with "Yanıtla" or "Yanıtı güncelle", removed with
+ * One approved customer review in the standard dialog: the review
+ * whole, the shop's public reply (plain text, 1,000 characters) sent with "Yanıtla" or "Yanıtı güncelle", removed with
  * "Yanıtı sil" after asking. The storefront shows it under the review as
  * "Mağazanın yanıtı", signed with the shop's name.
  */
@@ -89,6 +88,7 @@ export function ReviewDialog({ review, onClose }: { review: ReviewRow; onClose: 
           {review.title ? <p className="text-sm font-medium">{review.title}</p> : null}
           <p className="text-sm whitespace-pre-wrap">{review.body}</p>
           <ReviewPhotos photos={review.photos} author={review.author_name} />
+          <p className="text-xs text-muted-foreground">{t("reviews.customerText")}</p>
         </div>
         <Field
           label={t(`${R}.label`)}

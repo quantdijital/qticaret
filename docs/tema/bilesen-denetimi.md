@@ -49,6 +49,8 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | Kayan yazının `ground`/`closable`/`device` adları burada da kullanılmalı |
 | Shopify | Dawn `announcement-bar`: `auto_rotate` (kapalı), `change_slides_speed` 3–10 sn (5), `color_scheme`, `show_line_separator`, sosyal bağlantılar, ülke/dil seçici; en çok 12 duyuru |
 
+**Ek 2026-11-27 (kaydırıcı):** `mode: rotate` panelde "Kaydırıcı (tek tek döner)"; yeni ayarlar `transition` fade/slide (varsayılan fade, bugünkü) ve `arrows` off/on (varsayılan off), yalnız kaydırıcıda; koyu şeritte satır başına bağlantı `line_links` (satırın yerine göre, null = yalnız yazı; açık şeridin notu `link`'te kalır). Hareket azaltılmışsa kendiliğinden dönmez, oklar elle çalışır; oklar açıkken şerit `aria-roledescription="carousel"`, her satır "n / toplam" adlı slayt.
+
 ### 1.2 `hero` "Giriş" — `standard`, `category_list`
 
 | | |
@@ -129,7 +131,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | — |
 | Shopify | Dawn `featured-blog`: `post_limit` 2–4, `columns_desktop` 1–4, `show_view_all`, `show_image`, `show_date`, `show_author`. Yorum bölümü Dawn'ın bölüm listesinde yok |
 
-### 1.10 `google_rating` "Google puanı"
+### 1.10 `google_rating` "Google puanı" (2026-11-27 kaldırıldı, adr/0058)
 
 | | |
 | --- | --- |

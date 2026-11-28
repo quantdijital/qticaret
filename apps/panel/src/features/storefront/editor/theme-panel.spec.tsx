@@ -207,11 +207,11 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     await user.click(screen.getByRole("radio", { name: "Sıcak" }))
     expect(screen.getByRole("alert")).toHaveTextContent(CONTRAST)
     expect(screen.getByRole("alert")).not.toHaveTextContent(WELL)
-    // The row in the tree says where the problem is
+    // The row in the list (behind the open settings) says where the problem is
     expect(
-      within(screen.getByRole("navigation", { name: "Sayfanın bölümleri" })).getByRole("button", {
-        name: /Tema ayarları/,
-      })
+      within(
+        screen.getByRole("navigation", { name: "Sayfanın bölümleri", hidden: true })
+      ).getByRole("button", { name: /Tema ayarları/, hidden: true })
     ).toBeInTheDocument()
     await pass(AUTOSAVE_MS)
     expect(postsTo(fetchMock)).toHaveLength(before)

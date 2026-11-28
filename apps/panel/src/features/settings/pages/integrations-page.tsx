@@ -39,8 +39,8 @@ export function IntegrationsPage() {
       onSuccess: ({ check }) => {
         if (check === "valid") {
           toast.success(t(`${I}.tested.valid`, { name }))
-        } else if (check === "unreachable") {
-          toast.warning(t(`${I}.tested.unreachable`, { name }))
+        } else if (check === "unreachable" || check === "unconfirmed") {
+          toast.warning(t(`${I}.tested.${check}`, { name }))
         } else {
           toast.error(t(`${I}.tested.${check ?? "failed"}`, { name }))
         }

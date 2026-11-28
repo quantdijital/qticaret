@@ -20,7 +20,24 @@
     "actions": "İşlemler",
     "delete": "Sil",
     "more": "Diğer işlemler",
-    "previous": "Önceki"
+    "previous": "Önceki",
+    "placeholder": {
+      "imageAlt": "Örn. Kahverengi deri cüzdan, önden görünüm",
+      "firstName": "Örn. Ayşe",
+      "lastName": "Örn. Yılmaz",
+      "email": "ornek@alanadi.com",
+      "phone": "0532 123 45 67",
+      "company": "Örn. Yılmaz Ticaret Ltd. Şti.",
+      "price": "0,00",
+      "sku": "ORN-001",
+      "ean": "8691234567890",
+      "neighborhood": "Örn. Caferağa Mah.",
+      "addressLine": "Örn. Moda Cad. No: 12 D: 3",
+      "postalCode": "34710",
+      "fullName": "Örn. Ayşe Yılmaz",
+      "taxOffice": "Örn. Kadıköy",
+      "taxNumber": "10 haneli vergi numarası"
+    }
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -33,7 +50,8 @@
     "providerNames": {
       "aras": "Aras Kargo",
       "yurtici": "Yurtiçi Kargo",
-      "geliver": "Geliver",
+      "dhlecommerce": "DHL eCommerce",
+      "surat": "Sürat Kargo",
       "netgsm": "Netgsm",
       "parasut": "Paraşüt",
       "paytr": "PayTR",
@@ -41,7 +59,8 @@
       "google": "Google",
       "meta": "Meta",
       "shopify": "Shopify",
-      "turkiyeapi": "TürkiyeAPI"
+      "turkiyeapi": "TürkiyeAPI",
+      "ptt": "PTT Kargo"
     }
   },
   "nav": {
@@ -405,12 +424,20 @@
       "previewValue": "Örnek ürün adı",
       "previewField": "Örnek alan",
       "colors": "Renkler",
-      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod sayfanın, menü zemini sol menünün zeminini belirler.",
-      "layout": "Düzen",
-      "layoutHint": "Menünün davranışı, köşeler ve satır yüksekliği.",
+      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; zemin rengi yüzeylerin tonunu, mod açık ya da koyu zemini belirler.",
+      "layout": "Menü ve düzen",
+      "layoutHint": "Sol menünün zemini ve davranışı, köşeler ve satır yüksekliği.",
       "radiusHint": "Kartların, düğmelerin ve alanların köşeleri.",
       "densityHint": "Tablo satırlarının ve alanların yüksekliği.",
-      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
+      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler.",
+      "surface": "Zemin rengi",
+      "surfaceHint": "Sayfa, kart ve menülerin tonu. Marka rengi düğmelerde, bağlantılarda ve grafiklerde kalır.",
+      "surfaceOptions": {
+        "brand": "Markadan",
+        "neutral": "Nötr",
+        "warm": "Sıcak",
+        "cool": "Soğuk"
+      }
     },
     "saved": "Ayarlar kaydedildi.",
     "catalogDefaults": {
@@ -1087,7 +1114,8 @@
         "refund": "Para iadesi",
         "legal_document": "Yasal metin",
         "vat_rate": "KDV oranı",
-        "message_template": "Müşteri mesajı"
+        "message_template": "Müşteri mesajı",
+        "product_question": "Ürün sorusu"
       }
     },
     "locations": {
@@ -1336,11 +1364,8 @@
       "connect": "Bağla",
       "carriersTitle": "Kargo hizmetleri",
       "carriersDescription": "Gönderi oluşturma, etiket ve takip bu hizmetler üzerinden yapılır.",
+      "carrierUnavailable": "Platformun uygulama anahtarları bu sunucuda yok; kendi uygulama anahtarlarınızla bağlanabilirsiniz.",
       "carriers": {
-        "geliver": {
-          "name": "Geliver",
-          "description": "Birden çok kargo firmasının teklifini tek hesaptan alır; etiket ve takip Geliver üzerinden."
-        },
         "aras": {
           "name": "Aras Kargo",
           "description": "Mağazanın kendi Aras Kargo sözleşmesiyle gönderi, etiket ve takip. Bilgiler Aras'ın verdiği entegrasyon belgesinde."
@@ -1348,51 +1373,40 @@
         "yurtici": {
           "name": "Yurtiçi Kargo",
           "description": "Mağazanın kendi Yurtiçi Kargo sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler Yurtiçi'nin verdiği web servis belgesinde."
+        },
+        "dhlecommerce": {
+          "name": "DHL eCommerce",
+          "description": "Mağazanın kendi DHL eCommerce sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler DHL eCommerce sözleşmenizde ve Online Şube'de."
+        },
+        "surat": {
+          "name": "Sürat Kargo",
+          "description": "Mağazanın kendi Sürat Kargo sözleşmesiyle gönderi ve takip; Sürat etiket vermezse koli etiketini panel hazırlar. Bilgiler Sürat'ın sözleşmeyle verdiği web servis belgesinde."
+        },
+        "ptt": {
+          "name": "PTT Kargo",
+          "description": "Mağazanın kendi PTT Kargo sözleşmesiyle gönderi ve takip; her koli PTT'nin verdiği barkod aralığından numara alır, koli etiketini panel hazırlar."
         }
       },
-      "geliver": {
-        "keys": {
-          "title": "API anahtarı",
-          "description": "Geliver panelinizde API anahtarları sayfasından (app.geliver.io/apitokens) yeni bir anahtar oluşturup kopyalayın. Şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
-        },
-        "apiToken": "API anahtarı",
-        "notification": {
-          "title": "Takip bildirimleri",
-          "description": "Geliver gönderi durum değişikliklerini bu adrese bildirir; sipariş kargoya verildiğinde ve teslim edildiğinde kendiliğinden güncellenir. Bildirim gelmese de gönderiler yarım saatte bir sorgulanır.",
-          "where": "Geliver panelinin webhook ayarlarına TRACK_UPDATED olayı için yapıştırın."
-        },
-        "live": {
-          "title": "Test gönderileri ve canlıya geçiş",
-          "description": "Mağazanızı açmadan önce gönderi akışını Geliver'in test gönderileriyle deneyin."
-        },
-        "testMode": "Test gönderileri",
-        "testModeHint": "Açıkken oluşturulan gönderiler Geliver'de test olarak açılır: etiket satın alınmaz, kargo firmasına iletilmez. Aynı anahtar iki modda da çalışır.",
-        "checks": {
-          "merchant_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın.",
-          "secret_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın."
-        },
-        "rejected": "Geliver kayıtlı API anahtarını artık kabul etmiyor; gönderi oluşturulamaz. Geliver panelinden yeni bir anahtar alıp girin."
-      },
       "options": {
-        "title": "Kargo seçenekleri",
-        "description": "Müşteri ödeme sırasında bunlardan birini seçer.",
-        "add": "Seçenek ekle",
+        "title": "Ek kargo seçenekleri",
+        "description": "Müşteri ödeme adımında ana seçeneğin yanında bunları da görür (ör. hızlı kargo, mağazadan teslim).",
+        "add": "Ek seçenek ekle",
         "addTitle": "Yeni kargo seçeneği",
         "name": "Ad",
         "nameRequired": "Bir ad girin.",
         "carrier": "Taşıyan",
         "carriers": {
           "manual": "Kendi gönderimim",
-          "geliver": "Geliver",
           "pickup": "Mağazadan teslim",
           "aras": "Aras Kargo",
-          "yurtici": "Yurtiçi Kargo"
+          "yurtici": "Yurtiçi Kargo",
+          "dhlecommerce": "DHL eCommerce",
+          "surat": "Sürat Kargo",
+          "ptt": "PTT Kargo"
         },
         "pricing": "Ücret",
         "pricings": {
           "flat": "Sabit ücret",
-          "cheapest": "Geliver: en uygun teklif",
-          "fastest": "Geliver: en hızlı teklif",
           "table": "Ücret tablosu (desi)"
         },
         "amount": "Tutar",
@@ -1406,7 +1420,62 @@
         "removeConfirm": "Kaldır",
         "removed": "Kargo seçeneği kaldırıldı.",
         "defaultName": "Standart kargo",
-        "keep": "Vazgeç"
+        "keep": "Vazgeç",
+        "allTitle": "Kargo seçenekleri",
+        "noExtras": "Ek seçenek yok",
+        "namePlaceholder": "Örn. Standart kargo"
+      },
+      "fee": {
+        "title": "Kargo ücreti",
+        "description": "Müşterinin ödeme adımında ödediği kargo ücreti. Ücret her zaman sunucuda hesaplanır.",
+        "modes": {
+          "free": "Tüm siparişlerde kargo ücretsiz",
+          "threshold": "Belli tutarın üstünde ücretsiz",
+          "flat": "Sabit ücret",
+          "carrier": "Kargo firmasının ücreti"
+        },
+        "modeHints": {
+          "free": "Hiçbir siparişten kargo ücreti alınmaz.",
+          "threshold": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca kargo ücretsiz; altında sabit ücret.",
+          "flat": "Her siparişte aynı kargo ücreti.",
+          "carrier": "Ücret paketin desisine göre ücret tablonuzdan gelir."
+        },
+        "threshold": "Ücretsiz kargo sınırı",
+        "thresholdOptional": "Ücretsiz kargo sınırı (isteğe bağlı)",
+        "thresholdOptionalHint": "Boş bırakırsanız her siparişte firmanın ücreti alınır.",
+        "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin.",
+        "feeBelow": "Sınırın altında kargo ücreti",
+        "feeFlat": "Sipariş başına kargo ücreti",
+        "feeInvalid": "0'dan büyük, en çok 100.000 TL bir tutar girin.",
+        "source": "Ücreti veren",
+        "sources": {
+          "aras-table": "Aras Kargo: ücret tablom (desi)",
+          "yurtici-table": "Yurtiçi Kargo: ücret tablom (desi)",
+          "dhlecommerce-table": "DHL eCommerce: ücret tablom (desi)",
+          "surat-table": "Sürat Kargo: ücret tablom (desi)",
+          "ptt-table": "PTT Kargo: ücret tablom (desi)"
+        },
+        "tableEmpty": "Ücret tablonuz henüz boş; satır eklemeden bu seçenek fiyatlanamaz.",
+        "tableLink": "Ücret tablosunu doldurun",
+        "primary": "Bu ücret \"{{name}}\" seçeneğine uygulanır ({{carrier}}).",
+        "customNote": "Kargo ücretleriniz bu seçeneklerden birine uymuyor; aşağıdaki listeden düzenleyebilir ya da bir seçim yapıp kaydedebilirsiniz.",
+        "noneNote": "Henüz kargo seçeneği yok; bir seçim yapıp kaydedince oluşur.",
+        "defaultName": "Standart kargo",
+        "replacedKept": "Eski seçenek gönderilmemiş siparişlerde kullanıldığı için ek seçenek olarak kaldı; siparişler gönderilince silebilirsiniz.",
+        "notConnected": "{{carrier}} hesabınız bağlı değil; Kargo firmaları sekmesinden bağlayın. Bağlanana kadar bu seçenek ödeme adımında fiyatlanamayabilir.",
+        "condition": {
+          "label": "Koşul",
+          "options": {
+            "amount": "Tutar",
+            "amount_or_coupon": "Tutar ya da ücretsiz kargo kuponu",
+            "amount_and_coupon": "Tutar ve ücretsiz kargo kuponu"
+          },
+          "hints": {
+            "amount": "Kargo yalnız sepet bu tutara ulaşınca ücretsiz. Kampanyalardaki ücretsiz kargo kuponları ve otomatik ücretsiz kargo kampanyaları kargoyu düşürmez.",
+            "amount_or_coupon": "Sepet bu tutara ulaşınca ya da müşteri ücretsiz kargo kuponu kullanınca kargo ücretsiz.",
+            "amount_and_coupon": "Kargo, sepet bu tutara ulaştığında ve müşteri ücretsiz kargo kuponu kullandığında ücretsiz. Sınırın altında kupon kabul edilmez."
+          }
+        }
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
@@ -1494,7 +1563,8 @@
           "merchant_invalid": "Aras Kargo bu kullanıcı adını kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın.",
           "secret_invalid": "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın."
         },
-        "rejected": "Aras Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Aras'ın verdiği güncel bilgileri girin."
+        "rejected": "Aras Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Aras'ın verdiği güncel bilgileri girin.",
+        "customerCodePlaceholder": "Örn. 1234567"
       },
       "yurtici": {
         "keys": {
@@ -1521,6 +1591,61 @@
         },
         "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin.",
         "keysHint": "Yurtiçi'nin “Gönderici Ödemeli” kullanıcısını girin. Yurtiçi takip sorgusuna dakikada bir izin verir; gönderi durumları bu aralıkla güncellenir."
+      },
+      "dhlecommerce": {
+        "keys": {
+          "title": "Müşteri bilgileri",
+          "description": "DHL eCommerce'in sözleşmeyle verdiği müşteri numarası ve Online Şube şifresi. Test ve canlı hesap ayrıdır."
+        },
+        "customerNumber": "Müşteri numarası",
+        "password": "Şifre",
+        "keysHint": "Şifre, Online Şube'ye girdiğiniz kalıcı şifredir; DHL'in e-postayla gönderdiği geçici şifre değil. Online Şube şifrenizi değiştirirseniz burada da güncelleyin.",
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler DHL eCommerce'in test sistemine gider; gerçek kurye gelmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek DHL eCommerce hesabına açılır. Test ve canlı bilgileri ayrı olduğundan yeniden istenir.",
+        "unavailable": "Platformun DHL eCommerce uygulama anahtarları bu sunucuda tanımlı değil. Bağlanmak için DHL'in API portalında kayıtlı kendi uygulamanızın anahtarlarını aşağıya girin ya da platform desteğine yazın.",
+        "app": {
+          "title": "Uygulama anahtarları",
+          "description": "Gönderiler varsayılan olarak platformun DHL eCommerce uygulamasıyla açılır. DHL'in API portalında kendi uygulamanız varsa onun anahtarları kullanılır.",
+          "toggle": "Kendi uygulama anahtarlarım var",
+          "clientId": "Client Id (X-IBM-Client-Id)",
+          "clientSecret": "Client Secret (X-IBM-Client-Secret)",
+          "hint": "DHL'in API portalında (apizone.mngkargo.com.tr) uygulamanızın sayfasında. Girdiğinizde platformun anahtarları yerine bunlar kullanılır. Test ve canlı ortamın anahtarları ayrıdır."
+        },
+        "checks": {
+          "merchant_invalid": "DHL eCommerce bu müşteri numarasını kabul etmedi. Numarayı sözleşmenizden ya da Online Şube'den yeniden kopyalayın.",
+          "secret_invalid": "DHL eCommerce bu müşteri numarası ve şifreyi kabul etmedi. Online Şube'ye girdiğiniz kalıcı şifreyi yazın; test ve canlı hesap ayrıdır."
+        },
+        "rejected": "DHL eCommerce kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Online Şube şifreniz değiştiyse yenisini girin.",
+        "customerNumberPlaceholder": "Örn. 123456789"
+      },
+      "surat": {
+        "keys": {
+          "title": "Web servis bilgileri",
+          "description": "Sürat Kargo'nun sözleşmeyle verdiği web servis kullanıcı adı ve şifresi. Gönderiler bu bilgilerle açılır. Sürat'ın test ortamı yoktur; bağlantı doğrudan canlı hesaptır."
+        },
+        "username": "Kullanıcı adı",
+        "usernamePlaceholder": "Örn. magazaadi_ws",
+        "password": "Şifre",
+        "keysHint": "Bu kullanıcı adı ve şifre yalnız gönderi açarken denenebilir; yanlışsa ilk “Kargoya ver”de Sürat'ın yanıtı gösterilir.",
+        "cari": {
+          "title": "Cari kodu ve web şifresi",
+          "description": "Sürat takip, etiket ve gönderi silme için cari kodunuzu ve web şifrenizi ister. Sürat size ayrı bir cari kodu ve web şifresi verdiyse buraya girin; vermediyse boş bırakın, yukarıdaki bilgiler kullanılır.",
+          "hint": "İsteğe bağlı; cari kodu ve web şifresini birlikte girin."
+        },
+        "cariCode": "Cari kodu",
+        "cariCodePlaceholder": "Örn. 1234567",
+        "webPassword": "Web şifresi",
+        "cariHint": "Kaydederken Sürat'a bu bilgilerle bir takip sorgusu yapılır ve doğrulanır.",
+        "labelHint": "Sürat hesabınıza barkod oluşturma yetkisi verdiyse etiketi Sürat'tan alırız. Vermediyse etiketi panel hazırlar: barkodu gönderinin özel takip numarasıdır. Şubenizin bu etiketi okuttuğunu Sürat temsilcinize teyit ettirin.",
+        "checks": {
+          "merchant_invalid": "Sürat Kargo bu cari kodu ve web şifresini kabul etmedi. Bilgileri Sürat'ın verdiği belgeden yeniden kopyalayın.",
+          "secret_invalid": "Sürat Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Sürat'ın verdiği belgeden yeniden kopyalayın."
+        },
+        "rejected": "Sürat Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Sürat'ın verdiği güncel bilgileri girin."
       },
       "returns": {
         "title": "İade koşulları",
@@ -1557,16 +1682,9 @@
         "returns": "İade",
         "locations": "Depolar ve stok"
       },
-      "freeShipping": {
-        "title": "Ücretsiz kargo eşiği",
-        "description": "Sepet toplamı (KDV dahil, indirimlerden sonra) bu tutara ulaşınca bütün kargo seçenekleri ücretsiz olur.",
-        "switch": "Belli bir tutardan sonra kargo bedava",
-        "threshold": "En az sepet tutarı",
-        "thresholdInvalid": "0'dan büyük, en çok 10.000.000 TL bir tutar girin."
-      },
       "classes": {
         "title": "Kargo sınıfları",
-        "description": "Ürüne verilen sınıf kargo ücretine ek ücret ekler; sepette en yüksek olan bir kez eklenir.",
+        "description": "Büyük ya da ağır ürünlere ek kargo ücreti ekler; sepette en yüksek olan bir kez eklenir. Ücretsiz kargolu ürünü ürün sayfasının Kargo sekmesinden seçin.",
         "name": "Sınıf adı",
         "nameOf": "{{number}}. sınıfın adı",
         "surcharge": "Ek ücret",
@@ -1574,9 +1692,6 @@
         "products_one": "{{count}} ürün",
         "products_other": "{{count}} ürün",
         "noProducts": "Ürün yok",
-        "freeRow": "Ücretsiz kargo",
-        "freeHint": "Kargo ücretine eklenmez",
-        "locked": "Hazır sınıf: adı değişmez, silinmez.",
         "add": "Sınıf ekle",
         "remove": "{{name}} sınıfını sil",
         "removeUsed_one": "{{count}} ürün Standart'a döner.",
@@ -1585,7 +1700,9 @@
         "keep": "Vazgeç",
         "nameInvalid": "Sınıfa bir ad verin (en çok 60 karakter).",
         "surchargeInvalid": "Ek ücreti 0 ile 100.000 TL arasında girin.",
-        "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır."
+        "optionsNote": "Ücretsiz kargolu ürünler ve sınıf ek ücretleri bütün kargo seçeneklerine uygulanır.",
+        "empty": "Henüz sınıf yok. Çoğu mağazanın ihtiyacı olmaz.",
+        "namePlaceholder": "Örn. Büyük koli"
       },
       "ownDeliveryInvoice": "Kendi gönderdiğiniz paketlerin faturasında mağazanızın unvanı ve VKN'si yazılır:",
       "ownDeliveryLink": "Yasal bilgiler",
@@ -1599,7 +1716,8 @@
         "rates_one": "{{count}} satır, {{desi}} desiye kadar",
         "rates_other": "{{count}} satır, {{desi}} desiye kadar",
         "ratesNeeded": "Ücret tablosuyla fiyatlanan bir seçenek var ama tablo boş.",
-        "platformParcel": "Platform paketi: 1 kg, 30 × 20 × 10 cm (2 desi)"
+        "platformParcel": "Platform paketi: 1 kg, 30 × 20 × 10 cm (2 desi)",
+        "noClasses": "Sınıf yok"
       },
       "invoiceIdentity": {
         "title": "Faturadaki firma bilgisi",
@@ -1607,7 +1725,98 @@
         "titleLabel": "Unvan",
         "taxId": "VKN",
         "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
-        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
+        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur.",
+        "titlePlaceholder": "Örn. Örnek Kargo Taşımacılık A.Ş."
+      },
+      "manager": {
+        "title": "Kargoyu nereden yönetiyorsun?",
+        "description": "Kargo etiketlerini nerede oluşturduğunu seç. Kargo ücretini müşteri yine Seçenekler sekmesindeki ayara göre öder.",
+        "options": {
+          "own": "Kendi anlaşmam",
+          "birfatura": "BirFatura"
+        },
+        "hints": {
+          "own": "Etiketi panelden alırsın; kargo firması paketi alınca sipariş kargoya verilir.",
+          "birfatura": "Etiketi BirFatura panelinden oluşturursun; takip numarası buraya kendiliğinden gelir."
+        },
+        "notConnected": "BirFatura seçilebilmesi için önce E-Fatura ayarlarında BirFatura'yı seçip bağlantı şifresini oluşturman gerekiyor.",
+        "ownerOnly": "Bunu yalnız mağaza sahibi değiştirebilir.",
+        "einvoiceLink": "E-Fatura ayarlarına git",
+        "birfatura": {
+          "labels": "Etiketler BirFatura'nın kargo modülünde oluşturulur; buradaki kargo firması bağlantıları kullanılmaz.",
+          "tracking": "BirFatura takip numarasını yazınca sipariş \"Kargoya verildi\" olur ve müşteriye kargo e-postası gider. İstersen siparişi panelden takip numarasıyla kendin de kargoya verebilirsin.",
+          "invoice": "BirFatura yalnız kendisine verilen siparişi kargolayabildiği için sipariş, ödemesi alınınca (kapıda ödemede hemen) BirFatura'ya verilir; faturanın ne zaman kesileceği BirFatura'daki ayarlarına bağlıdır.",
+          "price": "Ödemede kargo ücreti mağazanın kendi ücret ayarından hesaplanır; Seçenekler sekmesinde \"Kargo firmasının ücreti\" yerine ücretsiz, sabit ya da belli tutarın üstünde ücretsiz kargo seç."
+        }
+      },
+      "returnCode": {
+        "title": "Anlaşmalı iade kodu",
+        "description": "Kargo firmasının anlaşmalı mağazaya verdiği sabit iade kodu. Onaylanan iadede müşteriye e-postada ve sipariş sayfasında gösterilir.",
+        "descriptionOther": "BirFatura ile çalıştığın kargo firmasının adı ve sana verdiği sabit iade kodu. Onaylanan iadede müşteriye gösterilir.",
+        "label": "Anlaşmalı iade kodu",
+        "hint": "Müşteri iade paketini şubeye verirken bu kodu söyler; ücret sizin anlaşmanızdan ödenir.",
+        "carrier": "Kargo firması",
+        "carrierPlaceholder": "Örn. Aras Kargo",
+        "both": "Firma adını ve kodu birlikte girin ya da ikisini de boş bırakın.",
+        "invalid": "Kod en çok 40 karakter olur; harf, rakam, boşluk, nokta, tire ve eğik çizgi içerebilir.",
+        "missing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kod gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir.",
+        "placeholder": "Örn. 4578912"
+      },
+      "ptt": {
+        "keys": {
+          "title": "Web servis bilgileri",
+          "description": "PTT Başmüdürlüğünün sözleşmeyle verdiği müşteri numarası ve web servis şifresi. Test ve canlı hesap ayrı olabilir."
+        },
+        "customerId": "Müşteri numarası",
+        "customerIdPlaceholder": "Örn. 900123456",
+        "customerIdHint": "9 ya da 10 hane.",
+        "customerIdInvalid": "Müşteri numarası 9 ya da 10 haneden oluşur.",
+        "password": "Web servis şifresi",
+        "keysHint": "Kaydederken PTT'ye bu bilgilerle bir takip sorgusu yapılır. PTT yanlış bilgiyi her zaman reddetmediği için bilgiler kaydedilir ama \"Doğrulanmadı\" görünür; ilk gönderiyi test modunda yükleyerek deneyin.",
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler PTT'nin test sistemine yüklenir; şubede kabul edilmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek PTT hesabınıza yüklenir. Test ve canlı bilgileri ayrı olabileceğinden şifre yeniden istenir.",
+        "checks": {
+          "merchant_invalid": "PTT Kargo bu müşteri numarasını kabul etmedi. Numarayı PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın.",
+          "secret_invalid": "PTT Kargo bu müşteri numarası ve şifreyi kabul etmedi. Bilgileri PTT Başmüdürlüğünün verdiği belgeden yeniden kopyalayın.",
+          "unconfirmed": "Bilgiler kaydedildi ama doğrulanamadı: PTT Kargo yanlış bilgileri de reddetmeden yanıtlıyor. Müşteri numarası ve şifreyi PTT'nin verdiği belgeyle karşılaştırın, ilk gönderiyi test modunda yükleyerek deneyin."
+        },
+        "unverified": "Bilgiler doğrulanmadı: PTT Kargo yanlış bilgileri de reddetmeden yanıtladığı için hesabın doğru olduğu kayıtta anlaşılamıyor. Müşteri numarası ve şifreyi PTT'nin verdiği belgeyle karşılaştırın; ilk gönderiyi test modunda yükleyin. Bilgiler yanlışsa PTT gönderiyi reddeder.",
+        "rejected": "PTT Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi yüklenemez. PTT'nin verdiği güncel şifreyi girin.",
+        "ranges": {
+          "title": "Barkod aralığı",
+          "description": "PTT'nin size ayırdığı barkod numaraları. Her koli sıradaki numarayı alır; bir numara bir daha kullanılmaz.",
+          "empty": "Henüz barkod aralığı girilmedi. Aralık olmadan PTT'ye gönderi yüklenemez.",
+          "remaining": "Kalan barkod: {{left}}",
+          "low": "Barkodlarınız azalıyor: {{left}} kaldı. PTT'den yeni aralık isteyin ve aşağıya ekleyin.",
+          "exhausted": "Barkod aralığınız bitti; PTT'ye gönderi yüklenemez. PTT'den yeni aralık isteyin ve aşağıya ekleyin.",
+          "range": "{{first}} – {{last}}",
+          "usage": "{{used}} / {{size}} kullanıldı · {{remaining}} kaldı",
+          "first": "Başlangıç numarası",
+          "last": "Bitiş numarası",
+          "firstPlaceholder": "Örn. 275036569000",
+          "lastPlaceholder": "Örn. 275036569999",
+          "hint": "12 hane, kontrol hanesi olmadan.",
+          "add": "Aralığı ekle",
+          "added": "Aralık eklendi.",
+          "remove": "Sil",
+          "removeLabel": "{{range}} aralığını sil",
+          "removed": "Aralık silindi.",
+          "invalid": "12 haneli numara girin.",
+          "reversed": "Bitiş numarası başlangıçtan küçük olamaz."
+        },
+        "checklist": {
+          "title": "PTT'den istenecekler",
+          "description": "Bağlanmadan önce PTT Başmüdürlüğünden alın.",
+          "contract": "PTT Başmüdürlüğü ile imzalı kargo sözleşmesi.",
+          "privacy": "İmzalı 3. taraf gizlilik taahhütnamesi (Başmüdürlükten alınır).",
+          "account": "Müşteri numarası ve web servis şifresi.",
+          "range": "E-ticaret gönderileri için barkod aralığı (başlangıç ve bitiş, 12 hane). Bu aralığı başka bir programla paylaşmayın.",
+          "cod": "Kapıda ödeme alacaksanız sözleşmede ödeme şartlı gönderi (OS) ek hizmeti."
+        }
       }
     },
     "integrations": {
@@ -1642,30 +1851,34 @@
         "iyzico": "iyzico",
         "bank_transfer": "Havale / EFT",
         "cash_on_delivery": "Kapıda ödeme",
-        "geliver": "Geliver",
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
+        "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
         "netgsm": "Netgsm",
         "meta": "Meta (Facebook, Instagram)",
         "ga4": "Google Analytics 4",
         "resend": "E-posta (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Ürün akışları"
+        "feeds": "Ürün akışları",
+        "ptt": "PTT Kargo"
       },
       "purposes": {
         "paytr": "Kartla ödeme",
         "iyzico": "Kartla ödeme",
         "bank_transfer": "Mağazanın banka hesabına havale; sağlayıcı yok",
         "cash_on_delivery": "Kapıda nakit ya da kartla ödeme; sağlayıcı yok",
-        "geliver": "Birden çok kargo firması tek hesapla",
         "aras": "Mağazanın kendi kargo sözleşmesi",
         "yurtici": "Mağazanın kendi kargo sözleşmesi",
+        "dhlecommerce": "Mağazanın kendi kargo sözleşmesi",
+        "surat": "Mağazanın kendi kargo sözleşmesi",
         "netgsm": "SMS ve İYS",
         "meta": "Reklam dönüşümlerinin ölçümü",
         "ga4": "Satışların ölçümü",
         "resend": "Sipariş ve hesap e-postaları",
         "google": "Arama sonuçları ve alışveriş ilanları",
-        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi"
+        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi",
+        "ptt": "Mağazanın kendi kargo sözleşmesi"
       },
       "states": {
         "connected": "Bağlı",
@@ -1677,6 +1890,7 @@
       "notes": {
         "test_mode": "Test modunda: gerçek para ya da gönderi yok.",
         "unverified": "Kaydedildi ama sağlayıcıya sorulamadı; bağlantıyı test edin.",
+        "unconfirmed": "Hesap doğrulanamıyor: sağlayıcı yanlış bilgileri de reddetmeden yanıtlıyor. Bilgiler yanlışsa ilk gönderi reddedilir.",
         "rejected": "Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.",
         "unreadable": "Kayıtlı bilgiler okunamıyor; hesabı yeniden girin.",
         "search_console_not_granted": "Search Console izni verilmemiş; Google'ı yeniden bağlayın.",
@@ -1700,6 +1914,7 @@
       "tested": {
         "valid": "{{name}} bağlantısı çalışıyor.",
         "unreachable": "{{name}} şu an yanıt vermedi; biraz sonra tekrar deneyin.",
+        "unconfirmed": "{{name}} yanıt verdi ve bilgileri reddetmedi, ama doğruluklarını onaylamıyor; hesap doğrulanmadı olarak kalır.",
         "merchant_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
         "secret_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
         "failed": "{{name}} beklenmedik bir yanıt verdi.",
@@ -2279,7 +2494,7 @@
         "disconnected": "Google bağlantısı kaldırıldı.",
         "confirm": {
           "title": "Google bağlantısı kaldırılsın mı?",
-          "description": "Erişim Google'da da sonlandırılır, ürünler artık gönderilmez ve vitrindeki Google yorumları kaldırılır. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
+          "description": "Erişim Google'da da sonlandırılır ve ürünler artık gönderilmez. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
           "action": "Bağlantıyı kaldır"
         },
         "outcome": {
@@ -2755,7 +2970,8 @@
         "publishedHint": "Yayındaki metin. Değiştirip kaydettiğinizde yeni bir taslak sürüm açılır; yürürlükteki metin yayımlayana kadar aynı kalır.",
         "titleLabel": "Başlık",
         "body": "Metnin gövdesi",
-        "saved": "Taslak kaydedildi."
+        "saved": "Taslak kaydedildi.",
+        "titlePlaceholder": "Örn. Mesafeli Satış Sözleşmesi"
       },
       "tokens": {
         "title": "Belirteçler",
@@ -2879,7 +3095,8 @@
         },
         "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir.",
         "series": "Web satış serisi",
-        "seriesHint": "Web satışlarının faturaları bu seriyle kesilir (ör. WEB); elle girilen numara bu seriyle başlamazsa kabul edilmez. Boş bırakılırsa her seri kabul edilir."
+        "seriesHint": "Web satışlarının faturaları bu seriyle kesilir (ör. WEB); elle girilen numara bu seriyle başlamazsa kabul edilmez. Boş bırakılırsa her seri kabul edilir.",
+        "triggerBirfaturaShips": "BirFatura kargoyu yönettiği için sipariş, ödemesi alınınca (kapıda ödemede hemen) BirFatura'ya verilir; kesim anını BirFatura'daki ayarların belirler. Değiştirmek için Ayarlar > Kargo'da \"Kendi anlaşmam\"ı seç."
       },
       "parasut": {
         "title": "Paraşüt bağlantısı",
@@ -3077,6 +3294,22 @@
           "found": "Var olan",
           "skipped": "Atlanan"
         },
+        "postImagesConfirmTitle": "Blog görselleri taşınsın mı?",
+        "postImagesConfirmText": "Bu dosyanın daha önce taşıdığı blog yazılarındaki görseller eski siteden indirilip Ortam kütüphanesine eklenir ve yazının metnine, eski sitedeki yerine konur. Yazının metnindeki diğer değişiklikleriniz korunur; daha önce eklenip sonradan çıkardığınız görsel yeniden eklenmez.",
+        "postImages": {
+          "applied": "Blog görselleri taşındı.",
+          "planned": "Kuru çalıştırma bitti: taşınacak görseller aşağıda.",
+          "updated": "Görselleri eklenen yazılar",
+          "plannedUpdated": "Görselleri eklenecek yazılar",
+          "stored": "Ortam kütüphanesine eklenen görseller",
+          "plannedStored": "İndirilecek görseller",
+          "done": "Görselleri zaten eklenmiş yazılar",
+          "notMoved": "Görselsiz ya da önceki bir çalıştırmada taşınmamış yazılar",
+          "notMovedHint": "Taşınmamış yazılar için önce kutuyu işaretlemeden bir taşıma uygulayın.",
+          "failed": "Görselleri eklenemeyen yazılar",
+          "imageFailed": "İndirilemeyen görseller",
+          "imageFailedHint": "Hangileri olduğu ve nedeni indirilen raporda; yeniden çalıştırınca yalnız bunlar denenir."
+        },
         "refreshConfirmTitle": "Açıklamalar yenilensin mi?",
         "refreshConfirmText": "Bu dosyanın daha önce taşıdığı ürünlerin açıklaması dosyadakiyle değiştirilir; panelde sonradan yaptığınız açıklama değişiklikleri de yerini dosyadakine bırakır. Başka hiçbir alan değişmez.",
         "descriptions": {
@@ -3156,6 +3389,8 @@
             "blog_comments": "Vitrinde blog yorumu yok."
           }
         },
+        "postImages": "Yalnız blog görsellerini taşı",
+        "postImagesHint": "Önceki bir çalıştırmanın taşıdığı blog yazılarındaki görseller eski siteden indirilir, Ortam kütüphanesine eklenir ve yazıdaki yerlerine konur. Yazının geri kalanı ve diğer alanları değişmez.",
         "refresh": "Yalnız açıklamaları yenile",
         "refreshHint": "Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması bu dosyadan başlık, liste ve tablolarıyla yeniden yazılır. Fiyat, stok, durum ve SEO alanlarına dokunulmaz, yeni kayıt eklenmez. Yalnızca uygulanır."
       },
@@ -3298,6 +3533,39 @@
         "show": "Tükenen ürün listelerde kalır, kartında tükendiği yazar. Varsayılan.",
         "hide": "Tükenen ürün listelerden, aramadan ve kategori sayılarından çıkar. Ürün sayfası adresiyle açılmaya ve site haritasında kalmaya devam eder; stok gelince listelere kendiliğinden döner."
       }
+    },
+    "placeholders": {
+      "apiKeyName": "Örn. Depo programı",
+      "brandColor": "#1F5EFF",
+      "bankName": "Örn. Ziraat Bankası",
+      "iban": "TR00 0000 0000 0000 0000 0000 00",
+      "blockReason": "Örn. Tekrarlayan sahte sipariş",
+      "ga4": "G-ABC123XYZ",
+      "merchantId": "123456789",
+      "mersis": "16 haneli MERSİS numarası",
+      "taxOrId": "10 ya da 11 haneli numara",
+      "kep": "firmaniz@hs01.kep.tr",
+      "etbis": "ETBİS kayıt numaranız",
+      "documentName": "Örn. TÜRSAB belge no",
+      "documentNumber": "Örn. 12345",
+      "location": "Örn. Ana Depo",
+      "pixelId": "123456789012345",
+      "testEventCode": "TEST12345",
+      "shopifyClientId": "Örn. 1a2b3c4d5e6f…",
+      "smsHeader": "Örn. MAGAZAADI",
+      "iysCode": "Örn. 123456",
+      "parasutCompany": "Örn. 123456",
+      "parasutCode": "Paraşüt'ün verdiği kod",
+      "paytrMerchant": "Örn. 123456",
+      "senderLocal": "siparis",
+      "robots": "User-agent: *",
+      "smtpPort": "587",
+      "fromName": "Örn. Kuzey Deri",
+      "smtpRate": "60",
+      "staffEmails": "ornek@alanadi.com, depo@alanadi.com",
+      "storeName": "Örn. Kuzey Deri",
+      "storeAddress": "Örn. Caferağa Mah. Moda Cad. No: 12, Kadıköy / İstanbul",
+      "vatName": "Örn. KDV %10"
     }
   },
   "status": {
@@ -4435,6 +4703,7 @@
         "advisor": "SEO danışmanı",
         "organize": "Kategori, marka ve KDV",
         "catalog": "Katalog bilgileri",
+        "linked": "Bağlantılı ürünler",
         "shipping": "Kargo (paket ölçüleri)",
         "data": "Ürün verileri",
         "pricing": "Genel (fiyat)",
@@ -4516,6 +4785,7 @@
         "attributes": "Özellikler",
         "variants": "Varyantlar",
         "catalog": "Katalog",
+        "linked": "Bağlantılı ürünler",
         "advanced": "Gelişmiş"
       },
       "pricesOnVariants": "Fiyatlar her varyantta ayrı girilir.",
@@ -4723,7 +4993,7 @@
     },
     "faq": {
       "title": "Sık sorulan sorular",
-      "description": "Ürün sayfasındaki Soru-Cevap bölümüne mağaza adına soru ve yanıt ekleyin. Eklenenler hemen yayımlanır; Yorumlar ve sorular › Sorular ekranından gizleyebilirsiniz.",
+      "description": "Ürün sayfasındaki Soru-Cevap bölümü: müşterilerin soruları ve mağaza adına eklediğiniz soru ve yanıtlar. Eklenenler hemen yayımlanır; bir soruya tıklayıp düzenleyebilir, gizleyebilir ya da silebilirsiniz.",
       "empty": "Yapay zekâ ürünün açıklamasından, kısa açıklamasından, özelliklerinden ve seçeneklerinden 3–5 soru ve yanıt önerir. Veride yanıtı olmayan soru yazılmaz.",
       "draft": "SSS taslağı",
       "hint": "Ekleyeceklerinizi işaretleyin; soru ve yanıtları eklemeden önce düzenleyebilirsiniz.",
@@ -4741,7 +5011,15 @@
         "too_long": "Soru en çok 120, yanıt en çok 400 karakter olabilir."
       },
       "summary": "Ürün bilgilerinden soru ve yanıt taslağı",
-      "summaryOpen": "Taslak açık"
+      "summaryOpen": "Taslak açık",
+      "addOne": "Soru ekle",
+      "noAnswer": "Henüz yanıt yok",
+      "none": "Bu ürüne henüz soru yok.",
+      "listLabel": "Ürünün soruları",
+      "open": "Soruyu aç: {{question}}",
+      "more": "En yeni {{shown}} soru gösteriliyor ({{count}} soru). Tümü Yorumlar ve sorular › Sorular ekranında.",
+      "summaryCount_one": "{{count}} soru",
+      "summaryCount_other": "{{count}} soru"
     },
     "addonTemplates": {
       "title": "Ek seçenek grupları",
@@ -4923,6 +5201,20 @@
         "other": "Kayıt sırasında bir sorun oluştu."
       }
     },
+    "linked": {
+      "title": "Bağlantılı ürünler",
+      "add": "Ürün ekle",
+      "noResults": "Ürün bulunamadı.",
+      "full": "En çok {{max}} ürün eklenebilir. Yenisi için birini kaldırın.",
+      "upsells": {
+        "label": "Benzer / daha iyi ürünler",
+        "hint": "Ürün sayfasında benzer ürünler alanında bu sırayla gösterilir. Boş bırakılırsa aynı kategoriden ürünler gösterilir. Taslak ürünler yayına alınınca görünür."
+      },
+      "cross_sells": {
+        "label": "Birlikte alınanlar",
+        "hint": "Bu ürün sepetteyken \"Bunu da beğenebilirsiniz\" başlığıyla sepette önerilir. Sepette olan ürünler önerilmez."
+      }
+    },
     "purchaseLimit": {
       "title": "Satın alma sınırı",
       "label": "En çok satın alma adedi",
@@ -4933,11 +5225,23 @@
     "shippingClass": {
       "label": "Kargo sınıfı",
       "standard": "Standart",
-      "free": "Ücretsiz kargo",
-      "hintStandard": "Kargo ücreti seçilen kargo seçeneğine göre hesaplanır.",
+      "hintStandard": "Kargo ücreti mağazanın kargo ücreti ayarına göre hesaplanır.",
       "hintFree": "Ücretsiz kargolu ürün kargo ücretine eklenmez; sepette yalnız bu tür ürünler varsa kargo ücretsizdir.",
       "hintSurcharge": "Bu ürün sepetteyse siparişin kargosuna {{amount}} eklenir.",
-      "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor."
+      "gone": "Seçili sınıf artık yok; ürün Standart sayılıyor.",
+      "freeSwitch": "Bu ürünün kargosu ücretsiz"
+    },
+    "placeholders": {
+      "addonGroup": "Örn. Kişiselleştirme",
+      "tag": "Örn. yeni-sezon",
+      "addonLabel": "Örn. İsim yazdırma",
+      "addonHelp": "Örn. En çok 12 harf",
+      "addonChoice": "Örn. Hediye paketi",
+      "badge": "Örn. Sınırlı",
+      "faqQuestion": "Örn. Kargo ne kadar sürer?",
+      "faqAnswer": "Örn. Siparişiniz 1–3 iş gününde kargoya verilir.",
+      "title": "Örn. Deri cüzdan",
+      "mpn": "Örn. AB-1234"
     }
   },
   "orders": {
@@ -5010,7 +5314,8 @@
       "trackingInvalid": "Firma adını ve 4–40 harf/rakamlık takip numarasını yazın.",
       "trackingUrlInvalid": "Takip bağlantısı bir web adresi olmalı (kargotakip.ornek.com/…).",
       "packedParcel": "Paketlenmiş koli",
-      "restTitle": "Koliye girmemiş ürünler (ayrı koliyle)"
+      "restTitle": "Koliye girmemiş ürünler (ayrı koliyle)",
+      "birfatura": "Kargo BirFatura'dan yönetiliyor: etiketi BirFatura panelinde oluştur; takip numarası gelince sipariş kendiliğinden kargoya verilir. Buradan kargoya verirsen takip numarasını aşağıya yaz."
     },
     "deliver": {
       "title": "Sipariş teslim edildi mi?",
@@ -5264,7 +5569,7 @@
     },
     "returns": {
       "queue": "İade talepleri",
-      "queueDescription": "Müşterilerin iade talepleri; karar bekleyenler önce. Onaylanan iadede müşteri kargoya iade koduyla verir; ürün depoya ulaşınca teslim alın, para iadesi kendiliğinden yapılır.",
+      "queueDescription": "Müşterilerin iade talepleri; karar bekleyenler önce. Onaylanan iadede müşteri paketi anlaşmalı iade koduyla kargo şubesine verir; ürün depoya ulaşınca teslim alın, para iadesi kendiliğinden yapılır.",
       "columns": {
         "order": "Sipariş",
         "date": "Talep tarihi",
@@ -5394,7 +5699,9 @@
       "cancelReason": "İptal sebebi",
       "cancelReasonHint": "Ekip için not; müşteri görmez.",
       "canceled": "İade talebi iptal edildi; müşteriye e-posta gönderildi.",
-      "dialogTitle": "#{{number}} siparişinin talebi"
+      "dialogTitle": "#{{number}} siparişinin talebi",
+      "codeMissing": "Anlaşmalı iade kodu girilmedi. Onaylanan iadelerde müşteriye kargo kodu gösterilmez; mağazanın kendisiyle iletişime geçeceği söylenir.",
+      "codeMissingLink": "Kargo ayarlarına git"
     },
     "edit": {
       "title": "#{{number}} siparişini düzenle",
@@ -5476,8 +5783,10 @@
       "carriers": {
         "aras": "Aras Kargo",
         "yurtici": "Yurtiçi Kargo",
-        "geliver": "Geliver",
-        "own": "Mağazanın kendi teslimatı"
+        "dhlecommerce": "DHL eCommerce",
+        "surat": "Sürat Kargo",
+        "own": "Mağazanın kendi teslimatı",
+        "ptt": "PTT Kargo"
       },
       "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
       "days": "Sipariş tarihi",
@@ -5931,6 +6240,16 @@
       "utmMedium": "Kampanya ortamı",
       "utmCampaign": "Kampanya adı",
       "referrer": "Yönlendiren site"
+    },
+    "placeholders": {
+      "cancelReturn": "Örn. Müşteri vazgeçti, ürünü tutacak.",
+      "chargebackReference": "Örn. CB-2026-001234",
+      "chargebackNote": "Örn. Kargo teslim belgesi gönderildi.",
+      "invoiceNumber": "Örn. ABC2026000000123",
+      "ettn": "00000000-0000-0000-0000-000000000000",
+      "returnNote": "Örn. Müşteri telefonla bildirdi.",
+      "refundNote": "Örn. Kargo ücreti de iade edildi.",
+      "rejectReason": "Örn. Ürün kullanılmış, etiketi sökülmüş."
     }
   },
   "customers": {
@@ -6382,7 +6701,12 @@
       "eraseText": "Kayıtlar kalıcı silinir; geri alınamaz. Sipariş, tutarı ve satırlarıyla muhasebe için kalır. Silme kayda geçer.",
       "eraseConfirm": "Kalıcı sil",
       "erased_one": "{{count}} kayıt silindi.",
-      "erased_other": "{{count}} kayıt silindi."
+      "erased_other": "{{count}} kayıt silindi.",
+      "placeholders": {
+        "first_name": "Örn. Ayşe",
+        "last_name": "Örn. Yılmaz",
+        "document_no": "Örn. 12345678901"
+      }
     },
     "columnOptions": "Sütunlar",
     "stats": {
@@ -6400,6 +6724,12 @@
       "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > Denetim kaydı > İşler'den indirebilirsiniz.",
       "laterNoJobs": "Dosya arka planda hazırlanıyor.",
       "failed": "Müşteri dosyası hazırlanamadı."
+    },
+    "placeholders": {
+      "addressName": "Örn. Ev",
+      "note": "Örn. Hediye paketi tercih ediyor.",
+      "group": "Örn. Sadık müşteriler",
+      "segment": "Örn. Son 90 günde alışveriş yapanlar"
     }
   },
   "categories": {
@@ -6462,7 +6792,10 @@
       "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
       "saved": "Kategori görseli kaydedildi."
     },
-    "countOf": "{{name}}: {{count}} ürün"
+    "countOf": "{{name}}: {{count}} ürün",
+    "placeholders": {
+      "name": "Örn. Cüzdanlar"
+    }
   },
   "inventory": {
     "description": "Satılabilir stok; önce azalan ve tükenen ürünler",
@@ -6714,11 +7047,20 @@
       "freeShippingSummary": "Kargo bedava eşiği: {{value}}",
       "freeShippingOff": "Kapalı",
       "freeShippingEdit": "Kargo ayarlarında değiştir",
+      "freeShippingCoupon": "Ücretsiz kargo kuponları: {{value}}",
+      "freeShippingCouponValues": {
+        "any": "her tutarda geçerli",
+        "off": "kargoyu düşürmez (yalnız tutar)",
+        "from": "{{amount}} ve üzeri sepette geçerli"
+      },
       "combineCodes": "Bir sepette birden fazla kod",
       "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
       "saved": "Kampanya ayarları kaydedildi."
     },
-    "limited": "En yeni {{total}} kampanya gösteriliyor."
+    "limited": "En yeni {{total}} kampanya gösteriliyor.",
+    "placeholders": {
+      "code": "KASIM20"
+    }
   },
   "reports": {
     "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si, tahsilatı, stoğu ve vitrindeki aramalar",
@@ -7868,6 +8210,9 @@
           "hint": "Değişen sayfaları Bing ve Yandex'e anında bildirmek için açın."
         }
       }
+    },
+    "placeholders": {
+      "description": "Örn. El yapımı deri cüzdanlar; ücretsiz kargo ve 14 gün iade."
     }
   },
   "attributes": {
@@ -8099,7 +8444,15 @@
     "newValue": "Yeni değer ekle",
     "newValueName": "{{label}} için yeni değer",
     "addValue": "Ekle",
-    "valueAdded": "{{value}} eklendi."
+    "valueAdded": "{{value}} eklendi.",
+    "placeholders": {
+      "value": "Örn. Paslanmaz çelik",
+      "optionTitle": "Örn. Beden",
+      "textUnit": "Örn. HRC",
+      "unit": "Örn. cm",
+      "groupName": "Örn. Ölçüler",
+      "description": "Örn. Giyim ürünlerinin ortak özellikleri"
+    }
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
@@ -8138,7 +8491,11 @@
     "fieldHint": "Ürün sayfasında ve arama sonucu başlığında görünür.",
     "pick": "Marka seçin",
     "noneFound": "Marka bulunamadı.",
-    "noLogo": "Logo yok"
+    "noLogo": "Logo yok",
+    "placeholders": {
+      "name": "Örn. Kuzey Deri",
+      "handle": "kuzey-deri"
+    }
   },
   "collections": {
     "description": "Koleksiyonlar ürünleri bir tema altında toplar; her birinin kendi sayfası, görseli ve ürünleri olur.",
@@ -8201,6 +8558,10 @@
     "gate": {
       "off": "Koleksiyonlar bu mağazada kapalı. Koleksiyonlarınız silinmedi; açınca burada yeniden yönetilir.",
       "turnOn": "Özelliklere git"
+    },
+    "placeholders": {
+      "name": "Örn. Yaz koleksiyonu",
+      "handle": "yaz-koleksiyonu"
     }
   },
   "address": {
@@ -8723,6 +9084,16 @@
         "category": "Kategori",
         "product": "Ürün"
       }
+    },
+    "placeholders": {
+      "jobTitle": "Örn. Tasarımcı",
+      "bio": "Örn. On yıldır el işi ve tasarım üzerine yazıyor.",
+      "title": "Örn. Deri bakımı için 5 öneri",
+      "handle": "deri-bakimi-icin-5-oneri",
+      "excerpt": "Örn. Deriyi yıllarca korumanın beş kolay yolu.",
+      "landingTitle": "Örn. Kasım indirimleri",
+      "landingHandle": "kasim-indirimleri",
+      "term": "Örn. Bakım rehberi"
     }
   },
   "priceLists": {
@@ -8837,6 +9208,10 @@
       "done_other": "{{count}} fiyat yazıldı.",
       "skipped_one": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı.",
       "skipped_other": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı."
+    },
+    "placeholders": {
+      "title": "Örn. Yaz indirimi",
+      "description": "Örn. Haziran sonuna kadar geçerli fiyatlar"
     }
   },
   "giftCards": {
@@ -8894,7 +9269,11 @@
       "used": "Kullanıldı",
       "expired": "Süresi doldu"
     },
-    "limited": "Bu görünüm en yeni 5.000 karta bakar; daha eskiler listede görünmüyor."
+    "limited": "Bu görünüm en yeni 5.000 karta bakar; daha eskiler listede görünmüyor.",
+    "placeholders": {
+      "closeReason": "Örn. Sipariş iade edildi",
+      "note": "Örn. Doğum günü hediyesi, Ayşe Yılmaz"
+    }
   },
   "storeCredit": {
     "title": "Mağaza kredisi",
@@ -8961,7 +9340,6 @@
     "sections": "Müşteri yazıları",
     "sectionReviews": "Yorumlar",
     "sectionQuestions": "Sorular",
-    "sectionGoogle": "Google yorumları",
     "questions": {
       "description": "Müşterilerin ürünler hakkındaki soruları. Mağaza adına verdiğiniz cevap hemen görünür; ürünü teslim almış müşterilerin cevapları onayınızı bekler.",
       "views": "Soru durumu",
@@ -8985,6 +9363,49 @@
         "pending": "Bakılacak soru ya da cevap yok.",
         "approved": "Yayında soru yok.",
         "rejected": "Reddedilen soru yok."
+      },
+      "manage": {
+        "edit": "Düzenle",
+        "editFor": "Soruyu düzenle: {{question}}",
+        "addTitle": "Soru ekle",
+        "editTitle": "Soruyu düzenle",
+        "newDescription": "Mağaza adına eklenir ve ürün sayfasında hemen yayımlanır.",
+        "question": "Soru",
+        "answer": "Mağazanın yanıtı",
+        "questionPlaceholder": "Örn. Bıçak bulaşık makinesinde yıkanabilir mi?",
+        "answerPlaceholder": "Örn. Önermiyoruz; ılık suyla elde yıkayıp hemen kurulayın.",
+        "customerHint": "Müşterinin sorusu. Yalnız yazım hatası ya da kişisel bilgi (telefon, adres) için düzenleyin.",
+        "answerHint": "Boş bırakırsanız mağazanın yanıtı kaldırılır. Bekleyen soruya yazdığınız yanıt soruyu da yayımlar.",
+        "answerHintNew": "Soru yanıtıyla birlikte yayımlanır.",
+        "customerAnswers": "Müşteri yanıtları",
+        "customerAnswersHint": "Müşteri yanıtları değiştirilmez; Yorumlar ve sorular › Sorular ekranında onaylanır ya da reddedilir.",
+        "save": "Kaydet",
+        "add": "Ekle",
+        "hide": "Gizle",
+        "show": "Yayımla",
+        "delete": "Sil",
+        "added": "Soru ürün sayfasına eklendi.",
+        "saved": "Soru kaydedildi.",
+        "hidden": "Soru gizlendi; ürün sayfasında görünmüyor.",
+        "shown": "Soru yayımlandı.",
+        "deleted": "Soru silindi.",
+        "restored": "Soru geri alındı.",
+        "undo": "Geri al",
+        "deleteConfirm": {
+          "title": "Soru silinsin mi?",
+          "description": "Soru ve bütün yanıtları ürün sayfasından kaldırılır. Hemen ardından \"Geri al\" ile geri getirebilirsiniz.",
+          "action": "Soruyu sil"
+        },
+        "issues": {
+          "short": "En az 2 karakter yazın.",
+          "long": "En çok 1.000 karakter olabilir."
+        },
+        "state": {
+          "published": "Yayında",
+          "hidden": "Gizli",
+          "waiting": "Yanıt bekliyor"
+        },
+        "editedByShop": "Mağaza tarafından düzenlendi · {{when}}"
       }
     },
     "photos": {
@@ -8993,86 +9414,11 @@
       "title": "{{author}} yorumundaki fotoğraf",
       "position": "{{number}} / {{count}}"
     },
-    "google": {
-      "title": "Google yorumları",
-      "pageDescription": "Google İşletme Profilinizdeki yorumlar her gün okunur ve vitrinin Yorumlar sayfasında Google'ın puanı ve bağlantısıyla, kendi yorumlarınızdan ayrı gösterilir.",
-      "description": "Google'daki işletme profilinizin puanı, yorum sayısı ve en yeni yorumları vitrinde Google adıyla görünür. Yorumlar Google'ındır; burada düzenlenmez.",
-      "notConfigured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
-      "notConnected": "İşletme profilinizin sahibi ya da yöneticisi olan Google hesabıyla bağlanın. İzni Google'ın kendi ekranında verirsiniz; şifreniz bizimle paylaşılmaz.",
-      "notGranted": "Google hesabınız bağlı, ama İşletme Profili izni verilmemiş. Yorumları okuyabilmemiz için Google'ın ekranında bu izni de verin.",
-      "connect": "Google yorumlarını bağla",
-      "reconnect": "Yeniden bağla",
-      "connected": "Google yorumları bağlandı.",
-      "noLocations": "Bu Google hesabının yönettiği bir işletme profili yok. Profilin sahibi ya da yöneticisi olan hesapla yeniden bağlayın.",
-      "location": "İşletme konumu",
-      "chooseLocation": "Konum seçin",
-      "useLocation": "Bu konumu kullan",
-      "locationSaved": "Konum kaydedildi, yorumlar Google'dan okundu.",
-      "changeLocation": "Konumu değiştir",
-      "figures": "Google'da {{rating}} · {{count}} yorum",
-      "noFigures": "Google'da henüz yorum yok",
-      "syncedAgo": "son eşitleme {{when}}",
-      "errorReconnect": "Google bağlantısı yorumları okuyamıyor; yeniden bağlayın.",
-      "errorLost": "Bağlı Google hesabı bu işletme profiline artık erişemiyor; konumu yeniden seçin ya da profilin sahibi olan hesapla bağlayın.",
-      "errorLater": "Son eşitleme Google'dan yanıt alamadı; vitrinde son okunan yorumlar görünüyor. Ertesi gün kendiliğinden yeniden denenir.",
-      "syncNow": "Şimdi eşitle",
-      "synced": "Yorumlar Google'dan okundu.",
-      "syncFailed": "Google'dan yanıt alınamadı; daha sonra yeniden deneyin.",
-      "remove": "Bağlantıyı kaldır",
-      "removed": "Google yorumları vitrinden kaldırıldı.",
-      "confirm": {
-        "title": "Google yorumları kaldırılsın mı?",
-        "description": "Vitrindeki Google yorumları kaldırılır ve burada tutulan kopyaları silinir. Yorumlar Google'da kalır. Google hesabı bağlantısı (Merchant Center, Search Console) sürer.",
-        "action": "Kaldır"
-      },
-      "listTitle": "Yorumlar",
-      "listDescription": "Google'dan okunan yorumlar, en yeniden. Yanıtlamak ya da vitrinden kaldırmak için bir yoruma tıklayın. Bir yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için vitrinden kaldırabilirsiniz; Google'daki puan ve yorum sayısı değişmez.",
-      "empty": "Bu konumun Google'da yorumu yok.",
-      "anonymous": "Google kullanıcısı",
-      "noText": "Yalnızca puan verilmiş.",
-      "replied": "Yanıtlandı",
-      "hiddenBadge": "Vitrinden kaldırıldı",
-      "shownDone": "Yorum vitrine geri alındı.",
-      "hiddenDone": "Yorum vitrinden kaldırıldı.",
-      "hide": "Vitrinden kaldır",
-      "hideFor": "{{author}} yorumunu vitrinden kaldır",
-      "hideTitle": "Yorum vitrinden kaldırılsın mı?",
-      "hideDescription": "{{author}} yorumu Google'da kalır; yalnızca vitrinde görünmez. Gerekçeyi seçin.",
-      "hideReason": "Kaldırma gerekçesi",
-      "hideRule": "Olumsuz yorumlar puanı nedeniyle kaldırılamaz; yalnızca bu üç gerekçeyle kaldırabilirsiniz.",
-      "reasons": {
-        "personal_data": "Kişisel veri içeriyor",
-        "abusive": "Hakaret, küfür ya da nefret söylemi",
-        "off_topic": "Konu dışı ya da spam"
-      },
-      "hiddenWhy": "Gerekçe: {{reason}}",
-      "restore": "Vitrine geri al",
-      "open": "{{author}} yorumunu aç",
-      "dialogTitle": "{{author}} yorumu",
-      "reply": "Yanıtınız",
-      "replyHint": "Düz metin. Google'da ve vitrinde yorumun altında “Mağazanın yanıtı” olarak görünür.",
-      "replyPlaceholder": "Örn. Değerlendirmeniz için teşekkür ederiz…",
-      "replyBytes": "{{used}} / {{max}} bayt",
-      "replyTooLong": "Google en çok {{max}} bayt alıyor; Türkçe harfler iki sayılır. Biraz kısaltın.",
-      "replySend": "Yanıtla",
-      "replyUpdate": "Yanıtı güncelle",
-      "replyDelete": "Yanıtı sil",
-      "replySent": "Yanıt Google'a gönderildi.",
-      "replyUpdated": "Yanıt Google'da güncellendi.",
-      "replyDeleted": "Yanıt Google'dan silindi.",
-      "repliedAt": "Son yanıt {{when}}",
-      "replyPending": "Google onayında",
-      "replyPendingNote": "Google yanıtı inceliyor; onaylayınca vitrinde de görünür.",
-      "replyRejected": "Google yayımlamadı",
-      "replyRejectedNote": "Google bu yanıtı yayımlamadı; metni düzenleyip yeniden gönderebilirsiniz.",
-      "deleteConfirm": {
-        "title": "Yanıt silinsin mi?",
-        "description": "Yanıt Google'dan ve vitrinden kaldırılır; yorum yerinde kalır.",
-        "action": "Sil"
-      },
-      "visibility": "Vitrinde",
-      "shownLine": "Bu yorum vitrinin Yorumlar sayfasında görünüyor."
-    }
+    "hide": "Gizle",
+    "show": "Yayımla",
+    "hideFor": "{{author}} yorumunu gizle",
+    "showFor": "{{author}} yorumunu yayımla",
+    "customerText": "Müşterinin yorumu ve puanı değiştirilemez ya da silinemez; yorumu listeden gizleyebilirsiniz."
   },
   "staff": {
     "roles": {
@@ -9461,6 +9807,98 @@
         "pages": "Taslaktaki sayfalar",
         "pageLive": "{{title}} sayfasını da yayına al"
       },
+      "topSlider": {
+        "empty": "Henüz görsel yok: vitrinde bu şerit görsel ekleyince görünür.",
+        "slides": "Slaytlar",
+        "slide": "{{number}}. slayt",
+        "noAlt": "Açıklama yok",
+        "flawed": "Düzeltilecek bir alan var",
+        "image": "Görsel",
+        "imageHint": "Şeridin tam genişliğinde, seçtiğiniz yükseklikte kırpılır; geniş ve yatay bir görsel seçin (ör. 1920 × 120).",
+        "mobileImage": "Telefon görseli",
+        "mobileHint": "İsteğe bağlı: 640 pikselin altında bunun yerine gösterilir.",
+        "link": "Bağlantı",
+        "linkHint": "İsteğe bağlı: görsele tıklayınca gidilecek sayfa.",
+        "add": "Görsel ekle",
+        "addHint": "En çok {{max}} görsel; sırayla tek tek gösterilir.",
+        "full": "En çok {{max}} görsel eklenebilir.",
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "thin": "İnce",
+          "medium": "Orta",
+          "tall": "Yüksek",
+          "hint": "Geniş ekranda 48, 80 ya da 120 piksel; telefonda biraz daha alçak."
+        },
+        "interval": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı",
+          "hint": "Her görselin ekranda kalma süresi: 8, 6 ya da 4 saniye. Hareket azaltılmışsa kendiliğinden dönmez."
+        },
+        "transition": {
+          "label": "Geçiş biçimi",
+          "term": "transition",
+          "slide": "Kayarak",
+          "fade": "Solarak",
+          "hint": "Kayarak: yenisi yandan gelir. Solarak: yerinde solup yenisi belirir."
+        },
+        "arrows": {
+          "label": "Önceki / sonraki okları",
+          "term": "arrows",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Görselin iki yanında küçük oklar; ziyaretçi elle geçer."
+        },
+        "dots": {
+          "label": "Noktaları göster",
+          "term": "dots",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Görselin altında her görsel için bir nokta."
+        }
+      },
+      "topStrip": {
+        "title": "Üst şerit",
+        "hide": "Üst şeridi gizle",
+        "show": "Üst şeridi göster",
+        "off": "Üst şerit gizli: üst bilginin üstünde hiçbir ekranda bir şey çizilmez.",
+        "add": "Üst şeride ekle",
+        "full": "Üst şeritte bir şerit ve bir kayan yazı var; yenisi için birini kaldırın.",
+        "pick": {
+          "title": "Üst şeride ekle",
+          "description": "Üst bilginin üstüne bir şerit ya da kayan yazı ekleyin. Şeridin tasarımını ve hareketini sonra ayarlarından değiştirebilirsiniz.",
+          "taken": "Zaten ekli.",
+          "barTaken": "Zaten ekli: üst şeritte bir yazı şeridi var; koyu ya da açık tasarımını onun ayarlarından değiştirin.",
+          "graphite": {
+            "name": "Duyuru şeridi",
+            "description": "Koyu şerit: duyurunuz, yanında küçük bir düğme, geniş ekranda üst bağlantılar ve telefon."
+          },
+          "light": {
+            "name": "Açık şerit",
+            "description": "İnce açık şerit: kısa bir not, üst bağlantılar ve istenirse “Hesabım”."
+          },
+          "slider": {
+            "name": "Kaydırıcı şerit",
+            "description": "Tam genişlikte görselleriniz, tek tek kayarak; oklu, her görsel isteğe bağlı bir bağlantı."
+          },
+          "marquee": {
+            "name": "Kayan yazı",
+            "description": "Kısa sözleriniz ya da bir kampanya, yan yana sürekli kayan bir şerit olarak."
+          },
+          "sliderLine1": "{ücretsiz_kargo_eşiği} ve üzeri siparişlerde kargo bedava",
+          "sliderLine2": "Siparişleriniz özenle paketlenip hızla kargoya verilir",
+          "sliderLine3": "Kredi kartına taksit seçenekleriyle güvenli ödeme"
+        },
+        "linksLabel": "Üst bağlantılar",
+        "linksHint": "“Üst” menünüzdeki bağlantılar, 1024 px ve üstünde.",
+        "phoneLabel": "Telefon",
+        "phoneHint": "Mağaza profilinizdeki telefon, 1024 px ve üstünde.",
+        "accountLabel": "“Hesabım” yazısı",
+        "lightNote": "Açık şeritte ilk satır not olarak durur; bağlantı verirseniz not tıklanır. Duyuruların sırayla dönmesi koyu tasarımdadır: Stil'de tasarımı «Koyu şerit» yapın."
+      },
       "tree": {
         "label": "Sayfanın bölümleri",
         "header": "Üst bilgi",
@@ -9475,6 +9913,7 @@
           "product": "Ürün sayfalarına eklenmiş bölüm yok; ürünün kendi bilgileri görünür."
         },
         "logo": "Logo ve menü",
+        "headerBar": "Üst bilgi düzeni",
         "columns": "Bağlantı sütunları",
         "contact": "İletişim ve yasal bilgiler",
         "storeProfile": "Mağaza profili",
@@ -9514,7 +9953,10 @@
           "bottom": "Izgaranın altına taşı"
         },
         "off": "Kapalı",
-        "offNote": "{{capability}} kapalı olduğu için bu bölüm vitrinde görünmez; özellik açılınca yeniden görünür."
+        "offNote": "{{capability}} kapalı olduğu için bu bölüm vitrinde görünmez; özellik açılınca yeniden görünür.",
+        "insertAbove": "{{name}} bölümünün üstüne bölüm ekle",
+        "addAbove": "Üstüne bölüm ekle",
+        "addBelow": "Altına bölüm ekle"
       },
       "add": {
         "title": "Bölüm ekle",
@@ -9524,15 +9966,23 @@
           "top": "Bütün kategori sayfalarında, ürün ızgarasının üstüne eklenir.",
           "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir.",
           "footer": "Bütün sayfalarda, ödeme sayfası dışında, alt bilginin üstünde görünür; her bölüm bir kez eklenir, sonra sürükleyerek sırasını değiştirebilirsiniz.",
-          "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
+          "pages": "Bu sayfaya, bölümlerin sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz.",
+          "aimed": "Seçtiğiniz yere eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
         },
         "once": "Bu sayfada zaten var.",
-        "general": "Genel bölümler"
+        "general": "Genel bölümler",
+        "search": "Bölüm ara",
+        "searchPlaceholder": "Ara: ürün, banner, SSS…",
+        "none": "Aramanızla eşleşen bölüm yok."
       },
       "types": {
+        "top_slider": {
+          "name": "Görsel kaydırıcı",
+          "description": "Üst bilginin üstünde tam genişlikte görselleriniz, tek tek kayarak; her görsel isteğe bağlı bir bağlantı."
+        },
         "announcement_bar": {
-          "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde ince bir şerit; birden çok duyuru yalnız ilki, sırayla ya da yan yana gösterilir."
+          "name": "Üst şerit",
+          "description": "Üst bilginin üstündeki ince şerit: duyurularınız, üst bağlantılarınız ve telefonunuz. Koyu ya da açık biçimde; üst bilgiden ayrıdır, gizlenince hiçbir şey çizilmez."
         },
         "hero": {
           "name": "Giriş",
@@ -9573,10 +10023,6 @@
         "reviews": {
           "name": "Müşteri yorumları",
           "description": "Müşterilerinizin son yorumları."
-        },
-        "google_rating": {
-          "name": "Google puanı",
-          "description": "Google'daki ortalama puanınız ve değerlendirme sayınız; isterseniz son 4–5 yıldızlı yorumlardan alıntılar. Google yorumları bağlı değilse ya da yorum yoksa vitrinde görünmez."
         },
         "rich_text": {
           "name": "Metin",
@@ -9676,6 +10122,10 @@
           "strip": "Şerit",
           "lined": "Çizgili kutular",
           "card": "Yüzen kart"
+        },
+        "announcement_bar": {
+          "graphite": "Koyu şerit",
+          "light": "Açık şerit"
         },
         "header_bar": {
           "standard": "Solda logo",
@@ -9827,6 +10277,7 @@
       },
       "panel": {
         "back": "Bölümlere dön",
+        "trail": "Konum",
         "visibility": "Görünürlük",
         "visible": "Vitrinde göster",
         "visibleHint": "Gizli bölüm vitrinde görünmez; ayarları saklanır.",
@@ -9836,7 +10287,6 @@
         "duplicate": "Çoğalt",
         "remove": "Bölümü kaldır",
         "placement": "Yeri",
-        "sections": "Bölümler",
         "content": "İçerik",
         "layout": "Diziliş",
         "scroll": "Kaydırma",
@@ -9894,11 +10344,11 @@
         "brands": "Markalar",
         "posts": "Blogdan",
         "reviews": "Müşterilerimiz ne diyor?",
-        "google_rating": "Google'da bizi değerlendirenler",
         "newsletter": "E-bültene abone olun",
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
         "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
+        "newsletterLine": "Vitrinin metni: abone olarak ticari elektronik ileti gönderilmesini kabul edersiniz…",
         "faq": "Sık sorulan sorular",
         "related_products": "Benzer ürünler",
         "price_bands": "Fiyata göre alışveriş",
@@ -9918,6 +10368,7 @@
         "image": "Görsel",
         "alt": "Görselin açıklaması",
         "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
+        "altPlaceholder": "Örn. Kış indirimi: tüm ürünlerde %20",
         "noImage": "Görsel yok",
         "limit": "Gösterilecek sayı",
         "limitTerm": "limit",
@@ -10137,6 +10588,14 @@
         "consent": "Onay metni",
         "consentTerm": "İYS",
         "consentHint": "Abonelik onay kutusunun yanındaki cümle: ziyaretçi bunu işaretleyerek ticari ileti almayı kabul eder. Açıklama değildir; mağazanızın adını ve onay bağlantısının gönderileceğini söylemelidir. Boş bırakırsanız vitrinin yasal metni kullanılır.",
+        "consentLineHint": "Formun altındaki küçük satır: abone olmanın ticari ileti almayı kabul etmek olduğunu söylemeli ve mağazanızın adını anmalıdır; KVKK aydınlatma metni bağlantısı yanına kendiliğinden eklenir. Boş bırakırsanız vitrinin kısa metni kullanılır.",
+        "consentStyle": "Onay biçimi",
+        "consentStyleTerm": "İYS",
+        "consentStyleHint": "Onay kutusu: ziyaretçi abone olmak için kutuyu işaretler; alt bilgide kutu forma dokununca açılır. Tek satır: kutu yok, formun altında hep görünen küçük bir satır abone olmanın onay olduğunu söyler ve KVKK aydınlatma metnine bağlanır. İkisinde de abonelik, e-postadaki onay bağlantısı açılınca başlar ve kayda geçer.",
+        "consentStyles": {
+          "box": "Onay kutusu",
+          "line": "Tek satır"
+        },
         "joined": "Alt bilgiyle birleşik",
         "joinedTerm": "footer band",
         "joinedHint": "Açıkken bant, Serbest düzen alt bilginin kendi zemininde, en üst şerit olarak çizilir. Kapalıyken alt bilginin üstünde ayrı bir kutu olarak durur. Öteki alt bilgi biçimleri bandı zaten kendi içinde çizer.",
@@ -10153,13 +10612,16 @@
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
         "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
+        "lineLink": "{{number}}. duyurunun bağlantısı",
+        "addSecond": "İkinci duyuruyu ekle",
+        "sliderNeedsTwo": "Sırayla dönmesi için en az iki duyuru ekleyin.",
         "mode": {
           "label": "Birden çok duyuru",
           "term": "multiple",
           "first": "Yalnız ilki",
-          "rotate": "Sırayla dönsün",
+          "rotate": "Sırayla döner",
           "inline": "Yan yana",
-          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla: hareket azaltılmışsa ilk duyuru kalır."
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla döner: duyurular tek tek, seçtiğiniz sürede değişir; geçişi, okları ve durdurmayı Hareket bölümünden ayarlarsınız. Hareket azaltılmışsa kendiliğinden dönmez, oklar açıksa ziyaretçi elle geçer."
         },
         "interval": {
           "label": "Geçiş süresi",
@@ -10182,6 +10644,20 @@
           "on": "Açık",
           "off": "Kapalı",
           "hint": "Klavyeyle şeride gelince her zaman durur."
+        },
+        "transition": {
+          "label": "Geçiş biçimi",
+          "term": "transition",
+          "fade": "Solarak",
+          "slide": "Kayarak",
+          "hint": "Solarak: duyuru yerinde solup yenisi belirir (bugünkü). Kayarak: yenisi yandan kayarak gelir, eskisi öbür yana çıkar. Hareket azaltılmışsa ikisi de anında değişir."
+        },
+        "arrows": {
+          "label": "Önceki / sonraki okları",
+          "term": "arrows",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Duyurunun iki yanında küçük oklar çıkar; ziyaretçi duyurular arasında elle geçer. Hareket azaltılmış ekranlarda da çalışır."
         },
         "align": {
           "label": "Hizalama",
@@ -10209,7 +10685,9 @@
         },
         "link": {
           "label": "Şerit düğmesi",
-          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez."
+          "hint": "Yazının yanında küçük bir hap düğme olur; düğmenin yazısı bağlantının adıdır. Boşsa düğme çizilmez.",
+          "lightLabel": "Notun bağlantısı",
+          "lightHint": "İsteğe bağlı: nota tıklayınca gidilecek sayfa."
         }
       },
       "problems": {
@@ -10219,6 +10697,7 @@
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin.",
         "linkLabel": "Dış adresin görünen yazısını girin.",
+        "altRequired": "Görseli anlatan kısa bir metin yazın (ör. Kış indirimi: tüm ürünlerde %20).",
         "slidesRequired": "En az bir görsel ekleyin.",
         "productsRequired": "En az bir ürün seçin.",
         "productRequired": "Bir ürün seçin.",
@@ -10640,11 +11119,13 @@
           },
           "count_word": {
             "label": "Ürün sayısında birim kelimesi",
-            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs."
+            "hint": "Sayfadaki sayının yanında yazar (24 tur). Boş: ürün. Örnek: tur, oda, kurs.",
+            "placeholder": "ör. tur"
           },
           "all_title": {
             "label": "Tüm ürünler başlığı",
-            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar."
+            "hint": "Tüm ürünler sayfasının (/magaza) başlığı; yol izinde ve tarayıcı sekmesinde de bu yazar. Boş: Tüm ürünler. Örnek: Tüm turlar.",
+            "placeholder": "ör. Tüm turlar"
           },
           "words": "liste ızgara grid görünüm satır yol izi breadcrumb kırıntı kategori sayfası tüm ürünler sayı adet birim kelime başlık"
         },
@@ -10813,10 +11294,6 @@
         "edit": "Düzenle",
         "preview": "Önizle"
       },
-      "drawer": {
-        "title": "Sayfanın bölümleri",
-        "description": "Ayarlarını açmak için bir bölüm seçin."
-      },
       "sidebar": {
         "hide": "Kenar çubuğunu gizle",
         "show": "Kenar çubuğunu göster"
@@ -10973,19 +11450,6 @@
           "term": "strips_dim",
           "hint": "Geniş ekranda bir şeridin üstüne gelinince ya da klavyeyle seçilince diğer şeritler kararır."
         }
-      },
-      "googleRating": {
-        "excerpts": "Son yorumlardan alıntı göster",
-        "excerptsTerm": "excerpts",
-        "excerptsHint": "Gizlediğiniz yorumlar hiçbir zaman çıkmaz; yalnızca 4 ve 5 yıldızlı, metni olan son yorumlar.",
-        "count": "Alıntı sayısı",
-        "countTerm": "count",
-        "countHint": "1 ile {{max}} arası.",
-        "profileLink": "Google'daki sayfanıza bağlantı",
-        "profileLinkTerm": "link",
-        "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
-        "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
-        "sourceLink": "Yorumlar > Google yorumları"
       },
       "shared": {
         "badges": {
@@ -11428,8 +11892,8 @@
           "label": "Dev marka adı",
           "term": "wordmark",
           "hint": "Alt satırın altında mağaza adı çok büyük ve soluk yazılır; alt kenar onu keser.",
-          "off": "Kapal\u0131",
-          "on": "A\u00e7\u0131k"
+          "off": "Kapalı",
+          "on": "Açık"
         },
         "bottom_badges": {
           "label": "Alt satırda ödeme logoları",
@@ -12018,6 +12482,12 @@
             "term": "icon style",
             "boxed": "Yuvarlak kutulu",
             "inline": "Satır içi, küçük"
+          },
+          "consent_style": {
+            "label": "Onay biçimi",
+            "term": "İYS",
+            "box": "Onay kutusu",
+            "line": "Tek satır"
           }
         },
         "source": {
@@ -12732,6 +13202,15 @@
       "search": "Başlıkta ara",
       "empty": "Henüz sayfa yok. İlk sayfayı açın; tema düzenleyicide yazarsınız.",
       "full": "Kendi düzeni olan en çok {{max}} sayfa olabilir; yeni sayfanın metni bölüm olarak eklenemez, yalnız gösterilir."
+    },
+    "placeholders": {
+      "maintenance": "Örn. Kısa bir bakım yapıyoruz, birazdan geri döneceğiz.",
+      "menuTitle": "Örn. Kurumsal",
+      "footerAbout": "Örn. El yapımı deri ürünler; 14 gün içinde ücretsiz iade.",
+      "pageTitle": "Örn. Hakkımızda",
+      "designName": "Örn. Kış vitrini",
+      "search_placeholder": "Örn. Ürün ya da marka ara",
+      "strip_note": "Örn. 750 TL üzeri kargo bedava"
     }
   },
   "bulkMessages": {
@@ -13055,6 +13534,12 @@
         "title": "SMS metni öner",
         "description": "Yapay zekâ iletinin adından ve bugünkü metninden üç kısa metin yazar; her biri mağaza adı ve ret satırıyla tek SMS'e sığar. Alıcı listesi gönderilmez; Kaydet'e basana kadar hiçbir şey değişmez."
       }
+    },
+    "placeholders": {
+      "name": "Örn. Kasım indirimi duyurusu",
+      "sms": "Örn. Kasım indirimi başladı: tüm ürünlerde %20 indirim.",
+      "subject": "Örn. Kasım indirimi başladı",
+      "preheader": "Örn. Tüm ürünlerde %20 indirim, pazar gecesine kadar"
     }
   },
   "popups": {
@@ -13257,6 +13742,13 @@
       "title": "Özet",
       "created": "Oluşturuldu",
       "updated": "Son değişiklik"
+    },
+    "placeholders": {
+      "name": "Örn. Kasım bülten çağrısı",
+      "title": "Örn. İlk siparişe %10 indirim",
+      "body": "Örn. Bültene katılın, kampanyaları ilk siz duyun.",
+      "submitLabel": "Kaydol",
+      "buttonLabel": "Örn. Alışverişe başla"
     }
   },
   "paymentLinks": {
@@ -13511,6 +14003,10 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Not",
       "noNote": "Not yok."
+    },
+    "placeholders": {
+      "discountReason": "Örn. Sadık müşteri",
+      "note": "Örn. Telefonla sipariş, kargoyu cuma istiyor."
     }
   },
   "media": {
@@ -13664,6 +14160,9 @@
       "deleted_other": "{{formatted}} görsel silindi.",
       "kept_one": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı.",
       "kept_other": "{{formatted}} görsel kullanıldığı ya da silinemediği için kütüphanede bırakıldı."
+    },
+    "placeholders": {
+      "filename": "Örn. deri-cuzdan-on"
     }
   },
   "confirmEmail": {
@@ -14122,6 +14621,9 @@
       "hint": "Şifreyi toptancıya iletin; ilk girişte değiştirmesini önerin. Açık oturumları kapanır. Bu şifre bir daha gösterilmez.",
       "save": "Şifreyi kaydet",
       "saved": "Yeni şifre kaydedildi; toptancının açık oturumları kapandı."
+    },
+    "placeholders": {
+      "tier": "Örn. Toptan A"
     }
   },
   "ai": {
@@ -14249,11 +14751,11 @@
         }
       },
       "fake": {
-        "name": "Deneme servisi",
-        "description": "Yalnız geliştirme ortamında görünür; gerçek bir servise bağlanmaz.",
-        "rejected": "Deneme servisi kayıtlı anahtarı reddetti.",
+        "name": "Vireo AI",
+        "description": "Metin yazma, görsel okuma ve arka plan temizleme servisi.",
+        "rejected": "Vireo AI kayıtlı anahtarı reddetti. Anahtarı değiştirin ya da Vireo AI hesabınızda kredi olup olmadığına bakın.",
         "checks": {
-          "secret_invalid": "Deneme servisi anahtarı kabul etmedi."
+          "secret_invalid": "Vireo AI anahtarı kabul etmedi. Anahtarı yeniden kopyalayıp girin."
         }
       },
       "platform": {
@@ -14268,7 +14770,7 @@
       "gemini": "Ücretsiz kullanımda Google gönderilen içeriği kendi ürünlerini geliştirmek için kullanır; ücretli kullanımda kullanmaz.",
       "photoroom": "Veri ABD'de işlenir; görsel yanıttan sonra silinir. Model eğitiminde kullanılıp kullanılmadığı belgelerde açık değil.",
       "bria": "Verinin işlendiği ülke ve model eğitiminde kullanılıp kullanılmadığı belirtilmemiş; Bria girdiyi saklamadığını, sonucu 3 gün geçici adreste tuttuğunu yazar.",
-      "fake": "Veri bu bilgisayardan çıkmaz.",
+      "fake": "Veri yanıttan sonra saklanmaz ve model eğitiminde kullanılmaz.",
       "platform": "İçerik, platformun anlaşmalı yapay zekâ servislerinden birine gönderilir; platform içeriği saklamaz. Bu servisler mağaza sözleşmesinde yazılıdır."
     },
     "data_detail": {
@@ -14278,7 +14780,7 @@
       "gemini": "Google'ın şartlarına göre ücretsiz katmanda gönderilen içerik Google ürünlerini geliştirmede kullanılır ve Google çalışanlarınca okunabilir; ücretli katmanda (faturalandırma açık) kullanılmaz. Veri, Google'ın tesisi olan herhangi bir ülkede işlenebilir. Mağazanızdan yalnız vitrinde yayımlanan içerik gider.",
       "photoroom": "Photoroom görseli ABD'deki sunucularında işler ve yanıtı verdikten sonra siler. Görsellerin model eğitiminde kullanılıp kullanılmadığı Photoroom'un sayfalarında çelişkili anlatılıyor; bağlamadan önce kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
       "bria": "Bria, gönderilen görseli saklamadığını ve sonucu 3 gün boyunca geçici bir adreste tuttuğunu yazar. Verinin hangi ülkede işlendiği ve model eğitiminde kullanılıp kullanılmadığı belgelerinde belirtilmemiş; bunun yazılı teyidi bekleniyor. Bağlamadan önce Bria'nın kendi şartlarına bakmanızı öneririz. Mağazanızdan yalnız düzenlenecek görsel gider.",
-      "fake": "Geliştirme için sahte servis: yanıtı verinin kendisinden yazar, hiçbir yere bağlanmaz."
+      "fake": "Vireo AI gönderilen içeriği yanıtı verdikten sonra saklamaz ve model eğitiminde kullanmaz. Mağazanızdan yalnız vitrinde yayımlanan içerik ve düzenlenecek görsel gider."
     },
     "tasks": {
       "assistant": "Yardımcı",

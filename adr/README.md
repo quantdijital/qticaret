@@ -63,7 +63,7 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0055 | [Ürün açıklaması içerik belgesi olarak](0055-urun-aciklamasi-icerik-belgesi.md) | — |
 | 0056 | [Site araması ve listeler PostgreSQL tam metin ile](0056-arama-postgresql-tam-metin.md) | — |
 | 0057 | [Vitrinin tema paketi derleme anında seçilir (`STOREFRONT_THEME`)](0057-vitrin-tema-secimi.md) | — |
-| 0058 | [Google yorumları: Business Profile API](0058-google-yorumlari-business-profile-api.md) | — |
+| 0058 | [Google yorumları: Business Profile API](0058-google-yorumlari-business-profile-api.md) | Kaldırıldı (2026-11-27) |
 | 0059 | [Eski platformun kendi adresleri (WordPress)](0059-eski-platform-adresleri.md) | — |
 | 0060 | [Blog yazarları](0060-blog-yazarlari.md) | — |
 | 0061 | [Üst panel (control plane): teknoloji, veri modeli, güvenlik sınırı ve secret şifreleme](0061-ust-panel-control-plane.md) | — |
@@ -93,3 +93,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0085 | [Yapay zekâ platform kredisi: üst panelde ağ geçidi, kredi defteri, paket hakkı ve yükleme](0085-yapay-zeka-platform-kredisi.md) | — |
 | 0086 | [Varyantın indirimli fiyatı (WooCommerce "İndirimli fiyat" ve "Zamanla")](0086-varyant-indirimli-fiyati.md) | — |
 | 0087 | [Üründe ücretsiz kargo ve kargo sınıfları](0087-urun-ucretsiz-kargo-ve-kargo-siniflari.md) | — |
+| 0088 | [İllere göre kargo ücreti ve gönderim yapılmayan iller](0088-il-bazli-kargo-ucreti.md) | Deniz (önerildi, 2026-11-26) |

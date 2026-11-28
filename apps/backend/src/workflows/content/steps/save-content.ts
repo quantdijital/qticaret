@@ -1,5 +1,6 @@
 import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { ConflictError } from "../../../lib/errors"
 import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord, ContentKind } from "../../../modules/content/service"
@@ -14,6 +15,12 @@ export interface SaveContentInput {
   values: ContentInput
   /** A post's category and tags (adr/0019 ek 2026-11-03); left out, they stay. */
   terms?: PostTermsInput | undefined
+  /**
+   * The entry's `updated_at` as the caller read it: a save made since
+   * refuses this one (`content.changed_meanwhile`), checked under the
+   * content lock. Left out, the save does not compare.
+   */
+  expected_updated_at?: Date | string | undefined
 }
 
 /** The entry as written; `was_live` says whether it had been live before (its old path's fate). */
@@ -48,6 +55,13 @@ export const saveContentStep = createStep(
       : null
     if (input.id && !current) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "content.unknown")
+    }
+    if (
+      current &&
+      input.expected_updated_at !== undefined &&
+      new Date(current.updated_at).getTime() !== new Date(input.expected_updated_at).getTime()
+    ) {
+      throw new ConflictError("content.changed_meanwhile")
     }
     const kind = current?.kind ?? input.kind ?? "page"
     const { fields, media, wasLive } = await contentPlan(container, kind, input.values, current)

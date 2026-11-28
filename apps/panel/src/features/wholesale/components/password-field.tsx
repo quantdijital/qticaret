@@ -30,6 +30,7 @@ export function PasswordField({
   return (
     <div className="flex gap-2">
       <Input
+        // placeholder-exempt: a generated password has no example
         id={id}
         type="text"
         autoComplete="new-password"

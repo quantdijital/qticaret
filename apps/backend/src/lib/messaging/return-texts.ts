@@ -26,7 +26,10 @@ export const RETURN_TEXTS: Readonly<Record<string, string>> = {
     "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaşıp kontrol edildikten sonra ödemeniz iade edilir.",
   "return_approved.intro.exchange":
     "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaştığında yenileri yola çıkar.",
-  "return_approved.code_title": "Kargo kodu",
+  "return_approved.code_title": "İade kargosu",
+  // adr/0031 Ek 2026-11-26: the shop's one contracted return code, said at any branch
+  "return_approved.contracted":
+    "İade paketinizi {{carrier}} şubesine verin ve gönderirken '{{code}}' anlaşmalı iade kodunu söyleyin. Kargo ücreti ödemezsiniz.",
   "return_approved.code": "Koliyi kargo şubesine teslim ederken bu kodu söyleyin: {{code}}",
   "return_approved.no_code":
     "Ürünleri nasıl göndereceğinizle ilgili mağaza sizinle iletişime geçecek.",
@@ -67,9 +70,9 @@ export const RETURN_TEXTS: Readonly<Record<string, string>> = {
   "return_canceled.heading.return": "{{name}}, iade talebiniz iptal edildi",
   "return_canceled.heading.exchange": "{{name}}, değişim talebiniz iptal edildi",
   "return_canceled.intro.return":
-    "#{{number}} numaralı siparişinizdeki iade talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+    "#{{number}} numaralı siparişinizdeki iade talebiniz iptal edildi. Lütfen ürünleri kargoya vermeyin.",
   "return_canceled.intro.exchange":
-    "#{{number}} numaralı siparişinizdeki değişim talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+    "#{{number}} numaralı siparişinizdeki değişim talebiniz iptal edildi. Lütfen ürünleri kargoya vermeyin.",
   "return_canceled.again":
     "Ürünleri yine de iade etmek ya da değiştirmek isterseniz süre içinde sipariş sayfanızdan yeni talep oluşturabilirsiniz. Bu iptal size bir hata gibi geldiyse bizimle iletişime geçin.",
 }

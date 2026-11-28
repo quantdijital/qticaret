@@ -6,15 +6,16 @@ import type {
   ShopView,
   Translate,
 } from "@qticaret/ui"
-import { drawnVariant } from "@qticaret/ui"
-import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { FooterGroup } from "./frame/FooterGroup"
-import { HEADER_VARIANTS, Header, catalogOf } from "./frame/Header"
+import { Header } from "./frame/Header"
+import { topStripOf } from "./frame/TopStrip"
+import { TopSlider } from "./frame/TopSlider"
+import { topSliderWords } from "./frame/top-slider-words"
 import { CardCycle } from "./frame/CardCycle"
 import { ImageCue } from "./frame/ImageCue"
 import { LayerMarks } from "./frame/Layers"
@@ -91,12 +92,8 @@ export function Layout({
       </div>
     )
   }
-  // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
-  // its search: not twice
-  const catalog = catalogOf(shop)
-  // The one-row header keeps no top strip of links or phone: they are in its menu sheet; the
-  // strip stays for the shop's announcements
-  const inline = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS) === "inline"
+  // The shop's top strip, its own section whatever the header (owner 2026-11-27)
+  const strip = topStripOf(shop, t)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
@@ -108,24 +105,14 @@ export function Layout({
     <div className="flex min-h-dvh flex-col" {...marks}>
       <LayerMarks marks={layers}>
         {skip}
-        <Announcement
-          lines={shop.announcements}
-          settings={shop.announcementSettings}
-          button={shop.announcementLink}
-          mark={shop.announcementMark}
-          links={catalog?.links || inline ? [] : shop.topLinks}
-          contact={
-            catalog?.phone || inline
-              ? { ...shop.contact, phone: null, phoneHref: null }
-              : shop.contact
-          }
-          words={{
-            announcements: t("nav.announcements"),
-            links: t("nav.top_links"),
-            pause: t("nav.announcements_pause"),
-            play: t("nav.announcements_play"),
-          }}
-        />
+        {shop.topSlider && (
+          <TopSlider
+            view={shop.topSlider}
+            words={topSliderWords(t, shop.topSlider.slides.length)}
+            mark={shop.editor ? shop.topSlider.id : undefined}
+          />
+        )}
+        {strip.above}
         {shop.marquee && (
           <Marquee
             section={shop.marquee}
@@ -134,7 +121,13 @@ export function Layout({
             mark={shop.editor ? shop.marquee.id : undefined}
           />
         )}
-        <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
+        <Header
+          shop={shop}
+          t={t}
+          searchSuggest={searchSuggest}
+          changeCartLine={changeCartLine}
+          strip={strip.inHeader}
+        />
         <main id="icerik" className="flex-1">
           {children}
         </main>

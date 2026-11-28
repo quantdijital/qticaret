@@ -209,7 +209,6 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/returns",
     // Review M1, L2: only the stop actions and the disconnect; the loyalty plugin closed
     "POST /admin/bulk-messages/:id/resume",
-    "DELETE /admin/google/reviews",
     "POST /admin/google/merchant/sync",
     "POST /admin/gift-cards",
     "POST /admin/store-credit-accounts/:id/credit",

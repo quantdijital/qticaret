@@ -106,6 +106,8 @@ export function MessageTextField({
   const described = [hint ? `${id}-hint` : null, refused ? `${id}-error` : null]
     .filter(Boolean)
     .join(" ")
+  // Left empty, the field takes the platform's words: they are its example
+  const example = message.fields.find((each) => each.field === field)?.default
   const common = {
     id,
     value,
@@ -130,6 +132,7 @@ export function MessageTextField({
       >
         {multiline ? (
           <Textarea
+            placeholder={example}
             {...common}
             rows={field === "intro" ? 5 : 4}
             onChange={(event) => {
@@ -138,6 +141,7 @@ export function MessageTextField({
           />
         ) : (
           <Input
+            placeholder={example}
             {...common}
             onChange={(event) => {
               onChange(event.target.value.replace(/[\r\n]+/g, " "))

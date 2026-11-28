@@ -156,6 +156,7 @@ export function VatRateDialog({ rate, onClose }: VatRateDialogProps) {
               required
             >
               <Input
+                placeholder={t("settings.placeholders.vatName")}
                 id="vat-rate-name"
                 value={name}
                 maxLength={NAME_MAX}

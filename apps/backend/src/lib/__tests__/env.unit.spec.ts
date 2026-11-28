@@ -3,6 +3,7 @@ import {
   EnvValidationError,
   backendUrl,
   isLocalEnv,
+  panelUrl,
   parseEnv,
   s3Settings,
   sharedFileOrigins,
@@ -112,6 +113,17 @@ describe("parseEnv", () => {
     expect(backendUrl({ BACKEND_URL: undefined })).toBe("http://localhost:9000")
     expect(backendUrl({ BACKEND_URL: "https://api.example.com/x/" })).toBe(
       "https://api.example.com"
+    )
+  })
+
+  it("puts the panel on its dev server locally, on the backend's host once deployed", () => {
+    expect(panelUrl({ BACKEND_URL: undefined, NODE_ENV: "development" })).toBe(
+      "http://localhost:5173"
+    )
+    expect(panelUrl({ BACKEND_URL: undefined, NODE_ENV: "test" })).toBe("http://localhost:5173")
+    // adr/0022 §4: deployed, panel and backend share one origin
+    expect(panelUrl({ BACKEND_URL: "https://magaza.example.com/x/", NODE_ENV: "production" })).toBe(
+      "https://magaza.example.com"
     )
   })
 
@@ -358,24 +370,6 @@ describe("parseEnv", () => {
     ).toContain("IYZICO_BASE_URL: is allowed on development and test only")
   })
 
-  it("lets a fake Geliver address on a developer's machine only", () => {
-    const fake = { GELIVER_BASE_URL: "http://127.0.0.1:9103/api/v1" }
-
-    expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).GELIVER_BASE_URL).toBe(
-      fake.GELIVER_BASE_URL
-    )
-    expect(
-      errorOf({
-        ...validEnv,
-        ...s3Env,
-        ...fake,
-        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
-        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
-        NODE_ENV: "production",
-      })
-    ).toContain("GELIVER_BASE_URL: is allowed on development and test only")
-  })
-
   it("sends e-mail through Mailpit on a developer's machine only, and through Resend with its key", () => {
     const mailpit = {
       EMAIL_TRANSPORT: "mailpit",
@@ -484,9 +478,11 @@ describe("parseEnv", () => {
   it.each([
     "PAYTR_BASE_URL",
     "IYZICO_BASE_URL",
-    "GELIVER_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
+    "DHL_ECOMMERCE_BASE_URL",
+    "SURAT_BASE_URL",
+    "PTT_BASE_URL",
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",
     "APPLE_AUTH_BASE_URL",

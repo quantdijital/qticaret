@@ -99,7 +99,6 @@ describe("staff roles", () => {
     ["POST", "/admin/features/ai.assistant"],
     ["POST", "/admin/features/ai.storefront_search"],
     ["POST", "/admin/google/connect"],
-    ["POST", "/admin/google/reviews/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
     ["GET", "/admin/invites"],
@@ -715,15 +714,6 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/google/merchant/sync": false,
   "DELETE /admin/google": false,
   "POST /admin/google/search-console": false,
-  // adr/0058: the shop's Google reviews set up by the admin; a review hidden by moderation
-  "POST /admin/google/reviews/connect": false,
-  "POST /admin/google/reviews/location": false,
-  "POST /admin/google/reviews/sync": false,
-  "DELETE /admin/google/reviews": false,
-  "POST /admin/google/reviews/items/:id": true,
-  // The shop's reply to a Google review, as a product question's answer (adr/0058 Ek 2026-11-06)
-  "POST /admin/google/reviews/items/:id/reply": true,
-  "DELETE /admin/google/reviews/items/:id/reply": true,
   "POST /admin/integrations/credentials/:provider/check": false,
   "POST /admin/integrations/credentials/:provider": false,
   "DELETE /admin/integrations/credentials/:provider": false,
@@ -779,6 +769,12 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/price-lists/:id/discount": false,
   "POST /admin/product-answers/moderate": true,
   "POST /admin/product-questions/:id/answer": true,
+  // Owner 2026-11-27: the shop's own question added, a question edited by the day's staff;
+  // deleting one and bringing it back are the admin's
+  "POST /admin/product-questions": true,
+  "POST /admin/product-questions/:id/edit": true,
+  "DELETE /admin/product-questions/:id": false,
+  "POST /admin/product-questions/:id/restore": false,
   // adr/0047: answering the contact form is the day's work; deleting a message is not
   "POST /admin/contact-messages/:id": true,
   // F18: a draft's preview link, with the content it previews
@@ -842,6 +838,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/shipping-setup/options/:id": false,
   "DELETE /admin/shipping-setup/options/:id": false,
   "POST /admin/shipping-setup/options": false,
+  // PTT's barcode ranges: the shop's settings, not the day's work
+  "POST /admin/shipping-setup/ptt-barcodes": false,
+  "DELETE /admin/shipping-setup/ptt-barcodes/:id": false,
   "POST /admin/staff/invites/:id/resend": false,
   "DELETE /admin/staff/invites/:id": false,
   "POST /admin/staff/invites/accept": false,

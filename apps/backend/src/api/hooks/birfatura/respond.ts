@@ -47,16 +47,36 @@ export function refusalCode(error: unknown): string {
  */
 export async function auditBirfatura(
   req: MedusaRequest,
-  entry: Pick<AuditEntryInput, "kind" | "action" | "resource_id" | "outcome" | "changes">
+  entry: Pick<AuditEntryInput, "kind" | "action" | "resource_id" | "outcome" | "changes"> & {
+    /** What the entry is about: an invoice unless said (an order, for a parcel). */
+    resource_type?: "invoice" | "order"
+  }
 ): Promise<void> {
   const context = auditContext(req)
   await auditService(req).record({
     ...entry,
-    resource_type: "invoice",
+    resource_type: entry.resource_type ?? "invoice",
     actor_type: "system",
     actor_id: "birfatura",
     request_id: context.request_id ?? null,
     ip: context.ip ?? null,
     user_agent: context.user_agent ?? null,
   })
+}
+
+const ANY_CODE = /^[a-z_]{1,40}\.[a-z_]{1,60}$/
+
+/**
+ * Why shipping on BirFatura's word failed, for the log and the record:
+ * the ship workflow's own code (`orders.nothing_to_ship`, a fraud hold, a
+ * payment awaited), or a general one. Never a message that may quote input.
+ */
+export function cargoRefusalCode(error: unknown): string {
+  const shape = (error ?? {}) as { safeMessage?: unknown; message?: unknown }
+  for (const candidate of [shape.safeMessage, shape.message]) {
+    if (typeof candidate === "string" && ANY_CODE.test(candidate)) {
+      return candidate
+    }
+  }
+  return "shipping.error"
 }

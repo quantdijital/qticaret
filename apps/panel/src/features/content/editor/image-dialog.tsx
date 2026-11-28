@@ -44,6 +44,7 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
       hint={t("content.editor.image.altHint")}
     >
       <Input
+        placeholder={t("common.placeholder.imageAlt")}
         id="content-image-alt"
         value={alt}
         maxLength={500}

@@ -7,7 +7,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { FULL_RESET, beginSave } from "@qticaret/admin-ui/lib/forms"
 
 interface Values {
   title: string
@@ -28,6 +28,7 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
   const saved = valuesOf(entry)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
+    const settle = beginSave(form)
     const { dirtyFields } = form.formState
     update.mutate(
       {
@@ -36,7 +37,7 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.entry), FULL_RESET)
+          settle(valuesOf(result.entry))
           toast.success(t("content.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -54,7 +55,12 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
       }}
     >
       <Field label={t("content.fields.title")} htmlFor="content-title" required>
-        <Input id="content-title" maxLength={200} {...form.register("title")} />
+        <Input
+          placeholder={t("content.placeholders.title")}
+          id="content-title"
+          maxLength={200}
+          {...form.register("title")}
+        />
       </Field>
       <Field
         label={t("content.fields.handle")}
@@ -66,6 +72,7 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
             {pathPrefix(entry.kind)}
           </span>
           <Input
+            placeholder={t("content.placeholders.handle")}
             id="content-handle"
             spellCheck={false}
             className="border-0 pl-0 font-mono text-[13px] shadow-none"

@@ -12,6 +12,7 @@ import {
   WXR_ACCEPT,
   isWxrName,
 } from "@/features/settings/api/migration-wordpress"
+import type { WordpressRefresh } from "@/features/settings/api/migration-wordpress"
 import { NO_PARCEL, readParcel } from "@/features/settings/components/migration/parcel"
 import { ParcelFields, RunButtons } from "@/features/settings/components/migration/run-controls"
 
@@ -39,7 +40,7 @@ const schema = z
           ctx.addIssue({ code: "custom", message: problem })
         }
       }),
-    refresh: z.boolean(),
+    refresh: z.enum(["descriptions", "post_images"]).nullable(),
     categoryBase: z.string(),
     parcel: z.object({
       weight: parcelText,
@@ -48,7 +49,7 @@ const schema = z
       height: parcelText,
     }),
   })
-  // A refresh writes descriptions only: the address base and the parcel are not read
+  // A refresh writes descriptions or posts' pictures only: the address base and the parcel are not read
   .superRefine((values, ctx) => {
     if (values.refresh) {
       return
@@ -63,14 +64,23 @@ const schema = z
   })
 type Values = z.infer<typeof schema>
 
-const EMPTY: Values = { file: null, refresh: false, categoryBase: "", parcel: NO_PARCEL }
+const EMPTY: Values = { file: null, refresh: null, categoryBase: "", parcel: NO_PARCEL }
+
+// The refresh-only runs, each its own box; ticking one clears the other
+const REFRESHES: readonly { kind: WordpressRefresh; label: string; hint: string }[] = [
+  { kind: "descriptions", label: "refresh", hint: "refreshHint" },
+  { kind: "post_images", label: "postImages", hint: "postImagesHint" },
+]
 
 export interface WordpressRun {
   file: File
   categoryBase: string
   parcel: Parcel | null
-  /** Only the descriptions of products an earlier run moved, rewritten from this export (ADR-0055). */
-  refresh: boolean
+  /**
+   * Only this of what an earlier run moved: the products' descriptions
+   * rewritten (ADR-0055), or the blog posts' pictures added (adr/0042 Ek 2026-11-27).
+   */
+  refresh: WordpressRefresh | null
 }
 
 interface WordpressSourceProps {
@@ -86,7 +96,9 @@ interface WordpressSourceProps {
  * empty; and the parcel, which most WooCommerce shops need, their products
  * carrying no measurements. "Refresh descriptions only" (ADR-0055) rewrites
  * the descriptions of products already moved and nothing else: applied
- * only, without the base or the parcel.
+ * only, without the base or the parcel. "Move blog pictures only" adds the
+ * pictures an earlier run left out to the posts it moved; it may be tried
+ * dry first.
  */
 export function WordpressSource({ disabled, pending, onRun }: WordpressSourceProps) {
   const { t } = useTranslation()
@@ -139,29 +151,36 @@ export function WordpressSource({ disabled, pending, onRun }: WordpressSourcePro
         control={form.control}
         name="refresh"
         render={({ field }) => (
-          <div className="flex items-start gap-3 rounded-md border px-3 py-2.5">
-            <Checkbox
-              id="wordpress-refresh"
-              className="mt-0.5"
-              checked={field.value}
-              aria-describedby="wordpress-refresh-hint"
-              onCheckedChange={(checked) => {
-                field.onChange(checked === true)
-              }}
-            />
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <label htmlFor="wordpress-refresh" className="cursor-pointer text-sm font-medium">
-                {t(`${W}.refresh`)}
-              </label>
-              <p id="wordpress-refresh-hint" className="text-[13px] text-muted-foreground">
-                {t(`${W}.refreshHint`)}
-              </p>
-            </div>
+          <div className="flex flex-col gap-2">
+            {REFRESHES.map(({ kind, label, hint }) => {
+              const id = `wordpress-refresh-${kind}`
+              return (
+                <div key={kind} className="flex items-start gap-3 rounded-md border px-3 py-2.5">
+                  <Checkbox
+                    id={id}
+                    className="mt-0.5"
+                    checked={field.value === kind}
+                    aria-describedby={`${id}-hint`}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked === true ? kind : null)
+                    }}
+                  />
+                  <div className="flex min-w-0 flex-col gap-0.5">
+                    <label htmlFor={id} className="cursor-pointer text-sm font-medium">
+                      {t(`${W}.${label}`)}
+                    </label>
+                    <p id={`${id}-hint`} className="text-[13px] text-muted-foreground">
+                      {t(`${W}.${hint}`)}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       />
       {/* What a full run reads; a refresh leaves them as they are */}
-      <fieldset disabled={refresh} className="flex flex-col gap-4 disabled:opacity-60">
+      <fieldset disabled={refresh !== null} className="flex flex-col gap-4 disabled:opacity-60">
         <Field
           label={t(`${W}.categoryBase`)}
           htmlFor="wordpress-category-base"
@@ -184,7 +203,7 @@ export function WordpressSource({ disabled, pending, onRun }: WordpressSourcePro
       </fieldset>
       <RunButtons
         disabled={disabled || file === null}
-        checkDisabled={refresh}
+        checkDisabled={refresh === "descriptions"}
         pending={pending}
         onCheck={() => {
           run("check")

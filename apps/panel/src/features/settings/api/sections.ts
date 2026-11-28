@@ -121,7 +121,17 @@ export interface ShippingSettings {
   packing_slip_prices: boolean
   /** The shop's own shipping classes (adr/0087); absent from an older backend: none. */
   shipping_classes?: ShippingClass[]
+  /** The option the "Kargo ücreti" answer prices; null or absent: the cheapest flat one. */
+  primary_option_id?: string | null
+  /**
+   * Who manages the parcels (adr/0072 Ek 2026-11-26): the shop's own
+   * contracts, or BirFatura's cargo module; absent from an older backend: own.
+   */
+  manager?: ShippingManager
 }
+
+export const SHIPPING_MANAGERS = ["own", "birfatura"] as const
+export type ShippingManager = (typeof SHIPPING_MANAGERS)[number]
 
 /** A shop's shipping class (adr/0087 §1): its key on products, its name, its surcharge in kuruş. */
 export interface ShippingClass {
@@ -151,7 +161,26 @@ export interface ReturnsSettings {
    * 30 days or more ahead keeps nothing; the refund comes within 14 days.
    */
   package_travel: boolean
+  /**
+   * The shop's contracted return codes (adr/0031 Ek 2026-11-26): one per
+   * carrier of ours, and BirFatura's carrier named with its code. Absent
+   * from an older backend. Each saved alone: the server merges the others.
+   */
+  contracted_return?: ContractedReturnCodes
 }
+
+export interface ContractedReturnCodes {
+  aras: string | null
+  yurtici: string | null
+  dhlecommerce: string | null
+  surat: string | null
+  ptt: string | null
+  other_carrier: string | null
+  other_code: string | null
+}
+
+/** A code as the server takes it (`platform_settings.return_code_invalid`). */
+export const RETURN_CODE_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9 ./-]{0,38}[A-Za-z0-9])?$/
 
 export const MIN_WITHDRAWAL_DAYS = 14
 
@@ -182,7 +211,17 @@ export interface PromotionSettings {
   combine_codes: boolean
   /** Lira, KDV in, after discounts; null: no free shipping by basket total. */
   free_shipping_threshold: number | null
+  /** What the threshold needs beside the total ("Koşul"); read only while one is set. */
+  free_shipping_condition: FreeShippingCondition
 }
+
+/**
+ * What frees shipping beside the basket total (WooCommerce's "Free
+ * shipping requires"): the total alone, the total or a free shipping
+ * coupon, or both. The server holds it at checkout.
+ */
+export const FREE_SHIPPING_CONDITIONS = ["amount", "amount_or_coupon", "amount_and_coupon"] as const
+export type FreeShippingCondition = (typeof FREE_SHIPPING_CONDITIONS)[number]
 
 type UrlStyle = "prefixed" | "flat"
 

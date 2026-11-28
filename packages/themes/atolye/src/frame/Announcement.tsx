@@ -5,27 +5,40 @@ import type { ContactView, LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { AnnouncementTurns } from "./AnnouncementTurns"
+import type { AnnouncementTurnsWords } from "./AnnouncementTurns"
+import { AnnouncementLine } from "./announcement-line"
 import { announcementStepsOf } from "./announcement-steps"
 
 /** The bar's lines as the shop wants several shown (docs/tema/bilesen-denetimi (b) 6). */
 function Lines({
   lines,
+  links,
   keys,
   settings,
   words,
 }: {
   lines: readonly string[]
+  /** Each line's own link, by its place among `lines`; none: words only. */
+  links: readonly (LinkView | null)[] | undefined
   /** Each line's field key in the editor's live preview; none elsewhere. */
   keys: readonly string[] | undefined
   settings: AnnouncementSettings | undefined
-  words: { announcements: string; pause: string; play: string }
+  words: AnnouncementTurnsWords
 }) {
   const mode = lines.length > 1 ? (settings?.mode ?? "first") : "first"
   // A line's field mark (adr/0065 Faz 2b): its place among the bar's lines in the design
   const qf = (index: number) => (keys?.[index] ? { "data-qf": keys[index] } : {})
   const { align, size } = announcementStepsOf(settings)
   if (mode === "rotate" && settings) {
-    return <AnnouncementTurns lines={lines} keys={keys} settings={settings} words={words} />
+    return (
+      <AnnouncementTurns
+        lines={lines}
+        links={links}
+        keys={keys}
+        settings={settings}
+        words={words}
+      />
+    )
   }
   if (mode === "inline") {
     // Side by side on a wide screen; a phone has room for the first only
@@ -52,7 +65,7 @@ function Lines({
                 ·
               </span>
             )}
-            {line}
+            <AnnouncementLine line={line} link={links?.[index]} />
           </li>
         ))}
       </ul>
@@ -64,7 +77,7 @@ function Lines({
       className={cn(size.pad, align.text, "font-semibold", align.textWide)}
       {...qf(0)}
     >
-      {lines[0]}
+      <AnnouncementLine line={lines[0] ?? ""} link={links?.[0]} />
     </p>
   )
 }
@@ -89,15 +102,21 @@ export function Announcement({
   words,
   mark,
   button,
+  lineLinks,
 }: {
   lines: readonly string[]
+  /**
+   * Each line's own link, by its place among `lines` (null: words only;
+   * owner 2026-11-27); absent: none.
+   */
+  lineLinks?: readonly (LinkView | null)[] | undefined
   /** How several lines show; absent (an older storefront): the first alone. */
   settings?: AnnouncementSettings | undefined
   /** The small pill button beside the lines (`announcement_bar.link`); absent: none. */
   button?: LinkView | undefined
   links: readonly LinkView[]
   contact: ContactView
-  words: { announcements: string; links: string; pause: string; play: string }
+  words: AnnouncementTurnsWords & { links: string }
   /**
    * The bar's section id in the theme editor's live preview (adr/0065 Faz
    * 2b): the bar carries its section mark and each line its field mark
@@ -108,6 +127,7 @@ export function Announcement({
   const kept = lines.flatMap((line, at) => (line.length > 0 ? [{ line, at }] : []))
   const shown = kept.map(({ line }) => line)
   const keys = mark ? kept.map(({ at }) => `lines.${String(at)}`) : undefined
+  const shownLinks = lineLinks ? kept.map(({ at }) => lineLinks[at] ?? null) : undefined
   const phone = contact.phone && contact.phoneHref ? contact : null
   const wide = links.length > 0 || phone !== null
   if (shown.length === 0 && !wide) {
@@ -133,7 +153,9 @@ export function Announcement({
           wide && align.spacer
         )}
       >
-        {shown.length > 0 && <Lines lines={shown} keys={keys} settings={settings} words={words} />}
+        {shown.length > 0 && (
+          <Lines lines={shown} links={shownLinks} keys={keys} settings={settings} words={words} />
+        )}
         {button && shown.length > 0 && (
           <a href={button.path} className="gf-bar-btn" {...(mark ? { "data-qf": "link" } : {})}>
             {button.label}

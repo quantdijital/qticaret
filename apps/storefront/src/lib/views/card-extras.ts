@@ -226,7 +226,8 @@ export function customerPhotos(
  * (their sources in its README), by the backend's key, with each file's
  * size. A bank transfer has our own drawn mark (owner 2026-11-27: it stood
  * out among the networks' cards); cash at the door and instalments have
- * none: the theme draws their name.
+ * none: the theme draws their name, as it does for any carrier without
+ * a file here yet (DHL eCommerce).
  */
 const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height: number }>> = {
   visa: { file: "visa.png", width: 208, height: 68 },
@@ -238,6 +239,8 @@ const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height:
   iyzico: { file: "iyzico.svg", width: 108, height: 38 },
   aras: { file: "aras.svg", width: 148, height: 40 },
   yurtici: { file: "yurtici.svg", width: 178, height: 44 },
+  surat: { file: "surat.png", width: 401, height: 71 },
+  ptt: { file: "ptt.png", width: 1010, height: 310 },
 }
 
 export const shopMarks = (keys: readonly string[] | undefined, t: Translate): ShopMarkView[] =>
