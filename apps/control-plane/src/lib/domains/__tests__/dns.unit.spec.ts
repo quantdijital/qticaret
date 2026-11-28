@@ -2,7 +2,7 @@ import { checkDomainDns } from "../dns"
 import type { DnsLookup } from "../dns"
 
 const HOST = "www.atolye.com.tr"
-const TOKEN = "0123456789abcdef0123456789abcdef"
+const TOKEN = "ab".repeat(16)
 const NO_TARGET = { cname: null, addresses: [] }
 const TARGET = { cname: "edge.quantticaret.com", addresses: ["203.0.113.7"] }
 

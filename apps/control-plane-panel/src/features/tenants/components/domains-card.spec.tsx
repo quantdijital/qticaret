@@ -18,7 +18,7 @@ const BASE = "/admin/cp/tenants/ten_kahve"
 const PROOF = {
   step_up: { token: "proof-1", expires_at: new Date(Date.now() + 300_000).toISOString() },
 }
-const TOKEN = "0123456789abcdef".repeat(2)
+const TOKEN = "ab".repeat(16)
 
 const TXT = {
   name: "_qticaret-verify.www.kahveduragi.com.tr",
