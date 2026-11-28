@@ -29,6 +29,8 @@ export interface NewTenant {
   sector_pack?: string
   /** Its ready-made look (adr/0063 task 2.7); left out: the pack's first. */
   preset?: string
+  /** The owner's e-mail and phone handed to the shop as its storefront contact (default: yes). */
+  storefront_contact?: boolean
 }
 
 export const useRenameTenant = (id: string) =>

@@ -14,6 +14,8 @@ export interface CreateTenantInput {
   sector_pack?: string | null
   /** Its ready-made look (adr/0063 task 2.7; applied by the setup's `preset` step). */
   preset?: string | null
+  /** The owner's e-mail and phone as the storefront contact at setup (default: yes). */
+  storefront_contact?: boolean
 }
 
 /** The record, its subdomain and first status row; undone, it is gone again, children too. */

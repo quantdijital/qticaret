@@ -20,12 +20,14 @@ import { command } from "./steps-setup"
  */
 export const profileStep = provisionStep("profile", async (input, container) => {
   const tenants = tenantsIn(container)
-  if ((await tenants.tenantOf(input.tenant_id)).status === "active") {
+  const tenant = await tenants.tenantOf(input.tenant_id)
+  if (tenant.status === "active") {
     return { status: "skipped", created: false, output: { active: true } }
   }
   const profile = profileOf(
     await tenants.companyOf(input.tenant_id),
-    await tenants.contactsOf(input.tenant_id)
+    // Review L2: the owner's e-mail and phone only when they may be shown on the storefront
+    tenant.storefront_contact ? await tenants.contactsOf(input.tenant_id) : []
   )
   if (!profile) {
     return { status: "skipped", created: false, output: { filled: 0 } }
@@ -56,7 +58,8 @@ interface PresetUndo {
  * `tenant:apply-preset pack= preset= demo=false`. A shop that has never
  * published a design opens with it; otherwise it waits in the draft. None
  * chosen: skipped. Applied once: a run again leaves the shop's design
- * alone (skipped), so the owner's edits stay. Its compensation forgets
+ * alone (skipped), so the owner's edits stay; an active shop never gets
+ * a look from a setup run (security review L1). Its compensation forgets
  * that it was applied, so the setup tried again applies it again (the
  * database it went into is dropped by its own compensation, when this run
  * made it).
@@ -68,6 +71,9 @@ export const presetStep = provisionStep<PresetUndo>(
     const tenant = await tenants.tenantOf(input.tenant_id)
     if (!tenant.preset) {
       return { status: "skipped", created: false, output: { preset: null } }
+    }
+    if (tenant.status === "active") {
+      return { status: "skipped", created: false, output: { preset: tenant.preset, active: true } }
     }
     const pack = sectorPackOf(tenant)
     if (tenant.preset_applied_at) {

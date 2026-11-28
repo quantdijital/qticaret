@@ -79,7 +79,9 @@ export const PostTenant = z
       .nullable()
       .optional(),
     // adr/0063 task 2.7: one of the chosen pack's looks (none: no look applied)
-    preset: z.string().max(40).nullable().optional(),
+    preset: z.string().min(1).max(40).nullable().optional(),
+    // Review L2: the owner's e-mail and phone as the storefront contact (default: yes)
+    storefront_contact: z.boolean().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

@@ -1074,6 +1074,8 @@
     "contacts": {
       "ownerTitle": "Shop owner",
       "ownerText": "At the end of the setup the shop panel's owner invitation is sent to this e-mail address.",
+      "storefrontUse": "Use as the storefront's contact details",
+      "storefrontNote": "These details appear on the shop's storefront as its contact details.",
       "billingTitle": "Billing contact",
       "billingText": "Payment reminders go to this person. Without one they go to the shop owner.",
       "billingAdd": "Add a separate billing contact",

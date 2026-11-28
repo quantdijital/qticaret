@@ -180,6 +180,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "storefront_contact": {
+          "name": "storefront_contact",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "true",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "created_by": {
           "name": "created_by",
           "type": "text",

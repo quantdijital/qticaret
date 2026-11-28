@@ -20,6 +20,8 @@ export interface TenantRecord {
   preset: string | null
   preset_version: number | null
   preset_applied_at: Date | null
+  /** The owner's e-mail and phone handed to the shop as its storefront contact at setup. */
+  storefront_contact: boolean
   created_by: string | null
   /** Internal base URL its plan document is pushed to (Ek C9); null: none. */
   api_base_url: string | null

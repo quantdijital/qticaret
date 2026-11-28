@@ -80,12 +80,21 @@ const page = () =>
 const next = () => userEvent.click(screen.getByRole("button", { name: /İleri/ }))
 
 /** Through every step to the review, the address free; a sector pack and a look chosen if named. */
-async function fillIn(domain = "", pack = "", look = "") {
+async function fillIn(domain = "", pack = "", look = "", hideContact = false) {
   await userEvent.type(screen.getByLabelText("Mağaza adı"), "Bıçak Atölyesi")
   await userEvent.type(screen.getByLabelText("Vergi kimlik no"), "1234567890")
   await next()
   await userEvent.type(screen.getByLabelText("Ad soyad"), "Ayşe Demir")
   await userEvent.type(screen.getByLabelText("E-posta"), "ayse@bicakatolyesi.com")
+  // Review L2: said before the owner's details reach the storefront; on unless unticked
+  expect(
+    screen.getByText("Bu bilgiler mağazanın vitrininde iletişim bilgisi olarak görünür.")
+  ).toBeInTheDocument()
+  const contact = screen.getByRole("checkbox", { name: "Vitrinde iletişim bilgisi olarak kullan" })
+  expect(contact).toBeChecked()
+  if (hideContact) {
+    await userEvent.click(contact)
+  }
   await next()
   await userEvent.click(await screen.findByRole("radio", { name: /Profesyonel/ }))
   await next()
@@ -177,7 +186,7 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
   it("makes the record, saves the rest, starts the setup with one proof, opens its tab", async () => {
     const sent = stubApi(controlPlane())
     page()
-    await fillIn("bicakatolyesi.com", "Bıçak ve çatal-bıçak", "Tezgâh")
+    await fillIn("bicakatolyesi.com", "Bıçak ve çatal-bıçak", "Tezgâh", true)
     // The review names the pack and the look chosen
     expect(screen.getByText("Bıçak ve çatal-bıçak")).toBeInTheDocument()
     expect(screen.getByText("Tezgâh")).toBeInTheDocument()
@@ -212,6 +221,7 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
       package_id: PRO.id,
       sector_pack: "cutlery",
       preset: "tezgah",
+      storefront_contact: false,
     })
   })
 

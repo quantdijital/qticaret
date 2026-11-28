@@ -124,7 +124,7 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostTenantType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { name, slug, package_id, sector_pack, preset } = req.validatedBody
+  const { name, slug, package_id, sector_pack, preset, storefront_contact } = req.validatedBody
   const { result: tenant } = await createTenantWorkflow(req.scope).run({
     input: {
       name,
@@ -135,6 +135,7 @@ export async function POST(
       sector_pack: sector_pack ?? null,
       // adr/0063 task 2.7: not said, the pack's first look; null, none
       preset: preset === undefined ? defaultPresetOf(sector_pack ?? DEFAULT_SECTOR_PACK) : preset,
+      storefront_contact: storefront_contact ?? true,
     },
   })
   noteAuditResource(req, tenant.id)

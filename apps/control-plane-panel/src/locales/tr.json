@@ -1074,6 +1074,8 @@
     "contacts": {
       "ownerTitle": "Mağaza sahibi",
       "ownerText": "Kurulumun sonunda mağaza panelinin sahip daveti bu e-posta adresine gönderilir.",
+      "storefrontUse": "Vitrinde iletişim bilgisi olarak kullan",
+      "storefrontNote": "Bu bilgiler mağazanın vitrininde iletişim bilgisi olarak görünür.",
       "billingTitle": "Faturalama kişisi",
       "billingText": "Ödeme hatırlatmaları bu kişiye gider. Eklenmezse mağaza sahibine gider.",
       "billingAdd": "Ayrı bir faturalama kişisi ekle",

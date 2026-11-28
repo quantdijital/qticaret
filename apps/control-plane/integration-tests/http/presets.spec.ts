@@ -168,6 +168,8 @@ medusaIntegrationTestRunner({
       expect(tenant.preset_applied_at).not.toBeNull()
       expect(fakeState().shops.get(made.id)?.presets).toEqual([`cutlery/${FIRST.code}`])
 
+      // Review L1: an active shop never gets a look (or a profile) from a setup run again
+      await tenants().updateTenants({ id: made.id, preset_applied_at: null })
       const again = await create(made.id)
       expect(statusOf(again)).toMatchObject({ preset: "skipped", profile: "skipped" })
       expect(fakeState().shops.get(made.id)?.presets).toHaveLength(1)
@@ -235,6 +237,21 @@ medusaIntegrationTestRunner({
       })
       // Values stay out of the run's record
       expect(JSON.stringify(run)).not.toContain("Moda Cad.")
+
+      // Review L2: the owner's details kept off the storefront: only the company's go
+      const hidden = await shop({ storefront_contact: false })
+      await create(hidden.id)
+      expect(fakeState().shops.get(hidden.id)?.profiles).toEqual([])
+      expect(
+        (
+          await call.post(
+            "/admin/cp/tenants",
+            { name: "Kalem", slug: freshSlug(), preset: "" },
+            operator,
+            await proved(http, operator)
+          )
+        ).status
+      ).toBe(400)
 
       const sole = await shop({})
       expect(

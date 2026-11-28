@@ -173,8 +173,12 @@ export class LocalProvisioner implements TenantProvisioner {
         ? { stdin: cmd.document }
         : {}),
       timeoutMs: COMMAND_TIMEOUT_MS[cmd.name],
-      // The owner's invitation token is in that output: kept nowhere
-      logFile: cmd.name === "invite-owner" ? null : join(layout.logDir, "commands.log"),
+      // The owner's invitation token is in that output, the profile's values may be in an
+      // error's: kept nowhere
+      logFile:
+        cmd.name === "invite-owner" || cmd.name === "apply-profile"
+          ? null
+          : join(layout.logDir, "commands.log"),
     })
   }
 

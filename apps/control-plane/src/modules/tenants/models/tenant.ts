@@ -37,6 +37,12 @@ export const Tenant = model
     preset: model.text().nullable(),
     preset_version: model.number().nullable(),
     preset_applied_at: model.dateTime().nullable(),
+    /**
+     * Whether the owner's e-mail and phone go into the shop's settings at
+     * setup as its storefront contact (the wizard's choice, on by default);
+     * off: only the company's details are handed over.
+     */
+    storefront_contact: model.boolean().default(true),
     /** The staff member who made the record; null for the system (a script). */
     created_by: model.text().nullable(),
     /**

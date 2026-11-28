@@ -62,6 +62,8 @@ export interface ShopDraft {
    * "" or another pack's: the pack's first (the control plane's default).
    */
   preset: string
+  /** The owner's e-mail and phone as the storefront's contact details at setup (default: yes). */
+  storefront_contact: boolean
 }
 
 const person = (): PersonDraft => ({ name: "", email: "", phone: "" })
@@ -87,6 +89,7 @@ export const emptyDraft = (): ShopDraft => ({
   custom_domain: "",
   sector_pack: "general",
   preset: "",
+  storefront_contact: true,
 })
 
 /** The slug the shop gets: the typed one, else the name's. */
