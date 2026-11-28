@@ -3,7 +3,7 @@
 > Ortak durum dosyası: aktif faz, sıradaki görev, açık sorular, faz durumu. Kişisel oturum notları `progress/<kişi>.md` içindedir (en yeni en üstte); bu dosyaya oturum notu yazılmaz (CLAUDE.md "Ortak çalışma"). Claude oturuma buradan ve kendi kişisel dosyasından başlar.
 
 ## Aktif faz
-**F17 — Üst panel (control plane): BİTTİ (2026-11-12; C1–C19, KK1–KK3 işaretli, KK1 ADR-0061'e göre yeniden yazıldı: mağazayı personel açar, self-servis kayıt sonraki aşama).** `apps/control-plane` + `apps/control-plane-panel`; imzalı plan belgesi, paket limitleri, kısıt/askı, abonelik takibi, zarf şifreli mağaza hesapları, sürüm ve gösterge. Kapanış güvenlik incelemesi iki tur (üst panel + mağaza) ve takip incelemesi: kritik/yüksek yok, bir orta (üst panel ham hata logu) ve bütün düşükler kapandı; kalan riskler docs/04'te, F16 notları ADR-0061 Ek C19'da (mağaza başına Redis ya da ACL kullanıcısı canlıya çıkış şartı, SMTP, eski `kid`'li belge denetimi, saklama işi). Sıradaki: F16 canlıya çıkış (sahiple birlikte).
+**F17 — Üst panel (control plane): ÇEKİRDEK BİTTİ, takipler sürüyor (2026-11-12; C1–C19, KK1–KK3 işaretli, KK1 ADR-0061'e göre yeniden yazıldı: mağazayı personel açar, self-servis kayıt sonraki aşama). Mağaza kurma yerelde `local` provisioner'la çalışıyor; destek erişimi ve kurulum durumu ekranı dallarda sürüyor; `docker` provisioner F16'da.** `apps/control-plane` + `apps/control-plane-panel`; imzalı plan belgesi, paket limitleri, kısıt/askı, abonelik takibi, zarf şifreli mağaza hesapları, sürüm ve gösterge. Kapanış güvenlik incelemesi iki tur (üst panel + mağaza) ve takip incelemesi: kritik/yüksek yok, bir orta (üst panel ham hata logu) ve bütün düşükler kapandı; kalan riskler docs/04'te, F16 notları ADR-0061 Ek C19'da (mağaza başına Redis ya da ACL kullanıcısı canlıya çıkış şartı, SMTP, eski `kid`'li belge denetimi, saklama işi). Sıradaki: F16 canlıya çıkış (sahiple birlikte).
 
 **F18 — Vitrin ve çoklu tema: BAŞLADI (2026-11-01; D1–D2 bitti, D3 çerçeve bitti, D4–D6 başladı; tasarım shadcn/ui, kurallar docs/19; ilk müşteri sitesinin envanteri `docs/gecis/mylarte/`).** Kullanıcı: "kodlamaya başla f18i bana bir şey sorma bi yedek al mevcuttan ben dönüğümde kontrol edicem beğenmezsem geri alırız. kalan adımları tamamla ve bir arayüz işine giriş bakalım." F16'dan önce. Dal `f18-storefront` (`f15-hardening` üzerinden), push yok (kullanıcı 2026-11-01: "şimdilik push yok"). **Yedek:** etiket `pre-f18-2026-11-01` ve dal `backup/pre-f18-2026-11-01` (F18'den önceki son commit `6a68475`); tam depo paketi `~/Desktop/qticaret-yedek-pre-f18-2026-11-01.bundle` (doğrulandı). Geri almak için `git switch f15-hardening` yeter; F18 dalı silinmeden durur. Mimari ADR-0046 (otonom kabul, gözden geçir); plan aşağıda "F18 görev planı".
 
@@ -820,7 +820,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F14 Veri taşıma ve geçiş araçları | ✅ (G1–G9; KK1–KK4; 2026-10-31; gerçek Shopify ve Türk platformu akışıyla ilk geçişte denenecek) |
 | F15 Sertleştirme (güvenlik/dolandırıcılık/yük) | ✅ (H1–H9; KK3, KK4 işaretli; KK1 iç incelemelerle, dış pentest ve staging yük ölçümü F16; 2026-10-31) |
 | F16 Dağıtım & tenant işletimi | ⬜ |
-| F17 Control plane | ⬜ |
+| F17 Control plane | ⏳ çekirdek bitti (C1–C19, KK1–KK3; 2026-11-12; yerel provisioner); destek erişimi ve kurulum durumu sürüyor, Docker provisioner F16'da |
 | F18 Storefront & temalar | ◐ (D1–D2 bitti, D3–D6 başladı; 2026-11-01, F16'dan önce) |
 | F19 Genişleme: pazaryeri, B2B, yurt dışı, ajan ticareti (sonraki aşama) | ⬜ |
 

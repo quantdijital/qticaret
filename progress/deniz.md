@@ -16,9 +16,6 @@
    - Vitrin ürün sayfası sepete eklerken stok sayısını gösterebilir (tema sözleşmesi değişikliği ister: `ActionResult`).
    - D4-1: düzenleme iadesinde referansla sürdürme gerçek bir düzenleme iadesiyle denenmedi.
    - **Kilit incelemesi L2 (#294'ten):** iç içe katalog kayıtları (toplu düzenleme, çoğaltma, içe aktarma) alt workflow'da kilitsiz koşuyor (öncesinden var).
-   - Üst panel `sector-packs.spec.ts` `dev`'de düşüyor (cutlery hazır görünüm sayısı).
-   - CI HTTP parçası 10/12 35 dakikalık süre sınırına yakın.
-   - Kararsız zamanlama testi: `src/lib/integrations/health/__tests__/health.unit.spec.ts` "times out a check that ignores its signal" (<1000 ms bekliyor, CI'da 1252 ms).
    - İsteğe bağlı: denetim yetkisi olmayan roller için "İndirmelerim" (#304'ten sonra dışa aktarmalarını indirecek ekran yok; sahip kararıyla bilinçli).
 5. **Sahibin tarayıcıda bakması bekleniyor:**
    - Kart görselinin üzerine gelince değişmesi, hover alt çizgisinin kalkması, küçük görsel oklarının kalkması (#201); Katalog'da "Canlı" hareket (#203).
