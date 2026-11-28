@@ -1446,7 +1446,7 @@ Destek oturumu rota tablosunda sahip gibi başlar: tasarım (`storefront-designs
 - Oturumun bütün değişiklikleri normal mutasyon kaydıyla `actor_id = qtsup_…` olarak yazılır.
 - **Üst panel denetim kaydı:** `POST /admin/cp/tenants/:id/support-grants` mutasyonu. Alanlar: `grant_id`, süre ve gerekçe uzunluğu. Gerekçenin kendisi üst panelin etkinlik akışındadır (mağaza notu kalıbı). İzin ve imza yazılmaz.
 - **Sahibe bildirim:**
-  - Zil: `support_access.started`. Yalnız sahip ve yönetici rolleri görür; tetikleyici erişim listesinde.
+  - Zil: `support_access.started`. Yalnız sahip görür (erişim listesinde `/admin/support-access` ile, sahibe özel).
   - E-posta: `staff.support_access` şablonu sahip rolündeki her kullanıcının adresine gider (posta yapılandırılmışsa; yoksa zil yeter). Metin: "Platform desteği (Ad) şu gerekçeyle panelinize giriş yaptı: …, oturum HH:MM'de biter. İstemiyorsanız Ayarlar > Güvenlik'ten bitirebilir ya da kapatabilirsiniz."
 - **Panelde şerit:** destek oturumu boyunca her sayfanın üstünde kalıcı şerit: "Platform desteği olarak giriş yaptınız (Ad) · Kalan süre 42 dk · Oturumu bitir". Kalan süre dakikada bir güncellenir; süre dolunca panel giriş sayfasına döner.
 - **Ayarlar > Güvenlik > Destek erişimi** (yalnız sahip):
