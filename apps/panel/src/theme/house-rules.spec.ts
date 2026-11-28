@@ -41,6 +41,7 @@ const ALLOWED: Record<string, string> = {
   // A look's miniature draws the shop's colours, its words white on them as the shop shows them
   "features/storefront/gallery/design-thumb.tsx bg-white": "look miniature",
   "features/storefront/gallery/thumb-blocks.tsx bg-white": "look miniature",
+  "features/storefront/gallery/design-frame.tsx bg-white": "storefront page behind a look preview",
   // The browser's colour input takes a hex value only
   "features/settings/components/appearance-fields.tsx #000000": "colour input",
 }
