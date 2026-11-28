@@ -132,7 +132,14 @@ medusaIntegrationTestRunner({
           { select: ["title", "handle", "status", "published_at"] }
         )
       expect(
-        opened.map((each) => ({ ...each })).sort((a, b) => a.handle.localeCompare(b.handle))
+        opened
+          .map(({ title, handle, status, published_at }) => ({
+            title,
+            handle,
+            status,
+            published_at,
+          }))
+          .sort((a, b) => a.handle.localeCompare(b.handle))
       ).toEqual(
         STARTERS.map((page) => ({
           title: page.name,
