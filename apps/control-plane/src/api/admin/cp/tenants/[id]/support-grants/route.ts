@@ -2,7 +2,11 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { createHash } from "node:crypto"
 import { MedusaError } from "@medusajs/framework/utils"
 import { STEP_UP_TTL_MS } from "@qticaret/server-kit"
-import { issueSupportGrant, operatorName } from "../../../../../../lib/tenants/support-grant"
+import {
+  issueSupportGrant,
+  operatorName,
+  supportAllowed,
+} from "../../../../../../lib/tenants/support-grant"
 import { saveNoteWorkflow } from "../../../../../../workflows/tenants/tenant-notes"
 import { cpStaff } from "../../../../../http/caller"
 import { noteAuditChanges } from "../../../../../http/audit"
@@ -29,6 +33,11 @@ export async function POST(
   if (role !== "owner" && role !== "operator") {
     // The route table lets only these through; a role changed meanwhile is refused here
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.forbidden")
+  }
+  // Answered here: Medusa's own CONFLICT answer replaces the message with a retry hint
+  if (!supportAllowed(tenant.status)) {
+    res.status(409).json({ type: "conflict", message: "cp.support_unavailable" })
+    return
   }
   // The step-up proof opens one grant only (security review L1): a proof reused within its
   // five minutes is refused as a spent one, and the panel asks for a new code
