@@ -2,6 +2,7 @@ import { sdk } from "@/lib/sdk"
 import type { SheetJob } from "@/features/products/api/sheets"
 import { productBoard } from "@/features/products/api/products"
 import type { ProductFilters } from "@/features/products/api/products"
+import type { ProductKind } from "@/features/products/api/product-edit"
 
 /** Bulk edit (F3.10): one change to the products picked, run as a job on the server. */
 
@@ -21,6 +22,7 @@ export type BulkAction =
   | "brand"
   | "tag"
   | "backorder"
+  | "kind"
 
 /** The change as the job takes it (`catalog.bulk_edit`). */
 export type BulkChange =
@@ -51,6 +53,11 @@ export type BulkChange =
   | { action: "tag"; mode: "add" | "remove"; value: string }
   /** Selling past stock, for the variants whose stock is tracked. */
   | { action: "backorder"; allow: boolean }
+  /**
+   * The kind (F3.2) and how it is booked (adr/0076 §2): another kind than
+   * service is booked by none; the reserved `range` is never offered.
+   */
+  | { action: "kind"; kind: ProductKind; booking_mode: "none" | "departure" }
 
 /** A product left out or failed, with why (the server's Turkish). */
 export interface BulkProblem {
@@ -77,6 +84,8 @@ export interface BulkPreview {
   unchanged: number
   skipped: number
   problems: BulkProblem[]
+  /** A kind change's: the dated products it takes off dated sale. */
+  booking_off?: number
 }
 
 /** `POST /admin/catalog/bulk-edit/preview`: the products planned as the job would, none written. */

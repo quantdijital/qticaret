@@ -17,6 +17,7 @@ import {
   BulkSaleFields,
   BulkTagFields,
 } from "@/features/products/bulk/bulk-more-fields"
+import { BulkKindFields } from "@/features/products/bulk/bulk-kind-fields"
 import { bulkChangeOf, examplePrice } from "@/features/products/bulk/bulk-form"
 import type { BulkForm } from "@/features/products/bulk/bulk-form"
 import { formatMoney } from "@qticaret/admin-ui/lib/format"
@@ -257,5 +258,7 @@ export function BulkFields({ action, ...props }: FieldsProps & { action: BulkAct
       return <BulkTagFields {...props} />
     case "backorder":
       return <BulkBackorderFields {...props} />
+    case "kind":
+      return <BulkKindFields {...props} />
   }
 }

@@ -4605,7 +4605,8 @@
         "sale": "İndirimli fiyat",
         "brand": "Markayı değiştir",
         "tag": "Etiket ekle / kaldır",
-        "backorder": "Stok bitince satış"
+        "backorder": "Stok bitince satış",
+        "kind": "Ürün türünü değiştir"
       },
       "price": {
         "mode": "Fiyat değişikliği",
@@ -4759,6 +4760,21 @@
           "deny": "Satışı durdur"
         },
         "hint": "Yalnızca stoğu takip edilen varyantlar değişir; stoğu takip edilmeyenler her zaman satılır."
+      },
+      "kind": {
+        "label": "Ürün türü",
+        "booking": "Rezervasyon",
+        "bookings": {
+          "none": "Tarihsiz satış",
+          "departure": "Tarihli satış (kalkışlı)"
+        },
+        "hints": {
+          "physical": "Kargoyla gönderilir; mağazanın varsayılan kargo profiline bağlanır. Hediye kartları dijital kalır, atlanır.",
+          "digital": "Kargo istenmez; ürün kargo profilinden çıkar.",
+          "service": "Kargo istenmez. Tarihli satışta her kalkışın kendi kontenjanı olur, varyantlarda stok takibi kapanır. Hediye kartları dijital kalır, atlanır."
+        },
+        "bookingOff_one": "{{formatted}} tarihli ürün tarihli satıştan çıkacak.",
+        "bookingOff_other": "{{formatted}} tarihli ürün tarihli satıştan çıkacak."
       }
     },
     "priceHistory": {

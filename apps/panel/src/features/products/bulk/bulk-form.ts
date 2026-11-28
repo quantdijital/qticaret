@@ -1,4 +1,5 @@
 import type { BulkAction, BulkChange } from "@/features/products/api/bulk"
+import type { ProductKind } from "@/features/products/api/product-edit"
 import { dayEnd, dayOf, dayStart } from "@qticaret/admin-ui/lib/days"
 import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import {
@@ -37,6 +38,9 @@ export interface BulkForm {
   tagMode: "add" | "remove"
   tag: string
   backorder: "allow" | "deny"
+  kind: ProductKind
+  /** A service's booking: by departure or none; another kind is always none. */
+  kindBooking: "none" | "departure"
 }
 
 export const EMPTY_BULK_FORM: BulkForm = {
@@ -60,6 +64,8 @@ export const EMPTY_BULK_FORM: BulkForm = {
   tagMode: "add",
   tag: "",
   backorder: "allow",
+  kind: "physical",
+  kindBooking: "none",
 }
 
 const MAX_AMOUNT = 1_000_000_000
@@ -215,6 +221,14 @@ export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult
       return tagChange(form)
     case "backorder":
       return { change: { action: "backorder", allow: form.backorder === "allow" } }
+    case "kind":
+      return {
+        change: {
+          action: "kind",
+          kind: form.kind,
+          booking_mode: form.kind === "service" ? form.kindBooking : "none",
+        },
+      }
   }
 }
 
