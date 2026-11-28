@@ -8,7 +8,6 @@ import {
   transform,
 } from "@medusajs/framework/workflows-sdk"
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
-import { sectorPack } from "@qticaret/sector-packs"
 import type { SampleCatalog } from "@qticaret/sector-packs"
 import { logger } from "../../lib/logging"
 import { ASYNC_JOB_MODULE } from "../../modules/async-job"
@@ -20,13 +19,14 @@ import type { HeldSampleLock } from "../../lib/sample-catalog/lock"
 import { madeMark, sampleMark } from "../../lib/sample-catalog/mark"
 import { acquireLocksStep } from "../locking/acquire-locks"
 import { releaseLocksStep } from "../locking/release-locks"
+import { sampleSetOf } from "../../lib/sample-catalog/samples"
 import { writeSampleProduct } from "../../lib/sample-catalog/write-product"
 import { liveProductIds, setOpened, undoSampleCategories, undoSampleProducts } from "./undo"
 
 export { SAMPLE_LOCK }
 
 const samplesOf = (pack: string): SampleCatalog => {
-  const samples = sectorPack(pack)?.samples
+  const samples = sampleSetOf(pack)
   if (!samples) {
     throw new Error(`sample-catalog: ${pack} has no samples`)
   }

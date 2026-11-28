@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { sectorPack } from "@qticaret/sector-packs"
+import { sampleSetOf } from "./samples"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
 import { blockReason } from "./plan"
@@ -48,7 +48,7 @@ export async function sampleStatus(container: Container): Promise<SampleStatus> 
   const rows = await readSampleRows(container)
   const loadedPacks = new Set(rows.products.map((product) => product.pack))
   const sets = applied.flatMap((row): SampleSet[] => {
-    const samples = sectorPack(row.pack)?.samples
+    const samples = sampleSetOf(row.pack)
     return samples
       ? [
           {

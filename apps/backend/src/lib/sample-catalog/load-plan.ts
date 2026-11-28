@@ -13,6 +13,7 @@ import { ValidationError } from "../errors"
 import { URL_STYLES, productPath } from "../seo/url-patterns"
 import { sampleTag } from "./mark"
 import { readSampleRows } from "./read"
+import { sampleSetOf } from "./samples"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -155,7 +156,7 @@ export function neededCategories(
  */
 export async function planSampleLoad(container: Container, pack: string): Promise<SampleLoadPlan> {
   const found = sectorPack(pack)
-  const samples = found?.samples
+  const samples = sampleSetOf(pack)
   if (!found || !samples) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "sample_catalog.unknown")
   }

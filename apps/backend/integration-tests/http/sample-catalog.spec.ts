@@ -27,6 +27,11 @@ import type { Storefront } from "../helpers/storefront"
 
 jest.setTimeout(300 * 1000)
 
+// A test run loads a cut set (src/lib/sample-catalog/samples.ts): two tours, one picture
+// each, so a load takes seconds; the whole set's ten tours took minutes and twice a test
+const LIMIT = 2
+process.env["QT_TEST_SAMPLE_LIMIT"] = String(LIMIT)
+
 type Answer = { message?: string } & Record<string, unknown>
 interface Status {
   sets: { pack: string; products: number; loaded: boolean }[]
@@ -48,7 +53,7 @@ if (!found) {
   throw new Error("the travel pack is missing")
 }
 const travel = found
-const SET_SIZE = travel.samples?.products.length ?? 0
+const SET_SIZE = Math.min(LIMIT, travel.samples?.products.length ?? 0)
 
 /**
  * The sector pack's sample catalogue (owner, 2026-11-28): loaded once,
@@ -175,7 +180,8 @@ medusaIntegrationTestRunner({
       expect((await load()).status).toBe("succeeded")
       const products = container().resolve(Modules.PRODUCT)
       const [sampleCategory] = await products.listProductCategories(
-        { handle: "kapadokya-turlari" },
+        // The cut set makes this one (Efes is in it)
+        { handle: "ege-ve-akdeniz-turlari" },
         { select: ["id", "metadata"] }
       )
       expect(sampleCategory?.metadata?.["sample_of"]).toBe(sampleCategory?.id)
@@ -219,7 +225,7 @@ medusaIntegrationTestRunner({
         products: SET_SIZE,
         reviews: loaded.reviews,
         categories_kept: [
-          { id: sampleCategory?.id, name: "Kapadokya Turları", reason: "own_products" },
+          { id: sampleCategory?.id, name: "Ege ve Akdeniz Turları", reason: "own_products" },
         ],
       })
       const after = await status()
