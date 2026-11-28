@@ -1,4 +1,4 @@
-import { Copy } from "lucide-react"
+import { Copy, ExternalLink } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -9,8 +9,10 @@ const localPanelPort = (port: number) => port + 1000
 
 /**
  * Where a shop set up on this machine is managed (development only: the
- * local provisioner's): its panel's address and the command that opens it
- * against the shop's backend. Nothing secret: a port and a command.
+ * local provisioner's): the shop's start runs its panel too (adr/0061 Ek
+ * 2026-11-28, Karar 8), so "Paneli aç" opens it; the command stays for a
+ * panel that did not come up (its port taken, a shop started before).
+ * Nothing secret: a port and a command.
  */
 export function LocalPanelCard({ port }: { port: number }) {
   const { t } = useTranslation()
@@ -28,14 +30,18 @@ export function LocalPanelCard({ port }: { port: number }) {
       <dl className="flex flex-col gap-3 text-sm">
         <div className="flex flex-col gap-1">
           <dt className="text-[13px] text-muted-foreground">{t("setup.local.address")}</dt>
-          <dd>
-            <a href={url} target="_blank" rel="noreferrer" className="font-medium underline">
-              {url}
-            </a>
+          <dd className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <Button asChild size="sm">
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink aria-hidden="true" />
+                {t("setup.local.open")}
+              </a>
+            </Button>
+            <span className="font-mono text-xs text-muted-foreground">{url}</span>
           </dd>
         </div>
         <div className="flex flex-col gap-1">
-          <dt className="text-[13px] text-muted-foreground">{t("setup.local.command")}</dt>
+          <dt className="text-[13px] text-muted-foreground">{t("setup.local.commandFallback")}</dt>
           <dd className="flex items-start gap-2">
             <code className="min-w-0 flex-1 rounded-md bg-muted px-2 py-1.5 font-mono text-xs break-all">
               {command}

@@ -635,7 +635,8 @@
       "chargeVoided": "Ödeme kaydı iptal edildi",
       "chargeAmount": "Ödeme tutarı düzeltildi",
       "grace": "Ek süre değişti",
-      "other": "Değişiklik"
+      "other": "Değişiklik",
+      "supportGrant": "Mağaza paneline geçildi"
     }
   },
   "packages": {
@@ -846,7 +847,10 @@
       "ai_route_no_key": "Bu servisin anahtarı yok; önce anahtarını yazın.",
       "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
       "ai_route_unverified": "Bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez.",
-      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
+      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi.",
+      "support_no_panel": "Mağazanın panel adresi henüz yok; önce kurulumu tamamlayın ya da alan adını doğrulayın.",
+      "support_reason_required": "Gerekçe en az 10 karakter olmalı.",
+      "support_unavailable": "Kurulumu süren ya da kapanan mağazanın paneline geçilemez."
     },
     "ai_credits": {
       "pack_unknown": "Paket bulunamadı ya da satışta değil.",
@@ -1258,11 +1262,12 @@
     },
     "local": {
       "title": "Mağaza paneli (bu bilgisayar)",
-      "text": "Yerel kurulumda mağazanın paneli sunucusunun portunun 1000 fazlasında açılır.",
+      "text": "Yerel kurulumda mağazanın paneli mağazayla birlikte, sunucusunun portunun 1000 fazlasında başlar.",
       "address": "Adres",
-      "command": "Paneli açan komut",
       "copy": "Komutu kopyala",
-      "copied": "Komut kopyalandı."
+      "copied": "Komut kopyalandı.",
+      "open": "Paneli aç",
+      "commandFallback": "Panel açılmazsa bu komutla başlatın"
     },
     "pack": {
       "title": "Sektör paketi",
@@ -1840,5 +1845,19 @@
     "reasonHelp": "En az 3 karakter; kayıtta kalır.",
     "saved": "Hedef sürüm kaydedildi.",
     "noReleases": "Henüz sürüm yok: önce Sürümler sayfasından ekleyin."
+  },
+  "supportAccess": {
+    "open": "Mağaza paneline geç",
+    "title": "Mağaza paneline geç",
+    "text": "Mağazanın panelinde süreli bir \"Platform desteği\" oturumu açılır. Mağaza sahibi zil ve e-postayla haberdar edilir; personel, ödeme ve entegrasyon ayarları, yasal bilgiler ve müşteri verisi dışa aktarımı kapalıdır.",
+    "reason": "Gerekçe",
+    "reasonPlaceholder": "Örn. Ürün girişi ve vitrin düzeni için kurulum desteği",
+    "reasonHelp": "Mağaza sahibine aynen gösterilir ve mağazanın notlarına yazılır. Tek satır, en az 10, en çok 500 karakter.",
+    "minutes": "Süre",
+    "minutesOption": "{{count}} dakika",
+    "submit": "İzin oluştur",
+    "readyTitle": "Bağlantı hazır",
+    "readyText": "Bağlantı tek kullanımlıktır ve 5 dakika içinde açılmalıdır. Oturum {{time}} saatinde kendiliğinden biter.",
+    "openPanel": "Paneli aç"
   }
 }

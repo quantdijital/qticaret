@@ -34,6 +34,7 @@ import {
   PostTenantPlan,
   PostTenantUpdate,
 } from "../admin/cp/tenants/validators"
+import { PostSupportGrant } from "../admin/cp/tenants/[id]/support-grants/validators"
 
 /**
  * What each shop and package route takes (C7), strictly: its body or
@@ -92,6 +93,15 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
     middlewares: [
       rateLimit(() => CP_RATE_LIMIT_PROFILES.tckn_reveal, { identity: userIdOf }),
       validateAndTransformBody(NoBody),
+    ],
+  },
+  {
+    matcher: `${T}/:id/support-grants`,
+    methods: ["POST"],
+    // adr/0061 Ek 2026-11-28: per staff member, every address together
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.support_grant, { identity: userIdOf }),
+      validateAndTransformBody(PostSupportGrant),
     ],
   },
   body(`${T}/:id/contacts`, PostContact),
