@@ -51,7 +51,11 @@ const everything: PresetLookups = {
   records: new Map(
     tezgah.handles.map((ref, index) => [
       ref,
-      ref.startsWith("product:") ? `prod_${String(index)}` : `pcat_${String(index)}`,
+      ref.startsWith("product:")
+        ? `prod_${String(index)}`
+        : ref.startsWith("page:")
+          ? `cnt_page${String(index)}`
+          : `pcat_${String(index)}`,
     ])
   ),
   links: new Map([...markers.hrefs].map((href, index) => [href, linkOf(href, index)])),
@@ -132,11 +136,15 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
   it("in a shop with the pack's skeleton and none of its products, leaves out only the close-up", () => {
     const skeleton: PresetLookups = {
       ...everything,
-      records: new Map(
-        tezgah.handles
+      records: new Map([
+        ...tezgah.handles
           .filter((ref) => ref.startsWith("category:"))
-          .map((ref, index) => [ref, `pcat_${String(index)}`])
-      ),
+          .map((ref, index): [string, string] => [ref, `pcat_${String(index)}`]),
+        // The starter pages the shop has (adr/0073 Ek 2026-11-28)
+        ...tezgah.handles
+          .filter((ref) => ref.startsWith("page:"))
+          .map((ref, index): [string, string] => [ref, `cnt_page${String(index)}`]),
+      ]),
     }
     const { resolved, doc } = draft("tezgah", skeleton)
 

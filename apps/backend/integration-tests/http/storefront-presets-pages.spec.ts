@@ -33,6 +33,14 @@ interface Applied {
   layout: { draft: Draft }
 }
 
+/** The starter pages Katalog lays out beside Hakkımızda (adr/0073 Ek 2026-11-28). */
+const STARTERS = [
+  "page:iletisim",
+  "page:sik-sorulan-sorular",
+  "page:odeme-secenekleri",
+  "page:kargo-ve-teslimat",
+]
+
 const doc = (value: string) => ({
   type: "doc",
   content: [{ type: "paragraph", content: [{ type: "text", text: value }] }],
@@ -48,7 +56,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    it("lays out the shop's Hakkımızda page with its own text, keeps its İletişim layout", async () => {
+    it("lays out the shop's Hakkımızda page with its own text, keeps its own page's layout", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const asOwner = { headers: owner.headers }
@@ -72,9 +80,13 @@ medusaIntegrationTestRunner({
           )
         )
 
-      // Hakkımızda still a draft; İletişim live, laid out by the shop
+      // Hakkımızda still a draft; a page the look does not lay out live, laid out by the shop
       const aboutId = await content({ kind: "page", title: "Hakkımızda", handle: "hakkimizda" })
-      const contactId = await content({ kind: "page", title: "İletişim", handle: "iletisim" })
+      const contactId = await content({
+        kind: "page",
+        title: "Bize Ulaşın",
+        handle: "bize-ulasin",
+      })
       // A page's text is the system's to write (adr/0073 Ek 2026-11-19 (2) K4)
       await writePageText(container, contactId, doc("Bize yazın."))
       expect(
@@ -104,13 +116,18 @@ medusaIntegrationTestRunner({
 
       const first = await apply()
       expect(first.status).toBe(200)
-      // The page found though a draft: nothing skipped or opened for it; the shop's contact layout kept
+      // The page found though a draft: nothing skipped or opened for it; the shop's own layout
+      // kept; the starter pages the shop lacks opened as drafts
       expect(first.data.result.skipped.filter((each) => each.where === "pages")).toEqual([])
-      expect(first.data.result.made_pages).toEqual([])
+      expect(first.data.result.made_pages.map((page) => page.ref)).toEqual(STARTERS)
       expect(first.data.result.kept).toContain(`pages.${contactId}`)
       expect(first.data.result.dropped_pages).toBe(0)
       const pages = first.data.layout.draft.pages
-      expect(pages.map((page) => page.page_id)).toEqual([contactId, aboutId])
+      expect(pages.map((page) => page.page_id)).toEqual([
+        contactId,
+        aboutId,
+        ...first.data.result.made_pages.map((page) => page.page_id),
+      ])
       expect(pages[0]).toEqual(ownContact)
       // The shop's text in the place of the look's own (K6, K9): never wiped, never overwritten
       const [look, ...design] = about.sections
@@ -172,8 +189,8 @@ medusaIntegrationTestRunner({
       )
 
       expect(applied.status).toBe(200)
-      const [page] = applied.data.layout.draft.pages
-      expect(page?.page_id).toBe(aboutId)
+      const page = applied.data.layout.draft.pages.find((each) => each.page_id === aboutId)
+      expect(page).toBeDefined()
       expect(page?.sections[0]).toMatchObject({
         type: "rich_text",
         variant: "article",
@@ -206,14 +223,14 @@ medusaIntegrationTestRunner({
       )
 
       expect(applied.status).toBe(200)
-      const [page] = applied.data.layout.draft.pages
-      expect(page?.page_id).toBe(aboutId)
+      const page = applied.data.layout.draft.pages.find((each) => each.page_id === aboutId)
+      expect(page).toBeDefined()
       expect(page?.sections.map((section) => section.id)).toEqual(
         katalog?.layout.pages?.[0]?.sections.map((section) => section.id)
       )
       expect(JSON.stringify(page?.sections[0])).toContain("Köklerimizden geleceğe.")
       expect(applied.data.result.texts_kept).toEqual([])
-      expect(applied.data.result.made_pages).toEqual([])
+      expect(applied.data.result.made_pages.map((each) => each.ref)).toEqual(STARTERS)
     })
 
     it("applies the look without the Hakkımızda layout when fifty pages have their own", async () => {

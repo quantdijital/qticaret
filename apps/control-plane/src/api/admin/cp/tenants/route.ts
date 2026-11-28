@@ -3,6 +3,7 @@ import { parseEnv } from "../../../../lib/env"
 import { listVersions } from "../../../../lib/fleet/release-views"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
+import { DEFAULT_SECTOR_PACK, defaultPresetOf } from "../../../../lib/tenants/sector-packs"
 import type { HealthTarget } from "../../../../modules/fleet/models/health"
 import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { createTenantWorkflow } from "../../../../workflows/tenants/create-tenant"
@@ -115,14 +116,15 @@ export async function GET(
 /**
  * POST /admin/cp/tenants (owner, operator): a new shop as a record
  * (adr/0061 §2): `provisioning`, its subdomain under `PLATFORM_DOMAIN`,
- * optionally its package and sector pack (C11). Bringing it up is the
+ * optionally its package, sector pack (C11) and ready-made look (adr/0063
+ * task 2.7; not said: the pack's first). Bringing it up is the
  * setup's (C10); C11's wizard starts it once the record is filled in.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostTenantType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { name, slug, package_id, sector_pack } = req.validatedBody
+  const { name, slug, package_id, sector_pack, preset, storefront_contact } = req.validatedBody
   const { result: tenant } = await createTenantWorkflow(req.scope).run({
     input: {
       name,
@@ -131,6 +133,9 @@ export async function POST(
       created_by: actorOf(req),
       package_id: package_id ?? null,
       sector_pack: sector_pack ?? null,
+      // adr/0063 task 2.7: not said, the pack's first look; null, none
+      preset: preset === undefined ? defaultPresetOf(sector_pack ?? DEFAULT_SECTOR_PACK) : preset,
+      storefront_contact: storefront_contact ?? true,
     },
   })
   noteAuditResource(req, tenant.id)

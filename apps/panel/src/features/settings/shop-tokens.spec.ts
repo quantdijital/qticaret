@@ -24,10 +24,12 @@ describe("shop tokens", () => {
     expect(hasShopToken("1500 TL ve üzeri")).toBe(false)
     expect(hasShopToken("{ kargo }")).toBe(false)
     expect(hasShopToken("{telefon}")).toBe(true)
-    expect(unknownShopTokens("{telefon} {kargo} {kargo} {iade_süresi}")).toEqual([
+    expect(unknownShopTokens("{telefon} {kargo} {kargo} {indirim_oranı}")).toEqual([
       "kargo",
-      "iade_süresi",
+      "indirim_oranı",
     ])
+    // The shipping days and the withdrawal period are shop details (adr/0073 Ek 2026-11-28)
+    expect(unknownShopTokens("{hazırlama_süresi} {kargo_süresi} {iade_süresi}")).toEqual([])
     // Written decomposed (a pasted ü), it is still the detail the server knows
     expect(unknownShopTokens("{ücretsiz_kargo_eşiği}")).toEqual([])
   })

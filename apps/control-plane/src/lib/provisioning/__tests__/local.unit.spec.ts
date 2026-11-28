@@ -171,6 +171,27 @@ describe("the closed command list (adr/0061 §3.4)", () => {
         "provisioning.sector_pack_unknown"
       )
     }
+    // adr/0063 task 2.7: a look's code, never a path or an option; never the demo content
+    expect(argvOf({ name: "apply-preset", pack: "cutlery", preset: "katalog" })).toEqual([
+      "exec",
+      "./src/scripts/apply-preset.js",
+      "pack=cutlery",
+      "preset=katalog",
+      "demo=false",
+    ])
+    for (const preset of ["../katalog", "--help", "demo=true", "Katalog", "a"]) {
+      expect(codeOf(() => argvOf({ name: "apply-preset", pack: "cutlery", preset }))).toBe(
+        "provisioning.preset_unknown"
+      )
+    }
+    expect(codeOf(() => argvOf({ name: "apply-preset", pack: "../x", preset: "katalog" }))).toBe(
+      "provisioning.sector_pack_unknown"
+    )
+    // The profile goes on stdin: nothing of it on the command line
+    expect(argvOf({ name: "apply-profile", document: '{"legal":{}}' })).toEqual([
+      "exec",
+      "./src/scripts/apply-profile.js",
+    ])
     expect(codeOf(() => argvOf({ name: "bootstrap", store_name: "a\u202eb" }))).toBe(
       "provisioning.store_name_invalid"
     )
@@ -178,7 +199,15 @@ describe("the closed command list (adr/0061 §3.4)", () => {
       "provisioning.owner_email_invalid"
     )
     expect(Object.keys(COMMAND_TIMEOUT_MS).sort()).toEqual(
-      ["apply-pack", "bootstrap", "invite-owner", "migrate", "plan-import"].sort()
+      [
+        "apply-pack",
+        "apply-preset",
+        "apply-profile",
+        "bootstrap",
+        "invite-owner",
+        "migrate",
+        "plan-import",
+      ].sort()
     )
   })
 

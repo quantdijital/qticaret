@@ -44,6 +44,9 @@ medusaIntegrationTestRunner({
         "adres",
         "whatsapp",
         "ücretsiz_kargo_eşiği",
+        "hazırlama_süresi",
+        "kargo_süresi",
+        "iade_süresi",
       ])
       expect(before.find((token) => token.name === "telefon")?.value).toBeNull()
       expect(after).toMatchObject({

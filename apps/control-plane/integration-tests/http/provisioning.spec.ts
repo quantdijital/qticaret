@@ -165,8 +165,12 @@ medusaIntegrationTestRunner({
         database: "succeeded",
         migrate: "succeeded",
         bootstrap: "succeeded",
+        // Audit 1.3: the owner's e-mail into the shop's settings
+        profile: "succeeded",
         // C12: no pack on the record: the general one, applied
         sector_pack: "succeeded",
+        // adr/0063 task 2.7: no look chosen
+        preset: "skipped",
         plan_document: "succeeded",
         start: "succeeded",
         health: "succeeded",
@@ -176,10 +180,10 @@ medusaIntegrationTestRunner({
       })
       const tenant = await tenants().tenantOf(made.id)
       expect(tenant.status).toBe("active")
-      expect(tenant).toMatchObject({ sector_pack: "general", sector_pack_version: 2 })
+      expect(tenant).toMatchObject({ sector_pack: "general", sector_pack_version: 3 })
       expect(first.steps?.find((step) => step.name === "sector_pack")?.output).toMatchObject({
         pack: "general",
-        version: 2,
+        version: 3,
         added: 6,
       })
       expect(tenant.api_base_url).toBe(`http://localhost:${String(first.port)}`)
@@ -218,8 +222,9 @@ medusaIntegrationTestRunner({
       expect(statusOf(again)).toMatchObject({
         secrets: "skipped",
         database: "skipped",
-        // The pack offers nothing a second time
+        // The pack offers nothing a second time; the profile finds its field filled
         sector_pack: "skipped",
+        profile: "skipped",
         start: "skipped",
         api_url: "skipped",
         owner_invite: "skipped",

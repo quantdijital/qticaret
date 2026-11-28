@@ -258,9 +258,12 @@ export const composePresetDraftStep = createStep(
   ) => {
     const [kept, legacy] = await Promise.all([keptSettings(container), legacySettings(container)])
     const records = { ...input.resolution.records, ...input.opened.records }
+    // A page the apply just opened has no text of the shop's: its role's synthesis (the contact
+    // page's empty `contact`) is not kept over the look's own text (adr/0073 Ek 2026-11-28)
+    const justOpened = new Set(input.opened.made.map((page) => page.page_id))
     const sources = await shopTextSources(
       container,
-      laidOutIds(input.preset, records),
+      laidOutIds(input.preset, records).filter((id) => !justOpened.has(id)),
       kept.frame.pages
     )
     const made = documentOf(

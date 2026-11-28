@@ -1539,3 +1539,19 @@ Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPL
 - **N-2 (kapatıldı):** sayfa sınırı (en çok 50) müşterilerle birlikte siparişler, sipariş panosu ve müşteri gruplarına da uygulanır. Müşteri gruplarında `fields` ile müşteri açılması reddedilir. Testli.
 - **N-3 (kapatıldı):** `promotion.codes` destek iş türleri listesinden çıktı (toplu indirim kodu mağaza adına indirimdir).
 - **N-4:** Karar 5 tablosuna `store` ve `notifications` bölümleri eklendi. İkinci incelemedeki "kanıt tekrar kullanılabilir" bilgisi geçersiz olarak işaretlendi.
+
+## Ek: hazır görünüm ve mağaza profili kurulumda (2026-11-28)
+
+adr/0063 görev 2.7 ve üst panel denetimi 1.1/1.3. §3.4'ün kapalı komut listesi iki komutla genişler:
+
+- **`apply-preset pack= preset=`** → `tenant:apply-preset pack=<kod> preset=<kod> demo=false`. Kodlar `argvOf`'ta paket/görünüm kodu kalıbıyla (`^[a-z][a-z0-9-]{1,39}$`) denetlenir; `demo` her zaman `false` (sahte içerik müşteri mağazasına girmez). Sonuç `applyPresetResultSchema` ile okunur. Süre sınırı 10 dk.
+- **`apply-profile`** → `tenant:apply-profile`, belge **stdin**'den (`plan-import` kalıbı): `{ legal: { company_title?, tax_office?, tax_number? (yalnız 10 haneli VKN), address? }, store: { contact_email?, contact_phone? } }`, katı şema (`tenantProfileSchema`). Mağaza her alanı kendi ayar şemasıyla tek tek denetler ve **yalnız boş alanları** doldurur; dönen sonuç yalnız sayılardır. TCKN hiçbir yoldan geçmez. Süre sınırı 2 dk.
+
+Kayıt: `tenant.preset` (sihirbazda seçilen görünüm; seçilen paketin görünümlerinden biri olmalı, `cp.preset_unknown`), `preset_version`, `preset_applied_at` (migration `Migration20261128143512`). `POST /admin/cp/tenants` `preset` söylenmezse paketin ilk görünümünü alır; `null` görünümsüz kurar.
+
+Kurulum adımları: `bootstrap → profile → sector_pack → preset → plan_document …`. `profile` idempotenttir (ikinci çalışmada her alan dolu, `skipped`). `preset` bir kez uygulanır: `preset_applied_at` doluysa atlanır (sahibin tasarımına dokunulmaz); telafisi kayıttaki uygulanma işaretini siler (yeni veritabanı zaten kendi telafisiyle düşer), yeniden deneme görünümü yeniden uygular. Mağaza hiç düzen yayımlamamışsa betik görünümü yayımlar, yoksa taslakta bırakır (adr/0063 §7).
+
+Sihirbazın "Görünüm" adımı küçük resimleri üst panelin kendi paket kopyasından okur: `GET /admin/cp/sector-packs/:pack/presets/:code/preview` (bütün personel; yalnız yükleyicinin bulduğu `preview.webp`, yol istekten kurulmaz, sembolik bağ reddedilir, `nosniff`, `default-src 'none'`).
+
+Açık: Kurulum sekmesinde "Görünümü yeniden uygula" (yalnız yayında düzen yokken) bu ekte yok; ayrı iş.
+

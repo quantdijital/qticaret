@@ -15,6 +15,9 @@ const values: ShopInfoValues = {
   adres: "Bağbaşı, Pamukkale / Denizli",
   whatsapp: null,
   ücretsiz_kargo_eşiği: "₺1.500",
+  hazırlama_süresi: "1–2 iş günü",
+  kargo_süresi: "1–3 iş günü",
+  iade_süresi: "14",
 }
 
 describe("shop info tokens", () => {
@@ -27,6 +30,16 @@ describe("shop info tokens", () => {
     )
     // A detail not given leaves nothing; an unknown name is not touched
     expect(fillShopText("[{whatsapp}] {indirim}", values)).toBe("[] {indirim}")
+  })
+
+  it("fills the shipping days and the withdrawal period a starter page cites", () => {
+    expect(
+      fillShopText(
+        "{hazırlama_süresi} içinde kargoda, {kargo_süresi} içinde kapıda; {iade_süresi} gün iade.",
+        values
+      )
+    ).toBe("1–2 iş günü içinde kargoda, 1–3 iş günü içinde kapıda; 14 gün iade.")
+    expect(unknownShopTokens("{hazırlama_süresi} {kargo_süresi} {iade_süresi}")).toEqual([])
   })
 
   it("fills a line only whole: none when a detail it names is not given", () => {

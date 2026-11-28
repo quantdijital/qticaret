@@ -10,7 +10,12 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { useRunAction } from "@/features/provisioning/api"
 import type { ProvisioningState } from "@/features/provisioning/api"
 import { actionRules } from "@/features/provisioning/rules"
-import { DEFAULT_SECTOR_PACK, packName, sectorPacksQuery } from "@/features/sector-packs/api"
+import {
+  DEFAULT_SECTOR_PACK,
+  packName,
+  presetsOf,
+  sectorPacksQuery,
+} from "@/features/sector-packs/api"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
@@ -19,6 +24,9 @@ export interface ShopPack {
   sector_pack: string | null
   sector_pack_version: number | null
   sector_pack_applied_at: string | null
+  /** adr/0063 task 2.7: the look chosen for its setup (none: none), and the version applied. */
+  preset: string | null
+  preset_version: number | null
 }
 
 /**
@@ -63,6 +71,10 @@ export function PackCard({
       },
     })
   }
+  const lookName = shop.preset
+    ? (presetsOf(packs.data?.sector_packs, code).find((look) => look.code === shop.preset)?.name ??
+      shop.preset)
+    : null
   const facts: [string, string][] = [
     [t("setup.pack.name"), packName(packs.data?.sector_packs, code)],
     [
@@ -74,6 +86,14 @@ export function PackCard({
     [
       t("setup.pack.appliedAt"),
       shop.sector_pack_applied_at ? formatDateTime(shop.sector_pack_applied_at) : "—",
+    ],
+    [
+      t("setup.pack.preset"),
+      lookName === null
+        ? t("setup.pack.presetNone")
+        : shop.preset_version === null
+          ? `${lookName} · ${t("setup.pack.presetPending")}`
+          : t("setup.pack.presetApplied", { name: lookName, version: shop.preset_version }),
     ],
   ]
   return (

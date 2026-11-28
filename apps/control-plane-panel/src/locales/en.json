@@ -850,7 +850,8 @@
       "ai_service_unknown": "Unknown AI service.",
       "support_no_panel": "The shop has no panel address yet; finish its setup or verify its domain first.",
       "support_reason_required": "The reason must be at least 10 characters.",
-      "support_unavailable": "A shop being set up or closed cannot be entered."
+      "support_unavailable": "A shop being set up or closed cannot be entered.",
+      "preset_unknown": "This ready-made look is not in the chosen sector pack."
     },
     "ai_credits": {
       "pack_unknown": "Pack not found or not on sale.",
@@ -861,6 +862,12 @@
       "apply_pack_failed": "The sector pack could not be applied.",
       "apply_pack_result_invalid": "The shop did not report the sector pack's result in a readable form.",
       "apply_pack_timeout": "Applying the sector pack ran over its time limit.",
+      "apply_preset_failed": "The ready-made look could not be applied.",
+      "apply_preset_result_invalid": "The shop did not report the look's result in a readable form.",
+      "apply_preset_timeout": "Applying the ready-made look took too long.",
+      "apply_profile_failed": "The shop profile could not be handed over.",
+      "apply_profile_result_invalid": "The shop did not report the profile's result in a readable form.",
+      "apply_profile_timeout": "Handing over the shop profile took too long.",
       "backend_not_built": "The shop software is not built. Build it first.",
       "bootstrap_failed": "The shop's first settings could not be made.",
       "bootstrap_timeout": "The shop's first settings ran over their time limit.",
@@ -896,6 +903,7 @@
       "plan_import_refused": "The shop refused the plan document.",
       "plan_import_timeout": "Importing the plan document ran over its time limit.",
       "port_in_use": "The shop's port is used by another application.",
+      "preset_unknown": "This ready-made look is not in the shop's sector pack.",
       "repo_unknown": "The shop software could not be found.",
       "secrets_exposed": "The shop's secret values file is not safely permissioned; it was not used.",
       "secrets_lost": "The shop's secret values were not found; its keys must be renewed.",
@@ -1052,6 +1060,10 @@
         "title": "Sector pack",
         "description": "The shop's starting templates."
       },
+      "look": {
+        "title": "Look",
+        "description": "The ready-made look the storefront opens with."
+      },
       "review": {
         "title": "Review and set up",
         "description": "Check the details, then set the shop up."
@@ -1066,6 +1078,8 @@
     "contacts": {
       "ownerTitle": "Shop owner",
       "ownerText": "At the end of the setup the shop panel's owner invitation is sent to this e-mail address.",
+      "storefrontUse": "Use as the storefront's contact details",
+      "storefrontNote": "These details appear on the shop's storefront as its contact details.",
       "billingTitle": "Billing contact",
       "billingText": "Payment reminders go to this person. Without one they go to the shop owner.",
       "billingAdd": "Add a separate billing contact",
@@ -1096,6 +1110,13 @@
     "sector": {
       "title": "Sector pack",
       "text": "The shop opens with ready attribute templates, suggested categories, settings and search appearance templates. The setup adds only what the shop lacks; the shop can change all of it later."
+    },
+    "look": {
+      "title": "Ready-made look",
+      "text": "The {{pack}} pack's ready-made looks. The chosen look is applied to the storefront and published during setup; the owner can change it later in the panel.",
+      "none": "This sector pack has no ready-made look. The shop opens with the plain storefront; a look can be chosen later in the shop's panel.",
+      "noneShort": "None",
+      "default": "Default"
     },
     "review": {
       "edit": "Edit",
@@ -1227,7 +1248,9 @@
       "database": "Database",
       "migrate": "Database schema",
       "bootstrap": "Shop's first settings",
+      "profile": "Shop profile",
       "sector_pack": "Sector pack",
+      "preset": "Ready-made look",
       "plan_document": "Plan document",
       "start": "Starting the shop server",
       "health": "Health check",
@@ -1251,7 +1274,16 @@
       "packAdded_one": "{{count}} item added",
       "packAdded_other": "{{count}} items added",
       "packKept_one": "{{count}} item was already in the shop, kept",
-      "packKept_other": "{{count}} items were already in the shop, kept"
+      "packKept_other": "{{count}} items were already in the shop, kept",
+      "profileFilled_one": "{{count}} field filled",
+      "profileFilled_other": "{{count}} fields filled",
+      "profileKept_one": "{{count}} field was already filled in the shop, kept",
+      "profileKept_other": "{{count}} fields were already filled in the shop, kept",
+      "profileRefused_one": "{{count}} field did not fit the shop's format, not handed over",
+      "profileRefused_other": "{{count}} fields did not fit the shop's format, not handed over",
+      "presetPublished": "Published on the storefront",
+      "presetDraft": "Written to the draft, not published",
+      "presetApplied": "Applied before; the shop's design was left alone"
     },
     "columns": {
       "kind": "Run",
@@ -1276,7 +1308,11 @@
       "applied": "Version applied",
       "notApplied": "Not applied yet",
       "appliedAt": "Applied on",
-      "newer": "A newer version of the pack is out (version {{version}}). Applying it again adds only the new items."
+      "newer": "A newer version of the pack is out (version {{version}}). Applying it again adds only the new items.",
+      "preset": "Ready-made look",
+      "presetNone": "Not chosen",
+      "presetPending": "Not applied yet",
+      "presetApplied": "{{name}} · version {{version}}"
     }
   },
   "sectorPacks": {
