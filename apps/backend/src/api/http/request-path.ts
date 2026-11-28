@@ -25,11 +25,21 @@ function requestTarget(req: MedusaRequest): string {
   return fields.originalUrl ?? fields.url ?? fields.path ?? "/"
 }
 
-// A feed's address carries its token (F10.8): the logs keep the route, never the token
-const FEED_PATH = /^\/feeds\/[^/]+/
+// A feed's address carries its token (F10.8), and so do the signed preview
+// links: the logs keep the route, never the token
+const TOKEN_PATHS: readonly [RegExp, string][] = [
+  [/^\/feeds\/[^/]+/, "/feeds/:token"],
+  [
+    /^\/store\/storefront-layout\/(design|preview|session)\/[^/]+/,
+    "/store/storefront-layout/$1/:token",
+  ],
+  [/^\/store\/content\/preview\/[^/]+/, "/store/content/preview/:token"],
+  [/^\/store\/product-preview\/[^/]+/, "/store/product-preview/:token"],
+]
 
 /** The request path as logs keep it: a path that carries a secret has it masked. */
-export const loggedPath = (path: string): string => path.replace(FEED_PATH, "/feeds/:token")
+export const loggedPath = (path: string): string =>
+  TOKEN_PATHS.reduce((kept, [pattern, mask]) => kept.replace(pattern, mask), path)
 
 /**
  * The path as Express routes it, for deciding which rule applies: lower-cased,

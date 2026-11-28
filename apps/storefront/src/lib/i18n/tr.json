@@ -794,6 +794,8 @@
   "preview.gone": "Önizleme bağlantısı geçersiz",
   "preview.design": "Vitrin tasarımı",
   "preview.design_notice": "Bu bir önizleme: vitrinin yayınlanmamış taslağını görüyorsunuz. Ziyaretçiler bunu yayınlandıktan sonra görür.",
+  "preview.look": "Kayıtlı görünüm",
+  "preview.look_notice": "Bu bir önizleme: kayıtlı bir görünümü görüyorsunuz. Ziyaretçiler bunu ancak görünüm taslağa alınıp yayınlanınca görür.",
   "preview.notice": "Önizleme: bu sayfa yayımlanmadan önceki hâlidir ve yalnız bağlantıyı bilenler görebilir. Bağlantı 24 saat geçerlidir.",
   "preview.product_notice": "Önizleme: bu ürün henüz yayında değil; sayfası yayımlandığında böyle görünecek. Yalnız bağlantıyı bilenler görebilir, bağlantı 24 saat geçerlidir. Önizlemede sepete eklenemez.",
   "listing.all_products_description": "{shop} mağazasındaki tüm ürünler: fiyatları ve stok durumlarıyla, filtreleyip sıralayarak inceleyin.",

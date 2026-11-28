@@ -48,4 +48,25 @@ export const STOREFRONT_DESIGN_ROUTES = [
       validateAndTransformBody(AdminPostStorefrontDesignApply),
     ],
   },
+  // A saved look's preview link (its card's picture, "Önizle"): people only, per staff member
+  {
+    matcher: "/admin/storefront-designs/:id/preview",
+    methods: ["GET" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.storefront_design_preview, perStaff),
+    ],
+  },
+  // The storefront reading a look through that link, its content pages too; a guessed token
+  // finds nothing
+  {
+    matcher: "/store/storefront-layout/design/:token",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.design_preview)],
+  },
+  {
+    matcher: "/store/storefront-layout/design/:token/pages/:id",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.design_preview)],
+  },
 ]

@@ -210,6 +210,15 @@ export const RATE_LIMIT_PROFILES = {
     name: "storefront_design_write",
     perIdentityAnyIp: { max: 60, windowMs: HOUR },
   },
+  // adr/0064: a saved look's preview link; the gallery asks one per card shown, again
+  // within the hour; per staff member
+  storefront_design_preview: {
+    name: "storefront_design_preview",
+    perIdentityAnyIp: { max: 600, windowMs: HOUR },
+  },
+  // adr/0064: the storefront reading a saved look through its link (a card's picture,
+  // its pages in a tab); a guessed token finds nothing
+  design_preview: { name: "design_preview", perIp: { max: 120, windowMs: MINUTE } },
   // adr/0064: a look applied to the draft (each keeps the draft first and checks the design)
   storefront_design_apply: {
     name: "storefront_design_apply",

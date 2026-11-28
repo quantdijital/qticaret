@@ -13341,6 +13341,8 @@
       "card": {
         "apply": "Load into draft",
         "applyOf": "Load ‘{{name}}’ into the draft",
+        "preview": "Preview",
+        "previewOf": "Preview ‘{{name}}’ in a new tab",
         "actions": "Actions for ‘{{name}}’",
         "rename": "Rename",
         "keep": "Keep with a name",

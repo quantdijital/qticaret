@@ -1,3 +1,4 @@
+import { Eye } from "lucide-react"
 import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
@@ -5,7 +6,8 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import type { DesignCard as Design } from "./api"
 import { DesignMenu } from "./design-menu"
 import { designName, sourceName } from "./design-name"
-import { DesignThumb } from "./design-thumb"
+import { DesignFrame } from "./design-frame"
+import { useDesignPreview } from "./design-preview"
 import { LookState } from "./look-state"
 
 const G = "storefront.gallery"
@@ -36,10 +38,30 @@ function ApplyButton({ design, name, busy, onApply }: DesignCardProps & { name: 
   )
 }
 
+/** "Önizle": the look whole on the storefront, in a new tab (adr/0064). */
+function PreviewButton({ design, name }: { design: Design; name: string }) {
+  const { t } = useTranslation()
+  const preview = useDesignPreview()
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="ghost"
+      disabled={preview.opening}
+      aria-label={t(`${G}.card.previewOf`, { name })}
+      onClick={() => void preview.open(design.id)}
+    >
+      <Eye />
+      {t(`${G}.card.preview`)}
+    </Button>
+  )
+}
+
 /**
- * A named saved look (adr/0064), small: its sketch drawn from its own
- * colours and sections, name, date and source in one line, one state;
- * "Taslağa al" brings it into the draft, "⋯" renames or deletes it.
+ * A named saved look (adr/0064), small: its picture the storefront's own
+ * page drawn with it (its sketch until then), name, date and source in one
+ * line, one state; "Önizle" opens it whole in a new tab, "Taslağa al"
+ * brings it into the draft, "⋯" renames or deletes it.
  */
 export function DesignCard(props: DesignCardProps) {
   const { design } = props
@@ -52,7 +74,7 @@ export function DesignCard(props: DesignCardProps) {
       aria-labelledby={`${ids}-title`}
       className="flex min-w-0 flex-col gap-2 rounded-lg border bg-card p-2.5 shadow-card"
     >
-      <DesignThumb summary={design.summary} />
+      <DesignFrame design={design} />
       <div className="flex items-start gap-1 px-0.5">
         <div className="flex min-w-0 flex-1 flex-col">
           <h3 id={`${ids}-title`} className="truncate text-sm leading-6 font-semibold" title={name}>
@@ -67,7 +89,10 @@ export function DesignCard(props: DesignCardProps) {
       </div>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 px-0.5">
         <LookState live={design.live} inDraft={design.in_draft} edited={design.edited} />
-        <ApplyButton {...props} name={name} />
+        <div className="flex items-center gap-1">
+          <PreviewButton design={design} name={name} />
+          <ApplyButton {...props} name={name} />
+        </div>
       </div>
     </article>
   )
@@ -98,6 +123,7 @@ export function DesignRow(props: DesignCardProps) {
       </div>
       <LookState live={design.live} inDraft={design.in_draft} edited={design.edited} />
       <div className="ml-auto flex items-center gap-1">
+        <PreviewButton design={design} name={name} />
         <ApplyButton {...props} name={name} />
         <DesignMenu design={design} name={name} savedFull={props.savedFull} />
       </div>
