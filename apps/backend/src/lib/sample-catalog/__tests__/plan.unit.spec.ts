@@ -26,8 +26,12 @@ describe("a sample record's mark", () => {
 
   it("does not make a copy a sample: the copy carries another id", () => {
     expect(isSampleRecord({ id: "prod_2", metadata: sampleMark(tag, "prod_1", at) })).toBe(false)
-    expect(isSampleRecord({ id: "prod_1", metadata: { sample: tag } })).toBe(false)
+    expect(isSampleRecord({ id: "prod_1", metadata: { sample: tag, sample_of: "" } })).toBe(false)
     expect(isSampleRecord({ id: "prod_1", metadata: null })).toBe(false)
+  })
+
+  it("takes a record its load left half made (the tag, no sample_of yet) as a sample", () => {
+    expect(isSampleRecord({ id: "prod_1", metadata: { sample: tag } })).toBe(true)
   })
 
   it("reads a product saved well after it was made as edited", () => {

@@ -131,15 +131,19 @@ export function useRemoveSamples() {
   })
 }
 
-/** A product the sample catalogue made, still its own record (a copy is the shop's). */
+/**
+ * A product the sample catalogue made, as the server knows it
+ * (`isSampleRecord`): the set's tag and its own id as `sample_of`; or the
+ * tag and no `sample_of` yet, left half made by a stopped load. A copy
+ * carries another id and is the shop's.
+ */
 export function isSampleProduct(product: {
   id: string
   metadata?: Record<string, unknown> | null
 }): boolean {
   const meta = product.metadata
-  return (
-    typeof meta?.["sample"] === "string" &&
-    meta["sample"] !== "" &&
-    meta["sample_of"] === product.id
-  )
+  if (typeof meta?.["sample"] !== "string" || meta["sample"] === "") {
+    return false
+  }
+  return meta["sample_of"] === product.id || !("sample_of" in meta)
 }

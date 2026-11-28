@@ -72,6 +72,8 @@ describe("isSampleProduct", () => {
       false
     )
     expect(isSampleProduct({ id: "p1", metadata: { sample: "", sample_of: "p1" } })).toBe(false)
+    // Half made by a stopped load: the tag, no sample_of yet
+    expect(isSampleProduct({ id: "p1", metadata: { sample: "travel@1" } })).toBe(true)
     expect(isSampleProduct({ id: "p1", metadata: null })).toBe(false)
   })
 })

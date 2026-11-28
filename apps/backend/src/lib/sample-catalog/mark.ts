@@ -39,10 +39,19 @@ export const sampleMark = (tag: string, id: string, at: Date): Record<string, st
   [SAMPLE_AT_KEY]: at.toISOString(),
 })
 
-/** A record the sample catalogue made: marked, and marked as itself (a copy is not). */
-export const isSampleRecord = (record: { id: string; metadata?: Metadata }): boolean =>
-  packOfTag(record.metadata?.[SAMPLE_KEY]) !== null &&
-  record.metadata?.[SAMPLE_OF_KEY] === record.id
+/**
+ * A record the sample catalogue made: marked, and marked as itself (a copy
+ * is not). One with the set's tag and no `sample_of` key at all was being
+ * made when its load stopped (a restart): never the shop's, removed with
+ * the samples and never sold.
+ */
+export const isSampleRecord = (record: { id: string; metadata?: Metadata }): boolean => {
+  if (packOfTag(record.metadata?.[SAMPLE_KEY]) === null) {
+    return false
+  }
+  const of = record.metadata?.[SAMPLE_OF_KEY]
+  return of === record.id || of === undefined
+}
 
 /** A review's source reference: the set, the product's handle in it and the review's place. */
 export const sampleReviewRef = (tag: string, handle: string, index: number): string =>
