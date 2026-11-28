@@ -135,19 +135,19 @@
         {
           "type": "heading",
           "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Sipariş ve ödeme" }]
+          "content": [{ "type": "text", "text": "Rezervasyon ve ödeme" }]
         },
         {
           "type": "heading",
           "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "Siparişimi nasıl veririm?" }]
+          "content": [{ "type": "text", "text": "Rezervasyonumu nasıl yaparım?" }]
         },
         {
           "type": "paragraph",
           "content": [
             {
               "type": "text",
-              "text": "Ürünü sepete ekleyin, sepetinizden ödeme adımına geçin ve teslimat ile ödeme bilgilerinizi girin. Siparişiniz tamamlandığında onay e-postası gönderilir."
+              "text": "Tarihi ve kişi sayısını seçip sepete ekleyin, ödeme adımında katılımcı ve ödeme bilgilerinizi girin. Rezervasyonunuz tamamlandığında onay e-postası gönderilir."
             }
           ]
         },
@@ -182,80 +182,47 @@
         {
           "type": "heading",
           "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Kargo ve teslimat" }]
+          "content": [{ "type": "text", "text": "İptal ve değişiklik" }]
         },
         {
           "type": "heading",
           "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "Siparişim ne zaman kargoya verilir?" }]
+          "content": [{ "type": "text", "text": "Rezervasyonumu iptal edebilir miyim?" }]
         },
         {
           "type": "paragraph",
           "content": [
             {
               "type": "text",
-              "text": "Siparişiniz, ödemeniz onaylandıktan sonra {hazırlama_süresi} içinde hazırlanarak kargoya verilir."
+              "text": "Evet. İptal koşulları ve iade oranları İptal ve Değişiklik Koşulları sayfamızda yer alır; iptal talebinizi bize yazılı olarak iletebilirsiniz."
             }
           ]
         },
         {
           "type": "heading",
           "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "Siparişim ne zaman elimde olur?" }]
+          "content": [{ "type": "text", "text": "Yerimi başka birine devredebilir miyim?" }]
         },
         {
           "type": "paragraph",
           "content": [
             {
               "type": "text",
-              "text": "Kargoya verilen siparişler genellikle {kargo_süresi} içinde teslim edilir. Kargoya verildiğinde size e-postayla bildirilir."
+              "text": "Katılım koşullarını taşıyan başka bir kişiye devir, İptal ve Değişiklik Koşulları sayfamızdaki sürelere göre yapılabilir."
             }
           ]
         },
         {
           "type": "heading",
           "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "Siparişimi nasıl takip ederim?" }]
+          "content": [{ "type": "text", "text": "İadem ne zaman ödenir?" }]
         },
         {
           "type": "paragraph",
           "content": [
             {
               "type": "text",
-              "text": "Kargo bildirim e-postasındaki takip numarasıyla ya da hesabınızdaki siparişlerinizden siparişinizin durumunu izleyebilirsiniz."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "İade ve değişim" }]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "Ürünü iade edebilir miyim?" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Teslim aldığınız ürünü {iade_süresi} gün içinde, cayma hakkınızı kullanarak iade edebilirsiniz. Kişiye özel hazırlanan ürünler gibi yasal istisnalar bu hakkın dışındadır."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 3 },
-          "content": [{ "type": "text", "text": "İade ücretim ne zaman ödenir?" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "İade ettiğiniz ürün bize ulaşıp incelendikten sonra ücretiniz ödeme yaptığınız yönteme iade edilir. Tutarın hesabınıza geçme süresi bankanıza göre değişir."
+              "text": "İade tutarı ödeme yaptığınız yönteme iade edilir. Tutarın hesabınıza geçme süresi bankanıza göre değişir."
             }
           ]
         },
@@ -353,94 +320,6 @@
             {
               "type": "text",
               "text": "Sitemizdeki tüm bağlantılar SSL ile şifrelenir. Ödemeniz onaylandığında sipariş özetiniz e-posta adresinize gönderilir."
-            }
-          ]
-        }
-      ]
-    }
-  },
-  {
-    "handle": "kargo-ve-teslimat",
-    "title": "Kargo ve Teslimat",
-    "body": {
-      "type": "doc",
-      "content": [
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Siparişlerinizi anlaşmalı kargo firmalarımızla adresinize gönderiyoruz. Bu sayfada siparişinizin ne zaman kargoya verileceğini, teslimat sürelerini ve takip adımlarını bulabilirsiniz."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Hazırlama süresi" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Siparişiniz, ödemeniz onaylandıktan sonra {hazırlama_süresi} içinde hazırlanarak kargoya verilir. Havale ya da EFT ile ödenen siparişlerde bu süre ödemenin hesabımıza ulaştığı günden başlar. Cumartesi, pazar ve resmî tatiller iş gününden sayılmaz."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Teslimat süresi" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Kargoya verilen siparişler, teslimat adresine göre genellikle {kargo_süresi} içinde teslim edilir. Yoğun dönemler, hava koşulları ve kargo firmasından kaynaklanan gecikmeler bu süreyi uzatabilir."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Kargo ücreti" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Kargo ücreti sepetinize ve gönderinin boyutuna göre ödeme adımında hesaplanır ve siparişi onaylamadan önce gösterilir. Ücretsiz kargo fırsatı olduğunda koşulları sepette belirtilir."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Sipariş takibi" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Siparişiniz kargoya verildiğinde size e-postayla bildirilir ve kargo takip numaranız iletilir. Siparişinizin durumunu hesabınızdaki siparişlerinizden de izleyebilirsiniz."
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": { "level": 2 },
-          "content": [{ "type": "text", "text": "Teslim alırken" }]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Paketi teslim alırken dış ambalajını kontrol edin. Ezik ya da yırtık bir paketi kargo görevlisine hasar tutanağı tutturarak teslim alın ve aynı gün bizimle iletişime geçin."
             }
           ]
         }

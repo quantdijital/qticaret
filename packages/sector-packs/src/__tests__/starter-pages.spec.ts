@@ -1,6 +1,13 @@
 import { sectorPacks } from "../index"
 import { STARTER_HANDLES } from "./starters"
 
+// A pack that sells no goods to ship (tours) offers no shipping page (owner, 2026-11-28)
+const NO_SHIPPING = new Set(["travel"])
+const startersOf = (pack: string): string[] =>
+  NO_SHIPPING.has(pack)
+    ? STARTER_HANDLES.filter((handle) => handle !== "kargo-ve-teslimat")
+    : STARTER_HANDLES
+
 /** The page's own types a starter page holds beside its text (adr/0073 Ek 2026-11-28). */
 const OWN_TYPES: Record<string, string[]> = {
   iletisim: ["contact"],
@@ -24,14 +31,14 @@ const SHOP_TOKENS = new Set([
 ])
 
 describe("the starter pages (adr/0073 Ek 2026-11-28)", () => {
-  it("are laid out by every look, Hakkımızda first", () => {
+  it("are laid out by every look, Hakkımızda first; a tour's look has no shipping page", () => {
     const presets = sectorPacks().flatMap((pack) => pack.presets)
     expect(presets.length).toBeGreaterThanOrEqual(7)
     for (const preset of presets) {
       const refs = (preset.layout.pages ?? []).map((page) => page.page_id.$handle)
       expect([preset.code, refs]).toEqual([
         preset.code,
-        STARTER_HANDLES.map((handle) => `page:${handle}`),
+        startersOf(preset.pack).map((handle) => `page:${handle}`),
       ])
     }
   })
@@ -52,13 +59,29 @@ describe("the starter pages (adr/0073 Ek 2026-11-28)", () => {
     }
   })
 
-  it("are offered by every pack, with the same texts", () => {
+  it("are offered by every pack, with the same texts but a tour's own questions", () => {
     const general = sectorPacks().find((pack) => pack.code === "general")
     for (const pack of sectorPacks()) {
+      const wanted = startersOf(pack.code)
       const starters = (pack.pages ?? []).filter((page) => STARTER_HANDLES.includes(page.handle))
-      expect([pack.code, starters.map((page) => page.handle)]).toEqual([pack.code, STARTER_HANDLES])
-      expect(starters).toEqual(general?.pages)
+      expect([pack.code, starters.map((page) => page.handle)]).toEqual([pack.code, wanted])
+      const same = (page: { handle: string }) =>
+        wanted.includes(page.handle) &&
+        !(NO_SHIPPING.has(pack.code) && page.handle === "sik-sorulan-sorular")
+      expect(starters.filter(same)).toEqual(general?.pages?.filter(same))
     }
+  })
+
+  it("ask a tour shop no shipping questions", () => {
+    const travel = sectorPacks().find((pack) => pack.code === "travel")
+    const faq = JSON.stringify([
+      travel?.pages?.find((page) => page.handle === "sik-sorulan-sorular"),
+      travel?.presets.map((preset) =>
+        preset.layout.pages?.find((page) => page.page_id.$handle === "page:sik-sorulan-sorular")
+      ),
+    ]).toLocaleLowerCase("tr")
+    expect(faq).toContain("rezervasyon")
+    expect(faq).not.toMatch(/kargo|teslimat/)
   })
 
   it("name only the shop's details, and no sample or test words", () => {

@@ -1,20 +1,22 @@
 import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { sectorPack } from "@qticaret/sector-packs"
 import { logger } from "../lib/logging"
-import { planStarterPages } from "../lib/storefront/starter-pages"
+import { planStarterPages, startersFor } from "../lib/storefront/starter-pages"
 import type { StarterFacts, StarterPage } from "../lib/storefront/starter-pages"
 import { CONTENT_MODULE } from "../modules/content"
 import type ContentModuleService from "../modules/content/service"
 import { PLATFORM_SETTINGS_MODULE } from "../modules/platform-settings"
 import type PlatformSettingsModuleService from "../modules/platform-settings/service"
+import { SECTOR_PACKS_MODULE } from "../modules/sector-packs"
+import type SectorPacksModuleService from "../modules/sector-packs/service"
 import { openDraftPage } from "../workflows/content/draft-page"
 import { convertFaqTexts } from "../workflows/storefront/faq-convert"
 import { storefrontRolePages } from "../workflows/storefront/page-roles"
 import { GENERAL_PACK } from "../workflows/storefront/preset-steps"
 
 export interface StarterPagesPorts {
-  /** The starter pages: the general pack's. */
-  starters: () => StarterPage[]
+  /** The starter pages: the general pack's, as the shop's sector pack offers them. */
+  starters: () => Promise<StarterPage[]>
   facts: (handles: readonly string[]) => Promise<StarterFacts>
   /** Opens one as a draft with its text; null when another record holds its address. */
   open: (page: StarterPage) => Promise<string | null>
@@ -34,7 +36,7 @@ export interface StarterPagesTally {
  * record holds is skipped. Idempotent: a second run finds them all.
  */
 export async function openStarterPages(ports: StarterPagesPorts): Promise<StarterPagesTally> {
-  const starters = ports.starters()
+  const starters = await ports.starters()
   const plan = planStarterPages(starters, await ports.facts(starters.map((page) => page.handle)))
   let opened = 0
   let taken = 0
@@ -50,7 +52,17 @@ export async function openStarterPages(ports: StarterPagesPorts): Promise<Starte
 
 export function starterPagesPorts(container: MedusaContainer): StarterPagesPorts {
   return {
-    starters: () => sectorPack(GENERAL_PACK)?.pages ?? [],
+    starters: async () => {
+      const applied = await container
+        .resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
+        .listSectorPackApplications({}, { select: ["pack"], take: null })
+      return startersFor(
+        sectorPack(GENERAL_PACK)?.pages ?? [],
+        applied
+          .filter((row) => row.pack !== GENERAL_PACK)
+          .flatMap((row) => sectorPack(row.pack) ?? [])
+      )
+    },
     facts: async (handles) => {
       const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
       const [entries, storefront] = await Promise.all([

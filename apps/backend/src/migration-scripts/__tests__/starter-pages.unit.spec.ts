@@ -1,7 +1,7 @@
 import { sectorPack } from "@qticaret/sector-packs"
 import type { ContentDoc } from "../../lib/content"
 import { faqRowsOf } from "../../lib/storefront/faq-text"
-import { planStarterPages, roleHandles } from "../../lib/storefront/starter-pages"
+import { planStarterPages, roleHandles, startersFor } from "../../lib/storefront/starter-pages"
 import type { StarterFacts, StarterPage } from "../../lib/storefront/starter-pages"
 import { openStarterPages } from "../starter-pages"
 import type { StarterPagesPorts } from "../starter-pages"
@@ -19,7 +19,7 @@ const NO_ROLES = { contact: null, payment: null, shipping: null }
 function ports(facts: StarterFacts, taken: readonly string[] = []) {
   const opened: string[] = []
   const fake = {
-    starters: () => STARTERS,
+    starters: async () => Promise.resolve(STARTERS),
     facts: jest.fn(async () => Promise.resolve(facts)),
     open: jest.fn(async (page: StarterPage) => {
       if (taken.includes(page.handle)) {
@@ -92,6 +92,24 @@ describe("planStarterPages", () => {
       "Bize ulaşın",
     ])
     expect(rows.filter((row) => "question" in row)).toHaveLength(9)
+  })
+
+  it("takes the shop's sector pack's own texts, and only the pages it offers", () => {
+    const general = sectorPack("general")?.pages ?? []
+    const travel = sectorPack("travel")
+    const cutlery = sectorPack("cutlery")
+
+    expect(startersFor(general, [])).toEqual(general)
+    expect(startersFor(general, cutlery ? [cutlery] : [])).toEqual(general)
+    const tour = startersFor(general, travel ? [travel] : [])
+    // A tour shop: no shipping page, its own questions, never the pack's other pages
+    expect(tour.map((page) => page.handle)).toEqual([
+      "hakkimizda",
+      "iletisim",
+      "sik-sorulan-sorular",
+      "odeme-secenekleri",
+    ])
+    expect(JSON.stringify(tour[2]?.body)).toContain("Rezervasyon")
   })
 
   it("takes the general pack's pages: the five starters", () => {

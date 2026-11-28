@@ -71,14 +71,15 @@ describe("the travel pack (adr/0076 §12)", () => {
 
   it("offers its cancellation terms as a page, after the starter pages", () => {
     expect(travel?.pages?.map((page) => page.handle)).toEqual([
-      ...STARTER_HANDLES,
+      // The starter pages but the shipping one: tours ship nothing (owner, 2026-11-28)
+      ...STARTER_HANDLES.filter((handle) => handle !== "kargo-ve-teslimat"),
       "iptal-kosullari",
     ])
     expect(travel?.pages?.at(-1)?.body.type).toBe("doc")
   })
 
   it("offers three storefront presets, each asking the destination in its search", () => {
-    expect(travel?.version).toBe(3)
+    expect(travel?.version).toBe(4)
     expect(travel?.presets.map((preset) => preset.code).sort()).toEqual(["patika", "rota", "vadi"])
     for (const preset of travel?.presets ?? []) {
       expect(preset.theme_settings).toMatchObject({

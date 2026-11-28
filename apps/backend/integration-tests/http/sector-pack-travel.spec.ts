@@ -14,8 +14,8 @@ jest.setTimeout(240 * 1000)
 
 const travel = sectorPack("travel") as SectorPack
 // A template, its six attributes, ten categories, two flags, three catalog defaults, its page and
-// the five starter pages (adr/0073 Ek 2026-11-28)
-const TRAVEL_ITEMS = 1 + 6 + 10 + 2 + 3 + 1 + 5
+// the four starter pages a tour shop gets (no shipping page; adr/0073 Ek 2026-11-28)
+const TRAVEL_ITEMS = 1 + 6 + 10 + 2 + 3 + 1 + 4
 
 /**
  * adr/0076 §12: the travel pack turns on dated selling, sets what a new

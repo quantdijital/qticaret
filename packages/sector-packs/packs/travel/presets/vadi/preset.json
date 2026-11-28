@@ -1,7 +1,7 @@
 {
   "format": "quant-storefront-preset",
   "code": "vadi",
-  "version": 2,
+  "version": 3,
   "theme": "atolye",
   "name": "Vadi",
   "description": "Sıcak açık zeminde koyu yeşil ve turuncu: tek satırlık üst bilgi, dalgalarla açılan tam genişlik manzara, turuncu düğme, kapağın içinde arama kutusu, alt kenara taşan güven rozetleri; görsel üstü yazılı tur kartları, ikonlu tur türleri, gezi yazıları, bölünmüş kampanya bandı, ikonlu rakamlar ve tur sayfasında açılır program. Menülere ve ürünlere dokunmaz.",

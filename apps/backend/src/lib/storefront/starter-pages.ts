@@ -75,3 +75,24 @@ export function planStarterPages(
   }
   return plan
 }
+
+/**
+ * The starter pages a shop gets: the general pack's, each as the shop's own
+ * sector pack writes it (a tour shop's questions are its own) and only the
+ * ones that pack offers (a tour shop has no shipping page, owner
+ * 2026-11-28); a shop with no sector pack, or one offering no pages, the
+ * general pack's.
+ */
+export function startersFor(
+  general: readonly StarterPage[],
+  sector: readonly { pages?: readonly StarterPage[] | undefined }[]
+): StarterPage[] {
+  const own = sector.find((pack) => (pack.pages ?? []).length > 0)?.pages
+  if (!own) {
+    return [...general]
+  }
+  return general.flatMap((page) => {
+    const mine = own.find((each) => each.handle === page.handle)
+    return mine ? [mine] : []
+  })
+}
