@@ -97,6 +97,15 @@ describe("the advisor", () => {
     expect(result.categories).toMatchObject({ structured: 0, images: 0 })
   })
 
+  it("asks no barcode, maker code nor brand of a service or a dated product (a tour)", () => {
+    const bare = { ...PRODUCT, unidentified: 2, brand: null, physical: false }
+    expect(ids(good({ product: bare }))).toEqual(expect.arrayContaining(["P-DATA-02", "P-DATA-03"]))
+    const tour = good({ product: { ...bare, service: true } })
+    expect(ids(tour)).not.toContain("P-DATA-02")
+    expect(ids(tour)).not.toContain("P-DATA-03")
+    expect(assess(tour).score).toBe(100)
+  })
+
   it("hints at a missing short description without costing the score (adr/0055 Ek 2026-11-05)", () => {
     const empty = good({ product: { ...PRODUCT, summary: 0 } })
     expect(findIssues(empty)).toEqual([
