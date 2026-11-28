@@ -17,7 +17,8 @@
     "test:e2e": "playwright test -c e2e/playwright.config.ts",
     "style:capture": "node e2e/resolved-style/capture.ts",
     "style:diff": "node e2e/resolved-style/diff-cli.ts",
-    "preset:previews": "node e2e/preset-preview/capture.ts"
+    "preset:previews": "node e2e/preset-preview/capture.ts",
+    "preset:previews:live": "node e2e/preset-preview/live.ts"
   },
   "dependencies": {
     "@qticaret/theme-atolye": "workspace:*",
