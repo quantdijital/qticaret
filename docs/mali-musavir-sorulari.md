@@ -148,3 +148,74 @@ aynı seriyi mi kullanacak?
 - _Cevap:_ Uygun (araştırmayla). VUK 253'e göre 5 yıl (izleyen yıldan), TTK 82'ye göre 10 yıl; uzun
   olan esas. Asıl kayıt Türkiye'de durmalı (Paraşüt ve entegratörü); bizim kopyamız da Türkiye'de
   (ADR-0003). Yurt dışında ikinci bir kopya engellenmiyor (433 Sıra No.lu Tebliğ).
+
+## 8. Yurt dışı satış ve döviz (F19, 2026-11-28)
+
+> İngilizce vitrin ve döviz satışı planı için hazırlandı (`docs/24-coklu-dil-ve-para-birimi-plani.md` §8,
+> araştırma `docs/26-cok-dil-seo-arastirmasi.md` §9). Cevaplar gelmeden yurt dışı satış canlıda açılmaz.
+> Sistemin varsayımı her sorunun altında; uygunsa "uygun" yazmanız yeterli.
+
+**8.1 Mikro ihracatta fatura türü.** Yurt dışındaki bireysel alıcıya kargoyla (ETGB/BGB) mal gönderiliyor.
+- _Varsayım:_ e-Arşiv fatura, KDV %0 (istisna, kod 301), faturada ETGB numarası; ihracat senaryolu e-Fatura kullanılmaz.
+- _Soru:_ GİB "e-Fatura Uygulaması Gümrük İşlemleri Kılavuzu"na göre doğrusu bu mu?
+
+**8.2 Döviz faturada kur.**
+- _Varsayım:_ Fatura döviz cinsinden kesilir (yurt dışındaki müşteriye TL karşılığı şart değil, VUK m.215/2-a). KDV beyanı için TL karşılığı fatura tarihindeki Resmî Gazete'de yayımlanan TCMB döviz alış kuruyla; ihracat beyanında ETGB kapanış tarihi kuruyla. Kur, kaynağı ve tarihi siparişte saklanır.
+- _Soru:_ Hangi kur hangi kayıt için kullanılır? Tahsilat günündeki kur farkı nasıl kaydedilir?
+
+**8.3 ETGB numarası gelmeden fatura.**
+- _Varsayım:_ ETGB numarası bağlanmadan KDV'siz fatura kesilmez; sipariş "ETGB bekliyor" durumunda bekler.
+- _Soru:_ Fatura gönderiden önce kesilmek zorundaysa (kargo faturayı istiyor) sıra nasıl kurulur? ETGB hiç gelmezse fatura nasıl düzeltilir?
+
+**8.4 Fiyattaki vergi.** Yurt dışı fiyatı KDV'siz gösteriliyor; gümrük ve varış ülkesi vergileri alıcıya ait (DAP).
+- _Soru:_ Uygun mu? ETGB tevsik edilemezse KDV fiyatın içinden mi hesaplanır?
+
+**8.5 Döviz tahsilatın TL'ye çevrilmesi.** iyzico (ve muhtemelen PayTR) döviz tahsilatı TL'ye çevirip aktarıyor.
+- _Soru:_ Satış kuru ile aktarım kuru farkı nasıl kayda alınır? Döviz hesaba ödeme yapan banka POS'u muhasebede farklı mı?
+
+**8.6 İhracat bedelinin yurda getirilmesi ve bankaya satılması.**
+- _Soru:_ Kartla tahsil edilen ETGB ihracat bedelleri İBKB/DAB ve bankaya satış (basına göre %35) yükümlülüğüne tabi mi? Süre bugün kaç gün?
+
+**8.7 Yabancı turiste Türkiye'de tur.**
+- _Varsayım:_ Hizmetten Türkiye'de faydalanıldığı için KDV'li (KDV m.12/2-b); fatura döviz kesilebilir.
+- _Soru:_ Tur bileşenlerine göre KDV oranı nedir? Yurt dışı acenteye B2B satışta istisna olan aracılık kısmı faturada nasıl ayrılır?
+
+**8.8 Kur, marj ve yuvarlama.**
+- _Varsayım:_ Döviz fiyatı günde bir TCMB döviz satış kuru × marj ile hesaplanır ve ,99'a yuvarlanır.
+- _Soru:_ Fiyat hesabında döviz satış mı alış kuru mu kullanılmalı? Bunun faturadaki kurla farklı olması sorun mu?
+
+**8.9 Yurt dışı şirket ve Stripe.** Stripe Türkiye'de yok; kullanmak için yurt dışı şirket gerekiyor.
+- _Soru:_ UK Ltd, Atlas (Delaware) ya da Estonya OÜ kurulursa KVK m.3 iş merkezi riski, m.7 ve m.5/1-b şartları, transfer fiyatlandırması ne olur? Türk şirketi o şirkete mal ihraç edip tüketiciye o şirket mi satmalı?
+
+## 9. Avukata sorular: yurt dışı satış ve döviz (F19, 2026-11-28)
+
+> Aynı plan için. Cevaplar gelmeden ilgili ayar canlıda açılmaz.
+
+**9.1 Türkiye'deki tüketiciye döviz.**
+- _Varsayım:_ Türkiye teslimat adresli her sipariş TL ile ödenir; Türkçe vitrinde fiyat TL ve tüm vergiler dahil (Fiyat Etiketi m.9/4 ve m.5/2-c; Reklam m.13/4 ve m.13/2). Menkul satışında 2025'ten beri döviz serbest olsa da bu kural uygulanır.
+- _Soru:_ Uygun mu?
+
+**9.2 Türkçe vitrinde bilgi amaçlı döviz.**
+- _Varsayım:_ Gösterilmez.
+- _Soru:_ TL'nin yanında "≈ $X" göstermek m.13/1 "anlam karışıklığı" sayılır mı?
+
+**9.3 İngilizce vitrinde yalnız döviz fiyat.**
+- _Varsayım:_ `/en` yalnız yurt dışına teslimatla satar, fiyatı dövizdir; Türkiye adresi seçilince sepet TL'ye geçer.
+- _Soru:_ Türk tüketici mevzuatına aykırı mı? Ülkeye göre farklı fiyat Reklam m.13/10 "kişiselleştirilmiş fiyat" sayılır mı?
+
+**9.4 Yurt içi turun dövizle satışı.**
+- _Varsayım:_ Türkiye'de yerleşik T.C. vatandaşına yurt içi tur dövizle satılmaz (Tebliğ m.8/7; konaklama istisnası tura uygulanmaz). Yabancı uyruklu müşteriye ödemede uyruk beyanıyla (kutucuk + ülke) dövizle satılır.
+- _Soru:_ Beyan yeterli mi, pasaport bilgisi saklanmalı mı (KVKK)? Yurt dışı paket turda (m.8/7-ç) herkese döviz fiyat uygun mu?
+
+**9.5 Sözleşme dili.**
+- _Varsayım:_ Yabancı müşteriye ön bilgilendirme ve mesafeli satış sözleşmesi İngilizce; Türkçe metin bağlantıyla ayrıca verilir.
+- _Soru:_ 805 sayılı Kanun karşısında yeterli mi? Paket Tur Sözleşmeleri Yönetmeliği'ndeki broşür ve sözleşme İngilizce verilebilir mi?
+
+**9.6 AB tüketicisi.**
+- _Soru:_ İngilizce vitrin ve EUR fiyat "yöneltme" sayılırsa hangi AB kurallarına (cayma, ayıplı mal, fiyat gösterimi, dil) uyulmalı? Satış koşullarında hukuk seçimi yazılmalı mı?
+
+**9.7 Bıçak ihracatı.**
+- _Soru:_ Varış ülkesi kısıtları (UK yaş doğrulaması, AB, ABD) için platformun ve mağazanın sorumluluğu nedir?
+
+**9.8 Yurt dışı şirketin yönetimi.**
+- _Soru:_ Stripe için kurulan yurt dışı şirket Türkiye'den yönetilirse hukuki riskler nelerdir?
