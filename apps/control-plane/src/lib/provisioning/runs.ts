@@ -44,6 +44,10 @@ export const RUN_STATUSES: Partial<Record<RunKind, readonly TenantStatus[]>> = {
   start: ["provisioning", "active", "restricted", "suspended"],
   invite: ["provisioning", "active"],
   apply_pack: ["provisioning", "active"],
+  // Audit 3.2: any shop that has a database, a closing one too (its last backup)
+  backup: ["provisioning", "active", "restricted", "suspended", "closing"],
+  // Audit 3.1: a shop that sells or keeps running; never one being set up or closed
+  upgrade: ["active", "restricted", "suspended"],
 }
 
 export async function startRun(

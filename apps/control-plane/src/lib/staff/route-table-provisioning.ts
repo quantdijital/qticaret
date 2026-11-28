@@ -17,7 +17,8 @@ export const PROVISIONING_ROUTES: RouteRule[] = [
   { method: "GET", path: BASE, access: SHOPS, resource: TENANT },
   { method: "GET", path: `${BASE}/runs/:run_id`, access: SHOPS, resource: TENANT },
   // C12: "/apply-pack" applies the shop's sector pack again (`tenant:apply-pack`)
-  ...["", "/stop", "/start", "/invite", "/apply-pack"].map((action): RouteRule => ({
+  // Audit 3.1/3.2: "/upgrade" moves it to its target release, "/backup" backs it up
+  ...["", "/stop", "/start", "/invite", "/apply-pack", "/backup", "/upgrade"].map((action): RouteRule => ({
     method: "POST",
     path: `${BASE}${action}`,
     access: SHOPS,

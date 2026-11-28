@@ -102,6 +102,14 @@ const envSchema = z.object({
   CP_LOCAL_PG_ADMIN_URL: z
     .url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" })
     .optional(),
+  // Audit 3.2: how the local backup reaches the dev Postgres's `pg_dump` and
+  // `psql` (infra/backup's `PG_EXEC`, split into words, run without a shell),
+  // when not the default (this machine's tools, else the dev container).
+  // Local only
+  CP_LOCAL_PG_EXEC: z
+    .string()
+    .regex(/^[A-Za-z0-9_./:=@-]+(?: [A-Za-z0-9_./:=@-]+){1,15}$/, "must be a plain command")
+    .optional(),
   // Ek C13: where a local shop reaches this control plane (its pull and its
   // usage report), when it is not the default `http://localhost:9100` (a
   // second copy on other ports, Ek C12). This machine only, a base URL; local only
@@ -139,6 +147,9 @@ function provisionerIssues(env: Env, issue: (path: keyof Env, message: string) =
   }
   if (admin !== undefined && !isLocalEnv(env)) {
     issue("CP_LOCAL_PG_ADMIN_URL", "is allowed on development and test only")
+  }
+  if (env.CP_LOCAL_PG_EXEC !== undefined && !isLocalEnv(env)) {
+    issue("CP_LOCAL_PG_EXEC", "is allowed on development and test only")
   }
   if (env.CP_LOCAL_CONTROL_PLANE_URL !== undefined && !isLocalEnv(env)) {
     issue("CP_LOCAL_CONTROL_PLANE_URL", "is allowed on development and test only")

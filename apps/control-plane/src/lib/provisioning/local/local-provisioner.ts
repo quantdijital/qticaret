@@ -1,9 +1,11 @@
 import { existsSync } from "node:fs"
-import { lstat, mkdir, readdir, readlink, rm, symlink } from "node:fs/promises"
+import { lstat, mkdir, readFile, readdir, readlink, rm, symlink } from "node:fs/promises"
 import { join } from "node:path"
 import type { RuntimeSecrets } from "../../vault/tenant-secrets"
 import { ProvisioningError } from "../provisioner"
 import type {
+  BackupSummary,
+  BuiltRelease,
   CommandResult,
   HealthResult,
   ProvisionTarget,
@@ -11,6 +13,7 @@ import type {
   TenantProvisioner,
 } from "../provisioner"
 import { localAdminUrlProblem } from "./admin-url"
+import { runBackup } from "./backup"
 import { assertFreshBuilds } from "./build-check"
 import { COMMAND_TIMEOUT_MS, argvOf, runCommand } from "./commands"
 import * as database from "./database"
@@ -38,6 +41,10 @@ export interface LocalProvisionerOptions {
   redisUrl: string | null
   mailpitUrl: string | null
   controlPlaneUrl: string
+  /** `CP_ESCROW_RECIPIENTS`: the age public keys backups are encrypted to (audit 3.2). */
+  backupRecipients?: readonly string[]
+  /** `CP_LOCAL_PG_EXEC`: how the backup script reaches the dev Postgres's tools, when set. */
+  pgExec?: string | null
   root?: string
 }
 
@@ -238,5 +245,45 @@ export class LocalProvisioner implements TenantProvisioner {
     // Another process on the port is not this shop: its answer is not asked
     const health = running ? await healthOf(t.port) : { status: null, latency_ms: null }
     return { secrets, running, healthy: health.status === 200, ...health }
+  }
+
+  /**
+   * Audit 3.2: `infra/backup/backup.sh` on the shop's database and uploads,
+   * into `infra/tenants/backups/<slug>/`. Only this shop's (its store names
+   * it): a database another shop's store points at is never read here.
+   */
+  async backup(t: ProvisionTarget): Promise<BackupSummary> {
+    const layout = this.layout(t)
+    await this.shopEnv(layout, t)
+    return await runBackup({
+      script: layout.backupScript,
+      database: databaseNameOf(t.slug),
+      outDir: layout.backupDir,
+      recipientsFile: layout.backupRecipients,
+      recipients: this.options.backupRecipients ?? [],
+      filesDir: existsSync(layout.staticDir) ? layout.staticDir : null,
+      adminUrl: this.options.adminUrl,
+      pgExec: this.options.pgExec ?? null,
+      logFile: join(layout.logDir, "backup.log"),
+    })
+  }
+
+  /**
+   * Audit 3.1: every local shop runs the one compiled backend, so the
+   * release it would start on is that build's stamp (`release.json`,
+   * written by the backend's build); null when there is none.
+   */
+  async availableRelease(t: ProvisionTarget): Promise<BuiltRelease | null> {
+    const layout = this.layout(t)
+    try {
+      const stamp = JSON.parse(
+        await readFile(join(layout.backendDir, "release.json"), "utf8")
+      ) as Partial<BuiltRelease>
+      return typeof stamp.version === "string" && typeof stamp.commit === "string"
+        ? { version: stamp.version, commit: stamp.commit }
+        : null
+    } catch {
+      return null
+    }
   }
 }

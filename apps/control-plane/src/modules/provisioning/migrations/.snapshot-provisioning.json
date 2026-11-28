@@ -57,7 +57,8 @@
             "stop",
             "start",
             "invite",
-            "close"
+            "close",
+            "backup"
           ],
           "mappedType": "enum"
         },

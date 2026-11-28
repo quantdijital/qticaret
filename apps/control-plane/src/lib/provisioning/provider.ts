@@ -1,3 +1,4 @@
+import { parseAgeRecipients } from "@qticaret/server-kit/escrow"
 import { parseEnv } from "../env"
 import { FakeProvisioner } from "./fake-provisioner"
 import { LocalProvisioner } from "./local/local-provisioner"
@@ -23,6 +24,8 @@ export function provisioner(): TenantProvisioner {
     env.REDIS_URL,
     env.MAILPIT_URL,
     env.CP_LOCAL_CONTROL_PLANE_URL,
+    env.CP_LOCAL_PG_EXEC,
+    env.CP_ESCROW_RECIPIENTS,
   ].join("|")
   if (held?.key === key) {
     return held.provisioner
@@ -36,6 +39,9 @@ export function provisioner(): TenantProvisioner {
         redisUrl: env.REDIS_URL ?? null,
         mailpitUrl: env.EMAIL_TRANSPORT === "mailpit" ? (env.MAILPIT_URL ?? null) : null,
         controlPlaneUrl: new URL(env.CP_LOCAL_CONTROL_PLANE_URL ?? LOCAL_CONTROL_PLANE_URL).origin,
+        // Audit 3.2: backups go to the same offline keys as the escrow
+        backupRecipients: parseAgeRecipients(env.CP_ESCROW_RECIPIENTS, "CP_ESCROW_RECIPIENTS"),
+        pgExec: env.CP_LOCAL_PG_EXEC ?? null,
       })
       break
     case "fake":

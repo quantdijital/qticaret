@@ -49,3 +49,47 @@ export function matchesTarget(reported: ReleaseRef | null, target: ReleaseRef | 
 /** A shop drifts when it has a target and a report, and the two differ. */
 export const drifts = (reported: ReleaseRef | null, target: ReleaseRef | null): boolean =>
   matchesTarget(reported, target) === false
+
+/**
+ * Semver precedence (semver.org §11) of two strict versions: negative when
+ * `a` comes first, 0 when equal, positive after. A pre-release comes
+ * before its release; numeric identifiers compare as numbers, before any
+ * text one. Audit 3.1 orders a shop's target against the control plane
+ * with it (adr/0061 Ek C21: the control plane first).
+ */
+export function compareVersions(a: string, b: string): number {
+  const split = (version: string) => {
+    const [core = "", pre] = version.split(/-(.*)/s)
+    return { core: core.split(".").map(Number), pre: pre ? pre.split(".") : [] }
+  }
+  const left = split(a)
+  const right = split(b)
+  for (let i = 0; i < 3; i++) {
+    const diff = (left.core[i] ?? 0) - (right.core[i] ?? 0)
+    if (diff !== 0) {
+      return Math.sign(diff)
+    }
+  }
+  if (left.pre.length === 0 || right.pre.length === 0) {
+    return Math.sign(right.pre.length - left.pre.length)
+  }
+  for (let i = 0; i < Math.max(left.pre.length, right.pre.length); i++) {
+    const x = left.pre[i]
+    const y = right.pre[i]
+    if (x === undefined || y === undefined) {
+      return x === undefined ? -1 : 1
+    }
+    const xn = /^\d+$/.test(x)
+    const yn = /^\d+$/.test(y)
+    if (xn && yn && Number(x) !== Number(y)) {
+      return Math.sign(Number(x) - Number(y))
+    }
+    if (xn !== yn) {
+      return xn ? -1 : 1
+    }
+    if (x !== y) {
+      return x < y ? -1 : 1
+    }
+  }
+  return 0
+}

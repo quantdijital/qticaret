@@ -16,6 +16,7 @@ import { allocateStep, bootstrapStep, databaseStep, migrateStep, secretsStep } f
 import { sectorPackStep } from "./steps-pack"
 import { presetStep, profileStep } from "./steps-shop"
 import { contextOf } from "./target"
+import { backupStep, releaseStep, upgradeStartStep, upgradeStopStep } from "./steps-upgrade"
 
 /**
  * The provisioning workflows (adr/0061 §6.2, Ek C10). Each carries ids
@@ -47,6 +48,10 @@ export const RUN_STEPS = {
   invite: ["resend_invite"],
   // C12: "Paketi yeniden uygula": the setup's own step, alone
   apply_pack: ["sector_pack"],
+  // Audit 3.2: "Şimdi yedekle"
+  backup: ["backup"],
+  // Audit 3.1: "Sürümü yükselt": checked, backed up, stopped, migrated, started, healthy
+  upgrade: ["release", "backup", "upgrade_stop", "migrate", "upgrade_start", "health"],
 } as const
 
 export type RunKind = keyof typeof RUN_STEPS
@@ -123,10 +128,39 @@ export const applyPackWorkflow = createWorkflow(
   }
 )
 
+/** Audit 3.2: the shop's backup, alone. */
+export const backupShopWorkflow = createWorkflow(
+  { name: "cp-provisioning-backup", store: false },
+  (input: WorkflowData<RunInput>) => {
+    backupStep(input)
+    return new WorkflowResponse({ run_id: input.run_id })
+  }
+)
+
+/**
+ * Audit 3.1: the shop moved to its target release. Backup first; a
+ * failure stops the run at its step, the shop started again as it was
+ * (the stop's undo) and the backup kept.
+ */
+export const upgradeShopWorkflow = createWorkflow(
+  { name: "cp-provisioning-upgrade", store: false },
+  (input: WorkflowData<RunInput>) => {
+    releaseStep(input)
+    backupStep(input)
+    upgradeStopStep(input)
+    migrateStep(input)
+    upgradeStartStep(input)
+    healthStep(input)
+    return new WorkflowResponse({ run_id: input.run_id })
+  }
+)
+
 export const WORKFLOW_OF = {
   create: provisionShopWorkflow,
   start: startShopWorkflow,
   stop: stopShopWorkflow,
   invite: inviteOwnerWorkflow,
   apply_pack: applyPackWorkflow,
+  backup: backupShopWorkflow,
+  upgrade: upgradeShopWorkflow,
 } as const

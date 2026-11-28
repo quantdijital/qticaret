@@ -30,6 +30,7 @@ apps/backend/integration-tests/.bundles/
 
 # Shops the local provisioner set up (adr/0061 Ek C10): their secrets, files, logs
 infra/tenants/local/
+infra/tenants/backups/
 
 # Playwright e2e runs: the temporary admin's session, results and reports
 apps/panel/e2e/.auth/

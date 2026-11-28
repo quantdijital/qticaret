@@ -4,12 +4,10 @@ import {
   InjectTransactionManager,
   MedusaContext,
   MedusaError,
-  MedusaService,
 } from "@medusajs/framework/utils"
-import { ProvisioningRun } from "./models/provisioning-run"
 import type { RunStatus } from "./models/provisioning-run"
-import { ProvisioningStep } from "./models/provisioning-step"
 import type { StepStatus } from "./models/provisioning-step"
+import { ProvisioningReads } from "./service-reads"
 import { PORT_RANGE, STALE_AFTER_MS } from "./types"
 import type { OpenRunInput, RunView, StepView } from "./types"
 
@@ -18,6 +16,7 @@ interface Executor {
 }
 
 export type { OpenRunInput, RunView, StepView } from "./types"
+export type { BackupSeen } from "./service-reads"
 export { PORT_RANGE, STALE_AFTER_MS } from "./types"
 
 const RUN_FIELDS = [
@@ -49,7 +48,7 @@ const busy = () => new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.provisioni
  * at a time per shop; a run silent for `STALE_AFTER_MS` is taken as dead
  * (its process stopped) and closed `failed` when the next one opens.
  */
-class ProvisioningModuleService extends MedusaService({ ProvisioningRun, ProvisioningStep }) {
+class ProvisioningModuleService extends ProvisioningReads {
   /** A new run with its steps `pending`; refused while another of the shop's runs. */
   @InjectTransactionManager()
   async openRun(
@@ -256,23 +255,6 @@ class ProvisioningModuleService extends MedusaService({ ProvisioningRun, Provisi
       sharedContext
     )
     return { ...(run as unknown as RunView), steps: steps as unknown as StepView[] }
-  }
-
-  /** Whether an earlier run mailed the shop's owner invitation (a setup run again sends none). */
-  @InjectManager()
-  async ownerInvited(
-    tenantId: string,
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<boolean> {
-    const rows = (await (sharedContext.manager as Executor).execute(
-      `SELECT 1 FROM provisioning_step s JOIN provisioning_run r ON r.id = s.run_id
-        WHERE r.tenant_id = ? AND s.name IN ('owner_invite', 'resend_invite')
-          AND s.status = 'succeeded' AND s.output ->> 'mailed' = 'true'
-          AND s.deleted_at IS NULL AND r.deleted_at IS NULL
-        LIMIT 1`,
-      [tenantId]
-    )) as unknown[]
-    return rows.length > 0
   }
 
   /** The run is alive (a step that waits). */

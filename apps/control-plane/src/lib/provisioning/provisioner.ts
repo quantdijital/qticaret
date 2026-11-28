@@ -72,6 +72,28 @@ export interface HealthResult {
   latency_ms: number | null
 }
 
+/**
+ * A backup as `infra/backup/backup.sh`'s manifest summarises it (F15.5,
+ * audit 3.2): when, how long, how big, the dump's sha256 and the manifest's
+ * file name. No row count, path or personal data: the rest stays in the
+ * manifest beside the encrypted files.
+ */
+export interface BackupSummary {
+  manifest: string
+  taken_at: string
+  seconds: number
+  /** The encrypted dump and, when there were any, the encrypted files together. */
+  bytes: number
+  dump_sha256: string
+  files: boolean
+}
+
+/** A release as the provisioner can run it: semver and commit (the build's stamp). */
+export interface BuiltRelease {
+  version: string
+  commit: string
+}
+
 export interface TenantProvisioner {
   readonly kind: "local" | "docker" | "fake"
   /** The shop's database and its least-privileged role; `created` when this call made the database. */
@@ -87,6 +109,17 @@ export interface TenantProvisioner {
   /** Stops only a process this provisioner started for the shop. */
   stop(t: ProvisionTarget): Promise<void>
   probe(t: ProvisionTarget): Promise<HealthResult>
+  /**
+   * The shop's database (and its own files) encrypted to the backup
+   * recipients with `infra/backup/backup.sh` (audit 3.2). Opening one needs
+   * the offline key: restore is the runbook's, never the provisioner's.
+   */
+  backup(t: ProvisionTarget): Promise<BackupSummary>
+  /**
+   * The release this provisioner would start the shop on (audit 3.1);
+   * null when it cannot tell. Local: the compiled backend's `release.json`.
+   */
+  availableRelease(t: ProvisionTarget): Promise<BuiltRelease | null>
 }
 
 /** A provisioner's refusal or failure, as a code the run records (never a value). */

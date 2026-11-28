@@ -6,6 +6,7 @@ import { tenantVersionOf } from "../../../../lib/fleet/release-views"
 import { effectiveLimits } from "../../../../lib/plans/limits"
 import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { omit } from "../../../../lib/omit"
+import { latestBackupViews } from "../../../../lib/provisioning/backups"
 import { maskEmail, maskPhone } from "../../../../lib/tenants/mask"
 import { maskedTckn } from "../../../../lib/tenants/tckn"
 import type { CompanyRecord, NoteRecord, TenantRecord } from "../../../../modules/tenants/types"
@@ -64,8 +65,18 @@ export async function tenantDetail(
 ) {
   const service = tenantsOf(req)
   const plans = plansOf(req)
-  const [company, contacts, domains, notes, plan, overrides, flagOverrides, document, version] =
-    await Promise.all([
+  const [
+    company,
+    contacts,
+    domains,
+    notes,
+    plan,
+    overrides,
+    flagOverrides,
+    document,
+    version,
+    backups,
+  ] = await Promise.all([
       service.companyOf(tenant.id),
       service.contactsOf(tenant.id),
       service.domainsOf(tenant.id),
@@ -79,6 +90,8 @@ export async function tenantDetail(
         names: (ids) => staffNames(req, ids),
         showReason: options.fleet,
       }),
+      // Audit 3.2: its "Son yedek"
+      latestBackupViews(req.scope, [tenant.id]),
     ])
   const names = await staffNames(req, [
     tenant.created_by,
@@ -142,5 +155,6 @@ export async function tenantDetail(
       ? { ...document, issued: document !== null, push_target: tenant.api_base_url }
       : undefined,
     version,
+    backup: backups.get(tenant.id) ?? null,
   }
 }

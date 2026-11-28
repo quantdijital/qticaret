@@ -99,6 +99,11 @@ class Tail {
 
 export interface RunOptions {
   cli: string
+  /**
+   * Another program than Medusa's CLI under Node (the backup script, run
+   * by bash): then `args` are its whole argument list and `cli` is unused.
+   */
+  program?: string
   cwd: string
   env: Record<string, string>
   args: string[]
@@ -141,7 +146,10 @@ export async function runCommand(options: RunOptions): Promise<CommandResult> {
       }
     : null
   const tail = new Tail(CAPTURE_BYTES)
-  const child = spawn(process.execPath, [options.cli, ...options.args], {
+  const [program, argv] = options.program
+    ? [options.program, options.args]
+    : [process.execPath, [options.cli, ...options.args]]
+  const child = spawn(program, argv, {
     cwd: options.cwd,
     env: options.env,
     shell: false,
