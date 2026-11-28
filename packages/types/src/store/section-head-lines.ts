@@ -16,7 +16,7 @@ export const SECTION_EYEBROW_MAX = 60
 /** The two lines as the store API prints them on a section; absent: none. */
 export interface StoreHeadLines {
   /** A small upper-case line over the heading. */
-  eyebrow?: string | null
+  eyebrow?: string | null | undefined
   /** A short hand note beside the heading (`HAND_NOTE_MAX`). */
-  note?: string | null
+  note?: string | null | undefined
 }

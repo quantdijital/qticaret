@@ -52,7 +52,7 @@ describe("a section heading's eyebrow and hand note (head-lines.ts)", () => {
     })
     const bare = first(section)
     expect(bare).not.toHaveProperty("note")
-    if (section.variant !== "intro_panel") {
+    if (section["variant"] !== "intro_panel") {
       expect(bare).not.toHaveProperty("eyebrow")
     }
   })
@@ -81,13 +81,17 @@ describe("a section heading's eyebrow and hand note (head-lines.ts)", () => {
   it.each(SECTIONS)(
     "prints %s's lines only once written, the eyebrow's shop tokens filled",
     async (_, section) => {
-      const bare = await hydrateSection(first(section), at)
+      const bare = await hydrateSection(first(section) as Parameters<typeof hydrateSection>[0], at)
       expect(bare).not.toHaveProperty("note")
-      if (section.variant !== "intro_panel") {
+      if (section["variant"] !== "intro_panel") {
         expect(bare).not.toHaveProperty("eyebrow")
       }
       const written = await hydrateSection(
-        first({ ...section, eyebrow: "{mağaza_adı} seçkisi", note: "{shop_name} sizi bekliyor" }),
+        first({
+          ...section,
+          eyebrow: "{mağaza_adı} seçkisi",
+          note: "{shop_name} sizi bekliyor",
+        }) as Parameters<typeof hydrateSection>[0],
         at
       )
       expect(written).toMatchObject({

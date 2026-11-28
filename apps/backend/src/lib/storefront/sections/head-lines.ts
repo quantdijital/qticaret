@@ -30,7 +30,7 @@ export const headLines = {
  * filled; the note is plain text.
  */
 export function printedHeadLines(
-  section: { eyebrow?: string | null; note?: string | null },
+  section: { eyebrow?: string | null | undefined; note?: string | null | undefined },
   fill: (text: string | null) => string | null
 ): { eyebrow?: string; note?: string } {
   const eyebrow = section.eyebrow ? fill(section.eyebrow) : null
