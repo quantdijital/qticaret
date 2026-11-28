@@ -27,6 +27,8 @@ export interface NewTenant {
   package_id: string | null
   /** The sector pack it is to be set up with (C11); C12 applies it. */
   sector_pack?: string
+  /** Its ready-made look (adr/0063 task 2.7); left out: the pack's first. */
+  preset?: string
 }
 
 export const useRenameTenant = (id: string) =>

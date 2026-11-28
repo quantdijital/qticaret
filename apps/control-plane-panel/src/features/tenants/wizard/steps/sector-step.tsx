@@ -31,7 +31,8 @@ export function SectorStep({ draft, change }: StepProps) {
           aria-label={t("wizard.sector.title")}
           value={draft.sector_pack}
           onValueChange={(value) => {
-            change((current) => ({ ...current, sector_pack: value }))
+            // Another pack, its own looks: its first until one is chosen
+            change((current) => ({ ...current, sector_pack: value, preset: "" }))
           }}
           className="grid items-stretch gap-3 md:grid-cols-2"
         >

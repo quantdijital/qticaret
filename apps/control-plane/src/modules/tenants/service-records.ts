@@ -47,6 +47,7 @@ export class TenantsRecords extends MedusaService({
       created_by: string | null
       hostname: string
       sector_pack?: string | null
+      preset?: string | null
     },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<TenantRecord> {
@@ -63,6 +64,7 @@ export class TenantsRecords extends MedusaService({
           status_changed_at: new Date(),
           created_by: input.created_by,
           sector_pack: input.sector_pack ?? null,
+          preset: input.preset ?? null,
         },
       ],
       sharedContext

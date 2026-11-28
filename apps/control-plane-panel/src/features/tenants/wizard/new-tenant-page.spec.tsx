@@ -79,8 +79,8 @@ const page = () =>
 
 const next = () => userEvent.click(screen.getByRole("button", { name: /İleri/ }))
 
-/** Through every step to the review, the address free; a sector pack chosen if named. */
-async function fillIn(domain = "", pack = "") {
+/** Through every step to the review, the address free; a sector pack and a look chosen if named. */
+async function fillIn(domain = "", pack = "", look = "") {
   await userEvent.type(screen.getByLabelText("Mağaza adı"), "Bıçak Atölyesi")
   await userEvent.type(screen.getByLabelText("Vergi kimlik no"), "1234567890")
   await next()
@@ -99,6 +99,17 @@ async function fillIn(domain = "", pack = "") {
   expect(await screen.findByRole("radio", { name: /^Genel/ })).toBeChecked()
   if (pack) {
     await userEvent.click(screen.getByRole("radio", { name: new RegExp(`^${pack}`) }))
+  }
+  await next()
+  // adr/0063 task 2.7: the pack's looks, its first chosen; a pack with none says so
+  await screen.findByRole("heading", { name: "Hazır görünüm", level: 2 })
+  if (pack) {
+    expect(await screen.findByRole("radio", { name: /^Katalog/ })).toBeChecked()
+  } else {
+    expect(screen.getByText(/hazır görünümü yok/)).toBeInTheDocument()
+  }
+  if (look) {
+    await userEvent.click(screen.getByRole("radio", { name: new RegExp(`^${look}`) }))
   }
   await next()
   await screen.findByRole("heading", { name: "Özet ve kur", level: 2 })
@@ -166,9 +177,10 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
   it("makes the record, saves the rest, starts the setup with one proof, opens its tab", async () => {
     const sent = stubApi(controlPlane())
     page()
-    await fillIn("bicakatolyesi.com", "Bıçak ve çatal-bıçak")
-    // The review names the pack chosen
+    await fillIn("bicakatolyesi.com", "Bıçak ve çatal-bıçak", "Tezgâh")
+    // The review names the pack and the look chosen
     expect(screen.getByText("Bıçak ve çatal-bıçak")).toBeInTheDocument()
+    expect(screen.getByText("Tezgâh")).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole("button", { name: "Kur" }))
     await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
@@ -199,6 +211,7 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
       slug: "bicak-atolyesi",
       package_id: PRO.id,
       sector_pack: "cutlery",
+      preset: "tezgah",
     })
   })
 

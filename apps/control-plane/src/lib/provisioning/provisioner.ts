@@ -19,8 +19,11 @@ export interface ProvisionTarget {
 
 /**
  * The closed list of what may run in a shop (adr/0061 §3.4): no free
- * command. `plan-import` hands its document on stdin; `invite-owner`'s
- * result carries the owner's link, which the caller uses and forgets.
+ * command. `plan-import` and `apply-profile` hand their document on stdin
+ * (the profile holds the company's details: never on a command line);
+ * `invite-owner`'s result carries the owner's link, which the caller uses
+ * and forgets. `apply-preset` writes a ready-made look into the shop's
+ * design (adr/0063 §7, task 2.7), never its demo content.
  */
 export type TenantCommand =
   | { name: "migrate" }
@@ -28,6 +31,8 @@ export type TenantCommand =
   | { name: "invite-owner"; email: string }
   | { name: "apply-pack"; pack: string }
   | { name: "plan-import"; document: string }
+  | { name: "apply-preset"; pack: string; preset: string }
+  | { name: "apply-profile"; document: string }
 
 export const TENANT_COMMANDS = [
   "migrate",
@@ -35,6 +40,8 @@ export const TENANT_COMMANDS = [
   "invite-owner",
   "apply-pack",
   "plan-import",
+  "apply-preset",
+  "apply-profile",
 ] as const satisfies readonly TenantCommand["name"][]
 
 /**

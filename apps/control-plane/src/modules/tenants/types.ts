@@ -16,6 +16,10 @@ export interface TenantRecord {
   /** C12: the pack's version the shop last applied, and when; null until it has. */
   sector_pack_version: number | null
   sector_pack_applied_at: Date | null
+  /** adr/0063 task 2.7: the look it is set up with, and its version and when it was applied. */
+  preset: string | null
+  preset_version: number | null
+  preset_applied_at: Date | null
   created_by: string | null
   /** Internal base URL its plan document is pushed to (Ek C9); null: none. */
   api_base_url: string | null

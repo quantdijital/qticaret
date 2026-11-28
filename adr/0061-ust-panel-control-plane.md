@@ -1356,3 +1356,19 @@ Sahip yeni Ayarlar > Abonelik ekranını onayladı ve eksik abonelik verilerinin
 - **Düzeltme (aynı gün, HTTP testi):** aboneliği olmayan mağazada koşullar önce paketin fiyatı ve dönemiyle yazılıyordu; paket fiyatı değişince faturalanmayan mağazaların belgesi gereksiz yeniden yayınlanıyordu (`plan-documents.spec.ts`: fiyat değişikliği yeni serial üretmemeli). Karar: abonelik yokken dört alan da `null` (sözleşmede `period` da `null` alabilir); koşullar yalnız aboneliğin kendi kopyasından gelir, belge yalnız içerik gerçekten değişince yeniden yayınlanır.
 - **Panel sertleştirmesi (güvenlik incelemesi, isteğe bağlı):** fatura bağlantısı panelde de yalnız `https://` ile başlıyorsa bağlantı olur; başkası "Fatura yok" görünür.
 - **Kalan riskler:** (1) Eski sürüm mağaza yeni alanlı belgeyi reddeder (yayın sırası, C16 madde 7 ile aynı). (2) Geçmiş, üst panel kapalıyken görünmez (bilerek: imzasız önbellek diske yazılmaz). (3) Fatura bağlantısı kendi faturalamamız açılınca dolacak; o gün bağlantının barındırıldığı alan adı ayrıca değerlendirilir.
+
+## Ek: hazır görünüm ve mağaza profili kurulumda (2026-11-28)
+
+adr/0063 görev 2.7 ve üst panel denetimi 1.1/1.3. §3.4'ün kapalı komut listesi iki komutla genişler:
+
+- **`apply-preset pack= preset=`** → `tenant:apply-preset pack=<kod> preset=<kod> demo=false`. Kodlar `argvOf`'ta paket/görünüm kodu kalıbıyla (`^[a-z][a-z0-9-]{1,39}$`) denetlenir; `demo` her zaman `false` (sahte içerik müşteri mağazasına girmez). Sonuç `applyPresetResultSchema` ile okunur. Süre sınırı 10 dk.
+- **`apply-profile`** → `tenant:apply-profile`, belge **stdin**'den (`plan-import` kalıbı): `{ legal: { company_title?, tax_office?, tax_number? (yalnız 10 haneli VKN), address? }, store: { contact_email?, contact_phone? } }`, katı şema (`tenantProfileSchema`). Mağaza her alanı kendi ayar şemasıyla tek tek denetler ve **yalnız boş alanları** doldurur; dönen sonuç yalnız sayılardır. TCKN hiçbir yoldan geçmez. Süre sınırı 2 dk.
+
+Kayıt: `tenant.preset` (sihirbazda seçilen görünüm; seçilen paketin görünümlerinden biri olmalı, `cp.preset_unknown`), `preset_version`, `preset_applied_at` (migration `Migration20261128143512`). `POST /admin/cp/tenants` `preset` söylenmezse paketin ilk görünümünü alır; `null` görünümsüz kurar.
+
+Kurulum adımları: `bootstrap → profile → sector_pack → preset → plan_document …`. `profile` idempotenttir (ikinci çalışmada her alan dolu, `skipped`). `preset` bir kez uygulanır: `preset_applied_at` doluysa atlanır (sahibin tasarımına dokunulmaz); telafisi kayıttaki uygulanma işaretini siler (yeni veritabanı zaten kendi telafisiyle düşer), yeniden deneme görünümü yeniden uygular. Mağaza hiç düzen yayımlamamışsa betik görünümü yayımlar, yoksa taslakta bırakır (adr/0063 §7).
+
+Sihirbazın "Görünüm" adımı küçük resimleri üst panelin kendi paket kopyasından okur: `GET /admin/cp/sector-packs/:pack/presets/:code/preview` (bütün personel; yalnız yükleyicinin bulduğu `preview.webp`, yol istekten kurulmaz, sembolik bağ reddedilir, `nosniff`, `default-src 'none'`).
+
+Açık: Kurulum sekmesinde "Görünümü yeniden uygula" (yalnız yayında düzen yokken) bu ekte yok; ayrı iş.
+

@@ -153,6 +153,8 @@ const PLAN_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/plans", access: ALL },
   // C12: the sector packs' manifests and counts, read by all as the packages are (no personal data)
   { method: "GET", path: "/admin/cp/sector-packs", access: ALL },
+  // adr/0063 task 2.7: a look's picture for the wizard's "Görünüm" step (release data)
+  { method: "GET", path: "/admin/cp/sector-packs/:pack/presets/:code/preview", access: ALL },
   // A new package sets a price: proved again, as a price change (review M1)
   {
     method: "POST",

@@ -1,4 +1,4 @@
-import { isSectorPackCode, sectorPacks, summaryOf } from "@qticaret/sector-packs"
+import { isSectorPackCode, sectorPack, sectorPacks, summaryOf } from "@qticaret/sector-packs"
 import type { SectorPackSummary } from "@qticaret/sector-packs"
 
 /**
@@ -14,10 +14,49 @@ export const DEFAULT_SECTOR_PACK = "general"
 
 export const isKnownSectorPack = (code: string): boolean => isSectorPackCode(code)
 
-/** Every pack as the wizard shows it, the general one first. */
-export function sectorPackSummaries(): SectorPackSummary[] {
+/**
+ * A ready-made look as the wizard's "Görünüm" step shows it (adr/0063
+ * §7, task 2.7): its code, the pack's Turkish name and description, its
+ * tone, and whether the control plane can show its picture
+ * (`GET /admin/cp/sector-packs/:pack/presets/:code/preview`).
+ */
+export interface PresetSummary {
+  code: string
+  version: number
+  name: string
+  description: string
+  tone: "light" | "dark"
+  preview: boolean
+}
+
+export interface SectorPackOffer extends SectorPackSummary {
+  /** Its looks in the loader's order; the first is the wizard's default. */
+  presets: PresetSummary[]
+}
+
+/** A pack's looks, in the loader's order (by code); none for an unknown pack. */
+export function presetsOf(pack: string): PresetSummary[] {
+  return (sectorPack(pack)?.presets ?? []).map((preset) => ({
+    code: preset.code,
+    version: preset.version,
+    name: preset.name,
+    description: preset.description,
+    tone: preset.tone,
+    preview: preset.preview !== null,
+  }))
+}
+
+/** Whether this pack has a look of this code (a shop is set up only with its own pack's). */
+export const isPresetOf = (pack: string, code: string): boolean =>
+  presetsOf(pack).some((preset) => preset.code === code)
+
+/** The look a shop of this pack gets unless another is chosen: its first; null when it has none. */
+export const defaultPresetOf = (pack: string): string | null => presetsOf(pack)[0]?.code ?? null
+
+/** Every pack as the wizard shows it, the general one first, each with its looks. */
+export function sectorPackSummaries(): SectorPackOffer[] {
   return sectorPacks()
-    .map(summaryOf)
+    .map((pack) => ({ ...summaryOf(pack), presets: presetsOf(pack.code) }))
     .sort(
       (a, b) =>
         Number(b.code === DEFAULT_SECTOR_PACK) - Number(a.code === DEFAULT_SECTOR_PACK) ||

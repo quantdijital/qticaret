@@ -169,7 +169,9 @@ export class LocalProvisioner implements TenantProvisioner {
       cwd: layout.serverDir,
       env,
       args,
-      ...(cmd.name === "plan-import" ? { stdin: cmd.document } : {}),
+      ...(cmd.name === "plan-import" || cmd.name === "apply-profile"
+        ? { stdin: cmd.document }
+        : {}),
       timeoutMs: COMMAND_TIMEOUT_MS[cmd.name],
       // The owner's invitation token is in that output: kept nowhere
       logFile: cmd.name === "invite-owner" ? null : join(layout.logDir, "commands.log"),
