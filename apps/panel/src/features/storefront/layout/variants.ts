@@ -153,7 +153,8 @@ export const VARIANT_FIELDS: {
   // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
   // adr/0073 Ek 2026-11-24 (2): the rows and switches are every variant's and stay as written
   faq: { standard: {}, page: {} },
-  posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
+  // The upper line is every variant's since 2026-11-28 (a heading line, kept on switching)
+  posts: { grid: {}, intro_panel: { intro: null, link: null } },
   // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
   banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0], note: null } },
   product_main: { standard: {} },

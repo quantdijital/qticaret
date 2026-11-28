@@ -77,6 +77,15 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "help",
 ])
 
+/** The sections with a heading's upper line and hand note (`head-lines-fields.tsx`). */
+const HEAD_LINED: ReadonlySet<AnySection["type"]> = new Set([
+  "products",
+  "categories",
+  "departures",
+  "reviews",
+  "posts",
+])
+
 /** The sections whose one line of text the theme marks (`text`). */
 const TEXTED: ReadonlySet<AnySection["type"]> = new Set([
   "featured_product",
@@ -182,7 +191,9 @@ function wordField(section: AnySection, word: string): PreviewField | null {
     // The posts' intro panel's words and button, the split band's upper line (adr/0077 Ek)
     (section.type === "posts" &&
       section.variant === "intro_panel" &&
-      (word === "eyebrow" || word === "intro" || word === "link")) ||
+      (word === "intro" || word === "link")) ||
+    // A heading's upper line and hand note (2026-11-28), every variant of these
+    ((word === "eyebrow" || word === "note") && HEAD_LINED.has(section.type)) ||
     ((word === "eyebrow" || word === "note") &&
       section.type === "banner" &&
       section.variant === "split") ||

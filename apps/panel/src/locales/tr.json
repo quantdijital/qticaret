@@ -12747,6 +12747,16 @@
           "wide": "Geniş (2:1)"
         }
       },
+      "headLines": {
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Popüler rotalar). Boşsa çizilmez.",
+        "eyebrowPlaceholder": "Örn. Popüler rotalar",
+        "note": {
+          "label": "El yazısı not",
+          "term": "note",
+          "placeholder": "Örn. Yol seni çağırır",
+          "hint": "Başlığın yanında eğik, kısa bir not; altında fırça çizgisi olur. Vurgu yazı tipi açıksa el yazısıyla görünür. Boşsa çizilmez."
+        }
+      },
       "heroFull": {
         "accent": {
           "label": "Vurgulu satır",

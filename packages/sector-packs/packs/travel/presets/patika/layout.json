@@ -164,6 +164,7 @@
       "ends_at": null,
       "variant": "carousel",
       "title": "Bu sezon *en çok seçilenler*",
+      "eyebrow": "Sezonun favorileri",
       "source": {
         "kind": "best_sellers",
         "days": 90
@@ -244,6 +245,7 @@
       "ends_at": null,
       "variant": "panels",
       "title": "Popüler kategoriler",
+      "eyebrow": "Nereye gidelim?",
       "category_ids": [
         {
           "$handle": "category:kapadokya-turlari"
@@ -292,6 +294,7 @@
         "width": null
       },
       "title": "Yakında *yola çıkıyoruz*",
+      "eyebrow": "Kalkış takvimi",
       "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
       "source": {
         "kind": "all"
@@ -494,6 +497,7 @@
       "ends_at": null,
       "variant": "carousel",
       "title": "Misafir yorumları",
+      "eyebrow": "Gezginler anlatıyor",
       "limit": 8,
       "scroller": {
         "desktop": "four",

@@ -1,5 +1,6 @@
 import type { StoreLayoutLink } from "./layout.js"
 import type { PostsVariant } from "./section-variants.js"
+import type { StoreHeadLines } from "./section-head-lines.js"
 
 /**
  * The posts' own fields by variant (adr/0077 Ek, "Vadi"). `grid` has none
@@ -48,14 +49,14 @@ export const postsPanelStepOf = <S extends PostsPanelSetting>(
  * before variants. The storefront reads a variant it does not know as
  * `grid` (`variantOf`).
  */
-export interface StorePostsSection {
+export interface StorePostsSection extends Omit<StoreHeadLines, "eyebrow"> {
   id: string
   type: "posts"
   title: string | null
   limit: number
   /** Absent: `grid`. */
   variant?: PostsVariant
-  /** `intro_panel`: the line above the heading; null or absent: none. */
+  /** The line above the heading (every variant since 2026-11-28; `intro_panel` before); null or absent: none. */
   eyebrow?: string | null
   /** `intro_panel`: the words under the heading; null or absent: none. */
   intro?: string | null

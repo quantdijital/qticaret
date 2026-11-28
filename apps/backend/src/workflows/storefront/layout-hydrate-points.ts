@@ -1,3 +1,4 @@
+import { printedHeadLines } from "../../lib/storefront/sections/head-lines"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { StatsSection } from "../../lib/storefront/sections/stats"
 import type { StepsSection } from "../../lib/storefront/sections/steps"
@@ -106,5 +107,6 @@ export function hydrateDepartures(section: DeparturesSection, at: PointsContext)
     source: section.source,
     limit: section.limit,
     layout: section.layout,
+    ...printedHeadLines(section, at.fill),
   }
 }

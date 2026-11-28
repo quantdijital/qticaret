@@ -12747,6 +12747,16 @@
           "wide": "Wide (2:1)"
         }
       },
+      "headLines": {
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty: not drawn.",
+        "eyebrowPlaceholder": "E.g. Popular routes",
+        "note": {
+          "label": "Hand note",
+          "term": "note",
+          "placeholder": "E.g. The road is calling",
+          "hint": "A short tilted note beside the heading, a brush stroke under it. In handwriting while the accent face is on. Empty: not drawn."
+        }
+      },
       "heroFull": {
         "accent": {
           "label": "Accent line",

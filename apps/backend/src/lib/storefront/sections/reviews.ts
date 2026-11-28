@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { title } from "../layout-fields"
+import { headLines } from "./head-lines"
 import { bodyFields } from "./look"
 import { scroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
@@ -11,6 +12,8 @@ const common = {
   type: z.literal("reviews"),
   title,
   limit: z.number().int().min(1).max(12).default(6),
+  /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+  ...headLines,
 }
 
 /** Today's drawing: the shop's summary beside the three newest quotes. */

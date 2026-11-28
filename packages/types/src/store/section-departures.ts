@@ -12,6 +12,7 @@
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-departures` subpath).
  */
+import type { StoreHeadLines } from "./section-head-lines.js"
 
 /** How many departures, and the intro's longest text. */
 export const DEPARTURES_LIMITS = {
@@ -68,7 +69,8 @@ export type StoreDeparturesSection = {
   source: DeparturesSource
   /** How many departures at most (`DEPARTURES_LIMITS.limit`). */
   limit: number
-} & Partial<DeparturesSettings>
+} & Partial<DeparturesSettings> &
+  StoreHeadLines
 
 /** One departure of `GET /store/departures`. */
 export interface StoreUpcomingDeparture {

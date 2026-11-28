@@ -7,7 +7,12 @@ import { heroCatalogProblems, heroFullProblems, priceBandsProblems } from "./cat
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
 import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
-import { postsProblems, splitEyebrowProblem, splitNoteProblem } from "./band-problems"
+import {
+  headLinesProblems,
+  postsProblems,
+  splitEyebrowProblem,
+  splitNoteProblem,
+} from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
 import { faqProblems } from "./faq-problems"
@@ -139,6 +144,7 @@ function fieldsOf(section: AnySection): Found[] {
       return [
         ["title", textProblem(section.title, L.title)],
         ["intro", textProblem(section.intro, DEPARTURES_LIMITS.intro)],
+        ...headLinesProblems(section),
         [
           "source",
           source.kind === "category" && source.category_id === ""
@@ -204,6 +210,7 @@ function fieldsOf(section: AnySection): Found[] {
         ...listProblems("", section),
         ...lists.flatMap((list, index) => listProblems(`lists.${String(index)}.`, list)),
         ["more", linkProblem(section.more)],
+        ...headLinesProblems(section),
       ]
     }
     case "related_products": {
@@ -238,6 +245,7 @@ function fieldsOf(section: AnySection): Found[] {
       return [
         ["title", textProblem(section.title, L.title)],
         ["more", linkProblem(section.more)],
+        ...headLinesProblems(section),
       ]
     case "rich_text":
       // The picture beside it (adr/0073 §3): the draft waits for one
@@ -254,8 +262,9 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "posts":
       return postsProblems(section)
-    case "brands":
     case "reviews":
+      return [["title", textProblem(section.title, L.title)], ...headLinesProblems(section)]
+    case "brands":
     case "program":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":

@@ -1,4 +1,4 @@
-import type { CategoryCardView, LinkView, Translate } from "@qticaret/ui"
+import type { HeadLinesView, CategoryCardView, LinkView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CategoryTile } from "../parts/CategoryTile"
 import { Container } from "../parts/Container"
@@ -22,6 +22,7 @@ export function Aisles({
   t,
   marks,
   ownAll = false,
+  lines,
 }: {
   id: string
   title: string
@@ -34,11 +35,20 @@ export function Aisles({
   marks?: boolean | undefined
   /** `all` is the shop's own link (`more`): in the preview it is marked too. */
   ownAll?: boolean
+  /** The heading's upper line and hand note (sahip 2026-11-28); absent: none. */
+  lines?: HeadLinesView | undefined
 }) {
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
-        <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
+        <SectionHead
+          id={id}
+          title={title}
+          more={all}
+          marks={marks}
+          ownMore={ownAll}
+          lines={lines}
+        />
         <ul
           className={cn(
             "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[44%] grid-flow-col gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 sm:auto-cols-[30%]",

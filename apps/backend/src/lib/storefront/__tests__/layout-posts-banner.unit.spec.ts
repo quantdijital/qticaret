@@ -45,7 +45,7 @@ describe("the posts' intro panel (adr/0077 Ek, Vadi)", () => {
     expect(readStoredLayout({ home: [guides()] }).home[0]).toMatchObject({ variant: "grid" })
     // A variant off the list (a newer build's) reads as the grid, keeping the grid's fields only
     expect(
-      readStoredLayout({ home: [guides({ variant: "mosaic", eyebrow: "Yeni" })] }).home[0]
+      readStoredLayout({ home: [guides({ variant: "mosaic", intro: "Yeni" })] }).home[0]
     ).toEqual({ ...guides(), ...ALWAYS, variant: "grid" })
   })
 
@@ -64,7 +64,9 @@ describe("the posts' intro panel (adr/0077 Ek, Vadi)", () => {
   })
 
   it("refuses the panel's fields on the grid and words past their lengths", () => {
-    expect(issues({ home: [guides({ eyebrow: "Yeni" })] }).length).toBeGreaterThan(0)
+    // The upper line is every variant's since 2026-11-28 (`head-lines.ts`); the intro and button stay the panel's
+    expect(issues({ home: [guides({ eyebrow: "Yeni" })] })).toEqual([])
+    expect(issues({ home: [guides({ intro: "Yeni" })] }).length).toBeGreaterThan(0)
     const long = "a".repeat(POSTS_INTRO_LIMITS.intro + 1)
     expect(issues({ home: [guides({ variant: "intro_panel", intro: long })] }).length).toBe(1)
     expect(issues({ home: [guides({ variant: "intro_panel" })] })).toEqual([])

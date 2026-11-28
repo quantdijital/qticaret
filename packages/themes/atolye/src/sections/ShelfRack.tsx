@@ -75,7 +75,14 @@ export function Rack({
   const head = tabbed ? (
     title
   ) : (
-    <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} ownMore />
+    <SectionHead
+      id={id}
+      title={section.title}
+      more={section.more}
+      marks={section.editor}
+      ownMore
+      lines={section}
+    />
   )
   // A plain panel's link follows its cards in the page's order too; a
   // carousel's stays in its head row beside the arrows (`Scroller`)

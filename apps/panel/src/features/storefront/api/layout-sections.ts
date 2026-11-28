@@ -35,6 +35,7 @@ import type {
   RichTextVariant,
   TrustBadgesVariant,
   TrustCardStep,
+  StoreHeadLines,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
@@ -190,7 +191,7 @@ export type BannerSection = BodySectionBase & {
   note?: string | null
 } & BannerSettings
 
-interface CategoriesBase extends BodySectionBase {
+interface CategoriesBase extends BodySectionBase, StoreHeadLines {
   type: "categories"
   title: string | null
   /** None: the top categories. */
@@ -243,8 +244,10 @@ export interface PostsSection extends BodySectionBase {
   title: string | null
   limit: number
   variant: PostsVariant
-  /** `intro_panel`: the line above the heading. */
+  /** The line above the heading (every variant's since 2026-11-28). */
   eyebrow?: string | null
+  /** A short hand note beside the heading (`HAND_NOTE_MAX`); none: no note. */
+  note?: string | null
   /** `intro_panel`: the words under the heading. */
   intro?: string | null
   /** `intro_panel`: the button; none: the storefront's "every post". */
@@ -256,7 +259,7 @@ export interface PostsSection extends BodySectionBase {
 }
 
 /** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */
-export interface ReviewsSection extends BodySectionBase {
+export interface ReviewsSection extends BodySectionBase, StoreHeadLines {
   type: "reviews"
   title: string | null
   limit: number

@@ -1,4 +1,4 @@
-import type { DeparturesSettings, DeparturesSource } from "@qticaret/types"
+import type { DeparturesSettings, DeparturesSource, StoreHeadLines } from "@qticaret/types"
 import type { BodySectionBase } from "@/features/storefront/api/layout-sections"
 
 // Upcoming departures of the theme editor's document (adr/0077 §10)
@@ -16,4 +16,5 @@ export type DeparturesSection = BodySectionBase & {
   intro: string | null
   source: DeparturesSource
   limit: number
-} & DeparturesSettings
+} & DeparturesSettings &
+  StoreHeadLines

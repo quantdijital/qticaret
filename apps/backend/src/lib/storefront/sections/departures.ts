@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { optional, recordId, shopText, title } from "../layout-fields"
+import { headLines } from "./head-lines"
 import { bodyFields } from "./look"
 import { collectionSource } from "./sources"
 
@@ -62,6 +63,8 @@ export const departures = z
       .max(DEPARTURES_LIMITS.limit.max)
       .default(DEPARTURES_LIMITS.limit.default),
     layout: setting("layout"),
+    /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+    ...headLines,
   })
   .strict()
 
