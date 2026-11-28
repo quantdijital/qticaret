@@ -1,12 +1,14 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { reissuePlanDocuments } from "../../../../../../../../lib/fleet/reissue"
 import { primaryDomainWorkflow } from "../../../../../../../../workflows/tenants/tenant-domains"
 import { noteAuditChanges } from "../../../../../../../http/audit"
 import { paramOf, tenantParam } from "../../../../params"
 
 /**
  * POST /admin/cp/tenants/:id/domains/:domain_id/primary (owner,
- * operator): the shop's primary address; a verified domain only
- * (`cp.domain_unverified`: the storefront's links would break).
+ * operator, step-up): the shop's primary address; a verified domain only
+ * (`cp.domain_unverified`: the storefront's links would break). The
+ * shop's plan document carries the new primary.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const tenant = await tenantParam(req)
@@ -14,5 +16,6 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
     input: { tenant_id: tenant.id, domain_id: paramOf(req, "domain_id") },
   })
   noteAuditChanges(req, { primary_domain: result })
+  await reissuePlanDocuments(req.scope, [tenant.id])
   res.json({ primary: result.to })
 }

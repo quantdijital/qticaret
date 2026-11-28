@@ -2,7 +2,13 @@ import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { billingSummaryOf } from "../../lib/billing/summary"
-import { contentHash, planContent, planDocumentOf } from "../../lib/fleet/plan-content"
+import {
+  contentHash,
+  planContent,
+  planDocumentOf,
+  planDomainsOf,
+} from "../../lib/fleet/plan-content"
+import { isVerifiedDomain } from "../../lib/tenants/kinds"
 import type { PlanContent } from "../../lib/fleet/plan-content"
 import { signPlanDocument } from "../../lib/vault/signing"
 import { fleetIn, plansIn, tenantsIn, vaultIn } from "../modules"
@@ -12,7 +18,8 @@ type Container = Pick<MedusaContainer, "resolve">
 
 /**
  * What a shop's document says now (Ek C9): its status, its package's
- * limits and flags with its unexpired exceptions, its billing (Ek C16). Null for a shop on no
+ * limits and flags with its unexpired exceptions, its billing (Ek C16),
+ * its proved hosts (F16.7). Null for a shop on no
  * package: no document is issued for it, and a shop that had one keeps
  * its last (the package code is part of the contract).
  */
@@ -22,8 +29,9 @@ export async function planContentOf(
   now: Date = new Date()
 ): Promise<PlanContent | null> {
   const plans = plansIn(container)
-  const [tenant, plan, limitOverrides, flagOverrides] = await Promise.all([
+  const [tenant, domains, plan, limitOverrides, flagOverrides] = await Promise.all([
     tenantsIn(container).tenantOf(tenantId),
+    tenantsIn(container).domainsOf(tenantId),
     plans.planOf(tenantId),
     plans.overridesOf(tenantId),
     plans.featureOverridesOf(tenantId),
@@ -42,6 +50,10 @@ export async function planContentOf(
     limitOverrides,
     flagOverrides,
     billing,
+    // F16.7: the proved hosts, once the shop has a proved domain of its own
+    domains: planDomainsOf(
+      domains.map((domain) => ({ ...domain, verified: isVerifiedDomain(domain.verification) }))
+    ),
     now,
     nodeEnv: process.env["NODE_ENV"],
   })

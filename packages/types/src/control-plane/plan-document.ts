@@ -96,6 +96,28 @@ const billingSummarySchema = z.strictObject({
   trial_ends_on: z.iso.date().nullable().optional(),
 })
 
+/** A host name as DNS has it: lower case, labels of letters, digits and hyphens. */
+const HOSTNAME = /^(?=.{1,253}$)(?:(?!-)[a-z0-9-]{1,63}(?<!-)\.)*(?!-)[a-z0-9-]{1,63}(?<!-)$/
+
+/** At most this many hosts in a document (a shop's subdomain and 50 own domains fit). */
+export const PLAN_DOMAINS_MAX = 60
+
+/**
+ * The hosts the control plane has proved the shop answers on (F16.7):
+ * its platform subdomain and its own domains whose DNS proof passed, and
+ * the primary one (the storefront's canonical address as staff chose it).
+ * Optional, as C16's fields: the control plane sends it only once a shop
+ * has a proved domain of its own, so a shop on an older version keeps
+ * taking its documents until then (rollout: shops first, adr/0061 Ek
+ * F16.7). The shop's own settings (`seo.canonical_host`) stay its own.
+ */
+const domainsSchema = z
+  .strictObject({
+    primary: z.string().regex(HOSTNAME, "must be a host name"),
+    hosts: z.array(z.string().regex(HOSTNAME, "must be a host name")).min(1).max(PLAN_DOMAINS_MAX),
+  })
+  .refine((domains) => domains.hosts.includes(domains.primary), "primary must be one of hosts")
+
 export const planDocumentSchema = z.strictObject({
   version: z.literal(PLAN_DOCUMENT_VERSION),
   tenant_id: tenantIdSchema,
@@ -111,10 +133,12 @@ export const planDocumentSchema = z.strictObject({
     .record(z.string().regex(FEATURE_FLAG_KEY, "must be a flag key"), z.boolean())
     .refine((flags) => Object.keys(flags).length <= 100, "has too many flags"),
   billing: billingSummarySchema,
+  domains: domainsSchema.optional(),
 })
 export type PlanDocument = z.infer<typeof planDocumentSchema>
 export type PlanLimits = PlanDocument["limits"]
 export type PlanBillingSummary = PlanDocument["billing"]
+export type PlanDomains = NonNullable<PlanDocument["domains"]>
 
 /** The document as it travels and as both sides store it. */
 export const signedPlanDocumentSchema = z.strictObject({

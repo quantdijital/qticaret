@@ -99,7 +99,8 @@ const TENANT_ROUTES: RouteRule[] = [
       "/contacts",
       "/contacts/:contact_id",
       "/domains",
-      "/domains/:domain_id/primary",
+      // F16.7: "Doğrula", DNS asked now (no step-up: it proves, it changes no address)
+      "/domains/:domain_id/check",
       "/notes",
       "/notes/:note_id",
       "/overrides",
@@ -118,15 +119,25 @@ const TENANT_ROUTES: RouteRule[] = [
   },
   ...shopRules(
     "DELETE",
-    [
-      "/contacts/:contact_id",
-      "/domains/:domain_id",
-      "/notes/:note_id",
-      "/overrides/:key",
-      "/feature-overrides/:key",
-    ],
+    ["/contacts/:contact_id", "/notes/:note_id", "/overrides/:key", "/feature-overrides/:key"],
     SHOPS
   ),
+  // F16.7: the storefront's canonical address chosen, or a domain removed: a live
+  // storefront's address moves or goes, so proved again
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/domains/:domain_id/primary",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
+  {
+    method: "DELETE",
+    path: "/admin/cp/tenants/:id/domains/:domain_id",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
   // Ek C15: a suspension and its end (adr/0061 §3.5 "askıya alma, geri açma"): who runs
   // shops, proved again; it darkens or opens a storefront
   ...["/suspend", "/resume"].map((action): RouteRule => ({

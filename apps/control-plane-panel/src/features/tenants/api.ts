@@ -80,14 +80,39 @@ export interface Contact {
   created_at: string
 }
 
+/** Why the last DNS check did not prove or route a domain (F16.7). */
+export type DomainCheckError =
+  | "txt_missing"
+  | "txt_mismatch"
+  | "dns_unavailable"
+  | "expired"
+  | "txt_lost"
+  | "routing_missing"
+  | "routing_mismatch"
+
+/** The records the shop's owner publishes: the proof, and where to point (null before the server). */
+export interface DomainDns {
+  txt: { name: string; value: string }
+  routing: { type: "CNAME" | "A"; name: string; values: string[] } | null
+}
+
 export interface Domain {
   id: string
   hostname: string
   kind: "platform_subdomain" | "custom"
-  verification: "pending" | "verified" | "failed"
+  verification: "pending" | "verified" | "active" | "failed"
+  verification_error?: DomainCheckError | null
+  verified_at?: string | null
+  last_checked_at?: string | null
   is_primary: boolean
+  /** A custom domain's records; null on the platform's subdomain. */
+  dns?: DomainDns | null
   created_at: string
 }
+
+/** Whether the shop's hold on the domain is proven (it may be primary). */
+export const isVerified = (domain: Pick<Domain, "verification">): boolean =>
+  domain.verification === "verified" || domain.verification === "active"
 
 export interface Note {
   id: string

@@ -477,7 +477,7 @@
     "title": "Alan adları",
     "text": "Mağazanın yanıt verdiği adresler; birincil olan vitrinin adresidir.",
     "add": "Alan adı ekle",
-    "addText": "Mağazanın kendi alan adı kaydedilir; DNS doğrulaması yayına çıkışta yapılır.",
+    "addText": "Kaydedince DNS'e eklenecek TXT kaydı gösterilir; doğrulama kendiliğinden denenir.",
     "addSubmit": "Ekle",
     "hostname": "Alan adı",
     "empty": "Alan adı yok.",
@@ -493,7 +493,8 @@
     "states": {
       "pending": "Doğrulama bekliyor",
       "verified": "Doğrulandı",
-      "failed": "Doğrulanamadı"
+      "failed": "Doğrulanamadı",
+      "active": "Etkin"
     },
     "primary": "Birincil",
     "isPrimary": "Vitrinin birincil adresi",
@@ -511,6 +512,36 @@
       "title": "Alan adını kaldır",
       "text": "{{host}} mağazanın adreslerinden çıkarılır.",
       "action": "Kaldır"
+    },
+    "failedText": "Doğrulanamadı; nedeni aşağıda yazıyor. Kayıt yerindeyse Doğrula'ya basın.",
+    "check": "Doğrula",
+    "checking": "Denetleniyor…",
+    "checkProved": "Alan adı doğrulandı.",
+    "checkNotYet": "Henüz doğrulanamadı; nedeni pencerede yazıyor.",
+    "lastChecked": "Son denetim",
+    "never": "Henüz denetlenmedi",
+    "ssl": "SSL",
+    "sslLater": "Sunucu kurulunca verilecek",
+    "dns": {
+      "title": "DNS kayıtları",
+      "txtText": "Alan adının sahibi olduğunuzu göstermek için bu TXT kaydını alan adınızın DNS ayarlarına ekleyin.",
+      "cnameText": "Ardından adresi platforma yönlendirmek için bu CNAME kaydını ekleyin.",
+      "aText": "Ardından adresi platforma yönlendirmek için bu A kayıtlarını ekleyin.",
+      "routingLater": "Yönlendirme kaydı sunucu kurulunca burada görünecek; şimdilik TXT kaydı yeterli.",
+      "type": "Tür",
+      "name": "Ad",
+      "value": "Değer",
+      "copy": "{{what}} kopyala",
+      "copied": "Kopyalandı."
+    },
+    "reasons": {
+      "txt_missing": "TXT kaydı bulunamadı. Kayıt yeni eklendiyse DNS'in yayılması birkaç saat sürebilir.",
+      "txt_mismatch": "TXT kaydı var ama değeri farklı; yukarıdaki değeri birebir girin.",
+      "dns_unavailable": "DNS yanıt vermedi; kendiliğinden yeniden denenecek.",
+      "expired": "Bir hafta içinde doğrulanamadı; otomatik denetim durdu.",
+      "txt_lost": "TXT kaydı DNS'ten kaldırılmış. İki hafta içinde geri eklenmez ve adres platforma yönlenmezse alan adı doğrulamadan düşer, birincilse platform adresi birincil olur.",
+      "routing_missing": "Adres henüz platforma yönlendirilmedi.",
+      "routing_mismatch": "Adres başka bir yere yönleniyor; yönlendirme kaydını denetleyin."
     }
   },
   "plan": {

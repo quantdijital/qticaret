@@ -1,5 +1,6 @@
 import { INVITE_TOKEN } from "@qticaret/types/control-plane"
 import type { DomainRecord } from "../../modules/tenants/types"
+import { isVerifiedDomain } from "../tenants/kinds"
 import { ProvisioningError } from "./provisioner"
 import type { ProvisionTarget, TenantProvisioner } from "./provisioner"
 
@@ -27,7 +28,7 @@ export function shopPanelOrigin(
   if (kind === "local" || kind === "fake") {
     return `http://localhost:${String(target.port + LOCAL_PANEL_OFFSET)}`
   }
-  const verified = domains.filter((domain) => domain.verification === "verified")
+  const verified = domains.filter((domain) => isVerifiedDomain(domain.verification))
   const host =
     verified.find((domain) => domain.is_primary)?.hostname ??
     verified.find((domain) => domain.kind === "platform_subdomain")?.hostname

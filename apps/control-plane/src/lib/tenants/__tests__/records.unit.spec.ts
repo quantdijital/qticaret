@@ -61,6 +61,9 @@ describe("a shop's host names", () => {
     ["-a.com", "cp.domain_invalid"],
     ["10.0.0.1", "cp.domain_invalid"],
     ["shop.localhost", "cp.domain_invalid"],
+    ["magaza.test", "cp.domain_invalid"],
+    ["magaza.internal", "cp.domain_invalid"],
+    ["www.magaza.local", "cp.domain_invalid"],
     ["a.quantticaret.com", "cp.domain_platform"],
     ["quantticaret.com", "cp.domain_platform"],
   ])("judges %s", (hostname, problem) => {
