@@ -2098,7 +2098,8 @@
             "mfa_changed": "Team: two-step verification changed",
             "email_confirm": "Team: new e-mail confirmation",
             "account_changed": "Team: password or e-mail changed",
-            "smtp_rejections": "Team: mail server refusing recipients"
+            "smtp_rejections": "Team: mail server refusing recipients",
+            "support_access": "Team: platform support signed in"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
@@ -2837,7 +2838,8 @@
       "tabs": {
         "account": "My account",
         "team": "Team",
-        "fraud": "Fraud prevention"
+        "fraud": "Fraud prevention",
+        "support": "Support access"
       },
       "profile": {
         "title": "My profile",
@@ -15342,6 +15344,56 @@
       "done": "{{products}} products, {{categories}} categories, {{reviews}} reviews deleted.",
       "hidden_one": "{{count}} pack category hidden again.",
       "hidden_other": "{{count}} pack categories hidden again."
+    }
+  },
+  "supportAccess": {
+    "page": {
+      "title": "Platform support",
+      "opening": "Signing in to the shop's panel…",
+      "failedTitle": "The support session could not open",
+      "missing": "The link carries no grant. Choose \"Open the shop's panel\" again in the control plane.",
+      "expired": "This link has expired. Get a new one from the control plane.",
+      "used": "This link was already used. Each link opens once; get a new one from the control plane.",
+      "disabled": "The shop's owner has turned support access off. Ask the owner to turn it on.",
+      "invalid": "This link is not valid for this shop.",
+      "failed": "Something went wrong. Try again in a moment."
+    },
+    "banner": {
+      "text": "You are signed in as platform support ({{name}})",
+      "left_one": "{{count}} min left",
+      "left_other": "{{count}} min left",
+      "end": "End session"
+    },
+    "settings": {
+      "title": "Allow support access",
+      "hint": "While on, the platform team can sign in to your panel for at most 60 minutes, stating a reason. You are told by the bell and e-mail every time.",
+      "onState": "Platform support can sign in when needed. The team, ownership, payment accounts, legal details and customer exports are closed to it.",
+      "offState": "Platform support cannot sign in. Turn this on when you need help.",
+      "onTitle": "Turn support access on?",
+      "onConfirm": "The platform team will be able to sign in for a limited time, stating a reason.",
+      "offTitle": "Turn support access off?",
+      "offConfirm": "Open support sessions end at once and no new one can start.",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "turnedOn": "Support access is on.",
+      "turnedOff": "Support access is off.",
+      "openTitle": "Open sessions",
+      "openHint": "Platform support sessions in your panel right now.",
+      "noneOpen": "No open support session.",
+      "endsAt": "Ends: {{time}}",
+      "end": "End",
+      "endTitle": "End this session?",
+      "endConfirm": "{{name}}'s support session ends at once.",
+      "endedToast": "Support session ended.",
+      "historyTitle": "Recent sign-ins",
+      "historyHint": "Platform support's last 20 sign-ins and their reasons.",
+      "noHistory": "No support sign-in yet.",
+      "ended": {
+        "logout": "Signed out: {{time}}",
+        "expired": "Ran out: {{time}}",
+        "ended_by_owner": "Ended by you: {{time}}",
+        "disabled": "Ended when access was turned off: {{time}}"
+      }
     }
   }
 }

@@ -15,6 +15,7 @@ import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
 import { Route as AuthMediaRouteImport } from './routes/_auth/media'
@@ -152,6 +153,11 @@ const LoginRoute = LoginRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
@@ -735,6 +741,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
@@ -851,6 +858,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
@@ -967,6 +975,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/_auth/inventory': typeof AuthInventoryRoute
   '/_auth/media': typeof AuthMediaRoute
   '/_auth/notifications': typeof AuthNotificationsRoute
@@ -1086,6 +1095,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/inventory'
     | '/media'
     | '/notifications'
@@ -1202,6 +1212,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/inventory'
     | '/media'
     | '/notifications'
@@ -1317,6 +1328,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/_auth/inventory'
     | '/_auth/media'
     | '/_auth/notifications'
@@ -1436,6 +1448,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SupportRoute: typeof SupportRoute
   SecuritySetupRoute: typeof SecuritySetupRoute
 }
 
@@ -1481,6 +1494,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/': {
@@ -2520,6 +2540,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SupportRoute: SupportRoute,
   SecuritySetupRoute: SecuritySetupRoute,
 }
 export const routeTree = rootRouteImport

@@ -10,6 +10,7 @@ import { appearanceQuery } from "@/features/settings/api/appearance"
 import { AppSidebar } from "./app-sidebar"
 import { MaintenanceBanner } from "./maintenance-banner"
 import { PlanStatusBanner } from "./plan-status-banner"
+import { SupportSessionBanner } from "./support-session-banner"
 import { ReauthHost } from "./reauth-host"
 import { Topbar } from "./topbar"
 import { useDocumentIcon } from "./use-document-icon"
@@ -88,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AppSidebar peek={peeking} {...(mode === "auto" ? { onPeek: setPeek } : {})} />
         <SidebarInset className="min-w-0 bg-background">
           <Topbar />
+          <SupportSessionBanner />
           <PlanStatusBanner />
           <MaintenanceBanner />
           {/* SidebarInset is the page's one <main>; this is the skip link's target */}

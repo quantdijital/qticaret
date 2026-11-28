@@ -2098,7 +2098,8 @@
             "mfa_changed": "Ekip: iki adımlı doğrulama değişti",
             "email_confirm": "Ekip: yeni e-posta onayı",
             "account_changed": "Ekip: şifre ya da e-posta değişti",
-            "smtp_rejections": "Ekip: e-posta sunucusu alıcıları reddediyor"
+            "smtp_rejections": "Ekip: e-posta sunucusu alıcıları reddediyor",
+            "support_access": "Ekip: platform desteği giriş yaptı"
           },
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",
@@ -2837,7 +2838,8 @@
       "tabs": {
         "account": "Hesabım",
         "team": "Ekip",
-        "fraud": "Sahtekârlık önleme"
+        "fraud": "Sahtekârlık önleme",
+        "support": "Destek erişimi"
       },
       "profile": {
         "title": "Profilim",
@@ -15342,6 +15344,56 @@
       "done": "{{products}} ürün, {{categories}} kategori, {{reviews}} yorum silindi.",
       "hidden_one": "{{count}} paket kategorisi yeniden gizlendi.",
       "hidden_other": "{{count}} paket kategorisi yeniden gizlendi."
+    }
+  },
+  "supportAccess": {
+    "page": {
+      "title": "Platform desteği",
+      "opening": "Mağaza paneline giriş yapılıyor…",
+      "failedTitle": "Destek oturumu açılamadı",
+      "missing": "Bağlantıda giriş izni yok. Üst panelden yeniden \"Mağaza paneline geç\" deyin.",
+      "expired": "Bu bağlantının süresi doldu. Üst panelden yeni bir bağlantı alın.",
+      "used": "Bu bağlantı daha önce kullanıldı. Her bağlantı yalnız bir kez açılır; üst panelden yenisini alın.",
+      "disabled": "Mağaza sahibi destek erişimini kapatmış. Açması için mağaza sahibiyle görüşün.",
+      "invalid": "Bu bağlantı bu mağaza için geçerli değil.",
+      "failed": "Bir sorun oldu. Birazdan yeniden deneyin."
+    },
+    "banner": {
+      "text": "Platform desteği olarak giriş yaptınız ({{name}})",
+      "left_one": "Kalan süre {{count}} dk",
+      "left_other": "Kalan süre {{count}} dk",
+      "end": "Oturumu bitir"
+    },
+    "settings": {
+      "title": "Destek erişimine izin ver",
+      "hint": "Açıkken platform ekibi, gerekçe yazarak en çok 60 dakikalık bir oturumla panelinize girebilir. Her girişte size zil ve e-postayla haber verilir.",
+      "onState": "Platform desteği gerektiğinde panelinize girebilir. Ekip, sahiplik, ödeme hesapları, yasal bilgiler ve müşteri listelerinin dışa aktarımı destek oturumunda kapalıdır.",
+      "offState": "Platform desteği panelinize giremez. Yardım gerektiğinde bu anahtarı açmanız gerekir.",
+      "onTitle": "Destek erişimi açılsın mı?",
+      "onConfirm": "Platform ekibi gerektiğinde, gerekçe yazarak süreli bir oturumla panelinize girebilecek.",
+      "offTitle": "Destek erişimi kapatılsın mı?",
+      "offConfirm": "Açık destek oturumları hemen biter ve yeni giriş yapılamaz.",
+      "turnOn": "Aç",
+      "turnOff": "Kapat",
+      "turnedOn": "Destek erişimi açık.",
+      "turnedOff": "Destek erişimi kapatıldı.",
+      "openTitle": "Açık oturumlar",
+      "openHint": "Şu anda panelinizde olan platform desteği oturumları.",
+      "noneOpen": "Açık destek oturumu yok.",
+      "endsAt": "Bitiş: {{time}}",
+      "end": "Sonlandır",
+      "endTitle": "Oturum sonlandırılsın mı?",
+      "endConfirm": "{{name}} adlı destek personelinin oturumu hemen biter.",
+      "endedToast": "Destek oturumu sonlandırıldı.",
+      "historyTitle": "Son girişler",
+      "historyHint": "Platform desteğinin son 20 girişi ve gerekçeleri.",
+      "noHistory": "Henüz destek girişi olmadı.",
+      "ended": {
+        "logout": "Çıkış yaptı: {{time}}",
+        "expired": "Süresi doldu: {{time}}",
+        "ended_by_owner": "Siz sonlandırdınız: {{time}}",
+        "disabled": "Erişim kapatılınca bitti: {{time}}"
+      }
     }
   }
 }
