@@ -210,7 +210,7 @@ export function decideSupport(
     return { allowed: false, reason: "support_denied" }
   }
   // A customer group's members are customers: never expanded through `fields`
-  if (decoded.startsWith("/admin/customer-groups") && (facts.fields ?? "").includes('customer')) {
+  if (decoded.startsWith("/admin/customer-groups") && (facts.fields ?? "").includes("customer")) {
     return { allowed: false, reason: "support_denied" }
   }
   return matches(SUPPORT_ALLOWED, verb, path, facts)

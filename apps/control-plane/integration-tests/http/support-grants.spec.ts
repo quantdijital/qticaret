@@ -7,9 +7,9 @@ import type ProvisioningModuleService from "../../src/modules/provisioning/servi
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
 import { ensureSigningKey } from "../helpers/fleet"
-import { makeMember } from "../helpers/staff"
+import { makeMember, stepUp } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
-import { auditRows, client, makeTenant, proved } from "../helpers/tenants"
+import { auditRows, client, makeTenant } from "../helpers/tenants"
 
 jest.setTimeout(240 * 1000)
 
@@ -79,7 +79,8 @@ medusaIntegrationTestRunner({
       member: Member,
       body: unknown = { reason: REASON, minutes: 30 }
     ) =>
-      call.post(`/admin/cp/tenants/${id}/support-grants`, body, member, await proved(http, member))
+      // A fresh proof each time: the route takes a proof for one grant only (review L1)
+      call.post(`/admin/cp/tenants/${id}/support-grants`, body, member, await stepUp(http, member))
 
     it("issues a grant the shop can verify: its panel's link, bound to the shop and the member", async () => {
       const id = await shop()
@@ -144,7 +145,7 @@ medusaIntegrationTestRunner({
 
     it("takes a step-up proof for one grant only (security review L1)", async () => {
       const id = await shop()
-      const proof = await proved(http, operator)
+      const proof = await stepUp(http, operator)
       const path = `/admin/cp/tenants/${id}/support-grants`
       const body = { reason: REASON, minutes: 30 }
       const first = await call.post(path, body, operator, proof)
@@ -169,10 +170,23 @@ medusaIntegrationTestRunner({
         { reason: REASON, minutes: 30 },
         operator
       )
-      const short = await grant(id, operator, { reason: "kısa", minutes: 30 })
-      const twoLines = await grant(id, operator, { reason: `${REASON}\nikinci`, minutes: 30 })
-      const longer = await grant(id, operator, { reason: REASON, minutes: 120 })
-      const extra = await grant(id, operator, { reason: REASON, minutes: 30, role: "owner" })
+      // Refused by the body's schema before the route: one proof serves them all
+      const proof = await stepUp(http, operator)
+      const path = `/admin/cp/tenants/${id}/support-grants`
+      const short = await call.post(path, { reason: "kısa", minutes: 30 }, operator, proof)
+      const twoLines = await call.post(
+        path,
+        { reason: `${REASON}\nikinci`, minutes: 30 },
+        operator,
+        proof
+      )
+      const longer = await call.post(path, { reason: REASON, minutes: 120 }, operator, proof)
+      const extra = await call.post(
+        path,
+        { reason: REASON, minutes: 30, role: "owner" },
+        operator,
+        proof
+      )
       const byFinance = await grant(id, finance)
       const byReader = await grant(id, readonly)
 

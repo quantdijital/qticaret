@@ -32,6 +32,9 @@ const DECISIONS: Record<string, Decision> = {
   "GET /google/callback": "checks",
   // The control plane's document: the only way a restriction is lifted
   "POST /hooks/control-plane/plan": "open",
+  // A platform support session (adr/0061 Ek "Destek erişimi"): a suspended shop is where
+  // support is needed most; once in, its writes meet the plan guard on /admin like anyone's
+  "POST /auth/support-access": "open",
   // Payment, shipping and mail providers' callbacks settle what already started (§5.5)
   "POST /hooks/iyzico/callback": "open",
   "POST /hooks/paytr": "open",
