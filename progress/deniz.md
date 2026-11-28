@@ -37,6 +37,28 @@
 
 Bitenler: #292–#307 (2026-11-24 notunda); #230 (notlar); sayfa rolleri sayfa kimliğiyle (#231); ADR-0073 Ek 2 kararı (#232); ADR-0073 içerik sayfalarında bölümler, dilim S1–S5 (#225–#229); BirFatura F1 + F2 (#209, #210); ADR-0069 ürün videoları (dilim 1–6 ve 8; dilim 7 iptal); D4-1 (#185); vitrin `core.ts` köken denetimi (#186); toptan analitik L1/L2 + SMS L4 (#187). Sıra: 1 hemen; 2 test sunucusu kurulunca; 3 canlıya çıkışta; 5 ve 6 sahipte.
 
+## 2026-11-27/28 — editör tek panel, üst şerit ve kaydırıcı, taşıma ekranı, üst panel kurulumu ve destek erişimi
+
+Çalışma düzeni (sahip kararı 2026-11-27): görünen işlerde dal önce sahibin çalışma kopyasına alınır (önce `origin/dev` birleştirilir), sahip görür, düzeltmeler aynı dalda; onay + yeşil CI sonrası birleşir.
+
+Birleşenler:
+- Kargo/entegrasyon: PTT bağlantı kontrolü "doğrulanamadı" (#480); yerel yapay zekâ adı Vireo AI (#481); Google OAuth dönüşü panel adresine, sahte Merchant numarası sabit (#482); footer'da PTT/Sürat logoları (#483).
+- Google yorumları tamamen kaldırıldı (sahip kararı; #484 karışık liste birleşti, #485 kaldırma + temizlik betiği).
+- Editör: üst şerit ayrı bölüm (#487), tek panel (#488), panel içinden bölüm ekleme + araya ekleme (#490), üst şerit kaydırıcısı + görsel kaydırıcı `top_slider` (#496).
+- Panel: zemin rengi ayrı seçenek (#491), Raporlar Pazarlama altında (#492), kapalı özellik sayfalarında başlık (#494).
+- Vitrin: e-bülten tek satır onay (#493), güvence kutuları ≥2 + telefonda alt alta, aynı gün kargo satırı başlıklı (#497).
+- Soru-cevap yönetimi: ürün detayında liste, düzenle/gizle/sil, KVKK silmesi silinmişleri de kapsar (#495).
+- WordPress blog görselleri + mevcut yazılara tamamlama (#499); taşıma ekranı yeniden tasarım: sadeleştirme, tür seçimi, Taşınanlar/Tamamlama işlemleri/Taşımadan sonra, sihirbaz, sonuç sayfası (#500).
+- Başlangıç sayfaları (Hakkımızda, İletişim, SSS, Ödeme Seçenekleri, Kargo ve Teslimat) taslak; tur paketinde kargo yok (#504). Sahibin DB'sinde 2 sayfa taslak açıldı.
+- Üst panel: Görünüm adımı + mağaza profili (#505), kurulum durumu raporu + panelin ödeme adımı düzeltmesi (#507), destek erişimi "Mağaza paneline geç" (allow-list, 3 güvenlik incelemesi; #506).
+- Belgeler: F19 dil/para planı taslağı (#489, açık, Oğuzhan'la tartışılacak), canlıya alma listesi `docs/25` (#498).
+
+Sahibin bakacakları: Vitrin › Sayfalar'daki Ödeme Seçenekleri ve Kargo ve Teslimat taslakları; üst panelde yeni mağaza sihirbazı (Görünüm adımı), Kurulum durumu kartı, "Mağaza paneline geç" (yerelde: `qt-dev-cp` yeniden başlat, `pnpm turbo run build --filter=@qticaret/backend`).
+
+Açık kararlar: destek erişimi anahtarı varsayılan açık (önerildi); F19 kararları (#489); canlıya alma için sunucu ve alan adları (docs/25 §4.2).
+
+Takip: üst panel kalanları (ust-panel-eksikler raporu): sürüm yükseltme, mağaza başına yedek, kapatma, alan adı doğrulama, DockerProvisioner (F16); ilk sahibi yalnız davet akışı oluştursun; tur paketi Hakkımızda/Ödeme metinlerinde "kargo" geçiyor; `promotion-codes.spec` bir kez zaman aşımı (izleniyor).
+
 ## 2026-11-26 (akşam/gece) — kargo firmaları yeniden: Geliver çıktı, BirFatura modu, DHL eCommerce, Sürat, PTT
 
 - **Birleşenler (`dev`, #454–#474):**
