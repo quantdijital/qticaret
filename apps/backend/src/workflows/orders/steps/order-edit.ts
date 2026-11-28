@@ -10,6 +10,7 @@ import type EinvoiceModuleService from "../../../modules/einvoice/service"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import { refuseBookingEdits } from "../../booking/order-edit"
+import { refuseSampleItems } from "../../checkout/sample-items"
 
 export interface OrderEditChanges {
   /** Existing lines: a new quantity (0 takes the line off), a corrected unit price (kuruş). */
@@ -83,6 +84,8 @@ export const checkOrderEditStep = createStep(
     }
     // A departure's places do not follow an edit (adr/0076 Ek, until D7)
     await refuseBookingEdits(container, order.items ?? [], input)
+    // A sample product is never sold, nor added to an order by staff (owner, 2026-11-28)
+    await refuseSampleItems(container, input.add)
     const packed = (order.fulfillments ?? []).some((each) => each && !each.canceled_at)
     if (order.status === "canceled" || order.status === "completed" || packed) {
       throw new ValidationError("orders.edit_after_packing")

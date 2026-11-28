@@ -185,6 +185,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/ai/seo-fill*" },
   // Wholesalers, their levels and prices (ADR-0068 §9): owner and admin; operations sees orders
   { methods: "*", path: "/admin/wholesale*" },
+  // The sector pack's sample catalogue, loaded and removed (owner, 2026-11-28): owner and admin
+  { methods: "*", path: "/admin/sample-catalog*" },
 ]
 
 /**

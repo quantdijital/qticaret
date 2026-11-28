@@ -1,5 +1,6 @@
 import { z } from "zod"
 import type { StorefrontPreset } from "./preset-schema"
+import type { SampleCatalog } from "./sample-schema"
 
 /**
  * A sector pack's files as this package reads them (adr/0061 F17.7, C12).
@@ -175,6 +176,8 @@ export interface LoadedSectorPack extends SectorPack {
   presets: readonly StorefrontPreset[]
   /** The AI scenes it offers (`scenes.json`, at most two); read where asked, never applied. */
   scenes: readonly SceneData[]
+  /** Its sample catalogue (`samples/`), loaded only when a shop asks; none for most packs. */
+  samples?: SampleCatalog | null
 }
 
 /** What the control plane's wizard shows of a pack. */

@@ -19,6 +19,7 @@ import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
 import { assertAddonLinesCurrent } from "../addons/checkout"
 import { assertBookingLinesCurrent } from "../booking/cart/checkout"
 import { assertCartWithinLimits } from "../checkout/purchase-limit"
+import { refuseSampleCartLines } from "../checkout/sample-items"
 import {
   assertLinkCartCompletes,
   claimLinkForCart,
@@ -82,6 +83,8 @@ completeCartWorkflow.hooks.validate(
       }
       return new StepResponse<undefined, LinkClaim | null>(undefined, null)
     }
+    // A sample product is never sold, whatever way its line came (owner, 2026-11-28)
+    await refuseSampleCartLines(container, cart.id)
     const problem = checkoutProblem(row)
     if (problem) {
       throw new ValidationError(problem.key, { field: problem.field })

@@ -977,7 +977,8 @@
         "ai.alt_text": "Bulk alt text suggestions",
         "ai.seo_fill": "Bulk SEO text suggestions",
         "content.link_rewrite": "Fixing links in texts",
-        "order.export": "Order export"
+        "order.export": "Order export",
+        "sample_catalog.load": "Sample content load"
       }
     },
     "audit": {
@@ -15252,6 +15253,68 @@
         "submit": "Send request",
         "refresh": "Refresh the list"
       }
+    }
+  },
+  "sampleCatalog": {
+    "badge": "Sample",
+    "badgeHint": "From the sample content; it shows in the store but cannot be bought.",
+    "productNote": "Sample product; it shows in the store but cannot be bought.",
+    "manage": "Manage sample content",
+    "card": {
+      "title": "Sample content",
+      "description": "Your sector pack's sample products, so the store looks full from day one. They show in the store but cannot be bought; remove them whenever you like.",
+      "set": "{{name}} · {{count}} products",
+      "none": "Not loaded",
+      "queued": "Queued, starting shortly",
+      "running": "Loading… {{percent}}%",
+      "loaded_one": "{{count}} sample product loaded",
+      "loaded_other": "{{count}} sample products loaded",
+      "extras": "{{categories}} categories, {{reviews}} reviews",
+      "failed": "The last load did not finish; what it did was undone. You can try again.",
+      "load": "Load",
+      "remove": "Remove sample content",
+      "queuedToast": "The sample content is loading; it takes a few minutes. You can leave this page.",
+      "loadedToast_one": "Sample content loaded: {{count}} product.",
+      "loadedToast_other": "Sample content loaded: {{count}} products.",
+      "noSets": "Your store's sector pack has no sample content."
+    },
+    "offer": {
+      "title": "Start with sample content",
+      "text": "{{name}}: {{count}} sample products in one click. They show in the store but cannot be bought; remove them whenever you like.",
+      "load": "Load"
+    },
+    "remove": {
+      "title": "Remove sample content",
+      "description": "Only records the sample content made are deleted; your own products and categories are left alone.",
+      "partsLabel": "What to remove",
+      "parts": {
+        "all": "All",
+        "products": "Sample products",
+        "productsHint": "With their departures, programs and reviews",
+        "categories": "Sample categories",
+        "categoriesHint": "Only those holding none of your own products",
+        "reviews": "Sample reviews"
+      },
+      "counting": "Counting…",
+      "keepToggle": "Keep some",
+      "keepHint": "A product you untick is not deleted; it stays a sample.",
+      "keepAria": "Delete {{title}}",
+      "edited": "edited",
+      "staysTitle": "Not deleted",
+      "stays": {
+        "ordered": "{{title}}: it has an order",
+        "booked": "{{title}}: it has a sold or held place",
+        "customer_content": "{{title}}: customers wrote on it ({{count}} reviews, questions or answers); deal with those first",
+        "own_products": "{{name}} category: it holds a product of your own",
+        "samples_left": "{{name}} category: it holds a sample you keep",
+        "children": "{{name}} category: a subcategory stays"
+      },
+      "nothing": "Nothing to delete in the parts you chose.",
+      "confirm": "Remove",
+      "doneTitle": "Sample content removed",
+      "done": "{{products}} products, {{categories}} categories, {{reviews}} reviews deleted.",
+      "hidden_one": "{{count}} pack category hidden again.",
+      "hidden_other": "{{count}} pack categories hidden again."
     }
   }
 }

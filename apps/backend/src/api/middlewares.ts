@@ -122,6 +122,7 @@ import { uploadValidator } from "./http/upload-validator"
 import { VIDEO_ROUTES } from "./http/video-routes"
 import { guardUploadStorage, registerUploads } from "./http/plan-limit-guards"
 import { PLAN_ROUTES } from "./http/plan-routes"
+import { SAMPLE_CATALOG_ROUTES } from "./http/sample-catalog-routes"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
@@ -384,6 +385,7 @@ export default defineMiddlewares({
     ...BIRFATURA_ROUTES,
     // adr/0061 Ek C14: Settings > Abonelik's reading
     ...PLAN_ROUTES,
+    ...SAMPLE_CATALOG_ROUTES,
     ...ACCOUNT_ROUTES,
     // ADR-0068 Ek 2026-11-15 (2): a changed password ends every older sign-in on the Store
     ...SIGN_IN_EPOCH_ROUTES,

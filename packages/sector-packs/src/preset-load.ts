@@ -30,7 +30,7 @@ const isFileName = (name: string): name is FileName => Object.hasOwn(PRESET_FILE
  * The entries of a folder; a hidden one (`.DS_Store`) and a link of any
  * kind are refused: only the frame's names may be there (adr/0063 §7).
  */
-function entries(dir: string, where: string) {
+export function entries(dir: string, where: string) {
   const found = readdirSync(dir, { withFileTypes: true })
   for (const entry of found) {
     if (entry.name.startsWith(".")) {
@@ -64,7 +64,7 @@ function head(path: string): Buffer {
 }
 
 /** An image file's size, after checking its type and size; throws naming it. */
-function imageBytes(path: string, where: string, max: number): number {
+export function imageBytes(path: string, where: string, max: number): number {
   const extension = path.slice(path.lastIndexOf(".") + 1)
   if (!SIGNATURES[extension]?.(head(path))) {
     throw new SectorPackError(`${where} is not a ${extension} image`)

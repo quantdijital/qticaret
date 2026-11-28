@@ -113,6 +113,8 @@ describe("every admin write route has a plan decision", () => {
       "migration.sitemap",
       "migration.urls",
       "promotion.codes",
+      // Writes products: as the import
+      "sample_catalog.load",
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",

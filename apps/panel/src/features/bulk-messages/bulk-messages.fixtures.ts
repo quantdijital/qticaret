@@ -136,6 +136,7 @@ const CAN_ALL = {
   resendMessages: true,
   looks: true,
   wholesale: true,
+  samples: true,
 }
 
 export const staff = (role: "owner" | "operations"): StaffMe => ({
@@ -158,6 +159,7 @@ export const staff = (role: "owner" | "operations"): StaffMe => ({
           team: false,
           looks: false,
           wholesale: false,
+          samples: false,
         },
   mfa: { available: true, required: false, enabled: true, passed: true },
 })

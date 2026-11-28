@@ -10,6 +10,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "async_job.unknown": "Job not found.",
   "async_job.type_unknown": "There is no such job type.",
   "audit_log.kind_invalid": "The entry kind is not valid.",
+  "sample_catalog.not_for_sale":
+    "This is a sample product; it shows in the store but cannot be bought.",
+  "sample_catalog.unknown": "This sector pack has no sample content.",
+  "sample_catalog.pack_not_applied": "This sector pack was not applied to your store.",
+  "sample_catalog.already_loaded": "This sample content is already loaded.",
+  "sample_catalog.loading": "The sample content is loading; try again once it is done.",
+  "sample_catalog.busy":
+    "The sample content is being loaded or removed right now; try again in a moment.",
+  "sample_catalog.metadata_reserved": "Sample content marks are set by the store only.",
+  "sample_catalog.booked_meanwhile":
+    "A sample product was booked or ordered meanwhile; refresh the list and try again.",
   "billing_profile.unknown": "This customer has no billing details.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",

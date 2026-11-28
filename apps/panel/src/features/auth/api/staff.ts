@@ -56,6 +56,8 @@ export type Capability =
   | "looks"
   /** The wholesalers, their levels and prices (ADR-0068 §9): owner and admin. */
   | "wholesale"
+  /** The sector pack's sample catalogue loaded and removed (2026-11-28): owner and admin. */
+  | "samples"
 
 export interface StaffMe {
   user_id: string

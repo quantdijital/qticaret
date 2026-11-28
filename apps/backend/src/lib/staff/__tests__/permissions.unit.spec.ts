@@ -375,6 +375,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: true,
+      samples: true,
       fraud: true,
       bulkMessages: true,
       paymentLinks: true,
@@ -405,6 +406,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: false,
+      samples: true,
       fraud: true,
       bulkMessages: true,
       paymentLinks: true,
@@ -438,6 +440,7 @@ describe("staff roles", () => {
       privacy: false,
       invoices: false,
       migration: false,
+      samples: false,
       fraud: false,
       bulkMessages: false,
       paymentLinks: true,
@@ -894,6 +897,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-layout/revisions/:revision/restore": false,
   // adr/0063 §7: a preset into the draft, as a draft's save
   "POST /admin/storefront-presets/:pack/:code/apply": false,
+  // The sample catalogue (owner, 2026-11-28): owner and admin
+  "POST /admin/sample-catalog/load": false,
+  "POST /admin/sample-catalog/remove": false,
   // adr/0064: the saved looks, as the design's own writes
   "POST /admin/storefront-designs": false,
   "POST /admin/storefront-designs/:id": false,

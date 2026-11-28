@@ -15,6 +15,8 @@ import { productQuery } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { publishScheduleOf } from "@/features/products/publish-schedule"
+import { isSampleProduct } from "@/features/sample-catalog/api"
+import { SampleBadge, SampleProductNote } from "@/features/sample-catalog/sample-badge"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
 import { usePartDraws, usePartUnused } from "@/features/products/detail/use-part-draws"
@@ -107,6 +109,7 @@ function ProductPage({
   const wide = useSideBySide()
   // The layout is the shop's: whoever may change its settings arranges it
   const canArrange = useCan("settings")
+  const sample = isSampleProduct(product)
   const slot = (key: PartKey) => {
     const why = page.shownWhy(key)
     return why === "off" ? undefined : why
@@ -145,10 +148,13 @@ function ProductPage({
             <PageHeader
               title={product.title}
               badge={
-                <ProductStatusBadge
-                  status={product.status}
-                  publishAt={publishScheduleOf(product).publish_at}
-                />
+                <span className="flex shrink-0 items-center gap-1.5">
+                  <ProductStatusBadge
+                    status={product.status}
+                    publishAt={publishScheduleOf(product).publish_at}
+                  />
+                  {sample ? <SampleBadge /> : null}
+                </span>
               }
               back={back}
               sticky
@@ -176,6 +182,7 @@ function ProductPage({
                 />
               }
             />
+            {sample ? <SampleProductNote /> : null}
             {wide ? null : nav}
             <EditorLayout
               main={
