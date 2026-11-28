@@ -24,6 +24,7 @@ infra/backup/backup.sh --db <mağaza-veritabanı> --recipients /etc/quant/yedek/
 
 - Postgres bağlantısı libpq değişkenleriyle kurulur (`PGHOST`, `PGUSER`, `PGPASSFILE`). Parola komut satırına yazılmaz.
 - Geliştirmede: `PG_EXEC="docker exec -i -e PGUSER=postgres qticaret-dev-postgres-1"`.
+- Üst panelden (mağaza sayfası, "Sürüm ve yedek" sekmesi, "Şimdi yedekle") aynı betik çalışır; yerelde çıktı `infra/tenants/backups/<slug>/`, alıcılar `CP_ESCROW_RECIPIENTS`. Makinede `age` kurulu olmalı.
 - Yarıda kalan yedek arkasında dosya bırakmaz. Çıkış kodu 0 değilse yedek alınmamıştır.
 - **Öneri (F16.8):** günlük tam döküm, ayrıca sağlayıcının WAL/PITR'si. Hedef RPO: PITR ile 5 dakika, yalnızca dökümle 24 saat. Döküm 35 gün, ayın ilk dökümü 12 ay saklanır.
 

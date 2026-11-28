@@ -159,9 +159,11 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/plan",
       "POST /admin/cp/tenants/:id/provisioning",
       "POST /admin/cp/tenants/:id/provisioning/apply-pack",
+      "POST /admin/cp/tenants/:id/provisioning/backup",
       "POST /admin/cp/tenants/:id/provisioning/invite",
       "POST /admin/cp/tenants/:id/provisioning/start",
       "POST /admin/cp/tenants/:id/provisioning/stop",
+      "POST /admin/cp/tenants/:id/provisioning/upgrade",
       "POST /admin/cp/tenants/:id/resume",
       "POST /admin/cp/tenants/:id/reveal-tckn",
       "POST /admin/cp/tenants/:id/subscription",
@@ -279,9 +281,11 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "GET /admin/cp/tenants/:id/provisioning/runs/:run_id",
       "POST /admin/cp/tenants/:id/provisioning",
       "POST /admin/cp/tenants/:id/provisioning/apply-pack",
+      "POST /admin/cp/tenants/:id/provisioning/backup",
       "POST /admin/cp/tenants/:id/provisioning/invite",
       "POST /admin/cp/tenants/:id/provisioning/start",
       "POST /admin/cp/tenants/:id/provisioning/stop",
+      "POST /admin/cp/tenants/:id/provisioning/upgrade",
     ])
     for (const rule of setup) {
       expect(CP_STAFF_ROLES.filter((role) => decide(rule, staff(role)).allowed)).toEqual([

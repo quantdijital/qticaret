@@ -11,6 +11,19 @@ import { api } from "@/lib/api"
  * is recorded.
  */
 
+/**
+ * Audit 3.2: a shop's latest backup as its runs recorded it ("Son yedek"):
+ * when, how big, whether it went and why not; null when never backed up.
+ */
+export interface LastBackup {
+  status: "succeeded" | "failed"
+  at: string
+  bytes: number | null
+  files: boolean | null
+  error_code: string | null
+  run_id: string
+}
+
 export type CompanyKind = "company" | "sole_proprietor"
 export type ContactRole = "owner" | "billing" | "technical"
 
@@ -31,6 +44,8 @@ export interface TenantRow {
   version: RowVersion
   /** Ek C21: its setup checklist from its latest report; null when none came. */
   setup: UsageSetup | null
+  /** Audit 3.2: its latest backup. */
+  backup: LastBackup | null
 }
 
 export interface TenantList {
@@ -194,6 +209,8 @@ export interface TenantDetail {
   plan_document?: PlanDocumentState
   /** Ek C18: what it runs (its latest report), its target and whether they match. */
   version: ShopVersion
+  /** Audit 3.2: its latest backup. */
+  backup: LastBackup | null
 }
 
 export interface ActivityItem {

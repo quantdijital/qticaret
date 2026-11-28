@@ -7,6 +7,7 @@ import { tenantVersionOf } from "../../../../lib/fleet/release-views"
 import { effectiveLimits } from "../../../../lib/plans/limits"
 import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { omit } from "../../../../lib/omit"
+import { latestBackupViews } from "../../../../lib/provisioning/backups"
 import { maskEmail, maskPhone } from "../../../../lib/tenants/mask"
 import { maskedTckn } from "../../../../lib/tenants/tckn"
 import type { CompanyRecord, NoteRecord, TenantRecord } from "../../../../modules/tenants/types"
@@ -65,22 +66,34 @@ export async function tenantDetail(
 ) {
   const service = tenantsOf(req)
   const plans = plansOf(req)
-  const [company, contacts, domains, notes, plan, overrides, flagOverrides, document, version] =
-    await Promise.all([
-      service.companyOf(tenant.id),
-      service.contactsOf(tenant.id),
-      service.domainsOf(tenant.id),
-      notesOf(req, tenant.id),
-      plans.planOf(tenant.id),
-      plans.overridesOf(tenant.id),
-      plans.featureOverridesOf(tenant.id),
-      options.fleet ? fleetIn(req.scope).planDocumentSummary(tenant.id) : null,
-      // Ek C18: what it runs and its target; why it was set, to the roles that set it
-      tenantVersionOf(req.scope, tenant.id, {
-        names: (ids) => staffNames(req, ids),
-        showReason: options.fleet,
-      }),
-    ])
+  const [
+    company,
+    contacts,
+    domains,
+    notes,
+    plan,
+    overrides,
+    flagOverrides,
+    document,
+    version,
+    backups,
+  ] = await Promise.all([
+    service.companyOf(tenant.id),
+    service.contactsOf(tenant.id),
+    service.domainsOf(tenant.id),
+    notesOf(req, tenant.id),
+    plans.planOf(tenant.id),
+    plans.overridesOf(tenant.id),
+    plans.featureOverridesOf(tenant.id),
+    options.fleet ? fleetIn(req.scope).planDocumentSummary(tenant.id) : null,
+    // Ek C18: what it runs and its target; why it was set, to the roles that set it
+    tenantVersionOf(req.scope, tenant.id, {
+      names: (ids) => staffNames(req, ids),
+      showReason: options.fleet,
+    }),
+    // Audit 3.2: its "Son yedek"
+    latestBackupViews(req.scope, [tenant.id]),
+  ])
   const names = await staffNames(req, [
     tenant.created_by,
     ...notes.map((note) => note.author_id),
@@ -144,5 +157,6 @@ export async function tenantDetail(
       ? { ...document, issued: document !== null, push_target: tenant.api_base_url }
       : undefined,
     version,
+    backup: backups.get(tenant.id) ?? null,
   }
 }

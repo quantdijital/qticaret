@@ -16,6 +16,7 @@ import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { useMe } from "@/features/auth/api"
 import { HEALTH_TONES, worstOf } from "@/features/monitoring/rules"
+import { BackupLine } from "@/features/provisioning/components/backup-line"
 import { setupProgress } from "@/features/monitoring/setup-rules"
 import { TENANTS_PAGE_SIZE, tenantsQuery } from "@/features/tenants/api"
 import type { TenantRow } from "@/features/tenants/api"
@@ -75,16 +76,22 @@ export function TenantsPage() {
       cell: (row) => <TenantStatusBadge status={row.status} />,
     },
     {
-      // Ek C13: the worse of its backend's and storefront's standings; a dash when never probed
+      // Ek C13: the worse of its backend's and storefront's standings; a dash when never probed.
+      // Audit 3.2: its latest backup under it
       key: "health",
       header: t("tenants.columns.health"),
       className: "hidden sm:table-cell",
       cell: (row) => {
         const state = worstOf([row.health.backend, row.health.storefront])
-        return state ? (
-          <StatusBadge tone={HEALTH_TONES[state]}>{t(`health.state.${state}`)}</StatusBadge>
-        ) : (
-          <span className="text-muted-foreground">—</span>
+        return (
+          <div className="flex flex-col items-start gap-1">
+            {state ? (
+              <StatusBadge tone={HEALTH_TONES[state]}>{t(`health.state.${state}`)}</StatusBadge>
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
+            <BackupLine backup={row.backup} />
+          </div>
         )
       },
     },

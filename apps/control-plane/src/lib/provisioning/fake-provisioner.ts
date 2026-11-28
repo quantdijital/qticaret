@@ -3,6 +3,8 @@ import { sectorPack, storefrontPreset, summaryOf } from "@qticaret/sector-packs"
 import type { RuntimeSecrets } from "../vault/tenant-secrets"
 import { ProvisioningError } from "./provisioner"
 import type {
+  BackupSummary,
+  BuiltRelease,
   CommandResult,
   HealthResult,
   ProvisionTarget,
@@ -34,6 +36,8 @@ export interface FakeShop {
   published: boolean
   /** The profiles handed over (the documents, as sent on stdin). */
   profiles: string[]
+  /** Audit 3.2: the backups taken, oldest first. */
+  backups: BackupSummary[]
 }
 
 export interface FakeState {
@@ -41,13 +45,15 @@ export interface FakeState {
   /** Fails the first call that matches (a method, or `runTenantCommand:<command>`). */
   failOn: string | null
   calls: string[]
+  /** Audit 3.1: the release a shop would start on (null: unknown). */
+  built: BuiltRelease | null
 }
 
 const KEY = Symbol.for("qticaret.control-plane.fake-provisioner")
 
 export function fakeState(): FakeState {
   const holder = globalThis as unknown as Record<symbol, FakeState | undefined>
-  holder[KEY] ??= { shops: new Map(), failOn: null, calls: [] }
+  holder[KEY] ??= { shops: new Map(), failOn: null, calls: [], built: null }
   return holder[KEY]
 }
 
@@ -83,6 +89,7 @@ export class FakeProvisioner implements TenantProvisioner {
         presets: [],
         published: false,
         profiles: [],
+        backups: [],
       }
       shops.set(t.tenant_id, shop)
     }
@@ -246,5 +253,29 @@ export class FakeProvisioner implements TenantProvisioner {
       status: shop.running ? (shop.healthy ? 200 : 503) : null,
       latency_ms: shop.running ? 1 : null,
     })
+  }
+
+  async backup(t: ProvisionTarget): Promise<BackupSummary> {
+    this.call("backup")
+    const shop = this.shop(t)
+    if (!shop.database) {
+      throw new ProvisioningError("provisioning.backup_failed")
+    }
+    const taken = new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+    const summary: BackupSummary = {
+      manifest: `qt_tenant_${t.slug.replace(/-/g, "_")}-${taken.replace(/[-:]/g, "")}.manifest.json`,
+      taken_at: taken,
+      seconds: 1,
+      bytes: 4096 * (shop.backups.length + 1),
+      dump_sha256: randomBytes(32).toString("hex"),
+      files: true,
+    }
+    shop.backups.push(summary)
+    return await Promise.resolve(summary)
+  }
+
+  async availableRelease(): Promise<BuiltRelease | null> {
+    this.call("availableRelease")
+    return await Promise.resolve(fakeState().built)
   }
 }

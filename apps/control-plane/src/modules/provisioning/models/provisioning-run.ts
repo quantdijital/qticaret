@@ -5,7 +5,8 @@ import { ProvisioningStep } from "./provisioning-step"
  * What a run does (adr/0061 §2 `provisioning`): `create` sets a shop up
  * (and retries it: a new run that skips what exists), `stop` and `start`
  * its process, `invite` sends the owner's invitation again (Ek C10). The
- * others come with their tasks (`apply_pack` C12, `upgrade` F16.6).
+ * others come with their tasks (`apply_pack` C12; `upgrade` and `backup`
+ * audit 3.1/3.2: the shop moved to its target release, its backup taken).
  */
 export const PROVISIONING_KINDS = [
   "create",
@@ -16,6 +17,7 @@ export const PROVISIONING_KINDS = [
   "start",
   "invite",
   "close",
+  "backup",
 ] as const
 export type ProvisioningKind = (typeof PROVISIONING_KINDS)[number]
 

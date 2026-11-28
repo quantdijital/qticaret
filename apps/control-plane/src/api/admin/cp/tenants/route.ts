@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { parseEnv } from "../../../../lib/env"
 import { listVersions } from "../../../../lib/fleet/release-views"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
+import { latestBackupViews } from "../../../../lib/provisioning/backups"
 import { platformHostname } from "../../../../lib/tenants/hostname"
 import { DEFAULT_SECTOR_PACK, defaultPresetOf } from "../../../../lib/tenants/sector-packs"
 import type { HealthTarget } from "../../../../modules/fleet/models/health"
@@ -86,6 +87,11 @@ export async function GET(
   )
   // Ek C21: each one's setup checklist from its latest report (yes/no only)
   const setups = await fleetIn(req.scope).latestSetups(rows.map((row) => row.id))
+  // Audit 3.2: each one's latest backup, for the list's health column
+  const backups = await latestBackupViews(
+    req.scope,
+    rows.map((row) => row.id)
+  )
   const healthOf = (id: string, target: HealthTarget) =>
     standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
@@ -107,6 +113,7 @@ export async function GET(
         },
         version: versions.get(row.id) ?? { reported: null, target: null, drift: false },
         setup: setups.get(row.id)?.setup ?? null,
+        backup: backups.get(row.id) ?? null,
       }
     }),
     count,

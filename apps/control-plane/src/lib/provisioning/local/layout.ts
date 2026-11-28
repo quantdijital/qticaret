@@ -39,6 +39,15 @@ export interface ShopLayout {
   logDir: string
   serverDir: string
   staticDir: string
+  /**
+   * Its backups (audit 3.2): `infra/tenants/backups/<slug>/` (0700,
+   * git-ignored), outside the shop's folder so removing a shop keeps them;
+   * the recipients file one level up.
+   */
+  backupDir: string
+  backupRecipients: string
+  /** `infra/backup/backup.sh`. */
+  backupScript: string
   /** The compiled backend every local shop runs. */
   backendDir: string
   backendModules: string
@@ -71,6 +80,9 @@ export function layoutOf(slug: string, root: string = repoRoot()): ShopLayout {
     logDir: join(dir, "logs"),
     serverDir,
     staticDir: join(serverDir, "static"),
+    backupDir: join(root, "infra", "tenants", "backups", slug),
+    backupRecipients: join(root, "infra", "tenants", "backups", "recipients.txt"),
+    backupScript: join(root, "infra", "backup", "backup.sh"),
     backendDir: join(backend, ".medusa", "server"),
     backendModules: join(backend, "node_modules"),
     cli: join(backend, "node_modules", "@medusajs", "cli", "cli.js"),

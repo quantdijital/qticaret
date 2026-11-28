@@ -1,4 +1,5 @@
 import type { TenantStatus } from "@qticaret/types/control-plane"
+import type { TenantDetail } from "@/features/tenants/api"
 import type { ProvisioningState, RunAction } from "./api"
 
 /**
@@ -26,6 +27,9 @@ export type ActionRules = Record<RunAction, ActionRule> & {
 
 const LIVE: readonly TenantStatus[] = ["provisioning", "active"]
 const STARTABLE: readonly TenantStatus[] = [...LIVE, "restricted", "suspended"]
+// Audit 3.1/3.2: as the control plane's `RUN_STATUSES`
+const UPGRADABLE: readonly TenantStatus[] = ["active", "restricted", "suspended"]
+const BACKED_UP: readonly TenantStatus[] = [...STARTABLE, "closing"]
 
 const yes: ActionRule = { enabled: true, reason: null }
 const no = (reason: string): ActionRule => ({ enabled: false, reason })
@@ -41,7 +45,7 @@ export const wasSetUp = (state: ProvisioningState): boolean =>
  */
 export function lastKnownRunning(state: ProvisioningState): boolean | null {
   const last = state.runs.find(
-    (run) => run.status === "succeeded" && ["create", "start", "stop"].includes(run.kind)
+    (run) => run.status === "succeeded" && ["create", "start", "stop", "upgrade"].includes(run.kind)
   )
   return last ? last.kind !== "stop" : null
 }
@@ -59,6 +63,8 @@ export function actionRules(
     start: rule,
     invite: rule,
     apply_pack: rule,
+    backup: rule,
+    upgrade: rule,
     createLabel,
   })
   if (!state) {
@@ -74,6 +80,8 @@ export function actionRules(
   const setUp = wasSetUp(state)
   const needsLive = (rule: ActionRule) => (live ? rule : no("setup.reasons.status"))
   const needsSetUp = setUp ? yes : no("setup.reasons.notSetUp")
+  const inStatus = (list: readonly TenantStatus[]) =>
+    list.includes(status) ? yes : no("setup.reasons.status")
   return {
     // Set up and active: nothing left to do (a setup run again would only skip)
     create: needsLive(setUp && status === "active" ? no("setup.reasons.done") : yes),
@@ -85,6 +93,27 @@ export function actionRules(
       : needsSetUp,
     invite: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
     apply_pack: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
+    backup: needsSetUp.enabled ? inStatus(BACKED_UP) : needsSetUp,
+    upgrade: needsSetUp.enabled ? inStatus(UPGRADABLE) : needsSetUp,
     createLabel,
   }
+}
+
+/**
+ * Whether "Sürümü yükselt" can start (audit 3.1): the setup's rules (a
+ * provisioner, no run under way, a shop set up and selling or running),
+ * a target chosen, and the shop not already reporting it.
+ */
+export function upgradeRule(state: ProvisioningState | undefined, shop: TenantDetail): ActionRule {
+  const rule = actionRules(state, shop.tenant.status).upgrade
+  if (!rule.enabled) {
+    return rule
+  }
+  if (!shop.version.target) {
+    return { enabled: false, reason: "upgrade.noTarget" }
+  }
+  if (shop.version.matches === true) {
+    return { enabled: false, reason: "upgrade.onTarget" }
+  }
+  return rule
 }

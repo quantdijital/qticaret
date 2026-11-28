@@ -14,7 +14,7 @@ import { useMe } from "@/features/auth/api"
 import { SubscriptionTab } from "@/features/billing/components/subscription-tab"
 import { UsageHealthTab } from "@/features/monitoring/components/usage-health-tab"
 import { SetupTab } from "@/features/provisioning/components/setup-tab"
-import { VersionCard } from "@/features/releases/components/version-card"
+import { VersionTab } from "@/features/releases/components/version-tab"
 import { tenantQuery } from "@/features/tenants/api"
 import type { TenantDetail } from "@/features/tenants/api"
 import { ActivityCard } from "@/features/tenants/components/activity-card"
@@ -94,7 +94,7 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
         // Ek C13: its usage against its limits and its health, every role's
         { key: "usage", label: t("usage.tab"), content: <UsageHealthTab shop={shop} /> },
         // Ek C18: what it runs and its target release, every role's (the change by role)
-        { key: "version", label: t("version.tab"), content: <VersionCard shop={shop} /> },
+        { key: "version", label: t("version.tab"), content: <VersionTab shop={shop} /> },
         ...aiCredits,
         ...setup,
         {
