@@ -12,6 +12,7 @@
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-departures` subpath).
  */
+import type { StoreHeadLines } from "./section-head-lines.js"
 
 /** How many departures, and the intro's longest text. */
 export const DEPARTURES_LIMITS = {
@@ -24,6 +25,8 @@ export const DEPARTURES_LIMITS = {
 export const DEPARTURES_SETTINGS = {
   /** `list`: a date box, the tour's name, places left, price and "İncele" per row; `cards`: a card each. */
   layout: ["list", "cards"],
+  /** The cards below 768 px: `stack` one under another, `scroll` one row swiped sideways, the next card peeking (the list keeps its rows). */
+  phone: ["stack", "scroll"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type DeparturesSetting = keyof typeof DEPARTURES_SETTINGS
@@ -32,6 +35,7 @@ export type DeparturesStep<S extends DeparturesSetting> = (typeof DEPARTURES_SET
 /** A new section's settings, and what one without them reads as. */
 export const DEPARTURES_DEFAULTS: { readonly [S in DeparturesSetting]: DeparturesStep<S> } = {
   layout: "list",
+  phone: "stack",
 }
 
 export const DEPARTURES_SETTING_NAMES = Object.keys(DEPARTURES_SETTINGS) as DeparturesSetting[]
@@ -68,7 +72,8 @@ export type StoreDeparturesSection = {
   source: DeparturesSource
   /** How many departures at most (`DEPARTURES_LIMITS.limit`). */
   limit: number
-} & Partial<DeparturesSettings>
+} & Partial<DeparturesSettings> &
+  StoreHeadLines
 
 /** One departure of `GET /store/departures`. */
 export interface StoreUpcomingDeparture {

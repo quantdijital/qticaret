@@ -43,6 +43,7 @@ describe("upcoming departures (adr/0077 §10)", () => {
       source: { kind: "all" },
       limit: 6,
       layout: "list",
+      phone: "stack",
     })
     expect(doc.pages[0]?.sections[0]).toMatchObject({ type: "departures", layout: "list" })
   })
@@ -124,6 +125,25 @@ describe("upcoming departures (adr/0077 §10)", () => {
       limit: 4,
       layout: "cards",
     })
+  })
+
+  it("swipes the cards on a phone only when asked; the default and the list say nothing", async () => {
+    const context = {
+      values: {},
+      images: new Map(),
+      links: new Map(),
+      container: {} as MedusaContainer,
+    } as unknown as HydrateContext
+    const of = (fields: Record<string, unknown>) =>
+      hydrateSection(departures.parse(upcoming(fields)), context)
+
+    expect(issues({ home: [upcoming({ phone: "scroll" })] })).toEqual([])
+    expect(issues({ home: [upcoming({ phone: "slide" })] })).toContain(
+      "storefront_layout.section_invalid"
+    )
+    expect(await of({ layout: "cards", phone: "scroll" })).toMatchObject({ phone: "scroll" })
+    expect(await of({ layout: "cards" })).not.toHaveProperty("phone")
+    expect(await of({ layout: "list", phone: "scroll" })).not.toHaveProperty("phone")
   })
 
   it("is left out of the storefront's design while dated products are off", () => {

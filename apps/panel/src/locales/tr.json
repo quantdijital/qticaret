@@ -10949,6 +10949,16 @@
               "serif_accent": "Büyük, eğik vurgulu"
             },
             "hint": "Ana sayfa bölümlerinin başlıkları. Standart, temanın kendi başlığıdır. Büyük, eğik vurgulu'da başlık büyük ve ince yazılır; başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\") vurgu yazı tipinin eğik hâliyle gelir."
+          },
+          "title_accent": {
+            "label": "Başlık vurgusu",
+            "term": "title_accent",
+            "steps": {
+              "none": "Yok",
+              "primary": "Ana renk",
+              "accent": "Vurgu rengi"
+            },
+            "hint": "Başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\"). Yok'ta yıldızlar silinir, kelimeler başlığın kendisi gibi görünür. Ana renk ya da Vurgu rengi'nde bu kelimeler o renkle yazılır; açık bir vurgu rengi açık zeminde zor okunur, o zaman Ana renk'i seçin."
           }
         },
         "card": "Ürün kartı",
@@ -12692,6 +12702,13 @@
           "hint": "Liste: tarih kutusu, tur adı, kalan yer ve fiyat satır satır. Kartlar: turun fotoğrafıyla.",
           "list": "Liste",
           "cards": "Kartlar"
+        },
+        "phone": {
+          "label": "Telefonda",
+          "term": "mobile",
+          "hint": "Dar ekranda kartlar alt alta mı dizilir, tek sırada yana mı kayar.",
+          "stack": "Alt alta",
+          "scroll": "Yana kaydır"
         }
       },
       "reviewsCard": {
@@ -12735,6 +12752,16 @@
           "hint": "Yazı kartlarındaki kapak görselinin biçimi.",
           "standard": "16:10",
           "wide": "Geniş (2:1)"
+        }
+      },
+      "headLines": {
+        "eyebrowHint": "Başlığın üstünde küçük, büyük harfli satır (ör. Popüler rotalar). Boşsa çizilmez.",
+        "eyebrowPlaceholder": "Örn. Popüler rotalar",
+        "note": {
+          "label": "El yazısı not",
+          "term": "note",
+          "placeholder": "Örn. Yol seni çağırır",
+          "hint": "Başlığın yanında eğik, kısa bir not; altında fırça çizgisi olur. Vurgu yazı tipi açıksa el yazısıyla görünür. Boşsa çizilmez."
         }
       },
       "heroFull": {

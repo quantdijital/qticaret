@@ -4,6 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { StoreHeadLines } from "./section-head-lines.js"
 import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
@@ -123,14 +124,15 @@ export type StoreCategoriesSection = {
   show_count?: boolean
   /** The link beside the title; none (or absent): the storefront's "every category". */
   more?: StoreLayoutLink | null
-} & (
-  | { variant?: "tiles" }
-  | StoreCategoriesLinked
-  | StoreCategoriesCollage
-  | StoreCategoriesPanels
-  | StoreCategoriesIcons
-  | StoreCategoriesCarousel
-)
+} & StoreHeadLines &
+  (
+    | { variant?: "tiles" }
+    | StoreCategoriesLinked
+    | StoreCategoriesCollage
+    | StoreCategoriesPanels
+    | StoreCategoriesIcons
+    | StoreCategoriesCarousel
+  )
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (
@@ -174,7 +176,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
  * `carousel` (a grid prints as it did before variants); the storefront
  * reads an unknown variant as the grid (`variantOf`).
  */
-export interface StoreReviewsSection {
+export interface StoreReviewsSection extends StoreHeadLines {
   id: string
   type: "reviews"
   title: string | null

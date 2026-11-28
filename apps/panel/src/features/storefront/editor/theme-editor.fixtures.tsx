@@ -79,6 +79,7 @@ export const THEME: ThemeSettings = {
   page_width: "standard",
   accent_ink: "auto",
   section_title: "plain",
+  title_accent: "none",
 }
 
 export const DOC: LayoutDocument = {

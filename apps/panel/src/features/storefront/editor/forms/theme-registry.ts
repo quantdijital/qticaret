@@ -220,8 +220,9 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   motion: kitField("motion", "surfaces"),
   page_width: { ...kitField("page_width", "spacing"), keywords: `${C}.spacingWords` },
   accent_ink: kitField("accent_ink", "colors"),
-  // S10: the home sections' headings, with the faces
+  // S10 and S11: the home sections' headings and their accent words, with the faces
   section_title: kitField("section_title", "fonts"),
+  title_accent: kitField("title_accent", "fonts"),
   "product_card.ratio": {
     group: "card",
     label: `${C}.ratio`,

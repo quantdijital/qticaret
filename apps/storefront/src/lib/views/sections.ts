@@ -38,6 +38,7 @@ import { departuresView } from "./departures"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 import { noteInHand } from "./theme-settings"
+import { withHeadLines } from "./head-lines"
 
 export type { ProductContext } from "./section-data"
 
@@ -276,7 +277,13 @@ export async function sectionViews(
     ? withFeatures(sections, (await storefrontSettings()).features)
     : sections
   const [views, editing] = await Promise.all([
-    Promise.all(allowed.map((section) => sectionView(section, t, context))),
+    Promise.all(
+      allowed.map(async (section) => {
+        const view = await sectionView(section, t, context)
+        // The heading's upper line and hand note, on the sections that carry them
+        return view ? withHeadLines(view, section) : null
+      })
+    ),
     isEditorSession(),
   ])
   return views.flatMap((view, index) => {

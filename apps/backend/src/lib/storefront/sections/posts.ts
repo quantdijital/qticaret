@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { optional, shopText, title } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { headNote } from "./head-lines"
 import { bodyFields } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -22,9 +23,18 @@ const common = {
   type: z.literal("posts"),
   title,
   limit: z.number().int().min(1).max(6).default(3),
+  /** The hand note beside the heading (`head-lines.ts`); absent: none. */
+  note: headNote,
 }
 
-const grid = z.object({ ...common, variant: defaultVariant("posts") }).strict()
+const grid = z
+  .object({
+    ...common,
+    variant: defaultVariant("posts"),
+    /** The line over the heading (2026-11-28; the intro panel had it first); absent: none. */
+    eyebrow: shopText(POSTS_INTRO_LIMITS.eyebrow).nullable().optional(),
+  })
+  .strict()
 
 /**
  * The intro panel's look: its tone, a leaf sprig and the covers' shape;

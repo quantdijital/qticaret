@@ -14,12 +14,13 @@ import type {
   ShelfStripsCount,
   ShelfStripsSettings,
   ShelfTabs,
+  StoreHeadLines,
 } from "@qticaret/types"
 import type { BodySectionBase, LayoutLink } from "@/features/storefront/api/layout-sections"
 
 // A product rail of the theme editor's document (adr/0049 Ek 2026-11-05, Ek 2026-11-15)
 
-export interface ProductsSection extends BodySectionBase {
+export interface ProductsSection extends BodySectionBase, StoreHeadLines {
   type: "products"
   /** How the cards stand (adr/0049 Ek 2026-11-15); the server fills `grid` on reading. */
   variant: ProductsVariant

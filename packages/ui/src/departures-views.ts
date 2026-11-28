@@ -1,5 +1,6 @@
 import type { DeparturesSettings } from "@qticaret/types"
 import type { ImageView, PriceView } from "./views"
+import type { HeadLinesView } from "./hand-note-views"
 
 /**
  * Upcoming departures as a theme draws them (`departures`, adr/0077 §10):
@@ -11,7 +12,7 @@ import type { ImageView, PriceView } from "./views"
  * product's zone, the price as a "from" price); it leaves out a section
  * with no departure, and a theme without this type draws nothing.
  */
-export interface DeparturesSectionView extends DeparturesSettings {
+export interface DeparturesSectionView extends DeparturesSettings, HeadLinesView {
   id: string
   type: "departures"
   /** The shop's heading, else the storefront's own words. */

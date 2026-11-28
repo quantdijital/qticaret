@@ -11,6 +11,7 @@ import { PREVIEW_IDS } from "./preview-fields"
 import { useProblemText } from "./problem-text"
 import { RecordField } from "./record-fields"
 import { TitleField } from "./simple-forms"
+import { HeadLinesFields } from "./head-lines-fields"
 
 const S = "storefront.editor.departures"
 
@@ -53,6 +54,12 @@ export function DeparturesForm({
         onChange={(title) => {
           onChange({ ...section, title }, "title")
         }}
+      />
+      <HeadLinesFields
+        section={section}
+        sectionId={section.id}
+        problems={problems}
+        onChange={onChange}
       />
       <TextField
         id={PREVIEW_IDS.text(section.id, "intro")}

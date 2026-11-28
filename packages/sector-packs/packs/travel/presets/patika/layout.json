@@ -87,7 +87,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "İlham veren rotalar",
+      "title": "İlham veren *rotalar*",
       "intro": null,
       "eyebrow": "Popüler rotalar",
       "more": {
@@ -163,7 +163,8 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Bu sezon en çok seçilenler",
+      "title": "Bu sezon *en çok seçilenler*",
+      "eyebrow": "Sezonun favorileri",
       "source": {
         "kind": "best_sellers",
         "days": 90
@@ -244,6 +245,7 @@
       "ends_at": null,
       "variant": "panels",
       "title": "Popüler kategoriler",
+      "eyebrow": "Nereye gidelim?",
       "category_ids": [
         {
           "$handle": "category:kapadokya-turlari"
@@ -259,6 +261,12 @@
         },
         {
           "$handle": "category:doga-ve-trekking"
+        },
+        {
+          "$handle": "category:gunubirlik-turlar"
+        },
+        {
+          "$handle": "category:gemi-turlari"
         }
       ],
       "show_count": true,
@@ -285,13 +293,15 @@
         "align": null,
         "width": null
       },
-      "title": "Yakında yola çıkıyoruz",
+      "title": "Yakında *yola çıkıyoruz*",
+      "eyebrow": "Kalkış takvimi",
       "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
       "source": {
         "kind": "all"
       },
       "limit": 3,
-      "layout": "cards"
+      "layout": "cards",
+      "phone": "scroll"
     },
     {
       "id": "raykapadokya",
@@ -488,6 +498,7 @@
       "ends_at": null,
       "variant": "carousel",
       "title": "Misafir yorumları",
+      "eyebrow": "Gezginler anlatıyor",
       "limit": 8,
       "scroller": {
         "desktop": "four",
@@ -559,7 +570,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "grid",
-      "title": "Yol notları",
+      "title": "Yol *notları*",
       "limit": 3
     }
   ],
