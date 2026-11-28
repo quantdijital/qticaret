@@ -68,8 +68,8 @@ const WELLS: Readonly<Record<string, readonly [number, number]>> = {
   "sections/Story.tsx": [1, 0],
   // adr/0077 §10: the white route card's photograph (`card: below`)
   "sections/collage-card.tsx": [1, 0],
-  // adr/0077 §10 Ek: the review card's customer photo (plain, small), its cover and product square
-  "sections/review-card.tsx": [4, 0],
+  // adr/0077 §10 Ek: the review card's customer photo (plain, small), its cover, product square and compact picture
+  "sections/review-card.tsx": [5, 0],
 }
 
 const count = (source: string, pattern: RegExp): number => source.match(pattern)?.length ?? 0
@@ -99,7 +99,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     }
     expect(found).toEqual(WELLS)
     const total = Object.values(WELLS).reduce((sum, [a, b]) => sum + a + b, 0)
-    expect(total).toBe(44)
+    expect(total).toBe(45)
   })
 
   it("leaves the same tones on what is not a photograph's ground", () => {

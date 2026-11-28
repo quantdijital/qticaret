@@ -83,7 +83,8 @@ export function OtherGroup({ section, reveal, onChange }: Omit<GroupProps, "grou
     section.type === "categories"
       ? section
       : null
-  const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
+  const carousel = rail?.variant === "carousel" ? rail : null
+  const scroller = carousel ? scrollerSettingsOf(carousel.scroller) : null
   const slider = turnsAsSlider(section) ? section : null
   if (!strip && !scroller && !slider) {
     return null
@@ -101,13 +102,13 @@ export function OtherGroup({ section, reveal, onChange }: Omit<GroupProps, "grou
       {strip ? (
         <MarqueeSettings section={strip} settings={MARQUEE_OTHER_SETTINGS} onChange={onChange} />
       ) : null}
-      {rail && scroller ? (
+      {carousel && scroller ? (
         <ScrollerFields
           value={scroller}
           settings={SCROLLER_OTHER}
-          fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
+          fieldId={(setting) => FIELD_IDS.scroller(carousel.id, setting)}
           onChange={(next) => {
-            onChange({ ...rail, scroller: next })
+            onChange({ ...carousel, scroller: next })
           }}
         />
       ) : null}

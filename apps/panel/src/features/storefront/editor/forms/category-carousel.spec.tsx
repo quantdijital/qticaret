@@ -107,12 +107,12 @@ describe("the categories' sliding cards", () => {
   })
 
   it("drops its scroller and a preset's handles back on the tiles", () => {
-    const carousel = {
+    const carousel: CategoriesSection = {
       ...tiles(),
       variant: "carousel",
       scroller: SCROLLER_DEFAULTS,
       category_handles: ["macera"],
-    } as const
+    }
     const back = switchVariant(carousel, "tiles")
     expect(back).toMatchObject({ variant: "tiles" })
     expect(back).not.toHaveProperty("scroller")
