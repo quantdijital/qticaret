@@ -3931,6 +3931,11 @@
       "summary": "Summary",
       "available": "Sellable stock",
       "created": "Added",
+      "nextDeparture": "Next departure",
+      "noDeparture": "No departure planned",
+      "placesLeft": "Places left",
+      "placesLeftValue": "{{places}} · {{departures}} departures",
+      "datesLine": "Added {{created}} · Changed {{updated}}",
       "shippingHint": "Optional. These apply to variants without their own values; with none, shipping is priced by the default parcel.",
       "aboutForm": "What is it for?",
       "publish": "Publish",
@@ -4669,7 +4674,8 @@
       "yes": "Yes",
       "withdrawal": "Right of withdrawal",
       "withdrawalOut": "Excluded",
-      "withdrawalIn": "Applies"
+      "withdrawalIn": "Applies",
+      "unset": "Not set: {{names}}"
     },
     "layout": {
       "customize": "Customise page",
@@ -4689,6 +4695,15 @@
       "showHidden": "Show",
       "shownAttention": "Hidden section: shown because something in it needs attention.",
       "shownRevealed": "Hidden section: shown for this visit.",
+      "back": "Back to products",
+      "view": {
+        "button": "View",
+        "title": "What you want to see on the page",
+        "description": "Kept for you alone; a hidden section's data is not deleted.",
+        "shopHidden": "Hidden in the shop's page layout",
+        "unused": "Not used for this kind of product",
+        "reset": "Back to default"
+      },
       "parts": {
         "general": "General",
         "variants": "Variants",

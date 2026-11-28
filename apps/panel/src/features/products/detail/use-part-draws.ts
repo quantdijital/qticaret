@@ -26,3 +26,18 @@ export function usePartDraws(productId: string): (key: PartKey) => boolean {
   }
   return (key) => only[key] ?? true
 }
+
+/**
+ * The parts this kind of product does not use, off by default ("Görünüm"
+ * says so and still turns them on): the Stok tab of a product sold by
+ * departure, whose places are its departures' (adr/0076), or of a service
+ * (nothing on a shelf). Unknown yet, none.
+ */
+export function usePartUnused(productId: string): (key: PartKey) => boolean {
+  const catalog = useQuery(productCatalogQuery(productId)).data
+  const booking = useFeature(BOOKING_FLAG)
+  const placeless =
+    catalog !== undefined &&
+    ((booking && catalog.booking_mode === "departure") || catalog.kind === "service")
+  return (key) => placeless && key === "stock"
+}

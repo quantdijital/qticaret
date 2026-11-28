@@ -1,6 +1,15 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import type { ReactNode } from "react"
+import { describe, expect, it, vi } from "vitest"
 import { PageHeader } from "./page-header"
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ to, children, ...rest }: { to: string; children: ReactNode }) => (
+    <a href={to} {...rest}>
+      {children}
+    </a>
+  ),
+}))
 
 // jsdom has no layout: the wide-actions case is checked in the browser (panel at
 // 768 px, Siparişler); this pins the classes that make it work.
@@ -50,5 +59,30 @@ describe("PageHeader", () => {
 
     unmount()
     expect(document.documentElement.style.getPropertyValue("--page-header-height")).toBe("")
+  })
+
+  it("puts an inline way back before the title, named, with no line of its own", () => {
+    render(
+      <PageHeader
+        title="Doğu Akdeniz Gemi Turu"
+        back={{ to: "/products", label: "Ürünlere dön", inline: true }}
+        sticky
+      />
+    )
+
+    const back = screen.getByRole("link", { name: "Ürünlere dön" })
+    const title = screen.getByRole("heading", { level: 1, name: "Doğu Akdeniz Gemi Turu" })
+    // In the title's row, inside the held header: it stays in sight as the page scrolls
+    expect(back.parentElement).toBe(title.parentElement)
+    expect(back.closest("header")).toHaveAttribute("data-page-header-sticky")
+    expect(back).toHaveTextContent("")
+    expect(title).toHaveClass("truncate")
+  })
+
+  it("keeps the back link on its own line over the title by default", () => {
+    render(<PageHeader title="Sipariş" back={{ to: "/orders", label: "Siparişler" }} sticky />)
+
+    const back = screen.getByRole("link", { name: "Siparişler" })
+    expect(back.closest("header")).toBeNull()
   })
 })

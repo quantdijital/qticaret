@@ -13,8 +13,14 @@ interface PageHeaderProps {
   action?: ReactNode
   /** Next to the title: a status badge. */
   badge?: ReactNode
-  /** The list this page belongs to, in the view it came from (`search`). */
-  back?: { to: string; search?: Record<string, string>; label: string } | undefined
+  /**
+   * The list this page belongs to, in the view it came from (`search`).
+   * `inline`: a small arrow button before the title instead of a line of
+   * its own over it (a long editor, where that line is a row lost); its
+   * `label` is then the button's accessible name ("Ürünlere dön").
+   */
+  back?:
+    { to: string; search?: Record<string, string>; label: string; inline?: boolean } | undefined
   /**
    * Held under the top bar while the page scrolls (a long editor whose
    * save sits in the header, WordPress's): the title keeps one line, the
@@ -60,20 +66,34 @@ export function PageHeader({
 }: PageHeaderProps) {
   useDocumentTitle(title)
   const ref = useHeaderHeight(sticky)
-  const backLink = back ? (
-    <Link
-      to={back.to}
-      search={back.search ?? {}}
-      // Sticky, the link stands in the page's column: its gap less, as inside the header
-      className={cn(
-        "inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground",
-        sticky && "-mb-1"
-      )}
-    >
-      <ArrowLeft className="size-3.5" aria-hidden="true" />
-      {back.label}
-    </Link>
-  ) : null
+  const inline = back?.inline === true
+  const backButton =
+    back && inline ? (
+      <Link
+        to={back.to}
+        search={back.search ?? {}}
+        aria-label={back.label}
+        title={back.label}
+        className="-ml-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+      >
+        <ArrowLeft className="size-[18px]" aria-hidden="true" />
+      </Link>
+    ) : null
+  const backLink =
+    back && !inline ? (
+      <Link
+        to={back.to}
+        search={back.search ?? {}}
+        // Sticky, the link stands in the page's column: its gap less, as inside the header
+        className={cn(
+          "inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground",
+          sticky && "-mb-1"
+        )}
+      >
+        <ArrowLeft className="size-3.5" aria-hidden="true" />
+        {back.label}
+      </Link>
+    ) : null
   const row = (
     <div
       className={cn(
@@ -92,7 +112,14 @@ export function PageHeader({
       <div
         className={cn("flex min-w-0 flex-col gap-1", sticky ? "lg:flex-1" : "sm:flex-[1_1_18rem]")}
       >
-        <div className={cn("flex items-center gap-3", sticky ? "min-w-0" : "flex-wrap")}>
+        <div
+          className={cn(
+            "flex items-center",
+            inline ? "gap-2 sm:gap-3" : "gap-3",
+            sticky || inline ? "min-w-0" : "flex-wrap"
+          )}
+        >
+          {backButton}
           {/* A title with no break in it (a customer known by e-mail only) wraps anywhere; held, it keeps one line */}
           <h1
             title={sticky ? title : undefined}

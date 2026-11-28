@@ -38,7 +38,14 @@ export function usePageLayout(
   attention: (key: PartKey) => boolean,
   /** Whether a part would draw anything for this product; one that would not is not named as hidden. */
   draws: (key: PartKey) => boolean = () => true,
-  tabs?: DataTabs
+  tabs?: DataTabs,
+  /**
+   * What the person keeps off over the shop's layout ("Görünüm"): `person`,
+   * hidden by them (named under the page, shown anyway when it needs them);
+   * `type`, not used by this kind of product and not turned on (not named,
+   * not brought up by a finding). Either is still reached by "Alana git".
+   */
+  own: (key: PartKey) => "person" | "type" | null = () => null
 ) {
   const saved = useProductLayout()
   const [draft, setDraft] = useState<ProductLayout | null>(null)
@@ -48,18 +55,20 @@ export function usePageLayout(
 
   /** Null: drawn as laid out; otherwise hidden but drawn, and why; "off": not drawn. */
   const shownWhy = (key: PartKey): ShownWhy | "off" | null => {
-    if (!hidden.has(key)) {
+    const mine = own(key)
+    if (!hidden.has(key) && mine === null) {
       return null
     }
     if (revealed.has(key)) {
       return "revealed"
     }
-    return attention(key) ? "attention" : "off"
+    // A part its kind does not use is not brought up by a finding (a tour's barcode)
+    return attention(key) && (hidden.has(key) || mine === "person") ? "attention" : "off"
   }
 
   /** The parts hidden and not drawn, in page order, for the line under the page. */
   const away = [...layout.main, ...layout.side, ...TAB_KEYS].filter(
-    (key) => shownWhy(key) === "off" && draws(key)
+    (key) => shownWhy(key) === "off" && draws(key) && (hidden.has(key) || own(key) === "person")
   )
 
   const showAll = () => {

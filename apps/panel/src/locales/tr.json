@@ -3931,6 +3931,11 @@
       "summary": "Özet",
       "available": "Satılabilir stok",
       "created": "Eklenme",
+      "nextDeparture": "Sıradaki kalkış",
+      "noDeparture": "Planlı kalkış yok",
+      "placesLeft": "Kalan yer",
+      "placesLeftValue": "{{places}} · {{departures}} kalkış",
+      "datesLine": "Eklendi {{created}} · Değişti {{updated}}",
       "shippingHint": "İsteğe bağlı. Varyantında ayrıca girilmemişse bu değerler geçerlidir; hiç girilmezse kargo ücreti varsayılan pakete göre hesaplanır.",
       "aboutForm": "Ne işe yarar?",
       "publish": "Yayınla",
@@ -4669,7 +4674,8 @@
       "yes": "Evet",
       "withdrawal": "Cayma hakkı",
       "withdrawalOut": "Dışında",
-      "withdrawalIn": "Var"
+      "withdrawalIn": "Var",
+      "unset": "Eklenmemiş: {{names}}"
     },
     "layout": {
       "customize": "Sayfayı düzenle",
@@ -4689,6 +4695,15 @@
       "showHidden": "Göster",
       "shownAttention": "Gizlenen bölüm: ilgilenilmesi gereken bir şey olduğu için gösteriliyor.",
       "shownRevealed": "Gizlenen bölüm: bu ziyaret için gösteriliyor.",
+      "back": "Ürünlere dön",
+      "view": {
+        "button": "Görünüm",
+        "title": "Sayfada görmek istedikleriniz",
+        "description": "Yalnız sizin için saklanır; gizlenen bölümün bilgileri silinmez.",
+        "shopHidden": "Mağazanın sayfa düzeninde gizli",
+        "unused": "Bu ürün türünde kullanılmıyor",
+        "reset": "Varsayılana dön"
+      },
       "parts": {
         "general": "Genel bilgiler",
         "variants": "Varyantlar",

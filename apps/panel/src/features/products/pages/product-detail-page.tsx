@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { FieldHints } from "@qticaret/admin-ui/hooks/use-field-hints"
 import { SectionDefaults } from "@qticaret/admin-ui/hooks/use-section-open"
 import { DirtyRegistryProvider } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { HeaderSaveActions } from "@qticaret/admin-ui/patterns/header-save-actions"
@@ -16,16 +17,19 @@ import { ProductStatusBadge } from "@/features/products/components/product-statu
 import { publishScheduleOf } from "@/features/products/publish-schedule"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { MainPartView, SidePartView } from "@/features/products/detail/product-sections"
-import { usePartDraws } from "@/features/products/detail/use-part-draws"
+import { usePartDraws, usePartUnused } from "@/features/products/detail/use-part-draws"
 import { useDataCard } from "@/features/products/detail/use-data-card"
 import { usePartAttention, usePartMarks } from "@/features/products/detail/use-product-findings"
 import { LayoutSheet } from "@/features/products/layout/layout-sheet"
 import { PartNav } from "@/features/products/layout/part-nav"
+import { TAB_KEYS } from "@/features/products/layout/parts"
 import type { PartKey } from "@/features/products/layout/parts"
 import { HiddenLine, PartSlot } from "@/features/products/layout/part-slot"
 import { useGoToCommands } from "@/features/products/layout/use-go-to-commands"
 import { usePageLayout } from "@/features/products/layout/use-page-layout"
 import { useSideBySide } from "@/features/products/layout/use-side-by-side"
+import { ViewMenu } from "@/features/products/layout/view-menu"
+import { useViewPrefs, viewOff } from "@/features/products/layout/view-prefs"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/products/$id")
@@ -62,7 +66,7 @@ export function ProductDetailPage() {
   const { id } = route.useParams()
   const query = useQuery(productQuery(id))
   const product = query.data
-  const back = { to: "/products", label: t("nav.products") }
+  const back = { to: "/products", label: t("products.layout.back"), inline: true }
 
   if (query.isError) {
     return (
@@ -88,12 +92,17 @@ function ProductPage({
   back,
 }: {
   product: ProductDetail
-  back: { to: string; label: string }
+  back: { to: string; label: string; inline: boolean }
 }) {
   const attention = usePartAttention(product)
   const draws = usePartDraws(product.id)
   const data = useDataCard(product)
-  const page = usePageLayout(attention, draws, { simple: data.simple, open: data.open })
+  const unused = usePartUnused(product.id)
+  // The person's own view over the shop's layout ("Görünüm")
+  const [view, setView] = useViewPrefs()
+  const page = usePageLayout(attention, draws, { simple: data.simple, open: data.open }, (key) =>
+    viewOff(view, key, unused(key)) ? (unused(key) ? "type" : "person") : null
+  )
   const marks = usePartMarks(product)
   const wide = useSideBySide()
   // The layout is the shop's: whoever may change its settings arranges it
@@ -103,7 +112,13 @@ function ProductPage({
     return why === "off" ? undefined : why
   }
   useGoToCommands({
-    layout: page.layout,
+    // What the person keeps off is named hidden too
+    layout: {
+      ...page.layout,
+      hidden: [...page.layout.main, ...page.layout.side, ...TAB_KEYS].filter(
+        (key) => page.layout.hidden.includes(key) || viewOff(view, key, unused(key))
+      ),
+    },
     draws,
     goToKey: page.goToKey,
     goTo: page.goTo,
@@ -123,64 +138,77 @@ function ProductPage({
   const open = new Set<string>(page.layout.open.map((key) => `product.${key}`))
   return (
     <DirtyRegistryProvider>
-      <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
-        <div className="flex flex-col gap-[var(--grid-gap)]">
-          <PageHeader
-            title={product.title}
-            badge={
-              <ProductStatusBadge
-                status={product.status}
-                publishAt={publishScheduleOf(product).publish_at}
-              />
-            }
-            back={back}
-            sticky
-            action={
-              <ProductActions
-                product={product}
-                save={<HeaderSaveActions />}
-                onCustomize={
-                  canArrange
-                    ? () => {
-                        page.setDraft(page.saved)
-                      }
-                    : undefined
-                }
-              />
-            }
-          />
-          {wide ? null : nav}
-          <EditorLayout
-            main={
-              <>
-                {wide ? nav : null}
-                {page.layout.main.map((key) => {
-                  const why = slot(key)
-                  return why === undefined ? null : (
-                    <PartSlot key={key} part={key} why={why}>
-                      <MainPartView
-                        part={key}
-                        product={product}
-                        data={{ state: data, slot, draws, marks }}
-                      />
-                    </PartSlot>
-                  )
-                })}
-                <HiddenLine parts={page.away} onShow={page.showAll} />
-              </>
-            }
-            side={page.layout.side.map((key) => {
-              const why = slot(key)
-              return why === undefined ? null : (
-                <PartSlot key={key} part={key} why={why}>
-                  <SidePartView part={key} product={product} onTarget={page.goTo} />
-                </PartSlot>
-              )
-            })}
-          />
-          <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
-        </div>
-      </SectionDefaults>
+      {/* A field's help folds into an (i) beside its name: the page reads as names and fields */}
+      <FieldHints style="tip">
+        <SectionDefaults value={(name) => (open.has(name) ? true : undefined)}>
+          <div className="flex flex-col gap-[var(--grid-gap)]">
+            <PageHeader
+              title={product.title}
+              badge={
+                <ProductStatusBadge
+                  status={product.status}
+                  publishAt={publishScheduleOf(product).publish_at}
+                />
+              }
+              back={back}
+              sticky
+              action={
+                <ProductActions
+                  product={product}
+                  save={<HeaderSaveActions />}
+                  view={
+                    <ViewMenu
+                      layout={page.layout}
+                      draws={draws}
+                      unused={unused}
+                      simple={data.simple}
+                      prefs={view}
+                      onPrefs={setView}
+                    />
+                  }
+                  onCustomize={
+                    canArrange
+                      ? () => {
+                          page.setDraft(page.saved)
+                        }
+                      : undefined
+                  }
+                />
+              }
+            />
+            {wide ? null : nav}
+            <EditorLayout
+              main={
+                <>
+                  {wide ? nav : null}
+                  {page.layout.main.map((key) => {
+                    const why = slot(key)
+                    return why === undefined ? null : (
+                      <PartSlot key={key} part={key} why={why}>
+                        <MainPartView
+                          part={key}
+                          product={product}
+                          data={{ state: data, slot, draws, marks }}
+                        />
+                      </PartSlot>
+                    )
+                  })}
+                  <HiddenLine parts={page.away} onShow={page.showAll} />
+                </>
+              }
+              side={page.layout.side.map((key) => {
+                const why = slot(key)
+                return why === undefined ? null : (
+                  <PartSlot key={key} part={key} why={why}>
+                    <SidePartView part={key} product={product} onTarget={page.goTo} />
+                  </PartSlot>
+                )
+              })}
+            />
+            <LayoutSheet saved={page.saved} draft={page.draft} onDraft={page.setDraft} />
+          </div>
+        </SectionDefaults>
+      </FieldHints>
     </DirtyRegistryProvider>
   )
 }
