@@ -13325,6 +13325,8 @@
       "card": {
         "apply": "Taslağa al",
         "applyOf": "‘{{name}}’ görünümünü taslağa al",
+        "preview": "Önizle",
+        "previewOf": "‘{{name}}’ görünümünü yeni sekmede önizle",
         "actions": "‘{{name}}’ için işlemler",
         "rename": "Adını değiştir",
         "keep": "Adıyla sakla",

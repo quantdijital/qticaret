@@ -138,7 +138,10 @@ describe("DesignCard", () => {
         "Kayıtlı görünüm kalıcı olarak silinir; geri alınamaz. Yayındaki görünüm değişmez."
       )
     ).toBeVisible()
-    expect(fetchMock).not.toHaveBeenCalled()
+    // Only the card's picture asked (its link); nothing removed before the answer
+    expect(fetchMock).not.toHaveBeenCalledWith("/admin/storefront-designs/sfd_1", {
+      method: "DELETE",
+    })
     await user.click(within(ask).getByRole("button", { name: "Görünümü sil" }))
 
     await waitFor(() => {
