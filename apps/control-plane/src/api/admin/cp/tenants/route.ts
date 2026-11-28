@@ -105,7 +105,7 @@ export async function GET(
           storefront: healthOf(row.id, "storefront"),
         },
         version: versions.get(row.id) ?? { reported: null, target: null, drift: false },
-        setup: setups.get(row.id) ?? null,
+        setup: setups.get(row.id)?.setup ?? null,
       }
     }),
     count,

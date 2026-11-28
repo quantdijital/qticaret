@@ -65,11 +65,7 @@ describe("UsageHealthTab: the shop's usage and health (Ek C13)", () => {
   })
 
   it("says so when the shop sends no setup steps: none yet, or an older release", async () => {
-    const usage = USAGE_HEALTH.usage
-    if (!usage) {
-      throw new Error("the fixture reports")
-    }
-    stubApi(answering({ ...USAGE_HEALTH, usage: { ...usage, setup: null } }))
+    stubApi(answering({ ...USAGE_HEALTH, setup: null }))
     renderAs(<UsageHealthTab shop={SHOP} />, "readonly")
     expect(await screen.findByText(/sürümü kurulum adımlarını göndermiyor/)).toBeInTheDocument()
     expect(screen.queryByRole("list", { name: "Kurulum adımları" })).not.toBeInTheDocument()

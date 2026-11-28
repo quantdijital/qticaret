@@ -27,8 +27,6 @@ export interface UsageSnapshot {
   counts: UsageCounts
   last_order_at: string | null
   release: { version: string; commit: string }
-  /** Ek C21: the shop's setup checklist (yes/no); null from an older shop. */
-  setup: UsageSetup | null
 }
 
 export interface Probe {
@@ -63,6 +61,8 @@ export interface TargetHealth {
 
 export interface UsageHealth {
   usage: UsageSnapshot | null
+  /** Ek C21: its last reported setup checklist (yes/no) and when; null if it never sent one. */
+  setup: { setup: UsageSetup; received_at: string } | null
   report: { expected: boolean; missing: boolean; missing_after_hours: number }
   health: { unhealthy_after: number; backend: TargetHealth; storefront: TargetHealth }
 }

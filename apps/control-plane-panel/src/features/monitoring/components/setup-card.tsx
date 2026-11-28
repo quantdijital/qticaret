@@ -11,14 +11,14 @@ import { setupProgress } from "../setup-rules"
 /**
  * "Kurulum durumu" (adr/0061 Ek C21): the shop's own setup checklist as its
  * last hourly report said it, a green check per step done, a grey circle
- * per step open, and when that report came. Yes/no only: what is behind a
+ * per step open, and when that report came (the latest that carried it). Yes/no only: what is behind a
  * step (which provider, which account) stays in the shop. No report yet,
  * or a shop on an older release: one sentence saying so.
  */
 export function SetupCard({ data }: { data: UsageHealth }) {
   const { t } = useTranslation()
-  const usage = data.usage
-  const progress = setupProgress(usage?.setup)
+  const seen = data.setup
+  const progress = setupProgress(seen?.setup)
   const badge = progress ? (
     <StatusBadge tone={progress.complete ? "success" : "neutral"}>
       {progress.complete
@@ -32,13 +32,13 @@ export function SetupCard({ data }: { data: UsageHealth }) {
       description={
         progress
           ? t("setupStatus.text")
-          : usage
+          : data.usage
             ? t("setupStatus.olderShop")
             : t("setupStatus.noReport")
       }
       action={badge}
     >
-      {progress && usage ? (
+      {progress && seen ? (
         <div className="flex flex-col gap-4">
           <Progress
             value={Math.round((progress.done / progress.total) * 100)}
@@ -72,8 +72,8 @@ export function SetupCard({ data }: { data: UsageHealth }) {
           </ul>
           <p className="border-t pt-3 text-sm text-muted-foreground">
             {t("setupStatus.reportedAt", {
-              relative: formatRelative(usage.received_at),
-              date: formatDateTime(usage.received_at),
+              relative: formatRelative(seen.received_at),
+              date: formatDateTime(seen.received_at),
             })}
           </p>
         </div>

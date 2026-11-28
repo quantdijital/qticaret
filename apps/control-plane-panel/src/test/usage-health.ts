@@ -23,6 +23,9 @@ export const USAGE_HEALTH: UsageHealth = {
     },
     last_order_at: "2026-11-11T08:40:00.000Z",
     release: { version: "1.4.0", commit: "0123456789abcdef0123456789abcdef01234567" },
+  },
+  setup: {
+    received_at: "2026-11-11T08:58:01.000Z",
     setup: {
       store_named: true,
       currency: true,
@@ -75,6 +78,7 @@ export const USAGE_HEALTH: UsageHealth = {
 /** A shop that has never reported nor been probed, but should be reporting. */
 export const SILENT: UsageHealth = {
   usage: null,
+  setup: null,
   report: { expected: true, missing: true, missing_after_hours: 3 },
   health: {
     unhealthy_after: 3,

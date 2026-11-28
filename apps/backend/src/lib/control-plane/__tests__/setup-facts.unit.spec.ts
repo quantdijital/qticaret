@@ -52,8 +52,8 @@ describe("setupFactsOf (adr/0061 Ek C21)", () => {
 })
 
 describe("readSetupFacts", () => {
-  it("reads one row or one count each, card providers and SMTP by state only", async () => {
-    const described: string[] = []
+  it("reads one row or one count each, card providers and SMTP by their check state only", async () => {
+    const asked: unknown[] = []
     const calls: Record<string, unknown[]> = {}
     const count =
       (name: string, n: number) =>
@@ -73,9 +73,12 @@ describe("readSetupFacts", () => {
       fulfillment: { listAndCountShippingOptions: count("shipping", 2) },
       product: { listAndCountProducts: count("product", 0) },
       integrationCredentials: {
-        describe: (provider: string) => {
-          described.push(provider)
-          return Promise.resolve({ state: provider === "iyzico" ? "unverified" : "not_configured" })
+        listIntegrationCredentials: (...args: unknown[]) => {
+          asked.push(...args)
+          return Promise.resolve([
+            { provider: "iyzico", verification: "unverified" },
+            { provider: "smtp", verification: "rejected" },
+          ])
         },
       },
       storefront_layout: { listStorefrontLayouts: () => Promise.resolve([{ id: "sfl_1" }]) },
@@ -97,7 +100,11 @@ describe("readSetupFacts", () => {
       legal_published: true,
       mail_sender: false,
     })
-    expect(described.sort()).toEqual(["iyzico", "paytr", "smtp"])
+    // The rows' check state only: no secret is opened
+    expect(asked).toEqual([
+      { provider: ["paytr", "iyzico", "smtp"] },
+      { select: ["provider", "verification"], take: 3 },
+    ])
     expect(calls["product"]).toEqual([{ status: "published" }, { select: ["id"], take: 1 }])
   })
 })

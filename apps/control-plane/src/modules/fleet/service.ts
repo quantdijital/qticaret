@@ -24,6 +24,12 @@ export interface TenantKeyView {
   created_at: Date
 }
 
+/** A shop's setup checklist as last reported (Ek C21) and when that report arrived. */
+export interface SetupSeen {
+  setup: UsageSetup
+  received_at: Date
+}
+
 const PUBLIC_KEY = /^[A-Za-z0-9_-]{43}$/
 
 /** The key id a raw Ed25519 public key (base64url) has; null when it is not one. */
@@ -148,29 +154,32 @@ class FleetModuleService extends FleetReleases {
   }
 
   /**
-   * Ek C21: each shop's setup checklist from its latest usage report, for
-   * the shops list (one page, at most 100). A shop without a report, or
-   * whose latest came from an older release without the field, is absent.
+   * Ek C21: each shop's setup checklist from its latest report that carried
+   * one (review L3: an hour whose read failed does not hide the last known
+   * state), with that report's arrival. One page of the list (at most 100)
+   * or one shop. A shop that never sent one is absent.
    */
   @InjectManager()
   async latestSetups(
     tenantIds: readonly string[],
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<Map<string, UsageSetup>> {
+  ): Promise<Map<string, SetupSeen>> {
     if (tenantIds.length === 0) {
       return new Map()
     }
     const rows = (await (sharedContext.manager as Executor).execute(
-      `SELECT t.id AS tenant_id, u.setup
+      `SELECT t.id AS tenant_id, u.setup, u.received_at
          FROM unnest(ARRAY[${tenantIds.map(() => "?").join(", ")}]::text[]) AS t(id)
          CROSS JOIN LATERAL (
-           SELECT setup FROM usage_snapshot
-            WHERE tenant_id = t.id AND deleted_at IS NULL ORDER BY reported_at DESC LIMIT 1
-         ) u
-        WHERE u.setup IS NOT NULL`,
+           SELECT setup, received_at FROM usage_snapshot
+            WHERE tenant_id = t.id AND deleted_at IS NULL AND setup IS NOT NULL
+            ORDER BY reported_at DESC LIMIT 1
+         ) u`,
       [...tenantIds]
-    )) as { tenant_id: string; setup: UsageSetup }[]
-    return new Map(rows.map((row) => [row.tenant_id, row.setup]))
+    )) as ({ tenant_id: string } & SetupSeen)[]
+    return new Map(
+      rows.map(({ tenant_id, setup, received_at }) => [tenant_id, { setup, received_at }])
+    )
   }
 
   /** The undo of `registerTenantKey` in a failed issue. */

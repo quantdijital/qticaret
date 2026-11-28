@@ -33,8 +33,6 @@ const usageView = (row: UsageSnapshotRow | null) =>
         },
         last_order_at: row.last_order_at,
         release: { version: row.release_version, commit: row.release_commit },
-        // Ek C21: the shop's setup checklist (yes/no); null from an older shop
-        setup: row.setup ?? null,
       }
     : null
 
@@ -48,9 +46,10 @@ const usageView = (row: UsageSnapshotRow | null) =>
  */
 export async function usageHealthOf(container: Container, tenant: TenantRecord, now: Date) {
   const fleet = fleetIn(container)
-  const [latest, standings] = await Promise.all([
+  const [latest, standings, setups] = await Promise.all([
     fleet.latestUsage(tenant.id),
     fleet.healthOf([tenant.id]),
+    fleet.latestSetups([tenant.id]),
   ])
   const expected = reportExpected(tenant)
   const since = new Date(now.getTime() - HEALTH_KEEP_MS)
@@ -71,6 +70,8 @@ export async function usageHealthOf(container: Container, tenant: TenantRecord, 
   ])
   return {
     usage: usageView(latest),
+    // Ek C21: its last reported setup checklist (yes/no) and when; null if it never sent one
+    setup: setups.get(tenant.id) ?? null,
     report: {
       expected,
       missing:

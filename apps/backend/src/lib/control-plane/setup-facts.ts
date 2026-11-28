@@ -26,7 +26,7 @@ const DEFAULT_STORE_NAME = "Medusa Store"
 /** Card providers: the panel's payment step. */
 const PAYMENT_PROVIDERS: readonly CredentialProviderName[] = ["paytr", "iyzico"]
 /** Saved and checked, or saved while the provider could not be reached (the panel's rule). */
-const USABLE = new Set(["connected", "unverified"])
+const USABLE = new Set(["verified", "unverified"])
 
 export interface SetupReads {
   storeName: string | null
@@ -61,19 +61,27 @@ export function setupFactsOf(reads: SetupReads): UsageSetup {
 
 const ONE = { select: ["id"], take: 1 }
 
-async function usable(
+/**
+ * Which of the providers have a usable account, from the rows' check state
+ * alone: nothing is opened or decrypted (security review L1), so a
+ * missing key never logs here either.
+ */
+async function connectedProviders(
   service: IntegrationCredentialsModuleService,
   providers: readonly CredentialProviderName[]
-): Promise<boolean> {
-  const states = await Promise.all(providers.map((provider) => service.describe(provider)))
-  return states.some((status) => USABLE.has(status.state))
+): Promise<Set<string>> {
+  const rows = await service.listIntegrationCredentials(
+    { provider: [...providers] },
+    { select: ["provider", "verification"], take: providers.length }
+  )
+  return new Set(rows.filter((row) => USABLE.has(row.verification)).map((row) => row.provider))
 }
 
 export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
   const credentials = container.resolve<IntegrationCredentialsModuleService>(
     INTEGRATION_CREDENTIALS_MODULE
   )
-  const [store, regions, locations, shipping, payment, products, layouts, legal, email] =
+  const [store, regions, locations, shipping, accounts, products, layouts, legal] =
     await Promise.all([
       container
         .resolve(ContainerRegistrationKeys.QUERY)
@@ -100,7 +108,7 @@ export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
         .resolve(Modules.FULFILLMENT)
         .listAndCountShippingOptions({}, ONE)
         .then(([, count]) => count),
-      usable(credentials, PAYMENT_PROVIDERS),
+      connectedProviders(credentials, [...PAYMENT_PROVIDERS, "smtp"]),
       container
         .resolve(Modules.PRODUCT)
         .listAndCountProducts({ status: "published" }, ONE)
@@ -114,7 +122,6 @@ export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
           { status: "published", kind: [...REQUIRED_KINDS] },
           { select: ["kind"], take: REQUIRED_KINDS.length }
         ),
-      usable(credentials, ["smtp"]),
     ])
   return setupFactsOf({
     storeName: store?.name ?? null,
@@ -122,10 +129,10 @@ export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
     regions,
     locations,
     shippingOptions: shipping,
-    paymentConnected: payment,
+    paymentConnected: PAYMENT_PROVIDERS.some((provider) => accounts.has(provider)),
     publishedProducts: products,
     lookPublished: layouts.length > 0,
     publishedLegalKinds: legal.map((row) => row.kind),
-    mailSender: email,
+    mailSender: accounts.has("smtp"),
   })
 }

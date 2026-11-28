@@ -73,11 +73,28 @@ medusaIntegrationTestRunner({
 
       const page = await call.get(`/admin/cp/tenants/${a.id}/usage-health`, readonly)
       expect(page.status).toBe(200)
-      expect((page.data as { usage: { setup: unknown } }).usage.setup).toEqual(SETUP)
+      expect((page.data as { setup: unknown }).setup).toEqual({
+        setup: SETUP,
+        received_at: expect.any(String) as unknown,
+      })
       const list = await call.get(`/admin/cp/tenants?q=${a.slug}`, readonly)
       expect((list.data as { tenants: { id: string; setup: unknown }[] }).tenants).toEqual([
         expect.objectContaining({ id: a.id, setup: SETUP }),
       ])
+
+      // A later report without it (its read failed that hour) keeps the last known one
+      const fleet = fleetOf(getContainer())
+      const [stored] = await fleet.listUsageSnapshots({ tenant_id: a.id }, { take: 1 })
+      await fleet.updateUsageSnapshots({
+        id: (stored as { id: string }).id,
+        received_at: new Date(Date.now() - 11 * 60_000),
+        reported_at: new Date(Date.now() - 11 * 60_000),
+      })
+      expect((await send(a.id, a.signer, reportOf(a.id, new Date()))).status).toBe(200)
+      const after = await call.get(`/admin/cp/tenants/${a.id}/usage-health`, readonly)
+      expect((after.data as { setup: { setup: unknown } }).setup.setup).toEqual(SETUP)
+      const again = await call.get(`/admin/cp/tenants?q=${a.slug}`, readonly)
+      expect((again.data as { tenants: { setup: unknown }[] }).tenants[0]?.setup).toEqual(SETUP)
     })
 
     it("takes an older shop's report without it, and shows none", async () => {
@@ -85,7 +102,7 @@ medusaIntegrationTestRunner({
       expect((await send(b.id, b.signer, reportOf(b.id, new Date()))).status).toBe(200)
       expect((await fleetOf(getContainer()).latestUsage(b.id))?.setup).toBeNull()
       const page = await call.get(`/admin/cp/tenants/${b.id}/usage-health`, readonly)
-      expect((page.data as { usage: { setup: unknown } }).usage.setup).toBeNull()
+      expect((page.data as { setup: unknown }).setup).toBeNull()
       const list = await call.get(`/admin/cp/tenants?q=${b.slug}`, readonly)
       expect((list.data as { tenants: { setup: unknown }[] }).tenants[0]?.setup).toBeNull()
     })
