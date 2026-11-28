@@ -50,7 +50,10 @@ const PLAN = {
   categories: 0,
   reviews: 4,
   categories_hidden: 0,
-  blocked: [{ id: "p3", title: "Tur p3", reason: "ordered" }],
+  blocked: [
+    { id: "p3", title: "Tur p3", reason: "ordered" },
+    { id: "p4", title: "Tur p4", reason: "customer_content", customer_content: 2 },
+  ],
   categories_kept: [{ id: "c1", name: "Kapadokya", reason: "own_products" }],
 }
 
@@ -72,8 +75,12 @@ describe("isSampleProduct", () => {
       false
     )
     expect(isSampleProduct({ id: "p1", metadata: { sample: "", sample_of: "p1" } })).toBe(false)
-    // Half made by a stopped load: the tag, no sample_of yet
-    expect(isSampleProduct({ id: "p1", metadata: { sample: "travel@1" } })).toBe(true)
+    // Half made by a stopped load: the tag and the job making it, no sample_of yet
+    expect(
+      isSampleProduct({ id: "p1", metadata: { sample: "travel@1", sample_job: "job_1" } })
+    ).toBe(true)
+    // The tag alone names no load: the shop's own
+    expect(isSampleProduct({ id: "p1", metadata: { sample: "travel@1" } })).toBe(false)
     expect(isSampleProduct({ id: "p1", metadata: null })).toBe(false)
   })
 })
@@ -114,6 +121,43 @@ describe("the sample offer in the empty product list", () => {
     expect(await screen.findByText("Yükleniyor… %42")).toBeInTheDocument()
   })
 
+  it("polls a running load by its job alone and reads the whole answer once it ends", async () => {
+    const running: SampleLoadJob = {
+      id: "job_1",
+      pack: "travel",
+      status: "running",
+      progress: 42,
+      summary: null,
+      error_code: null,
+      created_at: "2026-11-28T06:00:00Z",
+    }
+    const done: SampleLoadJob = { ...running, status: "succeeded", progress: 100 }
+    let polls = 0
+    fetchMock.mockImplementation((_url: string, init?: { query?: { job?: string } }) => {
+      if (init?.query?.job === "1") {
+        polls += 1
+        return Promise.resolve({ load_job: polls === 1 ? { ...running, progress: 60 } : done })
+      }
+      return Promise.resolve(polls === 0 ? answer({}, running) : answer({}, done))
+    })
+    renderWith(<SampleOffer />)
+    expect(await screen.findByText("Yükleniyor… %42")).toBeInTheDocument()
+    expect(await screen.findByText("Yükleniyor… %60", {}, { timeout: 4000 })).toBeInTheDocument()
+    await waitFor(
+      () => {
+        expect(fetchMock).toHaveBeenCalledTimes(4)
+      },
+      { timeout: 4000 }
+    )
+    // The first read whole, two polls by the job, the whole answer again once it ended
+    expect(fetchMock.mock.calls.map((call) => (call as unknown[])[1] ?? null)).toEqual([
+      null,
+      { query: { job: "1" } },
+      { query: { job: "1" } },
+      null,
+    ])
+  }, 10000)
+
   it("is not offered to a role that may not load it", () => {
     can.value = false
     renderWith(<SampleOffer />)
@@ -153,6 +197,11 @@ describe("the sample content card and its removal", () => {
     const dialog = await screen.findByRole("dialog")
     // What stays, and why
     expect(await within(dialog).findByText("Tur p3: siparişi var")).toBeInTheDocument()
+    expect(
+      within(dialog).getByText(
+        "Tur p4: müşteri içeriği var (2 yorum, soru ya da cevap); önce onları yönetin"
+      )
+    ).toBeInTheDocument()
     expect(
       within(dialog).getByText("Kapadokya kategorisi: içinde kendi ürününüz var")
     ).toBeInTheDocument()

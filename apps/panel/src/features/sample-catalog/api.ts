@@ -11,7 +11,7 @@ export interface SampleSet {
   loaded: boolean
 }
 
-export type SampleBlockReason = "ordered" | "booked"
+export type SampleBlockReason = "ordered" | "booked" | "customer_content"
 export type SampleCategoryKeptReason = "own_products" | "samples_left" | "children"
 
 export interface SampleProduct {
@@ -23,6 +23,8 @@ export interface SampleProduct {
   /** Changed since it was loaded: the owner may want to keep it. */
   edited: boolean
   blocked: SampleBlockReason | null
+  /** Reviews, questions and answers customers wrote on it: it stays while there are any. */
+  customer_content?: number
 }
 
 export interface SampleCatalogStatus {
@@ -65,7 +67,15 @@ export interface RemovalPlan {
   categories: number
   reviews: number
   categories_hidden: number
-  blocked: { id: string; title: string; reason: SampleBlockReason }[]
+  blocked: {
+    id: string
+    title: string
+    reason: SampleBlockReason
+    /** What customers wrote on it ("customer_content"). */
+    customer_content?: number
+  }[]
+  /** What customers wrote on the sample products that stay for it. */
+  customer_content?: number
   categories_kept: { id: string; name: string; reason: SampleCategoryKeptReason }[]
 }
 
@@ -74,11 +84,30 @@ export const isLoading = (job: SampleLoadJob | null | undefined): boolean =>
 
 const KEY = ["sample-catalog"] as const
 
-/** The card's facts; every two seconds while a load runs. */
+const STATUS_KEY = [...KEY, "status"] as const
+
+/**
+ * The card's facts; every two seconds while a load runs. Polling asks for
+ * the job alone (`?job=1`: the server does not read the whole catalogue
+ * each time) and keeps the facts it had; once the job ends the whole
+ * answer is read again.
+ */
 export const sampleCatalogQuery = (enabled = true) =>
   queryOptions({
-    queryKey: [...KEY, "status"],
-    queryFn: () => sdk.client.fetch<SampleCatalogAnswer>("/admin/sample-catalog"),
+    queryKey: STATUS_KEY,
+    queryFn: async ({ client }) => {
+      const before = client.getQueryData<SampleCatalogAnswer>(STATUS_KEY)
+      if (before && isLoading(before.load_job)) {
+        const { load_job } = await sdk.client.fetch<{ load_job: SampleLoadJob | null }>(
+          "/admin/sample-catalog",
+          { query: { job: "1" } }
+        )
+        if (isLoading(load_job)) {
+          return { ...before, load_job }
+        }
+      }
+      return sdk.client.fetch<SampleCatalogAnswer>("/admin/sample-catalog")
+    },
     enabled,
     refetchInterval: (query) => (isLoading(query.state.data?.load_job) ? 2000 : false),
   })
@@ -133,9 +162,9 @@ export function useRemoveSamples() {
 
 /**
  * A product the sample catalogue made, as the server knows it
- * (`isSampleRecord`): the set's tag and its own id as `sample_of`; or the
- * tag and no `sample_of` yet, left half made by a stopped load. A copy
- * carries another id and is the shop's.
+ * (`isUnsellableSample`): the set's tag and its own id as `sample_of`; or
+ * the tag and the load job making it with no `sample_of` yet (half made
+ * by a stopped load). A copy carries another id and is the shop's.
  */
 export function isSampleProduct(product: {
   id: string
@@ -145,5 +174,9 @@ export function isSampleProduct(product: {
   if (typeof meta?.["sample"] !== "string" || meta["sample"] === "") {
     return false
   }
-  return meta["sample_of"] === product.id || !("sample_of" in meta)
+  if (meta["sample_of"] === product.id) {
+    return true
+  }
+  const job = meta["sample_job"]
+  return !("sample_of" in meta) && typeof job === "string" && job !== ""
 }

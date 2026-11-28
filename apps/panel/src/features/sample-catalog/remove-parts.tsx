@@ -156,13 +156,19 @@ export function KeepList({
   )
 }
 
-/** What stays and why: a product an order or a sold place holds, a category holding the shop's. */
+/**
+ * What stays and why: a product an order, a sold place or a customer's
+ * words hold (with how many), a category holding the shop's.
+ */
 export function Stays({ plan }: { plan: Pick<RemovalPlan, "blocked" | "categories_kept"> }) {
   const { t } = useTranslation()
   const lines = [
     ...plan.blocked.map((row) => ({
       key: row.id,
-      text: t(`${R}.stays.${row.reason}`, { title: row.title }),
+      text: t(`${R}.stays.${row.reason}`, {
+        title: row.title,
+        count: row.customer_content ?? 0,
+      }),
     })),
     ...plan.categories_kept.map((row) => ({
       key: row.id,

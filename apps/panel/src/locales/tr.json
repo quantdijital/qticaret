@@ -15304,6 +15304,7 @@
       "stays": {
         "ordered": "{{title}}: siparişi var",
         "booked": "{{title}}: satılmış ya da ayrılmış yeri var",
+        "customer_content": "{{title}}: müşteri içeriği var ({{count}} yorum, soru ya da cevap); önce onları yönetin",
         "own_products": "{{name}} kategorisi: içinde kendi ürününüz var",
         "samples_left": "{{name}} kategorisi: içinde tuttuğunuz örnek ürün var",
         "children": "{{name}} kategorisi: alt kategorisi kalıyor"

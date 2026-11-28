@@ -15304,6 +15304,7 @@
       "stays": {
         "ordered": "{{title}}: it has an order",
         "booked": "{{title}}: it has a sold or held place",
+        "customer_content": "{{title}}: customers wrote on it ({{count}} reviews, questions or answers); deal with those first",
         "own_products": "{{name}} category: it holds a product of your own",
         "samples_left": "{{name}} category: it holds a sample you keep",
         "children": "{{name}} category: a subcategory stays"
