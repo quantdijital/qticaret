@@ -220,6 +220,10 @@ const CAPABILITY_PROBES = {
 
 export type Capability = keyof typeof CAPABILITY_PROBES
 
+/** The probes themselves, for a decision that is not a role's (a support session). */
+export const capabilityProbes = (): Readonly<Record<Capability, readonly [Method, string]>> =>
+  CAPABILITY_PROBES
+
 /** What a role may do; a user without one, nothing. */
 export function capabilitiesOf(role: StaffRole | null): Record<Capability, boolean> {
   return Object.fromEntries(

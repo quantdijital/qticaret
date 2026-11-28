@@ -135,6 +135,9 @@ export const OWNER_ONLY: readonly Rule[] = [
   // draft, kept, renamed, deleted (the owner, 2026-11-23: "yalnızca sahiplere açık")
   { methods: "*", path: "/admin/storefront-designs*" },
   { methods: "*", path: "/admin/storefront-presets*" },
+  // Whether the platform's support may come in, its sessions and their history
+  // (adr/0061 Ek "Destek erişimi")
+  { methods: "*", path: "/admin/support-access*" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },

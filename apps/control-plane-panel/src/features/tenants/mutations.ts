@@ -154,3 +154,21 @@ export const useRemoveFeatureOverride = (id: string) =>
   useShopChange(id, (key: string) =>
     api(tenantPath(id, `/feature-overrides/${encodeURIComponent(key)}`), { method: "DELETE" })
   )
+
+/** A support grant's answer: the link to open once, and when its session ends. */
+export interface SupportGrant {
+  url: string
+  grant_id: string
+  expires_at: string
+  /** The shop's owner has not joined yet: the shop will refuse the link. */
+  owner_pending?: boolean
+}
+
+/**
+ * A grant into the shop's panel (adr/0061 Ek 2026-11-28): proved again
+ * each time, a reason and a length; the link is shown once, never kept.
+ */
+export const useSupportGrant = (id: string) =>
+  useShopChange(id, (input: { reason: string; minutes: 15 | 30 | 60 }) =>
+    withStepUp((headers) => post<SupportGrant>(tenantPath(id, "/support-grants"), input, headers))
+  )

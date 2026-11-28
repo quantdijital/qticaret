@@ -145,6 +145,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Bir {{source}} muhasebe programına aktarılamadı",
       description: "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin.",
     },
+    "support_access.started": {
+      title: "Platform desteği panelinize giriş yaptı ({{operator}})",
+      description:
+        "Gerekçe: {{reason}}. Oturum {{ends_at}}'de biter; Ayarlar > Güvenlik'ten sonlandırabilirsiniz.",
+    },
     "migration.not_found_seen": {
       title: "Kesimden sonra {{count}} adres 404 verdi",
       description:
@@ -356,6 +361,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "accounting.sync_stopped": {
       title: "A {{source}} could not be sent to the accounting program",
       description: "It was tried many times; try it again from Settings > Accounting.",
+    },
+    "support_access.started": {
+      title: "Platform support signed in to your panel ({{operator}})",
+      description:
+        "Reason: {{reason}}. The session ends at {{ends_at}}; you can end it under Settings > Security.",
     },
     "migration.not_found_seen": {
       title: "{{count}} addresses answered 404 since cutover",

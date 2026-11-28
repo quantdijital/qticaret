@@ -636,7 +636,8 @@
       "chargeVoided": "Charge voided",
       "chargeAmount": "Payment amount corrected",
       "grace": "Grace changed",
-      "other": "Change"
+      "other": "Change",
+      "supportGrant": "Shop panel entered"
     }
   },
   "packages": {
@@ -848,6 +849,9 @@
       "ai_route_uncapped": "This service documents no output limit, so it cannot run on platform credits.",
       "ai_route_unverified": "This service is not verified yet; it cannot be routed on platform credits.",
       "ai_service_unknown": "Unknown AI service.",
+      "support_no_panel": "The shop has no panel address yet; finish its setup or verify its domain first.",
+      "support_reason_required": "The reason must be at least 10 characters.",
+      "support_unavailable": "A shop being set up or closed cannot be entered.",
       "preset_unknown": "This ready-made look is not in the chosen sector pack."
     },
     "ai_credits": {
@@ -1291,11 +1295,12 @@
     },
     "local": {
       "title": "Shop panel (this computer)",
-      "text": "In a local setup the shop's panel opens on its server's port plus 1000.",
+      "text": "On this machine the shop's panel starts with the shop, on its server's port plus 1000.",
       "address": "Address",
-      "command": "Command that opens the panel",
       "copy": "Copy the command",
-      "copied": "Command copied."
+      "copied": "Command copied.",
+      "open": "Open the panel",
+      "commandFallback": "If the panel does not open, start it with this command"
     },
     "pack": {
       "title": "Sector pack",
@@ -1877,6 +1882,22 @@
     "reasonHelp": "At least 3 characters; kept on the record.",
     "saved": "Target release saved.",
     "noReleases": "No release yet: add one on the Releases page first."
+  },
+  "supportAccess": {
+    "open": "Go to shop panel",
+    "title": "Go to the shop's panel",
+    "text": "Opens a time-limited \"Platform support\" session in the shop's panel. The shop owner is told by the bell and e-mail; staff, payment and integration settings, legal details and customer data exports stay closed.",
+    "reason": "Reason",
+    "reasonPlaceholder": "E.g. Setup help with product entry and storefront layout",
+    "reasonHelp": "Shown to the shop owner as written and saved to the shop's notes. One line, 10 to 500 characters.",
+    "minutes": "Length",
+    "minutesOption": "{{count}} minutes",
+    "submit": "Create grant",
+    "readyTitle": "Link ready",
+    "readyText": "The link works once and must be opened within 5 minutes. The session ends by itself at {{time}}.",
+    "openPanel": "Open the panel",
+    "ownerPending": "The shop's owner does not seem to have joined yet. Until the owner accepts the invitation, the shop refuses support sign-ins.",
+    "bearerNote": "This link signs in whoever opens it: never paste it into a chat, an e-mail or a ticket. It opens once."
   },
   "setupStatus": {
     "title": "Setup status",

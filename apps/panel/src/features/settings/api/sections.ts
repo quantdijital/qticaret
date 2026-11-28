@@ -58,6 +58,8 @@ export interface SecuritySettings {
   fraud_review_score: number
   /** A first order at or above this (kuruş) adds to its score. */
   fraud_high_amount: number
+  /** Whether the platform's support may open a time-limited session here (adr/0061 Ek "Destek erişimi"). */
+  support_access_enabled?: boolean
 }
 
 /** Stock rules (F3.8): the shop's default low-stock threshold. */

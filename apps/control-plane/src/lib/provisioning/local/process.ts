@@ -8,7 +8,8 @@ import type { ShopLayout } from "./layout"
 import { openLog, readPrivateFile, writePrivateFile } from "./private-files"
 
 /**
- * A local shop's backend process (adr/0061 §6.3, Ek C10): started
+ * A local shop's backend process (adr/0061 §6.3, Ek C10), and its panel
+ * (Ek 2026-11-28, Karar 8): each started
  * detached in its own process group with a pid file, so it outlives the
  * control plane; stopped only after the pid's command line is read and is
  * this shop's (`medusa start` of this backend on this shop's port). A pid
@@ -47,9 +48,66 @@ export const startArgs = (layout: ShopLayout, port: number): string[] => [
   String(port),
 ]
 
-async function pidOf(layout: ShopLayout): Promise<number | null> {
+/**
+ * A process this provisioner starts for a shop: its backend, and on a
+ * developer's machine its panel (adr/0061 Ek 2026-11-28, Karar 8). Its own
+ * pid file and log; its argv is what its pid's command line must end with,
+ * the port included, so a pid file never stands for another shop's process.
+ */
+export interface ShopProcess {
+  pidFile: string
+  logFile: string
+  cwd: string
+  args: string[]
+  port: number
+}
+
+export const backendProcess = (layout: ShopLayout, port: number): ShopProcess => ({
+  pidFile: layout.pidFile,
+  logFile: join(layout.logDir, "backend.log"),
+  cwd: layout.serverDir,
+  args: startArgs(layout, port),
+  port,
+})
+
+/** The shop's panel on this machine: its backend's port + 1000 (Ek C10 I1). */
+export const LOCAL_PANEL_OFFSET = 1000
+
+/** The argv a shop's panel runs with (Vite's dev server, its port fixed). */
+export const panelArgs = (layout: ShopLayout, panelPort: number): string[] => [
+  layout.panelVite,
+  "--strictPort",
+  "--port",
+  String(panelPort),
+]
+
+export const panelProcess = (layout: ShopLayout, port: number): ShopProcess => {
+  const panelPort = port + LOCAL_PANEL_OFFSET
+  return {
+    pidFile: layout.panelPidFile,
+    logFile: join(layout.logDir, "panel.log"),
+    cwd: layout.panelDir,
+    args: panelArgs(layout, panelPort),
+    port: panelPort,
+  }
+}
+
+/**
+ * The panel's environment: where its backend is and which port it takes,
+ * nothing of the shop's secrets (the panel holds none; it proxies to the
+ * backend, adr/0022).
+ */
+export const panelEnv = (port: number, base: NodeJS.ProcessEnv = process.env) => ({
+  PATH: base["PATH"] ?? "",
+  ...(base["HOME"] ? { HOME: base["HOME"] } : {}),
+  NODE_ENV: "development",
+  PANEL_PORT: String(port + LOCAL_PANEL_OFFSET),
+  PANEL_BACKEND_URL: `http://localhost:${String(port)}`,
+})
+
+async function pidIn(pidFile: string): Promise<number | null> {
   try {
-    const pid = Number(((await readPrivateFile(layout.pidFile)) ?? "").trim())
+    const pid = Number(((await readPrivateFile(pidFile)) ?? "").trim())
     return Number.isSafeInteger(pid) && pid > 1 ? pid : null
   } catch {
     return null
@@ -69,15 +127,19 @@ async function commandLineOf(pid: number): Promise<string | null> {
   }
 }
 
-/** The shop's backend pid when it is running and is the one this provisioner started. */
-export async function ownedPid(layout: ShopLayout, port: number): Promise<number | null> {
-  const pid = await pidOf(layout)
+/** The process's pid when it is running and is the one this provisioner started. */
+export async function ownedProcessPid(proc: ShopProcess): Promise<number | null> {
+  const pid = await pidIn(proc.pidFile)
   if (pid === null) {
     return null
   }
   const line = await commandLineOf(pid)
-  return line?.endsWith(startArgs(layout, port).join(" ")) ? pid : null
+  return line?.endsWith(proc.args.join(" ")) ? pid : null
 }
+
+/** The shop's backend pid when it is running and is the one this provisioner started. */
+export const ownedPid = (layout: ShopLayout, port: number): Promise<number | null> =>
+  ownedProcessPid(backendProcess(layout, port))
 
 /** A signal to the process group `pid` leads; false when no member is left. */
 function signalGroup(pid: number, signal: NodeJS.Signals | 0): boolean {
@@ -90,19 +152,18 @@ function signalGroup(pid: number, signal: NodeJS.Signals | 0): boolean {
 }
 
 /** Started detached on its port, its output to its own log (0600), its pid kept. */
-export async function startShop(
-  layout: ShopLayout,
-  port: number,
+export async function startProcess(
+  proc: ShopProcess,
   env: Record<string, string>
 ): Promise<number> {
-  if (!(await isPortFree(port))) {
+  if (!(await isPortFree(proc.port))) {
     throw new ProvisioningError("provisioning.port_in_use")
   }
-  const log = await openLog(join(layout.logDir, "backend.log"))
+  const log = await openLog(proc.logFile)
   let pid: number | undefined
   try {
-    const child = spawn(process.execPath, startArgs(layout, port), {
-      cwd: layout.serverDir,
+    const child = spawn(process.execPath, proc.args, {
+      cwd: proc.cwd,
       env,
       detached: true,
       shell: false,
@@ -117,7 +178,7 @@ export async function startShop(
     throw new ProvisioningError("provisioning.start_failed")
   }
   try {
-    await writePrivateFile(layout.pidFile, `${String(pid)}\n`)
+    await writePrivateFile(proc.pidFile, `${String(pid)}\n`)
   } catch (error) {
     // No pid file, no way to stop it later: it does not stay up (review L6)
     signalGroup(pid, "SIGKILL")
@@ -126,20 +187,23 @@ export async function startShop(
   return pid
 }
 
+export const startShop = (layout: ShopLayout, port: number, env: Record<string, string>) =>
+  startProcess(backendProcess(layout, port), env)
+
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
- * Ends the shop's process group: SIGTERM, then SIGKILL to the group if any
+ * Ends the process group: SIGTERM, then SIGKILL to the group if any
  * member is left after the wait (review L6). Only a verified pid.
  */
-export async function stopShop(layout: ShopLayout, port: number): Promise<boolean> {
-  const pid = await ownedPid(layout, port)
+export async function stopProcess(proc: ShopProcess): Promise<boolean> {
+  const pid = await ownedProcessPid(proc)
   if (pid === null) {
     // Gone already, or the pid is not this shop's: nothing of ours to stop. A
     // pid file of a process that is gone is dropped; one naming another process is left
-    const noted = await pidOf(layout)
+    const noted = await pidIn(proc.pidFile)
     if (noted !== null && !signalGroup(noted, 0) && (await commandLineOf(noted)) === null) {
-      await rm(layout.pidFile, { force: true })
+      await rm(proc.pidFile, { force: true })
     }
     return false
   }
@@ -153,9 +217,12 @@ export async function stopShop(layout: ShopLayout, port: number): Promise<boolea
     signalGroup(pid, "SIGKILL")
     await pause(500)
   }
-  await rm(layout.pidFile, { force: true })
+  await rm(proc.pidFile, { force: true })
   return true
 }
+
+export const stopShop = (layout: ShopLayout, port: number): Promise<boolean> =>
+  stopProcess(backendProcess(layout, port))
 
 /** `GET /health` on the shop's port: its status and how long it took. */
 export async function healthOf(

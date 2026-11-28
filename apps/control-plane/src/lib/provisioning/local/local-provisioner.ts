@@ -18,7 +18,17 @@ import { composeEnv, databasePasswordOf, ownEnvFile, shopRedisUrl, writeEnvFile 
 import type { LocalSettings } from "./env-file"
 import { databaseNameOf, layoutOf, repoRoot } from "./layout"
 import type { ShopLayout } from "./layout"
-import { healthOf, ownedPid, startShop, stopShop } from "./process"
+import {
+  healthOf,
+  ownedPid,
+  ownedProcessPid,
+  panelEnv,
+  panelProcess,
+  startProcess,
+  startShop,
+  stopProcess,
+  stopShop,
+} from "./process"
 
 export interface LocalProvisionerOptions {
   nodeEnv: string | undefined
@@ -156,6 +166,8 @@ export class LocalProvisioner implements TenantProvisioner {
     if ((await ownedPid(layout, t.port)) !== null) {
       throw new ProvisioningError("provisioning.shop_running")
     }
+    // Its panel keeps nothing of the shop's: stopped, so no process outlives the folder
+    await stopProcess(panelProcess(layout, t.port))
     await rm(layout.dir, { recursive: true, force: true })
   }
 
@@ -184,16 +196,39 @@ export class LocalProvisioner implements TenantProvisioner {
 
   async start(t: ProvisionTarget): Promise<void> {
     const layout = this.layout(t)
-    if ((await ownedPid(layout, t.port)) !== null) {
+    if ((await ownedPid(layout, t.port)) === null) {
+      const env = await this.processEnv(layout, t)
+      await this.prepareServer(layout)
+      await startShop(layout, t.port, env)
+    }
+    await this.startPanel(layout, t)
+  }
+
+  /**
+   * The shop's panel beside it on this machine (adr/0061 Ek 2026-11-28,
+   * Karar 8): Vite's dev server on the backend's port + 1000, pointed at
+   * the shop's backend, so "Mağaza paneline geç" opens a working panel.
+   * A convenience: a panel already running, a port taken (one opened by
+   * hand) or no panel installed leaves the shop's start as it is.
+   */
+  private async startPanel(layout: ShopLayout, t: ProvisionTarget): Promise<void> {
+    const panel = panelProcess(layout, t.port)
+    if (!existsSync(layout.panelVite) || (await ownedProcessPid(panel)) !== null) {
       return
     }
-    const env = await this.processEnv(layout, t)
-    await this.prepareServer(layout)
-    await startShop(layout, t.port, env)
+    try {
+      await startProcess(panel, panelEnv(t.port))
+    } catch (error) {
+      if (!(error instanceof ProvisioningError)) {
+        throw error
+      }
+    }
   }
 
   async stop(t: ProvisionTarget): Promise<void> {
-    await stopShop(this.layout(t), t.port)
+    const layout = this.layout(t)
+    await stopProcess(panelProcess(layout, t.port))
+    await stopShop(layout, t.port)
   }
 
   async probe(t: ProvisionTarget): Promise<HealthResult> {

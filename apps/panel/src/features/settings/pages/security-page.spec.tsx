@@ -13,6 +13,10 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 vi.mock("@/features/auth/api/staff", () => ({
   useCan: (capability: string) => staff.can.has(capability),
+  useSupportSession: () => null,
+}))
+vi.mock("@/features/settings/components/support-access-card", () => ({
+  SupportAccessCard: () => <p>support access</p>,
 }))
 // The cards have their own tests: here only which ones each tab holds
 vi.mock("@/features/settings/components/team-section", () => ({

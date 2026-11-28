@@ -163,6 +163,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/resume",
       "POST /admin/cp/tenants/:id/reveal-tckn",
       "POST /admin/cp/tenants/:id/subscription",
+      "POST /admin/cp/tenants/:id/support-grants",
       "POST /admin/cp/tenants/:id/suspend",
       "POST /admin/cp/tenants/:id/target-release",
     ])

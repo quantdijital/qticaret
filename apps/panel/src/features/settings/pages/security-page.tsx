@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
-import { useCan } from "@/features/auth/api/staff"
+import { useCan, useSupportSession } from "@/features/auth/api/staff"
 import { FraudBlocksCard } from "@/features/settings/components/fraud-blocks-card"
 import { FraudRulesCard } from "@/features/settings/components/fraud-rules-card"
 import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
@@ -9,6 +9,7 @@ import { spanOf } from "@qticaret/admin-ui/lib/page-spans"
 import { MyMfaCard } from "@/features/settings/components/my-mfa-card"
 import { MyProfileCard } from "@/features/settings/components/my-profile-card"
 import { MySignInCard } from "@/features/settings/components/my-sign-in-card"
+import { SupportAccessCard } from "@/features/settings/components/support-access-card"
 import { TeamMfaCard } from "@/features/settings/components/team-mfa-card"
 import { TeamSection } from "@/features/settings/components/team-section"
 
@@ -23,6 +24,10 @@ export function SecurityPage() {
   const { t } = useTranslation()
   const fraud = useCan("fraud")
   const team = useCan("team")
+  // The support switch and its sessions are the owner's (`security`); a support session has
+  // no account of its own to show (adr/0061 Ek "Destek erişimi")
+  const owner = useCan("security")
+  const support = useSupportSession() !== null
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -32,17 +37,21 @@ export function SecurityPage() {
       <SettingsTabs
         label={t("settings.security.title")}
         tabs={[
-          {
-            key: "account",
-            label: t("settings.security.tabs.account"),
-            content: (
-              <PageGrid>
-                <MyProfileCard className={spanOf(12)} />
-                <MySignInCard className={spanOf(6)} />
-                <MyMfaCard className={spanOf(6)} />
-              </PageGrid>
-            ),
-          },
+          ...(support
+            ? []
+            : [
+                {
+                  key: "account",
+                  label: t("settings.security.tabs.account"),
+                  content: (
+                    <PageGrid>
+                      <MyProfileCard className={spanOf(12)} />
+                      <MySignInCard className={spanOf(6)} />
+                      <MyMfaCard className={spanOf(6)} />
+                    </PageGrid>
+                  ),
+                },
+              ]),
           {
             key: "team",
             label: t("settings.security.tabs.team"),
@@ -64,6 +73,15 @@ export function SecurityPage() {
               </>
             ),
           },
+          ...(owner
+            ? [
+                {
+                  key: "support",
+                  label: t("settings.security.tabs.support"),
+                  content: <SupportAccessCard />,
+                },
+              ]
+            : []),
         ]}
       />
     </div>

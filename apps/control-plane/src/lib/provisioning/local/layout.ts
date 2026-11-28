@@ -7,7 +7,7 @@ import { ProvisioningError } from "../provisioner"
  * Where a local shop lives (adr/0061 §6.3, Ek C10):
  *
  * - `infra/tenants/local/<slug>/` (0700, git-ignored): `.env` (0600, its
- *   runtime secrets and settings), `backend.pid`, `logs/`
+ *   runtime secrets and settings), `backend.pid`, `panel.pid`, `logs/`
  * - `…/<slug>/server/`: the shop's working directory. It links to the
  *   compiled backend (`apps/backend/.medusa/server`: `medusa-config.js`,
  *   `src`, …) and the backend's `node_modules`, and holds its own
@@ -34,6 +34,8 @@ export interface ShopLayout {
   dir: string
   envFile: string
   pidFile: string
+  /** The shop's panel's pid (development: its Vite dev server, Ek 2026-11-28). */
+  panelPidFile: string
   logDir: string
   serverDir: string
   staticDir: string
@@ -42,6 +44,9 @@ export interface ShopLayout {
   backendModules: string
   /** Medusa's CLI, run with Node (no shell, no `npx`). */
   cli: string
+  /** The panel's sources and Vite's CLI, run with Node: one panel for every local shop. */
+  panelDir: string
+  panelVite: string
   /**
    * What the shop runs, built, beside the sources it was built from: the
    * backend and the shared packages' copies it loads (`qt-compiled`). A
@@ -62,12 +67,15 @@ export function layoutOf(slug: string, root: string = repoRoot()): ShopLayout {
     dir,
     envFile: join(dir, ".env"),
     pidFile: join(dir, "backend.pid"),
+    panelPidFile: join(dir, "panel.pid"),
     logDir: join(dir, "logs"),
     serverDir,
     staticDir: join(serverDir, "static"),
     backendDir: join(backend, ".medusa", "server"),
     backendModules: join(backend, "node_modules"),
     cli: join(backend, "node_modules", "@medusajs", "cli", "cli.js"),
+    panelDir: join(root, "apps", "panel"),
+    panelVite: join(root, "apps", "panel", "node_modules", "vite", "bin", "vite.js"),
     builds: [
       {
         source: join(backend, "src"),

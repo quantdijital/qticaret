@@ -136,6 +136,15 @@ const TENANT_ROUTES: RouteRule[] = [
     stepUp: true,
     resource: TENANT,
   })),
+  // adr/0061 Ek "Destek erişimi" (2026-11-28) Karar 7: a signed, single-use grant into the
+  // shop's panel; proved again every time (a fresh sign-in does not stand in)
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/support-grants",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
   ...shopRules("POST", ["/company"], INVOICED),
   // A sole proprietor's TCKN: proved again, recorded before it is shown
   {

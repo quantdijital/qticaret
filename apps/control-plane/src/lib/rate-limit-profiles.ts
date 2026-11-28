@@ -60,6 +60,9 @@ export const CP_RATE_LIMIT_PROFILES = {
   },
   // A sole proprietor's TCKN shown: per staff member from every address (C7 review L1)
   tckn_reveal: { name: "cp_tckn_reveal", perIdentityAnyIp: { max: 20, windowMs: HOUR } },
+  // A support grant into a shop's panel (adr/0061 Ek 2026-11-28): per staff member, every address;
+  // each also costs a fresh step-up (single use), so this only bounds a session gone wrong
+  support_grant: { name: "cp_support_grant", perIdentityAnyIp: { max: 30, windowMs: HOUR } },
 } as const satisfies Record<string, RateLimitProfile>
 
 /**

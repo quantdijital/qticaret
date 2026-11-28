@@ -14,6 +14,8 @@ import { updatePlatformSettingsWorkflow } from "../../../../workflows/platform-s
 import { refuseCraftUnlessOwner } from "../../ai/craft-owner"
 import { staffRoleOf } from "../../../http/staff-guard"
 import type { ShippingSettings } from "../../../../modules/platform-settings/sections"
+import { isSupportActor } from "../../../../lib/support-access/session"
+import { supportSeoChangeRefused } from "../../../../lib/support-access/settings"
 
 function sectionParam(req: AuthenticatedMedusaRequest): SectionName {
   const section = req.params["section"] ?? ""
@@ -40,6 +42,18 @@ async function refuseStyleChange(req: AuthenticatedMedusaRequest<SectionValues>)
   )
   if (changed) {
     throw new ValidationError("seo.url_style_job_required", { field: "url_style" })
+  }
+}
+
+/** A support session keeps the storefront's canonical host as the shop set it (adr/0061 Ek). */
+async function refuseHostChangeBySupport(req: AuthenticatedMedusaRequest<SectionValues>) {
+  if (!isSupportActor(req.auth_context.actor_id)) {
+    return
+  }
+  const service = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const current = (await service.readSection("seo")).values as unknown as SeoSettings
+  if (supportSeoChangeRefused(req.validatedBody, current)) {
+    throw new MedusaError(MedusaError.Types.FORBIDDEN, "support.canonical_host")
   }
 }
 
@@ -89,6 +103,7 @@ export async function POST(
   const section = sectionParam(req)
   if (section === "seo") {
     await refuseStyleChange(req)
+    await refuseHostChangeBySupport(req)
   }
   if (section === "shipping") {
     await refuseManagerUnlessOwner(req)
