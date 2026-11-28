@@ -140,6 +140,8 @@ export type HomeSectionView = {
       panels?: CategoryPanelsView | null
       /** `icons`' settings and discs (adr/0077 §10 Ek); a theme without that drawing draws the tiles. */
       icons?: CategoryIconsView | null
+      /** `carousel`'s scroller settings: `categories` in one sliding row; a theme without it draws the tiles. */
+      scroller?: ScrollerSettings | null
     }
   | ProductsSectionView
   | FeaturedProductSectionView

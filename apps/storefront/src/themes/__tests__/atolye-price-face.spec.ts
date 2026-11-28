@@ -28,7 +28,7 @@ describe("the face prices are drawn in", () => {
     expect(files.length).toBeGreaterThan(100)
   })
 
-  it("sets the heading face on headings, the shelf's tab row and the wordmark only", () => {
+  it("sets the heading face on headings, the shelf's tab row, the wordmark and a quote mark only", () => {
     const css = [
       "base.css",
       "ui.css",
@@ -45,7 +45,11 @@ describe("the face prices are drawn in", () => {
       ["tabs.css", 1],
     ])
     const users = files.filter((file) => /\bfont-display\b/.test(readFileSync(file, "utf8")))
-    expect(users.map((file) => file.slice(ATOLYE_SOURCE.length))).toEqual(["frame/Wordmark.tsx"])
+    // The wordmark, and the compact review card's opening quote mark (no amount)
+    expect(users.map((file) => file.slice(ATOLYE_SOURCE.length))).toEqual([
+      "frame/Wordmark.tsx",
+      "sections/review-card.tsx",
+    ])
   })
 
   it("holds no amount inside a heading", () => {

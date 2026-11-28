@@ -71,7 +71,7 @@ test.describe("shipping classes", () => {
       await page.goto("/settings/shipping?part=options")
       // Under "Gelişmiş", folded; the built-in free class is the product's switch, not a row
       const advanced = page.getByRole("region", { name: "Gelişmiş" })
-      const fold = advanced.getByRole("button", { name: "Kargo sınıfları" })
+      const fold = advanced.getByRole("button", { name: "Kargo sınıfları", exact: true })
       if ((await fold.getAttribute("aria-expanded")) !== "true") {
         await fold.click()
       }

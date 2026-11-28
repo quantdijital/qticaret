@@ -117,4 +117,10 @@ export const STOREFRONT_MENU_ROUTES = [
       validateAndTransformBody(AdminPostStorefrontPresetApply),
     ],
   },
+  // What a look's full apply would leave out here: asked by whoever may apply it
+  {
+    matcher: "/admin/storefront-presets/:pack/:code/fit",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
 ]

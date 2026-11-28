@@ -12,7 +12,7 @@
   },
   "radius": "round",
   "product_card": {
-    "ratio": "1:1",
+    "ratio": "4:5",
     "show_brand": false,
     "show_rating": true,
     "variant": "standard",
@@ -22,7 +22,7 @@
     "delivery_note": false,
     "full_button": false,
     "no_reviews": "hide",
-    "text_position": "over_split",
+    "text_position": "over",
     "rating_badge": true,
     "duration_row": true,
     "per_person": false,
@@ -50,7 +50,7 @@
     "default_view": "grid",
     "view_switch": "show",
     "breadcrumb_current": "hide",
-    "crumbs_place": "beside",
+    "crumbs_place": "none",
     "count_word": "tur",
     "all_title": "Tüm turlar"
   },

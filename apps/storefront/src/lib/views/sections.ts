@@ -13,6 +13,7 @@ import { reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
 import { cardedCategoriesView } from "./category-cards-data"
+import { carouselCategoriesView } from "./category-carousel"
 import { iconCategoriesView } from "./category-icons"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
@@ -75,6 +76,10 @@ async function sectionView(
       // The icon row (adr/0077 §10 Ek): its discs with the shop's icons
       if (section.variant === "icons") {
         return iconCategoriesView(section, t)
+      }
+      // The sliding picture cards, with the scroller kit's settings
+      if (section.variant === "carousel") {
+        return carouselCategoriesView(section, t, context.home === true)
       }
       // The carded variants (linked, collage, panels): their cards and own part; else the tiles
       const carded = await cardedCategoriesView(section, t, context.home === true)

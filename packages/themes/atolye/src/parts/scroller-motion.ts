@@ -35,11 +35,28 @@ export function placeOf(track: Track): ScrollerPlace {
 }
 
 /**
- * Where a step lands: a page on (the snap points settle it on a card), at
+ * One card's stride in the row: from the first card's start to the
+ * second's (its width and the gap); a row of one card, or one not laid
+ * out yet, strides a page.
+ */
+export function cardStride(track: Track & Pick<HTMLElement, "children">): number {
+  const [first, second] = Array.from(track.children) as HTMLElement[]
+  const stride = first && second ? second.offsetLeft - first.offsetLeft : 0
+  return stride > 0 ? stride : track.clientWidth
+}
+
+/**
+ * Where a step lands: a page on (or `stride` px, a card's when it turns by
+ * itself one card at a time; the snap points settle it on a card), at
  * the end the first again when the row loops (and the last before the
  * first); else it stays at the end.
  */
-export function stepTarget(track: Track, by: -1 | 1, loop: boolean): number {
+export function stepTarget(
+  track: Track,
+  by: -1 | 1,
+  loop: boolean,
+  stride = track.clientWidth
+): number {
   const max = Math.max(0, track.scrollWidth - track.clientWidth)
   if (by === 1 && track.scrollLeft >= max - SLACK) {
     return loop ? 0 : max
@@ -47,7 +64,7 @@ export function stepTarget(track: Track, by: -1 | 1, loop: boolean): number {
   if (by === -1 && track.scrollLeft <= SLACK) {
     return loop ? max : 0
   }
-  return Math.min(max, Math.max(0, track.scrollLeft + by * track.clientWidth))
+  return Math.min(max, Math.max(0, track.scrollLeft + by * stride))
 }
 
 /** A page's place: its width in view times its number, never past the end. */

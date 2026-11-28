@@ -24,6 +24,7 @@ import { dropTags, tagIds, tagsOf } from "./tag-values"
 import type { TagValue } from "./tag-values"
 import { PRODUCT_SECTIONS, someNames } from "./sections"
 import { SideCard } from "./side-card"
+import type { SideRow } from "./side-card"
 import { SideForm } from "./side-form"
 
 interface Values {
@@ -229,38 +230,38 @@ export function OrganizeCard({
     : rates?.default
   const categories = (product.categories ?? []).map((category) => category.name)
   const tags = saved.tags.map((tag) => tag.value)
+  // `unset`: optional and empty, named once under the facts
+  const rows: (SideRow & { unset?: boolean })[] = [
+    {
+      label: t("products.wizard.categories"),
+      value: categories.length > 0 ? someNames(categories, 3) : t("products.sections.noCategory"),
+      empty: categories.length === 0,
+    },
+    { label: t("brands.field"), value: saved.brand?.label ?? "", unset: !saved.brand },
+    ...(collectionsOn
+      ? [
+          {
+            label: t("collections.field"),
+            value: saved.collection?.label ?? "",
+            unset: !saved.collection,
+          },
+        ]
+      : []),
+    { label: t("products.tags.field"), value: someNames(tags, 3), unset: tags.length === 0 },
+    { label: t("products.wizard.vat"), value: rate ? vatLabelOf(rate) : "—" },
+  ]
+  const unset = rows.filter((row) => row.unset)
   return (
     <SideCard
       id={PRODUCT_SECTIONS.organize}
       title={t("products.detail.organize")}
-      rows={[
-        {
-          label: t("products.wizard.categories"),
-          value:
-            categories.length > 0 ? someNames(categories, 3) : t("products.sections.noCategory"),
-          empty: categories.length === 0,
-        },
-        {
-          label: t("brands.field"),
-          value: saved.brand?.label ?? t("products.sections.noBrand"),
-          empty: !saved.brand,
-        },
-        ...(collectionsOn
-          ? [
-              {
-                label: t("collections.field"),
-                value: saved.collection?.label ?? t("collections.none"),
-                empty: !saved.collection,
-              },
-            ]
-          : []),
-        {
-          label: t("products.tags.field"),
-          value: tags.length > 0 ? someNames(tags, 3) : t("products.tags.none"),
-          empty: tags.length === 0,
-        },
-        { label: t("products.wizard.vat"), value: rate ? vatLabelOf(rate) : "—" },
-      ]}
+      rows={rows.filter((row) => !row.unset)}
+      // What is not set yet (no brand, no tags) in one line, not a line each
+      note={
+        unset.length > 0
+          ? t("products.side.unset", { names: unset.map((row) => row.label).join(", ") })
+          : undefined
+      }
       findings={findings && findingsNote(t, findings)}
       editing={editing}
       onEdit={() => {

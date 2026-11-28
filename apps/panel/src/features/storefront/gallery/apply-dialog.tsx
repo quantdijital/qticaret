@@ -14,8 +14,9 @@ import { Label } from "@qticaret/admin-ui/ui/label"
 import { errorText } from "@/lib/errors"
 import { sayDroppedPages } from "@/features/storefront/editor/dropped-pages"
 import { REPORT_KEY, useApplyLook } from "./api"
-import type { ApplyReport, ApplyTarget } from "./api"
+import type { ApplyReport, ApplyScope, ApplyTarget } from "./api"
 import { applyLines } from "./apply-lines"
+import { ApplyScopePicker } from "./apply-scope"
 import { NAME_MAX, suggestedName } from "./design-name"
 
 const A = "storefront.gallery.apply"
@@ -78,14 +79,19 @@ function ApplyContent({
   const trimmed = name.trim()
   const saveAs = keep && !savedFull ? trimmed : null
   const lookName = targetName(target)
-  const menusReplaced = target.kind === "preset" && target.preset.has_menus
+  // Another sector's look: its style alone unless the whole is asked for (owner, 2026-11-28)
+  const foreign = target.kind === "preset" && !target.preset.own ? target.preset : null
+  const [chosen, setChosen] = useState<ApplyScope>("style")
+  const scope: ApplyScope = foreign ? chosen : "full"
+  const menusReplaced = target.kind === "preset" && target.preset.has_menus && scope === "full"
   const submit = () => {
     apply.mutate(
-      { target, saveAs },
+      { target, saveAs, scope },
       {
         onSuccess: ({ result }) => {
           const report: ApplyReport = {
             name: lookName,
+            ...(scope === "style" ? { scope } : {}),
             auto_saved: result.auto_saved,
             saved_name: result.auto_saved?.name ?? null,
             skipped: result.skipped,
@@ -106,6 +112,7 @@ function ApplyContent({
     <DialogContent size="md">
       <DialogHeading title={t(`${A}.title`, { name: lookName })} />
       <DialogBody>
+        {foreign ? <ApplyScopePicker preset={foreign} scope={scope} onChange={setChosen} /> : null}
         {menusReplaced ? (
           <Alert>
             <TriangleAlert className="text-warning" />
@@ -113,7 +120,7 @@ function ApplyContent({
           </Alert>
         ) : null}
         <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-5 text-muted-foreground marker:text-border">
-          {applyLines(target, draftChanged, pendingMenus).map((line) => (
+          {applyLines(target, draftChanged, pendingMenus, scope).map((line) => (
             <li key={line}>{t(`${A}.${line}`)}</li>
           ))}
         </ul>

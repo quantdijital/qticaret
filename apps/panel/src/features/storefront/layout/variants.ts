@@ -90,6 +90,8 @@ export const VARIANT_FIELDS: {
     panels: CATEGORY_PANELS_DEFAULTS,
     // The icon row starts with no icon picked: each disc its picture or initial
     icons: { ...CATEGORY_ICONS_DEFAULTS, category_icons: {} },
+    // The sliding cards start with the scroller kit's defaults
+    carousel: { scroller: SCROLLER_DEFAULTS },
   },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
@@ -169,8 +171,12 @@ const OPTIONAL_FIELDS: {
   >
 } = {
   hero: { category_list: ["slides", "scroller"] },
-  // A preset's icons by handle (adr/0077 §10 Ek): the icon row's, dropped with it
-  categories: { icons: ["category_icons_by_handle"] },
+  // A preset's handles and icons by handle (adr/0077 §10 Ek): the icon row's and the
+  // sliding cards', dropped with them (the tiles and cards hold none)
+  categories: {
+    icons: ["category_handles", "category_icons_by_handle"],
+    carousel: ["category_handles"],
+  },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
   newsletter: {
     split: ["joined", "tone"],

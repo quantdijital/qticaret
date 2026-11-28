@@ -115,6 +115,11 @@ function setup({ flag = true, catalog = {}, slots = [SLOT], refuse, money = true
   )
 }
 
+/** The departure's "⋯" menu: edit, close or open, and cancel. */
+const openMenu = async () => {
+  await userEvent.click(await screen.findByRole("button", { name: /09:00: işlemler/ }))
+}
+
 const posts = () =>
   fetchMock.mock.calls.filter(
     ([, init]) => (init as { method?: string } | undefined)?.method === "POST"
@@ -160,7 +165,7 @@ describe("DeparturesCard", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Kalkış ekle" }))
     const dialog = screen.getByRole("dialog", { name: "Kalkış ekle" })
     // Something typed lights the save; an empty start and a zero capacity are refused
-    await userEvent.type(within(dialog).getByLabelText(/Kontenjan/), "0")
+    await userEvent.type(within(dialog).getByLabelText(/^Kontenjan/), "0")
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
     expect(
       await within(dialog).findByText("Başlangıç tarihi ve saatini girin.")
@@ -173,8 +178,8 @@ describe("DeparturesCard", () => {
     fireEvent.change(within(dialog).getByLabelText(/Başlangıç tarihi/), {
       target: { value: "2099-05-02T09:00" },
     })
-    await userEvent.clear(within(dialog).getByLabelText(/Kontenjan/))
-    await userEvent.type(within(dialog).getByLabelText(/Kontenjan/), "12")
+    await userEvent.clear(within(dialog).getByLabelText(/^Kontenjan/))
+    await userEvent.type(within(dialog).getByLabelText(/^Kontenjan/), "12")
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
@@ -187,9 +192,10 @@ describe("DeparturesCard", () => {
 
   it("keeps a departure's capacity above what is sold and held, and words the server's refusal", async () => {
     setup({ refuse: { status: 400, message: "booking.capacity_below_sold" } })
-    await userEvent.click(await screen.findByRole("button", { name: /09:00: düzenle/ }))
+    await openMenu()
+    await userEvent.click(screen.getByRole("menuitem", { name: "Düzenle" }))
     const dialog = screen.getByRole("dialog", { name: "Kalkışı düzenle" })
-    const capacity = within(dialog).getByLabelText(/Kontenjan/)
+    const capacity = within(dialog).getByLabelText(/^Kontenjan/)
     await userEvent.clear(capacity)
     await userEvent.type(capacity, "4")
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
@@ -214,7 +220,8 @@ describe("DeparturesCard", () => {
 
   it("asks before cancelling a departure with what it touches and the server's refund", async () => {
     setup()
-    await userEvent.click(await screen.findByRole("button", { name: /09:00: iptal et/ }))
+    await openMenu()
+    await userEvent.click(screen.getByRole("menuitem", { name: "Kalkışı iptal et" }))
     const dialog = screen.getByRole("alertdialog", { name: "Kalkış iptal edilsin mi?" })
     const alert = await within(dialog).findByRole("alert")
     expect(alert).toHaveTextContent("Rezervasyon: 2 · sipariş: 2 · yer: 3")
@@ -231,8 +238,9 @@ describe("DeparturesCard", () => {
 
   it("does not offer a departure's cancel to a role that cannot give money back", async () => {
     setup({ money: false })
-    await screen.findByRole("button", { name: /09:00: düzenle/ })
-    expect(screen.queryByRole("button", { name: /09:00: iptal et/ })).toBeNull()
+    await openMenu()
+    expect(screen.getByRole("menuitem", { name: "Düzenle" })).toBeInTheDocument()
+    expect(screen.queryByRole("menuitem", { name: "Kalkışı iptal et" })).toBeNull()
   })
 
   it("shows a departure's bookings by order, with no person's details", async () => {
@@ -243,5 +251,44 @@ describe("DeparturesCard", () => {
     expect(link).toHaveAttribute("href", "/orders/order_1")
     expect(within(dialog).getByText("Onaylı")).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/booking-slots/bkslot_1/bookings")
+  })
+
+  it("closes a departure for sale from its menu", async () => {
+    setup()
+    await openMenu()
+    await userEvent.click(screen.getByRole("menuitem", { name: "Satışa kapat" }))
+    await waitFor(() => {
+      expect(posts()).toEqual([
+        ["/admin/booking-slots/bkslot_1", { method: "POST", body: { status: "closed" } }],
+      ])
+    })
+  })
+
+  it("shows each departure as a short card on a phone, its actions within reach", async () => {
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: query.includes("max-width"),
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }))
+    )
+    try {
+      setup()
+      const card = (await screen.findByText(/2 May 2099/)).closest("li")
+      expect(card).not.toBeNull()
+      expect(screen.queryByRole("table")).toBeNull()
+      const facts = within(card as HTMLElement)
+      expect(facts.getByText("Kontenjan").nextSibling?.textContent).toBe("20")
+      expect(facts.getByText("Kalan").nextSibling?.textContent).toBe("15")
+      expect(facts.getByRole("button", { name: /09:00: işlemler/ })).toBeInTheDocument()
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

@@ -17,6 +17,7 @@ export const SCROLLER_OTHER: readonly ScrollerSetting[] = [
   "dots",
   "autoplay",
   "speed",
+  "autoplay_step",
   "loop",
   "drag",
 ]
@@ -47,7 +48,7 @@ export const SLIDER_OTHER: readonly SliderSetting[] = ["loop"]
 
 /**
  * Whether the row offers the setting as it stands: the arrows' look with
- * arrows, the speed and the pause button when it turns, the dots' style
+ * arrows, the speed, the step and the pause button when it turns, the dots' style
  * with dots, their place while the pill under the slides shows (dots or
  * the pause button), the ground while something has one.
  */
@@ -60,6 +61,7 @@ export function scrollerOffers(settings: ScrollerSettings, setting: ScrollerSett
     case "arrow_size":
       return arrows
     case "speed":
+    case "autoplay_step":
     case "play_button":
       return settings.autoplay === "on"
     case "dot_style":

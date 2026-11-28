@@ -111,6 +111,7 @@
       ],
       "scroller": {
         "autoplay": "on",
+        "play_button": "off",
         "speed": "medium",
         "loop": "on",
         "arrows": "always",

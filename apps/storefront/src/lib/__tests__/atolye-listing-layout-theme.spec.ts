@@ -78,6 +78,22 @@ const SWITCH: NonNullable<ListingPageView["viewSwitch"]> = {
   keep: [{ name: "sirala", value: "yeni" }],
 }
 
+describe("the listing's trail (listing_page.crumbs_place)", () => {
+  const TRAIL = '<nav aria-label="Bulunduğunuz yer">'
+
+  it("draws the trail above the title by default and beside it on request", () => {
+    expect(page()).toContain(TRAIL)
+    expect(page({ crumbsPlace: "above" })).toBe(page())
+    expect(page({ crumbsPlace: "beside" })).toContain(TRAIL)
+  })
+
+  it("draws no trail when turned off, the title then first", () => {
+    const html = page({ crumbsPlace: "none" })
+    expect(html).not.toContain(TRAIL)
+    expect(html).toContain('<header class="flex flex-col gap-3"><h1>Tüm ürünler</h1>')
+  })
+})
+
 describe("the listing's layout", () => {
   it("draws today's grid and no switch without the setting", () => {
     const html = page()

@@ -160,8 +160,9 @@ export interface ListingPageView {
   layout?: ListingViewMode
   /**
    * Where the trail stands (`StoreThemeSettings.listing_page.crumbs_place`):
-   * on the title's line, flush right, from 1024 px (`beside`); absent or
-   * `above`: on its own line above the title, as today.
+   * on the title's line, flush right, from 1024 px (`beside`); not drawn
+   * (`none`: the page's `BreadcrumbList` data stays); absent or `above`: on
+   * its own line above the title, as today.
    */
   crumbsPlace?: ListingCrumbsPlace
   /** The shopper's grid/list switch beside the sort; none: no switch (today's page). */

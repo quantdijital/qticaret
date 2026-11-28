@@ -1322,6 +1322,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "The look's theme settings cannot be used in this shop.",
   "storefront_preset.layout_invalid": "The look's page design cannot be used in this shop.",
   "storefront_preset.demo_unavailable": "Demo content is not offered with this look yet.",
+  "storefront_preset.draft_unreadable":
+    "The draft cannot be opened in this version; discard it in the editor first, then apply the style again.",
   // adr/0064: saved looks
   "storefront_design.unknown": "This saved look was not found.",
   "storefront_design.limit_reached": "You can save up to 10 looks. Delete one to save another.",

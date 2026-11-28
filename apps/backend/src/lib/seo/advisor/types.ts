@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 7
+export const RULES_VERSION = 8
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]
@@ -72,6 +72,11 @@ export interface AdvisorFacts {
         categories: number
         primaryCategory: boolean
         physical: boolean
+        /**
+         * A service or a product sold by date (a tour): it has no barcode,
+         * maker code or brand to give (docs/14 P-DATA-02, P-DATA-03); left out as not one.
+         */
+        service?: boolean | undefined
         missingDimensions: boolean
         /** Labels of required attributes left empty (from the shop's template: sector neutral). */
         missingAttributes: string[]

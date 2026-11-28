@@ -197,7 +197,7 @@ test("uploads a product video, shows it once processed and removes it", async ({
     await tile.click()
     const dialog = page.getByRole("dialog", { name: "Video" })
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByLabel("Başlık")).toBeVisible()
+    await expect(dialog.getByLabel("Başlık", { exact: true })).toBeVisible()
     const facts = dialog.locator("dl")
     await expect(facts).toContainText(/Süre\s*0:0[234]/)
     await expect(facts).toContainText(/Boyut\s*320 × 240/)

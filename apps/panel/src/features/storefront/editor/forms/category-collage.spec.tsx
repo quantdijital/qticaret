@@ -53,12 +53,12 @@ function renderHeld(section: CategoriesSection) {
 
 /** adr/0049 Ek 2026-11-15: the category collage in the panel. */
 describe("the category collage's settings", () => {
-  it("is offered beside the tiles, the linked cards, the panels and the icon row", async () => {
+  it("is offered beside the tiles, the linked cards, the panels, the icon row and the sliding cards", async () => {
     const picked: string[] = []
     render(
       <VariantField id="v" type="categories" value="tiles" onChange={(next) => picked.push(next)} />
     )
-    expect(screen.getAllByRole("radio")).toHaveLength(5)
+    expect(screen.getAllByRole("radio")).toHaveLength(6)
     await userEvent.click(screen.getByRole("radio", { name: /Fotoğraflı kolaj/ }))
     expect(picked).toEqual(["collage"])
   })

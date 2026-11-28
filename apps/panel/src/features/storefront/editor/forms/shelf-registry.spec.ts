@@ -32,11 +32,12 @@ describe("a product list's fields for the settings search", () => {
     expect(found).toContain("scroll:scroller.arrows")
     expect(found).toContain("look:scroller.loop")
     expect(found).not.toContain("layout:columns")
-    // The speed only while it turns by itself
+    // The speed and the step only while it turns by itself
     expect(found).not.toContain("look:scroller.speed")
+    expect(found).not.toContain("look:scroller.autoplay_step")
     expect(
       keys({ ...carousel, scroller: { ...SCROLLER_DEFAULTS, autoplay: "on", arrows: "hidden" } })
-    ).toEqual(expect.arrayContaining(["look:scroller.speed"]))
+    ).toEqual(expect.arrayContaining(["look:scroller.speed", "look:scroller.autoplay_step"]))
   })
 
   it("names a compact list's rows and a columns list's count, never their card", () => {

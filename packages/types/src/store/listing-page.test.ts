@@ -26,6 +26,9 @@ describe("listing page settings", () => {
     expect(LISTING_BREADCRUMB_CURRENTS).toContain(LISTING_PAGE_DEFAULTS.breadcrumb_current)
     expect(LISTING_CRUMBS_PLACES).toContain(LISTING_PAGE_DEFAULTS.crumbs_place)
     expect(listingPageOf({ crumbs_place: "beside" }).crumbs_place).toBe("beside")
+    // The trail turned off: no visible trail, its BreadcrumbList data kept (docs/13)
+    expect(LISTING_CRUMBS_PLACES).toEqual(["above", "beside", "none"])
+    expect(listingPageOf({ crumbs_place: "none" }).crumbs_place).toBe("none")
   })
 
   it("reads none (a backend before it) and unknown values at their defaults", () => {

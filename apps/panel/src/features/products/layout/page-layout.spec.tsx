@@ -22,11 +22,22 @@ const TARGET: Partial<Record<PartKey, string>> = {
   organize: "product-organize",
 }
 
-function Page({ urgent = [], blank = [] }: { urgent?: PartKey[]; blank?: PartKey[] }) {
+type Own = Partial<Record<PartKey, "person" | "type">>
+
+function Page({
+  urgent = [],
+  blank = [],
+  own = {},
+}: {
+  urgent?: PartKey[]
+  blank?: PartKey[]
+  own?: Own
+}) {
   const page = usePageLayout(
     (key) => urgent.includes(key),
     (key) => !blank.includes(key),
-    { simple: true, open: openTab }
+    { simple: true, open: openTab },
+    (key) => own[key] ?? null
   )
   const draw = (key: PartKey) => {
     const why = page.shownWhy(key)
@@ -78,7 +89,8 @@ function Page({ urgent = [], blank = [] }: { urgent?: PartKey[]; blank?: PartKey
 function renderPage(
   stored: Omit<StoredLayout, "open"> & { open?: string[] },
   urgent: PartKey[] = [],
-  blank: PartKey[] = []
+  blank: PartKey[] = [],
+  own: Own = {}
 ) {
   fetchMock.mockImplementation((url: string, init?: unknown) => {
     const body = (init as { body?: unknown } | undefined)?.body
@@ -95,7 +107,7 @@ function renderPage(
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
     >
-      <Page urgent={urgent} blank={blank} />
+      <Page urgent={urgent} blank={blank} own={own} />
     </QueryClientProvider>
   )
 }
@@ -168,6 +180,29 @@ describe("product page layout", () => {
     ).toBeInTheDocument()
     expect(drawn()).toContain("attributes")
     expect(screen.queryByText(/Gizli bölümler/)).toBeNull()
+  })
+
+  it("leaves out what the person keeps off, naming only what they hid themselves", async () => {
+    renderPage({ main: [], side: [], hidden: [] }, ["stock"], [], {
+      faq: "person",
+      stock: "type",
+      catalog: "type",
+    })
+    expect(await screen.findByText("Gizli bölümler: Sık sorulan sorular")).toBeInTheDocument()
+    expect(drawn()).not.toContain("faq")
+    // A part its kind does not use stays away even when a finding points at it
+    expect(drawn()).not.toContain("stock")
+    expect(drawn()).not.toContain("catalog")
+    // ...and "Alana git" still reaches it
+    await userEvent.click(screen.getByRole("button", { name: "go to barcode" }))
+    expect(drawn()).toContain("stock")
+  })
+
+  it("shows a part the person hid when it needs attention", async () => {
+    renderPage({ main: [], side: [], hidden: [] }, ["attributes"], [], { attributes: "person" })
+    await waitFor(() => {
+      expect(drawn()).toContain("attributes")
+    })
   })
 
   it("arranges the page in a side sheet the page follows, and saves it for the team", async () => {

@@ -2,6 +2,8 @@ import type { ReactNode } from "react"
 import { CollapsibleSection } from "./collapsible-section"
 import type { CollapseOptions } from "./collapsible-section"
 import { cn } from "../lib/utils"
+import { useFieldHintStyle } from "../hooks/use-field-hints"
+import { TitleTip } from "./info-tip"
 
 interface SectionCardProps {
   title: string
@@ -27,6 +29,8 @@ export function SectionCard({
   collapse,
   children,
 }: SectionCardProps) {
+  // Under `FieldHints style="tip"` the sentence folds into an (i) beside the title
+  const tip = useFieldHintStyle() === "tip" && Boolean(description)
   if (collapse) {
     return (
       <CollapsibleSection
@@ -50,8 +54,15 @@ export function SectionCard({
       {/* The action goes under the title when the two do not fit side by side (a phone) */}
       <header className="flex min-h-14 flex-wrap items-start justify-between gap-x-4 gap-y-3 px-5 pt-4 pb-3">
         <div className="flex min-w-0 flex-[1_1_16rem] flex-col gap-0.5">
-          <h2 className="text-[15px] leading-6 font-semibold">{title}</h2>
-          {description ? (
+          {tip ? (
+            <div className="flex min-w-0 items-start gap-1.5">
+              <h2 className="text-[15px] leading-6 font-semibold">{title}</h2>
+              <TitleTip title={title} hint={description} />
+            </div>
+          ) : (
+            <h2 className="text-[15px] leading-6 font-semibold">{title}</h2>
+          )}
+          {description && !tip ? (
             <p className="text-[13px] leading-5 text-muted-foreground">{description}</p>
           ) : null}
         </div>

@@ -43,9 +43,13 @@
     flex: 1 1 auto;
     min-width: 0;
   }
+  /* Beside the tools the toggle has only its button's room: the box takes its
+     open width (its max-width still animates), not that room's, which drew
+     it 82 px wide over the next tool (owner 2026-11-28) */
   .gf-search-toggle[data-search-toggle="end"] .gf-search-toggle__box {
     right: 0;
     left: auto;
+    width: min(var(--gf-search-open, 22rem), 40vw);
   }
   .gf-search-toggle[data-open] .gf-search-toggle__box {
     max-width: var(--gf-search-open, 22rem);

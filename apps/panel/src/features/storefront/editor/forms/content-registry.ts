@@ -300,6 +300,8 @@ export function contentFields(section: AnySection): RegistryField[] {
       return [
         entry(section, "show_count", `${E}.categories.showCount`),
         ...iconFields(section, CONTENT_IDS.content),
+        // The sliding cards' scroller, as a rail's
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
       ]
     case "hero":
       return section.variant === "category_list"

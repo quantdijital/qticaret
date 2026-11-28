@@ -39,7 +39,7 @@ import { topStripOf } from "./top-strip"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
-import { footerLogosOf } from "./footer-logo"
+import { footerLogosOf, headerLogoOnDarkOf } from "./footer-logo"
 import { footerNewsletterOf, footerSectionsOf, joinedBand } from "./footer-group"
 import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
@@ -187,6 +187,7 @@ export async function shopView(): Promise<ShopView> {
           sources: { avif: null, webp: null },
         }
       : null,
+    logoOnDark: headerLogoOnDarkOf(site.shop),
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
     cart: withSuggestions(

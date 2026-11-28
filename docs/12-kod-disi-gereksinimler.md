@@ -85,6 +85,8 @@ Depoya yalnız sahibin sağladığı ya da lisansı kayıtlı görsel girer. Haz
 - demo kataloğun Wikimedia Commons fotoğrafları (depo dışındaki veri dosyası, `apps/backend/src/scripts/load-demo-catalog.ts`; kaynak listesi veri dosyasının yanında);
 - Tezgâh görünümlerinin kendi görselleri (`preset.json` `credits`).
 
+Turizm görünümlerinin (`travel`: Patika, Rota, Vadi) küçük resimleri yerel turizm deneme mağazasının canlı ana sayfasıdır: `pnpm preset:previews:live -- --yes --switch <görünüm betiği> --pack travel --only patika,rota,vadi --restore vadi` (mağazayı sırayla her görünüme alıp yayımlayan betik, giriş yapmaz; 2026-11-28). İçlerinde yalnız görünümlerin kendi kapak görselleri (`preset.json` `credits`: `kapak-kapadokya-balon`, `kapak-ayasofya`, `kapak-uzungol-yayla`) ve deneme mağazasının kendi çizimi logo görünür; ek atıf gerekmez.
+
 Demo fotoğraflarının küçük resimde kullanımı sahip kararıdır (2026-11-17). `credits.file` yalnız `images/` altını kabul ettiği için atıf `preset.json`'a değil buraya yazılır. Lisanslar CC BY 2.0, CC BY 4.0, CC BY-SA 3.0, CC BY-SA 4.0 ve kamu malıdır. CC BY-SA içerik bulunduğu için **küçük resimler de CC BY-SA 4.0 ile paylaşılır**: kaynak ve yazar aşağıdadır, fotoğraflar küçültülüp ekran görüntüsünün parçası olarak değiştirilmiştir.
 
 Küçük resimler yeniden üretildiğinde `--pictures <dosya>` her küçük resimde görünen fotoğrafların dosya adlarını yazar; bu tablo onunla güncellenir. Grafit hazır görünümü kaldırıldı (sahip, 2026-11-17); küçük resmi silindi, tablodan çıkarıldı.

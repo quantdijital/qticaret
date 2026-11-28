@@ -26,6 +26,7 @@ import { print, printError } from "../resolved-style/print.ts"
 import { settle } from "../resolved-style/settle.ts"
 import { BACKUP_NAME, keepBackup, readBefore, restore } from "./draft.ts"
 import type { Before } from "./draft.ts"
+import { toWebp } from "./encode.ts"
 import { asShopperSees, picturesInView } from "./frame.ts"
 
 const STOREFRONT_URL = process.env["E2E_BASE_URL"] ?? "http://localhost:8000"
@@ -33,10 +34,6 @@ const REPO_ROOT = join(import.meta.dirname, "..", "..", "..", "..")
 const PACKS = join(REPO_ROOT, "packages", "sector-packs", "packs")
 
 const VIEW = { width: 1440, height: 900 }
-const OUT = { width: 800, height: 500 }
-/** The loader's own limit (`PRESET_LIMITS.previewBytes`). */
-const MAX_BYTES = 256 * 1024
-const QUALITIES = [0.72, 0.64, 0.56, 0.48, 0.4]
 
 interface Options {
   only: string[] | null
@@ -80,40 +77,6 @@ interface Preset {
 
 interface Applied {
   result: { skipped?: unknown[]; dropped?: unknown[] }
-}
-
-/** A PNG made smaller in the browser's own encoder: no image library needed. */
-async function toWebp(encoder: Page, png: Buffer): Promise<Buffer> {
-  const src = `data:image/png;base64,${png.toString("base64")}`
-  for (const quality of QUALITIES) {
-    const url = await encoder.evaluate(
-      async ({ src, width, height, quality }) => {
-        const image = new Image()
-        image.src = src
-        await image.decode()
-        const canvas = document.createElement("canvas")
-        canvas.width = width
-        canvas.height = height
-        const context = canvas.getContext("2d")
-        if (!context) {
-          return ""
-        }
-        context.imageSmoothingEnabled = true
-        context.imageSmoothingQuality = "high"
-        context.drawImage(image, 0, 0, width, height)
-        return canvas.toDataURL("image/webp", quality)
-      },
-      { src, ...OUT, quality }
-    )
-    if (!url.startsWith("data:image/webp;base64,")) {
-      throw new Error("the browser did not encode WebP")
-    }
-    const bytes = Buffer.from(url.slice(url.indexOf(",") + 1), "base64")
-    if (bytes.length <= MAX_BYTES) {
-      return bytes
-    }
-  }
-  throw new Error(`the thumbnail stays over ${String(MAX_BYTES / 1024)} KB`)
 }
 
 /**

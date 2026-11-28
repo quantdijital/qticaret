@@ -15,7 +15,7 @@ const found = (query: string) => searchTheme(query, THEME, standard, t).map((hit
 
 const SWITCH = "Ziyaretçi görünümü değiştirebilsin"
 const CRUMB = "Yol izinde sayfanın kendi adı"
-const PLACE = "Yol izi başlıkla aynı satırda"
+const PLACE = "Yol izinin yeri"
 
 /** A listing page's layout: one shop-wide group of the theme, today's page by default. */
 describe("Liste sayfası in the theme panel", () => {
@@ -26,7 +26,7 @@ describe("Liste sayfası in the theme panel", () => {
     expect(screen.getByRole("combobox", { name: "Varsayılan görünüm" })).toHaveTextContent("Izgara")
     expect(screen.getByRole("switch", { name: SWITCH })).not.toBeChecked()
     expect(screen.getByRole("switch", { name: CRUMB })).toBeChecked()
-    expect(screen.getByRole("switch", { name: PLACE })).not.toBeChecked()
+    expect(screen.getByRole("combobox", { name: PLACE })).toHaveTextContent("Başlığın üstünde")
   })
 
   it("reads a draft from before the group at its defaults", () => {
@@ -59,11 +59,30 @@ describe("Liste sayfası in the theme panel", () => {
       listing_page: { ...THEME.listing_page, breadcrumb_current: "hide" },
     })
 
-    await user.click(screen.getByRole("switch", { name: PLACE }))
+    await user.click(screen.getByRole("combobox", { name: PLACE }))
+    expect((await screen.findAllByRole("option")).map((option) => option.textContent)).toEqual([
+      "Başlığın üstünde",
+      "Başlıkla aynı satırda",
+      "Gösterme",
+    ])
+    await user.click(screen.getByRole("option", { name: "Başlıkla aynı satırda" }))
     expect(onChange).toHaveBeenLastCalledWith({
       ...THEME,
       listing_page: { ...THEME.listing_page, crumbs_place: "beside" },
     })
+  })
+
+  it("turns the visible trail off, its search data kept", async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+    render(<ListingPageGroup theme={THEME} reveal={null} onChange={onChange} />)
+    await user.click(screen.getByRole("combobox", { name: PLACE }))
+    await user.click(await screen.findByRole("option", { name: "Gösterme" }))
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...THEME,
+      listing_page: { ...THEME.listing_page, crumbs_place: "none" },
+    })
+    expect(found("gösterme")).toContain("listing_page.crumbs_place")
   })
 
   it("puts the count's word in the draft, an empty one as none", async () => {

@@ -1336,6 +1336,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "Hazır görünümün tema ayarları bu mağazada kullanılamıyor.",
   "storefront_preset.layout_invalid": "Hazır görünümün sayfa düzeni bu mağazada kullanılamıyor.",
   "storefront_preset.demo_unavailable": "Demo içerik bu görünümde henüz sunulmuyor.",
+  "storefront_preset.draft_unreadable":
+    "Taslak bu sürümde açılamıyor; önce düzenleyicide taslağı geri alın, sonra stili yeniden uygulayın.",
   // adr/0064: saved looks
   "storefront_design.unknown": "Bu kayıtlı görünüm bulunamadı.",
   "storefront_design.limit_reached":

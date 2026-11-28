@@ -1,3 +1,4 @@
+import { LISTING_CRUMBS_PLACES } from "@qticaret/types"
 import { LISTING_VIEWS } from "@/features/storefront/api/theme"
 import type { FieldMeta } from "./theme-registry"
 
@@ -5,8 +6,8 @@ import type { FieldMeta } from "./theme-registry"
  * A listing page's layout (`listing_page`) as the theme panel and its
  * search know it, kept beside the registry (`theme-registry.ts`) that
  * spreads it in: the products as a grid or a list, the shopper's switch,
- * the trail's last crumb, the count's word. "liste", "ızgara", "görünüm"
- * find every one.
+ * the trail's last crumb and its place (or none), the count's word.
+ * "liste", "ızgara", "görünüm" find every one.
  */
 
 const C = "storefront.editor.theme"
@@ -26,6 +27,9 @@ const field = (
   keywords: `${P}.words`,
   ...(name === "default_view"
     ? { options: LISTING_VIEWS.map((view) => `${P}.default_view.steps.${view}`) }
+    : {}),
+  ...(name === "crumbs_place"
+    ? { options: LISTING_CRUMBS_PLACES.map((place) => `${P}.crumbs_place.steps.${place}`) }
     : {}),
 })
 

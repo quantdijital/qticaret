@@ -133,6 +133,10 @@ function productFacts(row: ProductRow): NonNullable<AdvisorFacts["product"]> {
     categories: (row.categories ?? []).filter(Boolean).length,
     primaryCategory: Boolean(row.product_extension?.primary_category_id),
     physical,
+    // A service (a tour, a lesson) and whatever is sold by date: no barcode nor brand to give
+    service:
+      row.product_extension?.kind === "service" ||
+      (row.product_extension?.booking_mode ?? "none") !== "none",
     missingDimensions:
       physical && variants.some((variant) => missingDimensions(row, variant).length > 0),
     missingAttributes: (row.attribute_template?.definitions ?? []).flatMap((definition) =>

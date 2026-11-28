@@ -40,6 +40,11 @@ describe("the storefront's draft-replacing routes", () => {
     }
   )
 
+  it("asks a person for a look's fit (owner, 2026-11-28), with no apply budget spent", () => {
+    const route = routeOf("GET", "/admin/storefront-presets/:pack/:code/fit")
+    expect(route?.middlewares).toEqual([requireUserActor])
+  })
+
   it("leaves publish and preview as they were: one body check, no actor rule of their own", () => {
     for (const path of ["/admin/storefront-layout/publish", "/admin/storefront-layout/preview"]) {
       const route = routeOf("POST", path)

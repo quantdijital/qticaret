@@ -43,11 +43,14 @@ export function ProductActions({
   product,
   onCustomize,
   save,
+  view,
 }: {
   product: ProductDetail
   onCustomize?: (() => void) | undefined
   /** The page's save (`HeaderSaveActions`), before the menu. */
   save?: ReactNode
+  /** The person's own view of the page ("Görünüm"), before the save. */
+  view?: ReactNode
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -80,6 +83,7 @@ export function ProductActions({
   return (
     <>
       <StorefrontButton product={product} />
+      {view}
       {save}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

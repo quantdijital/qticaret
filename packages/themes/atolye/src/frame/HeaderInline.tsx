@@ -95,7 +95,13 @@ export function HeaderInline({
             ...menu,
           }}
         />
-        <Wordmark name={shop.name} logo={shop.logo} large={!plain} className="mr-auto lg:mr-0" />
+        <Wordmark
+          name={shop.name}
+          logo={shop.logo}
+          logoOnDark={shop.headerBar?.overCover ? (shop.logoOnDark ?? null) : null}
+          large={!plain}
+          className="mr-auto lg:mr-0"
+        />
         <div className="hidden min-w-0 flex-1 justify-center lg:flex">
           {shop.categories.length > 0 && (
             <Aisle

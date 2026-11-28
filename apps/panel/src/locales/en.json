@@ -3931,7 +3931,13 @@
       "summary": "Summary",
       "available": "Sellable stock",
       "created": "Added",
+      "nextDeparture": "Next departure",
+      "noDeparture": "No departure planned",
+      "placesLeft": "Places left",
+      "placesLeftValue": "{{places}} · {{departures}} departures",
+      "datesLine": "Added {{created}} · Changed {{updated}}",
       "shippingHint": "Optional. These apply to variants without their own values; with none, shipping is priced by the default parcel.",
+      "aboutForm": "What is it for?",
       "publish": "Publish",
       "unpublish": "Unpublish",
       "published": "Product published.",
@@ -4129,10 +4135,11 @@
       "actions": {
         "bookings": "{{start}}: participants",
         "bookingsShort": "Participants",
-        "edit": "{{start}}: edit",
-        "close": "{{start}}: close for sale",
-        "open": "{{start}}: open for sale",
-        "cancel": "{{start}}: cancel"
+        "more": "{{start}}: actions",
+        "editShort": "Edit",
+        "closeShort": "Close for sale",
+        "openShort": "Open for sale",
+        "cancelShort": "Cancel the departure"
       },
       "bookings": {
         "title": "Participants",
@@ -4668,7 +4675,8 @@
       "yes": "Yes",
       "withdrawal": "Right of withdrawal",
       "withdrawalOut": "Excluded",
-      "withdrawalIn": "Applies"
+      "withdrawalIn": "Applies",
+      "unset": "Not set: {{names}}"
     },
     "layout": {
       "customize": "Customise page",
@@ -4688,6 +4696,15 @@
       "showHidden": "Show",
       "shownAttention": "Hidden section: shown because something in it needs attention.",
       "shownRevealed": "Hidden section: shown for this visit.",
+      "back": "Back to products",
+      "view": {
+        "button": "View",
+        "title": "What you want to see on the page",
+        "description": "Kept for you alone; a hidden section's data is not deleted.",
+        "shopHidden": "Hidden in the shop's page layout",
+        "unused": "Not used for this kind of product",
+        "reset": "Back to default"
+      },
       "parts": {
         "general": "General",
         "variants": "Variants",
@@ -5149,7 +5166,20 @@
       "autoDay": "Day {{n}}",
       "autoStep": "Step {{n}}",
       "empty": "No steps yet. Add the days or the lessons one by one; an empty program does not show on the product page.",
-      "add": "Add a step",
+      "addOf": {
+        "day": "Add a day",
+        "step": "Add a step"
+      },
+      "unitsShort": {
+        "day": "Day",
+        "step": "Step"
+      },
+      "openAll": "Open all",
+      "closeAll": "Close all",
+      "untitled": "Untitled",
+      "tagCount_one": "{{count}} included",
+      "tagCount_other": "{{count}} included",
+      "addImage": "Add a picture",
       "limit": "A program holds at most {{max}} steps.",
       "label": "Label",
       "stepTitle": "Title",
@@ -5158,7 +5188,6 @@
       "bodyPlaceholder": "What happens in this step? A short text.",
       "image": "Picture",
       "imageHint": "Optional; from the media library.",
-      "noImage": "No picture",
       "tags": "Included",
       "tagNames": {
         "breakfast": "Breakfast",
@@ -10166,7 +10195,8 @@
           "linked": "Cards with subcategories",
           "collage": "Photo collage",
           "panels": "Photo panels",
-          "icons": "Icon row"
+          "icons": "Icon row",
+          "carousel": "Sliding cards"
         },
         "related_products": {
           "grid": "Grid",
@@ -11108,8 +11138,13 @@
             "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
           },
           "crumbs_place": {
-            "label": "Breadcrumb on the title's line",
-            "hint": "On wide screens the breadcrumb sits on the right of the title's line, small and quiet. Off: on its own line above the title. On phones it is always above."
+            "label": "Breadcrumb position",
+            "hint": "Where the breadcrumb stands. On the title's line: on wide screens on the right of the title's line, small and quiet; on phones above it. Hidden: not shown on the page; the breadcrumb data for search engines does not change.",
+            "steps": {
+              "above": "Above the title",
+              "beside": "On the title's line",
+              "none": "Hidden"
+            }
           },
           "count_word": {
             "label": "Unit word in the product count",
@@ -12117,6 +12152,13 @@
           "medium": "Medium",
           "fast": "Fast"
         },
+        "autoplay_step": {
+          "label": "Autoplay step",
+          "term": "slides to scroll",
+          "page": "Page by page",
+          "card": "Card by card",
+          "hint": "While it turns by itself, whether each move goes a whole page or a single card."
+        },
         "loop": {
           "label": "Loop",
           "term": "loop",
@@ -12655,10 +12697,11 @@
         "productImage": {
           "label": "Product picture",
           "term": "product_image",
-          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one).",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one). Compact: the card no taller than today's; a short product picture across its top, the name and one star with the score under.",
           "none": "None",
           "thumb": "Small",
-          "cover": "Cover"
+          "cover": "Cover",
+          "compact": "Compact"
         }
       },
       "searchBox": {
@@ -13051,7 +13094,6 @@
     "gallery": {
       "title": "Looks",
       "description": "Choose your store's look, save it and come back to it any time. Changes stay hidden from visitors until you publish.",
-      "openEditor": "Open theme editor",
       "noAccess": "Only the shop owner can open the looks.",
       "thumbAlt": "Thumbnail of the {{name}} look",
       "sections_one": "{{count}} section",
@@ -13059,17 +13101,19 @@
       "from": "From {{name}}",
       "current": {
         "title": "Current look",
-        "liveLabel": "Live",
-        "live": "{{name}} · published {{date}}",
-        "neverLive": "Not published yet; visitors see the default look.",
-        "draftLabel": "Draft",
         "draftEdited": "{{name}}, edited",
         "draftChanged": "The draft has unpublished changes",
-        "draftSame": "The draft matches what is live",
         "newVersion": "This ready-made look has a new version. Apply it again to bring the new version into the draft.",
         "edit": "Edit",
         "save": "Save this look",
-        "full": "Saved looks are full; delete one to save another."
+        "full": "Saved looks are full; delete one to save another.",
+        "about": "The draft is the look you work on in the theme editor. Visitors see the live look until you press Publish.",
+        "notLive": "Not published yet",
+        "defaultShown": "Visitors see the default look.",
+        "liveIs": "Live: {{name}} · {{date}}",
+        "since": "since {{date}}",
+        "previewDraft": "Preview the draft in a new tab",
+        "saveShort": "Save"
       },
       "saved": {
         "title": "My saved looks ({{count}}/{{max}})",
@@ -13077,10 +13121,13 @@
         "autoNote": "The last {{max}} automatic saves are kept; they don't count toward the saved-look limit.",
         "empty": "You have no saved looks yet. Save the current look to come back to it any time.",
         "emptyAction": "Save the current look",
-        "unavailable": "Saved looks could not be loaded."
+        "unavailable": "Saved looks could not be loaded.",
+        "about": "Save your look by name and bring it back into the draft at any time. When a look goes into the draft, the draft before it is saved automatically; the last {{max}} automatic saves are kept.",
+        "namedEmpty": "No look saved by name yet.",
+        "autoTitle": "Automatic saves ({{count}})",
+        "autoLatest": "Newest: {{date}}"
       },
       "auto": {
-        "badge": "Automatic",
         "name": "{{source}}, {{date}}",
         "nameEdited": "{{source}}, {{date}}, edited",
         "own": "Your own design"
@@ -13090,10 +13137,6 @@
         "draft": "In draft",
         "edited": "edited",
         "newVersion": "New version"
-      },
-      "tone": {
-        "light": "Light",
-        "dark": "Dark"
       },
       "card": {
         "apply": "Load into draft",
@@ -13123,7 +13166,8 @@
         "applyOf": "Apply ‘{{name}}’ to the draft",
         "colors": "Colour set",
         "noPreview": "This look has no picture yet; a sketch is shown.",
-        "frameShop": "Whatever of the header and footer this look doesn't define stays yours."
+        "frameShop": "Whatever of the header and footer this look doesn't define stays yours.",
+        "sectorOf": "Made for {{sector}}"
       },
       "apply": {
         "title": "Apply ‘{{name}}’ to the draft?",
@@ -13144,7 +13188,23 @@
           "label": "Also save the current look with a name",
           "full": "Saved looks are full ({{max}}/{{max}}). An automatic save is still made."
         },
-        "confirm": "Apply to draft and edit"
+        "confirm": "Apply to draft and edit",
+        "madeFor": "This look was made for a {{sector}} shop.",
+        "styleOnly": "Only the style changes: your sections, header and footer stay as they are.",
+        "scope": {
+          "label": "What to take from the look",
+          "style": "Take its style only",
+          "styleHint": "Colours, fonts, corners, card style and the style kit come into the draft; your sections stay as they are.",
+          "full": "Take it with its layout",
+          "fullHint": "The style and the sections come in; sections with nothing to show in this shop are left out."
+        },
+        "fit": {
+          "loading": "Checking which sections have nothing to show in this shop…",
+          "unknown": "The sections could not be checked; the editor lists any left out after applying.",
+          "none": "Every section has something to show in this shop.",
+          "left_one": "{{count}} section will be left out, having nothing to show in this shop: {{names}}.",
+          "left_other": "{{count}} sections will be left out, having nothing to show in this shop: {{names}}."
+        }
       },
       "save": {
         "title": "Save look",
@@ -13173,14 +13233,21 @@
         "textKept": "The {{name}} page kept its own text; the look changed only its layout.",
         "keptPages": "The layouts you set up on your pages were kept.",
         "featureOff_one": "{{count}} section was not added: {{capabilities}} is off in this shop.",
-        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop."
+        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop.",
+        "styleApplied": "The style of ‘{{name}}’ was applied to the draft; your sections stay as they were."
       },
       "history": {
         "lead": "Older publications:",
         "link": "Theme editor › Looks › Publication history"
       },
       "pages_one": "{{count}} page",
-      "pages_other": "{{count}} pages"
+      "pages_other": "{{count}} pages",
+      "others": {
+        "title": "Other sectors",
+        "summary_one": "{{sectors}} · {{count}} look",
+        "summary_other": "{{sectors}} · {{count}} looks",
+        "description": "Looks made for other sectors. Take their style alone (colours, fonts, corners, card style) or apply them with their sections; sections with nothing to show in this shop are left out."
+      }
     },
     "pages": {
       "description": "The shop's own pages, such as About us and Contact. Click one to open it in the theme editor, where its text, sections and settings are edited.",

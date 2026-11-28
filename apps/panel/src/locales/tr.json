@@ -3931,7 +3931,13 @@
       "summary": "Özet",
       "available": "Satılabilir stok",
       "created": "Eklenme",
+      "nextDeparture": "Sıradaki kalkış",
+      "noDeparture": "Planlı kalkış yok",
+      "placesLeft": "Kalan yer",
+      "placesLeftValue": "{{places}} · {{departures}} kalkış",
+      "datesLine": "Eklendi {{created}} · Değişti {{updated}}",
       "shippingHint": "İsteğe bağlı. Varyantında ayrıca girilmemişse bu değerler geçerlidir; hiç girilmezse kargo ücreti varsayılan pakete göre hesaplanır.",
+      "aboutForm": "Ne işe yarar?",
       "publish": "Yayınla",
       "unpublish": "Yayından kaldır",
       "published": "Ürün yayınlandı.",
@@ -4129,10 +4135,11 @@
       "actions": {
         "bookings": "{{start}}: katılımcılar",
         "bookingsShort": "Katılımcılar",
-        "edit": "{{start}}: düzenle",
-        "close": "{{start}}: satışa kapat",
-        "open": "{{start}}: satışa aç",
-        "cancel": "{{start}}: iptal et"
+        "more": "{{start}}: işlemler",
+        "editShort": "Düzenle",
+        "closeShort": "Satışa kapat",
+        "openShort": "Satışa aç",
+        "cancelShort": "Kalkışı iptal et"
       },
       "bookings": {
         "title": "Katılımcılar",
@@ -4668,7 +4675,8 @@
       "yes": "Evet",
       "withdrawal": "Cayma hakkı",
       "withdrawalOut": "Dışında",
-      "withdrawalIn": "Var"
+      "withdrawalIn": "Var",
+      "unset": "Eklenmemiş: {{names}}"
     },
     "layout": {
       "customize": "Sayfayı düzenle",
@@ -4688,6 +4696,15 @@
       "showHidden": "Göster",
       "shownAttention": "Gizlenen bölüm: ilgilenilmesi gereken bir şey olduğu için gösteriliyor.",
       "shownRevealed": "Gizlenen bölüm: bu ziyaret için gösteriliyor.",
+      "back": "Ürünlere dön",
+      "view": {
+        "button": "Görünüm",
+        "title": "Sayfada görmek istedikleriniz",
+        "description": "Yalnız sizin için saklanır; gizlenen bölümün bilgileri silinmez.",
+        "shopHidden": "Mağazanın sayfa düzeninde gizli",
+        "unused": "Bu ürün türünde kullanılmıyor",
+        "reset": "Varsayılana dön"
+      },
       "parts": {
         "general": "Genel bilgiler",
         "variants": "Varyantlar",
@@ -5149,7 +5166,20 @@
       "autoDay": "{{n}}. Gün",
       "autoStep": "{{n}}. Adım",
       "empty": "Henüz adım yok. Gün gün akışı ya da ders sırasını adım adım ekleyin; boş program ürün sayfasında görünmez.",
-      "add": "Adım ekle",
+      "addOf": {
+        "day": "Gün ekle",
+        "step": "Adım ekle"
+      },
+      "unitsShort": {
+        "day": "Gün",
+        "step": "Adım"
+      },
+      "openAll": "Tümünü aç",
+      "closeAll": "Tümünü kapat",
+      "untitled": "Başlıksız",
+      "tagCount_one": "{{count}} dahil",
+      "tagCount_other": "{{count}} dahil",
+      "addImage": "Görsel ekle",
       "limit": "Program en çok {{max}} adım olabilir.",
       "label": "Etiket",
       "stepTitle": "Başlık",
@@ -5158,7 +5188,6 @@
       "bodyPlaceholder": "Bu adımda neler var? Kısa bir metin.",
       "image": "Görsel",
       "imageHint": "İsteğe bağlı; ortam kütüphanesinden.",
-      "noImage": "Görsel yok",
       "tags": "Dahil olanlar",
       "tagNames": {
         "breakfast": "Kahvaltı",
@@ -10166,7 +10195,8 @@
           "linked": "Alt kategorili kart",
           "collage": "Fotoğraflı kolaj",
           "panels": "Fotoğraf panoları",
-          "icons": "İkonlu sıra"
+          "icons": "İkonlu sıra",
+          "carousel": "Kayan kartlar"
         },
         "related_products": {
           "grid": "Izgara",
@@ -11108,8 +11138,13 @@
             "hint": "Kapalıyken yol izi bir üst sayfada biter (Ana sayfa / …); sayfanın adı zaten başlıkta yazar. Arama motorlarına giden yol izi verisi değişmez."
           },
           "crumbs_place": {
-            "label": "Yol izi başlıkla aynı satırda",
-            "hint": "Geniş ekranda yol izi (breadcrumb) başlığın satırında sağda, küçük ve soluk durur. Kapalı: başlığın üstünde ayrı satırda. Telefonda hep üsttedir."
+            "label": "Yol izinin yeri",
+            "hint": "Yol izi (breadcrumb) nerede dursun. Başlıkla aynı satırda: geniş ekranda başlığın satırında sağda, küçük ve soluk; telefonda üstte. Gösterme: sayfada görünmez, arama motorlarına giden yol izi verisi değişmez.",
+            "steps": {
+              "above": "Başlığın üstünde",
+              "beside": "Başlıkla aynı satırda",
+              "none": "Gösterme"
+            }
           },
           "count_word": {
             "label": "Ürün sayısında birim kelimesi",
@@ -12117,6 +12152,13 @@
           "medium": "Orta",
           "fast": "Hızlı"
         },
+        "autoplay_step": {
+          "label": "Kayma adımı",
+          "term": "slides to scroll",
+          "page": "Sayfa sayfa",
+          "card": "Kart kart",
+          "hint": "Kendiliğinden kayarken her seferinde bir sayfa mı yoksa tek kart mı ilerlesin."
+        },
         "loop": {
           "label": "Döngü",
           "term": "loop",
@@ -12655,10 +12697,11 @@
         "productImage": {
           "label": "Ürün görseli",
           "term": "product_image",
-          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o).",
+          "hint": "Yorumun ait olduğu ürünün görseli kartta. Yok: bugünkü kart, yalnız ürün adı. Küçük: kartın altında küçük kare görsel ve ürün adı. Kapak: kartın üstünde kısa görsel, ürün adı üstünde (müşteri fotoğrafı varsa o). Kompakt: kart bugünkünden büyümez; üstte kısa ürün görseli, altında ürün adı ve tek yıldızla puan.",
           "none": "Yok",
           "thumb": "Küçük",
-          "cover": "Kapak"
+          "cover": "Kapak",
+          "compact": "Kompakt"
         }
       },
       "searchBox": {
@@ -13051,7 +13094,6 @@
     "gallery": {
       "title": "Görünümler",
       "description": "Mağazanızın görünümünü seçin, kaydedin ve istediğiniz zaman geri dönün. Değişiklikler siz yayınlayana kadar ziyaretçilere görünmez.",
-      "openEditor": "Tema düzenleyiciyi aç",
       "noAccess": "Görünümleri yalnız mağaza sahibi açabilir.",
       "thumbAlt": "{{name}} görünümünün küçük resmi",
       "sections_one": "{{count}} bölüm",
@@ -13059,17 +13101,19 @@
       "from": "{{name}} görünümünden",
       "current": {
         "title": "Şu anki görünüm",
-        "liveLabel": "Yayında",
-        "live": "{{name}} · {{date}} tarihinde yayınlandı",
-        "neverLive": "Henüz yayınlanmadı; ziyaretçiler varsayılan görünümü görüyor.",
-        "draftLabel": "Taslak",
         "draftEdited": "{{name}}, düzenlenmiş",
         "draftChanged": "Taslakta yayınlanmamış değişiklik var",
-        "draftSame": "Taslak yayındakiyle aynı",
         "newVersion": "Bu hazır görünümün yeni sürümü var. Yeniden uygularsanız taslağa yeni sürüm gelir.",
         "edit": "Düzenle",
         "save": "Bu görünümü kaydet",
-        "full": "Adlı kayıtlar dolu; yenisi için birini silin."
+        "full": "Adlı kayıtlar dolu; yenisi için birini silin.",
+        "about": "Taslak, tema düzenleyicide üzerinde çalıştığınız görünümdür. Yayınla'ya basana kadar ziyaretçiler yayındaki görünümü görür.",
+        "notLive": "Henüz yayınlanmadı",
+        "defaultShown": "Ziyaretçiler varsayılan görünümü görüyor.",
+        "liveIs": "Yayında: {{name}} · {{date}}",
+        "since": "{{date}} tarihinden beri",
+        "previewDraft": "Taslağı yeni sekmede önizle",
+        "saveShort": "Kaydet"
       },
       "saved": {
         "title": "Kayıtlı görünümlerim ({{count}}/{{max}})",
@@ -13077,10 +13121,13 @@
         "autoNote": "Otomatik kayıtların son {{max}} tanesi tutulur; adlı kayıt sınırına sayılmaz.",
         "empty": "Henüz kayıtlı görünümünüz yok. Şu anki görünümü kaydederek istediğiniz zaman geri dönebilirsiniz.",
         "emptyAction": "Şu anki görünümü kaydet",
-        "unavailable": "Kayıtlı görünümler yüklenemedi."
+        "unavailable": "Kayıtlı görünümler yüklenemedi.",
+        "about": "Görünümünüzü adıyla kaydedip istediğiniz zaman taslağa geri alabilirsiniz. Bir görünüm taslağa alınırken önceki taslak otomatik kaydedilir; son {{max}} otomatik kayıt tutulur.",
+        "namedEmpty": "Henüz adıyla kaydettiğiniz bir görünüm yok.",
+        "autoTitle": "Otomatik kayıtlar ({{count}})",
+        "autoLatest": "En yenisi: {{date}}"
       },
       "auto": {
-        "badge": "Otomatik",
         "name": "{{source}}, {{date}}",
         "nameEdited": "{{source}}, {{date}}, düzenlenmiş",
         "own": "Kendi tasarımınız"
@@ -13090,10 +13137,6 @@
         "draft": "Taslakta",
         "edited": "düzenlenmiş",
         "newVersion": "Yeni sürüm var"
-      },
-      "tone": {
-        "light": "Açık",
-        "dark": "Koyu"
       },
       "card": {
         "apply": "Taslağa al",
@@ -13123,7 +13166,8 @@
         "applyOf": "‘{{name}}’ görünümünü taslağa uygula",
         "colors": "Renk takımı",
         "noPreview": "Bu görünümün resmi henüz yok; şema gösteriliyor.",
-        "frameShop": "Üst ve alt bilgiden bu görünümün tanımlamadığı kısım sizinki olarak kalır."
+        "frameShop": "Üst ve alt bilgiden bu görünümün tanımlamadığı kısım sizinki olarak kalır.",
+        "sectorOf": "{{sector}} için hazırlandı"
       },
       "apply": {
         "title": "‘{{name}}’ taslağa uygulansın mı?",
@@ -13144,7 +13188,23 @@
           "label": "Şimdiki görünümü adıyla da kaydet",
           "full": "Adlı kayıtlar dolu ({{max}}/{{max}}). Otomatik kayıt yine alınır."
         },
-        "confirm": "Taslağa uygula ve düzenle"
+        "confirm": "Taslağa uygula ve düzenle",
+        "madeFor": "Bu görünüm {{sector}} mağazası için hazırlandı.",
+        "styleOnly": "Yalnız stil değişir: bölümleriniz, üst ve alt bilginiz olduğu gibi kalır.",
+        "scope": {
+          "label": "Görünümden ne alınsın",
+          "style": "Yalnız stilini al",
+          "styleHint": "Renkler, yazı tipleri, köşeler, kart biçimi ve stil takımı taslağa gelir; bölümleriniz olduğu gibi kalır.",
+          "full": "Düzeniyle birlikte al",
+          "fullHint": "Stil ve bölümler gelir; bu mağazada karşılığı olmayan bölümler eklenmez."
+        },
+        "fit": {
+          "loading": "Bu mağazada karşılığı olmayan bölümler denetleniyor…",
+          "unknown": "Bölümler denetlenemedi; eklenmeyenler uygulamadan sonra düzenleyicide yazılır.",
+          "none": "Bütün bölümlerin bu mağazada karşılığı var.",
+          "left_one": "{{count}} bölüm bu mağazada karşılığı olmadığı için eklenmeyecek: {{names}}.",
+          "left_other": "{{count}} bölüm bu mağazada karşılığı olmadığı için eklenmeyecek: {{names}}."
+        }
       },
       "save": {
         "title": "Görünümü kaydet",
@@ -13173,14 +13233,21 @@
         "textKept": "{{name}} sayfasının kendi metni korundu; görünüm yalnız düzeni değiştirdi.",
         "keptPages": "Sayfalarınıza kendi kurduğunuz düzenler korundu.",
         "featureOff_one": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
-        "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı."
+        "featureOff_other": "{{count}} bölüm eklenmedi: {{capabilities}} bu mağazada kapalı.",
+        "styleApplied": "‘{{name}}’ görünümünün stili taslağa uygulandı; bölümleriniz olduğu gibi kaldı."
       },
       "history": {
         "lead": "Daha eski yayınlar:",
         "link": "Tema düzenleyici › Görünümler › Yayın geçmişi"
       },
       "pages_one": "{{count}} sayfa",
-      "pages_other": "{{count}} sayfa"
+      "pages_other": "{{count}} sayfa",
+      "others": {
+        "title": "Diğer sektörler",
+        "summary_one": "{{sectors}} · {{count}} görünüm",
+        "summary_other": "{{sectors}} · {{count}} görünüm",
+        "description": "Başka sektörler için hazırlanmış görünümler. Yalnız stilini (renkler, yazı tipleri, köşeler, kart biçimi) alabilir ya da bölümleriyle birlikte uygulayabilirsiniz; bu mağazada karşılığı olmayan bölümler eklenmez."
+      }
     },
     "pages": {
       "description": "Hakkımızda, İletişim gibi mağazanın kendi sayfaları. Bir sayfaya tıklayınca tema düzenleyicide açılır; metni, bölümleri ve ayarları orada düzenlenir.",

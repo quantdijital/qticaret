@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { DesignCard as Design } from "./api"
-import { DesignCard } from "./design-card"
+import { DesignCard, DesignRow } from "./design-card"
 import { design, summary } from "./gallery.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn())
@@ -13,12 +13,20 @@ const toastSuccess = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: toastSuccess, error: vi.fn() } }))
 
+// A named look is a card; an automatic save is a row of the folded list
 function card(look: Design, savedFull = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const onApply = vi.fn()
+  const props = { design: look, savedFull, busy: false, onApply }
   render(
     <QueryClientProvider client={client}>
-      <DesignCard design={look} savedFull={savedFull} busy={false} onApply={onApply} />
+      {look.kind === "auto" ? (
+        <ul>
+          <DesignRow {...props} />
+        </ul>
+      ) : (
+        <DesignCard {...props} />
+      )}
     </QueryClientProvider>
   )
   return { onApply }
@@ -38,7 +46,7 @@ describe("DesignCard", () => {
     toastSuccess.mockReset()
   })
 
-  it("names a look, its date, where it came from and where it stands", async () => {
+  it("names a look, its date, where it came from and where it stands, said once", async () => {
     const user = userEvent.setup()
     const { onApply } = card(
       design("sfd_1", { in_draft: true, edited: true, live: true, summary: summary() })
@@ -46,9 +54,9 @@ describe("DesignCard", () => {
 
     const article = screen.getByRole("article", { name: "Bayram vitrini" })
     expect(within(article).getByText("17 Kas 2026 14:20 · Sade görünümünden")).toBeVisible()
+    // Live wins: where the draft stands is the current look's bar to say
     expect(within(article).getByText("Yayında")).toBeVisible()
-    expect(within(article).getByText("Taslakta, düzenlenmiş")).toBeVisible()
-    expect(within(article).queryByText("Otomatik")).toBeNull()
+    expect(within(article).queryByText(/Taslakta/)).toBeNull()
 
     await user.click(
       within(article).getByRole("button", { name: "‘Bayram vitrini’ görünümünü taslağa al" })
@@ -84,10 +92,10 @@ describe("DesignCard", () => {
     card(AUTO)
 
     const name = "Sade, 17 Kas 2026 14:20, düzenlenmiş"
-    const article = screen.getByRole("article", { name })
-    expect(article).toContainElement(screen.getByText("Otomatik"))
+    const row = screen.getByRole("listitem", { name })
+    expect(within(row).getByText("6 bölüm")).toBeVisible()
     // Its date and time once, in its name: no date line under it repeats them
-    expect(article.textContent.match(/17 Kas 2026/g)).toHaveLength(1)
+    expect(row.textContent.match(/17 Kas 2026/g)).toHaveLength(1)
     await user.click(screen.getByRole("button", { name: `‘${name}’ için işlemler` }))
     await user.click(await screen.findByRole("menuitem", { name: "Adıyla sakla" }))
     const dialog = await screen.findByRole("dialog", { name: "Adıyla sakla" })

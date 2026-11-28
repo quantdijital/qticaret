@@ -40,7 +40,7 @@ test.describe("shipping settings", () => {
       "Kargo etiketi",
       "Kargo sınıfları",
     ]) {
-      await expect(advanced.getByRole("button", { name })).toBeVisible()
+      await expect(advanced.getByRole("button", { name, exact: true })).toBeVisible()
     }
     await expect(advanced.getByText(/^Kargoya verme \d/)).toBeVisible()
     await guard.assertHealthy()

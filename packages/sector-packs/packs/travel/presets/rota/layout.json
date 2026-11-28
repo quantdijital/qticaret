@@ -67,7 +67,7 @@
       },
       "card_variant": null,
       "scroller": {
-        "desktop": "five",
+        "desktop": "four",
         "mobile": "peek",
         "arrows": "always",
         "arrow_style": "round",
@@ -95,10 +95,10 @@
       "starts_at": null,
       "ends_at": null,
       "look": {
-        "space_outer": null,
-        "space_below": null,
+        "space_outer": "small",
+        "space_below": "small",
         "space_inner": null,
-        "ground": "page",
+        "ground": null,
         "align": "center",
         "width": null
       },
@@ -112,7 +112,7 @@
         {
           "value": "15",
           "label": "Yıllık deneyim",
-          "text": null
+          "text": "2011'den beri aynı ekiple."
         },
         {
           "value": "4 mevsim",
@@ -138,7 +138,7 @@
       "look": {
         "space_outer": null,
         "space_below": null,
-        "space_inner": "large",
+        "space_inner": "medium",
         "ground": "stage",
         "align": "center",
         "width": null
@@ -156,7 +156,7 @@
         }
       ],
       "columns": 3,
-      "height": "medium",
+      "height": "high",
       "lead": "off",
       "links": 0,
       "show_count": false,

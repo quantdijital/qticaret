@@ -12,6 +12,7 @@
  * `@qticaret/types/section-categories` subpath, which Turbopack resolves).
  */
 import type { SectionIcon } from "./section-icons.js"
+import type { ScrollerSettings } from "./section-scroller.js"
 
 export const CATEGORY_CARD_SETTINGS = {
   /** Cards in a row on a wide screen; a tablet shows two. */
@@ -181,6 +182,24 @@ export interface StoreCategoriesIcons {
    * the picture or initial. Absent while none is written (an older backend too).
    */
   category_icons_by_handle?: Record<string, SectionIcon>
+}
+
+/**
+ * The `carousel` variant: the categories named (else the top ones) as
+ * picture cards, each its picture with its name over the card's foot (its
+ * count under it while `show_count` is on), in one row that slides with the
+ * scroller kit. `scroller` is the kit's settings (read with
+ * `scrollerSettingsOf`: absent or off the list, the default).
+ */
+export interface StoreCategoriesCarousel {
+  variant: "carousel"
+  scroller?: ScrollerSettings
+  /**
+   * The categories by handle, in order (a preset's: it cannot know a shop's
+   * ids), read while no id is named: the top ones narrowed to these.
+   * Absent while none is written.
+   */
+  category_handles?: string[]
 }
 
 /** The icon row's settings as a reader takes them: one missing or off the list reads as its default. */

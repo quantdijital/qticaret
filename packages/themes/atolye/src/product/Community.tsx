@@ -145,6 +145,12 @@ export function Community({
       <SignIn href={view.loginPath} label={t("product.question_sign_in")} wide={wide} />
     )
   const rated = reviews.average !== null && reviews.count > 0 && reviews.items.length > 0
+  const reviewsHeading = (
+    <h2 id="degerlendirmeler-baslik" className="text-section">
+      {t("product.reviews")}
+      {reviews.count > 0 && <span className="tabular"> ({reviews.count})</span>}
+    </h2>
+  )
   return (
     <div className="flex flex-col gap-(--section-gap)">
       <section
@@ -152,12 +158,9 @@ export function Community({
         aria-labelledby="degerlendirmeler-baslik"
         className="flex scroll-mt-40 flex-col gap-6 lg:gap-8"
       >
-        <h2 id="degerlendirmeler-baslik" className="text-section">
-          {t("product.reviews")}
-          {reviews.count > 0 && <span className="tabular"> ({reviews.count})</span>}
-        </h2>
         {rated && reviews.average !== null ? (
           <ReviewList
+            heading={reviewsHeading}
             average={ratingText(reviews.average)}
             averageLabel={t("product.average", { value: ratingText(reviews.average) })}
             countText={t("reviews.count", { count: reviews.count })}
@@ -168,12 +171,15 @@ export function Community({
             words={reviewListWords(t)}
           />
         ) : (
-          <Empty
-            icon={<Star className="size-6" aria-hidden="true" strokeWidth={1.75} />}
-            title={t("product.reviews_empty")}
-            text={t("product.reviews_empty_text")}
-            action={write(false)}
-          />
+          <>
+            {reviewsHeading}
+            <Empty
+              icon={<Star className="size-6" aria-hidden="true" strokeWidth={1.75} />}
+              title={t("product.reviews_empty")}
+              text={t("product.reviews_empty_text")}
+              action={write(false)}
+            />
+          </>
         )}
       </section>
 

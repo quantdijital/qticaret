@@ -1,7 +1,12 @@
 import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
-import { LISTING_ALL_TITLE_MAX, LISTING_COUNT_WORD_MAX, listingPageOf } from "@qticaret/types"
+import {
+  LISTING_ALL_TITLE_MAX,
+  LISTING_COUNT_WORD_MAX,
+  LISTING_CRUMBS_PLACES,
+  listingPageOf,
+} from "@qticaret/types"
 import type { ListingPageSettings } from "@qticaret/types"
 import { LISTING_VIEWS } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -30,8 +35,9 @@ interface ListingPageGroupProps {
 /**
  * "Liste sayfası": how the shop's listing pages (all products, a
  * category, a brand) lay out their products, shop-wide: a grid or one to
- * a row by default, whether the shopper may switch, and whether the trail
- * ends with the page itself, the word after the count ("24 tur") and the
+ * a row by default, whether the shopper may switch, whether the trail
+ * ends with the page itself and where it stands (above the title, on its
+ * line, or not drawn), the word after the count ("24 tur") and the
  * all-products page's title ("Tüm turlar").
  * Every default is today's page; a draft from before the group reads at
  * its defaults.
@@ -87,14 +93,16 @@ export function ListingPageGroup({ theme, reveal, onChange }: ListingPageGroupPr
           set({ breadcrumb_current: on ? "show" : "hide" })
         }}
       />
-      <SwitchRow
+      <ChoiceSelect
         id={place.target}
         label={t(place.label)}
-        hint={t(`${P}.crumbs_place.hint`)}
-        checked={page.crumbs_place === "beside"}
-        onChange={(on) => {
-          set({ crumbs_place: on ? "beside" : "above" })
+        value={page.crumbs_place}
+        options={LISTING_CRUMBS_PLACES}
+        onChange={(value) => {
+          set({ crumbs_place: value })
         }}
+        render={(option) => t(`${P}.crumbs_place.steps.${option}`)}
+        hint={t(`${P}.crumbs_place.hint`)}
       />
       <Field label={t(word.label)} htmlFor={word.target} hint={t(`${P}.count_word.hint`)}>
         <Input

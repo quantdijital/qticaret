@@ -34,11 +34,11 @@
         }
       ],
       "image": {
-        "$image": "images/kapak-uzungol.webp",
-        "alt": "Ormanlı yamaçlar arasında sisli mavi tonlarla uzanan dağ vadisi ve önünde sakin bir göl"
+        "$image": "images/kapak-uzungol-yayla.webp",
+        "alt": "Bulutlu ormanlı dağların arasında Uzungöl, kıyısındaki kasaba ve yeşil yayla evleri"
       },
       "action": "both",
-      "search_position": "inside",
+      "search_position": "overlap",
       "height": "screen",
       "scrim": "light",
       "align": "start",
@@ -70,14 +70,17 @@
       "scroller": {
         "desktop": "four",
         "mobile": "peek",
-        "arrows": "hidden",
+        "arrows": "always",
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
-        "autoplay": "off",
+        "autoplay": "on",
         "speed": "medium",
-        "loop": "off",
-        "drag": "on"
+        "loop": "on",
+        "drag": "on",
+        "focus": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
       }
     },
     {
@@ -114,22 +117,81 @@
       "category_handles": ["macera", "plaj", "doga", "kultur", "balayi", "aile"]
     },
     {
-      "id": "geziyazilari",
-      "type": "posts",
+      "id": "vadikategoriler",
+      "type": "categories",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "intro_panel",
-      "title": "Yolculuğa ilham veren notlar",
-      "limit": 2,
-      "eyebrow": "Gezi yazıları",
-      "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
-      "panel_tone": "tint",
-      "ornament": "leaves",
-      "cover_ratio": "wide",
-      "link": {
-        "$href": "/blog",
-        "label": "Tüm yazılar"
+      "variant": "carousel",
+      "title": "Popüler *kategoriler*",
+      "category_ids": [],
+      "category_handles": [
+        "kapadokya-turlari",
+        "ege-ve-akdeniz-turlari",
+        "doga-ve-trekking",
+        "kultur-turlari",
+        "gunubirlik-turlar",
+        "gemi-turlari",
+        "yurt-disi-turlar"
+      ],
+      "show_count": true,
+      "more": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_position": "head",
+        "autoplay": "on",
+        "autoplay_step": "card",
+        "loop": "on",
+        "play_button": "off"
+      }
+    },
+    {
+      "id": "vadikalkislar",
+      "type": "departures",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yakında *yola çıkanlar*",
+      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli.",
+      "source": {
+        "kind": "all"
+      },
+      "limit": 3,
+      "layout": "cards"
+    },
+    {
+      "id": "vadidoga",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Doğa ve *yürüyüş* rotaları",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:doga-ve-trekking"
+        }
+      },
+      "limit": 8,
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm rotalar"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "on"
       }
     },
     {
@@ -173,6 +235,50 @@
       "text_position": "middle_left",
       "overlay": "none",
       "button_style": "solid"
+    },
+    {
+      "id": "vadiyorumlar",
+      "type": "reviews",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Gezginler *ne diyor*",
+      "limit": 8,
+      "variant": "carousel",
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "on",
+        "speed": "medium",
+        "loop": "on",
+        "drag": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
+      },
+      "product_image": "compact"
+    },
+    {
+      "id": "geziyazilari",
+      "type": "posts",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "intro_panel",
+      "title": "Yolculuğa ilham veren notlar",
+      "limit": 2,
+      "eyebrow": "Gezi yazıları",
+      "intro": "Rota önerileri, mevsim notları ve yolda öğrendiklerimiz. Gitmeden önce okuyun, giderken yanınıza alın.",
+      "panel_tone": "tint",
+      "ornament": "leaves",
+      "cover_ratio": "wide",
+      "link": {
+        "$href": "/blog",
+        "label": "Tüm yazılar"
+      }
     },
     {
       "id": "rakamlarlavadi",
@@ -273,7 +379,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "accordion",
-      "title": "Gün gün yolculuk"
+      "title": "Yolculuk planı"
     },
     {
       "id": "vadibenzer",

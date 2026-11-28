@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Paintbrush, Save } from "lucide-react"
-import { useState } from "react"
+import { Eye, Paintbrush, Save } from "lucide-react"
+import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { InfoTip, TitleTip } from "@qticaret/admin-ui/patterns/info-tip"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
@@ -16,6 +16,8 @@ import { draftSketch } from "./draft-summary"
 import { hasNewVersion, isLook } from "./families"
 import { LookFacts } from "./look-facts"
 import { SaveDesignDialog } from "./name-dialog"
+import { PresetPicture } from "./preset-card"
+import { useDraftPreview } from "./use-draft-preview"
 
 const G = "storefront.gallery.current"
 
@@ -26,26 +28,106 @@ interface CurrentLookCardProps {
   savedFull: boolean
 }
 
+/** Where the design stands, said once: live and the same, waiting to be published, or never live. */
+function Standing({ gallery, liveName }: { gallery: DesignGallery; liveName: string }) {
+  const { t } = useTranslation()
+  const { draft, live } = gallery.current
+  if (!(live.revision > 0 && live.published_at)) {
+    return (
+      <>
+        <StatusBadge tone="neutral">{t(`${G}.notLive`)}</StatusBadge>
+        <span>{t(`${G}.defaultShown`)}</span>
+      </>
+    )
+  }
+  const date = formatDateTime(live.published_at)
+  return draft.has_changes ? (
+    <>
+      <StatusBadge tone="warning">{t(`${G}.draftChanged`)}</StatusBadge>
+      <span>{t(`${G}.liveIs`, { name: liveName, date })}</span>
+    </>
+  ) : (
+    <>
+      <StatusBadge tone="success">{t("storefront.gallery.badge.live")}</StatusBadge>
+      <span>{t(`${G}.since`, { date })}</span>
+    </>
+  )
+}
+
 /**
- * "Şu anki görünüm": the draft as the editor holds it, drawn; what is
- * live and since when; whether the draft waits to be published; a newer
- * version of the ready-made look it came from. Edit it, or keep it.
+ * "Şu anki görünüm" in one bar: the draft's picture (the ready-made
+ * look's own when the draft came from one, else drawn from the draft),
+ * its name, where it stands, its faces and size; preview it as the
+ * storefront draws it, edit it, or keep it.
  */
 export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCardProps) {
   const { t } = useTranslation()
+  const titleId = useId()
   const layout = useQuery(layoutQuery())
+  const preview = useDraftPreview()
   const [saving, setSaving] = useState(false)
   const { draft, live } = gallery.current
   const draftName = lookName(t, draft, presets, gallery.designs)
   const liveName = lookName(t, live, presets, gallery.designs)
-  const source = draft.design_id ? null : presets.find((each) => isLook(each, draft.preset))
-  const newer = source !== undefined && source !== null && hasNewVersion(source)
+  const source = draft.design_id ? undefined : presets.find((each) => isLook(each, draft.preset))
+  const newer = source !== undefined && hasNewVersion(source)
   const sketch = layout.data ? draftSketch(layout.data.draft) : null
+  const title = t(`${G}.title`)
   return (
-    <SectionCard
-      title={t(`${G}.title`)}
-      action={
-        <>
+    <section
+      aria-labelledby={titleId}
+      className="@container flex min-w-0 flex-col rounded-lg border bg-card p-3 text-card-foreground shadow-card"
+    >
+      <div className="flex flex-col gap-3 @xl:flex-row @xl:items-center">
+        {/* The picture small beside the words, a phone too: the bar stays one glance */}
+        <div className="flex min-w-0 flex-1 items-start gap-3 @xl:items-center">
+          <div className="w-28 shrink-0 @md:w-44">
+            {source?.preview_url ? (
+              <PresetPicture preset={source} />
+            ) : sketch ? (
+              <DesignThumb summary={sketch} />
+            ) : (
+              <Skeleton className="aspect-[16/10] w-full rounded-md" />
+            )}
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+            <div className="flex items-center gap-1.5">
+              <h2 id={titleId} className="text-xs font-medium text-muted-foreground">
+                {title}
+              </h2>
+              <TitleTip title={title} hint={t(`${G}.about`)} className="h-4" />
+            </div>
+            <p className="text-[15px] leading-6 font-semibold break-words">
+              {draft.edited ? t(`${G}.draftEdited`, { name: draftName }) : draftName}
+            </p>
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <Standing gallery={gallery} liveName={liveName} />
+            </p>
+            {sketch ? <LookFacts summary={sketch} /> : null}
+            {newer ? (
+              <span className="flex items-center gap-1.5">
+                <StatusBadge tone="info">{t("storefront.gallery.badge.newVersion")}</StatusBadge>
+                <InfoTip
+                  name={t("storefront.gallery.badge.newVersion")}
+                  hint={t(`${G}.newVersion`)}
+                />
+              </span>
+            ) : null}
+            {savedFull ? <p className="text-xs text-muted-foreground">{t(`${G}.full`)}</p> : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2 @xl:flex-col @xl:items-stretch @3xl:flex-row">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            disabled={preview.opening}
+            aria-label={t(`${G}.previewDraft`)}
+            onClick={() => void preview.open()}
+          >
+            <Eye />
+            {t("storefront.gallery.presets.preview")}
+          </Button>
           <Button asChild variant="outline" size="sm">
             <Link to="/storefront/editor">
               <Paintbrush />
@@ -57,61 +139,15 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
             size="sm"
             variant="outline"
             disabled={savedFull}
+            aria-label={t(`${G}.save`)}
             title={savedFull ? t(`${G}.full`) : undefined}
             onClick={() => {
               setSaving(true)
             }}
           >
             <Save />
-            {t(`${G}.save`)}
+            {t(`${G}.saveShort`)}
           </Button>
-        </>
-      }
-    >
-      {/* Side by side once the card has room for both (the menu beside it at a tablet) */}
-      <div className="@container">
-        <div className="flex flex-col gap-4 @xl:flex-row @xl:items-start">
-          <div className="w-full shrink-0 @xl:w-72">
-            {sketch ? (
-              <DesignThumb summary={sketch} />
-            ) : (
-              <Skeleton className="aspect-[16/10] w-full rounded-md" />
-            )}
-          </div>
-          {/* Only the two name / value pairs are the list: the rest are notes beside it */}
-          <div className="flex min-w-0 flex-1 flex-col gap-3 text-sm">
-            <dl className="flex flex-col gap-3">
-              <div className="flex flex-col gap-0.5">
-                <dt className="text-xs text-muted-foreground">{t(`${G}.liveLabel`)}</dt>
-                <dd className="font-medium">
-                  {live.revision > 0 && live.published_at
-                    ? t(`${G}.live`, { name: liveName, date: formatDateTime(live.published_at) })
-                    : t(`${G}.neverLive`)}
-                </dd>
-              </div>
-              <div className="flex flex-col gap-1">
-                <dt className="text-xs text-muted-foreground">{t(`${G}.draftLabel`)}</dt>
-                <dd className="flex flex-col items-start gap-1.5">
-                  <span className="font-medium">
-                    {draft.edited ? t(`${G}.draftEdited`, { name: draftName }) : draftName}
-                  </span>
-                  <StatusBadge tone={draft.has_changes ? "warning" : "success"}>
-                    {t(draft.has_changes ? `${G}.draftChanged` : `${G}.draftSame`)}
-                  </StatusBadge>
-                </dd>
-              </div>
-            </dl>
-            {newer ? (
-              <div className="flex flex-col items-start gap-1">
-                <StatusBadge tone="info">{t("storefront.gallery.badge.newVersion")}</StatusBadge>
-                <p className="text-[13px] leading-5 text-muted-foreground">
-                  {t(`${G}.newVersion`)}
-                </p>
-              </div>
-            ) : null}
-            {sketch ? <LookFacts summary={sketch} /> : null}
-            {savedFull ? <p className="text-xs text-muted-foreground">{t(`${G}.full`)}</p> : null}
-          </div>
         </div>
       </div>
       <SaveDesignDialog
@@ -119,6 +155,6 @@ export function CurrentLookCard({ gallery, presets, savedFull }: CurrentLookCard
         onOpenChange={setSaving}
         initial={suggestedName(t, lookSource(t, draft, presets, gallery.designs))}
       />
-    </SectionCard>
+    </section>
   )
 }

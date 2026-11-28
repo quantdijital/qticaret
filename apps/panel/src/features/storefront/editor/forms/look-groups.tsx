@@ -75,12 +75,16 @@ export function FrameGroup({ section, group, reveal, onChange }: GroupProps) {
 export function OtherGroup({ section, reveal, onChange }: Omit<GroupProps, "group">) {
   const { t } = useTranslation()
   const strip = section.type === "marquee" ? section : null
-  // A product rail's, the related products' or the reviews' carousel (adr/0077 §10)
+  // A product rail's, the related products', the reviews' (adr/0077 §10) or the categories' carousel
   const rail =
-    section.type === "products" || section.type === "related_products" || section.type === "reviews"
+    section.type === "products" ||
+    section.type === "related_products" ||
+    section.type === "reviews" ||
+    section.type === "categories"
       ? section
       : null
-  const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
+  const carousel = rail?.variant === "carousel" ? rail : null
+  const scroller = carousel ? scrollerSettingsOf(carousel.scroller) : null
   const slider = turnsAsSlider(section) ? section : null
   if (!strip && !scroller && !slider) {
     return null
@@ -98,13 +102,13 @@ export function OtherGroup({ section, reveal, onChange }: Omit<GroupProps, "grou
       {strip ? (
         <MarqueeSettings section={strip} settings={MARQUEE_OTHER_SETTINGS} onChange={onChange} />
       ) : null}
-      {rail && scroller ? (
+      {carousel && scroller ? (
         <ScrollerFields
           value={scroller}
           settings={SCROLLER_OTHER}
-          fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
+          fieldId={(setting) => FIELD_IDS.scroller(carousel.id, setting)}
           onChange={(next) => {
-            onChange({ ...rail, scroller: next })
+            onChange({ ...carousel, scroller: next })
           }}
         />
       ) : null}

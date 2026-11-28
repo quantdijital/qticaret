@@ -4,6 +4,7 @@ import type {
   CategoryIconsStep,
   FooterBarStep,
   PaymentBadge,
+  ScrollerSettings,
   SectionIcon,
 } from "@qticaret/types"
 
@@ -54,6 +55,14 @@ export interface CategoriesIconsFields {
    * read after `category_icons`. The panel writes by id and keeps these as they are.
    */
   category_icons_by_handle?: Record<string, SectionIcon>
+}
+
+/** The sliding cards' own fields (`carousel`): the scroller kit's settings, filled on reading. */
+export interface CategoriesCarouselFields {
+  variant: "carousel"
+  scroller?: ScrollerSettings
+  /** The categories by handle, a preset's: read while no id is named. The panel keeps them as they are. */
+  category_handles?: string[]
 }
 
 /** The footer's settings, the same in every footer variant. */

@@ -28,6 +28,8 @@ export function preset(code: string, overrides: Partial<PresetCard> = {}): Prese
     tone: "light",
     family: code,
     swatch: null,
+    sector: { code: "general", name: "Genel" },
+    own: true,
     summary: summary({ preset: { pack: "general", code, version: 1 } }),
     has_menus: false,
     has_demo: false,

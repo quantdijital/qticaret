@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { SwitchName } from "./hint-parts"
 
 interface GiftCardFieldProps {
   checked: boolean
@@ -20,14 +21,12 @@ export function GiftCardField({ checked, onCheckedChange, failure }: GiftCardFie
   return (
     <div className="flex flex-col gap-3 border-t pt-4">
       <div className="flex items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <label htmlFor="catalog-gift-card" className="text-sm font-medium">
-            {t("products.catalog.giftCard")}
-          </label>
-          <span id="catalog-gift-card-hint" className="text-[13px] text-muted-foreground">
-            {t("products.catalog.giftCardHint")}
-          </span>
-        </div>
+        <SwitchName
+          htmlFor="catalog-gift-card"
+          label={t("products.catalog.giftCard")}
+          hint={t("products.catalog.giftCardHint")}
+          hintId="catalog-gift-card-hint"
+        />
         <Switch
           id="catalog-gift-card"
           aria-describedby="catalog-gift-card-hint"
