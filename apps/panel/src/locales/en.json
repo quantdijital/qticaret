@@ -15356,7 +15356,8 @@
       "used": "This link was already used. Each link opens once; get a new one from the control plane.",
       "disabled": "The shop's owner has turned support access off. Ask the owner to turn it on.",
       "invalid": "This link is not valid for this shop.",
-      "failed": "Something went wrong. Try again in a moment."
+      "failed": "Something went wrong. Try again in a moment.",
+      "noOwner": "The shop's owner has not joined the panel yet. Support cannot sign in until the owner accepts the invitation."
     },
     "banner": {
       "text": "You are signed in as platform support ({{name}})",

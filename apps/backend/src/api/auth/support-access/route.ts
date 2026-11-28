@@ -5,6 +5,8 @@ import { errorSummary, logger } from "../../../lib/logging"
 import { checkSupportGrant } from "../../../lib/support-access/grant"
 import { sessionOfGrant } from "../../../lib/support-access/session"
 import { recordSupportEvent, startSupportSessionWorkflow } from "../../../workflows/support-access"
+import { STAFF_ROLES_MODULE } from "../../../modules/staff-roles"
+import type StaffRolesModuleService from "../../../modules/staff-roles/service"
 import { SESSION_SIGNED_IN_AT } from "../../http/sign-in-epoch"
 import { factsOf, supportEnabled } from "../../http/support-guard"
 
@@ -17,6 +19,7 @@ const STATUS_OF: Readonly<Record<string, number>> = {
   "support.grant_expired": 401,
   "support.disabled": 403,
   "support.grant_used": 409,
+  "support.no_owner": 409,
 }
 
 interface BrowserSession {
@@ -93,6 +96,13 @@ export async function POST(
   const { grant } = checked
   if (!(await supportEnabled(req))) {
     await refuse("support.disabled", grant.grant_id)
+    return
+  }
+  // A shop whose owner has not joined yet takes no support: no one could see or end the
+  // session, and nothing must claim the first owner's place (security review H-A)
+  const hasStaff = await req.scope.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).hasStaff()
+  if (!hasStaff) {
+    await refuse("support.no_owner", grant.grant_id)
     return
   }
   let session

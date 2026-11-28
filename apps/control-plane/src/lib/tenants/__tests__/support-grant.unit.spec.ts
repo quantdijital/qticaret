@@ -7,6 +7,7 @@ import {
   supportGrantDocumentSchema,
 } from "@qticaret/types/control-plane"
 import type { SupportGrantDocument } from "@qticaret/types/control-plane"
+import { FLEET_MODULE } from "../../../modules/fleet"
 import { PROVISIONING_MODULE } from "../../../modules/provisioning"
 import { TENANTS_MODULE } from "../../../modules/tenants"
 import type { TenantRecord } from "../../../modules/tenants/types"
@@ -31,8 +32,11 @@ const signer = signerFromPrivateKey(privateKey)
 const tenant = (status: TenantRecord["status"]): TenantRecord =>
   ({ id: "ten_01SHOP", slug: "bicak", name: "Bıçak", status }) as TenantRecord
 
-const container = (port: number | null) => ({
+const container = (port: number | null, staff: number | null = 1) => ({
   resolve: (name: string) => {
+    if (name === FLEET_MODULE) {
+      return { latestUsage: () => Promise.resolve(staff === null ? null : { staff }) }
+    }
     if (name === PROVISIONING_MODULE) {
       return { portOf: () => Promise.resolve(port) }
     }
@@ -110,6 +114,21 @@ describe("the support grant (adr/0061 Ek 2026-11-28, Karar 7)", () => {
     expect(TENANT_STATUSES.filter(supportAllowed)).toEqual(["active", "restricted", "suspended"])
   })
 
+  it("warns when the shop's last report counted no staff: its owner has not joined (review H-A)", async () => {
+    const issue = (staff: number | null) =>
+      issueSupportGrant(container(9200, staff), {
+        tenant: tenant("active"),
+        operator: OPERATOR,
+        reason: REASON,
+        minutes: 15,
+        now: NOW,
+        sign: (doc: SupportGrantDocument) =>
+          Promise.resolve(signDocument(SUPPORT_GRANT_PURPOSE, doc, signer)),
+      })
+    expect((await issue(0)).owner_pending).toBe(true)
+    expect((await issue(null)).owner_pending).toBe(false)
+  })
+
   it("signs it so the shop verifies it with the published key, and only as a support grant", async () => {
     const issued = await issueSupportGrant(container(9200), {
       tenant: tenant("active"),
@@ -121,6 +140,7 @@ describe("the support grant (adr/0061 Ek 2026-11-28, Karar 7)", () => {
         Promise.resolve(signDocument(SUPPORT_GRANT_PURPOSE, doc, signer)),
     })
     expect(issued.url.startsWith("http://localhost:10200/support#grant=")).toBe(true)
+    expect(issued.owner_pending).toBe(false)
     expect(issued.expires_at).toBe(new Date(NOW + 30 * 60_000).toISOString())
     const grant = decode(issued.url)
     expect(grant.document.grant_id).toBe(issued.grant_id)

@@ -15356,7 +15356,8 @@
       "used": "Bu bağlantı daha önce kullanıldı. Her bağlantı yalnız bir kez açılır; üst panelden yenisini alın.",
       "disabled": "Mağaza sahibi destek erişimini kapatmış. Açması için mağaza sahibiyle görüşün.",
       "invalid": "Bu bağlantı bu mağaza için geçerli değil.",
-      "failed": "Bir sorun oldu. Birazdan yeniden deneyin."
+      "failed": "Bir sorun oldu. Birazdan yeniden deneyin.",
+      "noOwner": "Mağaza sahibi henüz panele katılmadı. Sahip davetini kabul edene kadar destek girişi yapılamaz."
     },
     "banner": {
       "text": "Platform desteği olarak giriş yaptınız ({{name}})",

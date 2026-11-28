@@ -11,7 +11,6 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     expect(allowed("POST", "/admin/storefront-designs/apply")).toBe(true)
     expect(allowed("GET", "/admin/storefront-presets")).toBe(true)
     expect(allowed("POST", "/admin/storefront-layout/draft")).toBe(true)
-    expect(allowed("POST", "/admin/platform-settings/store")).toBe(true)
     expect(allowed("POST", "/admin/platform-settings/theme")).toBe(true)
     expect(allowed("GET", "/admin/orders")).toBe(true)
     expect(allowed("GET", "/admin/staff/me")).toBe(true)
@@ -72,8 +71,38 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     ["POST", "/admin/payment-links"],
     ["POST", "/admin/bulk-messages/bm_1/send"],
     ["POST", "/admin/legal-documents/terms/publish"],
+    // Security review M-A
+    ["POST", "/admin/orders/order_1/bank-transfer/confirm"],
+    ["POST", "/admin/payment-collections/paycol_1/mark-as-paid"],
+    ["POST", "/admin/draft-orders/order_1/convert-to-order"],
+    ["POST", "/admin/wholesale/accounts/wacc_1/password"],
+    ["GET", "/admin/wholesale/accounts"],
+    ["POST", "/admin/messaging/customer-messages/order.placed"],
+    ["POST", "/admin/platform-settings/store"],
+    ["POST", "/admin/platform-settings/notifications"],
+    ["POST", "/admin/promotions"],
+    ["POST", "/admin/promotions/promo_1"],
+    ["GET", "/admin/fraud/blocks"],
+    ["POST", "/admin/fraud/blocks"],
+    // Security review M-B: not on the allow-list
+    ["POST", "/admin/orders/order_1"],
+    ["POST", "/admin/orders/order_1/cancel"],
+    ["POST", "/admin/customers/cus_1"],
+    ["POST", "/admin/customers"],
+    ["GET", "/admin/reports/sales"],
+    ["POST", "/admin/returns"],
+    ["GET", "/admin/a-route-nobody-listed"],
+    ["POST", "/admin/platform-settings/returns"],
+    ["GET", "/admin/platform-settings/bank_transfer"],
   ])("refuses %s %s", (method, path) => {
     expect(allowed(method, path)).toBe(false)
+  })
+
+  it("reads customers a page at a time (security review L3)", () => {
+    expect(decideSupport("GET", "/admin/customers", { pageSize: 50 }).allowed).toBe(true)
+    expect(decideSupport("GET", "/admin/customers", {}).allowed).toBe(true)
+    expect(decideSupport("GET", "/admin/customers", { pageSize: 51 }).allowed).toBe(false)
+    expect(decideSupport("GET", "/admin/customers", { pageSize: Number.NaN }).allowed).toBe(false)
   })
 
   it("starts only the jobs on its list: exports of customers and orders are refused", () => {
@@ -98,7 +127,7 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     const can = supportCapabilities()
     expect(can.catalog).toBe(true)
     expect(can.looks).toBe(true)
-    expect(can.settings).toBe(true)
+    expect(can.settings).toBe(false)
     expect(can.staff).toBe(false)
     expect(can.team).toBe(false)
     expect(can.accounts).toBe(false)
@@ -117,12 +146,6 @@ describe("every owner-only and private route is decided for support (security re
     "/admin/storefront-designs*",
     "/admin/storefront-presets*",
     "/admin/sample-catalog*",
-    "/admin/wholesale*",
-    "/admin/fraud/blocks*",
-    "/admin/ai/usage",
-    "/admin/ai/acceptance",
-    "/admin/ai/credits*",
-    "/admin/ai/guidance*",
     "/admin/ai/suggestions",
     "/admin/ai/seo-fill*",
   ]

@@ -17,7 +17,7 @@ import type {
 } from "@qticaret/types/control-plane"
 import type { DocumentSignature } from "@qticaret/server-kit"
 import type { TenantRecord } from "../../modules/tenants/types"
-import { provisioningIn, tenantsIn } from "../../workflows/modules"
+import { fleetIn, provisioningIn, tenantsIn } from "../../workflows/modules"
 import { shopPanelOrigin } from "../provisioning/invite-link"
 import { provisioner } from "../provisioning/provider"
 import { ProvisioningError } from "../provisioning/provisioner"
@@ -128,6 +128,12 @@ export interface IssuedSupportGrant {
   url: string
   grant_id: string
   expires_at: string
+  /**
+   * The shop's last usage report counted no staff: its owner has not joined
+   * yet, and the shop refuses support until one has (`support.no_owner`,
+   * security review H-A). A warning only: the report is up to an hour old.
+   */
+  owner_pending: boolean
 }
 
 /**
@@ -159,9 +165,11 @@ export async function issueSupportGrant(
   const signature = await (
     input.sign ?? ((doc) => signWithActiveKey(container, SUPPORT_GRANT_PURPOSE, doc))
   )(document)
+  const usage = await fleetIn(container).latestUsage(input.tenant.id)
   return {
     url: supportAccessLink(origin, encodeSupportGrant({ document, ...signature })),
     grant_id: document.grant_id,
     expires_at: new Date(document.expires_at * 1000).toISOString(),
+    owner_pending: usage !== null && usage.staff === 0,
   }
 }

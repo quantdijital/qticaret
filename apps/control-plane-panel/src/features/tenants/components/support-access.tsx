@@ -143,6 +143,12 @@ function ReadyDialog({ grant, onClose }: { grant: SupportGrant; onClose: () => v
           </DialogDescription>
         </DialogHeader>
         <DialogBody>
+          {grant.owner_pending ? (
+            <p role="alert" className="text-[13px] text-warning-text">
+              {t("supportAccess.ownerPending")}
+            </p>
+          ) : null}
+          <p className="text-[13px] text-muted-foreground">{t("supportAccess.bearerNote")}</p>
           <Button asChild className="self-start">
             <a href={grant.url} target="_blank" rel="noopener noreferrer" onClick={onClose}>
               <ExternalLink aria-hidden="true" />

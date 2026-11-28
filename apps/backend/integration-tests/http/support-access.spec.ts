@@ -7,6 +7,8 @@ import type { SupportGrantDocument } from "@qticaret/types/control-plane"
 import { TENANT_ID } from "@qticaret/types/control-plane/testing"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
+import { STAFF_ROLES_MODULE } from "../../src/modules/staff-roles"
+import type StaffRolesModuleService from "../../src/modules/staff-roles/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { createAdminUser } from "../helpers/admin"
@@ -72,7 +74,23 @@ medusaIntegrationTestRunner({
 
     managedForThisFile()
 
+    it("refuses support while the owner has not joined, and never makes it the first owner (review H-A)", async () => {
+      const roles = () =>
+        container().resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).listStaffRoles({})
+      expect(await roles()).toHaveLength(0)
+      const answer = await redeem(encode(grant()))
+      expect([answer.status, keyOf(answer.data)]).toEqual([409, "support.no_owner"])
+      // Even asked directly, a support identity claims no role in a shop without staff
+      expect(
+        await container()
+          .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
+          .roleOf("qtsup_AAECAwQFBgcICQoLDA0ODxAREhMUFRYX")
+      ).toBeNull()
+      expect(await roles()).toHaveLength(0)
+    })
+
     it("opens a support session once: who it is, what it reaches, then signing out ends it", async () => {
+      const owner = await createAdminUser(http, container())
       const document = grant()
       const first = await redeem(encode(document))
       expect(first.status).toBe(200)
@@ -110,6 +128,9 @@ medusaIntegrationTestRunner({
         ["post", "/admin/platform-settings/security"],
         ["get", "/admin/audit-log"],
         ["get", "/admin/support-access"],
+        ["post", "/admin/orders/order_1/cancel"],
+        ["get", "/admin/wholesale/accounts"],
+        ["post", "/admin/platform-settings/store"],
       ] as const) {
         const answer = await support[method](path)
         expect([path, answer.status, keyOf(answer.data)]).toEqual([path, 403, "support.forbidden"])
@@ -119,7 +140,6 @@ medusaIntegrationTestRunner({
       expect([token.status, keyOf(token.data)]).toEqual([403, "support.forbidden"])
 
       // Not on the team, not in its count
-      const owner = await createAdminUser(http, container())
       const team = await http.get<{ staff: { id: string }[] }>("/admin/staff", {
         headers: owner.headers,
       })
@@ -140,6 +160,7 @@ medusaIntegrationTestRunner({
     })
 
     it("refuses a forged, foreign, late or form-posted grant, and any while the switch is off", async () => {
+      await createAdminUser(http, container())
       const late = grant({ issued_at: Math.floor(Date.now() / 1000) - 10 * 60 })
       expect(keyOf((await redeem(encode(late))).data)).toBe("support.grant_expired")
       const foreign = grant({ tenant_id: "ten_01JOTHERSHOP000000000000" })
@@ -167,10 +188,10 @@ medusaIntegrationTestRunner({
     })
 
     it("ends open sessions when the owner turns the switch off or ends one", async () => {
+      const owner = await createAdminUser(http, container())
       const a = as(sessionCookie(await redeem(encode(grant()))))
       const document = grant()
       const b = as(sessionCookie(await redeem(encode(document))))
-      const owner = await createAdminUser(http, container())
 
       const end = await settle(
         http.post(

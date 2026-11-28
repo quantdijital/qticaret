@@ -1,9 +1,13 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { createHash } from "node:crypto"
 import { MedusaError } from "@medusajs/framework/utils"
+import { STEP_UP_TTL_MS } from "@qticaret/server-kit"
 import { issueSupportGrant, operatorName } from "../../../../../../lib/tenants/support-grant"
 import { saveNoteWorkflow } from "../../../../../../workflows/tenants/tenant-notes"
 import { cpStaff } from "../../../../../http/caller"
 import { noteAuditChanges } from "../../../../../http/audit"
+import { sharedRateLimitStore } from "../../../../../http/rate-limit"
+import { STEP_UP_HEADER } from "../../../../../http/staff-guard"
 import { actorOf, tenantParam } from "../../params"
 import type { PostSupportGrantType } from "./validators"
 
@@ -25,6 +29,21 @@ export async function POST(
   if (role !== "owner" && role !== "operator") {
     // The route table lets only these through; a role changed meanwhile is refused here
     throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.forbidden")
+  }
+  // The step-up proof opens one grant only (security review L1): a proof reused within its
+  // five minutes is refused as a spent one, and the panel asks for a new code
+  const proof = req.headers[STEP_UP_HEADER]
+  const spent =
+    typeof proof !== "string" ||
+    (
+      await sharedRateLimitStore(req).hit(
+        `support_grant_proof:${createHash("sha256").update(proof).digest("hex")}`,
+        STEP_UP_TTL_MS
+      )
+    ).count > 1
+  if (spent) {
+    res.status(428).json({ type: "not_allowed", message: "cp.step_up_invalid" })
+    return
   }
   const { reason, minutes } = req.validatedBody
   const issued = await issueSupportGrant(req.scope, {

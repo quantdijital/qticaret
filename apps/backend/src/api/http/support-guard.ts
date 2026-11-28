@@ -139,8 +139,11 @@ export async function guardSupportRequest(
     return true
   }
   const body = req.body as { type?: unknown } | undefined
+  const limit = (req.query as Record<string, unknown> | undefined)?.["limit"]
   const decision = decideSupport(req.method, routePath(req), {
     jobType: typeof body?.type === "string" ? body.type : undefined,
+    // A list's page size: anything given but a whole number reads as too long
+    pageSize: limit === undefined ? undefined : Number(limit),
   })
   if (!decision.allowed) {
     rejectRequest(

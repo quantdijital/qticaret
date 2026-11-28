@@ -156,6 +156,8 @@ export interface SupportGrant {
   url: string
   grant_id: string
   expires_at: string
+  /** The shop's owner has not joined yet: the shop will refuse the link. */
+  owner_pending?: boolean
 }
 
 /**

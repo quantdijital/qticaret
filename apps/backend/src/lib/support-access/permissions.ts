@@ -1,19 +1,21 @@
 /**
  * What a "Platform desteği" session may do (adr/0061 Ek "Destek erişimi",
- * Karar 5): what the owner may (the storefront's looks and the catalogue
- * are why it exists), less the list below: the shop's people and its
- * accounts, money and tax settings, the legal identity, customers'
- * personal data leaving in bulk, ways for data to leave the shop, the
- * audit trail, and the support switch itself. Medusa's own ways round the
- * role layer (`REPLACED`) stay closed as for everyone. Decided on the path
- * Express routes (lower-cased), refused lists matched raw and decoded, as
- * `decide` does. Queued jobs: an allow-list, so a new export is closed
- * until listed.
+ * Karar 5): only what `allowed.ts` names (the catalogue, the storefront's
+ * looks, orders and customers read, what the panel draws itself with),
+ * and never what the deny list below names, which is checked first: the
+ * shop's people and its accounts, money, tax and legal settings, customers'
+ * personal data leaving in bulk, ways for data to leave the shop, the audit
+ * trail and the support switch. Medusa's own ways round the role layer
+ * (`REPLACED`) stay closed as for everyone. Decided on the path Express
+ * routes (lower-cased), every list matched raw and decoded for a refusal,
+ * raw only for an allowance, as `decide` does. Queued jobs: an allow-list
+ * of kinds, so a new export is closed until listed.
  */
 import { capabilityProbes, matches } from "../staff/permissions"
 import type { Capability } from "../staff/permissions"
 import { REPLACED, SELF } from "../staff/permission-rules"
 import type { Method, RequestFacts, Rule } from "../staff/permission-rules"
+import { SUPPORT_ALLOWED, SUPPORT_PAGE_MAX, SUPPORT_WRITE_SECTIONS } from "./allowed"
 
 const WRITES: readonly Method[] = ["POST", "PUT", "PATCH", "DELETE"]
 
@@ -27,6 +29,8 @@ export const SUPPORT_CLOSED_SECTIONS = [
   "security",
   "maintenance",
   "legal",
+  // The shop's contact address and phone: a way to reach customers in its name (review M-A)
+  "store",
   // Who gets the staff alerts by e-mail (customers' details in them): an address added
   // here would keep receiving them after the session (security review M1)
   "notifications",
@@ -119,12 +123,37 @@ export const SUPPORT_DENIED: readonly Rule[] = [
   { methods: WRITES, path: "/admin/views*" },
   // The owner's switch, sessions and history
   { methods: "*", path: "/admin/support-access*" },
+  // Money marked as come, and messages or prices in the shop's name (security review M-A)
+  { methods: WRITES, path: "/admin/orders/:id/bank-transfer*" },
+  { methods: WRITES, path: "/admin/payment-collections*" },
+  { methods: WRITES, path: "/admin/draft-orders*" },
+  { methods: WRITES, path: "/admin/wholesale*" },
+  { methods: WRITES, path: "/admin/messaging*" },
+  { methods: WRITES, path: "/admin/promotions*" },
+  { methods: WRITES, path: "/admin/campaigns*" },
+  { methods: WRITES, path: "/admin/price-lists*" },
+  { methods: "*", path: "/admin/fraud*" },
+  // Medusa's own catalogue files, mailed to their asker (the panel's are `catalog.*` jobs)
+  { methods: "*", path: "/admin/products/export" },
+  { methods: "*", path: "/admin/inventory-items/export" },
+  { methods: "*", path: "/admin/products/import*" },
+  { methods: "*", path: "/admin/products/imports*" },
 ]
+
+/** Settings sections it writes: only those `allowed.ts` names, the deny list's never. */
+const SECTION_WRITE = /^\/admin\/platform-settings\/([^/]+)$/
 
 /** `/auth/*` a support session may call: signing out only. */
 const SUPPORT_AUTH: readonly Rule[] = [{ methods: ["DELETE"], path: "/auth/session" }]
 
-export type SupportDecision = { allowed: true } | { allowed: false; reason: "support_denied" }
+export type SupportDecision =
+  { allowed: true } | { allowed: false; reason: "support_denied" | "support_unlisted" }
+
+/** What the support guard reads from a request beyond the role layer's facts. */
+export interface SupportFacts extends RequestFacts {
+  /** A list's `limit`, when the request asks one. */
+  pageSize?: number | undefined
+}
 
 const decodedPath = (path: string): string =>
   path
@@ -143,7 +172,7 @@ const decodedPath = (path: string): string =>
 export function decideSupport(
   method: string,
   path: string,
-  facts: RequestFacts = {}
+  facts: SupportFacts = {}
 ): SupportDecision {
   const verb = method.toUpperCase()
   if (path === "/auth" || path.startsWith("/auth/")) {
@@ -161,7 +190,24 @@ export function decideSupport(
   if (refused(REPLACED) || refused(SUPPORT_DENIED)) {
     return { allowed: false, reason: "support_denied" }
   }
-  return { allowed: true }
+  // A settings section written: only the looks' and the catalogue's, by its decoded name
+  const section = SECTION_WRITE.exec(decoded)?.[1]
+  if (verb !== "GET" && verb !== "HEAD" && section !== undefined) {
+    return (SUPPORT_WRITE_SECTIONS as readonly string[]).includes(section)
+      ? { allowed: true }
+      : { allowed: false, reason: "support_denied" }
+  }
+  // Customers a page at a time, never the whole list in one answer
+  if (
+    decoded.startsWith("/admin/customers") &&
+    facts.pageSize !== undefined &&
+    !(facts.pageSize <= SUPPORT_PAGE_MAX)
+  ) {
+    return { allowed: false, reason: "support_denied" }
+  }
+  return matches(SUPPORT_ALLOWED, verb, path, facts)
+    ? { allowed: true }
+    : { allowed: false, reason: "support_unlisted" }
 }
 
 /** What the panel offers a support session: the same probes as a role's. */

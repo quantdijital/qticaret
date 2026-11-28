@@ -1419,7 +1419,15 @@ Sırayla, ilk düşen yanıt verir:
 
 ### Karar 5: destek yetkisi (rota katmanı)
 
-Destek oturumu rota katmanında sahip gibi başlar: tasarım (`storefront-designs`/`presets` sahibe özeldir) ve ürün girişi için gereken budur. Rotaların içindeki rol denetimlerinde ise **yönetici** sayılır (`staffRoleOf` → `admin`): sahibe özel dışa aktarma dosyası, zanaat metni, kargo yöneticisi gibi iç kontroller geçmez. Önce aşağıdaki yasak liste uygulanır (`lib/support-access/permissions.ts`); ardından `REPLACED` (herkese kapalı Medusa uçları). Yasak liste hem ham hem çözülmüş yolda eşleşir (`decide` ile aynı kural). Yeni dışa aktarma türü varsayılan kapalıdır (iş türleri izin listesiyle).
+**İzin listesi, varsayılan ret** (2026-11-28 ikinci inceleme M-B). Destek oturumu yalnız `lib/support-access/allowed.ts`'te adı geçen uçlara ulaşır:
+- katalog (ürün, varyant, stok, kategori, koleksiyon, marka, özellik şablonları, toplu düzenleme, içe aktarma);
+- vitrin (görünümler, hazır görünümler, düzen, menüler, içerik, açılış sayfaları, açılır pencereler, ortam kütüphanesi, SEO);
+- yorum ve soru moderasyonu, katalog için yazım önerileri;
+- siparişler ve müşteriler **yalnız okuma**; müşteri listesi sayfa başına en çok 50;
+- panelin kendini çizmek için okuduğu uçlar (ben, mağaza, uyarılar, bayraklar, bölgeler, depolar, KDV oranları);
+- ayar bölümlerinden okunanlar ve yalnız `appearance`, `theme`, `storefront`, `catalog`, `seo`, `product_badges`, `inventory`, `panel_layout` yazmaları.
+
+Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPLACED` ve aşağıdaki yasak liste uygulanır; liste hem ham hem çözülmüş yolda eşleşir (`decide` ile aynı kural), izin listesi yalnız ham yolda. Rotaların içindeki rol denetimlerinde destek oturumu **yönetici** sayılır (`staffRoleOf` → `admin`). Bir birim testi mağazanın ve Medusa'nın bütün admin rotalarını tarar; destek oturumunun ulaştıkları anlık görüntüde (snapshot) listelenir, yeni ulaşılan rota incelemede görünür.
 
 | Alan | Kapalı uçlar |
 | --- | --- |
@@ -1463,6 +1471,7 @@ Destek oturumu rota katmanında sahip gibi başlar: tasarım (`storefront-design
   - **Kim:** `owner` ve `operator`; her zaman yeniden doğrulama (`stepUp`, taze giriş yetmez).
   - **Hız sınırı:** personel başına.
   - **Gövde:** `{ reason (10–500), minutes: 15 | 30 | 60 }`.
+  - **Yeniden doğrulama kanıtı tek izin içindir:** aynı kanıtla ikinci istek 428 `cp.step_up_invalid` alır (inceleme L1).
   - **Mağaza:** `provisioning` dışında olmalı; `active`, `restricted` ya da `suspended` olabilir, çünkü askıdaki mağazaya destek tam da gereken yerdir. Kapanan ya da kapalı mağaza reddedilir. Mağazanın panel adresi bilinmelidir.
   - **İşleyiş:** izin `signWithActiveKey` ile imzalanır, gerekçe etkinlik akışına yazılır.
   - **Yanıt:** `{ url, expires_at }`. İzin üst panelde saklanmaz; bağlantı yalnız bu yanıttadır.
@@ -1502,3 +1511,24 @@ Destek oturumu rota katmanında sahip gibi başlar: tasarım (`storefront-design
 - **L1, L2 (kapatıldı):** oturum dizininin kendi ömrü kaldırıldı (kısa oturum uzun olanın kaydını silmiyordu); Redis işlem içi hatası artık atılır (sahip "bitti" görüp oturum açık kalamaz).
 - **L3 (kabul edildi):** `/support` bağlantısı tarayıcıdaki mevcut oturumun yerine geçer. Bağlantıyı yalnız üst panel personeli üretir, izin bu mağazaya bağlıdır ve sahibe bildirim gider; onay adımı eklenmedi.
 - **Bilgi:** anahtar varsayılan açık (Karar 4, sahibin onayına sunuldu); yeniden doğrulama kanıtı geçerlilik süresi içinde tekrar kullanılabilir (üst panelin genel kuralı).
+
+### Ek: Destek erişimi ikinci güvenlik incelemesi (2026-11-28)
+
+- **H-A (kapatıldı):** `staff-roles.roleOf` personeli olmayan mağazada ilk çağıranı sahip yapıyordu. Uyarı okuyucusu (`readerOf`) onu doğrudan çağırdığı için, sahibi henüz katılmamış mağazada destek kimliği kalıcı sahip olabilirdi. Düzeltme üç katmanlı:
+  - `roleOf` ve ilk sahip kaydı `qtsup_` kimliğine hiç rol vermez;
+  - uyarı okuyucusu destek kimliğini rol tablosuna sormaz;
+  - mağaza, personeli yokken izni 409 `support.no_owner` ile reddeder. Panelin `/support` sayfası bunu açıkça söyler. Üst panel, son kullanım raporu personel saymıyorsa bağlantı penceresinde uyarı gösterir (rapor bir saate kadar eski olabildiği için engel değil).
+  - HTTP testi var. İlk kullanıcıyı sahip yapan kuralın yalnız davet akışına taşınması ayrı iş olarak bırakıldı (yerel tohumlama ona dayanıyor).
+- **M-A (kapatıldı):** aşağıdakiler yasak listede, her biri için test satırı var:
+  - havale onayı, ödeme toplama "ödendi" işareti, taslak sipariş;
+  - toptancı yazmaları (şifre dahil) ve okumaları;
+  - müşteri mesaj şablonları;
+  - `store` bölümü (iletişim alanları);
+  - promosyon, kampanya ve fiyat listesi yazmaları;
+  - dolandırıcılık engelleri;
+  - Medusa'nın kendi ürün ve stok dosyaları.
+- **M-B (kapatıldı):** Karar 5 artık izin listesidir (yukarıda).
+- **L1 (kapatıldı):** üst panelde destek izni için yeniden doğrulama kanıtı tek kullanımlık.
+- **L2 (belgelendi):** bağlantı taşıyıcı bağlantıdır; açan kişiyi mağazaya sokar. Sohbete, e-postaya ya da destek kaydına yapıştırılmaz. Üst panel penceresi bunu yazar. Bağlantı bir kez açılır ve 5 dakika içinde kullanılmalıdır.
+- **L3 (kapatıldı):** müşteri listesi sayfa başına en çok 50 kayıt.
+- **Sonuç:** destek oturumunda Ayarlar menüsü (`settings` yeteneği) görünmez. Görünüm ve katalog ayarları API'de açıktır; menüye ayrı yetenek eklenmesi sahip isterse yapılır.

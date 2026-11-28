@@ -1858,6 +1858,8 @@
     "submit": "Create grant",
     "readyTitle": "Link ready",
     "readyText": "The link works once and must be opened within 5 minutes. The session ends by itself at {{time}}.",
-    "openPanel": "Open the panel"
+    "openPanel": "Open the panel",
+    "ownerPending": "The shop's owner does not seem to have joined yet. Until the owner accepts the invitation, the shop refuses support sign-ins.",
+    "bearerNote": "This link signs in whoever opens it: never paste it into a chat, an e-mail or a ticket. It opens once."
   }
 }

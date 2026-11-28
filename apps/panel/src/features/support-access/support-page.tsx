@@ -14,6 +14,7 @@ const FAILURES: Record<string, string> = {
   "support.grant_expired": `${S}.expired`,
   "support.grant_used": `${S}.used`,
   "support.disabled": `${S}.disabled`,
+  "support.no_owner": `${S}.noOwner`,
   "support.wrong_tenant": `${S}.invalid`,
   "support.grant_invalid": `${S}.invalid`,
   "signature.invalid": `${S}.invalid`,

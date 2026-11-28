@@ -1858,6 +1858,8 @@
     "submit": "İzin oluştur",
     "readyTitle": "Bağlantı hazır",
     "readyText": "Bağlantı tek kullanımlıktır ve 5 dakika içinde açılmalıdır. Oturum {{time}} saatinde kendiliğinden biter.",
-    "openPanel": "Paneli aç"
+    "openPanel": "Paneli aç",
+    "ownerPending": "Mağaza sahibi henüz panele katılmamış görünüyor. Sahip davetini kabul etmeden mağaza destek girişini reddeder.",
+    "bearerNote": "Bu bağlantı açan kişiyi mağaza paneline sokar: sohbete, e-postaya ya da destek kaydına yapıştırmayın. Bir kez açılır."
   }
 }

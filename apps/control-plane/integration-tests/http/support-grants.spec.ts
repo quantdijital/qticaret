@@ -142,6 +142,19 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("takes a step-up proof for one grant only (security review L1)", async () => {
+      const id = await shop()
+      const proof = await proved(http, operator)
+      const path = `/admin/cp/tenants/${id}/support-grants`
+      const body = { reason: REASON, minutes: 30 }
+      const first = await call.post(path, body, operator, proof)
+      const again = await call.post(path, body, operator, proof)
+
+      expect(first.status).toBe(200)
+      expect(again.status).toBe(428)
+      expect(again.data).toMatchObject({ message: "cp.step_up_invalid" })
+    })
+
     it("refuses a shop still being set up: 409 cp.support_unavailable", async () => {
       const id = await shop("provisioning")
       const answer = await grant(id, operator)

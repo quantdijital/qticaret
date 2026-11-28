@@ -1,4 +1,5 @@
 import type { Context } from "@medusajs/framework/types"
+import { SUPPORT_ACTOR_PREFIX } from "@qticaret/types/control-plane"
 import {
   InjectManager,
   InjectTransactionManager,
@@ -71,6 +72,11 @@ class StaffRolesModuleService extends MedusaService({ StaffRole }) {
    * user owner.
    */
   async roleOf(userId: string): Promise<Role | null> {
+    // A platform support session (adr/0061 Ek "Destek erişimi") is nobody's staff: never a
+    // role, never the first owner of a shop whose owner has not joined (security review H-A)
+    if (userId.startsWith(SUPPORT_ACTOR_PREFIX)) {
+      return null
+    }
     const roles = await this.cache.get()
     const role = roles.get(userId)
     if (role) {
@@ -123,6 +129,9 @@ class StaffRolesModuleService extends MedusaService({ StaffRole }) {
     userId: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
+    if (userId.startsWith(SUPPORT_ACTOR_PREFIX)) {
+      return false
+    }
     const manager = sharedContext.transactionManager as Executor
     await manager.execute(`SELECT pg_advisory_xact_lock(hashtext('staff_role:first_owner'))`, [])
     const rows = (await manager.execute(
