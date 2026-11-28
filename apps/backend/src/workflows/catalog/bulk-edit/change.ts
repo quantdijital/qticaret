@@ -1,4 +1,8 @@
 import { z } from "@medusajs/framework/zod"
+import {
+  PRODUCT_BOOKING_MODES,
+  PRODUCT_KINDS,
+} from "../../../modules/catalog-extension/models/product-extension"
 
 /**
  * One change applied to many products at once (F3.10): the base TRY price,
@@ -6,7 +10,8 @@ import { z } from "@medusajs/framework/zod"
  * given back to the shop's templates, the images' missing alt texts, or
  * the variants' unit cost (F11.4), an add-on template (adr/0052 Ek
  * 2026-11-23), the brand, a tag, selling past stock, or the variants' sale
- * price (adr/0086), as WooCommerce's bulk edit has them.
+ * price (adr/0086), as WooCommerce's bulk edit has them; or the kind with
+ * its booking mode.
  */
 
 /** Products one run takes; the panel selects at most this many. */
@@ -152,6 +157,22 @@ const sale = z
     { message: "variant_sale.dates_order" }
   )
 
+/**
+ * The product's kind (F3.2) and how it is booked (adr/0076 §2), as the
+ * product page saves them: a kind other than service is booked by none,
+ * so a dated product leaving service stops being dated in the same save.
+ */
+const kind = z
+  .object({
+    action: z.literal("kind"),
+    kind: z.enum(PRODUCT_KINDS),
+    booking_mode: z.enum(PRODUCT_BOOKING_MODES).default("none"),
+  })
+  .strict()
+  .refine(({ kind, booking_mode }) => kind === "service" || booking_mode === "none", {
+    message: "catalog.booking_kind",
+  })
+
 export const BulkChange = z.union([
   price,
   stock,
@@ -165,6 +186,7 @@ export const BulkChange = z.union([
   tag,
   backorder,
   sale,
+  kind,
 ])
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]

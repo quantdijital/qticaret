@@ -4605,7 +4605,8 @@
         "sale": "Sale price",
         "brand": "Change brand",
         "tag": "Add / remove tag",
-        "backorder": "Selling when out of stock"
+        "backorder": "Selling when out of stock",
+        "kind": "Change product type"
       },
       "price": {
         "mode": "Price change",
@@ -4759,6 +4760,21 @@
           "deny": "Stop selling"
         },
         "hint": "Only variants whose stock is tracked change; untracked ones always sell."
+      },
+      "kind": {
+        "label": "Product type",
+        "booking": "Booking",
+        "bookings": {
+          "none": "Sold without dates",
+          "departure": "Sold by date (departures)"
+        },
+        "hints": {
+          "physical": "Shipped by carrier; linked to the shop's default shipping profile. Gift cards stay digital and are skipped.",
+          "digital": "No shipping; the product leaves its shipping profile.",
+          "service": "No shipping. Sold by date, each departure has its own places and the variants stop tracking stock. Gift cards stay digital and are skipped."
+        },
+        "bookingOff_one": "{{formatted}} dated product will stop being sold by date.",
+        "bookingOff_other": "{{formatted}} dated products will stop being sold by date."
       }
     },
     "priceHistory": {

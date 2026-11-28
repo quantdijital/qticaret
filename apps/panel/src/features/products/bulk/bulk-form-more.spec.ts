@@ -75,4 +75,17 @@ describe("bulk edit form: Woo's fields (P7) and the sale price", () => {
       change: { action: "backorder", allow: false },
     })
   })
+
+  it("sets the kind, booked by departure only as a service", () => {
+    expect(bulkChangeOf("kind", form({}))).toEqual({
+      change: { action: "kind", kind: "physical", booking_mode: "none" },
+    })
+    expect(bulkChangeOf("kind", form({ kind: "service", kindBooking: "departure" }))).toEqual({
+      change: { action: "kind", kind: "service", booking_mode: "departure" },
+    })
+    // A booking picked before the kind moved off service is not sent
+    expect(bulkChangeOf("kind", form({ kind: "digital", kindBooking: "departure" }))).toEqual({
+      change: { action: "kind", kind: "digital", booking_mode: "none" },
+    })
+  })
 })

@@ -5,6 +5,8 @@ import { productSaleFacts, shopCurrency } from "../../pricing/variant-sale/read"
 import type { ProductSaleFacts } from "../../pricing/variant-sale/read"
 import { PRICE_FIELDS } from "../prices"
 import type { PriceRow } from "../prices"
+import type { BookingMode } from "../booking-mode"
+import type { ProductKind } from "../shipping-kind"
 import type { BulkAction } from "./change"
 
 /** A product as bulk edit reads it; each change reads only its own part (F3.10). */
@@ -14,7 +16,13 @@ export interface BulkProduct {
   title: string
   status: string
   categories?: ({ id: string; mpath?: string | null } | null)[] | null
-  product_extension?: { primary_category_id?: string | null; addons?: unknown } | null
+  product_extension?: {
+    primary_category_id?: string | null
+    addons?: unknown
+    kind?: ProductKind | null
+    booking_mode?: BookingMode | null
+    is_gift_card?: boolean | null
+  } | null
   /** adr/0052 Ek 2026-11-23: the templates linked to it, the ones its attribute template carries. */
   addon_templates?: ({ id: string } | null)[] | null
   attribute_template?: { addon_template_ids?: unknown } | null
@@ -75,6 +83,12 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
   tag: [...BASE, "tags.id", "tags.value"],
   backorder: [...BASE, "variants.id", "variants.manage_inventory", "variants.allow_backorder"],
   sale: BASE,
+  kind: [
+    ...BASE,
+    "product_extension.kind",
+    "product_extension.booking_mode",
+    "product_extension.is_gift_card",
+  ],
   alt_text: [
     ...BASE,
     "options.id",

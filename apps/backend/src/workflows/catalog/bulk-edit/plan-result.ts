@@ -1,7 +1,9 @@
 import type { AddonTemplateSource } from "../../../lib/catalog/addons"
 import type { LevelAdjustment, LevelQuantity } from "../../stock/write-levels"
 import type { SaleEntry } from "../../pricing/variant-sale/plan"
+import type { BookingMode } from "../booking-mode"
 import type { nextPrices } from "../prices"
+import type { ProductKind } from "../shipping-kind"
 
 /**
  * What planning one product gives (F3.10): the writes and their
@@ -41,6 +43,8 @@ export type BulkWrite =
   | { action: "backorder"; variants: { id: string; allow_backorder: boolean }[] }
   /** Sales set and cleared, through the product page's own workflow (adr/0086). */
   | { action: "sale"; set: SaleEntry[]; clear: string[] }
+  /** The kind and booking mode, through the product page's own catalog save. */
+  | { action: "kind"; kind: ProductKind; booking_mode: BookingMode }
 
 /** A field's value before and after, by a key naming it (`variant:<id>:price:try`). */
 export type BulkDiff = Record<string, { before: unknown; after: unknown }>
@@ -63,6 +67,8 @@ export interface PlanContext {
   tag?: { id: string | null; value: string }
   /** When a sale's days are checked against (a sale already over is refused). */
   now?: Date
+  /** A kind change's flags (`catalog.non_physical`, `catalog.booking`), read once for the run. */
+  features?: { nonPhysical: boolean; booking: boolean }
 }
 
 export const UNCHANGED: BulkPlan = { kind: "unchanged" }
