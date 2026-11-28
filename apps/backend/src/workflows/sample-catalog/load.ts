@@ -7,11 +7,7 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
-import {
-  acquireLockStep,
-  createProductCategoriesWorkflow,
-  releaseLockStep,
-} from "@medusajs/medusa/core-flows"
+import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 import { sectorPack } from "@qticaret/sector-packs"
 import type { SampleCatalog } from "@qticaret/sector-packs"
 import { logger } from "../../lib/logging"
@@ -19,11 +15,15 @@ import { ASYNC_JOB_MODULE } from "../../modules/async-job"
 import type AsyncJobModuleService from "../../modules/async-job/service"
 import { planSampleLoad } from "../../lib/sample-catalog/load-plan"
 import type { SampleLoadPlan } from "../../lib/sample-catalog/load-plan"
-import { SAMPLE_KEY, sampleMark } from "../../lib/sample-catalog/mark"
+import { SAMPLE_LOCK, SAMPLE_LOCK_TTL, renewSampleLock } from "../../lib/sample-catalog/lock"
+import type { HeldSampleLock } from "../../lib/sample-catalog/lock"
+import { madeMark, sampleMark } from "../../lib/sample-catalog/mark"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { writeSampleProduct } from "../../lib/sample-catalog/write-product"
 import { liveProductIds, setOpened, undoSampleCategories, undoSampleProducts } from "./undo"
 
-export const SAMPLE_LOCK = "sample-catalog"
+export { SAMPLE_LOCK }
 
 const samplesOf = (pack: string): SampleCatalog => {
   const samples = sectorPack(pack)?.samples
@@ -73,7 +73,8 @@ async function makeCategory(
   container: MedusaContainer,
   plan: SampleLoadPlan,
   category: SampleLoadPlan["make"][number],
-  ids: Record<string, string>
+  ids: Record<string, string>,
+  jobId: string | undefined
 ): Promise<string> {
   const parent = category.parent ? ids[category.parent] : undefined
   const { result } = await createProductCategoriesWorkflow(container).run({
@@ -83,7 +84,7 @@ async function makeCategory(
           name: category.name,
           handle: category.handle,
           is_active: true,
-          metadata: { [SAMPLE_KEY]: plan.tag },
+          metadata: madeMark(plan.tag, jobId),
           ...(parent ? { parent_category_id: parent } : {}),
           ...(category.description ? { description: category.description } : {}),
         },
@@ -108,11 +109,12 @@ async function makeCategory(
  */
 export const makeSampleCategoriesStep = createStep(
   "sample-catalog-make-categories",
-  async (plan: SampleLoadPlan, { container }) => {
+  async (input: { plan: SampleLoadPlan; job_id?: string }, { container }) => {
+    const { plan } = input
     const done: CategoriesDone = { category_ids: { ...plan.category_ids }, made: [], opened: [] }
     try {
       for (const category of plan.make) {
-        const id = await makeCategory(container, plan, category, done.category_ids)
+        const id = await makeCategory(container, plan, category, done.category_ids, input.job_id)
         done.made.push(id)
         done.category_ids[category.handle] = id
       }
@@ -141,7 +143,12 @@ export const makeSampleCategoriesStep = createStep(
 export const writeSampleProductsStep = createStep(
   "sample-catalog-write-products",
   async (
-    input: { plan: SampleLoadPlan; category_ids: Record<string, string>; job_id?: string },
+    input: {
+      plan: SampleLoadPlan
+      category_ids: Record<string, string>
+      job_id?: string
+      lock?: HeldSampleLock | undefined
+    },
     { container }
   ) => {
     const { plan } = input
@@ -151,6 +158,7 @@ export const writeSampleProductsStep = createStep(
     const context = {
       container,
       tag: plan.tag,
+      jobId: input.job_id,
       dir: samples.dir,
       salesChannelId: plan.sales_channel_id,
       categoryIds: new Map(Object.entries(input.category_ids)),
@@ -166,6 +174,8 @@ export const writeSampleProductsStep = createStep(
           (id) => made.push(id)
         )
         await report(made.length)
+        // A whole set takes minutes: the lock lasts as long as the products keep coming
+        await renewSampleLock(container, input.lock)
       }
     } catch (error) {
       await undoSampleProducts(container, made)
@@ -203,17 +213,23 @@ export interface LoadSampleCatalogResult {
 export const loadSampleCatalogWorkflow = createWorkflow(
   "sample-catalog-load",
   (input: LoadSampleCatalogInput) => {
-    acquireLockStep({ key: SAMPLE_LOCK, timeout: 5, ttl: 900 })
+    const held = acquireLocksStep({ key: SAMPLE_LOCK, timeout: 5, ttl: SAMPLE_LOCK_TTL })
     const plan = planSampleLoadStep(transform({ input }, ({ input }) => ({ pack: input.pack })))
-    const categories = makeSampleCategoriesStep(plan)
-    const products = writeSampleProductsStep(
-      transform({ plan, categories, input }, ({ plan, categories, input }) => ({
+    const categories = makeSampleCategoriesStep(
+      transform({ plan, input }, ({ plan, input }) => ({
         plan,
-        category_ids: categories.category_ids,
         ...(input.job_id ? { job_id: input.job_id } : {}),
       }))
     )
-    releaseLockStep({ key: SAMPLE_LOCK })
+    const products = writeSampleProductsStep(
+      transform({ plan, categories, input, held }, ({ plan, categories, input, held }) => ({
+        plan,
+        category_ids: categories.category_ids,
+        ...(input.job_id ? { job_id: input.job_id } : {}),
+        lock: held,
+      }))
+    )
+    releaseLocksStep(held)
     const result = transform(
       { plan, categories, products },
       ({ plan, categories, products }): LoadSampleCatalogResult => {

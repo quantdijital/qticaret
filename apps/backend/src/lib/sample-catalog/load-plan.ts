@@ -40,28 +40,61 @@ export interface SampleLoadPlan {
 
 const SUFFIX = "ornek"
 
-/** A handle not taken here: the set's, else `-ornek`, `-ornek-2`... */
-export function freeHandle(handle: string, taken: ReadonlySet<string>): string {
-  if (!taken.has(handle)) {
-    return handle
+// The handles looked up at once for each product: the set's and its first few `-ornek` forms
+const CANDIDATES = 5
+// Rounds of candidates looked up for one product before the load gives up
+const MAX_ROUNDS = 20
+
+/** The n-th form of a handle: the set's, then `-ornek`, `-ornek-2`... */
+const candidateAt = (handle: string, n: number): string =>
+  n === 0 ? handle : n === 1 ? `${handle}-${SUFFIX}` : `${handle}-${SUFFIX}-${String(n)}`
+
+/** A round of forms looked up together, from the `from`-th on. */
+export const handleCandidates = (handle: string, from = 0): string[] =>
+  Array.from({ length: CANDIDATES + 1 }, (_, index) => candidateAt(handle, from + index))
+
+/**
+ * Each product's handle here: the set's, else the first `-ornek` form no
+ * product has and no address holds. Every form chosen was looked up
+ * (`lookup` answers the ones taken): the first round for all products at
+ * once, a further round only for a product whose forms were all taken
+ * (security review 2026-11-28, D4). Two products never get one handle.
+ */
+export async function chooseHandles(
+  handles: readonly string[],
+  lookup: (candidates: string[]) => Promise<string[]>
+): Promise<Record<string, string>> {
+  const checked = new Set<string>()
+  const taken = new Set<string>()
+  const check = async (candidates: string[]) => {
+    const fresh = [...new Set(candidates.filter((candidate) => !checked.has(candidate)))]
+    if (fresh.length === 0) {
+      return
+    }
+    for (const handle of await lookup(fresh)) {
+      taken.add(handle)
+    }
+    fresh.forEach((candidate) => checked.add(candidate))
   }
-  for (let n = 1; ; n += 1) {
-    const candidate = n === 1 ? `${handle}-${SUFFIX}` : `${handle}-${SUFFIX}-${String(n)}`
-    if (!taken.has(candidate)) {
-      return candidate
+  await check(handles.flatMap((handle) => handleCandidates(handle)))
+  const chosen: Record<string, string> = {}
+  for (const handle of handles) {
+    for (let round = 0; ; round += 1) {
+      if (round === MAX_ROUNDS) {
+        throw new Error(`sample-catalog: no free handle for ${handle}`)
+      }
+      const batch = handleCandidates(handle, round * (CANDIDATES + 1))
+      await check(batch)
+      const free = batch.find((candidate) => !taken.has(candidate))
+      if (free !== undefined) {
+        taken.add(free)
+        chosen[handle] = free
+        break
+      }
     }
   }
+  return chosen
 }
-
-// The handles looked up at once: the set's and its first few `-ornek` forms
-const CANDIDATES = 5
-
-export const handleCandidates = (handle: string): string[] => [
-  handle,
-  ...Array.from({ length: CANDIDATES }, (_, index) =>
-    index === 0 ? `${handle}-${SUFFIX}` : `${handle}-${SUFFIX}-${String(index + 1)}`
-  ),
-]
 
 /**
  * The handles whose product address, in either URL style, a record holds
@@ -156,15 +189,15 @@ export async function planSampleLoad(container: Container, pack: string): Promis
     const item = offered.get(packItemKey.category(category.handle))
     return !category.is_active && item?.outcome === "added" && item.record_id === category.id
   })
-  const candidates = samples.products.flatMap((product) => handleCandidates(product.handle))
-  const taken = await products.listProducts(
-    { handle: candidates },
-    { select: ["handle"], take: null }
+  const handles = await chooseHandles(
+    samples.products.map((product) => product.handle),
+    async (candidates) => [
+      ...(
+        await products.listProducts({ handle: candidates }, { select: ["handle"], take: null })
+      ).map((product) => product.handle),
+      ...(await heldHandles(container, candidates)),
+    ]
   )
-  const takenHandles = new Set([
-    ...taken.map((product) => product.handle),
-    ...(await heldHandles(container, candidates)),
-  ])
   const templates = await container
     .resolve<ProductAttributesModuleService>(PRODUCT_ATTRIBUTES_MODULE)
     .listAttributeTemplates(
@@ -181,13 +214,7 @@ export async function planSampleLoad(container: Container, pack: string): Promis
     make: needed.filter((category) => !byHandle.has(category.handle)),
     open: open.map((category) => ({ id: category.id, handle: category.handle })),
     category_ids: Object.fromEntries(existing.map((category) => [category.handle, category.id])),
-    handles: Object.fromEntries(
-      samples.products.map((product) => {
-        const handle = freeHandle(product.handle, takenHandles)
-        takenHandles.add(handle)
-        return [product.handle, handle]
-      })
-    ),
+    handles,
     template_ids: Object.fromEntries(templates.map((template) => [template.handle, template.id])),
     sales_channel_id: store?.default_sales_channel_id ?? null,
   }

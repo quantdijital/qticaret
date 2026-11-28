@@ -1,14 +1,17 @@
 import {
   dropKeys,
   isEditedSample,
+  SAMPLE_RESERVED_KEYS,
   isSampleRecord,
   isSampleReviewRef,
+  isUnsellableSample,
+  madeMark,
   packOfTag,
   sampleMark,
   sampleReviewRef,
   sampleTag,
 } from "../mark"
-import { freeHandle, handleCandidates } from "../load-plan"
+import { chooseHandles, handleCandidates } from "../load-plan"
 import { planRemoval } from "../plan"
 import type { CategoryRow, SampleProductRow } from "../plan"
 
@@ -30,8 +33,40 @@ describe("a sample record's mark", () => {
     expect(isSampleRecord({ id: "prod_1", metadata: null })).toBe(false)
   })
 
-  it("takes a record its load left half made (the tag, no sample_of yet) as a sample", () => {
-    expect(isSampleRecord({ id: "prod_1", metadata: { sample: tag } })).toBe(true)
+  it("takes a record half made by a load that did not finish as a sample, and only that", () => {
+    const halfMade = { id: "prod_1", metadata: madeMark(tag, "job_stopped") }
+    expect(halfMade.metadata).toEqual({ sample: tag, sample_job: "job_stopped" })
+    expect(isSampleRecord(halfMade, new Set(["job_stopped"]))).toBe(true)
+    // The job succeeded (it marked all it made), or is not a load of this shop's: the shop's own
+    expect(isSampleRecord(halfMade, new Set(["job_other"]))).toBe(false)
+    expect(isSampleRecord(halfMade)).toBe(false)
+    // The tag alone, with no job, never makes a record a sample (security review D1)
+    expect(isSampleRecord({ id: "prod_1", metadata: { sample: tag } }, new Set(["job_1"]))).toBe(
+      false
+    )
+    expect(
+      isSampleRecord({ id: "prod_1", metadata: { sample: tag, sample_job: "" } }, new Set([""]))
+    ).toBe(false)
+  })
+
+  it("never sells a sample nor a record a load is making", () => {
+    expect(isUnsellableSample({ id: "prod_1", metadata: sampleMark(tag, "prod_1", at) })).toBe(true)
+    expect(isUnsellableSample({ id: "prod_1", metadata: madeMark(tag, "job_1") })).toBe(true)
+    expect(isUnsellableSample({ id: "prod_2", metadata: sampleMark(tag, "prod_1", at) })).toBe(
+      false
+    )
+    expect(isUnsellableSample({ id: "prod_1", metadata: { sample: tag } })).toBe(false)
+    expect(isUnsellableSample({ id: "prod_1", metadata: null })).toBe(false)
+  })
+
+  it("reserves every key of the mark", () => {
+    expect([...SAMPLE_RESERVED_KEYS].sort()).toEqual([
+      "sample",
+      "sample_at",
+      "sample_job",
+      "sample_of",
+      "sample_opened",
+    ])
   })
 
   it("reads a product saved well after it was made as edited", () => {
@@ -54,10 +89,31 @@ describe("a sample record's mark", () => {
 })
 
 describe("a sample product's handle", () => {
-  it("is the set's, or with -ornek when the shop has one by that name", () => {
-    expect(freeHandle("efes", new Set())).toBe("efes")
-    expect(freeHandle("efes", new Set(["efes"]))).toBe("efes-ornek")
-    expect(freeHandle("efes", new Set(["efes", "efes-ornek"]))).toBe("efes-ornek-2")
+  const lookupOf = (taken: readonly string[]) => {
+    const lookup = jest.fn((candidates: string[]) =>
+      Promise.resolve(candidates.filter((candidate) => taken.includes(candidate)))
+    )
+    return lookup
+  }
+
+  it("is the set's, or with -ornek when the shop has one by that name", async () => {
+    expect(await chooseHandles(["efes"], lookupOf([]))).toEqual({ efes: "efes" })
+    expect(await chooseHandles(["efes"], lookupOf(["efes"]))).toEqual({ efes: "efes-ornek" })
+    expect(await chooseHandles(["efes"], lookupOf(["efes", "efes-ornek"]))).toEqual({
+      efes: "efes-ornek-2",
+    })
+  })
+
+  it("looks every form up before choosing it, past the first round too (security review D4)", async () => {
+    const taken = handleCandidates("efes")
+    const lookup = lookupOf([...taken, "efes-ornek-6"])
+    expect(await chooseHandles(["efes", "kas"], lookup)).toEqual({
+      efes: "efes-ornek-7",
+      kas: "kas",
+    })
+    // One round for all at once, one more only for the product whose forms were all taken
+    expect(lookup).toHaveBeenCalledTimes(2)
+    expect(lookup.mock.calls[1]?.[0]).toEqual(handleCandidates("efes", 6))
   })
 
   it("looks up the set's handle and its first -ornek forms at once (products and held addresses)", () => {
@@ -77,6 +133,7 @@ const product = (id: string, over: Partial<SampleProductRow> = {}): SampleProduc
   title: id,
   ordered: false,
   booked: false,
+  customer_content: 0,
   ...over,
 })
 const category = (id: string, over: Partial<CategoryRow> = {}): CategoryRow => ({
@@ -125,13 +182,31 @@ describe("what removing the samples takes", () => {
     )
     expect(plan.product_ids).toEqual(["p3"])
     expect(plan.blocked).toEqual([
-      { id: "p1", title: "p1", reason: "ordered" },
-      { id: "p2", title: "p2", reason: "booked" },
+      { id: "p1", title: "p1", reason: "ordered", customer_content: 0 },
+      { id: "p2", title: "p2", reason: "booked", customer_content: 0 },
     ])
     // Its reviews stay with it; its category keeps it
     expect(plan.review_ids).toEqual([])
     expect(plan.category_ids).toEqual([])
     expect(plan.categories_kept).toEqual([{ id: "c1", name: "c1", reason: "samples_left" }])
+  })
+
+  it("leaves a product customers wrote on, and counts what they wrote (security review D6)", () => {
+    const plan = planRemoval(
+      {
+        products: [product("p1", { customer_content: 3 }), product("p2")],
+        categories: [],
+        reviews: [{ id: "r1", product_id: "p1" }],
+      },
+      ALL
+    )
+    expect(plan.product_ids).toEqual(["p2"])
+    expect(plan.blocked).toEqual([
+      { id: "p1", title: "p1", reason: "customer_content", customer_content: 3 },
+    ])
+    expect(plan.customer_content).toBe(3)
+    // The set's own reviews on it still go when reviews are chosen
+    expect(plan.review_ids).toEqual(["r1"])
   })
 
   it("keeps a sample category holding a product of the shop's, and one with the shop's child", () => {

@@ -2,6 +2,14 @@ import { z } from "@medusajs/framework/zod"
 import { PACK_CODE } from "@qticaret/sector-packs"
 import { SAMPLE_PARTS } from "../../../lib/sample-catalog/plan"
 
+/**
+ * `GET /admin/sample-catalog`: `?job=1` answers the newest load job alone
+ * (the panel polls it while a load runs; the whole catalogue is read once
+ * the job ends).
+ */
+export const AdminGetSampleCatalog = z.object({ job: z.enum(["1"]).optional() }).strict()
+export type AdminGetSampleCatalogType = z.output<typeof AdminGetSampleCatalog>
+
 /** A pack's sample catalogue loaded (owner, 2026-11-28): the pack's code only. */
 export const AdminPostSampleCatalogLoad = z.object({ pack: z.string().regex(PACK_CODE) }).strict()
 export type AdminPostSampleCatalogLoadType = z.output<typeof AdminPostSampleCatalogLoad>

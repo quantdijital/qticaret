@@ -7,6 +7,9 @@ import {
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { sectorPack } from "@qticaret/sector-packs"
 import { applySectorPack } from "../../src/lib/sector-packs/apply"
+import { SAMPLE_LOAD_JOB } from "../../src/lib/sample-catalog/load-job"
+import { ASYNC_JOB_MODULE } from "../../src/modules/async-job"
+import type AsyncJobModuleService from "../../src/modules/async-job/service"
 import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
@@ -69,19 +72,22 @@ medusaIntegrationTestRunner({
       })
       return data.sample_catalog
     }
-    // The load is a background job: queued (202), then polled on the status
+    // The load is a background job: queued (202), then polled by the job alone (`?job=1`)
     const load = async (): Promise<LoadJob> => {
       const queued = await post("/admin/sample-catalog/load", { pack: "travel" })
       expect(queued.status).toBe(202)
-      for (let attempt = 0; attempt < 1200; attempt++) {
-        const { data } = await http.get<{ load_job: LoadJob | null }>("/admin/sample-catalog", {
-          headers: admin.headers,
-        })
+      for (let attempt = 0; attempt < 600; attempt++) {
+        const { data } = await http.get<{ load_job: LoadJob | null }>(
+          "/admin/sample-catalog?job=1",
+          { headers: admin.headers }
+        )
+        // The light answer reads no catalogue
+        expect(data).not.toHaveProperty("sample_catalog")
         const job = data.load_job
         if (job && job.status !== "queued" && job.status !== "running") {
           return job
         }
-        await new Promise((resolve) => setTimeout(resolve, 200))
+        await new Promise((resolve) => setTimeout(resolve, 500))
       }
       throw new Error("the sample load did not finish")
     }
@@ -235,6 +241,75 @@ medusaIntegrationTestRunner({
       expect(again.products.map((each) => each.handle).sort()).toEqual(
         loaded.products.map((each) => each.handle).sort()
       )
+    })
+
+    it("takes a half made record for a sample only from a load that did not finish", async () => {
+      // Security review 2026-11-28, D1: the tag alone, or a job that succeeded, is the shop's
+      const jobs = container().resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
+      const [stopped, finished] = await jobs.createAsyncJobs([
+        {
+          type: SAMPLE_LOAD_JOB,
+          status: "failed",
+          input: { pack: "travel" },
+          error_code: "failed",
+        },
+        { type: SAMPLE_LOAD_JOB, status: "succeeded", input: { pack: "travel" } },
+      ])
+      const products = container().resolve(Modules.PRODUCT)
+      const [halfMade, forged, tagOnly] = await products.createProducts([
+        {
+          title: "Yarım kalan",
+          handle: "yarim-kalan",
+          metadata: { sample: "travel@1", sample_job: stopped?.id ?? "" },
+        },
+        {
+          title: "Taklit",
+          handle: "taklit",
+          metadata: { sample: "travel@1", sample_job: finished?.id ?? "" },
+        },
+        { title: "Etiketli", handle: "etiketli", metadata: { sample: "travel@1" } },
+      ])
+      const ids = (await status()).products.map((each) => each.id)
+      expect(ids).toContain(halfMade?.id)
+      expect(ids).not.toContain(forged?.id)
+      expect(ids).not.toContain(tagOnly?.id)
+      const removed = await post("/admin/sample-catalog/remove", { parts: ["products"] })
+      expect(removed.data["result"]).toMatchObject({ products: 1 })
+      expect(
+        await products.listProducts({ id: [forged?.id ?? "", tagOnly?.id ?? ""] })
+      ).toHaveLength(2)
+    })
+
+    it("keeps the sample marks the server's on Medusa's product and category routes", async () => {
+      const ownVariant = await createTestProduct(container(), store.salesChannelId, {
+        handle: "kendi-urunumuz",
+        price: 1000,
+      })
+      const [row] = await container()
+        .resolve(Modules.PRODUCT)
+        .listProductVariants({ id: ownVariant }, { select: ["product_id"] })
+      const own = row?.product_id ?? ""
+      const refused = [
+        await post("/admin/products", { title: "Yeni", metadata: { sample: "travel@1" } }),
+        await post(`/admin/products/${own}`, { metadata: { sample_of: own } }),
+        await post(`/admin/products/${own}`, { metadata: { sample_at: "" } }),
+        await post("/admin/products/batch", {
+          update: [{ id: own, metadata: { sample: "travel@1", sample_of: own } }],
+        }),
+        await post("/admin/product-categories", {
+          name: "Yeni",
+          metadata: { sample_opened: "travel@1" },
+        }),
+      ]
+      for (const answer of refused) {
+        expect([answer.status, answer.data.message]).toEqual([
+          400,
+          "sample_catalog.metadata_reserved",
+        ])
+      }
+      // The shop's own keys still save
+      const ownKeys = await post(`/admin/products/${own}`, { metadata: { renk: "kırmızı" } })
+      expect(ownKeys.status).toBe(200)
     })
 
     it("is the owner's and admin's: operations staff are turned away", async () => {

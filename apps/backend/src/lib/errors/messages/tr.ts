@@ -19,6 +19,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "sample_catalog.pack_not_applied": "Bu sektör paketi mağazanıza uygulanmamış.",
   "sample_catalog.already_loaded": "Bu örnek içerik zaten yüklü.",
   "sample_catalog.loading": "Örnek içerik şu an yükleniyor; bitince yeniden deneyin.",
+  "sample_catalog.busy":
+    "Örnek içerik şu an yükleniyor ya da kaldırılıyor; birazdan yeniden deneyin.",
+  "sample_catalog.metadata_reserved": "Örnek içerik işaretlerini yalnızca mağaza sistemi yazar.",
   "sample_catalog.booked_meanwhile":
     "Bu arada bir örnek ürüne rezervasyon ya da sipariş geldi; listeyi yenileyip yeniden deneyin.",
   "billing_profile.unknown": "Bu müşterinin fatura bilgisi yok.",

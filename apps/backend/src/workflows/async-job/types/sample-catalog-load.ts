@@ -1,8 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 import { loadSampleCatalogWorkflow } from "../../sample-catalog/load"
+import { SAMPLE_LOAD_JOB } from "../../../lib/sample-catalog/load-job"
+import { busyAsJobError } from "../../../lib/sample-catalog/lock"
 import type { JobType } from "./types"
 
-export const SAMPLE_LOAD_JOB = "sample_catalog.load"
+export { SAMPLE_LOAD_JOB }
 
 export const SampleCatalogLoadInput = z.object({ pack: z.string().min(1).max(64) }).strict()
 export type SampleCatalogLoadInput = z.infer<typeof SampleCatalogLoadInput>
@@ -23,9 +25,12 @@ export const sampleCatalogLoad: JobType<SampleCatalogLoadInput> = {
   containsPersonalData: false,
   execute: async ({ container, job, progress }, { pack }) => {
     await progress(1)
-    const { result } = await loadSampleCatalogWorkflow(container).run({
-      input: { pack, job_id: job.id },
-    })
+    const { result } = await loadSampleCatalogWorkflow(container)
+      .run({ input: { pack, job_id: job.id } })
+      .catch((error: unknown) => {
+        // A removal running: the job ends with a code the card can say
+        throw busyAsJobError(error)
+      })
     return { summary: { ...result } }
   },
 }

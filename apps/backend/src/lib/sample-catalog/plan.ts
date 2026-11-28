@@ -1,9 +1,12 @@
 /**
  * What "Örnek içeriği kaldır" takes out (owner, 2026-11-28), decided from
  * rows read beforehand: pure, so the choices are tested apart from the
- * writes. Only sample records go; a sample product an order holds, or
- * whose departure has a place sold or held, stays and is named; a sample
- * category with anything of the shop's in it stays and is named.
+ * writes. Only sample records go; a sample product an order holds, whose
+ * departure has a place sold or held, or that a customer wrote on (a
+ * review, a question or an answer: deleting the product would leave them
+ * pointing at nothing, deleting them is not this button's to do), stays
+ * and is named; a sample category with anything of the shop's in it stays
+ * and is named.
  */
 
 export const SAMPLE_PARTS = ["products", "categories", "reviews"] as const
@@ -16,6 +19,8 @@ export interface SampleProductRow {
   ordered: boolean
   /** A departure of it has a place sold or held by a cart. */
   booked: boolean
+  /** Reviews (not the set's), questions and answers customers wrote on it. */
+  customer_content: number
 }
 
 export interface CategoryRow {
@@ -41,18 +46,30 @@ export interface RemovalChoice {
   keep_product_ids: readonly string[]
 }
 
-export type BlockReason = "ordered" | "booked"
+export type BlockReason = "ordered" | "booked" | "customer_content"
 export type CategoryKeptReason = "own_products" | "samples_left" | "children"
 
 export interface RemovalPlan {
   product_ids: string[]
-  blocked: { id: string; title: string; reason: BlockReason }[]
+  blocked: { id: string; title: string; reason: BlockReason; customer_content: number }[]
+  /** What customers wrote on the sample products that stay for it ("müşteri içeriği var: N"). */
+  customer_content: number
   review_ids: string[]
   category_ids: string[]
   categories_kept: { id: string; name: string; reason: CategoryKeptReason }[]
   /** Pack categories the samples opened, empty once the products go: hidden again. */
   hide_category_ids: string[]
 }
+
+/** Why a sample product stays whatever is chosen, or null when it may go. */
+export const blockReason = (product: SampleProductRow): BlockReason | null =>
+  product.ordered
+    ? "ordered"
+    : product.booked
+      ? "booked"
+      : product.customer_content > 0
+        ? "customer_content"
+        : null
 
 /** The plan for a choice; every list holds ids the rows named, never one more. */
 export function planRemoval(
@@ -73,11 +90,13 @@ export function planRemoval(
       if (keep.has(product.id)) {
         continue
       }
-      if (product.ordered || product.booked) {
+      const reason = blockReason(product)
+      if (reason) {
         blocked.push({
           id: product.id,
           title: product.title,
-          reason: product.ordered ? "ordered" : "booked",
+          reason,
+          customer_content: product.customer_content,
         })
         continue
       }
@@ -132,6 +151,7 @@ export function planRemoval(
   return {
     product_ids: [...going],
     blocked,
+    customer_content: blocked.reduce((sum, row) => sum + row.customer_content, 0),
     review_ids,
     category_ids: samples.filter((c) => removed.has(c.id)).map((c) => c.id),
     categories_kept: samples.flatMap((category) => {

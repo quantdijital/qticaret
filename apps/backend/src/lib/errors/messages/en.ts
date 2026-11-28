@@ -16,6 +16,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "sample_catalog.pack_not_applied": "This sector pack was not applied to your store.",
   "sample_catalog.already_loaded": "This sample content is already loaded.",
   "sample_catalog.loading": "The sample content is loading; try again once it is done.",
+  "sample_catalog.busy":
+    "The sample content is being loaded or removed right now; try again in a moment.",
+  "sample_catalog.metadata_reserved": "Sample content marks are set by the store only.",
   "sample_catalog.booked_meanwhile":
     "A sample product was booked or ordered meanwhile; refresh the list and try again.",
   "billing_profile.unknown": "This customer has no billing details.",

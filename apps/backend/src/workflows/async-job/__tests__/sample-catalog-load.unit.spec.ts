@@ -32,6 +32,25 @@ describe("the sample catalogue load job (owner, 2026-11-28)", () => {
     })
   })
 
+  it("ends with sample_catalog.busy while a removal holds the lock", async () => {
+    const run = jest
+      .fn()
+      .mockRejectedValue(new Error('Failed to acquire lock for key "sample-catalog"'))
+    workflow.mockReturnValue({ run })
+    const job = { id: "job_1", requested_by: "user_1" } as AsyncJobRecord
+    await expect(
+      sampleCatalogLoad.execute(
+        {
+          container: {} as MedusaContainer,
+          job,
+          progress: jest.fn().mockResolvedValue(undefined),
+          resultFile: jest.fn(),
+        },
+        { pack: "travel" }
+      )
+    ).rejects.toMatchObject({ safeMessage: "sample_catalog.busy" })
+  })
+
   it("takes only a pack name", () => {
     expect(sampleCatalogLoad.input.safeParse({ pack: "travel" }).success).toBe(true)
     expect(sampleCatalogLoad.input.safeParse({ pack: "travel", extra: 1 }).success).toBe(false)

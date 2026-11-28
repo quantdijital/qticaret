@@ -7,10 +7,8 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  acquireLockStep,
   deleteProductCategoriesWorkflow,
   deleteProductsWorkflow,
-  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
@@ -27,7 +25,10 @@ import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
-import { SAMPLE_LOCK } from "./load"
+import { SAMPLE_LOCK, SAMPLE_LOCK_TTL, renewSampleLock } from "../../lib/sample-catalog/lock"
+import type { HeldSampleLock } from "../../lib/sample-catalog/lock"
+import { acquireLocksStep } from "../locking/acquire-locks"
+import { releaseLocksStep } from "../locking/release-locks"
 import { setOpened, slotIdsOf } from "./undo"
 
 export interface SampleRemovalPlan extends RemovalPlan {
@@ -185,12 +186,22 @@ export const freeSamplePathsStep = createStep(
   }
 )
 
+/** The run's lock held longer between its steps (`renewSampleLock`); nothing to undo. */
+export const renewSampleLockStep = createStep(
+  "sample-catalog-renew-lock",
+  async (input: { lock: HeldSampleLock | undefined; after: unknown }, { container }) => {
+    await renewSampleLock(container, input.lock)
+    return new StepResponse(true)
+  }
+)
+
 export interface RemoveSampleCatalogResult {
   products: number
   categories: number
   reviews: number
   categories_hidden: number
   blocked: RemovalPlan["blocked"]
+  customer_content: number
   categories_kept: RemovalPlan["categories_kept"]
 }
 
@@ -205,10 +216,14 @@ export interface RemoveSampleCatalogResult {
 export const removeSampleCatalogWorkflow = createWorkflow(
   "sample-catalog-remove",
   (input: RemovalChoice) => {
-    acquireLockStep({ key: SAMPLE_LOCK, timeout: 5, ttl: 300 })
+    const held = acquireLocksStep({ key: SAMPLE_LOCK, timeout: 5, ttl: SAMPLE_LOCK_TTL })
     const plan = planSampleRemovalStep(input)
     const reviews = removeSampleReviewsStep(transform({ plan }, ({ plan }) => plan.review_ids))
-    removeSampleSlotsStep(transform({ plan }, ({ plan }) => plan.slot_ids))
+    const slots = removeSampleSlotsStep(transform({ plan }, ({ plan }) => plan.slot_ids))
+    // Each step may take a while on a big set: the lock is held a TTL past the last one
+    renewSampleLockStep(
+      transform({ held, slots }, ({ held, slots }) => ({ lock: held, after: slots }))
+    )
     when("sample-catalog-products-going", { plan }, ({ plan }) => plan.product_ids.length > 0).then(
       () => {
         deleteProductsWorkflow.runAsStep({
@@ -232,7 +247,7 @@ export const removeSampleCatalogWorkflow = createWorkflow(
       }))
     )
     hideOpenedCategoriesStep(transform({ plan }, ({ plan }) => plan.hide_category_ids))
-    releaseLockStep({ key: SAMPLE_LOCK })
+    releaseLocksStep(held)
     const result = transform({ plan, reviews }, ({ plan, reviews }): RemoveSampleCatalogResult => {
       const summary = {
         products: plan.product_ids.length,
@@ -240,6 +255,7 @@ export const removeSampleCatalogWorkflow = createWorkflow(
         reviews,
         categories_hidden: plan.hide_category_ids.length,
         blocked: plan.blocked,
+        customer_content: plan.customer_content,
         categories_kept: plan.categories_kept,
       }
       logger.info(

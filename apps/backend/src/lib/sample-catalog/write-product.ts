@@ -17,7 +17,7 @@ import { Program } from "../booking/program"
 import { summaryDocOfText } from "../catalog/summary"
 import type { ContentDoc } from "../content/doc"
 import { prepareImage } from "../media"
-import { SAMPLE_KEY, sampleMark, sampleReviewRef } from "./mark"
+import { SAMPLE_AT_KEY, madeMark, sampleMark, sampleReviewRef } from "./mark"
 
 const DAY_MS = 24 * 60 * 60 * 1000
 // The shop's currency: a Turkish shop sells in lira (bootstrap sets it)
@@ -34,6 +34,8 @@ export interface SampleContext {
   container: MedusaContainer
   /** `<pack>@<version>`: written into every record's mark. */
   tag: string
+  /** The load job making the set: named on each record until its own id is (`madeMark`). */
+  jobId?: string | undefined
   /** The `samples` folder: an image `images/x.webp` is read from beside it. */
   dir: string
   salesChannelId: string | null
@@ -88,7 +90,7 @@ async function createProduct(
           title: product.title,
           handle,
           status: ProductStatus.PUBLISHED,
-          metadata: { [SAMPLE_KEY]: context.tag },
+          metadata: madeMark(context.tag, context.jobId),
           category_ids: product.categories.flatMap((each) => {
             const id = context.categoryIds.get(each)
             return id ? [id] : []
@@ -196,9 +198,11 @@ async function addReviews(
 
 /**
  * One sample product, made as the panel makes one: its pictures first,
- * Medusa's create, then its kind and texts, attribute values, departures
- * and program, reviews, and last its mark with its own id. Its id is
- * handed to `made` as soon as it exists, so a failure later removes it.
+ * Medusa's create, its mark with its own id at once (a stop later leaves a
+ * marked sample, never a product that only names its job), then its kind
+ * and texts, attribute values, departures and program, reviews, and last
+ * the time it was made, stamped again (the edits before it are the load's).
+ * Its id is handed to `made` as soon as it exists, so a failure later removes it.
  */
 export async function writeSampleProduct(
   context: SampleContext,
@@ -212,6 +216,8 @@ export async function writeSampleProduct(
   }
   const id = await createProduct(context, product, handle, urls)
   made(id)
+  const products = context.container.resolve(Modules.PRODUCT)
+  await products.updateProducts(id, { metadata: sampleMark(context.tag, id, new Date()) })
   await deriveProductMediaWorkflow(context.container).run({ input: { product_id: id } })
   const primary = context.categoryIds.get(product.categories[0] ?? "")
   const summary = product.summary ? summaryDocOfText(product.summary) : null
@@ -236,8 +242,6 @@ export async function writeSampleProduct(
   }
   await setBooking(context, product, id)
   await addReviews(context, product, id)
-  await context.container
-    .resolve(Modules.PRODUCT)
-    .updateProducts(id, { metadata: sampleMark(context.tag, id, new Date()) })
+  await products.updateProducts(id, { metadata: { [SAMPLE_AT_KEY]: new Date().toISOString() } })
   return id
 }

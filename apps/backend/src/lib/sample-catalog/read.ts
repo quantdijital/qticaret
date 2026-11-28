@@ -4,14 +4,18 @@ import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
+import { PRODUCT_QA_MODULE } from "../../modules/product-qa"
+import type ProductQaModuleService from "../../modules/product-qa/service"
 import {
   SAMPLE_KEY,
   SAMPLE_OPENED_KEY,
   SAMPLE_REVIEW_PREFIX,
   isEditedSample,
   isSampleRecord,
+  isSampleReviewRef,
   packOfTag,
 } from "./mark"
+import { unfinishedLoadJobs } from "./load-job"
 import type { CategoryRow, ReviewRow, SampleProductRow } from "./plan"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -39,7 +43,8 @@ interface ProductRow {
 
 /** Every product of the shop that carries a sample mark of its own; and whether any other exists. */
 async function markedProducts(
-  container: Container
+  container: Container,
+  unfinished: ReadonlySet<string>
 ): Promise<{ samples: ProductRow[]; others: number }> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const samples: ProductRow[] = []
@@ -52,7 +57,7 @@ async function markedProducts(
     })
     const rows = data as unknown as ProductRow[]
     for (const row of rows) {
-      if (isSampleRecord(row)) {
+      if (isSampleRecord(row, unfinished)) {
         samples.push(row)
       } else {
         others += 1
@@ -104,6 +109,44 @@ async function bookedProductIds(container: Container, ids: string[]): Promise<Se
   )
 }
 
+/**
+ * How much a customer wrote on each product (reviews not from the set,
+ * questions and answers of customers), any state: a sample product with
+ * some stays (security review 2026-11-28, D6).
+ */
+async function customerContent(container: Container, ids: string[]): Promise<Map<string, number>> {
+  const counts = new Map<string, number>()
+  if (ids.length === 0) {
+    return counts
+  }
+  const qa = container.resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
+  const [reviews, questions, answers] = await Promise.all([
+    container
+      .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+      .listProductReviews(
+        { product_id: ids },
+        { select: ["product_id", "source_ref"], take: null }
+      ),
+    qa.listProductQuestions(
+      { product_id: ids, author_kind: "customer" },
+      { select: ["product_id"], take: null }
+    ),
+    qa.listProductAnswers(
+      { product_id: ids, author_kind: "customer" },
+      { select: ["product_id"], take: null }
+    ),
+  ])
+  const rows = [
+    ...reviews.filter((review) => !isSampleReviewRef(review.source_ref)),
+    ...questions,
+    ...answers,
+  ]
+  for (const row of rows) {
+    counts.set(row.product_id, (counts.get(row.product_id) ?? 0) + 1)
+  }
+  return counts
+}
+
 export interface SampleRows {
   products: SampleProduct[]
   categories: CategoryRow[]
@@ -127,11 +170,13 @@ interface CategoryGraphRow {
  * made or opened with the products in it, and its reviews.
  */
 export async function readSampleRows(container: Container): Promise<SampleRows> {
-  const { samples, others } = await markedProducts(container)
+  const unfinished = await unfinishedLoadJobs(container)
+  const { samples, others } = await markedProducts(container, unfinished)
   const ids = samples.map((row) => row.id)
-  const [ordered, booked] = await Promise.all([
+  const [ordered, booked, written] = await Promise.all([
     orderedProductIds(container, ids),
     bookedProductIds(container, ids),
+    customerContent(container, ids),
   ])
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_category",
@@ -140,7 +185,7 @@ export async function readSampleRows(container: Container): Promise<SampleRows> 
   const categories = (data as unknown as CategoryGraphRow[]).map((row): CategoryRow => ({
     id: row.id,
     name: row.name,
-    sample: isSampleRecord(row),
+    sample: isSampleRecord(row, unfinished),
     opened: packOfTag(row.metadata?.[SAMPLE_OPENED_KEY]) !== null,
     is_active: row.is_active,
     parent_id: row.parent_category_id ?? null,
@@ -163,6 +208,7 @@ export async function readSampleRows(container: Container): Promise<SampleRows> 
       edited: isEditedSample(row),
       ordered: ordered.has(row.id),
       booked: booked.has(row.id),
+      customer_content: written.get(row.id) ?? 0,
     })),
     // A sample category, one the samples opened, or a child of a sample one (the shop's
     // own child keeps its parent): the others are not this feature's

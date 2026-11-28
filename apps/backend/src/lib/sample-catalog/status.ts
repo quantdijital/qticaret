@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { sectorPack } from "@qticaret/sector-packs"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
+import { blockReason } from "./plan"
 import type { BlockReason } from "./plan"
 import { readSampleRows } from "./read"
 
@@ -30,8 +31,10 @@ export interface SampleStatus {
     thumbnail: string | null
     pack: string
     edited: boolean
-    /** Why "Örnek içeriği kaldır" leaves it: an order holds it, or a place is sold or held. */
+    /** Why "Örnek içeriği kaldır" leaves it: an order, a sold or held place, a customer's words. */
     blocked: BlockReason | null
+    /** Reviews, questions and answers customers wrote on it. */
+    customer_content: number
   }[]
   categories: number
   reviews: number
@@ -68,7 +71,8 @@ export async function sampleStatus(container: Container): Promise<SampleStatus> 
       thumbnail: product.thumbnail,
       pack: product.pack,
       edited: product.edited,
-      blocked: product.ordered ? "ordered" : product.booked ? "booked" : null,
+      blocked: blockReason(product),
+      customer_content: product.customer_content,
     })),
     categories: rows.categories.filter((category) => category.sample).length,
     reviews: rows.reviews.length,

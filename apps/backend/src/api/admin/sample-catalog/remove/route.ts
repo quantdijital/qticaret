@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ConflictError } from "../../../../lib/errors"
 import { latestSampleLoad } from "../../../../lib/sample-catalog/load-job"
+import { busyAsConflict } from "../../../../lib/sample-catalog/lock"
 import { planRemoval } from "../../../../lib/sample-catalog/plan"
 import { readSampleRows } from "../../../../lib/sample-catalog/read"
 import { sampleStatus } from "../../../../lib/sample-catalog/status"
@@ -12,6 +13,8 @@ import type { AdminPostSampleCatalogRemoveType } from "../validators"
  * parts of what the sample catalogue made, never a record of the shop's
  * own. `dry_run` answers the plan (what would go, what stays and why)
  * without writing: the panel's confirmation shows it before the owner agrees.
+ * A load (or another removal) holding the catalogue's lock meanwhile,
+ * started after the check below, is answered 409 `sample_catalog.busy`.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostSampleCatalogRemoveType>,
@@ -33,11 +36,16 @@ export async function POST(
         reviews: plan.review_ids.length,
         categories_hidden: plan.hide_category_ids.length,
         blocked: plan.blocked,
+        customer_content: plan.customer_content,
         categories_kept: plan.categories_kept,
       },
     })
     return
   }
-  const { result } = await removeSampleCatalogWorkflow(req.scope).run({ input: choice })
+  const { result } = await removeSampleCatalogWorkflow(req.scope)
+    .run({ input: choice })
+    .catch((error: unknown) => {
+      throw busyAsConflict(error)
+    })
   res.json({ result, sample_catalog: await sampleStatus(req.scope) })
 }
