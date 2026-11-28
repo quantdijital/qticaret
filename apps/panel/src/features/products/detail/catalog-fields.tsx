@@ -22,6 +22,7 @@ import type {
 } from "@/features/products/api/product-edit"
 import { BookingModeField } from "./booking-mode-field"
 import { GiftCardField } from "./gift-card-field"
+import { SwitchName } from "./hint-parts"
 
 // Radix Select has no empty value; this one stands for "none chosen"
 const NONE = "__none__"
@@ -214,14 +215,12 @@ export function CatalogFields({
         </Field>
       ) : null}
       <div className="flex items-start justify-between gap-4 border-t pt-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <label htmlFor="catalog-withdrawal" className="text-sm font-medium">
-            {t("products.catalog.withdrawalExcluded")}
-          </label>
-          <span id="catalog-withdrawal-hint" className="text-[13px] text-muted-foreground">
-            {t("products.catalog.withdrawalExcludedHint")}
-          </span>
-        </div>
+        <SwitchName
+          htmlFor="catalog-withdrawal"
+          label={t("products.catalog.withdrawalExcluded")}
+          hint={t("products.catalog.withdrawalExcludedHint")}
+          hintId="catalog-withdrawal-hint"
+        />
         <Controller
           control={form.control}
           name="withdrawal_excluded"

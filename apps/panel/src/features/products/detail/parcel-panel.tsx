@@ -15,6 +15,7 @@ import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useStoreUnits } from "@/features/products/use-units"
 import { errorText } from "@/lib/errors"
+import { FormNote } from "./hint-parts"
 import { MEASURES, measureSchema, measureText } from "./measures"
 import type { MeasureName } from "./measures"
 import { PRODUCT_SECTIONS } from "./sections"
@@ -104,10 +105,11 @@ export function ParcelPanel({ product }: { product: ProductDetail }) {
         form.reset(saved, FULL_RESET)
       }}
     >
-      <p className="text-[13px] text-muted-foreground">
-        {t("products.detail.shippingHint")}
-        {entered ? null : ` ${t("products.sections.defaultParcel")}`}
-      </p>
+      <FormNote
+        name={t("products.wizard.shippingCard")}
+        hint={t("products.detail.shippingHint")}
+        state={entered ? undefined : t("products.sections.defaultParcel")}
+      />
       <Controller
         control={form.control}
         name="shipping_class"

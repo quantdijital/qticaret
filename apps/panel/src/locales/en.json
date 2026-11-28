@@ -3932,6 +3932,7 @@
       "available": "Sellable stock",
       "created": "Added",
       "shippingHint": "Optional. These apply to variants without their own values; with none, shipping is priced by the default parcel.",
+      "aboutForm": "What is it for?",
       "publish": "Publish",
       "unpublish": "Unpublish",
       "published": "Product published.",

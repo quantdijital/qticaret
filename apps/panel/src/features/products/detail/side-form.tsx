@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { useDirtyEntry } from "@qticaret/admin-ui/patterns/dirty-registry"
 import { useDiscardGuard } from "@qticaret/admin-ui/patterns/use-discard-guard"
 import { Button } from "@qticaret/admin-ui/ui/button"
+import { FormNote } from "./hint-parts"
 
 // A key pressed in a list or menu that is open (a picker's options): its own Esc closes that first
 const inOpenPopup = (target: EventTarget): boolean =>
@@ -75,7 +76,7 @@ export function SideForm({
           onSubmit()
         }}
       >
-        {hint ? <p className="text-[13px] text-muted-foreground">{hint}</p> : null}
+        {hint ? <FormNote name={label} hint={hint} /> : null}
         {children}
         <div className="flex items-center justify-end gap-2 border-t pt-4">
           <Button type="button" variant="cancel" size="sm" disabled={saving} onClick={cancel}>

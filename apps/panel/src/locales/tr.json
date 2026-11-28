@@ -3932,6 +3932,7 @@
       "available": "Satılabilir stok",
       "created": "Eklenme",
       "shippingHint": "İsteğe bağlı. Varyantında ayrıca girilmemişse bu değerler geçerlidir; hiç girilmezse kargo ücreti varsayılan pakete göre hesaplanır.",
+      "aboutForm": "Ne işe yarar?",
       "publish": "Yayınla",
       "unpublish": "Yayından kaldır",
       "published": "Ürün yayınlandı.",
