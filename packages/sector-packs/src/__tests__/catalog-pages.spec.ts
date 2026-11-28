@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { packItemKey, readPack, sectorPack, sectorPacks } from "../index"
+import { STARTER_HANDLES } from "./starters"
 
 /** A pack's catalog defaults and draft pages (adr/0076 §12), and the travel pack built on them. */
 
@@ -68,13 +69,16 @@ describe("the travel pack (adr/0076 §12)", () => {
     expect(["kategori", "tarih", "ay", "kisi", "sirala"]).not.toContain(destination?.key)
   })
 
-  it("offers its cancellation terms as one page", () => {
-    expect(travel?.pages?.map((page) => page.handle)).toEqual(["iptal-kosullari"])
-    expect(travel?.pages?.[0]?.body.type).toBe("doc")
+  it("offers its cancellation terms as a page, after the starter pages", () => {
+    expect(travel?.pages?.map((page) => page.handle)).toEqual([
+      ...STARTER_HANDLES,
+      "iptal-kosullari",
+    ])
+    expect(travel?.pages?.at(-1)?.body.type).toBe("doc")
   })
 
   it("offers three storefront presets, each asking the destination in its search", () => {
-    expect(travel?.version).toBe(2)
+    expect(travel?.version).toBe(3)
     expect(travel?.presets.map((preset) => preset.code).sort()).toEqual(["patika", "rota", "vadi"])
     for (const preset of travel?.presets ?? []) {
       expect(preset.theme_settings).toMatchObject({
@@ -83,9 +87,10 @@ describe("the travel pack (adr/0076 §12)", () => {
     }
   })
 
-  it("leaves the other packs' defaults and pages empty", () => {
+  it("leaves the other packs' defaults empty, their pages the starter pages", () => {
     expect(sectorPack("cutlery")?.catalog).toEqual({})
-    expect(sectorPack("general")?.pages).toEqual([])
+    expect(sectorPack("general")?.pages?.map((page) => page.handle)).toEqual(STARTER_HANDLES)
+    expect(sectorPack("cutlery")?.pages?.map((page) => page.handle)).toEqual(STARTER_HANDLES)
   })
 
   it("names the new items the same way every time", () => {

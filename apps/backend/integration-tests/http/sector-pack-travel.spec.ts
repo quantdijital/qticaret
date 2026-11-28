@@ -13,8 +13,9 @@ import { updatePlatformSettingsWorkflow } from "../../src/workflows/platform-set
 jest.setTimeout(240 * 1000)
 
 const travel = sectorPack("travel") as SectorPack
-// A template, its six attributes, ten categories, two flags, three catalog defaults, a page
-const TRAVEL_ITEMS = 1 + 6 + 10 + 2 + 3 + 1
+// A template, its six attributes, ten categories, two flags, three catalog defaults, its page and
+// the five starter pages (adr/0073 Ek 2026-11-28)
+const TRAVEL_ITEMS = 1 + 6 + 10 + 2 + 3 + 1 + 5
 
 /**
  * adr/0076 §12: the travel pack turns on dated selling, sets what a new
@@ -70,17 +71,22 @@ medusaIntegrationTestRunner({
         new_product_booking_mode: "departure",
         dated_schema_type: "TouristTrip",
       })
-      expect(await pages()).toEqual([
+      const drafts = await pages()
+      expect(drafts).toContainEqual(
         expect.objectContaining({
           handle: "iptal-kosullari",
           title: "İptal ve Değişiklik Koşulları",
           status: "draft",
-        }),
-      ])
+        })
+      )
+      expect(drafts.map((page) => page.handle).sort()).toEqual(
+        [...(travel.pages ?? []).map((page) => page.handle)].sort()
+      )
+      expect(drafts.every((page) => page.status === "draft")).toBe(true)
 
       const second = await applySectorPack(container(), travel)
       expect(second).toMatchObject({ added: 0, kept: 0, skipped: 0 })
-      expect(await pages()).toHaveLength(1)
+      expect(await pages()).toHaveLength(drafts.length)
     })
 
     it("keeps a new product's kind the shop chose, and the page of the same handle it has", async () => {
@@ -103,7 +109,8 @@ medusaIntegrationTestRunner({
         new_product_kind: "digital",
         new_product_booking_mode: "none",
       })
-      expect(await pages()).toEqual([
+      const after = await pages()
+      expect(after.filter((page) => page.handle === "iptal-kosullari")).toEqual([
         expect.objectContaining({ title: "Bizim koşullarımız", status: "published" }),
       ])
     })

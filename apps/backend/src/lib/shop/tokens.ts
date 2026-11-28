@@ -4,7 +4,9 @@ import type { Block, ContentDoc, Inline } from "../content"
  * The shop's details a text written in the panel stands in for (adr/0048):
  * `{telefon}` in an announcement, a page or a post shows the number as the
  * store details say it now, so a change is made once. The `{belirteç}`
- * form and the names are the legal texts' own (adr/0041 §1).
+ * form and the names are the legal texts' own (adr/0041 §1); the shipping
+ * days and the withdrawal period read as the legal texts print them
+ * ("1–2 iş günü", "14"), so a starter page can cite them.
  */
 export const SHOP_INFO_TOKENS = [
   "mağaza_adı",
@@ -13,6 +15,9 @@ export const SHOP_INFO_TOKENS = [
   "adres",
   "whatsapp",
   "ücretsiz_kargo_eşiği",
+  "hazırlama_süresi",
+  "kargo_süresi",
+  "iade_süresi",
 ] as const
 
 export type ShopInfoToken = (typeof SHOP_INFO_TOKENS)[number]

@@ -27,8 +27,9 @@ function packOf(code: string): SectorPack {
 }
 
 const cutlery = packOf("cutlery")
-// Everything the cutlery pack holds: templates, attributes, categories, flags, SEO templates
-const CUTLERY_ITEMS = 2 + 31 + 16 + 2 + 1
+// Everything the cutlery pack holds: templates, attributes, categories, flags, SEO templates,
+// the starter pages (adr/0073 Ek 2026-11-28)
+const CUTLERY_ITEMS = 2 + 31 + 16 + 2 + 1 + 5
 const BRAND = "{marka} Bıçak ve Çakı Modelleri | {mağaza}"
 
 /** The cutlery pack one version on: a template, attributes, a category and an SEO template more. */
@@ -264,8 +265,9 @@ medusaIntegrationTestRunner({
         expect(readTenantResult(written.join(""))).toEqual({
           status: "applied",
           pack: "general",
-          version: 2,
-          added: 6,
+          version: 3,
+          // A template, its five attributes and the five starter pages
+          added: 11,
           kept: 0,
           skipped: 0,
         })
