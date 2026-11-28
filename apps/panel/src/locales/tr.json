@@ -9739,7 +9739,10 @@
       "email": "E-posta",
       "address": "Adres",
       "whatsapp": "WhatsApp numarası",
-      "freeShippingThreshold": "Ücretsiz kargo eşiği"
+      "freeShippingThreshold": "Ücretsiz kargo eşiği",
+      "handlingDays": "Hazırlama süresi",
+      "transitDays": "Kargo süresi",
+      "withdrawalDays": "İade süresi (gün)"
     },
     "ownTitle": "Bilgi ekle",
     "ownHint": "Gönderimde müşterinin ve siparişin bilgisiyle dolar."
@@ -13406,7 +13409,8 @@
         "pageMissingAddress": "Adresi ‘{{handle}}’ olan sayfa olmadığı için sayfa düzeni eklenmedi. Bu adresle bir sayfa açıp görünümü yeniden uygulayın.",
         "pageLimit": "{{name}} sayfasının düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
         "pageLimitAddress": "Adresi ‘{{handle}}’ olan sayfanın düzeni eklenmedi: kendi düzeni olan en çok {{max}} sayfa olabilir.",
-        "pageMade": "{{name}} sayfası taslak olarak açıldı; yayına almak için sayfa ayarlarından Yayında'yı seçin.",
+        "pagesMade_one": "{{count}} sayfa taslak olarak açıldı. Yayına almak için sayfayı açın ve sayfa ayarlarından Yayında'yı seçin:",
+        "pagesMade_other": "{{count}} sayfa taslak olarak açıldı. Yayına almak için sayfayı açın ve sayfa ayarlarından Yayında'yı seçin:",
         "pageTaken": "{{name}} sayfası açılamadı: ‘{{handle}}’ adresini başka bir kayıt kullanıyor. Sayfa düzeni eklenmedi.",
         "pageTakenAddress": "‘{{handle}}’ adresinde sayfa açılamadı: adresi başka bir kayıt kullanıyor. Sayfa düzeni eklenmedi.",
         "textKept": "{{name}} sayfasının kendi metni korundu; görünüm yalnız düzeni değiştirdi.",

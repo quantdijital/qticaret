@@ -8,7 +8,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(katalog).toMatchObject({
       pack: "cutlery",
       code: "katalog",
-      version: 5,
+      version: 6,
       theme: "atolye",
       name: "Katalog",
       tone: "light",
@@ -83,6 +83,10 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
       "category:ozel-koleksiyon",
       "category:sef-bicaklari",
       "page:hakkimizda",
+      "page:iletisim",
+      "page:kargo-ve-teslimat",
+      "page:odeme-secenekleri",
+      "page:sik-sorulan-sorular",
     ])
   })
 
@@ -109,7 +113,13 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
   it("lays out the shop's Hakkımızda page as one list, its text first (adr/0073 Ek 2026-11-19 (2) K9)", () => {
     const katalog = storefrontPreset("cutlery", "katalog")
     const [about, ...others] = katalog?.layout.pages ?? []
-    expect(others).toEqual([])
+    // Then the starter pages every look lays out (adr/0073 Ek 2026-11-28)
+    expect(others.map((page) => page.page_id.$handle)).toEqual([
+      "page:iletisim",
+      "page:sik-sorulan-sorular",
+      "page:odeme-secenekleri",
+      "page:kargo-ve-teslimat",
+    ])
     expect(about).toMatchObject({ page_id: { $handle: "page:hakkimizda" }, name: "Hakkımızda" })
     // One list, no `placement`: the look's own page text first, then the six sections as before
     expect(about?.sections.map((each) => [each.id, each.type, each["variant"]])).toEqual([
@@ -147,7 +157,8 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     // The picture is the bıçak pack's own, credited
     expect(katalog?.credits.map((credit) => credit.file)).toEqual(["images/acilis-bileme.webp"])
     expect(katalog?.description).toContain("Hakkımızda sayfası düzeni")
-    expect(katalogVersion()).toBe(5)
-    expect(sectorPack("cutlery")?.version).toBe(16)
+    // Raised again with the starter pages (adr/0073 Ek 2026-11-28)
+    expect(katalogVersion()).toBe(6)
+    expect(sectorPack("cutlery")?.version).toBe(17)
   })
 })

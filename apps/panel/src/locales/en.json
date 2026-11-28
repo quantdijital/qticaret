@@ -9739,7 +9739,10 @@
       "email": "E-mail",
       "address": "Address",
       "whatsapp": "WhatsApp number",
-      "freeShippingThreshold": "Free shipping threshold"
+      "freeShippingThreshold": "Free shipping threshold",
+      "handlingDays": "Handling time",
+      "transitDays": "Delivery time",
+      "withdrawalDays": "Return period (days)"
     },
     "ownTitle": "Add a detail",
     "ownHint": "Filled with the customer's and order's details when it is sent."
@@ -13406,7 +13409,8 @@
         "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
         "pageLimit": "The {{name}} page's layout was not added: at most {{max}} pages can have their own layout.",
         "pageLimitAddress": "The layout of the page at ‘{{handle}}’ was not added: at most {{max}} pages can have their own layout.",
-        "pageMade": "The {{name}} page was opened as a draft; to put it live, choose Live in the page settings.",
+        "pagesMade_one": "{{count}} page was opened as a draft. To put it live, open it and choose Live in its settings:",
+        "pagesMade_other": "{{count}} pages were opened as drafts. To put one live, open it and choose Live in its settings:",
         "pageTaken": "The {{name}} page could not be opened: another record uses the address ‘{{handle}}’. The page layout was not added.",
         "pageTakenAddress": "No page could be opened at ‘{{handle}}’: another record uses the address. The page layout was not added.",
         "textKept": "The {{name}} page kept its own text; the look changed only its layout.",
