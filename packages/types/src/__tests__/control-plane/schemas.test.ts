@@ -19,7 +19,11 @@ import {
   SIGNED_REQUEST_HEADERS,
   signedRequestHeadersSchema,
 } from "../../control-plane/signature.js"
-import { usagePeriodOf, usageReportSchema } from "../../control-plane/usage-report.js"
+import {
+  SETUP_FACT_KEYS,
+  usagePeriodOf,
+  usageReportSchema,
+} from "../../control-plane/usage-report.js"
 import { planDocument, usageReport } from "./fixtures.js"
 
 const SIGNATURE = "A".repeat(86)
@@ -170,6 +174,35 @@ describe("usage report schema", () => {
     ["a bad commit", { ...usageReport, release: { ...usageReport.release, commit: "HEAD" } }],
   ])("refuses %s", (_case, report) => {
     expect(usageReportSchema.safeParse(report).success).toBe(false)
+  })
+
+  const setup = {
+    store_named: true,
+    currency: true,
+    region: true,
+    stock_location: true,
+    shipping: false,
+    payment: false,
+    product_published: true,
+    look_published: false,
+    legal_published: false,
+    mail_sender: false,
+  }
+
+  it("takes the setup checklist, or a report without one (an older shop)", () => {
+    expect(usageReportSchema.parse({ ...usageReport, setup })).toEqual({ ...usageReport, setup })
+    expect(Object.keys(setup).sort()).toEqual([...SETUP_FACT_KEYS].sort())
+    expect(usageReportSchema.parse(usageReport)).not.toHaveProperty("setup")
+  })
+
+  it.each([
+    ["a provider's name", { ...setup, payment: "paytr" }],
+    ["a count", { ...setup, product_published: 3 }],
+    ["an unknown step", { ...setup, domain: true }],
+    ["a missing step", { ...setup, mail_sender: undefined }],
+    ["null", null],
+  ])("refuses a setup with %s", (_case, value) => {
+    expect(usageReportSchema.safeParse({ ...usageReport, setup: value }).success).toBe(false)
   })
 
   it("names the period by the month in Turkey (UTC+3), Ek C13", () => {

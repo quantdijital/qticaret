@@ -3,7 +3,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { MemoryNonceStore, verifySignedRequest } from "@qticaret/server-kit"
-import { usageReportSchema } from "@qticaret/types/control-plane"
+import { SETUP_FACT_KEYS, usageReportSchema } from "@qticaret/types/control-plane"
 import { TENANT_ID } from "@qticaret/types/control-plane/testing"
 import { USAGE_PATH, sendUsageReport } from "../../src/lib/control-plane/report"
 import { startOfTurkishMonth, turkishMonth } from "../../src/lib/control-plane/usage"
@@ -122,9 +122,15 @@ medusaIntegrationTestRunner({
           "period",
           "release",
           "reported_at",
+          "setup",
           "tenant_id",
           "version",
         ].sort()
+      )
+      // Ek C21: the setup checklist, read from the real modules, yes/no only
+      expect(Object.keys(report.setup ?? {}).sort()).toEqual([...SETUP_FACT_KEYS].sort())
+      expect(Object.values(report.setup ?? {}).every((value) => typeof value === "boolean")).toBe(
+        true
       )
       expect(report).toMatchObject({
         version: 1,

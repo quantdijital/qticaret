@@ -1,7 +1,9 @@
 /**
  * The setup checklist (docs/17): which steps a new shop needs before it
  * can sell, and how each is judged done. No React or SDK here, so the
- * rules are unit-tested on their own.
+ * rules are unit-tested on their own. The shop's usage report sends the
+ * same steps to the control plane as yes/no (adr/0061 Ek C21,
+ * `apps/backend/src/lib/control-plane/setup-facts.ts`): change both together.
  */
 
 /** The name Medusa's store model starts with; bootstrap refuses it (docs/17). */

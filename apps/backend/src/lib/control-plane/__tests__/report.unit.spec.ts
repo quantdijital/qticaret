@@ -106,6 +106,31 @@ describe("sendUsageReport (adr/0061 §5.4, Ek C13)", () => {
     expect(changed).toEqual({ ok: false, code: "signature.invalid" })
   })
 
+  it("carries the setup checklist when it reads, and the counts without it when not (Ek C21)", async () => {
+    const withSetup: Record<string, unknown> = {
+      ...services,
+      region: { listAndCountRegions: () => Promise.resolve([[], 1]) },
+      stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 1]) },
+      fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
+      integrationCredentials: { describe: () => Promise.resolve({ state: "not_configured" }) },
+      storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
+      legal: { listLegalDocuments: () => Promise.resolve([]) },
+    }
+    const full = fakeFetch(200)
+    const resolver = { resolve: (key: string) => withSetup[key] } as never
+    expect(await sendUsageReport(resolver, { fetch: full.fetch, release })).toEqual({
+      outcome: "sent",
+    })
+    const sentReport = usageReportSchema.parse(JSON.parse(full.sent[0]?.init.body as string))
+    expect(sentReport.setup).toMatchObject({ region: true, shipping: false, payment: false })
+    // The base container has no region service: the setup read fails, the counts still go
+    const bare = fakeFetch(200)
+    expect(await sendUsageReport(container, { fetch: bare.fetch, release })).toEqual({
+      outcome: "sent",
+    })
+    expect(JSON.parse(bare.sent[0]?.init.body as string)).not.toHaveProperty("setup")
+  })
+
   it("tries once and says why when refused or unreachable; the next hour is the retry", async () => {
     const refused = fakeFetch(409)
     expect(await sendUsageReport(container, { fetch: refused.fetch, release })).toEqual({

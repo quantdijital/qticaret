@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import type { UsageSetup } from "@qticaret/types/control-plane"
 import { tenantPath } from "@/features/tenants/api"
 import { api } from "@/lib/api"
 
@@ -26,6 +27,8 @@ export interface UsageSnapshot {
   counts: UsageCounts
   last_order_at: string | null
   release: { version: string; commit: string }
+  /** Ek C21: the shop's setup checklist (yes/no); null from an older shop. */
+  setup: UsageSetup | null
 }
 
 export interface Probe {

@@ -6,6 +6,7 @@ import { readCapped } from "./pull"
 import type { Fetch } from "./pull"
 import { runningRelease } from "./release"
 import type { Release } from "./release"
+import { readSetupFacts } from "./setup-facts"
 import { buildUsageReport, readUsageCounts } from "./usage"
 
 export const USAGE_PATH = "/tenant-api/v1/usage"
@@ -44,10 +45,15 @@ export async function sendUsageReport(
     // Sent all the same, with the commit as zeros: the counts still matter
     logger.warn({ event: "control_plane.release_unknown" })
   }
+  // Ek C21: the setup checklist is optional; a failed read sends the counts without it
+  const setup = await readSetupFacts(container).catch((error: unknown) => {
+    logger.warn({ event: "control_plane.setup_read_failed", err: errorSummary(error) })
+    return null
+  })
   let body: string
   try {
     const counts = await readUsageCounts(container, now)
-    body = JSON.stringify(buildUsageReport(config.tenantId, counts, release, now))
+    body = JSON.stringify(buildUsageReport(config.tenantId, counts, release, now, setup))
   } catch (error) {
     logger.error({ event: "control_plane.usage_count_failed", err: errorSummary(error) })
     return { outcome: "count_failed" }

@@ -23,6 +23,18 @@ export const USAGE_HEALTH: UsageHealth = {
     },
     last_order_at: "2026-11-11T08:40:00.000Z",
     release: { version: "1.4.0", commit: "0123456789abcdef0123456789abcdef01234567" },
+    setup: {
+      store_named: true,
+      currency: true,
+      region: true,
+      stock_location: true,
+      shipping: true,
+      payment: false,
+      product_published: true,
+      look_published: false,
+      legal_published: true,
+      mail_sender: false,
+    },
   },
   report: { expected: true, missing: false, missing_after_hours: 3 },
   health: {

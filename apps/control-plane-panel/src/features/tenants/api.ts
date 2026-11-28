@@ -1,5 +1,5 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query"
-import type { LimitKey, TenantStatus } from "@qticaret/types/control-plane"
+import type { LimitKey, TenantStatus, UsageSetup } from "@qticaret/types/control-plane"
 import type { HealthState } from "@/features/monitoring/api"
 import type { Plan } from "@/features/packages/api"
 import type { RowVersion, ShopVersion } from "@/features/releases/api"
@@ -29,6 +29,8 @@ export interface TenantRow {
   health: { backend: HealthState | null; storefront: HealthState | null }
   /** Ek C18: what it reports running and whether that is its target. */
   version: RowVersion
+  /** Ek C21: its setup checklist from its latest report; null when none came. */
+  setup: UsageSetup | null
 }
 
 export interface TenantList {

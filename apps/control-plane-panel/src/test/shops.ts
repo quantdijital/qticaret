@@ -64,6 +64,19 @@ export const LIST: TenantList = {
         target: { version: "1.5.0" },
         drift: true,
       },
+      // Ek C21: two steps open
+      setup: {
+        store_named: true,
+        currency: true,
+        region: true,
+        stock_location: true,
+        shipping: false,
+        payment: false,
+        product_published: true,
+        look_published: true,
+        legal_published: true,
+        mail_sender: true,
+      },
     },
     {
       id: "ten_kahve",
@@ -77,6 +90,7 @@ export const LIST: TenantList = {
       next_payment_on: null,
       health: { backend: null, storefront: null },
       version: { reported: null, target: null, drift: false },
+      setup: null,
     },
   ],
   count: 2,

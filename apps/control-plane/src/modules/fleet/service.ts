@@ -6,6 +6,7 @@ import {
   MedusaError,
 } from "@medusajs/framework/utils"
 import { ed25519KeyId, publicKeyFromRaw } from "@qticaret/server-kit"
+import type { UsageSetup } from "@qticaret/types/control-plane"
 import type { TenantKeyStatus } from "./models/tenant-key"
 import { FleetReleases } from "./service-releases"
 
@@ -144,6 +145,32 @@ class FleetModuleService extends FleetReleases {
       [next.id]
     )
     return { from: active?.kid ?? null, to: next.kid }
+  }
+
+  /**
+   * Ek C21: each shop's setup checklist from its latest usage report, for
+   * the shops list (one page, at most 100). A shop without a report, or
+   * whose latest came from an older release without the field, is absent.
+   */
+  @InjectManager()
+  async latestSetups(
+    tenantIds: readonly string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Map<string, UsageSetup>> {
+    if (tenantIds.length === 0) {
+      return new Map()
+    }
+    const rows = (await (sharedContext.manager as Executor).execute(
+      `SELECT t.id AS tenant_id, u.setup
+         FROM unnest(ARRAY[${tenantIds.map(() => "?").join(", ")}]::text[]) AS t(id)
+         CROSS JOIN LATERAL (
+           SELECT setup FROM usage_snapshot
+            WHERE tenant_id = t.id AND deleted_at IS NULL ORDER BY reported_at DESC LIMIT 1
+         ) u
+        WHERE u.setup IS NOT NULL`,
+      [...tenantIds]
+    )) as { tenant_id: string; setup: UsageSetup }[]
+    return new Map(rows.map((row) => [row.tenant_id, row.setup]))
   }
 
   /** The undo of `registerTenantKey` in a failed issue. */

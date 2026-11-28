@@ -33,6 +33,8 @@ const usageView = (row: UsageSnapshotRow | null) =>
         },
         last_order_at: row.last_order_at,
         release: { version: row.release_version, commit: row.release_commit },
+        // Ek C21: the shop's setup checklist (yes/no); null from an older shop
+        setup: row.setup ?? null,
       }
     : null
 
