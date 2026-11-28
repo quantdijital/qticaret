@@ -870,10 +870,18 @@
       "apply_profile_result_invalid": "The shop did not report the profile's result in a readable form.",
       "apply_profile_timeout": "Handing over the shop profile took too long.",
       "backend_not_built": "The shop software is not built. Build it first.",
+      "backup_age_missing": "The backup encryption tool age is not installed on this machine (sudo apt install age).",
+      "backup_failed": "The backup failed; see the shop's backup log.",
+      "backup_no_manifest": "The backup finished but its summary could not be read.",
+      "backup_no_recipients": "No public key is set to encrypt backups to.",
+      "backup_pg_dump_missing": "The database backup tool (pg_dump) could not be reached.",
+      "backup_timeout": "The backup did not finish in time.",
+      "backup_tool_missing": "The backup script was not found.",
       "bootstrap_failed": "The shop's first settings could not be made.",
       "bootstrap_timeout": "The shop's first settings ran over their time limit.",
       "build_stale": "The shop software's build is behind its source. Build it again.",
       "command_unavailable": "This action does not exist in this release.",
+      "control_plane_release_unknown": "The control plane's own version could not be read; nothing was upgraded.",
       "database_failed": "The database operation could not finish.",
       "database_name_invalid": "The database name is not valid.",
       "env_value_invalid": "One of the shop's settings is not valid.",
@@ -898,6 +906,7 @@
       "no_plan_document": "The shop's plan document was not prepared.",
       "no_port": "No port was allocated to the shop.",
       "no_signing_key": "The control plane has no signing key. Prepare one on the Keys page.",
+      "no_target_release": "The shop has no target version. Choose one first.",
       "owner_address_taken": "The owner's e-mail address is used by another account in the shop.",
       "owner_email_invalid": "The owner's e-mail address is not valid.",
       "plan_import_failed": "The plan document could not be imported into the shop.",
@@ -905,6 +914,8 @@
       "plan_import_timeout": "Importing the plan document ran over its time limit.",
       "port_in_use": "The shop's port is used by another application.",
       "preset_unknown": "This ready-made look is not in the shop's sector pack.",
+      "release_ahead_of_control_plane": "The target version is newer than the control plane. Update the control plane first, then the shops.",
+      "release_not_built": "The target version is not built on this server. Build it first.",
       "repo_unknown": "The shop software could not be found.",
       "secrets_exposed": "The shop's secret values file is not safely permissioned; it was not used.",
       "secrets_lost": "The shop's secret values were not found; its keys must be renewed.",
@@ -1209,7 +1220,9 @@
       "start": "Starting the shop server.",
       "stop": "Stopping the shop server.",
       "invite": "Sending the invitation again.",
-      "apply_pack": "The sector pack is being applied."
+      "apply_pack": "The sector pack is being applied.",
+      "backup": "Taking a backup.",
+      "upgrade": "Upgrade started; follow the steps on the Setup tab."
     },
     "reasons": {
       "loading": "Reading the setup.",
@@ -1228,7 +1241,9 @@
       "start": "Start",
       "stop": "Stop",
       "invite": "Invitation",
-      "apply_pack": "Sector pack"
+      "apply_pack": "Sector pack",
+      "backup": "Backup",
+      "upgrade": "Version upgrade"
     },
     "runStatus": {
       "running": "In progress",
@@ -1259,7 +1274,11 @@
       "owner_invite": "Owner invitation",
       "activate": "Activation",
       "stop": "Stopping the shop server",
-      "resend_invite": "Sending the owner invitation again"
+      "resend_invite": "Sending the owner invitation again",
+      "release": "Version check",
+      "backup": "Backup",
+      "upgrade_stop": "Stop",
+      "upgrade_start": "Start"
     },
     "output": {
       "port": "Port {{port}}",
@@ -1284,7 +1303,10 @@
       "profileRefused_other": "{{count}} fields did not fit the shop's format, not handed over",
       "presetPublished": "Published on the storefront",
       "presetDraft": "Written to the draft, not published",
-      "presetApplied": "Applied before; the shop's design was left alone"
+      "presetApplied": "Applied before; the shop's design was left alone",
+      "release": "{{from}} → {{to}}",
+      "backupSize": "Size {{size}}",
+      "backupFiles": "Files included"
     },
     "columns": {
       "kind": "Run",
@@ -1857,7 +1879,7 @@
     "counts": "{{reported}} shops running · {{target}} shops targeting"
   },
   "version": {
-    "tab": "Release",
+    "tab": "Version and backup",
     "title": "Release",
     "text": "The release the shop reported last and its target release.",
     "running": "Running release",
@@ -1923,5 +1945,40 @@
       "legal_published": "Legal texts",
       "mail_sender": "E-mail sending"
     }
+  },
+  "backup": {
+    "title": "Backup",
+    "text": "The database and the shop's files are backed up encrypted. A backup cannot be opened without the offline key.",
+    "last": "Last backup",
+    "size": "Size",
+    "none": "No backup yet.",
+    "files": "Files included",
+    "state": {
+      "succeeded": "Taken",
+      "failed": "Failed",
+      "none": "None"
+    },
+    "failedReason": "Reason",
+    "action": "Back up now",
+    "running": "Taking a backup…",
+    "restore": "Restoring is done from the command line only.",
+    "runbook": "Restore steps",
+    "list": {
+      "ok": "Backup {{when}}",
+      "failed": "Last backup failed",
+      "none": "No backup"
+    }
+  },
+  "upgrade": {
+    "title": "Version upgrade",
+    "text": "A backup is taken first; then the shop is stopped, its database migrated, the shop started again and its health checked.",
+    "action": "Upgrade version",
+    "last": "Last upgrade",
+    "never": "This shop has not been upgraded yet.",
+    "noTarget": "Choose a target version first.",
+    "onTarget": "The shop runs its target version.",
+    "steps": "Follow the steps on the Setup tab.",
+    "confirmTitle": "Upgrade the version?",
+    "confirmText": "The shop moves to version {{to}}. After the backup it is down for a few minutes. If a step fails the run stops and the shop is started again as it was."
   }
 }

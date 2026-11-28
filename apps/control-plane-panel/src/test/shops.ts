@@ -77,6 +77,15 @@ export const LIST: TenantList = {
         legal_published: true,
         mail_sender: true,
       },
+      // Audit 3.2: backed up an hour before the list's clock
+      backup: {
+        status: "succeeded",
+        at: "2026-11-28T03:00:00.000Z",
+        bytes: 12_582_912,
+        files: true,
+        error_code: null,
+        run_id: "prun_bak",
+      },
     },
     {
       id: "ten_kahve",
@@ -91,6 +100,7 @@ export const LIST: TenantList = {
       health: { backend: null, storefront: null },
       version: { reported: null, target: null, drift: false },
       setup: null,
+      backup: null,
     },
   ],
   count: 2,
@@ -196,4 +206,5 @@ export const SHOP: TenantDetail = {
     push_target: null,
   },
   version: { reported: null, target: null, matches: null },
+  backup: null,
 }

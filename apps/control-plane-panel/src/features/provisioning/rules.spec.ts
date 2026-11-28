@@ -61,4 +61,19 @@ describe("the setup's actions by the control plane's rules (Ek C10)", () => {
     expect(lastKnownRunning(state(stopped, [SET_UP]))).toBe(false)
     expect(lastKnownRunning(state(run({ id: "prun_3", kind: "start" }), [stopped]))).toBe(true)
   })
+
+  it("offers a backup to any shop set up, closing too; an upgrade to one that sells or runs (audit 3.1/3.2)", () => {
+    expect(actionRules(state(null), "provisioning").backup.reason).toBe("setup.reasons.notSetUp")
+    for (const status of ["active", "restricted", "suspended"] as const) {
+      const rules = actionRules(state(SET_UP), status)
+      expect(rules.backup.enabled).toBe(true)
+      expect(rules.upgrade.enabled).toBe(true)
+    }
+    const closing = actionRules(state(SET_UP), "closing")
+    expect(closing.backup.enabled).toBe(true)
+    expect(closing.upgrade.reason).toBe("setup.reasons.status")
+    expect(actionRules(state(RUNNING), "active").upgrade.reason).toBe("setup.reasons.busy")
+    // A finished upgrade leaves the shop running
+    expect(lastKnownRunning(state(run({ id: "prun_9", kind: "upgrade" }), [SET_UP]))).toBe(true)
+  })
 })

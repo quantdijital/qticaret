@@ -1,4 +1,5 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useEffect, useRef } from "react"
 import { tenantKey, tenantPath } from "@/features/tenants/api"
 import { api } from "@/lib/api"
 import { withStepUp } from "@/lib/step-up"
@@ -9,7 +10,8 @@ import { withStepUp } from "@/lib/step-up"
  * serial, a duration). No secret, link or address is ever in a run.
  */
 
-export type RunKind = "create" | "start" | "stop" | "invite" | "apply_pack" | (string & {})
+export type RunKind =
+  "create" | "start" | "stop" | "invite" | "apply_pack" | "backup" | "upgrade" | (string & {})
 export type RunStatus = "running" | "succeeded" | "failed"
 export type StepStatus = "pending" | "running" | "succeeded" | "skipped" | "failed" | "compensated"
 
@@ -74,7 +76,7 @@ export const runQuery = (id: string, runId: string) =>
       api<{ run: Run }>(tenantPath(id, `/provisioning/runs/${encodeURIComponent(runId)}`)),
   })
 
-export type RunAction = "create" | "stop" | "start" | "invite" | "apply_pack"
+export type RunAction = "create" | "stop" | "start" | "invite" | "apply_pack" | "backup" | "upgrade"
 
 const ACTION_PATHS: Record<RunAction, string> = {
   create: "/provisioning",
@@ -83,6 +85,9 @@ const ACTION_PATHS: Record<RunAction, string> = {
   invite: "/provisioning/invite",
   // C12: the shop's sector pack again (only what it never had)
   apply_pack: "/provisioning/apply-pack",
+  // Audit 3.2: "Şimdi yedekle"; 3.1: "Sürümü yükselt"
+  backup: "/provisioning/backup",
+  upgrade: "/provisioning/upgrade",
 }
 
 /** Starts a run (owner, operator); each acts outside the control plane, so each asks a step-up. */
@@ -101,4 +106,23 @@ export function useRunAction(id: string) {
       await client.invalidateQueries({ queryKey: tenantKey(id) })
     },
   })
+}
+
+/**
+ * The shop's runs for a card outside the "Kurulum" tab (audit 3.1/3.2),
+ * asked only by the roles that may read them (owner, operator), and the
+ * shop's page read again when its latest run ends (a backup's "Son yedek").
+ */
+export function useShopRuns(id: string, enabled: boolean) {
+  const client = useQueryClient()
+  const query = useQuery({ ...provisioningQuery(id), enabled })
+  const status = query.data?.latest?.status
+  const seen = useRef(status)
+  useEffect(() => {
+    if (seen.current === "running" && status !== undefined && status !== "running") {
+      void client.invalidateQueries({ queryKey: tenantKey(id) })
+    }
+    seen.current = status
+  }, [client, id, status])
+  return query
 }

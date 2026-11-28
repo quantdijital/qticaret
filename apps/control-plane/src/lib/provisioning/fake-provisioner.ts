@@ -274,7 +274,7 @@ export class FakeProvisioner implements TenantProvisioner {
     return await Promise.resolve(summary)
   }
 
-  async availableRelease(_t: ProvisionTarget): Promise<BuiltRelease | null> {
+  async availableRelease(): Promise<BuiltRelease | null> {
     this.call("availableRelease")
     return await Promise.resolve(fakeState().built)
   }

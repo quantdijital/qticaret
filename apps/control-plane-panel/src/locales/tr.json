@@ -870,10 +870,18 @@
       "apply_profile_result_invalid": "Mağaza profil aktarımının sonucunu okunabilir biçimde bildirmedi.",
       "apply_profile_timeout": "Mağaza profilinin aktarımı süre sınırını aştı.",
       "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
+      "backup_age_missing": "Yedek şifreleme aracı age bu makinede kurulu değil (sudo apt install age).",
+      "backup_failed": "Yedek alınamadı; ayrıntı mağazanın yedek günlüğünde.",
+      "backup_no_manifest": "Yedek tamamlandı ama özet dosyası okunamadı.",
+      "backup_no_recipients": "Yedeklerin şifreleneceği açık anahtar tanımlı değil.",
+      "backup_pg_dump_missing": "Veritabanı yedek aracına (pg_dump) ulaşılamadı.",
+      "backup_timeout": "Yedek süre sınırında bitmedi.",
+      "backup_tool_missing": "Yedek betiği bulunamadı.",
       "bootstrap_failed": "Mağazanın ilk ayarları yapılamadı.",
       "bootstrap_timeout": "Mağazanın ilk ayarları süre sınırını aştı.",
       "build_stale": "Mağaza yazılımının derlemesi kaynağın gerisinde. Yeniden derlenmeli.",
       "command_unavailable": "Bu işlem bu sürümde yok.",
+      "control_plane_release_unknown": "Üst panelin kendi sürümü okunamadı; yükseltme yapılmadı.",
       "database_failed": "Veritabanı işlemi tamamlanamadı.",
       "database_name_invalid": "Veritabanı adı geçerli değil.",
       "env_value_invalid": "Mağazanın ayar değerlerinden biri geçerli değil.",
@@ -898,6 +906,7 @@
       "no_plan_document": "Mağazanın plan belgesi hazırlanmadı.",
       "no_port": "Mağazaya port ayrılmadı.",
       "no_signing_key": "Üst panelin imza anahtarı yok. Anahtarlar sayfasından hazırlanmalı.",
+      "no_target_release": "Mağazanın hedef sürümü yok. Önce hedef sürüm seçin.",
       "owner_address_taken": "Sahibin e-posta adresi mağazada başka bir hesapta kullanılıyor.",
       "owner_email_invalid": "Sahibin e-posta adresi geçerli değil.",
       "plan_import_failed": "Plan belgesi mağazaya aktarılamadı.",
@@ -905,6 +914,8 @@
       "plan_import_timeout": "Plan belgesinin aktarımı süre sınırını aştı.",
       "port_in_use": "Mağazanın portu başka bir uygulamada kullanılıyor.",
       "preset_unknown": "Bu hazır görünüm mağazanın sektör paketinde yok.",
+      "release_ahead_of_control_plane": "Hedef sürüm üst panelden yeni. Önce üst panel güncellenmeli, sonra mağazalar.",
+      "release_not_built": "Hedef sürüm bu sunucuda derlenmiş değil. Önce o sürüm derlenmeli.",
       "repo_unknown": "Mağaza yazılımının yeri bulunamadı.",
       "secrets_exposed": "Mağazanın gizli değer dosyasının izinleri güvenli değil; kullanılmadı.",
       "secrets_lost": "Mağazanın gizli değerleri bulunamadı; anahtar yenilemesi gerekir.",
@@ -1209,7 +1220,9 @@
       "start": "Mağaza sunucusu başlatılıyor.",
       "stop": "Mağaza sunucusu durduruluyor.",
       "invite": "Davet yeniden gönderiliyor.",
-      "apply_pack": "Sektör paketi uygulanıyor."
+      "apply_pack": "Sektör paketi uygulanıyor.",
+      "backup": "Yedek alınıyor.",
+      "upgrade": "Sürüm yükseltme başladı; adımlar Kurulum sekmesinde."
     },
     "reasons": {
       "loading": "Kurulum bilgisi okunuyor.",
@@ -1228,7 +1241,9 @@
       "start": "Başlatma",
       "stop": "Durdurma",
       "invite": "Davet gönderimi",
-      "apply_pack": "Sektör paketi"
+      "apply_pack": "Sektör paketi",
+      "backup": "Yedek",
+      "upgrade": "Sürüm yükseltme"
     },
     "runStatus": {
       "running": "Sürüyor",
@@ -1259,7 +1274,11 @@
       "owner_invite": "Sahip daveti",
       "activate": "Etkinleştirme",
       "stop": "Mağaza sunucusunun durdurulması",
-      "resend_invite": "Sahip davetinin yeniden gönderilmesi"
+      "resend_invite": "Sahip davetinin yeniden gönderilmesi",
+      "release": "Sürüm denetimi",
+      "backup": "Yedek",
+      "upgrade_stop": "Durdurma",
+      "upgrade_start": "Başlatma"
     },
     "output": {
       "port": "Port {{port}}",
@@ -1284,7 +1303,10 @@
       "profileRefused_other": "{{count}} alan mağazanın biçimine uymadı, aktarılmadı",
       "presetPublished": "Vitrinde yayımlandı",
       "presetDraft": "Taslağa yazıldı, yayımlanmadı",
-      "presetApplied": "Daha önce uygulanmıştı; mağazanın tasarımına dokunulmadı"
+      "presetApplied": "Daha önce uygulanmıştı; mağazanın tasarımına dokunulmadı",
+      "release": "{{from}} → {{to}}",
+      "backupSize": "Boyut {{size}}",
+      "backupFiles": "Dosyalar dahil"
     },
     "columns": {
       "kind": "Çalışma",
@@ -1857,7 +1879,7 @@
     "counts": "{{reported}} mağaza çalıştırıyor · {{target}} mağaza hedefliyor"
   },
   "version": {
-    "tab": "Sürüm",
+    "tab": "Sürüm ve yedek",
     "title": "Sürüm",
     "text": "Mağazanın son raporunda bildirdiği sürüm ve hedef sürümü.",
     "running": "Çalışan sürüm",
@@ -1923,5 +1945,40 @@
       "legal_published": "Yasal metinler",
       "mail_sender": "E-posta gönderimi"
     }
+  },
+  "backup": {
+    "title": "Yedek",
+    "text": "Veritabanı ve mağaza dosyaları şifreli olarak yedeklenir. Yedek, çevrimdışı anahtar olmadan açılamaz.",
+    "last": "Son yedek",
+    "size": "Boyut",
+    "none": "Henüz yedek alınmadı.",
+    "files": "Dosyalar dahil",
+    "state": {
+      "succeeded": "Alındı",
+      "failed": "Alınamadı",
+      "none": "Yok"
+    },
+    "failedReason": "Neden",
+    "action": "Şimdi yedekle",
+    "running": "Yedek alınıyor…",
+    "restore": "Geri yükleme yalnızca komut satırından yapılır.",
+    "runbook": "Geri yükleme adımları",
+    "list": {
+      "ok": "Yedek {{when}}",
+      "failed": "Son yedek alınamadı",
+      "none": "Yedek yok"
+    }
+  },
+  "upgrade": {
+    "title": "Sürüm yükseltme",
+    "text": "Önce yedek alınır, sonra mağaza durdurulur, veritabanı güncellenir, mağaza yeniden başlatılır ve sağlığı denetlenir.",
+    "action": "Sürümü yükselt",
+    "last": "Son yükseltme",
+    "never": "Bu mağaza henüz yükseltilmedi.",
+    "noTarget": "Önce hedef sürüm seçin.",
+    "onTarget": "Mağaza hedef sürümü çalıştırıyor.",
+    "steps": "Adımlar Kurulum sekmesinde izlenir.",
+    "confirmTitle": "Sürüm yükseltilsin mi?",
+    "confirmText": "Mağaza {{to}} sürümüne geçecek. Yedek alındıktan sonra birkaç dakika kapalı kalır. Bir adım başarısız olursa çalışma durur ve mağaza önceki hâliyle yeniden başlatılır."
   }
 }

@@ -110,7 +110,10 @@ export async function readNewestManifest(
   let newest: { name: string; at: number } | null = null
   for (const name of names) {
     const { mtimeMs } = await stat(join(outDir, name))
-    if (mtimeMs >= since - 2_000 && (!newest || mtimeMs > newest.at)) {
+    if (
+      mtimeMs >= since - 2_000 &&
+      (!newest || mtimeMs > newest.at || (mtimeMs === newest.at && name > newest.name))
+    ) {
       newest = { name, at: mtimeMs }
     }
   }

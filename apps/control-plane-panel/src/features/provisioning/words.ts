@@ -28,13 +28,26 @@ export const STEP_NAMES = [
   "activate",
   "stop",
   "resend_invite",
+  // Audit 3.1/3.2: the upgrade's and the backup's
+  "release",
+  "backup",
+  "upgrade_stop",
+  "upgrade_start",
 ] as const
 
 export const stepName = (t: TFunction, name: string): string =>
   (STEP_NAMES as readonly string[]).includes(name) ? t(`setup.steps.${name}`) : name
 
 /** The run kinds this panel names; another is shown as written. */
-export const RUN_KINDS = ["create", "start", "stop", "invite", "apply_pack"] as const
+export const RUN_KINDS = [
+  "create",
+  "start",
+  "stop",
+  "invite",
+  "apply_pack",
+  "backup",
+  "upgrade",
+] as const
 
 export const kindName = (t: TFunction, kind: string): string =>
   (RUN_KINDS as readonly string[]).includes(kind) ? t(`setup.kinds.${kind}`) : kind
@@ -80,6 +93,23 @@ export function durationText(t: TFunction, from: string | null, to: string | nul
     return t("setup.seconds", { count: seconds })
   }
   return t("setup.minutes", { minutes: Math.floor(seconds / 60), seconds: seconds % 60 })
+}
+
+const UNITS = ["kilobyte", "megabyte", "gigabyte", "terabyte"] as const
+
+/** A backup's size: "820 kB", "12,4 MB", "1,2 GB" (audit 3.2). */
+export function sizeText(bytes: number): string {
+  let value = bytes / 1024
+  let unit = 0
+  while (value >= 1024 && unit < UNITS.length - 1) {
+    value /= 1024
+    unit += 1
+  }
+  return new Intl.NumberFormat("tr-TR", {
+    style: "unit",
+    unit: UNITS[unit],
+    maximumFractionDigits: value < 10 ? 1 : 0,
+  }).format(value)
 }
 
 /** A step's outputs worth a person's eye: its port, a document's number, a reply's time, a mail. */
@@ -136,10 +166,26 @@ export function outputText(t: TFunction, step: RunStep): string[] {
       )
     }
   }
+  // Audit 3.1: from what the shop reported to its target
+  if (step.name === "release" && typeof output["to"] === "string") {
+    lines.push(
+      t("setup.output.release", {
+        from: typeof output["from"] === "string" ? output["from"] : "—",
+        to: output["to"],
+      })
+    )
+  }
+  // Audit 3.2: the backup's size, and whether the shop's files went with it
+  if (step.name === "backup" && typeof output["bytes"] === "number") {
+    lines.push(t("setup.output.backupSize", { size: sizeText(output["bytes"]) }))
+    if (output["files"] === true) {
+      lines.push(t("setup.output.backupFiles"))
+    }
+  }
   if (output["reason"] === "not_available_yet") {
     lines.push(t("setup.output.notAvailableYet"))
   }
-  if (step.name === "start" && output["running"] === true) {
+  if ((step.name === "start" || step.name === "upgrade_start") && output["running"] === true) {
     lines.push(t("setup.output.alreadyRunning"))
   }
   return lines

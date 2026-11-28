@@ -25,7 +25,13 @@ export type BackupView = ReturnType<typeof backupView>
 export async function latestBackupViews(
   container: Pick<MedusaContainer, "resolve">,
   tenantIds: readonly string[]
-): Promise<Map<string, NonNullable<BackupView>>> {
-  const seen = await provisioningIn(container).latestBackups(tenantIds)
-  return new Map([...seen].map(([id, each]) => [id, backupView(each) as NonNullable<BackupView>]))
+) {
+  const out = new Map<string, NonNullable<BackupView>>()
+  for (const [id, seen] of await provisioningIn(container).latestBackups(tenantIds)) {
+    const view = backupView(seen)
+    if (view) {
+      out.set(id, view)
+    }
+  }
+  return out
 }
