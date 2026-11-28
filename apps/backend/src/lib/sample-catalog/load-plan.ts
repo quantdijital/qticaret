@@ -6,7 +6,11 @@ import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../modules/product-attributes/service"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
+import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
+import type UrlRegistryModuleService from "../../modules/url-registry/service"
+import { CATALOG_LOCALE } from "../../workflows/catalog/entity-paths"
 import { ValidationError } from "../errors"
+import { URL_STYLES, productPath } from "../seo/url-patterns"
 import { sampleTag } from "./mark"
 import { readSampleRows } from "./read"
 
@@ -47,6 +51,34 @@ export function freeHandle(handle: string, taken: ReadonlySet<string>): string {
       return candidate
     }
   }
+}
+
+// The handles looked up at once: the set's and its first few `-ornek` forms
+const CANDIDATES = 5
+
+export const handleCandidates = (handle: string): string[] => [
+  handle,
+  ...Array.from({ length: CANDIDATES }, (_, index) =>
+    index === 0 ? `${handle}-${SUFFIX}` : `${handle}-${SUFFIX}-${String(index + 1)}`
+  ),
+]
+
+/**
+ * The handles whose product address, in either URL style, a record holds
+ * in the URL registry (a deleted product's path kept for its 410, a page
+ * by the same name in the flat style): claiming one would be refused.
+ */
+async function heldHandles(container: Container, handles: readonly string[]): Promise<string[]> {
+  const byPath = new Map(
+    handles.flatMap((handle) => URL_STYLES.map((style) => [productPath(handle, style), handle]))
+  )
+  const held = await container
+    .resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+    .listUrlEntries(
+      { locale: CATALOG_LOCALE, path: [...byPath.keys()] },
+      { select: ["path"], take: null }
+    )
+  return held.flatMap((entry) => byPath.get(entry.path) ?? [])
 }
 
 /** The categories the products need, with the parents they hang on, parents first. */
@@ -124,16 +156,15 @@ export async function planSampleLoad(container: Container, pack: string): Promis
     const item = offered.get(packItemKey.category(category.handle))
     return !category.is_active && item?.outcome === "added" && item.record_id === category.id
   })
+  const candidates = samples.products.flatMap((product) => handleCandidates(product.handle))
   const taken = await products.listProducts(
-    {
-      handle: samples.products.flatMap((product) => [
-        product.handle,
-        `${product.handle}-${SUFFIX}`,
-      ]),
-    },
+    { handle: candidates },
     { select: ["handle"], take: null }
   )
-  const takenHandles = new Set(taken.map((product) => product.handle))
+  const takenHandles = new Set([
+    ...taken.map((product) => product.handle),
+    ...(await heldHandles(container, candidates)),
+  ])
   const templates = await container
     .resolve<ProductAttributesModuleService>(PRODUCT_ATTRIBUTES_MODULE)
     .listAttributeTemplates(

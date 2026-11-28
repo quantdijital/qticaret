@@ -22,6 +22,9 @@ import { readSampleRows } from "../../lib/sample-catalog/read"
 import { BOOKING_MODULE } from "../../modules/booking"
 import type BookingModuleService from "../../modules/booking/service"
 import type { SlotInput } from "../../modules/booking/slots"
+import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
+import type UrlRegistryModuleService from "../../modules/url-registry/service"
+import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 import { SAMPLE_LOCK } from "./load"
@@ -148,6 +151,40 @@ export const hideOpenedCategoriesStep = createStep(
   }
 )
 
+/**
+ * The addresses of the samples deleted, given back to the pool: a sample
+ * was demo content, so no 410 holds its path (a deleted record's usually
+ * does) and a load again, or the shop's own product, may take it. Brought
+ * back if a later step fails.
+ */
+export const freeSamplePathsStep = createStep(
+  "sample-catalog-free-paths",
+  async (input: { product_ids: string[]; category_ids: string[] }, { container }) => {
+    const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+    const owners = [
+      ...input.product_ids.map((id) => ({
+        entity_type: CATALOG_ENTITY_TYPES.product,
+        entity_id: id,
+      })),
+      ...input.category_ids.map((id) => ({
+        entity_type: CATALOG_ENTITY_TYPES.category,
+        entity_id: id,
+      })),
+    ]
+    const freed: string[] = []
+    for (const owner of owners) {
+      freed.push(...(await registry.freePathsOf(owner)))
+    }
+    return new StepResponse(freed.length, freed)
+  },
+  async (freed, { container }) => {
+    if (!freed?.length) {
+      return
+    }
+    await container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE).restorePaths(freed)
+  }
+)
+
 export interface RemoveSampleCatalogResult {
   products: number
   categories: number
@@ -188,6 +225,12 @@ export const removeSampleCatalogWorkflow = createWorkflow(
         input: transform({ plan }, ({ plan }) => plan.category_ids),
       })
     })
+    freeSamplePathsStep(
+      transform({ plan }, ({ plan }) => ({
+        product_ids: plan.product_ids,
+        category_ids: plan.category_ids,
+      }))
+    )
     hideOpenedCategoriesStep(transform({ plan }, ({ plan }) => plan.hide_category_ids))
     releaseLockStep({ key: SAMPLE_LOCK })
     const result = transform({ plan, reviews }, ({ plan, reviews }): RemoveSampleCatalogResult => {

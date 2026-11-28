@@ -8,7 +8,7 @@ import {
   sampleReviewRef,
   sampleTag,
 } from "../mark"
-import { freeHandle } from "../load-plan"
+import { freeHandle, handleCandidates } from "../load-plan"
 import { planRemoval } from "../plan"
 import type { CategoryRow, SampleProductRow } from "../plan"
 
@@ -54,6 +54,17 @@ describe("a sample product's handle", () => {
     expect(freeHandle("efes", new Set())).toBe("efes")
     expect(freeHandle("efes", new Set(["efes"]))).toBe("efes-ornek")
     expect(freeHandle("efes", new Set(["efes", "efes-ornek"]))).toBe("efes-ornek-2")
+  })
+
+  it("looks up the set's handle and its first -ornek forms at once (products and held addresses)", () => {
+    expect(handleCandidates("efes")).toEqual([
+      "efes",
+      "efes-ornek",
+      "efes-ornek-2",
+      "efes-ornek-3",
+      "efes-ornek-4",
+      "efes-ornek-5",
+    ])
   })
 })
 

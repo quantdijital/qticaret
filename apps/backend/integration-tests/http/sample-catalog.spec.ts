@@ -11,6 +11,8 @@ import { BOOKING_MODULE } from "../../src/modules/booking"
 import type BookingModuleService from "../../src/modules/booking/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
 import type ProductReviewsModuleService from "../../src/modules/product-reviews/service"
+import { URL_REGISTRY_MODULE } from "../../src/modules/url-registry"
+import type UrlRegistryModuleService from "../../src/modules/url-registry/service"
 import { setFeatureFlagWorkflow } from "../../src/workflows/platform-settings/set-feature-flag"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -26,7 +28,7 @@ type Answer = { message?: string } & Record<string, unknown>
 interface Status {
   sets: { pack: string; products: number; loaded: boolean }[]
   catalog_empty: boolean
-  products: { id: string; title: string; blocked: string | null }[]
+  products: { id: string; title: string; handle: string; blocked: string | null }[]
   categories: number
   reviews: number
 }
@@ -223,6 +225,16 @@ medusaIntegrationTestRunner({
         .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
         .listProductReviews({ source_ref: { $like: "sample:%" } })
       expect(reviews).toHaveLength(0)
+      // A sample's address goes back to the pool (no 410 holds it): the set loads again as it was
+      const paths = await container()
+        .resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+        .listUrlEntries({ entity_id: loaded.products.map((each) => each.id) })
+      expect(paths).toHaveLength(0)
+      expect((await load()).status).toBe("succeeded")
+      const again = await status()
+      expect(again.products.map((each) => each.handle).sort()).toEqual(
+        loaded.products.map((each) => each.handle).sort()
+      )
     })
 
     it("is the owner's and admin's: operations staff are turned away", async () => {
