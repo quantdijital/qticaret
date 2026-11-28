@@ -15,8 +15,8 @@ export interface SetupFacts {
   regionCount: number
   locationCount: number
   shippingOptionCount: number
-  /** Card provider accounts connected in Settings > Payment (F5). */
-  paymentAccountCount: number
+  /** A card provider account (PayTR, iyzico) usable in Settings > Payment (F5). */
+  paymentConnected: boolean
   publishedProductCount: number
 }
 
@@ -53,7 +53,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
   {
     key: "payment",
     panelPath: "/settings/payments",
-    isDone: (facts) => facts.paymentAccountCount > 0,
+    isDone: (facts) => facts.paymentConnected,
   },
   {
     key: "product",

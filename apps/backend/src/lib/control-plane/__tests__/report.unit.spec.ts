@@ -112,7 +112,10 @@ describe("sendUsageReport (adr/0061 §5.4, Ek C13)", () => {
       region: { listAndCountRegions: () => Promise.resolve([[], 1]) },
       stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 1]) },
       fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
-      integrationCredentials: { listIntegrationCredentials: () => Promise.resolve([]) },
+      integrationCredentials: {
+        listIntegrationCredentials: () => Promise.resolve([]),
+        read: () => Promise.resolve(null),
+      },
       storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
       legal: { listLegalDocuments: () => Promise.resolve([]) },
     }
@@ -149,7 +152,10 @@ describe("sendUsageReport (adr/0061 §5.4, Ek C13)", () => {
       region: { listAndCountRegions: () => Promise.resolve([[], 1]) },
       stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 1]) },
       fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
-      integrationCredentials: { listIntegrationCredentials: () => Promise.resolve([]) },
+      integrationCredentials: {
+        listIntegrationCredentials: () => Promise.resolve([]),
+        read: () => Promise.resolve(null),
+      },
       storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
       legal: { listLegalDocuments: () => Promise.resolve([]) },
     }

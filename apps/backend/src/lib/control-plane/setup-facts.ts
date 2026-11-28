@@ -1,5 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import {
+  SETUP_MAIL_PROVIDER,
+  SETUP_PAYMENT_PROVIDERS,
+  hasSetupPayment,
+  isUsableSetupAccount,
+} from "@qticaret/types/control-plane"
 import type { UsageSetup } from "@qticaret/types/control-plane"
 import { REQUIRED_KINDS } from "../legal/tokens"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
@@ -23,10 +29,10 @@ type Resolver = Pick<MedusaContainer, "resolve">
 
 /** The name Medusa's store model starts with (the panel's `DEFAULT_STORE_NAME`). */
 const DEFAULT_STORE_NAME = "Medusa Store"
-/** Card providers: the panel's payment step. */
-const PAYMENT_PROVIDERS: readonly CredentialProviderName[] = ["paytr", "iyzico"]
-/** Saved and checked, or saved while the provider could not be reached (the panel's rule). */
-const USABLE = new Set(["verified", "unverified"])
+const ACCOUNT_PROVIDERS: readonly CredentialProviderName[] = [
+  ...SETUP_PAYMENT_PROVIDERS,
+  SETUP_MAIL_PROVIDER,
+]
 
 export interface SetupReads {
   storeName: string | null
@@ -62,19 +68,29 @@ export function setupFactsOf(reads: SetupReads): UsageSetup {
 const ONE = { select: ["id"], take: 1 }
 
 /**
- * Which of the providers have a usable account, from the rows' check state
- * alone: nothing is opened or decrypted (security review L1), so a
- * missing key never logs here either.
+ * The accounts' states as the panel sees them (`connected`, `unverified`,
+ * `rejected`, `unreadable`), the shared rule then judging them. The check
+ * state is the row's; whether it opens is the provider calls' own cached
+ * account (`read`): no extra opening, and one the server cannot open is
+ * `unreadable`, not connected, on both sides.
  */
-async function connectedProviders(
-  service: IntegrationCredentialsModuleService,
-  providers: readonly CredentialProviderName[]
-): Promise<Set<string>> {
+async function accountStates(
+  service: IntegrationCredentialsModuleService
+): Promise<{ provider: string; state: string }[]> {
   const rows = await service.listIntegrationCredentials(
-    { provider: [...providers] },
-    { select: ["provider", "verification"], take: providers.length }
+    { provider: [...ACCOUNT_PROVIDERS] },
+    { select: ["provider", "verification"], take: ACCOUNT_PROVIDERS.length }
   )
-  return new Set(rows.filter((row) => USABLE.has(row.verification)).map((row) => row.provider))
+  return Promise.all(
+    rows.map(async (row) => ({
+      provider: row.provider,
+      state: !(await service.read(row.provider as CredentialProviderName))
+        ? "unreadable"
+        : row.verification === "verified"
+          ? "connected"
+          : row.verification,
+    }))
+  )
 }
 
 export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
@@ -108,7 +124,7 @@ export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
         .resolve(Modules.FULFILLMENT)
         .listAndCountShippingOptions({}, ONE)
         .then(([, count]) => count),
-      connectedProviders(credentials, [...PAYMENT_PROVIDERS, "smtp"]),
+      accountStates(credentials),
       container
         .resolve(Modules.PRODUCT)
         .listAndCountProducts({ status: "published" }, ONE)
@@ -129,10 +145,12 @@ export async function readSetupFacts(container: Resolver): Promise<UsageSetup> {
     regions,
     locations,
     shippingOptions: shipping,
-    paymentConnected: PAYMENT_PROVIDERS.some((provider) => accounts.has(provider)),
+    paymentConnected: hasSetupPayment(accounts),
     publishedProducts: products,
     lookPublished: layouts.length > 0,
     publishedLegalKinds: legal.map((row) => row.kind),
-    mailSender: accounts.has("smtp"),
+    mailSender: accounts.some(
+      (account) => account.provider === SETUP_MAIL_PROVIDER && isUsableSetupAccount(account)
+    ),
   })
 }

@@ -21,6 +21,7 @@ import {
 } from "../../control-plane/signature.js"
 import {
   SETUP_FACT_KEYS,
+  hasSetupPayment,
   usagePeriodOf,
   usageReportSchema,
 } from "../../control-plane/usage-report.js"
@@ -203,6 +204,22 @@ describe("usage report schema", () => {
     ["null", null],
   ])("refuses a setup with %s", (_case, value) => {
     expect(usageReportSchema.safeParse({ ...usageReport, setup: value }).success).toBe(false)
+  })
+
+  it("counts only a usable card provider as the payment step (Ek C21, shared with the panel)", () => {
+    expect(hasSetupPayment([{ provider: "iyzico", state: "unverified" }])).toBe(true)
+    expect(hasSetupPayment([{ provider: "paytr", state: "connected" }])).toBe(true)
+    // A carrier or the mail account is no way to take card payments
+    expect(
+      hasSetupPayment([
+        { provider: "aras", state: "connected" },
+        { provider: "smtp", state: "connected" },
+      ])
+    ).toBe(false)
+    // Rejected, or saved but not openable by this server: not connected
+    expect(hasSetupPayment([{ provider: "paytr", state: "rejected" }])).toBe(false)
+    expect(hasSetupPayment([{ provider: "paytr", state: "unreadable" }])).toBe(false)
+    expect(hasSetupPayment([])).toBe(false)
   })
 
   it("names the period by the month in Turkey (UTC+3), Ek C13", () => {

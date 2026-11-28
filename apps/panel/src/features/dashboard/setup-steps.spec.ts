@@ -8,7 +8,7 @@ const READY: SetupFacts = {
   regionCount: 1,
   locationCount: 1,
   shippingOptionCount: 1,
-  paymentAccountCount: 1,
+  paymentConnected: true,
   publishedProductCount: 3,
 }
 
@@ -31,7 +31,7 @@ describe("setupStatus", () => {
 
   it("asks for a card provider after shipping, before the first product", () => {
     expect(
-      setupStatus({ ...READY, paymentAccountCount: 0, publishedProductCount: 0 }).nextKey
+      setupStatus({ ...READY, paymentConnected: false, publishedProductCount: 0 }).nextKey
     ).toBe("payment")
   })
 

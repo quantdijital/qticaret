@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import { hasSetupPayment } from "@qticaret/types/control-plane"
 import { sdk } from "@/lib/sdk"
 import type { SetupFacts } from "@/features/dashboard/setup-steps"
 import { fetchProviderAccounts } from "@/features/settings/api/payments"
@@ -23,10 +24,8 @@ async function loadSetupFacts(): Promise<SetupFacts> {
     regionCount: regions.count,
     locationCount: locations.count,
     shippingOptionCount: shippingOptions.count,
-    // Saved and checked, or saved while the provider could not be reached
-    paymentAccountCount: payments.accounts.filter(
-      (account) => account.state === "connected" || account.state === "unverified"
-    ).length,
+    // A card provider (PayTR, iyzico), saved and usable: the rule the usage report shares (Ek C21)
+    paymentConnected: hasSetupPayment(payments.accounts),
     publishedProductCount: published.count,
   }
 }

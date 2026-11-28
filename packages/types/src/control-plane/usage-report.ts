@@ -35,6 +35,29 @@ export const SETUP_FACT_KEYS = [
 ] as const
 export type SetupFactKey = (typeof SETUP_FACT_KEYS)[number]
 
+/**
+ * One rule for the setup's account steps, the shop panel's checklist and
+ * the report alike (Ek C21): the payment step means taking card payments
+ * ("Kartla ödeme alın"), so only the card providers count; the mail step
+ * is the SMTP account. An account counts once saved and checked, or saved
+ * while the provider could not be reached; never one that is not saved,
+ * was rejected, or cannot be opened (`unreadable`).
+ */
+export const SETUP_PAYMENT_PROVIDERS = ["paytr", "iyzico"] as const
+export const SETUP_MAIL_PROVIDER = "smtp"
+const USABLE_ACCOUNT_STATES: readonly string[] = ["connected", "unverified"]
+
+export const isUsableSetupAccount = (account: { state: string }): boolean =>
+  USABLE_ACCOUNT_STATES.includes(account.state)
+
+/** Whether any of the accounts is a usable card provider account. */
+export const hasSetupPayment = (accounts: readonly { provider: string; state: string }[]) =>
+  accounts.some(
+    (account) =>
+      (SETUP_PAYMENT_PROVIDERS as readonly string[]).includes(account.provider) &&
+      isUsableSetupAccount(account)
+  )
+
 export const usageSetupSchema = z.strictObject({
   store_named: z.boolean(),
   currency: z.boolean(),

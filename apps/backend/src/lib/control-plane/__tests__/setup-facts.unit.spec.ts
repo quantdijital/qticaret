@@ -80,6 +80,7 @@ describe("readSetupFacts", () => {
             { provider: "smtp", verification: "rejected" },
           ])
         },
+        read: (provider: string) => Promise.resolve({ provider }),
       },
       storefront_layout: { listStorefrontLayouts: () => Promise.resolve([{ id: "sfl_1" }]) },
       legal: {
@@ -100,11 +101,34 @@ describe("readSetupFacts", () => {
       legal_published: true,
       mail_sender: false,
     })
-    // The rows' check state only: no secret is opened
+    // The rows' check state, and whether the providers' own cached account opens
     expect(asked).toEqual([
       { provider: ["paytr", "iyzico", "smtp"] },
       { select: ["provider", "verification"], take: 3 },
     ])
     expect(calls["product"]).toEqual([{ status: "published" }, { select: ["id"], take: 1 }])
+  })
+
+  it("does not count an account this server cannot open, as the panel does not", async () => {
+    const services: Record<string, unknown> = {
+      query: { graph: () => Promise.resolve({ data: [] }) },
+      region: { listAndCountRegions: () => Promise.resolve([[], 0]) },
+      stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 0]) },
+      fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
+      product: { listAndCountProducts: () => Promise.resolve([[], 0]) },
+      integrationCredentials: {
+        listIntegrationCredentials: () =>
+          Promise.resolve([
+            { provider: "paytr", verification: "verified" },
+            { provider: "smtp", verification: "verified" },
+          ]),
+        // PayTR's sealed secrets do not open here (a removed key); SMTP's do
+        read: (provider: string) => Promise.resolve(provider === "smtp" ? { provider } : null),
+      },
+      storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
+      legal: { listLegalDocuments: () => Promise.resolve([]) },
+    }
+    const facts = await readSetupFacts({ resolve: (key: string) => services[key] } as never)
+    expect([facts.payment, facts.mail_sender]).toEqual([false, true])
   })
 })
