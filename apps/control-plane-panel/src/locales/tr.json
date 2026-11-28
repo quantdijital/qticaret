@@ -370,7 +370,8 @@
       "nextPayment": "Sonraki ödeme",
       "created": "Açılış",
       "health": "Sağlık",
-      "version": "Sürüm"
+      "version": "Sürüm",
+      "setup": "Kurulum"
     },
     "status": {
       "provisioning": "Kuruluyor",
@@ -1876,5 +1877,30 @@
     "reasonHelp": "En az 3 karakter; kayıtta kalır.",
     "saved": "Hedef sürüm kaydedildi.",
     "noReleases": "Henüz sürüm yok: önce Sürümler sayfasından ekleyin."
+  },
+  "setupStatus": {
+    "title": "Kurulum durumu",
+    "text": "Mağazanın kendi panelindeki kurulum adımları, son saatlik rapora göre.",
+    "noReport": "Henüz rapor gelmedi. Mağaza üst panele bağlı çalışmaya başlayınca kurulum adımları burada görünür.",
+    "olderShop": "Mağazanın sürümü kurulum adımlarını göndermiyor; sürümü güncellenince burada görünür.",
+    "complete": "Hazır",
+    "count": "{{done}}/{{total}} adım",
+    "missing": "Eksik: {{list}}",
+    "listLabel": "Kurulum adımları",
+    "done": "tamamlandı",
+    "open": "eksik",
+    "reportedAt": "Son rapor: {{relative}} · {{date}}",
+    "steps": {
+      "store_named": "Mağaza adı",
+      "currency": "Para birimi",
+      "region": "Satış bölgesi",
+      "stock_location": "Depo",
+      "shipping": "Kargo seçeneği",
+      "payment": "Kart ile ödeme",
+      "product_published": "Yayında ürün",
+      "look_published": "Görünüm yayında",
+      "legal_published": "Yasal metinler",
+      "mail_sender": "E-posta gönderimi"
+    }
   }
 }

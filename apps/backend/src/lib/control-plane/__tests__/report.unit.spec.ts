@@ -106,6 +106,91 @@ describe("sendUsageReport (adr/0061 §5.4, Ek C13)", () => {
     expect(changed).toEqual({ ok: false, code: "signature.invalid" })
   })
 
+  it("carries the setup checklist when it reads, and the counts without it when not (Ek C21)", async () => {
+    const withSetup: Record<string, unknown> = {
+      ...services,
+      region: { listAndCountRegions: () => Promise.resolve([[], 1]) },
+      stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 1]) },
+      fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
+      integrationCredentials: {
+        listIntegrationCredentials: () => Promise.resolve([]),
+        read: () => Promise.resolve(null),
+      },
+      storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
+      legal: { listLegalDocuments: () => Promise.resolve([]) },
+    }
+    const full = fakeFetch(200)
+    const resolver = { resolve: (key: string) => withSetup[key] } as never
+    expect(await sendUsageReport(resolver, { fetch: full.fetch, release })).toEqual({
+      outcome: "sent",
+    })
+    const sentReport = usageReportSchema.parse(JSON.parse(full.sent[0]?.init.body as string))
+    expect(sentReport.setup).toMatchObject({ region: true, shipping: false, payment: false })
+    // The base container has no region service: the setup read fails, the counts still go
+    const bare = fakeFetch(200)
+    expect(await sendUsageReport(container, { fetch: bare.fetch, release })).toEqual({
+      outcome: "sent",
+    })
+    expect(JSON.parse(bare.sent[0]?.init.body as string)).not.toHaveProperty("setup")
+    // A read that hangs is given up on: the counts go without the checklist (review L2)
+    const never = new Promise<never>(() => undefined)
+    const hanging: Record<string, unknown> = {
+      ...withSetup,
+      region: { listAndCountRegions: () => never },
+    }
+    const slow = fakeFetch(200)
+    const slowResolver = { resolve: (key: string) => hanging[key] } as never
+    expect(
+      await sendUsageReport(slowResolver, { fetch: slow.fetch, release, setupTimeoutMs: 20 })
+    ).toEqual({ outcome: "sent" })
+    expect(JSON.parse(slow.sent[0]?.init.body as string)).not.toHaveProperty("setup")
+  })
+
+  it("sends the counts once more without the checklist when an older control plane refuses it (Ek C21 L4)", async () => {
+    const withSetup: Record<string, unknown> = {
+      ...services,
+      region: { listAndCountRegions: () => Promise.resolve([[], 1]) },
+      stock_location: { listAndCountStockLocations: () => Promise.resolve([[], 1]) },
+      fulfillment: { listAndCountShippingOptions: () => Promise.resolve([[], 0]) },
+      integrationCredentials: {
+        listIntegrationCredentials: () => Promise.resolve([]),
+        read: () => Promise.resolve(null),
+      },
+      storefront_layout: { listStorefrontLayouts: () => Promise.resolve([]) },
+      legal: { listLegalDocuments: () => Promise.resolve([]) },
+    }
+    const resolver = { resolve: (key: string) => withSetup[key] } as never
+    const sent: Sent[] = []
+    const oldControlPlane = (url: string, init: RequestInit) => {
+      sent.push({ url, init })
+      const hasSetup = (init.body as string).includes('"setup"')
+      return Promise.resolve(
+        hasSetup
+          ? new Response(JSON.stringify({ message: "usage.invalid" }), { status: 400 })
+          : new Response("{}", { status: 200 })
+      )
+    }
+    expect(await sendUsageReport(resolver, { fetch: oldControlPlane, release })).toEqual({
+      outcome: "sent",
+    })
+    expect(sent).toHaveLength(2)
+    expect(JSON.parse(sent[1]?.init.body as string)).not.toHaveProperty("setup")
+    // Two signed requests, two nonces
+    const nonce = (each: Sent | undefined) =>
+      Object.entries(each?.init.headers as Record<string, string>).find(([name]) =>
+        name.toLowerCase().includes("nonce")
+      )?.[1]
+    expect(nonce(sent[0])).toBeDefined()
+    expect(nonce(sent[0])).not.toBe(nonce(sent[1]))
+    // Without a checklist a refusal is final: no second request
+    const plain = fakeFetch(400, { message: "usage.invalid" })
+    expect(await sendUsageReport(container, { fetch: plain.fetch, release })).toEqual({
+      outcome: "refused",
+      status: 400,
+    })
+    expect(plain.sent).toHaveLength(1)
+  })
+
   it("tries once and says why when refused or unreachable; the next hour is the retry", async () => {
     const refused = fakeFetch(409)
     expect(await sendUsageReport(container, { fetch: refused.fetch, release })).toEqual({

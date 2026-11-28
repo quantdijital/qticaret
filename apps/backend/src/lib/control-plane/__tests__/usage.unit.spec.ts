@@ -87,6 +87,37 @@ describe("buildUsageReport", () => {
   })
 })
 
+describe("buildUsageReport's setup (Ek C21)", () => {
+  const setup = {
+    store_named: true,
+    currency: true,
+    region: true,
+    stock_location: true,
+    shipping: true,
+    payment: false,
+    product_published: true,
+    look_published: false,
+    legal_published: false,
+    mail_sender: false,
+  }
+
+  it("adds the checklist when given, and leaves the field out when not", () => {
+    const now = new Date("2026-11-10T09:00:00.000Z")
+    expect(buildUsageReport(TENANT_ID, counts, release, now, setup).setup).toEqual(setup)
+    expect(buildUsageReport(TENANT_ID, counts, release, now, null)).not.toHaveProperty("setup")
+  })
+
+  it("refuses a checklist carrying more than yes and no", () => {
+    const now = new Date()
+    expect(() =>
+      buildUsageReport(TENANT_ID, counts, release, now, { ...setup, payment: "paytr" } as never)
+    ).toThrow()
+    expect(() =>
+      buildUsageReport(TENANT_ID, counts, release, now, { ...setup, owner: "x" } as never)
+    ).toThrow()
+  })
+})
+
 describe("readUsageCounts", () => {
   it("reads one row's count each, orders of this Turkish month without drafts", async () => {
     const graphs: { filters: Record<string, unknown>; pagination: unknown }[] = []

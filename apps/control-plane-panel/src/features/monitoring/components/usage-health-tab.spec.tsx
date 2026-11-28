@@ -50,6 +50,27 @@ describe("UsageHealthTab: the shop's usage and health (Ek C13)", () => {
     expect(screen.queryByText(/Rapor gelmiyor/)).not.toBeInTheDocument()
   })
 
+  it("shows the shop's setup steps, done in green and open in grey, and when it reported (Ek C21)", async () => {
+    stubApi(answering(USAGE_HEALTH))
+    renderAs(<UsageHealthTab shop={SHOP} />, "readonly")
+
+    const steps = await screen.findByRole("list", { name: "Kurulum adımları" })
+    expect(screen.getByText("7/10 adım")).toBeInTheDocument()
+    const stepOf = (name: string) => within(steps).getByText(name).closest("li") as HTMLElement
+    expect(within(stepOf("Kargo seçeneği")).getByText("tamamlandı")).toBeInTheDocument()
+    expect(within(stepOf("Kart ile ödeme")).getByText("eksik")).toBeInTheDocument()
+    expect(within(stepOf("Görünüm yayında")).getByText("eksik")).toBeInTheDocument()
+    expect(within(steps).getAllByRole("listitem")).toHaveLength(10)
+    expect(screen.getByText(/^Son rapor: /)).toBeInTheDocument()
+  })
+
+  it("says so when the shop sends no setup steps: none yet, or an older release", async () => {
+    stubApi(answering({ ...USAGE_HEALTH, setup: null }))
+    renderAs(<UsageHealthTab shop={SHOP} />, "readonly")
+    expect(await screen.findByText(/sürümü kurulum adımlarını göndermiyor/)).toBeInTheDocument()
+    expect(screen.queryByRole("list", { name: "Kurulum adımları" })).not.toBeInTheDocument()
+  })
+
   it("shows each target's health in words, its time, a day's share and the last probes", async () => {
     stubApi(answering(USAGE_HEALTH))
     renderAs(<UsageHealthTab shop={SHOP} />, "readonly")

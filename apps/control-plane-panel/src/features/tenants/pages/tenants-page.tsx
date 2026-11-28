@@ -16,6 +16,7 @@ import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { useMe } from "@/features/auth/api"
 import { HEALTH_TONES, worstOf } from "@/features/monitoring/rules"
+import { setupProgress } from "@/features/monitoring/setup-rules"
 import { TENANTS_PAGE_SIZE, tenantsQuery } from "@/features/tenants/api"
 import type { TenantRow } from "@/features/tenants/api"
 import { TenantStatusBadge } from "@/features/tenants/components/tenant-status"
@@ -84,6 +85,29 @@ export function TenantsPage() {
           <StatusBadge tone={HEALTH_TONES[state]}>{t(`health.state.${state}`)}</StatusBadge>
         ) : (
           <span className="text-muted-foreground">—</span>
+        )
+      },
+    },
+    {
+      // Ek C21: its setup checklist from its last report; what is missing in the label
+      key: "setup",
+      header: t("tenants.columns.setup"),
+      className: "hidden md:table-cell",
+      cell: (row) => {
+        const progress = setupProgress(row.setup)
+        if (!progress) {
+          return <span className="text-muted-foreground">—</span>
+        }
+        const missing = progress.missing.map((key) => t(`setupStatus.steps.${key}`)).join(", ")
+        return progress.complete ? (
+          <StatusBadge tone="success">{t("setupStatus.complete")}</StatusBadge>
+        ) : (
+          <span title={t("setupStatus.missing", { list: missing })}>
+            <StatusBadge tone="neutral">
+              {t("setupStatus.count", { done: progress.done, total: progress.total })}
+            </StatusBadge>
+            <span className="sr-only">{t("setupStatus.missing", { list: missing })}</span>
+          </span>
         )
       },
     },
