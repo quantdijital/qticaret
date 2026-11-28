@@ -1419,7 +1419,7 @@ Sırayla, ilk düşen yanıt verir:
 
 ### Karar 5: destek yetkisi (rota katmanı)
 
-Destek oturumu rota tablosunda sahip gibi başlar: tasarım (`storefront-designs`/`presets` sahibe özeldir) ve ürün girişi için gereken budur. Önce aşağıdaki yasak liste uygulanır (`lib/support-access/permissions.ts`); ardından `REPLACED` (herkese kapalı Medusa uçları). Yasak liste hem ham hem çözülmüş yolda eşleşir (`decide` ile aynı kural). Yeni dışa aktarma türü varsayılan kapalıdır (iş türleri izin listesiyle).
+Destek oturumu rota katmanında sahip gibi başlar: tasarım (`storefront-designs`/`presets` sahibe özeldir) ve ürün girişi için gereken budur. Rotaların içindeki rol denetimlerinde ise **yönetici** sayılır (`staffRoleOf` → `admin`): sahibe özel dışa aktarma dosyası, zanaat metni, kargo yöneticisi gibi iç kontroller geçmez. Önce aşağıdaki yasak liste uygulanır (`lib/support-access/permissions.ts`); ardından `REPLACED` (herkese kapalı Medusa uçları). Yasak liste hem ham hem çözülmüş yolda eşleşir (`decide` ile aynı kural). Yeni dışa aktarma türü varsayılan kapalıdır (iş türleri izin listesiyle).
 
 | Alan | Kapalı uçlar |
 | --- | --- |
@@ -1431,6 +1431,8 @@ Destek oturumu rota tablosunda sahip gibi başlar: tasarım (`storefront-designs
 | Mağazanın dışa açılması | `/admin/migrations*` (müşteri içe aktarımı dahil), `/admin/features/ai.reviews`, `ai.assistant`, `ai.storefront_search` yazma |
 | Denetim ve iç kayıtlar | `/admin/audit-log*`, `/admin/workflows-executions*`, `/admin/notifications*` |
 | Medusa Admin | `/admin/layouts*`, `/admin/views*` yazma |
+| Para ve oturumdan uzun yaşayan işler | `/admin/orders/:id/refunds*`, `/admin/payments/:id/refund`, `/admin/payments/:id/capture`, `/admin/gift-cards*`, `/admin/store-credit*`, `/admin/payment-links*`, `/admin/bulk-messages*`, `/admin/legal-documents*` (yazma) |
+| Dosya ve iç durum | `/admin/orders/export` (Medusa'nın sipariş dışa aktarımı), `/admin/async-jobs/:id/result`, `/admin/booking-travelers/erase`, `/admin/integrations/overview`, `notifications` bölümü (personel e-posta listesi) |
 | Destek ayarı | `/admin/support-access*` |
 
 - **Mağazayı silme** mağaza panelinde yoktur (F16.11, üst panelin `closing`'i). Destek için ayrı kural gerekmez.
@@ -1490,3 +1492,13 @@ Destek oturumu rota tablosunda sahip gibi başlar: tasarım (`storefront-designs
 1. **Redis yokken:** nonce ve oturum kaydı süreç belleğindedir. Çok süreçli kurulumda bir izin iki süreçte bir kez daha kullanılabilir. Canlıda Redis zorunludur (`REDIS_URL` canlı env şemasında zaten zorunlu).
 2. **Oturum ortasında devir:** destek oturumu açıkken sahip anahtarı kapatırsa, o anda süren istek tamamlanır; sonraki istek reddedilir.
 3. **Sentetik kimlik ve Medusa çekirdeği:** "kullanıcıyı oku" diyen az sayıdaki çekirdek uç (ör. not yazarı adı) destek kimliğini "bilinmeyen" gösterir. Kabul edildi.
+
+### Ek: Destek erişimi güvenlik incelemesi düzeltmeleri (2026-11-28)
+
+- **H1 (kapatıldı):** destek kimliği yalnız Medusa'nın doğruladığı `auth_context`'ten, `/auth/*`'ta yalnız sunucudaki oturumdan okunur. Bearer'ın doğrulanmamış talepleri hiç okunmaz. Böylece bir personelin çerezinin yanına uydurma `qtsup_` token koyup açık destek oturumunun yetkisini ödünç alma yolu kapandı; `DELETE /auth/session` ile başkasının destek oturumunu bitirme yolu da kapandı. Birim testli.
+- **H2 (kapatıldı):** rota içi denetimlerde destek oturumu `admin` sayılır (önce `owner`'dı); sahibin dışa aktarma dosyaları (`customer.export`, `order.export`, denetim kaydı) ve sahibe özel alanlar ulaşılmaz. Ayrıca `/admin/async-jobs/:id/result` yasak listede.
+- **M1 (kapatıldı):** `/admin/orders/export`, `notifications` bölümü yazma, `/admin/booking-travelers/erase`, `/admin/integrations/overview` yasak listede. Birim testi `OWNER_ONLY` ve `PRIVATE` listelerindeki her kuralın destek için ya reddedildiğini ya da açıkça "ulaşılır" listesinde olduğunu denetler; yeni sahibe özel rota karar verilene kadar testi düşürür.
+- **M2 (kapatıldı):** iade, tahsilat, hediye kartı, mağaza kredisi, ödeme bağlantısı, toplu ileti ve yasal metin yazmaları kapalı; destek oturumu görünüm ve katalog içindir.
+- **L1, L2 (kapatıldı):** oturum dizininin kendi ömrü kaldırıldı (kısa oturum uzun olanın kaydını silmiyordu); Redis işlem içi hatası artık atılır (sahip "bitti" görüp oturum açık kalamaz).
+- **L3 (kabul edildi):** `/support` bağlantısı tarayıcıdaki mevcut oturumun yerine geçer. Bağlantıyı yalnız üst panel personeli üretir, izin bu mağazaya bağlıdır ve sahibe bildirim gider; onay adımı eklenmedi.
+- **Bilgi:** anahtar varsayılan açık (Karar 4, sahibin onayına sunuldu); yeniden doğrulama kanıtı geçerlilik süresi içinde tekrar kullanılabilir (üst panelin genel kuralı).

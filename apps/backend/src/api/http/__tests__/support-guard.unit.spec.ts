@@ -76,6 +76,20 @@ describe("guardSupportRequest", () => {
     expect(get).not.toHaveBeenCalled()
   })
 
+  it("never takes a support actor beside a member Medusa signed in (security review H1)", async () => {
+    get.mockResolvedValue(record())
+    const req = {
+      ...(requestOf("POST", "/admin/products") as unknown as Record<string, unknown>),
+      auth_context: { actor_type: "user", actor_id: "user_readonly" },
+      headers: {
+        authorization: `Bearer x.${Buffer.from(JSON.stringify({ actor_id: ACTOR })).toString("base64url")}.y`,
+      },
+    } as unknown as MedusaRequest
+    const { handled } = await run(req)
+    expect(handled).toBe(false)
+    expect(get).not.toHaveBeenCalled()
+  })
+
   it("passes an open session's allowed request, noting the session for the routes", async () => {
     get.mockResolvedValue(record())
     const req = requestOf("POST", "/admin/products")

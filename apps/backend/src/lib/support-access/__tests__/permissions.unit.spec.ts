@@ -1,3 +1,4 @@
+import { OWNER_ONLY, PRIVATE } from "../../staff/permission-rules"
 import { decideSupport, supportCapabilities } from "../permissions"
 
 const allowed = (method: string, path: string, jobType?: string) =>
@@ -59,6 +60,18 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     // Medusa's own ways round the role layer
     ["DELETE", "/admin/customers/cus_1"],
     ["POST", "/admin/tax-rates"],
+    // Security review M1, M2, H2
+    ["POST", "/admin/orders/export"],
+    ["GET", "/admin/async-jobs/job_1/result"],
+    ["POST", "/admin/platform-settings/notifications"],
+    ["POST", "/admin/booking-travelers/erase"],
+    ["GET", "/admin/integrations/overview"],
+    ["POST", "/admin/orders/order_1/refunds"],
+    ["POST", "/admin/payments/pay_1/refund"],
+    ["POST", "/admin/gift-cards"],
+    ["POST", "/admin/payment-links"],
+    ["POST", "/admin/bulk-messages/bm_1/send"],
+    ["POST", "/admin/legal-documents/terms/publish"],
   ])("refuses %s %s", (method, path) => {
     expect(allowed(method, path)).toBe(false)
   })
@@ -95,5 +108,29 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     expect(can.taxId).toBe(false)
     expect(can.audit).toBe(false)
     expect(can.migration).toBe(false)
+  })
+})
+
+describe("every owner-only and private route is decided for support (security review M1)", () => {
+  // Reached on purpose: the looks and samples (the session's work), what admins read anyway
+  const REACHED = [
+    "/admin/storefront-designs*",
+    "/admin/storefront-presets*",
+    "/admin/sample-catalog*",
+    "/admin/wholesale*",
+    "/admin/fraud/blocks*",
+    "/admin/ai/usage",
+    "/admin/ai/acceptance",
+    "/admin/ai/credits*",
+    "/admin/ai/guidance*",
+    "/admin/ai/suggestions",
+    "/admin/ai/seo-fill*",
+  ]
+  const sample = (path: string) => path.replace(/\*$/, "").replace(/:(\w+)/g, "x_1")
+  const rules = [...OWNER_ONLY, ...PRIVATE].filter((rule) => !REACHED.includes(rule.path))
+
+  it.each(rules.map((rule) => [rule.path, rule]))("refuses %s", (_path, rule) => {
+    const method = rule.methods === "*" ? "POST" : (rule.methods[0] ?? "POST")
+    expect(decideSupport(method, sample(rule.path), { apiKeyType: "secret" }).allowed).toBe(false)
   })
 })

@@ -27,6 +27,9 @@ export const SUPPORT_CLOSED_SECTIONS = [
   "security",
   "maintenance",
   "legal",
+  // Who gets the staff alerts by e-mail (customers' details in them): an address added
+  // here would keep receiving them after the session (security review M1)
+  "notifications",
 ] as const
 
 /** The queued jobs a support session may start: none of them takes customers' data out. */
@@ -71,8 +74,24 @@ export const SUPPORT_DENIED: readonly Rule[] = [
   { methods: WRITES, path: "/admin/vat-rates*" },
   { methods: "*", path: "/admin/plan*" },
   { methods: "*", path: "/admin/ai/credits/orders*" },
+  // Money moved or promised, and words sent in the shop's name: they outlive the session
+  // (security review M2; the session is for the looks and the catalogue)
+  { methods: WRITES, path: "/admin/orders/:id/refunds*" },
+  { methods: WRITES, path: "/admin/payments/:id/refund" },
+  { methods: WRITES, path: "/admin/payments/:id/capture" },
+  { methods: WRITES, path: "/admin/gift-cards*" },
+  { methods: WRITES, path: "/admin/store-credit*" },
+  { methods: WRITES, path: "/admin/payment-links*" },
+  { methods: WRITES, path: "/admin/bulk-messages*" },
+  { methods: WRITES, path: "/admin/legal-documents*" },
   // Customers' personal data out in bulk, or one by one past what the screens show
   { methods: ["POST"], path: "/admin/order-board/export" },
+  // Medusa's own order export: every customer's name and address in one file (review M1)
+  { methods: "*", path: "/admin/orders/export" },
+  // Any queued job's file: an export the owner made is the owner's (review H2)
+  { methods: "*", path: "/admin/async-jobs/:id/result" },
+  { methods: WRITES, path: "/admin/booking-travelers/erase" },
+  { methods: "*", path: "/admin/integrations/overview" },
   { methods: "*", path: "/admin/customer-export*" },
   { methods: "*", path: "/admin/customers/:id/billing-profile/reveal" },
   { methods: "*", path: "/admin/booking-travelers/:id/reveal" },

@@ -72,14 +72,15 @@ export async function apiKeyTypeOf(req: MedusaRequest): Promise<string | undefin
 
 /**
  * The signed-in staff member's role: undefined for anyone else (a key,
- * nobody), null for a user without one; `owner` for a support session.
+ * nobody), null for a user without one; `admin` for a support session.
  */
 export async function staffRoleOf(req: MedusaRequest): Promise<StaffRole | null | undefined> {
   const userId = userOf(req)
   if (isSupportActor(userId)) {
-    // A support session (adr/0061 Ek "Destek erişimi", Karar 5): the owner's reach inside a
-    // route; what it may not call at all the support guard refused before the route
-    return "owner"
+    // A support session (adr/0061 Ek "Destek erişimi", Karar 5): an admin inside a route, so
+    // no owner-only check inside one passes (an owner's export, a craft, the parcels'
+    // manager; security review H2). Which routes it reaches at all is the support guard's
+    return "admin"
   }
   return userId
     ? req.scope.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId)

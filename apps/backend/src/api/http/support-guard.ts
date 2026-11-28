@@ -13,7 +13,6 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SecuritySettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { endSupportSessionWorkflow } from "../../workflows/support-access"
-import { claimsOf } from "./bearer"
 import { auditContext } from "./audit/context"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
@@ -38,18 +37,20 @@ interface SessionLike {
 const sessionOf = (req: MedusaRequest) =>
   (req as unknown as { session?: SessionLike | null }).session ?? null
 
-/** The support actor a request carries: Medusa's own reading, else its session's or bearer's. */
+/**
+ * The support actor a request carries, from what was checked only (security
+ * review H1): Medusa's own reading (`auth_context`, set for `/admin/*` from
+ * the session or a verified token), else, on `/auth/*` where Medusa sets
+ * none, the server-side session's. A bearer token's unverified claims are
+ * never read: a member's cookie beside a made-up `qtsup_` token is the member.
+ */
 export function supportActorOfRequest(req: MedusaRequest): string | null {
   const auth = (req as Partial<AuthenticatedMedusaRequest>).auth_context
-  if (auth?.actor_type === "user" && isSupportActor(auth.actor_id)) {
-    return auth.actor_id
+  if (auth) {
+    return auth.actor_type === "user" && isSupportActor(auth.actor_id) ? auth.actor_id : null
   }
   const fromSession = sessionOf(req)?.auth_context?.actor_id
-  if (isSupportActor(fromSession)) {
-    return fromSession as string
-  }
-  const fromBearer = claimsOf(req)?.["actor_id"]
-  return isSupportActor(fromBearer) ? (fromBearer as string) : null
+  return isSupportActor(fromSession) ? (fromSession as string) : null
 }
 
 export async function supportEnabled(req: MedusaRequest): Promise<boolean> {

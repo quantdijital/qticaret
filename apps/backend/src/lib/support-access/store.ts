@@ -57,12 +57,18 @@ export function createRedisSupportStore(redis: Redis, prefix: string): SupportSt
     put: async (record, ttlMs) => {
       const ttl = Math.max(1, Math.ceil(ttlMs))
       const until = Date.now() + ttl
-      await redis
+      // The index keeps no lifetime of its own: `list` prunes it by score, so a short session
+      // never takes a longer one's entry with it (security review L1)
+      const results = await redis
         .multi()
         .set(session(record.grant_id), JSON.stringify(record), "PX", ttl)
         .zadd(index, until, record.grant_id)
-        .pexpire(index, ttl)
         .exec()
+      // A command failing inside the transaction is not thrown by `exec` (review L2)
+      const failed = results?.find(([error]) => error !== null)
+      if (!results || failed) {
+        throw failed?.[0] ?? new Error("support_store_write_failed")
+      }
     },
     get: async (grantId) => parse(await redis.get(session(grantId))),
     list: async () => {
