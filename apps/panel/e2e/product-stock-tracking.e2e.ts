@@ -103,7 +103,7 @@ test.describe("stock tracking turned on later", () => {
       await expect(tracking).not.toBeChecked()
       await expect(form.getByText("Stok takibi yok: bu varyant her zaman satılır.")).toBeVisible()
       await tracking.click()
-      await form.getByLabel("Stok adedi").fill("7")
+      await form.getByLabel("Stok adedi", { exact: true }).fill("7")
       await expect(saveButton(page)).toBeEnabled()
       await saveButton(page).click()
       await expect(saved(page)).toBeDisabled()
@@ -116,7 +116,7 @@ test.describe("stock tracking turned on later", () => {
       await page.getByRole("button", { name: /Boy: 12 cm/ }).click()
       const again = page.getByRole("form", { name: "Varyantı düzenle" })
       await expect(again.getByRole("switch", { name: "Stok takibi" })).toBeChecked()
-      await expect(again.getByLabel("Stok adedi")).toHaveValue("7")
+      await expect(again.getByLabel("Stok adedi", { exact: true })).toHaveValue("7")
 
       // Off: asked in place, the count kept on the server
       await again.getByRole("switch", { name: "Stok takibi" }).click()

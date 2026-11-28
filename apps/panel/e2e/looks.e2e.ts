@@ -85,6 +85,11 @@ test("applies a look, keeps the changed draft automatically and brings it back",
 
     await toGallery(page)
     const saved = page.getByRole("region", { name: /^Kayıtlı görünümlerim/ })
+    // The automatic saves are folded into one list, closed until opened (the choice remembered)
+    const autoFold = saved.getByRole("button", { name: /^Otomatik kayıtlar \(\d+\)$/ })
+    if ((await autoFold.getAttribute("aria-expanded")) !== "true") {
+      await autoFold.click()
+    }
     const kept = saved.getByRole("button", {
       name: new RegExp(`^‘${LOOK}, .+, düzenlenmiş’ görünümünü taslağa al$`),
     })
