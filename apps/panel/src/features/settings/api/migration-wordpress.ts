@@ -1,5 +1,6 @@
 import { z } from "zod"
 import type { MigrationMode, Parcel } from "@/features/settings/api/migration"
+import type { RefreshKind, RunKindName } from "@/features/settings/api/migration-overview"
 
 /**
  * A WordPress + WooCommerce site's export (WXR) as a migration source
@@ -27,29 +28,26 @@ export const wxrContentType = (file: File) =>
 export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
 
 /**
- * What a WordPress run may refresh alone of what an earlier run moved: the
- * products' descriptions (ADR-0055) or the pictures in the blog posts'
- * texts (adr/0042 Ek 2026-11-27).
- */
-export type WordpressRefresh = "descriptions" | "post_images"
-
-/**
- * `POST /admin/migrations?source=wordpress`: the mode, the address base
- * when the owner names one (left out, the server reads it from the site's
- * own links), the parcel's four numbers when given.
- * A refresh sends `refresh=descriptions` or `refresh=post_images` alone: it
- * reads neither the base nor the parcel.
+ * `POST /admin/migrations?source=wordpress`: the mode, the kinds asked
+ * (none: everything), the address base when the owner names one (left
+ * out, the server reads it from the site's own links), the parcel's four
+ * numbers when given. A completion sends `refresh=<kind>` alone: it reads
+ * neither the base nor the parcel.
  */
 export function wordpressUploadPath(
   mode: MigrationMode,
   parcel: Parcel | null,
   categoryBase: string,
-  refresh: WordpressRefresh | null = null
+  refresh: RefreshKind | null = null,
+  kinds: readonly RunKindName[] = []
 ): string {
   const query = new URLSearchParams({ source: "wordpress", mode })
   if (refresh) {
     query.set("refresh", refresh)
     return `/admin/migrations?${query.toString()}`
+  }
+  if (kinds.length > 0) {
+    query.set("kinds", kinds.join(","))
   }
   if (categoryBase.trim() !== "") {
     query.set("category_base", categoryBase.trim())
@@ -97,13 +95,3 @@ export const NOT_MOVED_KINDS: readonly NotMovedKind[] = [
  */
 export const wordpressReportOf = (summary: unknown): WordpressReport =>
   reportSchema.safeParse(summary).data?.wordpress ?? {}
-
-const refreshSchema = z.object({ refresh: z.array(z.string()) })
-
-/** Whether a run only refreshed the descriptions of products moved before (ADR-0055). */
-export const isDescriptionRefresh = (summary: unknown): boolean =>
-  refreshSchema.safeParse(summary).data?.refresh.includes("descriptions") ?? false
-
-/** Whether a run only added the pictures to the texts of blog posts moved before. */
-export const isPostImageRefresh = (summary: unknown): boolean =>
-  refreshSchema.safeParse(summary).data?.refresh.includes("post_images") ?? false

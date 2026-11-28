@@ -53,8 +53,8 @@ describe("RecentRuns: a run stopped half-way", () => {
 
     expect(await screen.findByText("Yarıda kaldı")).toBeInTheDocument()
     expect(screen.getByText("Bitti")).toBeInTheDocument()
-    expect(screen.getAllByRole("button", { name: "Yeniden başlat" })).toHaveLength(1)
-    await userEvent.click(screen.getByRole("button", { name: "Yeniden başlat" }))
+    expect(screen.getAllByRole("button", { name: "Kaldığı yerden sürdür" })).toHaveLength(1)
+    await userEvent.click(screen.getByRole("button", { name: "Kaldığı yerden sürdür" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/migrations/mrun_1/restart", {
@@ -81,9 +81,9 @@ describe("RecentRuns: a run stopped half-way", () => {
     )
     renderRuns()
 
-    expect(await screen.findByText(/yeniden başlatıldı/)).toBeInTheDocument()
+    expect(await screen.findByText(/sürdürüldü/)).toBeInTheDocument()
     expect(screen.getAllByText("Yarıda kaldı")).toHaveLength(2)
-    await userEvent.click(screen.getByRole("button", { name: "Yeniden başlat" }))
+    await userEvent.click(screen.getByRole("button", { name: "Kaldığı yerden sürdür" }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(

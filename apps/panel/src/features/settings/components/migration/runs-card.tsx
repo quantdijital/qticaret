@@ -8,6 +8,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { migrationRunsQuery, useRestartMigration } from "@/features/settings/api/migration"
 import type { MigrationJob, MigrationRun } from "@/features/settings/api/migration"
+import { sourceKindOf } from "@/features/settings/components/migration/source-kind"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
@@ -17,10 +18,6 @@ const TONES: Readonly<Record<MigrationRun["status"], StatusTone>> = {
   done: "success",
   failed: "danger",
 }
-// "shopify:magaza.myshopify.com" as the panel names its source
-const SOURCE_KINDS = ["shopify", "wordpress", "feed", "customers", "bundle"] as const
-const sourceOf = (source: string) =>
-  SOURCE_KINDS.find((kind) => source === kind || source.startsWith(`${kind}:`)) ?? "bundle"
 
 // Its worker stopped half-way (a crash, a restart): started again from its file, or already
 const halfWay = (run: MigrationRun) =>
@@ -34,6 +31,8 @@ interface RecentRunsProps {
   onStarted?: (job: MigrationJob) => void
   /** Another run is under way: nothing starts beside it. */
   busy?: boolean
+  /** The page names the list itself (a folded "Geçmiş aktarımlar"). */
+  hideTitle?: boolean
 }
 
 /**
@@ -41,7 +40,7 @@ interface RecentRunsProps {
  * One its worker left half-way says so and can be started again from its
  * stored file (or, when that is gone, says to upload it again).
  */
-export function RecentRuns({ onStarted, busy = false }: RecentRunsProps) {
+export function RecentRuns({ onStarted, busy = false, hideTitle = false }: RecentRunsProps) {
   const { t } = useTranslation()
   const runs = useQuery(migrationRunsQuery())
   const restart = useRestartMigration()
@@ -56,7 +55,7 @@ export function RecentRuns({ onStarted, busy = false }: RecentRunsProps) {
   }
   return (
     <section className="flex flex-col gap-2" aria-labelledby="migration-runs">
-      <h3 id="migration-runs" className="text-sm font-medium">
+      <h3 id="migration-runs" className={hideTitle ? "sr-only" : "text-sm font-medium"}>
         {t(`${R}.title`)}
       </h3>
       {!runs.data ? (
@@ -74,7 +73,7 @@ export function RecentRuns({ onStarted, busy = false }: RecentRunsProps) {
             >
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="text-sm font-medium">
-                  {t(`settings.migration.run.sources.${sourceOf(run.source)}`)} ·{" "}
+                  {t(`settings.migration.run.sources.${sourceKindOf(run.source)}`)} ·{" "}
                   {t(`${R}.modes.${run.mode}`)}
                 </p>
                 <p className="text-[13px] text-muted-foreground">

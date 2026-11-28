@@ -31,6 +31,7 @@ const JOB_RHYTHM = "a scheduled job's last run: once a process, as after one boo
 
 /** Files whose module state is no request's: the same for every spec file. */
 const NEED_NOT_FORGET: ReadonlyMap<string, string> = new Map([
+  ["api/admin/migrations/urls/export/route.ts", IN_FLIGHT],
   ["api/http/booking-store-routes.ts", ENV],
   ["api/http/challenge.ts", ENV],
   ["api/http/checkout-guard.ts", ENV],

@@ -10,6 +10,7 @@ import { catalogImport } from "./catalog-import"
 import { contentLinkRewrite } from "./content-link-rewrite"
 import { customerDataExport } from "./customer-data-export"
 import { customerExport } from "./customer-export"
+import { migrationAddresses } from "./migration-addresses"
 import { migrationInvites } from "./migration-invites"
 import { migrationRun } from "./migration-run"
 import { migrationSitemap } from "./migration-sitemap"
@@ -46,6 +47,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "content.link_rewrite": erase(contentLinkRewrite),
   "customer.data_export": erase(customerDataExport),
   "customer.export": erase(customerExport),
+  "migration.addresses": erase(migrationAddresses),
   "migration.invites": erase(migrationInvites),
   "migration.run": erase(migrationRun),
   "migration.sitemap": erase(migrationSitemap),

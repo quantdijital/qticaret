@@ -1,5 +1,6 @@
 import type { Context } from "@medusajs/framework/types"
 import {
+  InjectManager,
   InjectTransactionManager,
   MedusaContext,
   MedusaService,
@@ -9,49 +10,31 @@ import { LegacyOrder } from "./models/legacy-order"
 import { MigrationCutover } from "./models/migration-cutover"
 import { MigrationFile } from "./models/migration-file"
 import { MigrationItem } from "./models/migration-item"
-import type { ITEM_STATUSES } from "./models/migration-item"
 import { MigrationRun } from "./models/migration-run"
 import { MigrationUrl } from "./models/migration-url"
-import type { URL_ORIGINS } from "./models/migration-url"
+import type {
+  InventoryUrl,
+  ItemStatus,
+  ItemTallies,
+  KeptFile,
+  LegacyOrderInput,
+  RememberedItem,
+  RunPhase,
+} from "./types"
 
-export type ItemStatus = (typeof ITEM_STATUSES)[number]
-
-export interface RememberedItem {
-  source_key: string
-  target_id: string | null
-  status: ItemStatus
-  error_code?: string | null
-  old_url?: string | null
+export type {
+  InventoryUrl,
+  ItemStatus,
+  ItemTallies,
+  KeptFile,
+  LegacyOrderInput,
+  RememberedItem,
+  RunPhase,
 }
 
-export interface LegacyOrderInput {
-  source_key: string
-  number: string
-  placed_at: Date
-  currency_code: string
-  total: string
-  status: string
-  customer_id: string | null
-  email: string | null
-  lines: { title: string; sku: string | null; quantity: number; total: string }[]
-}
-
-/** An old file and the media asset it became (adr/0059). */
-export interface KeptFile {
-  path: string
-  stem: string
-  media_id: string
-}
-
-export interface InventoryUrl {
-  address: string
-  path: string
-  query: string | null
-  origin: (typeof URL_ORIGINS)[number]
-  clicks?: number | null
-  entity_type?: string | null
-  entity_id?: string | null
-}
+// Kinds whose old addresses become 301s (entities.ts); constants, written into the SQL
+const ADDRESSED_KINDS =
+  "'product', 'category', 'brand', 'page', 'post', 'post_category', 'post_tag'"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -235,6 +218,61 @@ class MigrationModuleService extends MedusaService({
       own[key] = (own[key] ?? 0) + value
     }
     await this.updateMigrationRuns({ id: runId, counts: { ...counts, [kind]: own } })
+  }
+
+  /** The run's live step, beside its counts (`_phase`); written whole, read by the panel. */
+  @InjectTransactionManager()
+  async setPhase(
+    runId: string,
+    phase: RunPhase,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    await (sharedContext.transactionManager as Executor).execute(
+      `UPDATE migration_run
+       SET counts = jsonb_set(COALESCE(counts, '{}'::jsonb), '{_phase}', ?::jsonb), updated_at = now()
+       WHERE id = ?`,
+      [JSON.stringify(phase), runId]
+    )
+  }
+
+  /** What moved, counted (adr/0042 Ek 2026-11-27); a picture's key starts with its record's. */
+  @InjectManager()
+  async tallies(@MedusaContext() sharedContext: Context = {}): Promise<ItemTallies> {
+    const manager = sharedContext.manager as Executor
+    const items = (await manager.execute(
+      `SELECT kind, status, count(*)::int AS count FROM migration_item
+       WHERE deleted_at IS NULL GROUP BY kind, status`,
+      []
+    )) as ItemTallies["items"]
+    const unpictured = (await manager.execute(
+      `SELECT owner.kind, count(DISTINCT owner.id)::int AS count
+       FROM migration_item picture
+       JOIN migration_item owner ON owner.source = picture.source
+         AND owner.kind IN ('product', 'post') AND owner.status = 'done'
+         AND owner.source_key = split_part(picture.source_key, ' ', 1)
+         AND owner.deleted_at IS NULL
+       WHERE picture.kind = 'image' AND picture.status <> 'done' AND picture.deleted_at IS NULL
+       GROUP BY owner.kind`,
+      []
+    )) as ItemTallies["unpictured"]
+    const [unaddressed] = (await manager.execute(
+      `SELECT count(*)::int AS count FROM migration_item item
+       WHERE item.deleted_at IS NULL AND item.status = 'done' AND item.old_url IS NOT NULL
+         AND item.target_id IS NOT NULL AND item.kind IN (${ADDRESSED_KINDS})
+         AND NOT EXISTS (SELECT 1 FROM migration_url url
+           WHERE url.deleted_at IS NULL AND url.entity_id = item.target_id)`,
+      []
+    )) as { count: number }[]
+    const sources = (await manager.execute(
+      `SELECT DISTINCT source FROM migration_item WHERE deleted_at IS NULL ORDER BY source`,
+      []
+    )) as { source: string }[]
+    return {
+      items,
+      unpictured,
+      unaddressed: unaddressed?.count ?? 0,
+      sources: sources.map((row) => row.source),
+    }
   }
 
   /** Which of a source's orders a run kept before, by their keys. */

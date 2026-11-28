@@ -639,6 +639,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/migrations/:id/restart": false,
   "POST /admin/migrations/urls/:id/decision": false,
   "POST /admin/migrations/urls/apply": false,
+  "POST /admin/migrations/urls/rebuild": false,
   "POST /admin/migrations/cutover": false,
   "POST /admin/migrations/invites": false,
   "POST /admin/migrations/urls/sitemap": false,

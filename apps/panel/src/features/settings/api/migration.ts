@@ -2,7 +2,7 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import { z } from "zod"
 import type { AsyncJob } from "@/features/settings/api/activity"
 import { wordpressUploadPath, wxrContentType } from "@/features/settings/api/migration-wordpress"
-import type { WordpressRefresh } from "@/features/settings/api/migration-wordpress"
+import type { RefreshKind, RunKindName } from "@/features/settings/api/migration-overview"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -10,7 +10,11 @@ import { sdk } from "@/lib/sdk"
 
 export type MigrationSourceKind = "shopify" | "wordpress" | "feed" | "customers" | "bundle"
 export type MigrationMode = "check" | "apply"
-export type MigrationJob = AsyncJob & { error_message: string | null }
+/** A migration job; its input as the server shows it (the source, no file key). */
+export type MigrationJob = AsyncJob & {
+  error_message: string | null
+  input?: Record<string, unknown> | null
+}
 
 /** The owner's parcel for a product without measurements: grams and cm. */
 export interface Parcel {
@@ -123,6 +127,9 @@ const parcelQuery = (parcel: Parcel | null) =>
       ).toString()}`
     : ""
 
+const kindsQuery = (kinds: readonly RunKindName[] | undefined) =>
+  kinds?.length ? `&kinds=${encodeURIComponent(kinds.join(","))}` : ""
+
 export interface StartMigration {
   kind: MigrationSourceKind
   mode: MigrationMode
@@ -131,8 +138,10 @@ export interface StartMigration {
   url?: string
   /** A WordPress export's product category address base; empty, the server reads it. */
   categoryBase?: string
-  /** A WordPress export: only refresh this of what an earlier run moved (ADR-0055). */
-  refresh?: WordpressRefresh | null
+  /** Only this completion of what runs moved before (refresh.ts on the server). */
+  refresh?: RefreshKind | null
+  /** What to move (none: everything); the server adds what each kind needs. */
+  kinds?: readonly RunKindName[]
 }
 
 /** Starts a check or a run from the chosen source; applying asks the owner to prove it again. */
@@ -148,7 +157,8 @@ export function useStartMigration() {
               input.mode,
               input.parcel,
               input.categoryBase ?? "",
-              input.refresh ?? null
+              input.refresh ?? null,
+              input.kinds ?? []
             ),
             file,
             extra.headers,
@@ -158,7 +168,7 @@ export function useStartMigration() {
         if (input.kind === "bundle" || input.kind === "customers") {
           const path = input.kind === "bundle" ? "/admin/migrations" : "/admin/migrations/customers"
           return sendFile(
-            `${path}?mode=${input.mode}${input.kind === "bundle" ? parcelQuery(input.parcel) : ""}`,
+            `${path}?mode=${input.mode}${input.kind === "bundle" ? parcelQuery(input.parcel) + kindsQuery(input.kinds) : ""}`,
             input.file ?? new File([], "bos"),
             extra.headers
           )
@@ -167,6 +177,8 @@ export function useStartMigration() {
           mode: input.mode,
           defaults: input.parcel,
           ...(input.kind === "feed" ? { url: input.url ?? "" } : {}),
+          ...(input.kinds?.length ? { kinds: input.kinds } : {}),
+          ...(input.refresh ? { refresh: input.refresh } : {}),
         }
         return (
           await sdk.client.fetch<{ async_job: MigrationJob }>(`/admin/migrations/${input.kind}`, {
