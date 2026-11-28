@@ -97,6 +97,9 @@ export async function tenantDetail(
       sector_pack: tenant.sector_pack,
       sector_pack_version: tenant.sector_pack_version,
       sector_pack_applied_at: tenant.sector_pack_applied_at,
+      preset: tenant.preset,
+      preset_version: tenant.preset_version,
+      preset_applied_at: tenant.preset_applied_at,
       created_at: tenant.created_at,
       created_by: tenant.created_by ? (names[tenant.created_by] ?? null) : null,
       // Ek C16: its oldest open charge's day, else its next renewal

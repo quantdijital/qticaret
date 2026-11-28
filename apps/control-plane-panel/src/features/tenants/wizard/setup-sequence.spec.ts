@@ -75,6 +75,7 @@ describe("Kur: the record, its details, then the setup (C11)", () => {
       slug: "bicak-atolyesi",
       package_id: "pkg_pro",
       sector_pack: "general",
+      storefront_contact: true,
     })
     // The TCKN once, without spaces; a sole proprietor sends no VKN
     expect(bodies["saveCompany"]).toMatchObject({ kind: "sole_proprietor", tckn: "10000000146" })

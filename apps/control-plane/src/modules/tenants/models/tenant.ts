@@ -27,6 +27,22 @@ export const Tenant = model
      */
     sector_pack_version: model.number().nullable(),
     sector_pack_applied_at: model.dateTime().nullable(),
+    /**
+     * The ready-made look it is set up with (adr/0063 §7, task 2.7): a code
+     * of its sector pack's looks, chosen in the wizard; none: no look is
+     * applied. Its version and when the shop applied it are kept from the
+     * shop's `tenant:apply-preset` result; null until it has. Once applied,
+     * a setup run again leaves the shop's design alone.
+     */
+    preset: model.text().nullable(),
+    preset_version: model.number().nullable(),
+    preset_applied_at: model.dateTime().nullable(),
+    /**
+     * Whether the owner's e-mail and phone go into the shop's settings at
+     * setup as its storefront contact (the wizard's choice, on by default);
+     * off: only the company's details are handed over.
+     */
+    storefront_contact: model.boolean().default(true),
     /** The staff member who made the record; null for the system (a script). */
     created_by: model.text().nullable(),
     /**

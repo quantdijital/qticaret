@@ -165,8 +165,12 @@ medusaIntegrationTestRunner({
         database: "succeeded",
         migrate: "succeeded",
         bootstrap: "succeeded",
+        // Audit 1.3: the owner's e-mail into the shop's settings
+        profile: "succeeded",
         // C12: no pack on the record: the general one, applied
         sector_pack: "succeeded",
+        // adr/0063 task 2.7: no look chosen
+        preset: "skipped",
         plan_document: "succeeded",
         start: "succeeded",
         health: "succeeded",
@@ -218,8 +222,9 @@ medusaIntegrationTestRunner({
       expect(statusOf(again)).toMatchObject({
         secrets: "skipped",
         database: "skipped",
-        // The pack offers nothing a second time
+        // The pack offers nothing a second time; the profile finds its field filled
         sector_pack: "skipped",
+        profile: "skipped",
         start: "skipped",
         api_url: "skipped",
         owner_invite: "skipped",

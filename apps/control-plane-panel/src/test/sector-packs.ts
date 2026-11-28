@@ -12,8 +12,9 @@ export const GENERAL: SectorPackSummary = {
     categories: 0,
     flags: 0,
     seo_templates: 0,
-    presets: 1,
+    presets: 0,
   },
+  presets: [],
 }
 
 export const CUTLERY: SectorPackSummary = {
@@ -27,8 +28,26 @@ export const CUTLERY: SectorPackSummary = {
     categories: 16,
     flags: 2,
     seo_templates: 1,
-    presets: 0,
+    presets: 2,
   },
+  presets: [
+    {
+      code: "katalog",
+      version: 5,
+      name: "Katalog",
+      description: "Sık bir mağaza ana sayfası: solda kategori listesi, sekmeli raflar.",
+      tone: "light",
+      preview: true,
+    },
+    {
+      code: "tezgah",
+      version: 3,
+      name: "Tezgâh",
+      description: "Geniş açılış görseli ve öne çıkan ürünler.",
+      tone: "light",
+      preview: false,
+    },
+  ],
 }
 
 export const SECTOR_PACKS = { sector_packs: [GENERAL, CUTLERY] }

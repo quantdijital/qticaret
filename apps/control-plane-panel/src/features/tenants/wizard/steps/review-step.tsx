@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@qticaret/admin-ui/ui/alert
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { Plan } from "@/features/packages/api"
 import { priceText } from "@/features/packages/format"
-import { packName, sectorPacksQuery } from "@/features/sector-packs/api"
+import { chosenPreset, packName, sectorPacksQuery } from "@/features/sector-packs/api"
 import { compact } from "@/features/tenants/company-rules"
 import { domainOf, missingCompanyFields, slugOf } from "../draft"
 import type { ShopDraft, WizardStep } from "../draft"
@@ -167,6 +167,11 @@ export function ReviewStep({
               [
                 t("wizard.steps.sector.title"),
                 packName(packs.data?.sector_packs, draft.sector_pack),
+              ],
+              [
+                t("wizard.steps.look.title"),
+                chosenPreset(packs.data?.sector_packs, draft.sector_pack, draft.preset)?.name ??
+                  t("wizard.look.noneShort"),
               ],
             ]}
           />

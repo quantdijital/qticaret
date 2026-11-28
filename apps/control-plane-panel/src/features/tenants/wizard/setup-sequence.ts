@@ -150,6 +150,9 @@ export async function runSetup(
         slug: slugOf(draft),
         package_id: draft.package_id,
         sector_pack: draft.sector_pack,
+        // "": the pack's first look, the control plane's default
+        ...(draft.preset !== "" ? { preset: draft.preset } : {}),
+        storefront_contact: draft.storefront_contact,
       })
       progress = { ...progress, tenantId: made.id }
       mark("record", { state: "done" })

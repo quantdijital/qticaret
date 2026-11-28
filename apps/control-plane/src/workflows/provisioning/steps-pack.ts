@@ -6,7 +6,7 @@ import { provisionStep } from "./step"
 import { command } from "./steps-setup"
 
 /**
- * 6. The shop's sector pack (adr/0061 F17.7, Ek C12): `tenant:apply-pack
+ * 7. The shop's sector pack (adr/0061 F17.7, Ek C12): `tenant:apply-pack
  * pack=<code>` in the shop, the code its record names (none: the general
  * pack). The shop checks the pack with its own schemas and adds only what
  * it never had, so the step runs every time, in a setup, a retry and an

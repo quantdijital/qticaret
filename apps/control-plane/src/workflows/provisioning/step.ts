@@ -41,9 +41,16 @@ export function codeOf(error: unknown): string {
 }
 
 interface Back<U> {
+  /** Marks a real undo: without a compensation input Medusa hands the step's output instead. */
+  kind: "provisioning_undo"
   run_id: string
   undo: U
 }
+
+const isBack = <U>(value: unknown): value is Back<U> =>
+  typeof value === "object" &&
+  value !== null &&
+  (value as { kind?: unknown }).kind === "provisioning_undo"
 
 /**
  * A provisioning step (adr/0061 §6.2): recorded as it starts and ends on
@@ -78,11 +85,14 @@ export function provisionStep<U = undefined>(
         output: outcome.output ?? null,
       })
       const back =
-        outcome.created && undo ? { run_id: input.run_id, undo: outcome.undo as U } : undefined
+        outcome.created && undo
+          ? { kind: "provisioning_undo" as const, run_id: input.run_id, undo: outcome.undo as U }
+          : undefined
       return new StepResponse(outcome.output ?? {}, back)
     },
     async (back, { container }) => {
-      if (!back || !undo) {
+      // Nothing this run made (Medusa then passes the step's output here): nothing to undo
+      if (!isBack<U>(back) || !undo) {
         return
       }
       const runs = provisioningIn(container)
