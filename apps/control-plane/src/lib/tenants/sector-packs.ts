@@ -32,7 +32,16 @@ export interface PresetSummary {
 export interface SectorPackOffer extends SectorPackSummary {
   /** Its looks in the loader's order; the first is the wizard's default. */
   presets: PresetSummary[]
+  /**
+   * How many products its sample catalogue holds (`samples/`); 0 for none.
+   * The wizard offers "Örnek ürünlerle başla" only when there are some.
+   */
+  sample_products: number
 }
+
+/** The number of products in a pack's sample catalogue; 0 for none or an unknown pack. */
+export const sampleProductsOf = (pack: string): number =>
+  sectorPack(pack)?.samples?.products.length ?? 0
 
 /** A pack's looks, in the loader's order (by code); none for an unknown pack. */
 export function presetsOf(pack: string): PresetSummary[] {
@@ -56,7 +65,11 @@ export const defaultPresetOf = (pack: string): string | null => presetsOf(pack)[
 /** Every pack as the wizard shows it, the general one first, each with its looks. */
 export function sectorPackSummaries(): SectorPackOffer[] {
   return sectorPacks()
-    .map((pack) => ({ ...summaryOf(pack), presets: presetsOf(pack.code) }))
+    .map((pack) => ({
+      ...summaryOf(pack),
+      presets: presetsOf(pack.code),
+      sample_products: sampleProductsOf(pack.code),
+    }))
     .sort(
       (a, b) =>
         Number(b.code === DEFAULT_SECTOR_PACK) - Number(a.code === DEFAULT_SECTOR_PACK) ||

@@ -192,6 +192,17 @@ describe("the closed command list (adr/0061 §3.4)", () => {
       "exec",
       "./src/scripts/apply-profile.js",
     ])
+    // The wizard's "\u00d6rnek \u00fcr\u00fcnlerle ba\u015fla": the pack's code only, never a path or an option
+    expect(argvOf({ name: "load-samples", pack: "travel" })).toEqual([
+      "exec",
+      "./src/scripts/load-samples.js",
+      "pack=travel",
+    ])
+    for (const pack of ["../general", "--help", "B\u0131\u00e7ak", "a", "x y"]) {
+      expect(codeOf(() => argvOf({ name: "load-samples", pack }))).toBe(
+        "provisioning.sector_pack_unknown"
+      )
+    }
     expect(codeOf(() => argvOf({ name: "bootstrap", store_name: "a\u202eb" }))).toBe(
       "provisioning.store_name_invalid"
     )
@@ -205,6 +216,7 @@ describe("the closed command list (adr/0061 §3.4)", () => {
         "apply-profile",
         "bootstrap",
         "invite-owner",
+        "load-samples",
         "migrate",
         "plan-import",
       ].sort()

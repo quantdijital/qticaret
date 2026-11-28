@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto"
 import { sectorPack, storefrontPreset, summaryOf } from "@qticaret/sector-packs"
 import type { RuntimeSecrets } from "../vault/tenant-secrets"
+import { loadFakeSamples } from "./fake-samples"
 import { ProvisioningError } from "./provisioner"
 import type {
   CommandResult,
@@ -214,6 +215,8 @@ export class FakeProvisioner implements TenantProvisioner {
           })
         )
       }
+      case "load-samples":
+        return await Promise.resolve(loadFakeSamples(t.tenant_id, cmd.pack, shop.packs))
       case "migrate":
       case "bootstrap":
         return await Promise.resolve(ok())

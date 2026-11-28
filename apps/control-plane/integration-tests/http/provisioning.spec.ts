@@ -171,6 +171,8 @@ medusaIntegrationTestRunner({
         sector_pack: "succeeded",
         // adr/0063 task 2.7: no look chosen
         preset: "skipped",
+        // Not asked for in the wizard
+        sample_catalog: "skipped",
         plan_document: "succeeded",
         start: "succeeded",
         health: "succeeded",

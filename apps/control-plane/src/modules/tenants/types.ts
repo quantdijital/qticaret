@@ -23,6 +23,9 @@ export interface TenantRecord {
   preset_applied_at: Date | null
   /** The owner's e-mail and phone handed to the shop as its storefront contact at setup. */
   storefront_contact: boolean
+  /** The wizard's "Örnek ürünlerle başla", and when the shop loaded the samples (null: not yet). */
+  sample_catalog: boolean
+  sample_catalog_loaded_at: Date | null
   created_by: string | null
   /** Internal base URL its plan document is pushed to (Ek C9); null: none. */
   api_base_url: string | null
