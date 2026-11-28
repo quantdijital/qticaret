@@ -1,5 +1,11 @@
 import { ResponsiveImage } from "@qticaret/ui"
-import type { CategoryCollageView, LinkView, LinkedCategoryCardView, Translate } from "@qticaret/ui"
+import type {
+  HeadLinesView,
+  CategoryCollageView,
+  LinkView,
+  LinkedCategoryCardView,
+  Translate,
+} from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { collageCards } from "./collage-rows"
@@ -131,6 +137,7 @@ export function CategoryCollage({
   t,
   marks,
   ownAll = false,
+  lines,
 }: {
   id: string
   title: string
@@ -142,6 +149,8 @@ export function CategoryCollage({
   marks?: boolean | undefined
   /** `all` is the shop's own link (`more`): in the preview it is marked too. */
   ownAll?: boolean
+  /** The heading's upper line and hand note (sahip 2026-11-28); absent: none. */
+  lines?: HeadLinesView | undefined
 }) {
   const places = collageCards(
     view.cards.length,
@@ -152,7 +161,14 @@ export function CategoryCollage({
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
-        <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
+        <SectionHead
+          id={id}
+          title={title}
+          more={all}
+          marks={marks}
+          ownMore={ownAll}
+          lines={lines}
+        />
         <ul
           className="gf-collage grid grid-cols-12 gap-(--gap-columns)"
           data-height={view.height}

@@ -27,6 +27,7 @@ import {
 import { loadStaffAccountChanged, loadStaffEmailConfirm } from "./staff-account"
 import { loadStaffPaymentIssue } from "./payment-issue"
 import { loadStaffSmtpRejections } from "./smtp-rejections"
+import { loadStaffSupportAccess } from "./support-access"
 import { loadStaffStockShort } from "./stock-short"
 import { loadStockAlert } from "./stock"
 import type { Loaded } from "./types"
@@ -80,6 +81,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.invite": loadStaffInvite,
   "staff.password_reset": loadStaffPasswordReset,
   "staff.mfa_changed": loadStaffMfaChanged,
+  "staff.support_access": loadStaffSupportAccess,
   "staff.email_confirm": loadStaffEmailConfirm,
   "staff.account_changed": loadStaffAccountChanged,
   // adr/0050: the campaign in `extra.campaign_id`, the recipient's record as the resource

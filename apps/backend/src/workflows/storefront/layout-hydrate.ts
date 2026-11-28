@@ -22,6 +22,7 @@ import { hydrateShelf } from "./layout-hydrate-shelf"
 import { hydrateStrips } from "./layout-hydrate-strips"
 import { hydrateCollage, hydrateDepartures, hydratePoints } from "./layout-hydrate-points"
 import { hydrateBanner, hydratePosts } from "./layout-hydrate-band"
+import { printedHeadLines } from "../../lib/storefront/sections/head-lines"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -137,7 +138,10 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         ...(section.interval === undefined ? {} : { interval: section.interval }),
       }
     case "products":
-      return hydrateShelf(section, at.picks, link(section.more))
+      return {
+        ...hydrateShelf(section, at.picks, link(section.more)),
+        ...printedHeadLines(section, band.fill),
+      }
     case "related_products":
       return {
         id,
@@ -226,6 +230,7 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         // Printed only when set, so a section from before them prints as it did
         ...(section.show_count ? { show_count: true } : {}),
         ...(section.more ? { more: link(section.more) } : {}),
+        ...printedHeadLines(section, band.fill),
         // Today's tiles print no variant, as before variants (adr/0049 Ek 2026-11-15)
         ...(section.variant === "linked"
           ? {
@@ -272,6 +277,16 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
                 : {}),
             }
           : {}),
+        // The sliding cards: their scroller, and a preset's handles once written
+        ...(section.variant === "carousel"
+          ? {
+              variant: section.variant,
+              scroller: section.scroller,
+              ...(section.category_handles && section.category_handles.length > 0
+                ? { category_handles: section.category_handles }
+                : {}),
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
@@ -289,8 +304,15 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
             scroller: section.scroller,
             // The product's picture on each card, only once written (adr/0077 §10 Ek)
             ...(section.product_image ? { product_image: section.product_image } : {}),
+            ...printedHeadLines(section, band.fill),
           }
-        : { id, type, title: section.title, limit: section.limit }
+        : {
+            id,
+            type,
+            title: section.title,
+            limit: section.limit,
+            ...printedHeadLines(section, band.fill),
+          }
     case "trust_badges":
       // The badges are the shared settings'; the section says where and how it is drawn
       return {

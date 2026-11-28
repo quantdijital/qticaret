@@ -106,8 +106,11 @@ export function ReviewList({
   items,
   complete,
   action,
+  heading,
   words,
 }: {
+  /** The section's heading, drawn on one row with the order. */
+  heading: ReactNode
   /** "4,9". */
   average: string
   /** "Ortalama puan: 5 üzerinden 4,9", for a screen reader. */
@@ -137,59 +140,91 @@ export function ReviewList({
   }
   const label = stars === null ? "" : words.barStars.replace("{stars}", String(stars))
   return (
-    <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
-      <div className="lg:col-span-4">
-        <div className="flex flex-col gap-6 rounded-tile gf-box p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
-          <p className="flex items-end gap-3">
-            <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
-              {average}
+    <div className="flex flex-col gap-6 lg:gap-8">
+      {/* The heading and the order on one row (owner 2026-11-28), wrapping on a phone */}
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        {heading}
+        {filters && (
+          <div className="ml-auto flex items-center gap-2 text-sm">
+            <label htmlFor="yorum-sirasi" className="text-text-2">
+              {words.sort}
+            </label>
+            <span className="relative">
+              <select
+                id="yorum-sirasi"
+                value={order}
+                onChange={(event) => {
+                  setOrder(event.target.value as Order)
+                  setShown(PAGE)
+                }}
+                className="min-h-11 cursor-pointer appearance-none rounded-button border border-edge bg-paper py-2 pr-10 pl-4 font-semibold"
+              >
+                <option value="newest">{words.newest}</option>
+                <option value="highest">{words.highest}</option>
+                <option value="lowest">{words.lowest}</option>
+              </select>
+              <ChevronDown
+                className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+                aria-hidden="true"
+                strokeWidth={2}
+              />
             </span>
-            <span className="flex flex-col gap-1 pb-1">
-              <Stars rating={Number(average.replace(",", "."))} size="size-5" />
-              <span className="text-sm text-text-2">{countText}</span>
-            </span>
-            <span className="sr-only">{averageLabel}</span>
-          </p>
-          {bars.length > 0 && (
-            <ul
-              aria-label={filters ? words.filterLabel : words.distribution}
-              className={filters ? "-mx-3 flex flex-col gap-0.5" : "flex flex-col gap-1.5"}
-            >
-              {bars.map((bar) => (
-                <li key={bar.stars}>
-                  {filters && bar.count > 0 ? (
-                    <button
-                      type="button"
-                      aria-pressed={stars === bar.stars}
-                      onClick={() => {
-                        choose(stars === bar.stars ? null : bar.stars)
-                      }}
-                      className={cn(
-                        BAR,
-                        "min-h-11 w-full cursor-pointer rounded-inner px-3 text-left transition-colors duration-(--dur-micro) hover:bg-paper active:translate-y-px",
-                        stars === bar.stars ? "bg-paper font-extrabold text-text" : "text-text-2"
-                      )}
-                    >
-                      <Bar bar={bar} words={words} />
-                    </button>
-                  ) : (
-                    <span
-                      className={cn(BAR, filters ? "min-h-11 px-3 text-text-3" : "text-text-2")}
-                    >
-                      <Bar bar={bar} words={words} />
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-          {action}
-        </div>
+          </div>
+        )}
       </div>
-      <div className="flex min-w-0 flex-col gap-2 lg:col-span-8">
-        {(filters || stars !== null) && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-4">
-            <div aria-live="polite" className="flex min-h-11 flex-wrap items-center gap-2">
+      <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
+        <div className="lg:col-span-4">
+          <div className="flex flex-col gap-6 rounded-tile gf-box p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
+            <p className="flex items-end gap-3">
+              <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
+                {average}
+              </span>
+              <span className="flex flex-col gap-1 pb-1">
+                <Stars rating={Number(average.replace(",", "."))} size="size-5" />
+                <span className="text-sm text-text-2">{countText}</span>
+              </span>
+              <span className="sr-only">{averageLabel}</span>
+            </p>
+            {bars.length > 0 && (
+              <ul
+                aria-label={filters ? words.filterLabel : words.distribution}
+                className={filters ? "-mx-3 flex flex-col gap-0.5" : "flex flex-col gap-1.5"}
+              >
+                {bars.map((bar) => (
+                  <li key={bar.stars}>
+                    {filters && bar.count > 0 ? (
+                      <button
+                        type="button"
+                        aria-pressed={stars === bar.stars}
+                        onClick={() => {
+                          choose(stars === bar.stars ? null : bar.stars)
+                        }}
+                        className={cn(
+                          BAR,
+                          "min-h-11 w-full cursor-pointer rounded-inner px-3 text-left transition-colors duration-(--dur-micro) hover:bg-paper active:translate-y-px",
+                          stars === bar.stars ? "bg-paper font-extrabold text-text" : "text-text-2"
+                        )}
+                      >
+                        <Bar bar={bar} words={words} />
+                      </button>
+                    ) : (
+                      <span
+                        className={cn(BAR, filters ? "min-h-11 px-3 text-text-3" : "text-text-2")}
+                      >
+                        <Bar bar={bar} words={words} />
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {action}
+          </div>
+        </div>
+        <div className="flex min-w-0 flex-col gap-2 lg:col-span-8">
+          {filters && (
+            // Empty until a bar is pressed, so the first review starts at the column's top
+            <div aria-live="polite" className="flex flex-wrap items-center gap-2 empty:hidden">
               {stars !== null && (
                 <>
                   <span className="text-sm text-text-2">{words.filterShown}</span>
@@ -208,60 +243,35 @@ export function ReviewList({
                 </>
               )}
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <label htmlFor="yorum-sirasi" className="text-text-2">
-                {words.sort}
-              </label>
-              <span className="relative">
-                <select
-                  id="yorum-sirasi"
-                  value={order}
-                  onChange={(event) => {
-                    setOrder(event.target.value as Order)
-                    setShown(PAGE)
-                  }}
-                  className="min-h-11 cursor-pointer appearance-none rounded-button border border-edge bg-paper py-2 pr-10 pl-4 font-semibold"
+          )}
+          {picked.length === 0 ? (
+            <p className="py-6 text-text-2">{words.filterEmpty}</p>
+          ) : (
+            <ul className="flex flex-col">
+              {picked.map((review, index) => (
+                <li
+                  key={`${review.author}:${review.date}:${String(items.indexOf(review))}`}
+                  data-later={index >= shown ? "" : undefined}
+                  className="gf-later flex flex-col gap-3 border-b border-rule py-6 first:pt-0 last:border-b-0"
                 >
-                  <option value="newest">{words.newest}</option>
-                  <option value="highest">{words.highest}</option>
-                  <option value="lowest">{words.lowest}</option>
-                </select>
-                <ChevronDown
-                  className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
-                  aria-hidden="true"
-                  strokeWidth={2}
-                />
-              </span>
-            </div>
-          </div>
-        )}
-        {picked.length === 0 ? (
-          <p className="py-6 text-text-2">{words.filterEmpty}</p>
-        ) : (
-          <ul className="flex flex-col">
-            {picked.map((review, index) => (
-              <li
-                key={`${review.author}:${review.date}:${String(items.indexOf(review))}`}
-                data-later={index >= shown ? "" : undefined}
-                className="gf-later flex flex-col gap-3 border-b border-rule py-6 first:pt-2 last:border-b-0"
-              >
-                <Review review={review} words={words} />
-              </li>
-            ))}
-          </ul>
-        )}
-        {rest > 0 && (
-          <button
-            type="button"
-            onClick={() => {
-              setShown(shown + PAGE)
-            }}
-            className="gf-later-toggle gf-btn gf-btn--quiet gf-btn--small self-start"
-          >
-            {words.more}
-            <ChevronDown className="size-4" aria-hidden="true" strokeWidth={2} />
-          </button>
-        )}
+                  <Review review={review} words={words} />
+                </li>
+              ))}
+            </ul>
+          )}
+          {rest > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setShown(shown + PAGE)
+              }}
+              className="gf-later-toggle gf-btn gf-btn--quiet gf-btn--small self-start"
+            >
+              {words.more}
+              <ChevronDown className="size-4" aria-hidden="true" strokeWidth={2} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

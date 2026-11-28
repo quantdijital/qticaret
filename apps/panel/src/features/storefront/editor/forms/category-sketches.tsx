@@ -148,3 +148,27 @@ export function CategoriesLinked() {
     </>
   )
 }
+
+/** The sliding cards: tall pictures in a row, each its name on its foot, an arrow at each end. */
+export function CategoriesCarousel() {
+  return (
+    <>
+      {[10, 33, 56, 79].map((x) => (
+        <g key={x}>
+          <rect x={x} y={2} width={21} height={28} rx={3} className="fill-current opacity-40" />
+          <rect
+            x={x + 3}
+            y={24}
+            width={12}
+            height={2.5}
+            rx={1}
+            className="fill-current opacity-80"
+          />
+        </g>
+      ))}
+      <rect x={102} y={2} width={8} height={28} rx={3} className="fill-current opacity-20" />
+      <circle cx={5} cy={16} r={3} className="fill-current opacity-70" />
+      <circle cx={107} cy={16} r={3} className="fill-current opacity-70" />
+    </>
+  )
+}

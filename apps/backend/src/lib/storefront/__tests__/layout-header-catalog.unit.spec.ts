@@ -188,6 +188,9 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
         adres: null,
         whatsapp: null,
         ücretsiz_kargo_eşiği: "₺1.500",
+        hazırlama_süresi: "1–2 iş günü",
+        kargo_süresi: "1–3 iş günü",
+        iade_süresi: "14",
       }
       expect(withShopNote(main, values).header_bar.catalog?.strip_note).toBe(
         "₺1.500 üzeri siparişlerde kargo bedava"

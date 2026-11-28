@@ -13,3 +13,16 @@ export interface HandNoteView {
    */
   hand: boolean
 }
+
+/**
+ * A section heading's two optional lines as a theme draws them (sahip
+ * 2026-11-28): the small upper-case line over it and the hand note beside
+ * it; each absent: not drawn. The product rail, the categories, the
+ * departures, the reviews and the posts carry them.
+ */
+export interface HeadLinesView {
+  /** A small upper-case line over the heading. */
+  eyebrow?: string | null
+  /** A short hand note beside the heading. */
+  note?: HandNoteView
+}

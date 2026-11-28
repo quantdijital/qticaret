@@ -1,5 +1,12 @@
 import { randomBytes } from "node:crypto"
-import { previewOpens, previewToken, previewTokenParts, productPreview } from "../preview-token"
+import {
+  designPreview,
+  layoutPreview,
+  previewOpens,
+  previewToken,
+  previewTokenParts,
+  productPreview,
+} from "../preview-token"
 
 const key = randomBytes(32)
 const NOW = new Date("2026-11-02T10:00:00Z")
@@ -54,5 +61,35 @@ describe("a draft product's preview tokens (F18)", () => {
     expect(asContent && previewOpens(key, asContent, product.updated_at)).toBe(false)
     const content = previewToken(key, entry, NOW).token
     expect(productPreview.parts(content, NOW)).toBeNull()
+  })
+})
+
+describe("a saved look's preview tokens (adr/0064)", () => {
+  const design = { id: "sfd_01JLOOK", updated_at: new Date("2026-11-02T08:00:00Z") }
+
+  it("opens the look as saved when made, for an hour, and nothing after a rename", () => {
+    const { token, expires_at } = designPreview.token(key, design, NOW)
+    const parts = designPreview.parts(token, NOW)
+    expect(parts?.entryId).toBe(design.id)
+    expect(parts && designPreview.opens(key, parts, design.updated_at)).toBe(true)
+    expect(expires_at.toISOString()).toBe("2026-11-02T11:00:00.000Z")
+    expect(designPreview.parts(token, new Date("2026-11-02T11:00:00Z"))).toBeNull()
+    expect(parts && designPreview.opens(key, parts, new Date("2026-11-02T10:30:00Z"))).toBe(false)
+  })
+
+  it("opens no other look, and is never the draft's design link nor the other way round", () => {
+    const { token } = designPreview.token(key, design, NOW)
+    const [, expires, mac] = token.split(".")
+    const other = designPreview.parts(`sfd_01JOTHER.${expires ?? ""}.${mac ?? ""}`, NOW)
+    expect(other && designPreview.opens(key, other, design.updated_at)).toBe(false)
+    expect(layoutPreview.parts(token, NOW)).toBeNull()
+    const draft = layoutPreview.token(key, { id: "sfl_01JDRAFT", updated_at: NOW }, NOW).token
+    expect(designPreview.parts(draft, NOW)).toBeNull()
+    // The same id under the draft link's context: another MAC
+    const [, dExpires, dMac] = layoutPreview
+      .token(key, { id: "sfl_01JLOOK", updated_at: design.updated_at }, NOW)
+      .token.split(".")
+    const forged = designPreview.parts(`sfd_01JLOOK.${dExpires ?? ""}.${dMac ?? ""}`, NOW)
+    expect(forged && designPreview.opens(key, forged, design.updated_at)).toBe(false)
   })
 })

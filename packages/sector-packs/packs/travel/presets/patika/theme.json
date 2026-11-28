@@ -37,7 +37,7 @@
   },
   "buttons": "pill",
   "section_spacing": "normal",
-  "surface_style": "lined",
+  "surface_style": "filled",
   "search_form": {
     "attribute_key": "gidilecek_yer",
     "show_category": true,
@@ -67,5 +67,6 @@
   "menu_style": "plain",
   "chip_style": "lined",
   "density": "airy",
-  "motion": "lively"
+  "motion": "lively",
+  "title_accent": "primary"
 }

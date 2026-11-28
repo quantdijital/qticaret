@@ -7,7 +7,7 @@ import { CONTENT_PAGE_SECTION_TYPES } from "@qticaret/types"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { PAGE_TYPES } from "@/features/storefront/layout/sections"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
-import { AddSectionDialog } from "./add-section-dialog"
+import { AddSectionPicker } from "./add-section-picker"
 import {
   PRODUCTS,
   holdClock,
@@ -245,7 +245,7 @@ describe("the section forms", HEAVY, () => {
     admin.product.list.mockResolvedValue({ products: PRODUCTS })
     await opened()
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Öne çıkan ürün/ }))
 
     expect(await screen.findByRole("heading", { name: "Öne çıkan ürün" })).toBeVisible()
@@ -292,17 +292,16 @@ describe("a content page's section chooser (adr/0073 §3, Ek 2026-11-19 (2) K5)"
   it("offers the page's text first, the home page's types but its opening and price bands, then the page's own", () => {
     const pick = vi.fn()
     render(
-      <AddSectionDialog
-        open
+      <AddSectionPicker
         page="pages"
         placement="bottom"
         taken={new Set(["contact"])}
         marqueeFull={false}
-        onOpenChange={vi.fn()}
+        onBack={vi.fn()}
         onPick={pick}
       />
     )
-    const chooser = screen.getByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = screen.getByRole("region", { name: "Bölüm ekle" })
     expect(chooser).toHaveTextContent("Bu sayfaya, bölümlerin sonuna eklenir")
     expect(
       within(chooser)

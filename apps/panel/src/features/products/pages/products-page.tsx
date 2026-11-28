@@ -28,6 +28,7 @@ import { useProductFilters } from "@/features/products/components/product-filter
 import { ProductSort } from "@/features/products/components/product-sort"
 import type { FilterValues } from "@/features/products/components/product-filters"
 import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
+import { SampleOffer } from "@/features/sample-catalog/sample-offer"
 import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
 import { SheetImportDialog } from "@/features/products/components/sheet-import-dialog"
 import { productScoresQuery } from "@/features/seo/api/advisor"
@@ -282,6 +283,7 @@ export function ProductsPage() {
                       </Link>
                     </Button>
                   )}
+                  {filtered ? null : <SampleOffer />}
                 </div>
               }
             />

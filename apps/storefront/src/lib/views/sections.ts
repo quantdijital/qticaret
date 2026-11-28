@@ -13,13 +13,14 @@ import { reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
 import { cardedCategoriesView } from "./category-cards-data"
+import { carouselCategoriesView } from "./category-carousel"
 import { iconCategoriesView } from "./category-icons"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
 import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
-import { newsletterLookOf } from "./newsletter"
+import { consentStyleOf, consentWordsKey, newsletterLookOf } from "./newsletter"
 import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postsView } from "./posts-section"
@@ -37,6 +38,7 @@ import { departuresView } from "./departures"
 import { stripGalleryView } from "./strip-gallery"
 import { contactOf } from "./shop"
 import { noteInHand } from "./theme-settings"
+import { withHeadLines } from "./head-lines"
 
 export type { ProductContext } from "./section-data"
 
@@ -75,6 +77,10 @@ async function sectionView(
       // The icon row (adr/0077 §10 Ek): its discs with the shop's icons
       if (section.variant === "icons") {
         return iconCategoriesView(section, t)
+      }
+      // The sliding picture cards, with the scroller kit's settings
+      if (section.variant === "carousel") {
+        return carouselCategoriesView(section, t, context.home === true)
       }
       // The carded variants (linked, collage, panels): their cards and own part; else the tiles
       const carded = await cardedCategoriesView(section, t, context.home === true)
@@ -188,7 +194,10 @@ async function sectionView(
         type: "newsletter",
         title: section.title ?? t("newsletter.title"),
         text:
-          section.text ?? t("newsletter.text", { shop: identity.company_title ?? site.shop.name }),
+          section.text ??
+          t(consentWordsKey(consentStyleOf(section)), {
+            shop: identity.company_title ?? site.shop.name,
+          }),
         privacyPath: notice ? legalPath("privacy_notice") : null,
         ...newsletterLookOf(section, t, "page"),
       }
@@ -268,7 +277,13 @@ export async function sectionViews(
     ? withFeatures(sections, (await storefrontSettings()).features)
     : sections
   const [views, editing] = await Promise.all([
-    Promise.all(allowed.map((section) => sectionView(section, t, context))),
+    Promise.all(
+      allowed.map(async (section) => {
+        const view = await sectionView(section, t, context)
+        // The heading's upper line and hand note, on the sections that carry them
+        return view ? withHeadLines(view, section) : null
+      })
+    ),
     isEditorSession(),
   ])
   return views.flatMap((view, index) => {

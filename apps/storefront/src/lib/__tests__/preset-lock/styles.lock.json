@@ -2,7 +2,7 @@
   "note": "Digests of packages/themes/atolye/src/**/*.css; written by `pnpm lock:presets`",
   "files": [
     {
-      "sha256": "3b05ab7ba3aaae2c4aa215267d028db2267c18b8dfd46bcd676a6f9f1fc1bc6a",
+      "sha256": "94add060dd3fa8a9f4b7ce04e3fede2ed217be6cd846010068378e2e0844080e",
       "file": "announcement.css"
     },
     {
@@ -10,7 +10,7 @@
       "file": "banner.css"
     },
     {
-      "sha256": "1eaedba46318f683d6482745265ac93519bbba6c615d508187596cb31c0fb57a",
+      "sha256": "6afdb0db1773f934aecfc62ee26b702c27084e3c566410892aee32dfdc10b23d",
       "file": "base.css"
     },
     {
@@ -70,7 +70,7 @@
       "file": "footer-rows.css"
     },
     {
-      "sha256": "e78f2ce686fd2e795ba05eca359e2dd84373e03729045260232a68145b9ce761",
+      "sha256": "67183bfe010341e49de1cefb8e994dde4cf08783ceee8ec2fc278a49292ebd40",
       "file": "frame.css"
     },
     {
@@ -82,7 +82,7 @@
       "file": "header-inline.css"
     },
     {
-      "sha256": "f6cb7816473d779f5813ae4a549e88bc94f657552d7a330fda95dc8aef8c7bf7",
+      "sha256": "59b15504a3d5a7f4d08445bb0de8cc46f3e60416d48e9bd554a4c34eb365705a",
       "file": "header-over.css"
     },
     {
@@ -146,7 +146,7 @@
       "file": "pages.css"
     },
     {
-      "sha256": "0a85457c810898e87215c7758c915c4abcfb6bd27d09769c052ee09296742e1a",
+      "sha256": "a7390b7fe8c2be98a7fbd39c480a24b80dc279f8fdb35e67e98383aba7bcaceb",
       "file": "panels.css"
     },
     {
@@ -170,11 +170,11 @@
       "file": "search-fields.css"
     },
     {
-      "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
+      "sha256": "4ccb17cd017555d399f0b852e267e86e69843346ae2f5b771df14d9fd48de061",
       "file": "search-toggle.css"
     },
     {
-      "sha256": "4207c9ed4a66f8d998e098800d07f49978667ec27fe1b544b06eeb77ea8dca56",
+      "sha256": "a19215935897dc4489b291ceb1c572ce7dc97840dff7117f44c4812afac5027a",
       "file": "section-title.css"
     },
     {

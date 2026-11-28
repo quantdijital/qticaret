@@ -424,12 +424,20 @@
       "previewValue": "Sample product name",
       "previewField": "Sample field",
       "colors": "Colours",
-      "colorsHint": "The brand colour paints buttons, selections and charts; the mode sets the page's ground, the menu ground the left menu's.",
-      "layout": "Layout",
-      "layoutHint": "How the menu behaves, the corners and the row height.",
+      "colorsHint": "The brand colour paints buttons, selections and charts; the background colour sets the surfaces' tone, the mode light or dark.",
+      "layout": "Menu and layout",
+      "layoutHint": "The left menu's ground and behaviour, corners and row height.",
       "radiusHint": "The corners of cards, buttons and fields.",
       "densityHint": "The height of table rows and fields.",
-      "modeHint": "A light or dark ground; by system follows your device."
+      "modeHint": "A light or dark ground; by system follows your device.",
+      "surface": "Background colour",
+      "surfaceHint": "The tone of the page, cards and menus. The brand colour stays on buttons, links and charts.",
+      "surfaceOptions": {
+        "brand": "From the brand",
+        "neutral": "Neutral",
+        "warm": "Warm",
+        "cool": "Cool"
+      }
     },
     "saved": "Settings saved.",
     "catalogDefaults": {
@@ -969,7 +977,8 @@
         "ai.alt_text": "Bulk alt text suggestions",
         "ai.seo_fill": "Bulk SEO text suggestions",
         "content.link_rewrite": "Fixing links in texts",
-        "order.export": "Order export"
+        "order.export": "Order export",
+        "sample_catalog.load": "Sample content load"
       }
     },
     "audit": {
@@ -1106,7 +1115,8 @@
         "refund": "Refund",
         "legal_document": "Legal text",
         "vat_rate": "VAT rate",
-        "message_template": "Customer message"
+        "message_template": "Customer message",
+        "product_question": "Product question"
       }
     },
     "locations": {
@@ -2088,7 +2098,8 @@
             "mfa_changed": "Team: two-step verification changed",
             "email_confirm": "Team: new e-mail confirmation",
             "account_changed": "Team: password or e-mail changed",
-            "smtp_rejections": "Team: mail server refusing recipients"
+            "smtp_rejections": "Team: mail server refusing recipients",
+            "support_access": "Team: platform support signed in"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
@@ -2392,7 +2403,7 @@
       "security": "Your account and two-step verification, team members and invitations, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
       "einvoice": "Invoicing program, timing and series, VAT, accounting",
-      "migration": "Catalog, customers and 301s from the old platform",
+      "migration": "Bring products, posts and customers from your old site; redirect its old addresses",
       "subscription": "Your package, limits and usage, payment status",
       "maintenance": "Closing the storefront for a while, the maintenance page and the bypass link"
     },
@@ -2827,7 +2838,8 @@
       "tabs": {
         "account": "My account",
         "team": "Team",
-        "fraud": "Fraud prevention"
+        "fraud": "Fraud prevention",
+        "support": "Support access"
       },
       "profile": {
         "title": "My profile",
@@ -3225,17 +3237,14 @@
     },
     "migration": {
       "title": "Migration",
-      "subtitle": "Move your shop here from its old platform: the catalog, customers, past orders and the old addresses' 301 redirects.",
+      "subtitle": "Bring the products, posts and customers of your old site here; the old addresses lead to the new pages.",
       "run": {
-        "title": "Run the migration",
-        "description": "Check first: nothing is written, the report says what would happen. Then apply; running it again writes nothing twice.",
-        "source": "Source",
         "sources": {
           "shopify": "Shopify",
           "wordpress": "WordPress / WooCommerce",
           "feed": "Product feed (Ticimax, ikas, IdeaSoft, T-Soft)",
-          "customers": "Customer list (xlsx/CSV)",
-          "bundle": "Migration bundle (JSON)"
+          "customers": "Customer list (Excel or CSV)",
+          "bundle": "Migration file prepared by our team"
         },
         "hints": {
           "shopify": "Your shop is on Shopify: products, collections, customers, orders and pages are read through your app.",
@@ -3247,29 +3256,20 @@
         "feedUrl": "Feed address",
         "file": "File",
         "parcel": {
-          "title": "Default parcel",
+          "title": "Parcel for products without measurements",
           "hint": "Optional. Products without a weight or measurements get these values; left empty, they come as the source has them, without measurements, and shipping is priced by the shop's default parcel.",
           "weight": "Weight (g)",
           "length": "Length (cm)",
           "width": "Width (cm)",
           "height": "Height (cm)"
         },
-        "check": "Check",
-        "apply": "Apply",
-        "confirmTitle": "Apply the migration?",
-        "confirmText": "The source's records are written to this shop. Running it again writes nothing twice.",
-        "running": "Running… {{progress}}%",
-        "failed": "The migration stopped: {{reason}}",
-        "planned": "The check is done: what would happen is below.",
-        "applied": "The migration was applied.",
-        "report": "Download the report",
         "kinds": {
           "category": "Categories",
           "brand": "Brands",
           "product": "Products",
-          "image": "Pictures",
+          "image": "Product images",
           "customer": "Customers",
-          "consent": "Message consents",
+          "consent": "Marketing e-mail consents",
           "order": "Past orders",
           "review": "Reviews",
           "post_category": "Blog categories",
@@ -3277,46 +3277,16 @@
           "post": "Blog posts",
           "page": "Other pages"
         },
-        "columns": {
-          "kind": "Kind",
-          "read": "In the source",
-          "created": "Added",
-          "plannedCreated": "To add",
-          "found": "Already here",
-          "skipped": "Left out"
-        },
-        "refreshConfirmTitle": "Refresh the descriptions?",
-        "refreshConfirmText": "The descriptions of the products this file moved before are replaced with the file's; description edits made in the panel since give way too. No other field changes.",
-        "descriptions": {
-          "applied": "Descriptions refreshed.",
-          "planned": "Dry run finished: the descriptions to refresh are below.",
-          "refreshed": "Descriptions refreshed",
-          "plannedRefreshed": "Descriptions to refresh",
-          "same": "Already the same",
-          "notMoved": "Products no earlier run moved",
-          "notMovedHint": "Apply a migration without the box ticked to move these first.",
-          "failed": "Not refreshed",
-          "withDocument": "With a formatted description",
-          "documents_one": "{{formatted}} product's description moved with its formatting",
-          "documents_other": "{{formatted}} products' descriptions moved with their formatting",
-          "plannedDocuments_one": "{{formatted}} product's description will move with its formatting",
-          "plannedDocuments_other": "{{formatted}} products' descriptions will move with their formatting",
-          "documentsHint": "Headings, paragraphs, lists and tables kept; edited in the Description card on the product's page.",
-          "facts_one": "{{formatted}} fact value from descriptions written to fields",
-          "facts_other": "{{formatted}} fact values from descriptions written to fields",
-          "plannedFacts_one": "{{formatted}} fact value from descriptions will be written to fields",
-          "plannedFacts_other": "{{formatted}} fact values from descriptions will be written to fields",
-          "factsLeft_one": "{{formatted}} row waits for you: select the products in Products and use “Bring over facts from the description”.",
-          "factsLeft_other": "{{formatted}} rows wait for you: select the products in Products and use “Bring over facts from the description”."
-        }
+        "advanced": "Advanced",
+        "advancedHint": "Most shops do not need it"
       },
       "shopify": {
         "connected": "{{shop}} is connected",
         "notConnected": "No Shopify store is connected.",
         "steps": "Create an app in Shopify's Dev Dashboard, give it read scopes only (products, customers, orders, pages), install it on your store and enter its details here.",
         "shopDomain": "Store address",
-        "clientId": "Client ID",
-        "clientSecret": "Client secret",
+        "clientId": "App ID (Client ID)",
+        "clientSecret": "App key (Client secret)",
         "connect": "Connect",
         "reconnect": "Connect again",
         "saved": "The Shopify store is connected."
@@ -3324,8 +3294,8 @@
       "wordpress": {
         "file": "Export file",
         "fileHint": "The XML, or a zip holding it, up to 50 MB. Choose All content: products, variations and images exported apart cannot find each other.",
-        "categoryBase": "Category address prefix",
-        "categoryBaseHint": "The path in front of the old site's category addresses, e.g. /urun-kategori/; / when categories sit at the root. Left empty, it is read from the site's own links; fill it in when the report shows category addresses wrong.",
+        "categoryBase": "Old category addresses",
+        "categoryBaseHint": "The path in front of the old site's category addresses, e.g. /urun-kategori/; / when categories sit at the root. Left empty, it is found from the site's own links; fill it in when the preview shows category addresses wrong.",
         "parcelNote": "Most WooCommerce shops enter no weight or size for their products. They still arrive as the source has them; shipping is priced by the default parcel under Settings > Shipping. A parcel given here is written as their own measurements.",
         "errors": {
           "fileRequired": "Choose the export file.",
@@ -3335,22 +3305,6 @@
           "parcel": "Enter all four parcel values above zero, or leave all four empty."
         },
         "report": {
-          "tabs": {
-            "counts": "Counts",
-            "attributes": "Attributes",
-            "notMoved": "Not moved"
-          },
-          "attributesNote": "Attributes not used for variations (e.g. steel type) are not moved; they can be written once an attribute group is set up.",
-          "attributesInFile": "Products and values per attribute are on the report's Notlar (notes) sheet.",
-          "noAttributes": "No attributes left behind.",
-          "columns": {
-            "attribute": "Attribute",
-            "products": "Products",
-            "values": "Values"
-          },
-          "addressOnly": "Pages kept only for their old addresses",
-          "addressOnlyHint": "Legal texts, system pages such as cart and account, and the front page do not become content pages. After applying, decide where their old addresses go in the Old addresses card, e.g. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
-          "notMoved": "In the report, not moved",
           "kinds": {
             "coupons": "Coupons",
             "menu_items": "Menu items",
@@ -3363,17 +3317,15 @@
             "product_tags": "The storefront has no product tag pages.",
             "blog_comments": "The storefront shows no blog comments."
           }
-        },
-        "refresh": "Refresh descriptions only",
-        "refreshHint": "Products an earlier run moved get their description rewritten from this file, with its headings, lists and tables. Prices, stock, status and SEO fields stay as they are, and nothing new is added. Applied only."
+        }
       },
       "runs": {
-        "title": "Past runs",
-        "description": "Every check and apply, with its source.",
-        "empty": "No runs yet.",
+        "title": "Past moves",
+        "description": "Every preview and move, with its source.",
+        "empty": "No moves yet.",
         "modes": {
-          "check": "Check",
-          "apply": "Apply"
+          "check": "Preview",
+          "apply": "Move"
         },
         "statuses": {
           "running": "Running",
@@ -3382,25 +3334,25 @@
           "interrupted": "Stopped half-way"
         },
         "summary": "{{products}} products, {{customers}} customers",
-        "restart": "Start again",
-        "restarted": "The run started again from the same file.",
-        "restartedNote": "started again"
+        "restart": "Continue where it stopped",
+        "restarted": "The move continues from the same file.",
+        "restartedNote": "continued"
       },
       "addresses": {
-        "title": "Old addresses",
-        "description": "The old site's addresses 301 to the new pages; you decide the ones that match nothing. Once Search Console's 100 most visited addresses all answer, you are ready to cut over.",
-        "ready": "Ready to cut over",
-        "notReady": "Not ready to cut over",
+        "title": "Old addresses and redirects",
+        "description": "Send the old addresses to the new pages; once the 100 most visited all answer, you are ready to connect your domain.",
+        "ready": "Ready to connect the domain",
+        "notReady": "Not ready to connect the domain yet",
         "noTraffic": "No Search Console data: upload the most visited pages.",
         "unanswered": "{{count}} of the most visited addresses answer nothing yet.",
-        "categoryStyle": "{{kept}} of the old site's {{total}} category addresses stay exactly as they were with the “{{style}}” category URL style ({{now}} with the current one). If you change the style, the other category addresses 301 to their new ones.",
+        "categoryStyle": "{{kept}} of the old site's {{total}} category addresses stay exactly as they were with the “{{style}}” category URL style ({{now}} with the current one). If you change the style, the other category addresses redirect to their new ones (301).",
         "categoryStyleLink": "Open the URL style",
         "counts": {
           "total": "Addresses",
           "matched": "Matched",
           "decided": "Decided",
           "undecided": "To decide",
-          "unsupported": "With a query"
+          "unsupported": "Addresses with a question mark"
         },
         "sitemap": "Sitemap address",
         "readSitemap": "Read the sitemap",
@@ -3410,14 +3362,14 @@
         "sitemapStarted": "The sitemap is being read; its addresses join the list when it ends.",
         "apply": "Apply the decisions",
         "applyConfirmTitle": "Apply the address decisions?",
-        "applyConfirmText": "Matched old addresses go to their records' new address; your decisions are written as 301 and 410 rules.",
+        "applyConfirmText": "Matched old addresses redirect to their records' new page; your decisions are written as redirect (301) and removed (410) rules.",
         "applyStarted": "The decisions are being applied; the report is on the jobs page.",
         "filters": {
           "all": "All",
           "undecided": "To decide",
           "matched": "Matched",
           "decided": "Decided",
-          "unsupported": "With a query"
+          "unsupported": "Addresses with a question mark"
         },
         "columns": {
           "address": "Old address",
@@ -3427,21 +3379,21 @@
         },
         "states": {
           "live": "Page",
-          "redirected": "301",
-          "gone": "410",
-          "not_found": "404"
+          "redirected": "Redirects (301)",
+          "gone": "Removed (410)",
+          "not_found": "Not found (404)"
         },
         "actions": {
           "covered": "Answers",
-          "reserve": "301 to its record",
-          "redirect": "301 rule",
-          "gone": "410",
+          "reserve": "Redirects to its new page (301)",
+          "redirect": "Redirects to the chosen page (301)",
+          "gone": "Reported as removed (410)",
           "undecided": "To decide",
-          "unsupported": "Needs a server rule"
+          "unsupported": "Cannot be redirected here"
         },
         "decide": {
-          "redirect": "Redirect",
-          "gone": "Give 410",
+          "redirect": "Redirect (301)",
+          "gone": "Removed (410)",
           "auto": "Automatic",
           "target": "Target path",
           "save": "Save",
@@ -3451,13 +3403,13 @@
         "upload": "Upload"
       },
       "cutover": {
-        "title": "Cutover",
-        "description": "Mark the day your domain points at the new site: for 30 days 404s are watched, new ones join the old addresses and the bell rings.",
-        "mark": "Cutover is done",
-        "confirmTitle": "Is the cutover done?",
-        "confirmText": "Mark it if the domain shows the new site; the 404 watch starts today.",
-        "watching": "Cut over on {{date}}; 404s are watched until {{until}}.",
-        "none": "No cutover yet."
+        "title": "Domain switch",
+        "description": "Mark the day your domain points to the new site; for 30 days pages not found (404) are watched.",
+        "mark": "My domain points to the new site",
+        "confirmTitle": "Does your domain point to the new site?",
+        "confirmText": "Mark it once your domain shows the new site. Pages not found (404) are watched for 30 days from today; new ones join the old addresses and the bell rings.",
+        "watching": "The domain moved on {{date}}; pages not found (404) are watched until {{until}}.",
+        "none": "The domain has not moved yet."
       },
       "links": {
         "title": "Old links in your texts",
@@ -3466,18 +3418,18 @@
         "apply": "Fix the links",
         "confirmTitle": "Fix the links?",
         "confirmText": "Links to old addresses get the addresses of the pages their redirects lead to. Those that lead nowhere stay as they are and are listed in the report.",
-        "none": "Not run yet. A migration does this itself; run it here for texts moved before.",
+        "none": "Not run yet. The move does this itself; run it here for texts moved before.",
         "running": "Reading the links…",
         "checked": "Check of {{date}}: {{changed}} links in {{documents}} texts would be fixed, {{unresolved}} links lead nowhere.",
         "applied": "{{date}}: {{changed}} links fixed in {{documents}} texts, {{unresolved}} links lead nowhere.",
         "failed": "The last run did not finish. Try again.",
         "report": "Download the report",
         "downloadFailed": "The report could not be downloaded.",
-        "hint": "For links that lead nowhere, decide and apply their old addresses or edit the text, then run it again."
+        "hint": "For links that match nothing, decide and apply in the Old addresses and redirects card or edit the text, then run it again."
       },
       "invites": {
         "title": "Customer invitations",
-        "description": "Passwords cannot move: moved customers get an e-mail to open their accounts. Half of the daily e-mail limit goes each day; orders keep the rest.",
+        "description": "Passwords cannot move; moved customers get an e-mail to open their accounts, some of them each day.",
         "start": "Start the invitations",
         "confirmTitle": "Start the invitations?",
         "confirmText": "Each moved customer who has not taken their earlier record gets one e-mail; its personal key lasts 60 days.",
@@ -3487,6 +3439,235 @@
           "invited": "Sent",
           "waiting": "Waiting",
           "today": "Today"
+        }
+      },
+      "stepTitle": "{{step}}. {{title}}",
+      "after": {
+        "title": "After the move",
+        "description": "Once the move is done, take these three steps in order."
+      },
+      "overview": {
+        "title": "Moved",
+        "lastRun": "Last transfer: {{date}} · {{source}}",
+        "rule": "Records moved before are not touched; only what is missing is added. Use the completion actions to redo one part.",
+        "openResult": "Open the last transfer's result",
+        "newRun": "New migration",
+        "empty": "Nothing has moved yet. Start a new migration to bring in your old site's products, posts and customers.",
+        "kinds": {
+          "product": "Products",
+          "image": "Product images",
+          "category": "Categories",
+          "brand": "Brands",
+          "post": "Blog posts",
+          "page": "Pages",
+          "customer": "Customers",
+          "order": "Past orders",
+          "review": "Reviews"
+        },
+        "states": {
+          "ok": "Done",
+          "notMoved": "Not moved",
+          "problems": "{{count}} not moved",
+          "images": "{{count}} images missing",
+          "postImages": "{{count}} posts missing images"
+        }
+      },
+      "completions": {
+        "title": "Completion actions",
+        "description": "Each takes one part of what moved again and touches nothing else.",
+        "start": "Start",
+        "none": "Nothing missing",
+        "running": "Running · {{progress}}%",
+        "failed": "Stopped: {{reason}}",
+        "changes": "Changes:",
+        "keeps": "Stays the same:",
+        "file": "Export file",
+        "fileHint": "The file is deleted after each action. Download it again in WordPress under Tools › Export › All content; XML or zip, up to 50 MB.",
+        "feedUrl": "Feed address",
+        "feedUrlHint": "The product feed address the migration used.",
+        "rows": {
+          "images": {
+            "title": "Download missing product images",
+            "text": "Tries the images that could not be fetched again. Leaves existing images, their order and your cover choice alone.",
+            "count": "missing on {{count}} products",
+            "changes": "only images that could not be fetched before are downloaded and added to their products.",
+            "keeps": "existing images, their order, your cover choice and product details.",
+            "submit": "Download images",
+            "done": "{{created}} images added · {{skipped}} could not be fetched"
+          },
+          "descriptions": {
+            "title": "Take product descriptions again",
+            "text": "Replaces descriptions with the file's; description edits made in the panel are lost. Leaves price, stock, title, SEO and images alone.",
+            "count": "{{count}} products",
+            "changes": "the moved products' descriptions, with headings, lists and tables. Description edits made in the panel are lost too.",
+            "keeps": "price, stock, status, title, SEO fields, images and other products.",
+            "submit": "Replace descriptions",
+            "done": "{{updated}} descriptions changed · {{found}} already the same"
+          },
+          "summaries": {
+            "title": "Fill in short descriptions",
+            "text": "Writes only to products with an empty short description; leaves the ones you filled alone.",
+            "count": "{{count}} empty",
+            "changes": "moved products whose short description is empty, or still the list an earlier transfer wrote by itself, get the file's short description.",
+            "keeps": "short descriptions you wrote or changed, the long description and other fields.",
+            "submit": "Write short descriptions",
+            "done": "{{updated}} short descriptions written · {{skipped}} products left alone"
+          },
+          "post_images": {
+            "title": "Complete blog post images",
+            "text": "Downloads cover and in-text images and puts them into the post. Leaves the post's text, title and SEO fields alone.",
+            "count": "missing in {{count}} posts",
+            "changes": "missing images are downloaded to the media library and put back in their place in the post.",
+            "keeps": "the post's text, title and SEO fields; images you removed do not come back.",
+            "submit": "Add images",
+            "done": "images added to {{updated}} posts · {{skipped}} images could not be fetched"
+          },
+          "category_covers": {
+            "title": "Complete category images",
+            "text": "Puts the old site's image only on categories without one.",
+            "count": "{{count}} categories without an image",
+            "changes": "moved categories without an image get the old site's image.",
+            "keeps": "categories that have an image and the categories' other fields.",
+            "submit": "Set images",
+            "done": "images set on {{covers}} categories"
+          },
+          "new": {
+            "title": "Bring newly added products and posts",
+            "text": "Brings what was added on the old site later. Leaves what already moved alone.",
+            "submit": "Open a new migration"
+          },
+          "links": {
+            "title": "Fix links to the old site in texts",
+            "text": "Points links to the old site in posts, pages and descriptions at the pages here. Leaves links to other sites alone.",
+            "changes": "links to the old site in texts point at the pages the old addresses redirect to.",
+            "keeps": "links to other sites and the rest of the text; unmatched ones are listed in the report.",
+            "submit": "Fix links",
+            "done": "{{changed}} links fixed · {{unresolved}} unmatched"
+          },
+          "urls": {
+            "title": "Rebuild redirects",
+            "text": "Redirects each moved record's old address to its new page (301). Leaves your redirect decisions alone.",
+            "count": "{{count}} missing",
+            "changes": "moved records' old addresses redirect to their new pages (301).",
+            "keeps": "your redirect and removed (410) decisions.",
+            "submit": "Build redirects",
+            "done": "{{reserved}} addresses redirected to their new page"
+          }
+        }
+      },
+      "afterCards": {
+        "addresses": "Old addresses",
+        "addressesSummary": "{{total}} addresses · {{undecided}} awaiting a decision",
+        "addressesNone": "No old addresses yet; they are listed here after the migration.",
+        "decide": "Decide",
+        "history": "Past transfers"
+      },
+      "addressesPage": {
+        "title": "Old addresses and redirects",
+        "description": "Decide on the old site's addresses: redirect to a new page (301) or report as removed (410).",
+        "back": "Migration"
+      },
+      "wizard": {
+        "title": "New migration",
+        "subtitle": "Bring your old site's records here step by step.",
+        "steps": {
+          "source": {
+            "title": "Source",
+            "description": "Which is your old site?"
+          },
+          "file": {
+            "title": "File",
+            "description": "Connect your source or choose its file."
+          },
+          "kinds": {
+            "title": "What to move",
+            "description": "What the file holds. Untick what you do not want."
+          },
+          "transfer": {
+            "title": "Transfer",
+            "description": "Moving. You can leave this page; the transfer continues in the background."
+          },
+          "result": {
+            "title": "Result",
+            "description": "What moved and what needs your attention."
+          }
+        },
+        "sources": {
+          "wordpress": {
+            "title": "WordPress / WooCommerce",
+            "text": "You upload the site's export file."
+          },
+          "shopify": {
+            "title": "Shopify",
+            "text": "You connect your store; products, customers, orders and pages come."
+          },
+          "feed": {
+            "title": "Another platform",
+            "text": "Ticimax, ikas, IdeaSoft, T-Soft: by the product feed address."
+          },
+          "customers": {
+            "title": "Customer list only",
+            "text": "The old platform's customer export (Excel or CSV)."
+          },
+          "bundle": {
+            "title": "Migration file",
+            "text": "The file our team prepared for you."
+          }
+        },
+        "back": "Back",
+        "next": "Next",
+        "cancel": "Cancel",
+        "review": "Review",
+        "background": "Continue in the background",
+        "done": "Done",
+        "fileRequired": "Choose the file first.",
+        "urlRequired": "Enter the feed address.",
+        "connectFirst": "Connect your Shopify store first.",
+        "reading": "Reading the file, nothing is saved…",
+        "previewFailed": "The file could not be read: {{reason}}",
+        "fileKept": "The file stays on this page; it is sent again when the transfer starts and deleted from the server when the job ends.",
+        "kinds": {
+          "kind": "Kind",
+          "url": "Redirects (301)",
+          "urlText": "Old addresses redirect to their new pages.",
+          "read": "{{count}} in the source",
+          "created": "{{count}} to add",
+          "found": "{{count}} already here",
+          "problems": "{{count}} problems",
+          "nothing": "Not in this source",
+          "required": "needed for {{kind}}",
+          "noneChosen": "Choose at least one kind.",
+          "problemsTitle": "Will not move",
+          "moreInReport": "All of them are in the report.",
+          "notMoved": "Not moved",
+          "attributes": "{{count}} attributes match no template and will not move: {{names}}. Set up a template under Settings › Attributes to write them."
+        },
+        "start": "Start the transfer",
+        "transfer": {
+          "progress": "{{done}} / {{total}}",
+          "waiting": "Waiting",
+          "finished": "Done",
+          "failed": "The transfer stopped: {{reason}}"
+        },
+        "result": {
+          "finished": "Migration finished · {{date}}",
+          "previewed": "Preview finished · nothing was saved",
+          "added": "{{kind}} added",
+          "attention": "Needs your attention",
+          "nothing": "Nothing needs your attention.",
+          "retry": "Try again",
+          "openProducts": "Open products",
+          "openAddresses": "Go to old addresses",
+          "list": "Which ones?",
+          "next": "Next",
+          "nextSteps": {
+            "addresses": "Decide on the old addresses",
+            "domain": "Point your domain at the new site",
+            "invites": "Send customers invitations"
+          },
+          "report": "Download the report (Excel)",
+          "csv": "Download the redirect list (CSV)",
+          "retryStarted": "Started; you can follow it on the Migration page."
         }
       }
     },
@@ -3904,7 +4085,13 @@
       "summary": "Summary",
       "available": "Sellable stock",
       "created": "Added",
+      "nextDeparture": "Next departure",
+      "noDeparture": "No departure planned",
+      "placesLeft": "Places left",
+      "placesLeftValue": "{{places}} · {{departures}} departures",
+      "datesLine": "Added {{created}} · Changed {{updated}}",
       "shippingHint": "Optional. These apply to variants without their own values; with none, shipping is priced by the default parcel.",
+      "aboutForm": "What is it for?",
       "publish": "Publish",
       "unpublish": "Unpublish",
       "published": "Product published.",
@@ -4102,10 +4289,11 @@
       "actions": {
         "bookings": "{{start}}: participants",
         "bookingsShort": "Participants",
-        "edit": "{{start}}: edit",
-        "close": "{{start}}: close for sale",
-        "open": "{{start}}: open for sale",
-        "cancel": "{{start}}: cancel"
+        "more": "{{start}}: actions",
+        "editShort": "Edit",
+        "closeShort": "Close for sale",
+        "openShort": "Open for sale",
+        "cancelShort": "Cancel the departure"
       },
       "bookings": {
         "title": "Participants",
@@ -4417,7 +4605,8 @@
         "sale": "Sale price",
         "brand": "Change brand",
         "tag": "Add / remove tag",
-        "backorder": "Selling when out of stock"
+        "backorder": "Selling when out of stock",
+        "kind": "Change product type"
       },
       "price": {
         "mode": "Price change",
@@ -4571,6 +4760,21 @@
           "deny": "Stop selling"
         },
         "hint": "Only variants whose stock is tracked change; untracked ones always sell."
+      },
+      "kind": {
+        "label": "Product type",
+        "booking": "Booking",
+        "bookings": {
+          "none": "Sold without dates",
+          "departure": "Sold by date (departures)"
+        },
+        "hints": {
+          "physical": "Shipped by carrier; linked to the shop's default shipping profile. Gift cards stay digital and are skipped.",
+          "digital": "No shipping; the product leaves its shipping profile.",
+          "service": "No shipping. Sold by date, each departure has its own places and the variants stop tracking stock. Gift cards stay digital and are skipped."
+        },
+        "bookingOff_one": "{{formatted}} dated product will stop being sold by date.",
+        "bookingOff_other": "{{formatted}} dated products will stop being sold by date."
       }
     },
     "priceHistory": {
@@ -4641,7 +4845,8 @@
       "yes": "Yes",
       "withdrawal": "Right of withdrawal",
       "withdrawalOut": "Excluded",
-      "withdrawalIn": "Applies"
+      "withdrawalIn": "Applies",
+      "unset": "Not set: {{names}}"
     },
     "layout": {
       "customize": "Customise page",
@@ -4661,6 +4866,15 @@
       "showHidden": "Show",
       "shownAttention": "Hidden section: shown because something in it needs attention.",
       "shownRevealed": "Hidden section: shown for this visit.",
+      "back": "Back to products",
+      "view": {
+        "button": "View",
+        "title": "What you want to see on the page",
+        "description": "Kept for you alone; a hidden section's data is not deleted.",
+        "shopHidden": "Hidden in the shop's page layout",
+        "unused": "Not used for this kind of product",
+        "reset": "Back to default"
+      },
       "parts": {
         "general": "General",
         "variants": "Variants",
@@ -4966,7 +5180,7 @@
     },
     "faq": {
       "title": "Frequently asked questions",
-      "description": "Add questions and answers in the shop's name to the product page's Q&A. They are published at once; you can hide them under Reviews and questions › Questions.",
+      "description": "The product page's Q&A: customers' questions and the questions and answers you add in the shop's name. Added ones are published at once; click a question to edit, hide or delete it.",
       "empty": "The AI suggests 3–5 questions and answers from the product's description, short description, attributes and options. No question is written that the data cannot answer.",
       "draft": "FAQ draft",
       "hint": "Tick the ones to add; you can edit each question and answer before adding.",
@@ -4984,7 +5198,15 @@
         "too_long": "A question can be at most 120 characters, an answer at most 400."
       },
       "summary": "A question and answer draft from the product's details",
-      "summaryOpen": "Draft open"
+      "summaryOpen": "Draft open",
+      "addOne": "Add question",
+      "noAnswer": "No answer yet",
+      "none": "No questions on this product yet.",
+      "listLabel": "The product's questions",
+      "open": "Open question: {{question}}",
+      "more": "Showing the newest {{shown}} questions ({{count}} in all). See all on Reviews and questions › Questions.",
+      "summaryCount_one": "{{count}} question",
+      "summaryCount_other": "{{count}} questions"
     },
     "addonTemplates": {
       "title": "Add-on groups",
@@ -5114,7 +5336,20 @@
       "autoDay": "Day {{n}}",
       "autoStep": "Step {{n}}",
       "empty": "No steps yet. Add the days or the lessons one by one; an empty program does not show on the product page.",
-      "add": "Add a step",
+      "addOf": {
+        "day": "Add a day",
+        "step": "Add a step"
+      },
+      "unitsShort": {
+        "day": "Day",
+        "step": "Step"
+      },
+      "openAll": "Open all",
+      "closeAll": "Close all",
+      "untitled": "Untitled",
+      "tagCount_one": "{{count}} included",
+      "tagCount_other": "{{count}} included",
+      "addImage": "Add a picture",
       "limit": "A program holds at most {{max}} steps.",
       "label": "Label",
       "stepTitle": "Title",
@@ -5123,7 +5358,6 @@
       "bodyPlaceholder": "What happens in this step? A short text.",
       "image": "Picture",
       "imageHint": "Optional; from the media library.",
-      "noImage": "No picture",
       "tags": "Included",
       "tagNames": {
         "breakfast": "Breakfast",
@@ -8596,8 +8830,8 @@
       "description": "If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document."
     },
     "migrationNotFound": {
-      "title": "{{count}} addresses answered 404 since cutover",
-      "description": "Decide a 301 or 410 in Migration > Old addresses."
+      "title": "{{count}} addresses were not found (404) since the domain switch",
+      "description": "Decide a redirect or removal in Migration > Old addresses and redirects."
     },
     "contactMessage": {
       "title": "New contact message: {{subject}}",
@@ -9328,6 +9562,49 @@
         "pending": "No questions or answers to look at.",
         "approved": "No published questions.",
         "rejected": "No rejected questions."
+      },
+      "manage": {
+        "edit": "Edit",
+        "editFor": "Edit question: {{question}}",
+        "addTitle": "Add question",
+        "editTitle": "Edit question",
+        "newDescription": "Added in the shop's name and published on the product page at once.",
+        "question": "Question",
+        "answer": "Shop's answer",
+        "questionPlaceholder": "E.g. Can the knife go in the dishwasher?",
+        "answerPlaceholder": "E.g. We don't recommend it; wash by hand in warm water and dry at once.",
+        "customerHint": "A customer's question. Edit it only for a typo or personal details (phone, address).",
+        "answerHint": "Left empty, the shop's answer is removed. Answering a waiting question publishes it too.",
+        "answerHintNew": "The question is published with its answer.",
+        "customerAnswers": "Customers' answers",
+        "customerAnswersHint": "Customers' answers are not changed; approve or reject them on Reviews and questions › Questions.",
+        "save": "Save",
+        "add": "Add",
+        "hide": "Hide",
+        "show": "Publish",
+        "delete": "Delete",
+        "added": "Question added to the product page.",
+        "saved": "Question saved.",
+        "hidden": "Question hidden; it no longer shows on the product page.",
+        "shown": "Question published.",
+        "deleted": "Question deleted.",
+        "restored": "Question restored.",
+        "undo": "Undo",
+        "deleteConfirm": {
+          "title": "Delete this question?",
+          "description": "The question and all its answers are removed from the product page. You can bring it back right after with \"Undo\".",
+          "action": "Delete question"
+        },
+        "issues": {
+          "short": "Write at least 2 characters.",
+          "long": "At most 1,000 characters."
+        },
+        "state": {
+          "published": "Published",
+          "hidden": "Hidden",
+          "waiting": "Awaiting answer"
+        },
+        "editedByShop": "Edited by the shop · {{when}}"
       }
     },
     "photos": {
@@ -9335,7 +9612,12 @@
       "alt": "Photo {{number}} in {{author}}'s review",
       "title": "Photo in {{author}}'s review",
       "position": "{{number}} / {{count}}"
-    }
+    },
+    "hide": "Hide",
+    "show": "Publish",
+    "hideFor": "Hide {{author}}'s review",
+    "showFor": "Publish {{author}}'s review",
+    "customerText": "A customer's review and rating cannot be changed or deleted; you can hide the review instead."
   },
   "staff": {
     "roles": {
@@ -9475,7 +9757,10 @@
       "email": "E-mail",
       "address": "Address",
       "whatsapp": "WhatsApp number",
-      "freeShippingThreshold": "Free shipping threshold"
+      "freeShippingThreshold": "Free shipping threshold",
+      "handlingDays": "Handling time",
+      "transitDays": "Delivery time",
+      "withdrawalDays": "Return period (days)"
     },
     "ownTitle": "Add a detail",
     "ownHint": "Filled with the customer's and order's details when it is sent."
@@ -9724,18 +10009,97 @@
         "pages": "Pages in draft",
         "pageLive": "Also put the {{title}} page live"
       },
+      "topSlider": {
+        "empty": "No pictures yet: the strip shows on the storefront once you add one.",
+        "slides": "Slides",
+        "slide": "Slide {{number}}",
+        "noAlt": "No description",
+        "flawed": "A field needs fixing",
+        "image": "Picture",
+        "imageHint": "Cropped to the strip's full width at the height you pick; choose a wide, landscape picture (e.g. 1920 × 120).",
+        "mobileImage": "Phone picture",
+        "mobileHint": "Optional: shown instead below 640 pixels.",
+        "link": "Link",
+        "linkHint": "Optional: the page a click on the picture opens.",
+        "add": "Add picture",
+        "addHint": "Up to {{max}} pictures, shown one at a time.",
+        "full": "Up to {{max}} pictures can be added.",
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "thin": "Thin",
+          "medium": "Medium",
+          "tall": "Tall",
+          "hint": "48, 80 or 120 pixels on a wide screen; a little lower on a phone."
+        },
+        "interval": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast",
+          "hint": "How long each picture stays: 8, 6 or 4 seconds. With reduced motion it does not turn by itself."
+        },
+        "transition": {
+          "label": "Transition",
+          "term": "transition",
+          "slide": "Slide",
+          "fade": "Fade",
+          "hint": "Slide: the next comes in from the side. Fade: it fades in place."
+        },
+        "arrows": {
+          "label": "Previous / next arrows",
+          "term": "arrows",
+          "off": "Off",
+          "on": "On",
+          "hint": "Small arrows on either side; visitors step through by hand."
+        },
+        "dots": {
+          "label": "Show dots",
+          "term": "dots",
+          "off": "Off",
+          "on": "On",
+          "hint": "A dot for each picture under the band."
+        }
+      },
       "topStrip": {
         "title": "Top strip",
         "hide": "Hide the top strip",
         "show": "Show the top strip",
         "off": "Top strip hidden: nothing is drawn above the header on any screen.",
-        "add": "Add top strip",
+        "add": "Add to the top strip",
+        "full": "The top strip holds a strip and a scrolling strip; remove one to add another.",
+        "pick": {
+          "title": "Add to the top strip",
+          "description": "Add a strip or a scrolling strip above the header. You can change the strip's design and motion later in its settings.",
+          "taken": "Already added.",
+          "barTaken": "Already added: the top strip has a text strip; change its dark or light design in its settings.",
+          "graphite": {
+            "name": "Announcement strip",
+            "description": "Dark strip: your announcement, a small button beside it, and on wide screens the top links and phone."
+          },
+          "light": {
+            "name": "Light strip",
+            "description": "Thin light strip: a short note, the top links and, if you like, “My account”."
+          },
+          "slider": {
+            "name": "Image slider strip",
+            "description": "Your pictures at full width, one at a time, sliding; with arrows, each may link somewhere."
+          },
+          "marquee": {
+            "name": "Scrolling text",
+            "description": "Your short words or a campaign, in a strip that keeps scrolling."
+          },
+          "sliderLine1": "Free shipping on orders of {ücretsiz_kargo_eşiği} and over",
+          "sliderLine2": "Your orders are packed with care and shipped quickly",
+          "sliderLine3": "Secure payment with instalments on credit cards"
+        },
         "linksLabel": "Top links",
         "linksHint": "The links in your “Top” menu, from 1024 px.",
         "phoneLabel": "Phone",
         "phoneHint": "The phone in your store profile, from 1024 px.",
         "accountLabel": "“My account” text",
-        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable."
+        "lightNote": "On the light strip the first line stands as a note; give it a link and the note is clickable. Announcements taking turns are on the dark design: set the design to “Dark strip” under Style."
       },
       "tree": {
         "label": "The page's sections",
@@ -9791,7 +10155,10 @@
           "bottom": "Move below the grid"
         },
         "off": "Off",
-        "offNote": "{{capability}} is off, so this section is not shown on the storefront; it shows again once turned on."
+        "offNote": "{{capability}} is off, so this section is not shown on the storefront; it shows again once turned on.",
+        "insertAbove": "Add a section above {{name}}",
+        "addAbove": "Add section above",
+        "addBelow": "Add section below"
       },
       "add": {
         "title": "Add section",
@@ -9801,12 +10168,20 @@
           "top": "It is added on every category page, above the product grid.",
           "bottom": "It is added on every category page, below the product grid.",
           "footer": "Shown above the footer on every page but checkout; each section is added once, then drag to change their order.",
-          "pages": "Added to this page, after its sections; then drag it or use the arrows to move it."
+          "pages": "Added to this page, after its sections; then drag it or use the arrows to move it.",
+          "aimed": "Added where you chose; you can then drag it or use the arrows to move it."
         },
         "once": "Already on this page.",
-        "general": "General sections"
+        "general": "General sections",
+        "search": "Search sections",
+        "searchPlaceholder": "Search: products, banner, FAQ…",
+        "none": "No section matches your search."
       },
       "types": {
+        "top_slider": {
+          "name": "Image slider",
+          "description": "Your pictures at full width above the header, one at a time; each may link somewhere."
+        },
         "announcement_bar": {
           "name": "Top strip",
           "description": "The thin strip above the header: your announcements, top links and phone. Dark or light; separate from the header, hidden it draws nothing."
@@ -9993,7 +10368,8 @@
           "linked": "Cards with subcategories",
           "collage": "Photo collage",
           "panels": "Photo panels",
-          "icons": "Icon row"
+          "icons": "Icon row",
+          "carousel": "Sliding cards"
         },
         "related_products": {
           "grid": "Grid",
@@ -10103,6 +10479,7 @@
       },
       "panel": {
         "back": "Back to sections",
+        "trail": "Location",
         "visibility": "Visibility",
         "visible": "Show on the storefront",
         "visibleHint": "A hidden section does not show; its settings are kept.",
@@ -10112,7 +10489,6 @@
         "duplicate": "Duplicate",
         "remove": "Remove section",
         "placement": "Position",
-        "sections": "Sections",
         "content": "Content",
         "layout": "Layout",
         "scroll": "Scrolling",
@@ -10174,6 +10550,7 @@
         "help": "Something on your mind?",
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
         "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…",
+        "newsletterLine": "The storefront's text: by subscribing you agree to receive commercial e-mails…",
         "faq": "Frequently asked questions",
         "related_products": "Related products",
         "price_bands": "Shop by price",
@@ -10193,6 +10570,7 @@
         "image": "Image",
         "alt": "Image description",
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
+        "altPlaceholder": "e.g. Winter sale: 20% off everything",
         "noImage": "No image",
         "limit": "How many to show",
         "limitTerm": "limit",
@@ -10412,6 +10790,14 @@
         "consent": "Consent sentence",
         "consentTerm": "İYS",
         "consentHint": "The sentence beside the subscription consent box: ticking it, the visitor agrees to commercial messages. It is not a description; it should name your shop and say a confirmation link will be sent. Left empty, the storefront's legal sentence is used.",
+        "consentLineHint": "The small line under the form: it must say that subscribing is agreeing to commercial messages, and name your shop; the privacy notice's link is added after it. Left empty, the storefront's short line is used.",
+        "consentStyle": "Consent style",
+        "consentStyleTerm": "İYS",
+        "consentStyleHint": "Consent box: the visitor ticks the box to subscribe; in the footer the box opens once the form is touched. One line: no box; a small line always shown under the form says that subscribing is consenting and links the privacy notice. Either way the subscription starts, and is recorded, when the e-mailed confirmation link is opened.",
+        "consentStyles": {
+          "box": "Consent box",
+          "line": "One line"
+        },
         "joined": "Joined to the footer",
         "joinedTerm": "footer band",
         "joinedHint": "On: the band is drawn on the Free rows footer's own ground, as its top strip. Off: it stands above the footer as a box of its own. The other footer variants draw the band inside them anyway.",
@@ -10428,13 +10814,16 @@
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
         "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "lineLink": "Announcement {{number}}'s link",
+        "addSecond": "Add a second announcement",
+        "sliderNeedsTwo": "Add at least two announcements for them to take turns.",
         "mode": {
           "label": "Several announcements",
           "term": "multiple",
           "first": "First only",
           "rotate": "In turn",
           "inline": "Side by side",
-          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: one announcement at a time, changing at the interval you pick; set its transition, arrows and pausing under Motion. With reduced motion it does not turn by itself; with arrows on, visitors step through by hand."
         },
         "interval": {
           "label": "Interval",
@@ -10457,6 +10846,20 @@
           "on": "On",
           "off": "Off",
           "hint": "It always stops when the keyboard reaches the bar."
+        },
+        "transition": {
+          "label": "Transition",
+          "term": "transition",
+          "fade": "Fade",
+          "slide": "Slide",
+          "hint": "Fade: the announcement fades out in place and the next appears (as today). Slide: the next slides in from the side and the old one leaves the other way. With reduced motion both change instantly."
+        },
+        "arrows": {
+          "label": "Previous / next arrows",
+          "term": "arrows",
+          "off": "Off",
+          "on": "On",
+          "hint": "Small arrows beside the announcement let visitors step through by hand. They also work with reduced motion."
         },
         "align": {
           "label": "Alignment",
@@ -10484,7 +10887,9 @@
         },
         "link": {
           "label": "Bar button",
-          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn."
+          "hint": "A small pill button beside the words; its text is the link's name. Empty, no button is drawn.",
+          "lightLabel": "Note link",
+          "lightHint": "Optional: the page a click on the note opens."
         }
       },
       "problems": {
@@ -10494,6 +10899,7 @@
         "textInvalid": "The text cannot hold invisible control characters.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu.",
         "linkLabel": "Enter the shown text of the address.",
+        "altRequired": "Write a short text describing the picture (e.g. Winter sale: 20% off everything).",
         "slidesRequired": "Add at least one image.",
         "productsRequired": "Pick at least one product.",
         "productRequired": "Choose a product.",
@@ -10715,6 +11121,16 @@
               "serif_accent": "Large, italic accent"
             },
             "hint": "The home sections' headings. Plain is the theme's own. Large, italic accent sets them large and light; the words you put between asterisks (\"Our *favourite* tours\") come in the accent face's italic."
+          },
+          "title_accent": {
+            "label": "Heading accent",
+            "term": "title_accent",
+            "steps": {
+              "none": "None",
+              "primary": "Main colour",
+              "accent": "Accent colour"
+            },
+            "hint": "The words you put between asterisks in a heading (\"Our *favourite* tours\"). None drops the asterisks and the words read as the heading's own. Main colour or Accent colour sets those words in that colour; a light accent reads poorly on a light ground, so pick Main colour then."
           }
         },
         "card": "Product card",
@@ -10905,8 +11321,13 @@
             "hint": "When off, the breadcrumb ends at the parent page; the page's name is already in its title. The breadcrumb data for search engines does not change."
           },
           "crumbs_place": {
-            "label": "Breadcrumb on the title's line",
-            "hint": "On wide screens the breadcrumb sits on the right of the title's line, small and quiet. Off: on its own line above the title. On phones it is always above."
+            "label": "Breadcrumb position",
+            "hint": "Where the breadcrumb stands. On the title's line: on wide screens on the right of the title's line, small and quiet; on phones above it. Hidden: not shown on the page; the breadcrumb data for search engines does not change.",
+            "steps": {
+              "above": "Above the title",
+              "beside": "On the title's line",
+              "none": "Hidden"
+            }
           },
           "count_word": {
             "label": "Unit word in the product count",
@@ -11084,10 +11505,6 @@
         "label": "Edit or preview",
         "edit": "Edit",
         "preview": "Preview"
-      },
-      "drawer": {
-        "title": "The page's sections",
-        "description": "Pick a section to open its settings."
       },
       "sidebar": {
         "hide": "Hide sidebar",
@@ -11918,6 +12335,13 @@
           "medium": "Medium",
           "fast": "Fast"
         },
+        "autoplay_step": {
+          "label": "Autoplay step",
+          "term": "slides to scroll",
+          "page": "Page by page",
+          "card": "Card by card",
+          "hint": "While it turns by itself, whether each move goes a whole page or a single card."
+        },
         "loop": {
           "label": "Loop",
           "term": "loop",
@@ -12270,6 +12694,12 @@
             "term": "icon style",
             "boxed": "In round boxes",
             "inline": "Small, in the line"
+          },
+          "consent_style": {
+            "label": "Consent style",
+            "term": "İYS",
+            "box": "Consent box",
+            "line": "One line"
           }
         },
         "source": {
@@ -12444,16 +12874,24 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "On a narrow screen the cards stack or slide sideways in one row.",
+          "stack": "Stacked",
+          "scroll": "Slide sideways"
         }
       },
       "reviewsCard": {
         "productImage": {
           "label": "Product picture",
           "term": "product_image",
-          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one).",
+          "hint": "The reviewed product's picture on the card. None: today's card, the product's name only. Small: a small square picture and the name at the card's foot. Cover: a short picture across the card's top with the name on it (the customer's photo when there is one). Compact: the card no taller than today's; a short product picture across its top, the name and one star with the score under.",
           "none": "None",
           "thumb": "Small",
-          "cover": "Cover"
+          "cover": "Cover",
+          "compact": "Compact"
         }
       },
       "searchBox": {
@@ -12486,6 +12924,16 @@
           "hint": "The shape of the post cards' cover pictures.",
           "standard": "16:10",
           "wide": "Wide (2:1)"
+        }
+      },
+      "headLines": {
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty: not drawn.",
+        "eyebrowPlaceholder": "E.g. Popular routes",
+        "note": {
+          "label": "Hand note",
+          "term": "note",
+          "placeholder": "E.g. The road is calling",
+          "hint": "A short tilted note beside the heading, a brush stroke under it. In handwriting while the accent face is on. Empty: not drawn."
         }
       },
       "heroFull": {
@@ -12846,7 +13294,6 @@
     "gallery": {
       "title": "Looks",
       "description": "Choose your store's look, save it and come back to it any time. Changes stay hidden from visitors until you publish.",
-      "openEditor": "Open theme editor",
       "noAccess": "Only the shop owner can open the looks.",
       "thumbAlt": "Thumbnail of the {{name}} look",
       "sections_one": "{{count}} section",
@@ -12854,17 +13301,19 @@
       "from": "From {{name}}",
       "current": {
         "title": "Current look",
-        "liveLabel": "Live",
-        "live": "{{name}} · published {{date}}",
-        "neverLive": "Not published yet; visitors see the default look.",
-        "draftLabel": "Draft",
         "draftEdited": "{{name}}, edited",
         "draftChanged": "The draft has unpublished changes",
-        "draftSame": "The draft matches what is live",
         "newVersion": "This ready-made look has a new version. Apply it again to bring the new version into the draft.",
         "edit": "Edit",
         "save": "Save this look",
-        "full": "Saved looks are full; delete one to save another."
+        "full": "Saved looks are full; delete one to save another.",
+        "about": "The draft is the look you work on in the theme editor. Visitors see the live look until you press Publish.",
+        "notLive": "Not published yet",
+        "defaultShown": "Visitors see the default look.",
+        "liveIs": "Live: {{name}} · {{date}}",
+        "since": "since {{date}}",
+        "previewDraft": "Preview the draft in a new tab",
+        "saveShort": "Save"
       },
       "saved": {
         "title": "My saved looks ({{count}}/{{max}})",
@@ -12872,10 +13321,13 @@
         "autoNote": "The last {{max}} automatic saves are kept; they don't count toward the saved-look limit.",
         "empty": "You have no saved looks yet. Save the current look to come back to it any time.",
         "emptyAction": "Save the current look",
-        "unavailable": "Saved looks could not be loaded."
+        "unavailable": "Saved looks could not be loaded.",
+        "about": "Save your look by name and bring it back into the draft at any time. When a look goes into the draft, the draft before it is saved automatically; the last {{max}} automatic saves are kept.",
+        "namedEmpty": "No look saved by name yet.",
+        "autoTitle": "Automatic saves ({{count}})",
+        "autoLatest": "Newest: {{date}}"
       },
       "auto": {
-        "badge": "Automatic",
         "name": "{{source}}, {{date}}",
         "nameEdited": "{{source}}, {{date}}, edited",
         "own": "Your own design"
@@ -12886,13 +13338,11 @@
         "edited": "edited",
         "newVersion": "New version"
       },
-      "tone": {
-        "light": "Light",
-        "dark": "Dark"
-      },
       "card": {
         "apply": "Load into draft",
         "applyOf": "Load ‘{{name}}’ into the draft",
+        "preview": "Preview",
+        "previewOf": "Preview ‘{{name}}’ in a new tab",
         "actions": "Actions for ‘{{name}}’",
         "rename": "Rename",
         "keep": "Keep with a name",
@@ -12918,7 +13368,8 @@
         "applyOf": "Apply ‘{{name}}’ to the draft",
         "colors": "Colour set",
         "noPreview": "This look has no picture yet; a sketch is shown.",
-        "frameShop": "Whatever of the header and footer this look doesn't define stays yours."
+        "frameShop": "Whatever of the header and footer this look doesn't define stays yours.",
+        "sectorOf": "Made for {{sector}}"
       },
       "apply": {
         "title": "Apply ‘{{name}}’ to the draft?",
@@ -12939,7 +13390,23 @@
           "label": "Also save the current look with a name",
           "full": "Saved looks are full ({{max}}/{{max}}). An automatic save is still made."
         },
-        "confirm": "Apply to draft and edit"
+        "confirm": "Apply to draft and edit",
+        "madeFor": "This look was made for a {{sector}} shop.",
+        "styleOnly": "Only the style changes: your sections, header and footer stay as they are.",
+        "scope": {
+          "label": "What to take from the look",
+          "style": "Take its style only",
+          "styleHint": "Colours, fonts, corners, card style and the style kit come into the draft; your sections stay as they are.",
+          "full": "Take it with its layout",
+          "fullHint": "The style and the sections come in; sections with nothing to show in this shop are left out."
+        },
+        "fit": {
+          "loading": "Checking which sections have nothing to show in this shop…",
+          "unknown": "The sections could not be checked; the editor lists any left out after applying.",
+          "none": "Every section has something to show in this shop.",
+          "left_one": "{{count}} section will be left out, having nothing to show in this shop: {{names}}.",
+          "left_other": "{{count}} sections will be left out, having nothing to show in this shop: {{names}}."
+        }
       },
       "save": {
         "title": "Save look",
@@ -12962,20 +13429,28 @@
         "pageMissingAddress": "The page layout was not added because there is no page at the address ‘{{handle}}’. Create a page at that address and apply the look again.",
         "pageLimit": "The {{name}} page's layout was not added: at most {{max}} pages can have their own layout.",
         "pageLimitAddress": "The layout of the page at ‘{{handle}}’ was not added: at most {{max}} pages can have their own layout.",
-        "pageMade": "The {{name}} page was opened as a draft; to put it live, choose Live in the page settings.",
+        "pagesMade_one": "{{count}} page was opened as a draft. To put it live, open it and choose Live in its settings:",
+        "pagesMade_other": "{{count}} pages were opened as drafts. To put one live, open it and choose Live in its settings:",
         "pageTaken": "The {{name}} page could not be opened: another record uses the address ‘{{handle}}’. The page layout was not added.",
         "pageTakenAddress": "No page could be opened at ‘{{handle}}’: another record uses the address. The page layout was not added.",
         "textKept": "The {{name}} page kept its own text; the look changed only its layout.",
         "keptPages": "The layouts you set up on your pages were kept.",
         "featureOff_one": "{{count}} section was not added: {{capabilities}} is off in this shop.",
-        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop."
+        "featureOff_other": "{{count}} sections were not added: {{capabilities}} is off in this shop.",
+        "styleApplied": "The style of ‘{{name}}’ was applied to the draft; your sections stay as they were."
       },
       "history": {
         "lead": "Older publications:",
         "link": "Theme editor › Looks › Publication history"
       },
       "pages_one": "{{count}} page",
-      "pages_other": "{{count}} pages"
+      "pages_other": "{{count}} pages",
+      "others": {
+        "title": "Other sectors",
+        "summary_one": "{{sectors}} · {{count}} look",
+        "summary_other": "{{sectors}} · {{count}} looks",
+        "description": "Looks made for other sectors. Take their style alone (colours, fonts, corners, card style) or apply them with their sections; sections with nothing to show in this shop are left out."
+      }
     },
     "pages": {
       "description": "The shop's own pages, such as About us and Contact. Click one to open it in the theme editor, where its text, sections and settings are edited.",
@@ -14979,6 +15454,119 @@
         "packCredits": "{{credits}} credits",
         "submit": "Send request",
         "refresh": "Refresh the list"
+      }
+    }
+  },
+  "sampleCatalog": {
+    "badge": "Sample",
+    "badgeHint": "From the sample content; it shows in the store but cannot be bought.",
+    "productNote": "Sample product; it shows in the store but cannot be bought.",
+    "manage": "Manage sample content",
+    "card": {
+      "title": "Sample content",
+      "description": "Your sector pack's sample products, so the store looks full from day one. They show in the store but cannot be bought; remove them whenever you like.",
+      "set": "{{name}} · {{count}} products",
+      "none": "Not loaded",
+      "queued": "Queued, starting shortly",
+      "running": "Loading… {{percent}}%",
+      "loaded_one": "{{count}} sample product loaded",
+      "loaded_other": "{{count}} sample products loaded",
+      "extras": "{{categories}} categories, {{reviews}} reviews",
+      "failed": "The last load did not finish; what it did was undone. You can try again.",
+      "load": "Load",
+      "remove": "Remove sample content",
+      "queuedToast": "The sample content is loading; it takes a few minutes. You can leave this page.",
+      "loadedToast_one": "Sample content loaded: {{count}} product.",
+      "loadedToast_other": "Sample content loaded: {{count}} products.",
+      "noSets": "Your store's sector pack has no sample content."
+    },
+    "offer": {
+      "title": "Start with sample content",
+      "text": "{{name}}: {{count}} sample products in one click. They show in the store but cannot be bought; remove them whenever you like.",
+      "load": "Load"
+    },
+    "remove": {
+      "title": "Remove sample content",
+      "description": "Only records the sample content made are deleted; your own products and categories are left alone.",
+      "partsLabel": "What to remove",
+      "parts": {
+        "all": "All",
+        "products": "Sample products",
+        "productsHint": "With their departures, programs and reviews",
+        "categories": "Sample categories",
+        "categoriesHint": "Only those holding none of your own products",
+        "reviews": "Sample reviews"
+      },
+      "counting": "Counting…",
+      "keepToggle": "Keep some",
+      "keepHint": "A product you untick is not deleted; it stays a sample.",
+      "keepAria": "Delete {{title}}",
+      "edited": "edited",
+      "staysTitle": "Not deleted",
+      "stays": {
+        "ordered": "{{title}}: it has an order",
+        "booked": "{{title}}: it has a sold or held place",
+        "customer_content": "{{title}}: customers wrote on it ({{count}} reviews, questions or answers); deal with those first",
+        "own_products": "{{name}} category: it holds a product of your own",
+        "samples_left": "{{name}} category: it holds a sample you keep",
+        "children": "{{name}} category: a subcategory stays"
+      },
+      "nothing": "Nothing to delete in the parts you chose.",
+      "confirm": "Remove",
+      "doneTitle": "Sample content removed",
+      "done": "{{products}} products, {{categories}} categories, {{reviews}} reviews deleted.",
+      "hidden_one": "{{count}} pack category hidden again.",
+      "hidden_other": "{{count}} pack categories hidden again."
+    }
+  },
+  "supportAccess": {
+    "page": {
+      "title": "Platform support",
+      "opening": "Signing in to the shop's panel…",
+      "failedTitle": "The support session could not open",
+      "missing": "The link carries no grant. Choose \"Open the shop's panel\" again in the control plane.",
+      "expired": "This link has expired. Get a new one from the control plane.",
+      "used": "This link was already used. Each link opens once; get a new one from the control plane.",
+      "disabled": "The shop's owner has turned support access off. Ask the owner to turn it on.",
+      "invalid": "This link is not valid for this shop.",
+      "failed": "Something went wrong. Try again in a moment.",
+      "noOwner": "The shop's owner has not joined the panel yet. Support cannot sign in until the owner accepts the invitation."
+    },
+    "banner": {
+      "text": "You are signed in as platform support ({{name}})",
+      "left_one": "{{count}} min left",
+      "left_other": "{{count}} min left",
+      "end": "End session"
+    },
+    "settings": {
+      "title": "Allow support access",
+      "hint": "While on, the platform team can sign in to your panel for at most 60 minutes, stating a reason. You are told by the bell and e-mail every time.",
+      "onState": "Platform support can sign in when needed. The team, ownership, payment accounts, legal details and customer exports are closed to it.",
+      "offState": "Platform support cannot sign in. Turn this on when you need help.",
+      "onTitle": "Turn support access on?",
+      "onConfirm": "The platform team will be able to sign in for a limited time, stating a reason.",
+      "offTitle": "Turn support access off?",
+      "offConfirm": "Open support sessions end at once and no new one can start.",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "turnedOn": "Support access is on.",
+      "turnedOff": "Support access is off.",
+      "openTitle": "Open sessions",
+      "openHint": "Platform support sessions in your panel right now.",
+      "noneOpen": "No open support session.",
+      "endsAt": "Ends: {{time}}",
+      "end": "End",
+      "endTitle": "End this session?",
+      "endConfirm": "{{name}}'s support session ends at once.",
+      "endedToast": "Support session ended.",
+      "historyTitle": "Recent sign-ins",
+      "historyHint": "Platform support's last 20 sign-ins and their reasons.",
+      "noHistory": "No support sign-in yet.",
+      "ended": {
+        "logout": "Signed out: {{time}}",
+        "expired": "Ran out: {{time}}",
+        "ended_by_owner": "Ended by you: {{time}}",
+        "disabled": "Ended when access was turned off: {{time}}"
       }
     }
   }

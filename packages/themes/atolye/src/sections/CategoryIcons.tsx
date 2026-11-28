@@ -1,5 +1,5 @@
 import { ResponsiveImage } from "@qticaret/ui"
-import type { CategoryIconsView, LinkView, Translate } from "@qticaret/ui"
+import type { CategoryIconsView, HeadLinesView, LinkView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { SectionIcon } from "../parts/SectionIcon"
@@ -35,6 +35,7 @@ export function CategoryIcons({
   all,
   ownAll,
   t,
+  lines,
   marks,
 }: {
   id: string
@@ -42,6 +43,8 @@ export function CategoryIcons({
   view: CategoryIconsView
   all: LinkView
   ownAll: boolean
+  /** The heading's upper line and hand note (sahip 2026-11-28); absent: none. */
+  lines?: HeadLinesView | undefined
   t: Translate
   marks?: boolean | undefined
 }) {
@@ -56,7 +59,14 @@ export function CategoryIcons({
             {title}
           </h2>
         ) : (
-          <SectionHead id={id} title={title} more={all} ownMore={ownAll} marks={marks} />
+          <SectionHead
+            id={id}
+            title={title}
+            more={all}
+            ownMore={ownAll}
+            marks={marks}
+            lines={lines}
+          />
         )}
         <ul
           data-variant="icons"

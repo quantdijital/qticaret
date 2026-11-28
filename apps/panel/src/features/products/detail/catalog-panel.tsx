@@ -16,6 +16,7 @@ import { errorText } from "@/lib/errors"
 import { bookingFailureText } from "@/features/products/booking/booking-failure"
 import { BookingOffConfirm } from "@/features/products/booking/booking-off-confirm"
 import { CatalogFields } from "./catalog-fields"
+import { FormNote } from "./hint-parts"
 import type { CatalogShown, CatalogValues } from "./catalog-fields"
 
 const catalogValuesOf = (catalog: ProductCatalog): CatalogValues => ({
@@ -125,7 +126,7 @@ function CatalogForm({
         form.reset(saved, FULL_RESET)
       }}
     >
-      <p className="text-[13px] text-muted-foreground">{t("products.catalog.hint")}</p>
+      <FormNote name={t("products.catalog.card")} hint={t("products.catalog.hint")} />
       <CatalogFields
         form={form}
         catalog={catalog}

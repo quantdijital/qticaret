@@ -14,6 +14,8 @@ import {
 } from "./steps-launch"
 import { allocateStep, bootstrapStep, databaseStep, migrateStep, secretsStep } from "./steps-setup"
 import { sectorPackStep } from "./steps-pack"
+import { sampleCatalogStep } from "./steps-samples"
+import { presetStep, profileStep } from "./steps-shop"
 import { contextOf } from "./target"
 
 /**
@@ -31,7 +33,10 @@ export const RUN_STEPS = {
     "database",
     "migrate",
     "bootstrap",
+    "profile",
     "sector_pack",
+    "preset",
+    "sample_catalog",
     "plan_document",
     "start",
     "health",
@@ -57,7 +62,10 @@ export const provisionShopWorkflow = createWorkflow(
     databaseStep(input)
     migrateStep(input)
     bootstrapStep(input)
+    profileStep(input)
     sectorPackStep(input)
+    presetStep(input)
+    sampleCatalogStep(input)
     planDocumentStep(input)
     startStep(input)
     healthStep(input)

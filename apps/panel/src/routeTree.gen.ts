@@ -15,6 +15,7 @@ import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
 import { Route as AuthMediaRouteImport } from './routes/_auth/media'
@@ -84,7 +85,6 @@ import { Route as AuthSettingsIntegrationsRouteImport } from './routes/_auth/set
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
 import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
 import { Route as AuthSettingsMaintenanceRouteImport } from './routes/_auth/settings/maintenance'
-import { Route as AuthSettingsMigrationRouteImport } from './routes/_auth/settings/migration'
 import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
 import { Route as AuthSettingsSecurityRouteImport } from './routes/_auth/settings/security'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
@@ -114,6 +114,9 @@ import { Route as AuthSettingsLegalIndexRouteImport } from './routes/_auth/setti
 import { Route as AuthSettingsLegalKindRouteImport } from './routes/_auth/settings/legal/$kind'
 import { Route as AuthSettingsMarketingIndexRouteImport } from './routes/_auth/settings/marketing/index'
 import { Route as AuthSettingsMarketingProviderRouteImport } from './routes/_auth/settings/marketing/$provider'
+import { Route as AuthSettingsMigrationIndexRouteImport } from './routes/_auth/settings/migration/index'
+import { Route as AuthSettingsMigrationAddressesRouteImport } from './routes/_auth/settings/migration/addresses'
+import { Route as AuthSettingsMigrationNewRouteImport } from './routes/_auth/settings/migration/new'
 import { Route as AuthSettingsPaymentsIndexRouteImport } from './routes/_auth/settings/payments/index'
 import { Route as AuthSettingsPaymentsProviderRouteImport } from './routes/_auth/settings/payments/$provider'
 import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/settings/shipping/index'
@@ -152,6 +155,11 @@ const LoginRoute = LoginRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
@@ -502,11 +510,6 @@ const AuthSettingsMaintenanceRoute = AuthSettingsMaintenanceRouteImport.update({
   path: '/maintenance',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
-const AuthSettingsMigrationRoute = AuthSettingsMigrationRouteImport.update({
-  id: '/migration',
-  path: '/migration',
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
 const AuthSettingsNotificationsRoute =
   AuthSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -666,6 +669,24 @@ const AuthSettingsMarketingProviderRoute =
     path: '/marketing/$provider',
     getParentRoute: () => AuthSettingsRoute,
   } as any)
+const AuthSettingsMigrationIndexRoute =
+  AuthSettingsMigrationIndexRouteImport.update({
+    id: '/migration/',
+    path: '/migration/',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsMigrationAddressesRoute =
+  AuthSettingsMigrationAddressesRouteImport.update({
+    id: '/migration/addresses',
+    path: '/migration/addresses',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsMigrationNewRoute =
+  AuthSettingsMigrationNewRouteImport.update({
+    id: '/migration/new',
+    path: '/migration/new',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 const AuthSettingsPaymentsIndexRoute =
   AuthSettingsPaymentsIndexRouteImport.update({
     id: '/payments/',
@@ -735,6 +756,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
@@ -788,7 +810,6 @@ export interface FileRoutesByFullPath {
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/maintenance': typeof AuthSettingsMaintenanceRoute
-  '/settings/migration': typeof AuthSettingsMigrationRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
@@ -828,6 +849,8 @@ export interface FileRoutesByFullPath {
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/settings/migration/addresses': typeof AuthSettingsMigrationAddressesRoute
+  '/settings/migration/new': typeof AuthSettingsMigrationNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
@@ -837,6 +860,7 @@ export interface FileRoutesByFullPath {
   '/settings/attributes/': typeof AuthSettingsAttributesIndexRoute
   '/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
+  '/settings/migration/': typeof AuthSettingsMigrationIndexRoute
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/settings/sms/': typeof AuthSettingsSmsIndexRoute
@@ -851,6 +875,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/inventory': typeof AuthInventoryRoute
   '/media': typeof AuthMediaRoute
   '/notifications': typeof AuthNotificationsRoute
@@ -902,7 +927,6 @@ export interface FileRoutesByTo {
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/maintenance': typeof AuthSettingsMaintenanceRoute
-  '/settings/migration': typeof AuthSettingsMigrationRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
@@ -942,6 +966,8 @@ export interface FileRoutesByTo {
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/settings/migration/addresses': typeof AuthSettingsMigrationAddressesRoute
+  '/settings/migration/new': typeof AuthSettingsMigrationNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
@@ -951,6 +977,7 @@ export interface FileRoutesByTo {
   '/settings/attributes': typeof AuthSettingsAttributesIndexRoute
   '/settings/legal': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing': typeof AuthSettingsMarketingIndexRoute
+  '/settings/migration': typeof AuthSettingsMigrationIndexRoute
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping': typeof AuthSettingsShippingIndexRoute
   '/settings/sms': typeof AuthSettingsSmsIndexRoute
@@ -967,6 +994,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/support': typeof SupportRoute
   '/_auth/inventory': typeof AuthInventoryRoute
   '/_auth/media': typeof AuthMediaRoute
   '/_auth/notifications': typeof AuthNotificationsRoute
@@ -1021,7 +1049,6 @@ export interface FileRoutesById {
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
   '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
   '/_auth/settings/maintenance': typeof AuthSettingsMaintenanceRoute
-  '/_auth/settings/migration': typeof AuthSettingsMigrationRoute
   '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/_auth/settings/security': typeof AuthSettingsSecurityRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
@@ -1061,6 +1088,8 @@ export interface FileRoutesById {
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/_auth/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/_auth/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/_auth/settings/migration/addresses': typeof AuthSettingsMigrationAddressesRoute
+  '/_auth/settings/migration/new': typeof AuthSettingsMigrationNewRoute
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
@@ -1070,6 +1099,7 @@ export interface FileRoutesById {
   '/_auth/settings/attributes/': typeof AuthSettingsAttributesIndexRoute
   '/_auth/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/_auth/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
+  '/_auth/settings/migration/': typeof AuthSettingsMigrationIndexRoute
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
   '/_auth/settings/sms/': typeof AuthSettingsSmsIndexRoute
@@ -1086,6 +1116,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/inventory'
     | '/media'
     | '/notifications'
@@ -1139,7 +1170,6 @@ export interface FileRouteTypes {
     | '/settings/jobs'
     | '/settings/locations'
     | '/settings/maintenance'
-    | '/settings/migration'
     | '/settings/notifications'
     | '/settings/security'
     | '/settings/seo'
@@ -1179,6 +1209,8 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
     | '/settings/marketing/$provider'
+    | '/settings/migration/addresses'
+    | '/settings/migration/new'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
@@ -1188,6 +1220,7 @@ export interface FileRouteTypes {
     | '/settings/attributes/'
     | '/settings/legal/'
     | '/settings/marketing/'
+    | '/settings/migration/'
     | '/settings/payments/'
     | '/settings/shipping/'
     | '/settings/sms/'
@@ -1202,6 +1235,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/inventory'
     | '/media'
     | '/notifications'
@@ -1253,7 +1287,6 @@ export interface FileRouteTypes {
     | '/settings/jobs'
     | '/settings/locations'
     | '/settings/maintenance'
-    | '/settings/migration'
     | '/settings/notifications'
     | '/settings/security'
     | '/settings/seo'
@@ -1293,6 +1326,8 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
     | '/settings/marketing/$provider'
+    | '/settings/migration/addresses'
+    | '/settings/migration/new'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
@@ -1302,6 +1337,7 @@ export interface FileRouteTypes {
     | '/settings/attributes'
     | '/settings/legal'
     | '/settings/marketing'
+    | '/settings/migration'
     | '/settings/payments'
     | '/settings/shipping'
     | '/settings/sms'
@@ -1317,6 +1353,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/login'
     | '/reset-password'
+    | '/support'
     | '/_auth/inventory'
     | '/_auth/media'
     | '/_auth/notifications'
@@ -1371,7 +1408,6 @@ export interface FileRouteTypes {
     | '/_auth/settings/jobs'
     | '/_auth/settings/locations'
     | '/_auth/settings/maintenance'
-    | '/_auth/settings/migration'
     | '/_auth/settings/notifications'
     | '/_auth/settings/security'
     | '/_auth/settings/seo'
@@ -1411,6 +1447,8 @@ export interface FileRouteTypes {
     | '/_auth/promotions/price-lists/new'
     | '/_auth/settings/legal/$kind'
     | '/_auth/settings/marketing/$provider'
+    | '/_auth/settings/migration/addresses'
+    | '/_auth/settings/migration/new'
     | '/_auth/settings/payments/$provider'
     | '/_auth/settings/shipping/$carrier'
     | '/_auth/settings/sms/$provider'
@@ -1420,6 +1458,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/attributes/'
     | '/_auth/settings/legal/'
     | '/_auth/settings/marketing/'
+    | '/_auth/settings/migration/'
     | '/_auth/settings/payments/'
     | '/_auth/settings/shipping/'
     | '/_auth/settings/sms/'
@@ -1436,6 +1475,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SupportRoute: typeof SupportRoute
   SecuritySetupRoute: typeof SecuritySetupRoute
 }
 
@@ -1481,6 +1521,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/': {
@@ -1966,13 +2013,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsMaintenanceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    '/_auth/settings/migration': {
-      id: '/_auth/settings/migration'
-      path: '/migration'
-      fullPath: '/settings/migration'
-      preLoaderRoute: typeof AuthSettingsMigrationRouteImport
-      parentRoute: typeof AuthSettingsRoute
-    }
     '/_auth/settings/notifications': {
       id: '/_auth/settings/notifications'
       path: '/notifications'
@@ -2176,6 +2216,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsMarketingProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/migration/': {
+      id: '/_auth/settings/migration/'
+      path: '/migration'
+      fullPath: '/settings/migration/'
+      preLoaderRoute: typeof AuthSettingsMigrationIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/migration/addresses': {
+      id: '/_auth/settings/migration/addresses'
+      path: '/migration/addresses'
+      fullPath: '/settings/migration/addresses'
+      preLoaderRoute: typeof AuthSettingsMigrationAddressesRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/migration/new': {
+      id: '/_auth/settings/migration/new'
+      path: '/migration/new'
+      fullPath: '/settings/migration/new'
+      preLoaderRoute: typeof AuthSettingsMigrationNewRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/payments/': {
       id: '/_auth/settings/payments/'
       path: '/payments'
@@ -2298,7 +2359,6 @@ interface AuthSettingsRouteChildren {
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
   AuthSettingsLocationsRoute: typeof AuthSettingsLocationsRoute
   AuthSettingsMaintenanceRoute: typeof AuthSettingsMaintenanceRoute
-  AuthSettingsMigrationRoute: typeof AuthSettingsMigrationRoute
   AuthSettingsNotificationsRoute: typeof AuthSettingsNotificationsRoute
   AuthSettingsSecurityRoute: typeof AuthSettingsSecurityRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
@@ -2309,12 +2369,15 @@ interface AuthSettingsRouteChildren {
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
   AuthSettingsLegalKindRoute: typeof AuthSettingsLegalKindRoute
   AuthSettingsMarketingProviderRoute: typeof AuthSettingsMarketingProviderRoute
+  AuthSettingsMigrationAddressesRoute: typeof AuthSettingsMigrationAddressesRoute
+  AuthSettingsMigrationNewRoute: typeof AuthSettingsMigrationNewRoute
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
   AuthSettingsShippingCarrierRoute: typeof AuthSettingsShippingCarrierRoute
   AuthSettingsSmsProviderRoute: typeof AuthSettingsSmsProviderRoute
   AuthSettingsAttributesIndexRoute: typeof AuthSettingsAttributesIndexRoute
   AuthSettingsLegalIndexRoute: typeof AuthSettingsLegalIndexRoute
   AuthSettingsMarketingIndexRoute: typeof AuthSettingsMarketingIndexRoute
+  AuthSettingsMigrationIndexRoute: typeof AuthSettingsMigrationIndexRoute
   AuthSettingsPaymentsIndexRoute: typeof AuthSettingsPaymentsIndexRoute
   AuthSettingsShippingIndexRoute: typeof AuthSettingsShippingIndexRoute
   AuthSettingsSmsIndexRoute: typeof AuthSettingsSmsIndexRoute
@@ -2333,7 +2396,6 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,
   AuthSettingsLocationsRoute: AuthSettingsLocationsRoute,
   AuthSettingsMaintenanceRoute: AuthSettingsMaintenanceRoute,
-  AuthSettingsMigrationRoute: AuthSettingsMigrationRoute,
   AuthSettingsNotificationsRoute: AuthSettingsNotificationsRoute,
   AuthSettingsSecurityRoute: AuthSettingsSecurityRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
@@ -2344,12 +2406,15 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
   AuthSettingsLegalKindRoute: AuthSettingsLegalKindRoute,
   AuthSettingsMarketingProviderRoute: AuthSettingsMarketingProviderRoute,
+  AuthSettingsMigrationAddressesRoute: AuthSettingsMigrationAddressesRoute,
+  AuthSettingsMigrationNewRoute: AuthSettingsMigrationNewRoute,
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
   AuthSettingsShippingCarrierRoute: AuthSettingsShippingCarrierRoute,
   AuthSettingsSmsProviderRoute: AuthSettingsSmsProviderRoute,
   AuthSettingsAttributesIndexRoute: AuthSettingsAttributesIndexRoute,
   AuthSettingsLegalIndexRoute: AuthSettingsLegalIndexRoute,
   AuthSettingsMarketingIndexRoute: AuthSettingsMarketingIndexRoute,
+  AuthSettingsMigrationIndexRoute: AuthSettingsMigrationIndexRoute,
   AuthSettingsPaymentsIndexRoute: AuthSettingsPaymentsIndexRoute,
   AuthSettingsShippingIndexRoute: AuthSettingsShippingIndexRoute,
   AuthSettingsSmsIndexRoute: AuthSettingsSmsIndexRoute,
@@ -2520,6 +2585,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SupportRoute: SupportRoute,
   SecuritySetupRoute: SecuritySetupRoute,
 }
 export const routeTree = rootRouteImport

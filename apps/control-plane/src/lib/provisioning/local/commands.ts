@@ -20,14 +20,21 @@ export const COMMAND_TIMEOUT_MS: Readonly<Record<TenantCommand["name"], number>>
   "invite-owner": 2 * MINUTE,
   "apply-pack": 10 * MINUTE,
   "plan-import": 2 * MINUTE,
+  // Uploads the look's pictures through the media pipeline
+  "apply-preset": 10 * MINUTE,
+  "apply-profile": 2 * MINUTE,
+  // Every sample product's pictures through the media pipeline
+  "load-samples": 20 * MINUTE,
 }
 
 // The result line comes last; what came before it is the command's log
 const CAPTURE_BYTES = 64 * 1024
 const KILL_GRACE_MS = 5_000
 
-// As the sector packs' codes (packages/sector-packs PACK_CODE): never a path or an option
+// As the sector packs' and looks' codes (packages/sector-packs PACK_CODE, PRESET_CODE):
+// never a path or an option
 const PACK = /^[a-z][a-z0-9-]{1,39}$/
+const PRESET = /^[a-z][a-z0-9-]{1,39}$/
 // Control and invisible format characters never make an argument
 const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]+$/u
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/
@@ -55,6 +62,28 @@ export function argvOf(cmd: TenantCommand): string[] {
         throw new ProvisioningError("provisioning.sector_pack_unknown")
       }
       return ["exec", "./src/scripts/apply-pack.js", `pack=${cmd.pack}`]
+    case "apply-preset":
+      if (!PACK.test(cmd.pack)) {
+        throw new ProvisioningError("provisioning.sector_pack_unknown")
+      }
+      if (!PRESET.test(cmd.preset)) {
+        throw new ProvisioningError("provisioning.preset_unknown")
+      }
+      // Never the demo content: a customer's shop gets no sample records
+      return [
+        "exec",
+        "./src/scripts/apply-preset.js",
+        `pack=${cmd.pack}`,
+        `preset=${cmd.preset}`,
+        "demo=false",
+      ]
+    case "apply-profile":
+      return ["exec", "./src/scripts/apply-profile.js"]
+    case "load-samples":
+      if (!PACK.test(cmd.pack)) {
+        throw new ProvisioningError("provisioning.sector_pack_unknown")
+      }
+      return ["exec", "./src/scripts/load-samples.js", `pack=${cmd.pack}`]
   }
 }
 

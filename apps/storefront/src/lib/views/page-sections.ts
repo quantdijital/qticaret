@@ -3,6 +3,7 @@ import type { Resolution, StoreContentPageSection, StorePageLayout } from "@qtic
 import type { ContentPageSectionView, Translate } from "@qticaret/ui"
 import type { ContentEntry } from "@/lib/store-api/content-entry"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { designPageLayout } from "@/lib/store-api/design-preview"
 import { previewPageLayout, publishedPageLayout, sessionPage } from "@/lib/store-api/page-layout"
 import { isEditorSession, layoutPreviewToken, previewTokenKind } from "./layout"
 import { pageAnchors } from "./page-anchors"
@@ -14,9 +15,10 @@ type Entity = Extract<Resolution, { type: "entity" }>
 /**
  * A content page's own layout as this request shows it (adr/0073 §5, §6):
  * the theme editor's live session reads the draft (the page in draft or
- * live), a signed design link the draft of a live page, anyone else the
- * published one. An answer that fails is no layout: the page is its text
- * alone (`contentSections`).
+ * live), a signed design link the draft of a live page, a saved look's link
+ * that look's of a live page (adr/0064), anyone else the published one.
+ * An answer that fails is no layout: the page is its text alone
+ * (`contentSections`).
  */
 export async function pageLayoutOf(id: string): Promise<StorePageLayout | null> {
   const token = await layoutPreviewToken()
@@ -27,6 +29,10 @@ export async function pageLayoutOf(id: string): Promise<StorePageLayout | null> 
     }
     if (token && kind === "link") {
       return await previewPageLayout(token, id)
+    }
+    // A saved look's link (adr/0064): a live page as the look lays it out
+    if (token && kind === "design") {
+      return await designPageLayout(token, id)
     }
     return await publishedPageLayout(id)
   } catch (error) {

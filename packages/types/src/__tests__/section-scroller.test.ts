@@ -20,6 +20,7 @@ describe("the scroller kit (adr/0049 Ek 2026-11-15)", () => {
       "dots",
       "autoplay",
       "speed",
+      "autoplay_step",
       "loop",
       "drag",
       "focus",
@@ -29,12 +30,20 @@ describe("the scroller kit (adr/0049 Ek 2026-11-15)", () => {
       "arrow_size",
       "controls_tone",
     ])
-    // A row draws the first eleven; the rest are the slider's own controls
-    expect(ROW_SCROLLER).toEqual(SCROLLER_SETTING_NAMES.slice(0, 11))
+    // A row draws the first twelve; the rest are the slider's own controls
+    expect(ROW_SCROLLER).toEqual(SCROLLER_SETTING_NAMES.slice(0, 12))
     for (const name of SCROLLER_SETTING_NAMES) {
       expect(SCROLLER_SETTINGS[name]).toContain(SCROLLER_DEFAULTS[name])
     }
     expect(SCROLLER_DEFAULTS.autoplay).toBe("off")
+  })
+
+  it("turns by itself a page at a time unless the shop asks for one card (adr/0066)", () => {
+    expect(SCROLLER_SETTINGS.autoplay_step).toEqual(["page", "card"])
+    expect(SCROLLER_DEFAULTS.autoplay_step).toBe("page")
+    expect(scrollerSettingsOf({ autoplay: "on" }).autoplay_step).toBe("page")
+    expect(scrollerStepOf("autoplay_step", "half")).toBe("page")
+    expect(scrollerStepOf("autoplay_step", "card")).toBe("card")
   })
 
   it("reads a step it does not know, or none, as the default", () => {

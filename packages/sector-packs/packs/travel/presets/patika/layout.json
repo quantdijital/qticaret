@@ -87,7 +87,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "İlham veren rotalar",
+      "title": "İlham veren *rotalar*",
       "intro": null,
       "eyebrow": "Popüler rotalar",
       "more": {
@@ -157,6 +157,40 @@
       "height": "tall"
     },
     {
+      "id": "patikapopuler",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Bu sezon *en çok seçilenler*",
+      "eyebrow": "Sezonun favorileri",
+      "source": {
+        "kind": "best_sellers",
+        "days": 90
+      },
+      "limit": 12,
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm turlar"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "round",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "on",
+        "speed": "medium",
+        "loop": "on",
+        "drag": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
+      }
+    },
+    {
       "id": "nedenpatika",
       "type": "stats",
       "visible": true,
@@ -204,33 +238,14 @@
       "item_style": "feature"
     },
     {
-      "id": "seciliturlar",
-      "type": "products",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "variant": "grid",
-      "title": "Sizin için seçtiklerimiz",
-      "source": {
-        "kind": "newest"
-      },
-      "limit": 8,
-      "more": {
-        "$href": "/magaza",
-        "label": "Tüm turlar"
-      },
-      "card_variant": null,
-      "columns": 4,
-      "columns_mobile": 1
-    },
-    {
       "id": "patikakategoriler",
       "type": "categories",
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "collage",
+      "variant": "panels",
       "title": "Popüler kategoriler",
+      "eyebrow": "Nereye gidelim?",
       "category_ids": [
         {
           "$handle": "category:kapadokya-turlari"
@@ -242,16 +257,16 @@
           "$handle": "category:yurt-disi-turlar"
         },
         {
-          "$handle": "category:gemi-turlari"
+          "$handle": "category:kultur-turlari"
         },
         {
-          "$handle": "category:kultur-turlari"
+          "$handle": "category:doga-ve-trekking"
         },
         {
           "$handle": "category:gunubirlik-turlar"
         },
         {
-          "$handle": "category:doga-ve-trekking"
+          "$handle": "category:gemi-turlari"
         }
       ],
       "show_count": true,
@@ -263,6 +278,30 @@
       "height": "medium",
       "lead": "on",
       "links": 0
+    },
+    {
+      "id": "patikakalkislar",
+      "type": "departures",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Yakında *yola çıkıyoruz*",
+      "eyebrow": "Kalkış takvimi",
+      "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
+      "source": {
+        "kind": "all"
+      },
+      "limit": 3,
+      "layout": "cards",
+      "phone": "scroll"
     },
     {
       "id": "raykapadokya",
@@ -364,36 +403,6 @@
       }
     },
     {
-      "id": "yaylabandi",
-      "type": "banner",
-      "visible": true,
-      "starts_at": null,
-      "ends_at": null,
-      "variant": "standard",
-      "slides": [
-        {
-          "image": {
-            "$image": "images/rota-oludeniz.webp",
-            "alt": "Yukarıdan bakışla Ölüdeniz lagünü, turkuaz su ve kumsal"
-          },
-          "mobile_image": null,
-          "heading": "Yaz kalkışları açıldı",
-          "text": "İstanbul'dan Kapadokya'ya, Ege koylarından Karadeniz yaylalarına: rehberli turlarda yerinizi şimdiden ayırın.",
-          "link": {
-            "$href": "/magaza",
-            "label": "Kalkışları gör"
-          },
-          "second_link": null,
-          "tone": "light"
-        }
-      ],
-      "width": "boxed",
-      "height": "low",
-      "text_position": "middle_left",
-      "overlay": "light",
-      "button_style": "solid"
-    },
-    {
       "id": "rayyurtdisi",
       "type": "products",
       "visible": true,
@@ -424,8 +433,62 @@
         "speed": "medium",
         "loop": "off",
         "drag": "on"
+      }
+    },
+    {
+      "id": "yaylabandi",
+      "type": "banner",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "standard",
+      "slides": [
+        {
+          "image": {
+            "$image": "images/bant-oludeniz.webp",
+            "alt": "Havadan Ölüdeniz lagünü, Belcekız kumsalı, gulet ve çamlı tepeler"
+          },
+          "mobile_image": null,
+          "heading": "Yaz kalkışları açıldı",
+          "text": "İstanbul'dan Kapadokya'ya, Ege koylarından Karadeniz yaylalarına: rehberli turlarda yerinizi şimdiden ayırın.",
+          "link": {
+            "$href": "/magaza",
+            "label": "Kalkışları gör"
+          },
+          "second_link": null,
+          "tone": "light"
+        }
+      ],
+      "width": "boxed",
+      "height": "low",
+      "text_position": "middle_left",
+      "overlay": "light",
+      "button_style": "solid"
+    },
+    {
+      "id": "patikaayinrotasi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "stage_list",
+      "title": "Ayın rotası: doğa ve yürüyüş",
+      "source": {
+        "kind": "category",
+        "category_id": {
+          "$handle": "category:doga-ve-trekking"
+        }
       },
-      "tabs": "off"
+      "limit": 8,
+      "more": {
+        "$href": "/magaza",
+        "label": "Tüm doğa turları"
+      },
+      "card_variant": null,
+      "stage_count": 4,
+      "stage_side": "end",
+      "stage_ground": "well",
+      "stage_follow": "on"
     },
     {
       "id": "yuruyusyorumlari",
@@ -435,20 +498,70 @@
       "ends_at": null,
       "variant": "carousel",
       "title": "Misafir yorumları",
-      "limit": 6,
+      "eyebrow": "Gezginler anlatıyor",
+      "limit": 8,
       "scroller": {
-        "desktop": "three",
+        "desktop": "four",
         "mobile": "peek",
         "arrows": "always",
         "arrow_style": "round",
         "arrow_position": "head",
         "dots": "off",
-        "autoplay": "off",
+        "autoplay": "on",
         "speed": "medium",
-        "loop": "off",
-        "drag": "on"
+        "loop": "on",
+        "drag": "on",
+        "autoplay_step": "card",
+        "play_button": "off"
       },
-      "product_image": "cover"
+      "product_image": "compact"
+    },
+    {
+      "id": "patikarakamlar",
+      "type": "stats",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_below": null,
+        "space_inner": null,
+        "ground": "primary",
+        "align": "center",
+        "width": null
+      },
+      "title": null,
+      "items": [
+        {
+          "value": "120+",
+          "label": "Rota",
+          "text": null,
+          "icon": "map_pin"
+        },
+        {
+          "value": "8.000+",
+          "label": "Mutlu gezgin",
+          "text": null,
+          "icon": "users"
+        },
+        {
+          "value": "4,8",
+          "label": "Ortalama puan",
+          "text": null,
+          "icon": "star"
+        },
+        {
+          "value": "12",
+          "label": "Kişilik gruplar",
+          "text": null,
+          "icon": "compass"
+        }
+      ],
+      "dividers": "on",
+      "icons": "on",
+      "item_style": "figure",
+      "arrangement": "stacked",
+      "social": "off"
     },
     {
       "id": "patikayazilari",
@@ -457,7 +570,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "grid",
-      "title": "Yol notları",
+      "title": "Yol *notları*",
       "limit": 3
     }
   ],
@@ -621,6 +734,405 @@
       "card_variant": null,
       "columns": 4,
       "columns_mobile": 2
+    }
+  ],
+  "pages": [
+    {
+      "page_id": { "$handle": "page:hakkimizda" },
+      "name": "Hakkımızda",
+      "sections": [
+        {
+          "id": "hakkimizdametin",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "article",
+          "title": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  { "type": "text", "text": "Hoş geldiniz.", "marks": [{ "type": "bold" }] },
+                  {
+                    "type": "text",
+                    "text": " {mağaza_adı}, beğenerek seçtiği ürünleri kolay ve güvenli bir alışverişle size ulaştırmak için kuruldu. Her ürünü satışa sunmadan önce inceliyor, bilgilerini açık ve eksiksiz yazmaya özen gösteriyoruz."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Neye önem veriyoruz" }]
+              },
+              {
+                "type": "bulletList",
+                "content": [
+                  {
+                    "type": "listItem",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Özenle seçilmiş ürünler:",
+                            "marks": [{ "type": "bold" }]
+                          },
+                          { "type": "text", "text": " Sattığımız her ürünün arkasında dururuz." }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "listItem",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          { "type": "text", "text": "Açık bilgi:", "marks": [{ "type": "bold" }] },
+                          {
+                            "type": "text",
+                            "text": " Fiyatı, kargo ve iade koşullarını alışverişten önce açıkça paylaşırız."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "listItem",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Güvenli ödeme:",
+                            "marks": [{ "type": "bold" }]
+                          },
+                          {
+                            "type": "text",
+                            "text": " Ödemeleriniz güvenli ödeme altyapısıyla alınır."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "listItem",
+                    "content": [
+                      {
+                        "type": "paragraph",
+                        "content": [
+                          {
+                            "type": "text",
+                            "text": "Ulaşılabilir destek:",
+                            "marks": [{ "type": "bold" }]
+                          },
+                          {
+                            "type": "text",
+                            "text": " Sorularınızı iş günlerinde en kısa sürede yanıtlarız."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bizi tercih ettiğiniz için teşekkür ederiz. Aklınıza takılan her konuda İletişim sayfamızdan bize ulaşabilirsiniz."
+                  }
+                ]
+              }
+            ]
+          },
+          "outline": "auto",
+          "questions": "auto"
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:iletisim" },
+      "name": "İletişim",
+      "sections": [
+        {
+          "id": "iletisimform",
+          "type": "contact",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Sorularınız, siparişleriniz ya da iade talepleriniz için formu doldurarak bize yazabilirsiniz. Mesajlarınızı iş günlerinde en kısa sürede yanıtlıyoruz."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bir siparişiniz hakkında yazıyorsanız sipariş numaranızı da eklemeniz yanıtımızı hızlandırır."
+                  }
+                ]
+              }
+            ]
+          },
+          "form": "on",
+          "imprint": "on"
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:sik-sorulan-sorular" },
+      "name": "Sık Sorulan Sorular",
+      "sections": [
+        {
+          "id": "sssorular",
+          "type": "faq",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "page",
+          "title": null,
+          "items": [
+            { "heading": "Rezervasyon ve ödeme" },
+            {
+              "question": "Rezervasyonumu nasıl yaparım?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Tarihi ve kişi sayısını seçip sepete ekleyin, ödeme adımında katılımcı ve ödeme bilgilerinizi girin. Rezervasyonunuz tamamlandığında onay e-postası gönderilir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Hangi ödeme yöntemlerini kullanabilirim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Geçerli ödeme yöntemlerini ve kartınıza göre taksit seçeneklerini Ödeme Seçenekleri sayfamızda bulabilirsiniz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Kartla ödeme güvenli mi?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kart bilgileriniz ödeme kuruluşunun 3D Secure korumalı güvenli sayfasında işlenir; {mağaza_adı} kart bilgilerinizi görmez ve saklamaz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            { "heading": "İptal ve değişiklik" },
+            {
+              "question": "Rezervasyonumu iptal edebilir miyim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Evet. İptal koşulları ve iade oranları İptal ve Değişiklik Koşulları sayfamızda yer alır; iptal talebinizi bize yazılı olarak iletebilirsiniz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Yerimi başka birine devredebilir miyim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Katılım koşullarını taşıyan başka bir kişiye devir, İptal ve Değişiklik Koşulları sayfamızdaki sürelere göre yapılabilir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "İadem ne zaman ödenir?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "İade tutarı ödeme yaptığınız yönteme iade edilir. Tutarın hesabınıza geçme süresi bankanıza göre değişir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            { "heading": "Bize ulaşın" },
+            {
+              "question": "Size nasıl ulaşabilirim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "İletişim sayfamızdaki formdan bize yazabilirsiniz; mesajlarınızı iş günlerinde en kısa sürede yanıtlıyoruz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "open_first": "on",
+          "single_open": "off"
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:odeme-secenekleri" },
+      "name": "Ödeme Seçenekleri",
+      "sections": [
+        {
+          "id": "odememetin",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "article",
+          "title": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Siparişinizi size uygun yöntemle güvenle ödeyebilirsiniz. Mağazamızda geçerli ödeme yöntemleri ve kart taksit seçenekleri bu sayfada güncel olarak yer alır."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Kredi ve banka kartı" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kartla ödemeleriniz, ödeme kuruluşunun 3D Secure korumalı güvenli sayfasında alınır. Kart bilgileriniz {mağaza_adı} tarafından görülmez ve saklanmaz."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Taksit seçenekleri kartınızın bankasına göre değişir. Ödeme adımında kartınız için geçerli taksitler ve ödeyeceğiniz toplam tutar, siparişi onaylamadan önce gösterilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Havale / EFT ve kapıda ödeme" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bu yöntemler sunulduğunda ödeme adımında seçilebilir. Havale ya da EFT ile ödemede banka hesap bilgilerimiz sipariş onayınızla birlikte iletilir; açıklamaya sipariş numaranızı yazmanız yeterlidir. Siparişiniz, ödemeniz hesabımıza ulaştığında hazırlanmaya başlar."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kapıda ödemede tutarı teslimat sırasında kargo görevlisine ödersiniz. Kapıda ödemeye ait bir hizmet bedeli varsa ödeme adımında ayrıca gösterilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Güvenli alışveriş" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Sitemizdeki tüm bağlantılar SSL ile şifrelenir. Ödemeniz onaylandığında sipariş özetiniz e-posta adresinize gönderilir."
+                  }
+                ]
+              }
+            ]
+          },
+          "outline": "auto",
+          "questions": "auto"
+        },
+        {
+          "id": "odemebilgileri",
+          "type": "payment_facts",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null
+        }
+      ]
     }
   ]
 }

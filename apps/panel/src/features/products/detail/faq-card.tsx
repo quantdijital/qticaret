@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query"
 import { Plus, Sparkles } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -13,7 +15,12 @@ import { AiServicePicker } from "@/features/ai/components/ai-service-picker"
 import { AiTryOthers } from "@/features/ai/components/ai-try-others"
 import { FAQ_LIMITS, faqItemIssue } from "@/features/ai/faq"
 import { aiFailureText, serviceName } from "@/features/ai/failure-text"
+import { useCan } from "@/features/auth/api/staff"
+import { productQuestionsQuery } from "@/features/reviews/api/questions"
+import type { QuestionRow } from "@/features/reviews/api/questions"
+import { QuestionDialog } from "@/features/reviews/components/question-dialog"
 import { errorText } from "@/lib/errors"
+import { ProductQuestions } from "./product-questions"
 import { PRODUCT_SECTIONS } from "./sections"
 import { useFaqAi } from "./use-faq-ai"
 import type { FaqAi, FaqDraftItem } from "./use-faq-ai"
@@ -184,18 +191,20 @@ function FaqDraft({ ai }: { ai: FaqAi }) {
 }
 
 /**
- * The product's FAQ (adr/0074 §5 madde 4): a draft of questions and answers
- * from the product's own facts, each editable; those kept are added as the
- * shop's questions to the storefront's Q&A, published at once (moderated,
- * like any question, under Yorumlar › Sorular). Drawn only for a role that
- * may ask, as the task's own button.
+ * The product's questions and answers (adr/0074 §5 madde 4; owner
+ * 2026-11-27): the list of this product's questions, the shop's own and
+ * customers', each opening its dialog (edit, hide or show, delete);
+ * "Soru ekle" adds one by hand in the shop's name, and "SSS taslağı" a
+ * draft from the product's own facts, each editable, those kept added the
+ * same way. Both are published at once and appear in the list.
  */
 export function FaqCard({ productId }: { productId: string }) {
   const { t } = useTranslation()
   const ai = useFaqAi(productId)
-  if (!ai.shown) {
-    return null
-  }
+  const canEdit = useCan("moderation")
+  // null: closed; "new": adding one by hand; else the question opened
+  const [opened, setOpened] = useState<QuestionRow | "new" | null>(null)
+  const count = useQuery(productQuestionsQuery(productId)).data?.count ?? 0
   return (
     <SectionCard
       title={t("products.faq.title")}
@@ -204,33 +213,68 @@ export function FaqCard({ productId }: { productId: string }) {
       collapse={{
         id: PRODUCT_SECTIONS.faq,
         name: "product.faq",
-        summary: t(ai.open ? "products.faq.summaryOpen" : "products.faq.summary"),
+        summary: ai.open
+          ? t("products.faq.summaryOpen")
+          : count > 0
+            ? t("products.faq.summaryCount", { count })
+            : t("products.faq.summary"),
         attention: ai.open,
       }}
       action={
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          aria-expanded={ai.open}
-          onClick={() => {
-            if (ai.open) {
-              ai.close()
-            } else {
-              ai.start()
-            }
-          }}
-        >
-          <Sparkles />
-          {t("products.faq.draft")}
-        </Button>
+        canEdit || ai.shown ? (
+          <div className="flex flex-wrap gap-2">
+            {canEdit ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOpened("new")
+                }}
+              >
+                <Plus />
+                {t("products.faq.addOne")}
+              </Button>
+            ) : null}
+            {ai.shown ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-expanded={ai.open}
+                onClick={() => {
+                  if (ai.open) {
+                    ai.close()
+                  } else {
+                    ai.start()
+                  }
+                }}
+              >
+                <Sparkles />
+                {t("products.faq.draft")}
+              </Button>
+            ) : null}
+          </div>
+        ) : null
       }
     >
-      {ai.open ? (
-        <FaqDraft ai={ai} />
-      ) : (
-        <p className="text-sm text-muted-foreground">{t("products.faq.empty")}</p>
-      )}
+      <div className="flex flex-col gap-3">
+        {ai.open ? <FaqDraft ai={ai} /> : null}
+        <ProductQuestions productId={productId} onOpen={canEdit ? setOpened : null} />
+        {ai.shown && !ai.open && count === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("products.faq.empty")}</p>
+        ) : null}
+      </div>
+      {opened ? (
+        <QuestionDialog
+          key={opened === "new" ? "new" : opened.id}
+          question={opened === "new" ? null : opened}
+          productId={productId}
+          onClose={() => {
+            setOpened(null)
+          }}
+        />
+      ) : null}
     </SectionCard>
   )
 }

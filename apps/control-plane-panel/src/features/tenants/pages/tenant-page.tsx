@@ -28,6 +28,7 @@ import { NotesCard } from "@/features/tenants/components/notes-card"
 import { PlanCard } from "@/features/tenants/components/plan-card"
 import { SummaryCard } from "@/features/tenants/components/summary-card"
 import { StatusActions } from "@/features/tenants/components/status-actions"
+import { SupportAccess } from "@/features/tenants/components/support-access"
 import { TenantStatusBadge } from "@/features/tenants/components/tenant-status"
 import { canManageShops } from "@/features/tenants/permissions"
 import { errorText } from "@/lib/errors"
@@ -149,7 +150,12 @@ export function TenantPage() {
       <PageHeader
         title={shop.tenant.name}
         badge={<TenantStatusBadge status={shop.tenant.status} />}
-        action={<StatusActions tenantId={shop.tenant.id} status={shop.tenant.status} />}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <SupportAccess tenantId={shop.tenant.id} status={shop.tenant.status} />
+            <StatusActions tenantId={shop.tenant.id} status={shop.tenant.status} />
+          </div>
+        }
         description={t("tenants.detail.line", {
           address: primary,
           date: formatDate(shop.tenant.created_at),

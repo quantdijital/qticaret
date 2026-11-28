@@ -186,7 +186,10 @@ medusaIntegrationTestRunner({
         actor_type: "user",
         actor_id: owner.userId,
         resource_id: `${LOOK.pack}/${LOOK.code}`,
-        changes: { made_pages: [made?.page_id], texts_kept: [] },
+        changes: {
+          made_pages: applied.data.result.made_pages.map((page) => page.page_id),
+          texts_kept: [],
+        },
       })
       expect(JSON.stringify(entry?.changes)).not.toContain("Hakkımızda")
 
@@ -211,7 +214,9 @@ medusaIntegrationTestRunner({
           await new Promise((resolve) => setTimeout(resolve, 100))
         }
       }
-      expect(second.map((each) => each.changes?.["texts_kept"])).toContainEqual(["page:hakkimizda"])
+      expect(second.map((each) => each.changes?.["texts_kept"])).toContainEqual(
+        expect.arrayContaining(["page:hakkimizda"])
+      )
     })
   },
 })

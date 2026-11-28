@@ -5,6 +5,7 @@ import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import type { ExchangeLine } from "../../../lib/orders/exchanges"
+import { refuseSampleItems } from "../../checkout/sample-items"
 import { quoteExchange } from "../exchange-quote"
 
 /**
@@ -32,6 +33,8 @@ export const checkExchangeStep = createStep(
     if (problem) {
       throw new ValidationError(problem)
     }
+    // The new items go into the order: a sample product is never sold (owner, 2026-11-28)
+    await refuseSampleItems(container, input.exchange_items)
     if (difference !== input.shown) {
       throw new ValidationError("returns.exchange_price_changed")
     }

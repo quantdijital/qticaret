@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { LAYOUT_LIMITS, columns, columnsMobile, optional, recordId, title } from "../layout-fields"
+import { headLines } from "./head-lines"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { scroller } from "./scroller"
@@ -136,6 +137,8 @@ const common = {
   limit: z.number().int().min(1).max(LAYOUT_LIMITS.items).default(12),
   /** A "see all" link under the rail. */
   more: optional(storefrontLink),
+  /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+  ...headLines,
   /**
    * The rail's own card variant over the theme setting's (adr/0049 Ek
    * 2026-11-14 §3.3, owner's decision 4); null: the setting's. Only the

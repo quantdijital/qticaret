@@ -1,25 +1,14 @@
-import { BookmarkPlus, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
-import { useId, useState } from "react"
+import { Eye } from "lucide-react"
+import { useId } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
-import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
-import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
-import { Button } from "@qticaret/admin-ui/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@qticaret/admin-ui/ui/dropdown-menu"
-import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@qticaret/admin-ui/lib/format"
-import { useDeleteDesign, useRenameDesign } from "./api"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { DesignCard as Design } from "./api"
+import { DesignMenu } from "./design-menu"
 import { designName, sourceName } from "./design-name"
-import { DesignThumb } from "./design-thumb"
-import { LookFacts } from "./look-facts"
-import { NameDialog } from "./name-dialog"
+import { DesignFrame } from "./design-frame"
+import { useDesignPreview } from "./design-preview"
+import { LookState } from "./look-state"
 
 const G = "storefront.gallery"
 
@@ -31,140 +20,113 @@ interface DesignCardProps {
   onApply: (design: Design, name: string) => void
 }
 
+function ApplyButton({ design, name, busy, onApply }: DesignCardProps & { name: string }) {
+  const { t } = useTranslation()
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      disabled={busy}
+      aria-label={t(`${G}.card.applyOf`, { name })}
+      onClick={() => {
+        onApply(design, name)
+      }}
+    >
+      {t(`${G}.card.apply`)}
+    </Button>
+  )
+}
+
+/** "Önizle": the look whole on the storefront, in a new tab (adr/0064). */
+function PreviewButton({ design, name }: { design: Design; name: string }) {
+  const { t } = useTranslation()
+  const preview = useDesignPreview()
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="ghost"
+      disabled={preview.opening}
+      aria-label={t(`${G}.card.previewOf`, { name })}
+      onClick={() => void preview.open(design.id)}
+    >
+      <Eye />
+      {t(`${G}.card.preview`)}
+    </Button>
+  )
+}
+
 /**
- * A saved look (adr/0064): its sketch, name, date and state (an automatic
- * save's date is in its name, shown once); "Taslağa al"
- * brings it into the draft. Its menu renames it (keeps an automatic one
- * by name) or deletes it for good, asked first (K2).
+ * A named saved look (adr/0064), small: its picture the storefront's own
+ * page drawn with it (its sketch until then), name, date and source in one
+ * line, one state; "Önizle" opens it whole in a new tab, "Taslağa al"
+ * brings it into the draft, "⋯" renames or deletes it.
  */
-export function DesignCard({ design, savedFull, busy, onApply }: DesignCardProps) {
+export function DesignCard(props: DesignCardProps) {
+  const { design } = props
   const { t } = useTranslation()
   const ids = useId()
-  const rename = useRenameDesign()
-  const remove = useDeleteDesign()
-  const [naming, setNaming] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const name = designName(t, design)
-  const auto = design.kind === "auto"
   const from = design.summary.source !== "own" ? sourceName(t, design.summary) : null
   return (
     <article
       aria-labelledby={`${ids}-title`}
-      className="flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-3 shadow-card"
+      className="flex min-w-0 flex-col gap-2 rounded-lg border bg-card p-2.5 shadow-card"
     >
-      <DesignThumb summary={design.summary} />
-      <div className="flex flex-1 flex-col gap-2 px-1">
-        <div className="flex items-start gap-2">
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <h3 id={`${ids}-title`} className="text-[15px] leading-6 font-semibold break-words">
-              {name}
-            </h3>
-            {/* An automatic save's name already carries its source and date and time */}
-            {design.name ? (
-              <p className="text-xs text-muted-foreground">
-                {formatDateTime(design.created_at)}
-                {from ? ` · ${t(`${G}.from`, { name: from })}` : null}
-              </p>
-            ) : null}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 shrink-0"
-                aria-label={t(`${G}.card.actions`, { name })}
-              >
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                disabled={auto && savedFull}
-                onSelect={() => {
-                  setNaming(true)
-                }}
-              >
-                {auto ? <BookmarkPlus /> : <Pencil />}
-                {t(auto ? `${G}.card.keep` : `${G}.card.rename`)}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  setDeleting(true)
-                }}
-              >
-                <Trash2 />
-                {t(`${G}.card.delete`)}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <DesignFrame design={design} />
+      <div className="flex items-start gap-1 px-0.5">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <h3 id={`${ids}-title`} className="truncate text-sm leading-6 font-semibold" title={name}>
+            {name}
+          </h3>
+          <p className="truncate text-xs text-muted-foreground">
+            {formatDateTime(design.created_at)}
+            {from ? ` · ${t(`${G}.from`, { name: from })}` : null}
+          </p>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {auto ? <StatusBadge tone="neutral">{t(`${G}.auto.badge`)}</StatusBadge> : null}
-          {design.live ? <StatusBadge tone="success">{t(`${G}.badge.live`)}</StatusBadge> : null}
-          {design.in_draft ? (
-            <StatusBadge tone="info">
-              {design.edited
-                ? `${t(`${G}.badge.draft`)}, ${t(`${G}.badge.edited`)}`
-                : t(`${G}.badge.draft`)}
-            </StatusBadge>
-          ) : null}
+        <DesignMenu design={design} name={name} savedFull={props.savedFull} />
+      </div>
+      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 px-0.5">
+        <LookState live={design.live} inDraft={design.in_draft} edited={design.edited} />
+        <div className="flex items-center gap-1">
+          <PreviewButton design={design} name={name} />
+          <ApplyButton {...props} name={name} />
         </div>
-        <LookFacts summary={design.summary} />
       </div>
-      <div className="mt-auto flex px-1 pb-1">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={busy}
-          aria-label={t(`${G}.card.applyOf`, { name })}
-          onClick={() => {
-            onApply(design, name)
-          }}
-        >
-          {t(`${G}.card.apply`)}
-        </Button>
-      </div>
-      <NameDialog
-        open={naming}
-        onOpenChange={setNaming}
-        title={t(auto ? `${G}.rename.keepTitle` : `${G}.rename.title`)}
-        description={auto ? t(`${G}.rename.keepText`) : undefined}
-        initial={design.name ?? name}
-        submitLabel={t("common.save")}
-        renaming={!auto}
-        saving={rename.isPending}
-        onSubmit={(next) => {
-          rename.mutate(
-            { design: design.id, name: next },
-            {
-              onSuccess: () => {
-                setNaming(false)
-                toast.success(t(`${G}.save.done`, { name: next }))
-              },
-              onError: (failure) => toast.error(errorText(t, failure)),
-            }
-          )
-        }}
-      />
-      <ConfirmDialog
-        open={deleting}
-        onOpenChange={setDeleting}
-        title={t(`${G}.delete.title`, { name })}
-        description={t(`${G}.delete.text`)}
-        confirmLabel={t(`${G}.delete.confirm`)}
-        destructive
-        onConfirm={() => {
-          setDeleting(false)
-          remove.mutate(design.id, {
-            onSuccess: () => toast.success(t(`${G}.delete.done`, { name })),
-            onError: (failure) => toast.error(errorText(t, failure)),
-          })
-        }}
-      />
     </article>
+  )
+}
+
+/**
+ * An automatic save as one row (adr/0064 Ek 2026-11-17): its name already
+ * carries its source and date and time; its size, one state, "Taslağa al"
+ * and "⋯" beside it.
+ */
+export function DesignRow(props: DesignCardProps) {
+  const { design } = props
+  const { t } = useTranslation()
+  const ids = useId()
+  const name = designName(t, design)
+  return (
+    <li
+      aria-labelledby={`${ids}-title`}
+      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2.5"
+    >
+      <div className="flex min-w-0 flex-[1_1_14rem] flex-col">
+        <span id={`${ids}-title`} className="text-sm leading-6 font-medium break-words">
+          {name}
+        </span>
+        <span className="text-xs text-muted-foreground">
+          {t(`${G}.sections`, { count: design.summary.sections.home })}
+        </span>
+      </div>
+      <LookState live={design.live} inDraft={design.in_draft} edited={design.edited} />
+      <div className="ml-auto flex items-center gap-1">
+        <PreviewButton design={design} name={name} />
+        <ApplyButton {...props} name={name} />
+        <DesignMenu design={design} name={name} savedFull={props.savedFull} />
+      </div>
+    </li>
   )
 }

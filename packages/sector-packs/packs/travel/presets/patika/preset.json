@@ -1,10 +1,10 @@
 {
   "format": "quant-storefront-preset",
   "code": "patika",
-  "version": 1,
+  "version": 3,
   "theme": "atolye",
   "name": "Patika",
-  "description": "Kültür, doğa ve şehir turları için: duyuru şeridi, tek satır üst bilgi ve düğme, soldan koyulaşan tam görsel kapakta üç satır başlık, oynat simgeli ikinci düğme, kapak içi güven ikonları ve el yazısı not, kutulu alanlı sekmeli arama kartı; rota kartları, ikonlu neden biz şeridi, oklu tur kartları, kutulu kampanya bandı, tur görselli yorum kartları ve koyu alt bilgi. Menülere ve ürünlere dokunmaz.",
+  "description": "Kültür, doğa ve şehir turları için: tam görsel kapakta üç satır başlık, el yazısı not, güven ikonları ve sekmeli arama kartı; rota kartları, kart kart kayan çok seçilenler, neden biz şeridi, görsel panolu kategoriler, yaklaşan kalkışlar, sekmeli bölge rayları, kampanya bandı, ayın rotası vitrini, kayan yorumlar ve koyu yeşil rakam bandı. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
@@ -21,6 +21,11 @@
       "file": "images/rota-oludeniz.webp",
       "source": "https://commons.wikimedia.org/wiki/File:Oludeniz.jpg",
       "license": "CC BY 2.0, Dan Taylor (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bant-oludeniz.webp",
+      "source": "https://unsplash.com/photos/c9XeS3QGhJg",
+      "license": "Unsplash License, Artem Bryzgalov (kırpıldı, küçültülüp WebP'ye çevrildi)"
     },
     {
       "file": "images/rota-karadeniz.webp",

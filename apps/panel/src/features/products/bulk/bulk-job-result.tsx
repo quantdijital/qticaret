@@ -52,6 +52,19 @@ export function BulkPreviewResult({ preview }: { preview: BulkPreview }) {
           </p>
         ) : null}
       </div>
+      {preview.booking_off ? (
+        // adr/0076 Ek D2: what the product page asks before a dated product stops being one
+        <div
+          role="alert"
+          className="flex flex-col gap-1.5 rounded-md border border-warning/40 bg-warning-soft px-3 py-2 text-[13px]"
+        >
+          <p className="font-medium">
+            {t("products.bulk.kind.bookingOff", count(preview.booking_off))}
+          </p>
+          <p>{t("products.booking.off.description")}</p>
+          <p>{t("products.booking.off.stock")}</p>
+        </div>
+      ) : null}
       <BulkProblems problems={preview.problems} />
     </div>
   )

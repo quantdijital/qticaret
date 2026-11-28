@@ -10,6 +10,7 @@ import { catalogImport } from "./catalog-import"
 import { contentLinkRewrite } from "./content-link-rewrite"
 import { customerDataExport } from "./customer-data-export"
 import { customerExport } from "./customer-export"
+import { migrationAddresses } from "./migration-addresses"
 import { migrationInvites } from "./migration-invites"
 import { migrationRun } from "./migration-run"
 import { migrationSitemap } from "./migration-sitemap"
@@ -17,6 +18,7 @@ import { migrationUrls } from "./migration-urls"
 import { orderExport } from "./order-export"
 import { promotionCodes } from "./promotion-codes"
 import { reportExport } from "./report-export"
+import { sampleCatalogLoad } from "./sample-catalog-load"
 import { seoAudit } from "./seo-audit"
 import { seoSitemap } from "./seo-sitemap"
 import { seoUrlStyle } from "./seo-url-style"
@@ -45,6 +47,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "content.link_rewrite": erase(contentLinkRewrite),
   "customer.data_export": erase(customerDataExport),
   "customer.export": erase(customerExport),
+  "migration.addresses": erase(migrationAddresses),
   "migration.invites": erase(migrationInvites),
   "migration.run": erase(migrationRun),
   "migration.sitemap": erase(migrationSitemap),
@@ -52,6 +55,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "order.export": erase(orderExport),
   "promotion.codes": erase(promotionCodes),
   "report.export": erase(reportExport),
+  "sample_catalog.load": erase(sampleCatalogLoad),
   "seo.audit": erase(seoAudit),
   "seo.sitemap": erase(seoSitemap),
   "seo.url_style": erase(seoUrlStyle),

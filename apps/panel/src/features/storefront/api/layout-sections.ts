@@ -25,6 +25,8 @@ import type {
   ShelfColumns,
   ShelfPhoneColumns,
   SliderSettings,
+  TopSliderSettings,
+  NewsletterConsentStyle,
   NewsletterTone,
   NewsletterVariant,
   PageTextSwitch,
@@ -33,6 +35,7 @@ import type {
   RichTextVariant,
   TrustBadgesVariant,
   TrustCardStep,
+  StoreHeadLines,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
@@ -40,6 +43,7 @@ import type {
   CategoriesCollageFields,
   CategoriesPanelsFields,
   CategoriesIconsFields,
+  CategoriesCarouselFields,
   CategoriesLinkedFields,
 } from "@/features/storefront/api/layout-cards"
 import type { StoreHeroFull } from "@qticaret/types"
@@ -187,7 +191,7 @@ export type BannerSection = BodySectionBase & {
   note?: string | null
 } & BannerSettings
 
-interface CategoriesBase extends BodySectionBase {
+interface CategoriesBase extends BodySectionBase, StoreHeadLines {
   type: "categories"
   title: string | null
   /** None: the top categories. */
@@ -206,6 +210,7 @@ export type CategoriesSection = CategoriesBase &
     | CategoriesCollageFields
     | CategoriesPanelsFields
     | CategoriesIconsFields
+    | CategoriesCarouselFields
   )
 
 /**
@@ -239,8 +244,10 @@ export interface PostsSection extends BodySectionBase {
   title: string | null
   limit: number
   variant: PostsVariant
-  /** `intro_panel`: the line above the heading. */
+  /** The line above the heading (every variant's since 2026-11-28). */
   eyebrow?: string | null
+  /** A short hand note beside the heading (`HAND_NOTE_MAX`); none: no note. */
+  note?: string | null
   /** `intro_panel`: the words under the heading. */
   intro?: string | null
   /** `intro_panel`: the button; none: the storefront's "every post". */
@@ -252,7 +259,7 @@ export interface PostsSection extends BodySectionBase {
 }
 
 /** The shop's newest reviews (adr/0077 §10): today's grid, or one card each in a sliding row. */
-export interface ReviewsSection extends BodySectionBase {
+export interface ReviewsSection extends BodySectionBase, StoreHeadLines {
   type: "reviews"
   title: string | null
   limit: number
@@ -325,6 +332,8 @@ export interface NewsletterFields {
   joined?: boolean
   /** The boxed bands' ground (`split`, `image_card`, `strip`); absent: `plain`. */
   tone?: NewsletterTone
+  /** How the consent is asked, every variant's: the required box or one small line; absent: `box`. */
+  consent_style?: NewsletterConsentStyle
 }
 
 export interface NewsletterSection extends BodySectionBase, NewsletterFields {
@@ -491,7 +500,29 @@ export type AnnouncementBar = SectionBase & {
   phone?: boolean
   /** The light strip's "Hesabım"; true: written. */
   account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only); absent: none (owner 2026-11-27: the strip as a slider).
+   */
+  line_links?: (LayoutLink | null)[]
 } & Partial<AnnouncementSettings>
+
+/** One picture of the top image slider: its words required, a phone's own and a link optional. */
+export interface TopSlide {
+  image: LayoutImage
+  mobile_image: LayoutImage | null
+  link: LayoutLink | null
+}
+
+/**
+ * The top image slider (owner 2026-11-27): a full-width band of the
+ * shop's pictures above the header, one at a time; a type of its own.
+ */
+export type TopSliderSection = SectionBase & {
+  type: "top_slider"
+  /** Up to six; none: nothing drawn yet. */
+  slides: TopSlide[]
+} & TopSliderSettings
 
 export interface FooterNewsletter extends SectionBase, NewsletterFields {
   type: "newsletter"
@@ -541,8 +572,8 @@ export interface LayoutSettings {
   design?: { id: string | null; digest: string } | null
 }
 
-/** The header: the announcement bar, the scrolling strip and the shop's bar, each at most once. */
-export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection
+/** The header: the image slider, the announcement bar, the scrolling strip and the shop's bar, each at most once. */
+export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection | TopSliderSection
 /** The footer group (adr/0070 §4): the bar, and above it a box, a rich text, badges, a strip. */
 export type FooterSection =
   FooterNewsletter | FooterBarSection | RichTextSection | TrustBadgesSection | MarqueeSection

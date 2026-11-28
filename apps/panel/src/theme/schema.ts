@@ -5,6 +5,7 @@ import {
   THEME_MODES,
   THEME_RADII,
   THEME_SIDEBARS,
+  THEME_SURFACES,
 } from "@qticaret/types"
 import { z } from "zod"
 
@@ -20,6 +21,7 @@ export const appearanceSchema = z.object({
   mode: z.enum(THEME_MODES),
   sidebar: z.enum(THEME_SIDEBARS),
   sidebar_mode: z.enum(SIDEBAR_MODES),
+  surface: z.enum(THEME_SURFACES),
 })
 
 export type AppearanceForm = z.infer<typeof appearanceSchema>

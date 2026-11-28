@@ -103,7 +103,7 @@ Kimlik önekleri `ten_`, `pkg_` gibi. Kişisel veri yalnızca bizim müşterimiz
    - **Denetim kaydı:** her mutasyon (önce/sonra alan özeti), dışa aktarmalar ve TCKN okuma. Yalnızca ekleme.
    - **2026-11-12: sahip doğrudan davet edilebilir** ("yönetici = sahip", yeni rol yok). Sahip, personel davetinde `owner` da verir: aynı uç, aynı yeniden doğrulama ve denetim kaydı. Bu davet `cp:create-owner`'ın bootstrap davetinden ayrıdır, biri öbürünün yerine geçmez; bootstrap kuralları (1 saat, yalnız etkin sahip yokken, `bootstrap: true`) değişmedi. Bilgi, kayıt ve kabulde daveti yapan hâlâ etkin, yetkisi verilmiş bir sahip olmalı; değilse `cp.invite_invalid`. Rol, öbür rollerdeki gibi kişi 2FA'sını kurunca verilir; o zamana kadar sahip sayılmaz (son sahip koruması dahil). 2FA onayında da (`activate`, sahiplerin kilidi altında) rolü veren (`assigned_by`) hâlâ etkin sahip olmalı; değilse 403 `cp.enrolment_token_invalid`, ayrıntısız. Bootstrap sahip, öbür roller ve 2FA sıfırlamasından sonraki yeniden kurulum bu denetime girmez. C4 ekindeki "davet `owner` vermez" cümlesinin yerini alır.
 6. **Ele geçirilme etki alanı.** Üst panel ele geçirilirse saldırgan: mağazaları kısıtlayabilir/limit değiştirebilir (imza anahtarıyla), kurulum tetikleyebilir. Okuyamadıkları: mağazaların müşteri verisi, veritabanı şifreleri, mağaza şifreleme anahtarları (§4.3). Önlem: imza anahtarı döndürülür, mağazalar yeni açık anahtarı alır; ağ erişimi kısıtlı; her eylem denetim kaydında.
-7. **Destek erişimi (break-glass, F16.10) sonraya.** Taslak: üst panel kısa ömürlü (≤ 60 dk) imzalı bir destek izni üretir (personel, gerekçe, mağaza, rol); mağaza bunu doğrulayıp süreli oturum açar, sahibine zil + e-postayla bildirir, iki tarafta denetim kaydı. Aynı imza düzenini kullanır.
+7. **Destek erişimi (break-glass).** Üst panel kısa ömürlü (≤ 60 dk) imzalı bir destek izni üretir (personel, gerekçe, mağaza, rol); mağaza bunu doğrulayıp süreli oturum açar, sahibine zil + e-postayla bildirir, iki tarafta denetim kaydı. Aynı imza düzenini kullanır. 2026-11-28'de F16.10'dan öne alındı; kesin tasarım "Ek: Destek erişimi (2026-11-28)".
 
 ### 4. Secret şifreleme
 
@@ -196,7 +196,7 @@ Kimlik önekleri `ten_`, `pkg_` gibi. Kişisel veri yalnızca bizim müşterimiz
 | F17.3 faturalama | takip, hatırlatma, kısıt | kartla tahsilat; e-fatura şirket kurulunca |
 | F17.4 secret | zarf şifreleme, yerel KEK, döndürme, emanet | OpenBao Transit (F16 ile) |
 | F17.5 sürüm | bildirilen sürüm, sürüm listesi, hedef sürüm alanı | dalga/canary yürütme F16.6 (`upgrade` çalışması `DockerProvisioner`'la) |
-| F17.6 platform paneli | liste, durum, kullanım, sağlık, notlar | destek erişimi F16.10 (§3.7) |
+| F17.6 platform paneli | liste, durum, kullanım, sağlık, notlar; destek erişimi (Ek 2026-11-28) | — |
 | F17.7 sektör paketi | `packages/sector-packs/<kod>/` veri dosyaları (özellik şablonları, mağazanın kendi bayrak ön ayarları, SEO şablon seti), backend'in mevcut Zod şemalarıyla doğrulanır, idempotent uygulanır (eksik olanı ekler, mağazanın düzenlediğini ezmez). Kod paket adına göre dallanmaz | pakete yeni sürüm gelince "yeniden uygula" yalnız ekler |
 
 **KK önerisi (docs/03 §F17):** "Yeni müşteri kendi kendine kayıt olup deneme mağazasını açabiliyor" yerine: "Platform personeli üst panelden bilgileri girerek yeni mağaza açabiliyor; mağaza yerelde gerçek olarak ayağa kalkıyor, sağlık yeşil ve sahip daveti gidiyor." Self-servis kayıt sonraki aşamaya.
@@ -1356,3 +1356,241 @@ Sahip yeni Ayarlar > Abonelik ekranını onayladı ve eksik abonelik verilerinin
 - **Düzeltme (aynı gün, HTTP testi):** aboneliği olmayan mağazada koşullar önce paketin fiyatı ve dönemiyle yazılıyordu; paket fiyatı değişince faturalanmayan mağazaların belgesi gereksiz yeniden yayınlanıyordu (`plan-documents.spec.ts`: fiyat değişikliği yeni serial üretmemeli). Karar: abonelik yokken dört alan da `null` (sözleşmede `period` da `null` alabilir); koşullar yalnız aboneliğin kendi kopyasından gelir, belge yalnız içerik gerçekten değişince yeniden yayınlanır.
 - **Panel sertleştirmesi (güvenlik incelemesi, isteğe bağlı):** fatura bağlantısı panelde de yalnız `https://` ile başlıyorsa bağlantı olur; başkası "Fatura yok" görünür.
 - **Kalan riskler:** (1) Eski sürüm mağaza yeni alanlı belgeyi reddeder (yayın sırası, C16 madde 7 ile aynı). (2) Geçmiş, üst panel kapalıyken görünmez (bilerek: imzasız önbellek diske yazılmaz). (3) Fatura bağlantısı kendi faturalamamız açılınca dolacak; o gün bağlantının barındırıldığı alan adı ayrıca değerlendirilir.
+
+## Ek: Destek erişimi (2026-11-28)
+
+Sahibin amacı: "üst panelden mağaza oluşturup ardından mağazanın paneline geçip orada tasarımları ve ürün girişlerini gerekirse yapabilmemiz". Bugün personelin mağaza paneline tek yolu sahibin davet e-postasıdır. §3.7 taslağı F16.10'dan öne alınır ve aşağıdaki biçimde kesinleşir. Kod bu ekten sonra yazılır.
+
+### Karar 1: kimlik sentetik, Medusa kullanıcısı açılmaz
+
+- Destek oturumu `actor_type: "user"`, `actor_id: "qtsup_<iznin rastgele parçası>"` taşır. Mağazada `user` satırı, `auth_identity`, şifre ya da 2FA yoktur.
+- Sonuç: personel listesinde görünmez, personel limitine sayılmaz, kullanım raporundaki personel sayısına girmez (hepsi `user` tablosunu sayar). Personel e-postası listesine düşmez.
+- Panelin "ben kimim" okumaları sentetik yanıtla karşılanır: `GET /admin/users/me` → `{ id, email: "", first_name: "Platform desteği", last_name: <personelin adı> }`; `GET /admin/staff/me` → `support` nesnesiyle (personel adı, gerekçe, bitiş zamanı) ve destek yetkilerinden hesaplanan `can`.
+- Her iznin kendi `actor_id`'si vardır. Oturumun yaptığı her değişiklik denetim kaydında bu kimlikle durur; kimlik iznin kaydıyla personel adına ve gerekçeye bağlanır.
+- Alternatif (personel başına gizli Medusa kullanıcısı) reddedildi: personel listesi, sayım, bildirim alıcıları, `/admin/users` ve davet denetimlerinin hepsine süzgeç gerekirdi. Unutulan bir süzgeç destek hesabını kalıcı bir personele çevirirdi. Sentetik kimlikte unutulan yer yalnız "kullanıcı bulunamadı" der.
+- 2.2 (operatörün kalıcı hesabı, `invite-staff`) bu ekte yapılmaz; sahip isterse ayrı iş.
+
+### Karar 2: izin belgesi
+
+- Sözleşme `packages/types/src/control-plane/support-grant.ts`. İmza `signDocument("support_access", …)`: plan belgesiyle aynı düzen ve anahtar, başka amaç. Plan belgesi izin yerine, izin plan belgesi yerine geçmez.
+- Alanlar (hepsi katı, bilinmeyen alan ret):
+  - `version: 1`, `audience: "shop_panel"`, `tenant_id`;
+  - `grant_id` (`sgr_` + en az 16 rastgele bayt, tek kullanımlık nonce);
+  - `operator { id, name, role: owner | operator }`;
+  - `reason` (10–500 karakter, düz metin);
+  - `issued_at`, `expires_at` (Unix saniye, aradaki fark ≤ 60 dk).
+- Taşıma: `<mağaza paneli>/support#grant=<base64url(JSON)>`. Fragment sunucu loglarına ve Referer'a düşmez. Panel onu okur okumaz adres çubuğundan ve geçmişten siler (davet bağlantısının `linkParams` kalıbı).
+- Yerelde panel adresi `localhost:<port + 1000>`, canlıda mağazanın birincil doğrulanmış alan adı (`shopPanelOrigin`, Ek C10 ile aynı kural).
+
+### Karar 3: mağazanın doğrulaması (`POST /auth/support-access`)
+
+Sırayla, ilk düşen yanıt verir:
+
+1. Yönetimsiz mağaza (`CONTROL_PLANE_PUBLIC_KEYS` yok) → 404. Destek erişimi yalnız üst panele bağlı mağazada vardır.
+2. Gövde katı şema, `grant` ≤ 4096 karakter base64url; çözülen JSON `signedSupportGrantSchema` → değilse 400 `support.grant_invalid`.
+3. İmza `CONTROL_PLANE_PUBLIC_KEYS` ile `kid`'e göre → değilse 401.
+4. `audience` ve `tenant_id` bu mağaza (`TENANT_ID`) → değilse 403 `support.wrong_tenant`.
+5. Zaman:
+   - `issued_at` en çok 5 dk ileride olabilir (saat kayması);
+   - izin düzenlendikten sonra en geç 5 dk içinde kullanılır;
+   - şimdi `< expires_at`.
+   - Değilse 401 `support.grant_expired`.
+6. Sahibin anahtarı açık → değilse 403 `support.disabled`.
+7. `grant_id` tek kullanımlık: Redis `SET NX` (`expires_at`'e kadar), Redis'siz geliştirmede süreç belleği. Görülmüşse 409 `support.grant_used`. Redis hatası reddedilir (kapalı başarısızlık).
+
+- Her ret denetim kaydına sistem olayı olarak yazılır (`support_access.refused`, neden kodu; izin gövdesi yazılmaz). Hız sınırı `/auth/*` profiliyle aynıdır (`lib/security` tabanı).
+- Başarıda oturum yenilenir (`regenerate`, oturum sabitleme yok). İçine `auth_context` yazılır: sentetik kimlik ve `mfa_challenge_completed_at = şimdi`. Üst panelin her zaman zorunlu 2FA'sı ve bu iş için istenen yeniden doğrulama ikinci faktör sayılır.
+- Oturumun kaydı (`grant_id`, personel, rol, gerekçe, başlangıç, bitiş) Redis'e bitişe kadar yazılır. Çerez ömrü normal oturumla aynı kalır; geçerlilik her istekte kayıttan okunur.
+
+### Karar 4: oturum kuralları
+
+- **Süre kaymaz.** `expires_at` geldiğinde oturum biter; kullanım uzatmaz. Uzatma yeni izinle olur (yeni gerekçe, yeni denetim kaydı).
+- **Her istekte denetim** (`/admin/*` ve `/auth/*`). Kimlik `qtsup_` ile başlıyorsa:
+  - kayıt Redis'te var mı,
+  - bitirilmiş mi,
+  - süresi geçmiş mi,
+  - sahibin anahtarı hâlâ açık mı?
+  - Biri tutmazsa oturum yok edilir ve 401 `support.session_ended` döner. Bu denetim kimliğe bakar, taşıyıcıya bakmaz: oturumdan bir yolla bearer token üretilse bile aynı kayda takılır.
+- **Kapalı uçlar:** `/auth/token/refresh` (oturumdan 24 saatlik token üretimi), `/auth/mfa/*`, şifre ve e-posta uçları, `DELETE /auth/session` dışındaki bütün `/auth/*`. Çıkış (`DELETE /auth/session`) oturumu bitmiş olarak işaretler.
+- **Sahip anahtarı:** `security` bölümüne `support_access_enabled` (varsayılan **açık**). Kapatmak yeni izinleri reddeder ve açık oturumları bir sonraki istekte bitirir.
+  - Gerekçe: mağazalar bizim kurduğumuz mağazalardır; ilk günlerde destek akışın parçasıdır. Kapalı varsayılan, sahibin henüz giriş yapmadığı yeni mağazada desteği imkânsız kılar.
+  - Denge: anahtar Ayarlar > Güvenlik'te görünür, her giriş zil ve e-postayla bildirilir.
+  - Anahtarı yalnız sahip değiştirir (`security` bölümü zaten `OWNER_ONLY`); destek oturumu değiştiremez.
+
+### Karar 5: destek yetkisi (rota katmanı)
+
+**İzin listesi, varsayılan ret** (2026-11-28 ikinci inceleme M-B). Destek oturumu yalnız `lib/support-access/allowed.ts`'te adı geçen uçlara ulaşır:
+- katalog (ürün, varyant, stok, kategori, koleksiyon, marka, özellik şablonları, toplu düzenleme, içe aktarma);
+- vitrin (görünümler, hazır görünümler, düzen, menüler, içerik, açılış sayfaları, açılır pencereler, ortam kütüphanesi, SEO);
+- yorum ve soru moderasyonu, katalog için yazım önerileri;
+- siparişler ve müşteriler **yalnız okuma**; müşteri listesi sayfa başına en çok 50;
+- panelin kendini çizmek için okuduğu uçlar (ben, mağaza, uyarılar, bayraklar, bölgeler, depolar, KDV oranları);
+- ayar bölümlerinden okunanlar ve yalnız `appearance`, `theme`, `storefront`, `catalog`, `seo`, `product_badges`, `inventory`, `panel_layout` yazmaları.
+
+Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPLACED` ve aşağıdaki yasak liste uygulanır; liste hem ham hem çözülmüş yolda eşleşir (`decide` ile aynı kural), izin listesi yalnız ham yolda. Rotaların içindeki rol denetimlerinde destek oturumu **yönetici** sayılır (`staffRoleOf` → `admin`). Bir birim testi mağazanın ve Medusa'nın bütün admin rotalarını tarar; destek oturumunun ulaştıkları anlık görüntüde (snapshot) listelenir, yeni ulaşılan rota incelemede görünür.
+
+| Alan | Kapalı uçlar |
+| --- | --- |
+| Personel, sahiplik, roller | `/admin/users*`, `/admin/invites*`, `/admin/staff*` (`GET /admin/staff/me` hariç), kendi hesabı uçları (`/admin/staff/me/*`), `/admin/alerts/read` |
+| Ödeme ve entegrasyon sırları | `/admin/integrations/credentials*`, `/admin/api-access*`, `/admin/api-keys*`, `/admin/webhooks*`, `/admin/messaging/smtp*`, `/admin/einvoice/parasut*`, `/admin/einvoice/birfatura*`, `/admin/google/connect`, `DELETE /admin/google` |
+| Ayar bölümleri (yazma) | `accounting`, `invoicing`, `bank_transfer`, `payments`, `payment_links`, `security`, `maintenance`, `legal` (yasal kimlik: unvan, vergi no, MERSİS, KEP), `store` (iletişim alanları), `notifications` (personel e-posta listesi); izin listesi ayrıca yalnız görünüm ve katalog bölümlerini yazdırır, `seo` içinde `canonical_host` hariç |
+| Para ve vergi | `/admin/vat-rates*` yazma, `/admin/ai/credits/orders`, `/admin/plan*` |
+| Müşteri kişisel verisi toplu çıkışı | `/admin/order-board/export`, `/admin/customer-export`, `/admin/customers/:id/billing-profile/reveal`, `/admin/booking-travelers/:id/reveal`, `/admin/booking-travelers/search`, `/admin/customers/:id/privacy-requests`, `/admin/privacy-requests*` yazma, `/admin/invoices/:id/pdf`, `/admin/invoices/:id/draft`; iş kuyruğunda yalnız izin listesi (`catalog.*`, `seo.*`, `content.link_rewrite`, `sample_catalog.load`, `ai.alt_text`, `ai.image_edit`, `ai.seo_fill`) |
+| Mağazanın dışa açılması | `/admin/migrations*` (müşteri içe aktarımı dahil), `/admin/features/ai.reviews`, `ai.assistant`, `ai.storefront_search` yazma |
+| Denetim ve iç kayıtlar | `/admin/audit-log*`, `/admin/workflows-executions*`, `/admin/notifications*` |
+| Medusa Admin | `/admin/layouts*`, `/admin/views*` yazma |
+| Para ve oturumdan uzun yaşayan işler | `/admin/orders/:id/refunds*`, `/admin/payments/:id/refund`, `/admin/payments/:id/capture`, `/admin/gift-cards*`, `/admin/store-credit*`, `/admin/payment-links*`, `/admin/bulk-messages*`, `/admin/legal-documents*` (yazma) |
+| Dosya ve iç durum | `/admin/orders/export` (Medusa'nın sipariş dışa aktarımı), `/admin/async-jobs/:id/result`, `/admin/booking-travelers/erase`, `/admin/integrations/overview`, `notifications` bölümü (personel e-posta listesi) |
+| Destek ayarı | `/admin/support-access*` |
+
+- **Mağazayı silme** mağaza panelinde yoktur (F16.11, üst panelin `closing`'i). Destek için ayrı kural gerekmez.
+- Yeniden doğrulama isteyen uçlar destek oturumunda zaten çalışmaz (şifresi yok). Hepsi yukarıdaki listededir; liste bu varsayıma dayanmaz.
+- Panel `can` yeteneklerini aynı kararla hesaplar. Kapalı ekranlar menüde görünmez, API her istekte yeniden karar verir.
+
+### Karar 6: görünürlük
+
+- **Mağaza denetim kaydı** (sistem olayları, `resource_type: "support_session"`, `resource_id: grant_id`):
+  - `support_access.started`: personel adı ve rolü, gerekçe, bitiş;
+  - `support_access.ended`: neden `logout | expired | ended_by_owner | disabled`;
+  - `support_access.refused`.
+- Oturumun bütün değişiklikleri normal mutasyon kaydıyla `actor_id = qtsup_…` olarak yazılır.
+- **Üst panel denetim kaydı:** `POST /admin/cp/tenants/:id/support-grants` mutasyonu. Alanlar: `grant_id`, süre ve gerekçe uzunluğu. Gerekçenin kendisi üst panelin etkinlik akışındadır (mağaza notu kalıbı). İzin ve imza yazılmaz.
+- **Sahibe bildirim:**
+  - Zil: `support_access.started`. Yalnız sahip görür (erişim listesinde `/admin/support-access` ile, sahibe özel).
+  - E-posta: `staff.support_access` şablonu sahip rolündeki her kullanıcının adresine gider (posta yapılandırılmışsa; yoksa zil yeter). Metin: "Platform desteği (Ad) şu gerekçeyle panelinize giriş yaptı: …, oturum HH:MM'de biter. İstemiyorsanız Ayarlar > Güvenlik'ten bitirebilir ya da kapatabilirsiniz."
+- **Panelde şerit:** destek oturumu boyunca her sayfanın üstünde kalıcı şerit: "Platform desteği olarak giriş yaptınız (Ad) · Kalan süre 42 dk · Oturumu bitir". Kalan süre dakikada bir güncellenir; süre dolunca panel giriş sayfasına döner.
+- **Ayarlar > Güvenlik > Destek erişimi** (yalnız sahip):
+  - anahtar;
+  - açık oturumlar (personel, gerekçe, bitiş, "Sonlandır");
+  - son 20 giriş (denetim kaydından).
+  - Uçlar: `GET /admin/support-access`, `POST /admin/support-access/sessions/:grant_id/end`. Anahtar `security` bölümünün kendi ucundan yazılır.
+
+### Karar 7: üst panel
+
+- `POST /admin/cp/tenants/:id/support-grants`:
+  - **Kim:** `owner` ve `operator`; her zaman yeniden doğrulama (`stepUp`, taze giriş yetmez).
+  - **Hız sınırı:** personel başına.
+  - **Gövde:** `{ reason (10–500), minutes: 15 | 30 | 60 }`.
+  - **Yeniden doğrulama kanıtı tek izin içindir:** aynı kanıtla ikinci istek 428 `cp.step_up_invalid` alır (inceleme L1).
+  - **Mağaza:** `provisioning` dışında olmalı; `active`, `restricted` ya da `suspended` olabilir, çünkü askıdaki mağazaya destek tam da gereken yerdir. Kapanan ya da kapalı mağaza reddedilir. Mağazanın panel adresi bilinmelidir.
+  - **İşleyiş:** izin `signWithActiveKey` ile imzalanır, gerekçe etkinlik akışına yazılır.
+  - **Yanıt:** `{ url, expires_at }`. İzin üst panelde saklanmaz; bağlantı yalnız bu yanıttadır.
+- **Mağaza sayfası:** başlıkta "Mağaza paneline geç" düğmesi; yalnız `owner`/`operator` görür. Pencerede gerekçe (zorunlu, örnekli placeholder), süre seçimi ve yeniden doğrulama istenir. Başarıda "Paneli aç" bağlantısı yeni sekmede açılır (`noopener noreferrer`).
+
+### Karar 8: yerelde panel de başlar (denetim 1.4)
+
+- `LocalProvisioner.start` mağaza backend'inin yanında panelin Vite geliştirme sürecini başlatır:
+  - port `port + 1000`;
+  - `PANEL_BACKEND_URL=http://localhost:<port>`;
+  - kabuksuz `spawn`;
+  - backend'le aynı pid sahipliği kuralı (review L1).
+- `stop` ikisini de durdurur. Kurulum sekmesindeki kart komut yerine "Paneli aç" bağlantısı gösterir; panel ayakta değilse komut yine görünür.
+- Canlı provisioner (`DockerProvisioner`, F16.4) değişmez: canlıda panel mağazanın alan adındadır.
+
+### Güvenlik değerlendirmesi
+
+- **Üst panel ele geçirilirse** (§3.6) saldırgan destek izni üretip mağaza paneline girebilir. Bu ekle etki alanı müşteri verisini okumaya kadar genişler.
+  - Dengeleyenler: sahibin anahtarı, her girişte zil ve e-posta, iki tarafta denetim kaydı, en çok 60 dk, yasak liste (para, sırlar, kişi verisi çıkışı).
+  - Kişi verisinin toplu çıkışı yasak listededir. Ekranda tek tek okunabilir; bu, destek işinin doğası.
+- **İzin çalınırsa:** tek kullanımlık, 5 dk içinde kullanılmalı, mağazaya bağlı. Fragment loglara düşmez ve panel onu hemen siler.
+- **KVKK:** destek personeli mağazanın müşteri verisini panel ekranlarında görebilir. `docs/kvkk-envanter.md`'ye platform desteği erişimi işlenir; hizmet sözleşmesine madde eklenir (taslak işaretli, danışman yok).
+- `security-reviewer` PR'da zorunludur (auth işi).
+
+### Kalan riskler
+
+1. **Redis yokken:** nonce ve oturum kaydı süreç belleğindedir. Çok süreçli kurulumda bir izin iki süreçte bir kez daha kullanılabilir. Canlıda Redis zorunludur (`REDIS_URL` canlı env şemasında zaten zorunlu).
+2. **Oturum ortasında devir:** destek oturumu açıkken sahip anahtarı kapatırsa, o anda süren istek tamamlanır; sonraki istek reddedilir.
+3. **Sentetik kimlik ve Medusa çekirdeği:** "kullanıcıyı oku" diyen az sayıdaki çekirdek uç (ör. not yazarı adı) destek kimliğini "bilinmeyen" gösterir. Kabul edildi.
+
+### Ek: Destek erişimi güvenlik incelemesi düzeltmeleri (2026-11-28)
+
+- **H1 (kapatıldı):** destek kimliği yalnız Medusa'nın doğruladığı `auth_context`'ten, `/auth/*`'ta yalnız sunucudaki oturumdan okunur. Bearer'ın doğrulanmamış talepleri hiç okunmaz. Böylece bir personelin çerezinin yanına uydurma `qtsup_` token koyup açık destek oturumunun yetkisini ödünç alma yolu kapandı; `DELETE /auth/session` ile başkasının destek oturumunu bitirme yolu da kapandı. Birim testli.
+- **H2 (kapatıldı):** rota içi denetimlerde destek oturumu `admin` sayılır (önce `owner`'dı); sahibin dışa aktarma dosyaları (`customer.export`, `order.export`, denetim kaydı) ve sahibe özel alanlar ulaşılmaz. Ayrıca `/admin/async-jobs/:id/result` yasak listede.
+- **M1 (kapatıldı):** `/admin/orders/export`, `notifications` bölümü yazma, `/admin/booking-travelers/erase`, `/admin/integrations/overview` yasak listede. Birim testi `OWNER_ONLY` ve `PRIVATE` listelerindeki her kuralın destek için ya reddedildiğini ya da açıkça "ulaşılır" listesinde olduğunu denetler; yeni sahibe özel rota karar verilene kadar testi düşürür.
+- **M2 (kapatıldı):** iade, tahsilat, hediye kartı, mağaza kredisi, ödeme bağlantısı, toplu ileti ve yasal metin yazmaları kapalı; destek oturumu görünüm ve katalog içindir.
+- **L1, L2 (kapatıldı):** oturum dizininin kendi ömrü kaldırıldı (kısa oturum uzun olanın kaydını silmiyordu); Redis işlem içi hatası artık atılır (sahip "bitti" görüp oturum açık kalamaz).
+- **L3 (kabul edildi):** `/support` bağlantısı tarayıcıdaki mevcut oturumun yerine geçer. Bağlantıyı yalnız üst panel personeli üretir, izin bu mağazaya bağlıdır ve sahibe bildirim gider; onay adımı eklenmedi.
+- **Bilgi:** anahtar varsayılan açık (Karar 4, sahibin onayına sunuldu). ~~Yeniden doğrulama kanıtı geçerlilik süresi içinde tekrar kullanılabilir (üst panelin genel kuralı).~~ Geçersiz: ikinci incelemenin L1 düzeltmesiyle destek izni için kanıt tek kullanımlık.
+
+### Ek: Destek erişimi ikinci güvenlik incelemesi (2026-11-28)
+
+- **H-A (kapatıldı):** `staff-roles.roleOf` personeli olmayan mağazada ilk çağıranı sahip yapıyordu. Uyarı okuyucusu (`readerOf`) onu doğrudan çağırdığı için, sahibi henüz katılmamış mağazada destek kimliği kalıcı sahip olabilirdi. Düzeltme üç katmanlı:
+  - `roleOf` ve ilk sahip kaydı `qtsup_` kimliğine hiç rol vermez;
+  - uyarı okuyucusu destek kimliğini rol tablosuna sormaz;
+  - mağaza, personeli yokken izni 409 `support.no_owner` ile reddeder. Panelin `/support` sayfası bunu açıkça söyler. Üst panel, son kullanım raporu personel saymıyorsa bağlantı penceresinde uyarı gösterir (rapor bir saate kadar eski olabildiği için engel değil).
+  - HTTP testi var. İlk kullanıcıyı sahip yapan kuralın yalnız davet akışına taşınması ayrı iş olarak bırakıldı (yerel tohumlama ona dayanıyor).
+- **M-A (kapatıldı):** aşağıdakiler yasak listede, her biri için test satırı var:
+  - havale onayı, ödeme toplama "ödendi" işareti, taslak sipariş;
+  - toptancı yazmaları (şifre dahil) ve okumaları;
+  - müşteri mesaj şablonları;
+  - `store` bölümü (iletişim alanları);
+  - promosyon, kampanya ve fiyat listesi yazmaları;
+  - dolandırıcılık engelleri;
+  - Medusa'nın kendi ürün ve stok dosyaları.
+- **M-B (kapatıldı):** Karar 5 artık izin listesidir (yukarıda).
+- **L1 (kapatıldı):** üst panelde destek izni için yeniden doğrulama kanıtı tek kullanımlık.
+- **L2 (belgelendi):** bağlantı taşıyıcı bağlantıdır; açan kişiyi mağazaya sokar. Sohbete, e-postaya ya da destek kaydına yapıştırılmaz. Üst panel penceresi bunu yazar. Bağlantı bir kez açılır ve 5 dakika içinde kullanılmalıdır.
+- **L3 (kapatıldı):** müşteri listesi sayfa başına en çok 50 kayıt.
+- **Sonuç:** destek oturumunda Ayarlar menüsü (`settings` yeteneği) görünmez. Görünüm ve katalog ayarları API'de açıktır; menüye ayrı yetenek eklenmesi sahip isterse yapılır.
+
+### Ek: Destek erişimi üçüncü inceleme düzeltmeleri (2026-11-28)
+
+- **N-1 (kapatıldı):** destek oturumu `seo` bölümünü yazabilir, ama `canonical_host`'u değiştiremez. Bu alan e-posta bağlantılarını, e-fatura web adresini, yasal metin adreslerini, Turnstile host'unu ve site haritasını yönetir. Saklı değerden farklı bir host gönderilirse 403 `support.canonical_host` döner; aynı değer geçer (URL biçimi kuralı gibi). Birim testi var.
+- **N-2 (kapatıldı):** sayfa sınırı (en çok 50) müşterilerle birlikte siparişler, sipariş panosu ve müşteri gruplarına da uygulanır. Müşteri gruplarında `fields` ile müşteri açılması reddedilir. Testli.
+- **N-3 (kapatıldı):** `promotion.codes` destek iş türleri listesinden çıktı (toplu indirim kodu mağaza adına indirimdir).
+- **N-4:** Karar 5 tablosuna `store` ve `notifications` bölümleri eklendi. İkinci incelemedeki "kanıt tekrar kullanılabilir" bilgisi geçersiz olarak işaretlendi.
+
+## Ek: hazır görünüm ve mağaza profili kurulumda (2026-11-28)
+
+adr/0063 görev 2.7 ve üst panel denetimi 1.1/1.3. §3.4'ün kapalı komut listesi iki komutla genişler:
+
+- **`apply-preset pack= preset=`** → `tenant:apply-preset pack=<kod> preset=<kod> demo=false`. Kodlar `argvOf`'ta paket/görünüm kodu kalıbıyla (`^[a-z][a-z0-9-]{1,39}$`) denetlenir; `demo` her zaman `false` (sahte içerik müşteri mağazasına girmez). Sonuç `applyPresetResultSchema` ile okunur. Süre sınırı 10 dk.
+- **`apply-profile`** → `tenant:apply-profile`, belge **stdin**'den (`plan-import` kalıbı): `{ legal: { company_title?, tax_office?, tax_number? (yalnız 10 haneli VKN), address? }, store: { contact_email?, contact_phone? } }`, katı şema (`tenantProfileSchema`). Mağaza her alanı kendi ayar şemasıyla tek tek denetler ve **yalnız boş alanları** doldurur; dönen sonuç yalnız sayılardır. TCKN hiçbir yoldan geçmez. Süre sınırı 2 dk.
+
+Kayıt: `tenant.preset` (sihirbazda seçilen görünüm; seçilen paketin görünümlerinden biri olmalı, `cp.preset_unknown`), `preset_version`, `preset_applied_at` (migration `Migration20261128143512`). `POST /admin/cp/tenants` `preset` söylenmezse paketin ilk görünümünü alır; `null` görünümsüz kurar.
+
+Kurulum adımları: `bootstrap → profile → sector_pack → preset → plan_document …`. `profile` idempotenttir (ikinci çalışmada her alan dolu, `skipped`). `preset` bir kez uygulanır: `preset_applied_at` doluysa atlanır (sahibin tasarımına dokunulmaz); telafisi kayıttaki uygulanma işaretini siler (yeni veritabanı zaten kendi telafisiyle düşer), yeniden deneme görünümü yeniden uygular. Mağaza hiç düzen yayımlamamışsa betik görünümü yayımlar, yoksa taslakta bırakır (adr/0063 §7).
+
+Sihirbazın "Görünüm" adımı küçük resimleri üst panelin kendi paket kopyasından okur: `GET /admin/cp/sector-packs/:pack/presets/:code/preview` (bütün personel; yalnız yükleyicinin bulduğu `preview.webp`, yol istekten kurulmaz, sembolik bağ reddedilir, `nosniff`, `default-src 'none'`).
+
+Açık: Kurulum sekmesinde "Görünümü yeniden uygula" (yalnız yayında düzen yokken) bu ekte yok; ayrı iş.
+
+## Ek: kurulumda örnek ürünler (2026-11-29)
+
+Sihirbazın "Görünüm" adımında **"Örnek ürünlerle başla"** seçeneği: yalnız örnek kataloğu (`packages/sector-packs/packs/<kod>/samples/`) olan pakette görünür, varsayılan kapalı. `GET /admin/cp/sector-packs` her paket için `sample_products` (örnek ürün sayısı) döner; paket adı kodda geçmez.
+
+- **Kayıt:** `tenant.sample_catalog` (istendi mi, varsayılan `false`) ve `sample_catalog_loaded_at` (migration `Migration20261129090000`). `POST /admin/cp/tenants` örneksiz pakette `sample_catalog: true`'yu 400 `cp.sample_catalog_unavailable` ile reddeder.
+- **Komut:** §3.4'ün kapalı listesine **`load-samples pack=`** → `tenant:load-samples pack=<kod>`. Kod `argvOf`'ta paket kalıbıyla denetlenir. Mağaza, panelin "Örnek içerik" kartıyla aynı denetimi (`planSampleLoad`) ve aynı workflow'u (`sample-catalog-load`) arka plan işi olmadan çalıştırır (mağaza henüz hizmette değil); her kayıt örnek olarak işaretlenir. Sonuç `loadSamplesResultSchema` ile okunur: `loaded` (sayılar), `already_loaded`, `unknown_samples` (ikisi de çıkış 0: neden okunur). Süre sınırı 20 dk.
+- **Adım:** `preset → sample_catalog → plan_document …`. İstenmediyse, mağaza etkinse (görünüm gibi, inceleme L1) ya da daha önce yüklendiyse atlanır. Yükleme başarısızsa (red, süre aşımı, okunamayan sonuç) kurulum **bozulmaz**: adım `skipped` olur, hata kodu uyarı olarak kaydedilir (`provisioning.load_samples_*`); kurulum sekmesi uyarıyı gösterir. Yeniden deneme: bitmemiş kurulumun yeniden denenmesi ya da mağaza sahibinin "Örnek içerik" kartı. `already_loaded` yüklenmiş sayılır. Telafi yalnız `sample_catalog_loaded_at`'i siler (yeni veritabanı kendi telafisiyle düşer; düşmediyse yeniden deneme `already_loaded` alır).
+- Yeni çalışma türü eklenmedi (`provisioning_run.kind` kısıtına dokunulmaz); etkin mağazaya üst panelden örnek yükleme bu ekte yok.
+
+## Ek: C21 kurulum durumu kullanım raporunda (2026-11-28)
+
+Denetim maddesi 1.2: operatör "mağaza satışa hazır mı, nerede takıldı" sorusunu üst panelden görsün. Mağazanın kurulum ilerlemesi bugüne kadar üst panele hiç gelmiyordu.
+
+- **Sözleşme:** saatlik kullanım raporuna (`usageReportSchema`, C13) isteğe bağlı `setup` nesnesi. On anahtar, hepsi zorunlu ve yalnız `true`/`false`: `store_named`, `currency`, `region`, `stock_location`, `shipping`, `payment`, `product_published`, `look_published`, `legal_published`, `mail_sender`. Nesne katıdır: bilinmeyen anahtar, sayı, metin ya da `null` raporun tamamını `usage.invalid` ile reddettirir (testli). Rapor sürümü (`version: 1`) değişmez: geriye uyumlu genişleme. `setup`'sız rapor (eski sürüm mağaza) aynen kabul edilir.
+- **Veri en azı (§3.1 "toplamlar"):** sağlayıcı adı (PayTR/iyzico), hesap, ayar, sayı, alan adı ya da kişi gönderilmez; yalnız "adım tamam mı". `mail_sender` adı bilerek "email" kelimesini taşımaz: mağaza tarafı entegrasyon testi rapor gövdesinde `email` geçmediğini denetler.
+- **Kurallar (mağaza, `lib/control-plane/setup-facts.ts`):** mağaza panelinin kurulum listesiyle aynı (`apps/panel/src/features/dashboard/setup-steps.ts`, docs/17; ikisi birlikte değişir): mağaza adı boş ya da "Medusa Store" değil; varsayılan para birimi var; en az bir bölge, depo, kargo seçeneği; kart sağlayıcısı (PayTR ya da iyzico) `connected`/`unverified` (çözülemeyen hesap sayılmaz); en az bir yayında ürün. Ek olarak: görünüm en az bir kez yayınlanmış (`storefront_layout.published_at`), zorunlu yasal metinlerin (`REQUIRED_KINDS`) hepsi yayında, SMTP hesabı `connected`/`unverified`. Her okuma tek satır ya da tek sayımdır; sağlayıcı hesabı satırın denetim durumu ve sağlayıcı çağrılarının zaten tuttuğu önbellekli hesaptan (`read`) okunur, rapor için ayrıca sır açılmaz. Hesap kuralı (`SETUP_PAYMENT_PROVIDERS`, `hasSetupPayment`) `packages/types`'ta tektir; mağaza paneli de onu kullanır. Okuma başarısız olursa ya da 5 saniyeyi aşarsa rapor `setup`'sız gider (sayımlar yine ulaşır), log `control_plane.setup_read_failed`.
+- **Alan adı adımı yok:** mağaza kendi alan adını bilmez; üst panel zaten biliyor (Alan adları sekmesi).
+- **Üst panel:** `usage_snapshot.setup` (jsonb, boş olabilir; migration `Migration20261128071800`). Mağaza sayfası "Kullanım ve sağlık" sekmesinin en üstünde tam genişlik "Kurulum durumu" kartı: ilerleme çubuğu, adım başına yeşil onay ya da gri daire, "Son rapor" zamanı; rapor yoksa ya da mağaza eski sürümse tek cümle. Mağaza listesinde "Kurulum" sütunu (md ve üstü): hepsi tamamsa "Hazır", değilse "7/10 adım" ve eksikler etiketin `title`'ında ve ekran okuyucu metninde; rapor yoksa "—". Liste ve kart, `setup` taşıyan en son raporu okur (sayfa başına tek sorgu): bir saatin okuması başarısız olsa da son bilinen durum ve onun zamanı görünür.
+- **Yayın sırası (zorunlu, canlıya çıkış listesinde): önce üst panel, sonra mağazalar.** Bu yön C16/C20'nin tersidir: orada alıcı mağazaydı, burada alıcı üst paneldir. Katı şemalı eski üst panel `setup`'lı raporu bilinmeyen alan diye reddeder; mağaza o saatlerin kullanım raporunu kaybeder ("Rapor gelmiyor" uyarısı). Yeni üst panel `setup`'sız raporu kabul ettiği için önce o yayınlanır, migration koşulur; sonra mağazalar güncellenir. İleride anahtar eklemek de aynı sırayı ister. **Güvenlik ağı:** sıra bozulursa mağaza, `setup`'lı raporu 400 `usage.invalid` ile reddedilince aynı sayımları bir kez daha, `setup`'sız ve yeni imza/nonce ile gönderir (log `control_plane.usage_setup_refused`); rapor kaybolmaz, yalnız kurulum durumu görünmez. C13'ün "çalışma içinde yeniden deneme yok" kuralının tek istisnasıdır.
+- **Güvenlik incelemesi (`security-reviewer`, 2026-11-28):** kritik/yüksek/orta yok. Dört düşük bulgu kapatıldı: L1 sağlayıcı hesapları her saat çözülüyordu (artık denetim durumu + sağlayıcıların ortak önbelleği); L2 okumanın süre sınırı yoktu (5 sn); L3 tek başarısız okuma durumu bir saat gizliyordu (son `setup`'lı rapor okunur); L4 yayın sırası bozulursa rapor kayboluyordu (`setup`'sız ikinci gönderim).
+- **Kalan riskler:** (1) Mağaza paneliyle kural ayrışması: iki yerde yazılıdır; dosyaların başında birbirini gösteren not var. (2) Düzeltme (aynı PR): mağaza panelinin ödeme adımı her bağlı sağlayıcı hesabını sayıyordu (kargo, SMTP dahil). Adımın metni "Kartla ödeme alın — PayTR ya da iyzico" olduğu için iki taraf da yalnız kullanılabilir kart sağlayıcısını sayar; çözülemeyen (`unreadable`) hesap iki tarafta da bağlı değildir.
+
+## Ek: F16.7 özel alan adı doğrulaması (2026-11-28)
+
+Denetim maddesi 4.4: özel alan adını `pending`'den çıkaran kod yoktu. Bu ek doğrulamayı üst panelde kurar; SSL ve vekil sunucu F16'nın (sunucu) işidir.
+
+- **Kanıt:** alan adı eklenince 32 hanelik rastgele belirteç üretilir (`verification_token`; DNS'te herkese açık olacağı için sır değildir, yine de yanıtta yalnız kayıt içinde görünür). Sahip `_qticaret-verify.<alan adı>` adına `qticaret-verify=<belirteç>` değerli TXT kaydı ekler. 255 baytlık parçalar birleştirilip karşılaştırılır.
+- **Yönlendirme:** `CP_DOMAIN_CNAME_TARGET` (alt alan adı için CNAME hedefi) ve `CP_DOMAIN_A_TARGETS` (kök alan adı için A/AAAA adresleri), ikisi de isteğe bağlı. Boşken panel "Yönlendirme kaydı sunucu kurulunca burada görünecek" der ve alan adı `verified`'da kalır. Doluyken CNAME hedefi ya da adreslerin tamamı platformunsa (hedefin adreslerine düzleştirilmiş CNAME dahil) `active` olur.
+- **Durumlar:** `pending` → `verified` (TXT tuttu) → `active` (platforma da yönleniyor); `failed` bir hafta içinde kanıt gelmezse (`expired`) ya da kanıt iki hafta kaybolursa (aşağıda). Son denetimin nedeni `verification_error`'da: `txt_missing`, `txt_mismatch`, `dns_unavailable`, `expired`, `txt_lost`, `routing_missing`, `routing_mismatch`. Doğrulanmış alan adı tek denetimle **geri alınmaz**: TXT kaybolursa `txt_lost` uyarısı yazılır ve `txt_lost_since` tutulur. **İki hafta** boyunca kanıt yoksa ve adres platforma yönlenmiyorsa (alan adı büyük olasılıkla el değiştirmiştir) `failed` (`txt_lost`) olur; birincilse platform alt alan adı birincil olur, plan belgesi yeniden çıkar (güvenlik incelemesi M1). Platforma yönlenmeye devam eden alan adı yalnız uyarıyla kalır. DNS yanıt vermezse durum değişmez. Birincil yapılabilirlik ve davet/vitrin adresi kuralları `verified` ve `active`'i birlikte kabul eder (`isVerifiedDomain`).
+- **Denetim:** yalnız DNS sorgusu (`node:dns` `Resolver`, genel çözücüler 1.1.1.1 / 8.8.8.8 / 9.9.9.9; sorgu başına 2 sn × 2 deneme, denetimin tamamı 8 sn). Alan adına ya da gösterdiği adrese hiçbir bağlantı açılmaz (SSRF yüzeyi yok); makinenin kendi çözücüsü iç adları bilebileceği için kullanılmaz. Testlerde yalnız `NODE_ENV=test` altında `CP_DNS_FAKE` (JSON yanıt tablosu).
+- **Zamanlama:** iş `cp-domain-checks` beş dakikada bir, kilitli, çalışma başına en çok 50 alan adı, 4'er 4'er. Bekleyen alan adı 1, 2, 4… dakika arayla (en çok saatte bir) bir hafta denenir; doğrulanmışlar günde bir (yönlendirme ve kanıtın yerinde olduğu). `failed` olanı iş denemez; panelde "Doğrula" (`POST /admin/cp/tenants/:id/domains/:domain_id/check`, sahip ve operatör, adım doğrulamasız: adres değiştirmez) her zaman dener ve süresi geçmiş bekleyen alan adını düşürmez.
+- **Mağazaya iletim:** plan belgesine isteğe bağlı `domains: { primary, hosts[] }` (yalnız kanıtlı adlar: platform alt alan adı ve doğrulanmış özel alan adları; birincil listede olmak zorunda; en çok 60). Üst panel alanı **yalnız mağazanın kanıtlı bir özel alan adı varken** koyar: öteki mağazaların belgesi ve özeti değişmez, yayında hiçbir belge yeniden çıkmaz. Kanıt değişince, birincil değişince ve alan adı kaldırılınca belge yeniden çıkar ve itilir. Mağaza bugün alanı yalnız kabul eder (ortak şema); `seo.canonical_host` mağazanın kendi ayarı olarak kalır, otomatik değişmez. Alanı kullanmak (kanonik adres önerisi, izinli kökenler) ayrı iştir.
+- **Alanın anlamı:** `domains` yoksa mağaza için "kanıtlı özel alan adı yok, yalnız platform alt alan adı" demektir, "son listeyi koru" değil (son özel alan adı kaldırılınca alan belgeden düşer). Mağaza tarafında alanı okuyan kod yazılınca bu kural orada testlenir.
+- **Yayın sırası (zorunlu): önce mağazalar, sonra üst panel** (C16/C20 ile aynı yön). Katı şemalı eski mağaza `domains`'li belgeyi reddeder; üst panel alanı yalnız kanıtlı özel alan adı olan mağazaya koyduğu için risk o mağazalarla sınırlıdır. Bugün canlı mağaza yok.
+- **Adım doğrulaması:** birincil seçimi ve alan adı kaldırma artık `stepUp` ister (vitrinin adresi değişir ya da gider). Her üç uç da denetim kaydına yazılır (`domain_check: { host, from, to }`, `primary_domain`, `domain`).
+- **Model:** `tenant_domain`'e `verification_token`, `verification_error`, `verified_at`, `txt_lost_since`, `last_checked_at`, `next_check_at` (kısmi dizinli), `check_attempts`; `verification`'a `active` (migration `Migration20261128211947`; eski özel alan adlarına belirteç verir ve hemen denetime alır).
+- **Panel:** alan adı penceresinde "DNS kayıtları" (TXT, varsa CNAME/A; ad ve değer kopyalanır), son denetimin nedeni, "Son denetim", "SSL: Sunucu kurulunca verilecek", "Doğrula" düğmesi; yeni eklenen alan adının penceresi kendiliğinden açılır. Durum rozeti: bekliyor (sarı), doğrulandı (mavi), etkin (yeşil), doğrulanamadı (kırmızı).
+- **Güvenlik incelemesi (`security-reviewer`, 2026-11-28):** kritik/yüksek yok. M1 (kanıtı kaybolan alan adı sonsuza dek birincil) iki haftalık süreyle kapatıldı. M2 (eski mağaza `domains`'li belgeyi reddeder) yayın sırasıyla ve alanın yalnız kanıtlı özel alan adlı mağazaya gitmesiyle sınırlandı; mağazanın bildirdiği sürüme göre alanı kesme ayrı iştir. Düşük bulgular: L1 "Doğrula" ucuna boş gövde doğrulaması ve personel başına 20/dk hız sınırı; L2 süre dolunca çözücünün sorguları iptal edilir; L3 hata veren alan adının sırası bir saat ileri alınır (kuyruğu tıkamaz); L4 özel alan adlarının toplam uzunluğu 4000 karakter (`cp.domains_full`, imzalı belge 16 KiB sınırının altında kalır); L6 `CP_DNS_FAKE` test dışında açılışta reddedilir; L7 `com.tr` gibi ikinci düzey uzantılarda kök alan adı doğru tanınır (A kaydı önerilir); L8 `.local`, `.test`, `.internal` gibi ayrılmış uzantılar özel alan adı olamaz. L5 (elle denetimle işin aynı anda yazması) kabul edildi: ikisi de aynı DNS sonucunu yazar, en kötü `check_attempts` bir eksik sayılır.
+- **Kalan riskler:** (1) Alan adı el değiştirip platforma yönlenmeye devam ederse (yeni sahip kaydı değiştirmediyse) kayıt uyarıyla kalır; alt alan adı ele geçirme denetimi F16.7'nin vekil sunucu tarafında (sertifika ancak yönlendirme platformdaysa) tamamlanır. (2) DNS önbellekleri yüzünden yeni TXT kaydı birkaç saat görünmeyebilir; arka plan denetimi bir hafta sürer. (3) Cloudflare gibi vekil arkasındaki kök alan adı platform adreslerine değil vekilin adreslerine çözülür; o durumda `routing_mismatch` görünür, kanıt yine geçerlidir.

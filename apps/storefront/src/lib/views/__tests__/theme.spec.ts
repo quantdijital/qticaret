@@ -103,6 +103,7 @@ describe("themeSettings", () => {
       page_width: "narrow",
       accent_ink: "light",
       section_title: "serif_accent",
+      title_accent: "primary",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -187,6 +188,7 @@ describe("themeSettings", () => {
       page_width: "standard",
       accent_ink: "auto",
       section_title: "plain",
+      title_accent: "none",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -331,6 +333,20 @@ describe("themeStyle", () => {
     }
   })
 
+  it("widens a narrow-spaced face's word space, for the body and the headings apart", () => {
+    const both = themeStyle(
+      theme({ typography: { heading: "plus-jakarta", body: "plus-jakarta" } })
+    )
+    expect(both).toContain("--word-space-body:0.08em")
+    expect(both).toContain("--word-space-head:0.08em")
+    const headOnly = themeStyle(theme({ typography: { heading: "plus-jakarta", body: "inter" } }))
+    expect(headOnly).toContain("--word-space-head:0.08em")
+    expect(headOnly).not.toContain("--word-space-body")
+    expect(themeStyle(theme({ typography: { heading: "inter", body: "inter" } }))).not.toContain(
+      "--word-space"
+    )
+  })
+
   it("sets a heading's weight to what its face carries: 400 for DM Serif, 800 (unprinted) for the rest", () => {
     expect(themeStyle(theme({ typography: { heading: "dm-serif", body: "manrope" } }))).toBe(
       ':root{--font-heading:var(--font-dm-serif), ui-serif, Georgia, "Times New Roman", serif;' +
@@ -415,6 +431,7 @@ describe("themeView", () => {
         page_width: "standard",
         accent_ink: "auto",
         section_title: "plain",
+        title_accent: "none",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")

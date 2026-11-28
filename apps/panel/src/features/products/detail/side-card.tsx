@@ -84,7 +84,7 @@ export function SideCard({
             children
           ) : (
             <>
-              <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 text-[13px]">
+              <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1.5 text-[13px]">
                 {rows.map((row) => (
                   <div key={row.label} className="contents">
                     <dt className="text-muted-foreground">{row.label}</dt>
@@ -101,7 +101,7 @@ export function SideCard({
                 ))}
               </dl>
               {note || findings ? (
-                <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
+                <p className="mt-2.5 border-t pt-2.5 text-xs text-muted-foreground">
                   {note}
                   {note && findings ? " · " : null}
                   {findings ? <span className="text-warning-text">{findings}</span> : null}

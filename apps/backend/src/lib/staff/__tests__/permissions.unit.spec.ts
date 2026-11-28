@@ -121,6 +121,9 @@ describe("staff roles", () => {
     ["GET", "/admin/storefront%2Dpresets/general/sade/preview"],
     ["POST", "/admin/storefront-presets/general/sade/apply"],
     ["POST", "/admin/Storefront-Presets/general/sade/apply"],
+    // The support switch, its sessions and history (adr/0061 Ek "Destek erişimi")
+    ["GET", "/admin/support-access"],
+    ["POST", "/admin/support-access/sessions/sgr_x/end"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
@@ -375,6 +378,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: true,
+      samples: true,
       fraud: true,
       bulkMessages: true,
       paymentLinks: true,
@@ -405,6 +409,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: false,
+      samples: true,
       fraud: true,
       bulkMessages: true,
       paymentLinks: true,
@@ -438,6 +443,7 @@ describe("staff roles", () => {
       privacy: false,
       invoices: false,
       migration: false,
+      samples: false,
       fraud: false,
       bulkMessages: false,
       paymentLinks: true,
@@ -542,6 +548,7 @@ describe("staff roles", () => {
         ["POST", "/admin/storefront-designs/sfd_1"],
         ["DELETE", "/admin/storefront-designs/sfd_1"],
         ["POST", "/admin/storefront-designs/sfd_1/apply"],
+        ["GET", "/admin/storefront-designs/sfd_1/preview"],
         ["GET", "/admin/storefront-presets"],
         ["GET", "/admin/storefront-presets/cutlery/katalog/preview"],
         ["POST", "/admin/storefront-presets/cutlery/katalog/apply"],
@@ -633,6 +640,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/migrations/:id/restart": false,
   "POST /admin/migrations/urls/:id/decision": false,
   "POST /admin/migrations/urls/apply": false,
+  "POST /admin/migrations/urls/rebuild": false,
   "POST /admin/migrations/cutover": false,
   "POST /admin/migrations/invites": false,
   "POST /admin/migrations/urls/sitemap": false,
@@ -769,6 +777,12 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/price-lists/:id/discount": false,
   "POST /admin/product-answers/moderate": true,
   "POST /admin/product-questions/:id/answer": true,
+  // Owner 2026-11-27: the shop's own question added, a question edited by the day's staff;
+  // deleting one and bringing it back are the admin's
+  "POST /admin/product-questions": true,
+  "POST /admin/product-questions/:id/edit": true,
+  "DELETE /admin/product-questions/:id": false,
+  "POST /admin/product-questions/:id/restore": false,
   // adr/0047: answering the contact form is the day's work; deleting a message is not
   "POST /admin/contact-messages/:id": true,
   // F18: a draft's preview link, with the content it previews
@@ -888,6 +902,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-layout/revisions/:revision/restore": false,
   // adr/0063 §7: a preset into the draft, as a draft's save
   "POST /admin/storefront-presets/:pack/:code/apply": false,
+  "POST /admin/support-access/sessions/:grant_id/end": false,
+  // The sample catalogue (owner, 2026-11-28): owner and admin
+  "POST /admin/sample-catalog/load": false,
+  "POST /admin/sample-catalog/remove": false,
   // adr/0064: the saved looks, as the design's own writes
   "POST /admin/storefront-designs": false,
   "POST /admin/storefront-designs/:id": false,

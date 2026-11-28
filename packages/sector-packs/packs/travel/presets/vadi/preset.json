@@ -1,16 +1,16 @@
 {
   "format": "quant-storefront-preset",
   "code": "vadi",
-  "version": 1,
+  "version": 3,
   "theme": "atolye",
   "name": "Vadi",
   "description": "Sıcak açık zeminde koyu yeşil ve turuncu: tek satırlık üst bilgi, dalgalarla açılan tam genişlik manzara, turuncu düğme, kapağın içinde arama kutusu, alt kenara taşan güven rozetleri; görsel üstü yazılı tur kartları, ikonlu tur türleri, gezi yazıları, bölünmüş kampanya bandı, ikonlu rakamlar ve tur sayfasında açılır program. Menülere ve ürünlere dokunmaz.",
   "tone": "light",
   "credits": [
     {
-      "file": "images/kapak-uzungol.webp",
-      "source": "https://commons.wikimedia.org/wiki/File:Uzung%C3%B6l_Nature_Park.jpg",
-      "license": "CC BY-SA 4.0, Thorodin33 (Uzungöl, Trabzon; 16:9 kırpılıp küçültüldü, WebP'ye çevrildi; değiştirilmiş hali de CC BY-SA 4.0)"
+      "file": "images/kapak-uzungol-yayla.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Uzung%C3%B6l_lake_and_town.jpg",
+      "license": "CC BY-SA 3.0, İhsan Deniz Kılıçoğlu (Uzungöl, Trabzon; 16:9 kırpılıp küçültüldü, WebP'ye çevrildi; değiştirilmiş hali de CC BY-SA 3.0)"
     },
     {
       "file": "images/bant-ayder.webp",

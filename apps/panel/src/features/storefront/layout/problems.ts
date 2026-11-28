@@ -7,7 +7,12 @@ import { heroCatalogProblems, heroFullProblems, priceBandsProblems } from "./cat
 import { listProblems } from "./shelf-problems"
 import { stripGalleryProblems } from "./strip-problems"
 import { collageProblems, statsProblems, stepsProblems } from "./points-problems"
-import { postsProblems, splitEyebrowProblem, splitNoteProblem } from "./band-problems"
+import {
+  headLinesProblems,
+  postsProblems,
+  splitEyebrowProblem,
+  splitNoteProblem,
+} from "./band-problems"
 import { marqueeLimitIds } from "./page-limits"
 import { footerBandProblem, footerRowsProblems } from "./footer-rows-problems"
 import { faqProblems } from "./faq-problems"
@@ -28,6 +33,7 @@ export type Problem =
   | "textInvalid"
   | "tokenUnknown"
   | "linkLabel"
+  | "altRequired"
   | "slidesRequired"
   | "slidesTwo"
   | "stripsTwo"
@@ -96,10 +102,17 @@ type Found = [string, Problem | null]
 function fieldsOf(section: AnySection): Found[] {
   switch (section.type) {
     case "announcement_bar":
-      return section.lines.map((line, index): Found => [
-        `lines.${String(index)}`,
-        line.trim() === "" ? "required" : textProblem(line, L.line, true),
-      ])
+      return [
+        ...section.lines.map((line, index): Found => [
+          `lines.${String(index)}`,
+          line.trim() === "" ? "required" : textProblem(line, L.line, true),
+        ]),
+        // Each line's own link (owner 2026-11-27)
+        ...(section.line_links ?? []).map((link, index): Found => [
+          `line_links.${String(index)}`,
+          linkProblem(link),
+        ]),
+      ]
     case "hero":
       return [
         ["eyebrow", textProblem(section.eyebrow, L.eyebrow, true)],
@@ -131,6 +144,7 @@ function fieldsOf(section: AnySection): Found[] {
       return [
         ["title", textProblem(section.title, L.title)],
         ["intro", textProblem(section.intro, DEPARTURES_LIMITS.intro)],
+        ...headLinesProblems(section),
         [
           "source",
           source.kind === "category" && source.category_id === ""
@@ -160,6 +174,21 @@ function fieldsOf(section: AnySection): Found[] {
           ]
         }),
       ]
+    // The top image slider (owner 2026-11-27): each picture's words written
+    case "top_slider":
+      return section.slides.flatMap((slide, index): Found[] => {
+        const at = `slides.${String(index)}`
+        return [
+          [
+            `${at}.image`,
+            (slide.image.alt ?? "").trim() === ""
+              ? "altRequired"
+              : textProblem(slide.image.alt, L.alt),
+          ],
+          [`${at}.mobile_image`, textProblem(slide.mobile_image?.alt ?? null, L.alt)],
+          [`${at}.link`, linkProblem(slide.link)],
+        ]
+      })
     case "hero_slider":
       return [
         ["slides", section.slides.length < SLIDER_LIMITS.slides.min ? "slidesTwo" : null],
@@ -181,6 +210,7 @@ function fieldsOf(section: AnySection): Found[] {
         ...listProblems("", section),
         ...lists.flatMap((list, index) => listProblems(`lists.${String(index)}.`, list)),
         ["more", linkProblem(section.more)],
+        ...headLinesProblems(section),
       ]
     }
     case "related_products": {
@@ -215,6 +245,7 @@ function fieldsOf(section: AnySection): Found[] {
       return [
         ["title", textProblem(section.title, L.title)],
         ["more", linkProblem(section.more)],
+        ...headLinesProblems(section),
       ]
     case "rich_text":
       // The picture beside it (adr/0073 §3): the draft waits for one
@@ -231,8 +262,9 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "posts":
       return postsProblems(section)
-    case "brands":
     case "reviews":
+      return [["title", textProblem(section.title, L.title)], ...headLinesProblems(section)]
+    case "brands":
     case "program":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":

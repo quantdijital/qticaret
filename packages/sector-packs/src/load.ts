@@ -4,6 +4,8 @@ import type { z } from "zod"
 import { PRESETS_DIR, readPresets } from "./preset-load"
 import type { StorefrontPreset } from "./preset-schema"
 import { SectorPackError, readJsonFile } from "./read-json"
+import { readSamples } from "./sample-load"
+import { SAMPLES_DIR } from "./sample-schema"
 import { checkPresetFlags } from "./section-requires"
 import { PACK_CODE, PACK_FILES } from "./schema"
 import type { LoadedSectorPack, SectorPack, SectorPackSummary } from "./schema"
@@ -92,7 +94,7 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     // A hidden file (`.DS_Store`) is no pack file either: refused by its name
     (entry) =>
       !(entry.isFile() && isFileName(entry.name)) &&
-      !(entry.isDirectory() && entry.name === PRESETS_DIR)
+      !(entry.isDirectory() && (entry.name === PRESETS_DIR || entry.name === SAMPLES_DIR))
   )
   if (stray) {
     throw new SectorPackError(`${code}/${stray.name} is not a pack file`)
@@ -119,6 +121,7 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     scenes: readFile(dir, code, "scenes.json") ?? [],
   }
   checkItems(pack)
+  pack.samples = readSamples(dir, code, new Set(pack.categories.map((category) => category.handle)))
   // A look laying out a flagged section only in a pack that turns its flag on (adr/0077 §8)
   checkPresetFlags(pack)
   return pack

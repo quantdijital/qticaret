@@ -7,6 +7,7 @@ import type { FieldGroupName } from "../forms/field-registry"
 import { Panel } from "../panel-header"
 import { tabOfGroup } from "../panel-groups"
 import { SectionActions } from "../section-actions"
+import { kindOf } from "../section-meta"
 import { SettingsLayout } from "../settings-layout"
 import { FieldFocusContext } from "../use-field-focus"
 import type { FieldFocus } from "../use-field-focus"
@@ -83,6 +84,9 @@ export function FooterPartPanel({
         title={title}
         onBack={onBack}
         back={t(`${FR}.backToFooter`)}
+        trail={[
+          { label: t(`storefront.editor.types.${kindOf(section, true)}.name`), onSelect: onBack },
+        ]}
       >
         <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
           {found ? t(`${FR}.types.${found.block.type}.description`) : t(`${FR}.row.description`)}

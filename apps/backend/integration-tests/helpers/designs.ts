@@ -19,7 +19,9 @@ export async function withCutlery(container: MedusaContainer): Promise<void> {
   if (!cutlery) {
     throw new Error("no cutlery pack")
   }
-  await applySectorPack(container, cutlery)
+  // Its looks only: the starter pages it offers (adr/0073 Ek 2026-11-28) are left to the tests
+  // that ask for them, so a look's apply opens them here as before
+  await applySectorPack(container, { ...cutlery, pages: [] })
 }
 
 /** The saved looks' answers as the panel reads them (adr/0064 Ek 2026-11-17). */

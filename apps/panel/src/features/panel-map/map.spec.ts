@@ -81,6 +81,7 @@ const CAPABILITIES = {
   resendMessages: true,
   looks: true,
   wholesale: true,
+  samples: true,
 } satisfies Record<Capability, true>
 
 const FLAGS = new Set([

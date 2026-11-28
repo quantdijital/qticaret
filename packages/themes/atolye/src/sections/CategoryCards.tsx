@@ -1,5 +1,6 @@
 import { ResponsiveImage } from "@qticaret/ui"
 import type {
+  HeadLinesView,
   CategoriesVariant,
   CategoryCardsView,
   LinkView,
@@ -17,6 +18,7 @@ export const CATEGORY_VARIANTS = [
   "collage",
   "panels",
   "icons",
+  "carousel",
 ] as const satisfies readonly CategoriesVariant[]
 
 /**
@@ -155,6 +157,7 @@ export function CategoryCards({
   t,
   marks,
   ownAll = false,
+  lines,
 }: {
   id: string
   title: string
@@ -166,11 +169,20 @@ export function CategoryCards({
   marks?: boolean | undefined
   /** `all` is the shop's own link (`more`): in the preview it is marked too. */
   ownAll?: boolean
+  /** The heading's upper line and hand note (sahip 2026-11-28); absent: none. */
+  lines?: HeadLinesView | undefined
 }) {
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
-        <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
+        <SectionHead
+          id={id}
+          title={title}
+          more={all}
+          marks={marks}
+          ownMore={ownAll}
+          lines={lines}
+        />
         <ul
           className={cn(
             view.phoneColumns === 2 ? "grid grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2",

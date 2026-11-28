@@ -182,6 +182,8 @@ const CAPABILITY_PROBES = {
   invoices: ["GET", "/admin/invoices/:id/pdf"],
   // F14: moving the shop in from its old platform, the owner's alone
   migration: ["POST", "/admin/migrations"],
+  // The sector pack's sample catalogue loaded and removed (owner, 2026-11-28): owner and admin
+  samples: ["POST", "/admin/sample-catalog/remove"],
   // F15.6: releasing held orders and keeping the block list, owner and admin
   fraud: ["POST", "/admin/fraud/blocks"],
   // adr/0050: writing and sending bulk messages, owner and admin; everyone reads them
@@ -217,6 +219,10 @@ const CAPABILITY_PROBES = {
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES
+
+/** The probes themselves, for a decision that is not a role's (a support session). */
+export const capabilityProbes = (): Readonly<Record<Capability, readonly [Method, string]>> =>
+  CAPABILITY_PROBES
 
 /** What a role may do; a user without one, nothing. */
 export function capabilitiesOf(role: StaffRole | null): Record<Capability, boolean> {

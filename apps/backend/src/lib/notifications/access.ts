@@ -77,6 +77,8 @@ export const ALERT_ACCESS: Readonly<Record<string, readonly [Method, string]>> =
   "webhooks.disabled": ["GET", "/admin/webhooks"],
   // The move from the old platform (the `migration` capability's route: the owner's)
   "migration.not_found_seen": ["POST", "/admin/migrations"],
+  // The platform's support signed in (adr/0061 Ek "Destek erişimi"): the owner's alone, as its page
+  "support_access.started": ["GET", "/admin/support-access"],
   // The accounting program refusing records: sending them again
   "accounting.sync_stopped": ["POST", "/admin/accounting/syncs/:id/retry"],
   // A provider's statement not matching the orders: the money's (the `money` capability's route)

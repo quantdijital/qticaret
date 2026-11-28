@@ -29,6 +29,7 @@ describe("job types", () => {
       "content.link_rewrite",
       "customer.data_export",
       "customer.export",
+      "migration.addresses",
       "migration.invites",
       "migration.run",
       "migration.sitemap",
@@ -36,6 +37,7 @@ describe("job types", () => {
       "order.export",
       "promotion.codes",
       "report.export",
+      "sample_catalog.load",
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",
@@ -100,9 +102,19 @@ describe("job types", () => {
     expect(MANAGER_JOB_TYPES).toEqual([
       "ai.image_edit",
       "ai.seo_fill",
+      "sample_catalog.load",
       "wholesale.carts",
       "wholesale.sync",
     ])
+  })
+
+  it("loads a sample catalogue one at a time, queued by its own route, seen by managers", () => {
+    expect(jobType("sample_catalog.load")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {
@@ -145,6 +157,7 @@ describe("job types", () => {
       "catalog.description_facts",
       "catalog.import",
       "content.link_rewrite",
+      "migration.addresses",
       "migration.run",
       "migration.sitemap",
       "migration.urls",

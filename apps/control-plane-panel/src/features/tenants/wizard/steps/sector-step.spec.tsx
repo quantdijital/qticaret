@@ -20,7 +20,7 @@ describe("SectorStep: the packs the control plane offers (C12)", () => {
         ? { status: 200, body: SECTOR_PACKS }
         : { status: 404, body: {} }
     )
-    let draft: ShopDraft = filledDraft()
+    let draft: ShopDraft = { ...filledDraft(), preset: "tezgah", sample_catalog: true }
     const change = vi.fn((next: (current: ShopDraft) => ShopDraft) => {
       draft = next(draft)
     })
@@ -30,16 +30,20 @@ describe("SectorStep: the packs the control plane offers (C12)", () => {
     expect(general).toBeChecked()
     // No pack is "coming soon" any more: every one listed can be chosen
     expect(screen.queryByText("Yakında")).not.toBeInTheDocument()
-    expect(screen.getByText("1 özellik şablonu · 5 özellik · 1 hazır görünüm")).toBeInTheDocument()
+    expect(screen.getByText("1 özellik şablonu · 5 özellik")).toBeInTheDocument()
     expect(
       screen.getByText(
-        "2 özellik şablonu · 31 özellik · 16 önerilen kategori · 2 ayar · 1 SEO şablonu"
+        "2 özellik şablonu · 31 özellik · 16 önerilen kategori · 2 ayar · 1 SEO şablonu · 2 hazır görünüm"
       )
     ).toBeInTheDocument()
     expect(screen.getByText("Sürüm 2")).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole("radio", { name: /^Bıçak ve çatal-bıçak/ }))
     expect(draft.sector_pack).toBe("cutlery")
+    // Another pack: its own first look until one is chosen (adr/0063 task 2.7)
+    expect(draft.preset).toBe("")
+    // Samples are the pack's own: asked for again under the new pack's looks
+    expect(draft.sample_catalog).toBe(false)
     expect(sent.filter((call) => call.path === "/admin/cp/sector-packs")).toHaveLength(1)
   })
 

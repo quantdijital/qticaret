@@ -138,6 +138,21 @@ describe("Atölye's upcoming departures", () => {
     expect(html).toContain('src="https://cdn/e.webp"')
     expect(html.match(/bg-media\b/g)).toHaveLength(2)
     expect(html).toContain("Son 3 yer")
+    // Stacked on a phone by default
+    expect(html).not.toContain("gf-rail")
+  })
+
+  it("swipes the cards sideways on a phone when asked; the list never", async () => {
+    const cards = await departuresView(section({ layout: "cards", phone: "scroll" }), t)
+    expect(cards?.phone).toBe("scroll")
+    const html = home(cards ? [cards] : [])
+    expect(html).toContain("gf-rail")
+    expect(html).toContain("max-md:grid-flow-col")
+    expect(html).toContain("md:grid-cols-2 lg:grid-cols-3")
+
+    const list = await departuresView(section({ phone: "scroll" }), t)
+    expect(home(list ? [list] : [])).not.toContain("gf-rail")
+    expect((await departuresView(section({ phone: "slide" as never }), t))?.phone).toBe("stack")
   })
 
   // adr/0076 Ek "kalkış fiyatı promosyonlu": the promoted price, struck through only when sent

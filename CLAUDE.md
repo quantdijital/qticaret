@@ -71,6 +71,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Yapay zekâ çekirdeği uygulama planı (servisler, işler, PR sırası) | docs/22-yapay-zeka-uygulama-plani.md |
 | Yapay zekâ kredi satışı (kararlar, sağlayıcı şartları, sözleşme taslağı) | docs/23-yapay-zeka-kredi-satisi.md |
 | Çoklu dil (tr/en) ve para birimi (USD/EUR) planı, F19 taslağı | docs/24-coklu-dil-ve-para-birimi-plani.md |
+| Canlıya alma listesi, entegrasyon durumu, gerçek sağlayıcı doğrulamaları (F16) | docs/25-canliya-alma-listesi.md |
 | Çok dil ve para birimi araştırması (SEO, platformlar, hukuk, ödeme, geçmiş vaka) | docs/26-cok-dil-seo-arastirmasi.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 

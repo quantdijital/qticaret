@@ -43,7 +43,6 @@ describe("PresetCard", () => {
 
     expect(within(article).getByRole("radio", { name: "Gece" })).toBeChecked()
     expect(within(article).getByText("Koyu zemin")).toBeVisible()
-    expect(within(article).getByText("Koyu")).toBeVisible()
     expect(within(article).getByText("Taslakta")).toBeVisible()
     expect(within(article).getByText("Yeni sürüm var")).toBeVisible()
     expect(within(article).queryByText("Yayında")).toBeNull()
@@ -55,7 +54,8 @@ describe("PresetCard", () => {
 
     await user.click(within(article).getByRole("radio", { name: "Lacivert ve çelik" }))
     expect(within(article).getByText("Lacivert zemin")).toBeVisible()
-    expect(within(article).getByText("Açık")).toBeVisible()
+    // One state: its tone shows in its picture, not in a badge
+    expect(within(article).queryByText("Açık")).toBeNull()
     expect(within(article).getByText("Yayında")).toBeVisible()
     expect(within(article).queryByText("Yeni sürüm var")).toBeNull()
 

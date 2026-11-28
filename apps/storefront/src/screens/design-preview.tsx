@@ -15,14 +15,14 @@ import { EntityScreen } from "./entity"
 import { SearchScreen } from "./search"
 import { queryOf, ShopScreen } from "./shop"
 
-/** The draft's home page, said to be a preview. */
-async function DraftHome({ layout }: { layout: StoreLayout }) {
+/** The draft's home page, said to be a preview (but in a card's picture). */
+async function DraftHome({ layout, notice }: { layout: StoreLayout; notice: string | null }) {
   const words = await shopWords()
   const sections = await homeSections(layout.home, words)
   return (
     <theme.HomePage
       t={words}
-      view={{ sections, notice: t("preview.design_notice") }}
+      view={{ sections, notice }}
       subscribe={subscribeNewsletter}
       // As live and as the draft's other pages: a one-variant card says "Sepete ekle" (Z-02)
       quickAdd={addToCart}
@@ -41,13 +41,16 @@ async function DraftHome({ layout }: { layout: StoreLayout }) {
 export async function DesignPreviewScreen({
   layout,
   target,
+  notice = t("preview.design_notice"),
 }: {
   layout: StoreLayout
   target: PreviewPage
+  /** What the home page says it is: the draft's preview by default; none in a card's picture. */
+  notice?: string | null
 }) {
   switch (target.kind) {
     case "home":
-      return <DraftHome layout={layout} />
+      return <DraftHome layout={layout} notice={notice} />
     case "shop":
       return <ShopScreen query={queryOf(target.url.searchParams)} />
     case "blog":
@@ -63,7 +66,7 @@ export async function DesignPreviewScreen({
       return draft ? (
         <ContentScreen page={draft.page} entry={draft.entry} />
       ) : (
-        <DraftHome layout={layout} />
+        <DraftHome layout={layout} notice={notice} />
       )
     }
     case "resolve": {
@@ -71,7 +74,7 @@ export async function DesignPreviewScreen({
       return page.type === "entity" ? (
         <EntityScreen page={page} url={target.url} />
       ) : (
-        <DraftHome layout={layout} />
+        <DraftHome layout={layout} notice={notice} />
       )
     }
   }

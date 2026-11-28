@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { isSupportActor } from "../../lib/support-access/session"
 import { Modules } from "@medusajs/framework/utils"
 import { visibleTriggers } from "../../lib/notifications/access"
 import {
@@ -42,6 +43,16 @@ export async function readerOf(
   container: Container,
   userId: string
 ): Promise<{ state: ReadState; floor: Date | null; visible: string[] | null; stored: unknown }> {
+  if (isSupportActor(userId)) {
+    // A platform support session (adr/0061 Ek "Destek erişimi"): no user record to keep what
+    // it read, an admin's kinds of alert, and never the role table's first-owner rule
+    return {
+      state: { until: null, ids: [] },
+      floor: null,
+      visible: visibleTriggers("admin"),
+      stored: undefined,
+    }
+  }
   const [user, role] = await Promise.all([
     container
       .resolve(Modules.USER)

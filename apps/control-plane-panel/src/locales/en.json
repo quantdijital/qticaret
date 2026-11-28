@@ -370,7 +370,8 @@
       "nextPayment": "Next payment",
       "created": "Opened",
       "health": "Health",
-      "version": "Release"
+      "version": "Release",
+      "setup": "Setup"
     },
     "status": {
       "provisioning": "Setting up",
@@ -476,7 +477,7 @@
     "title": "Domains",
     "text": "The addresses the shop answers on; the primary one is the storefront's address.",
     "add": "Add domain",
-    "addText": "The shop's own domain is recorded; its DNS check is done at launch.",
+    "addText": "Once saved, the TXT record to add to DNS is shown; it is checked automatically.",
     "addSubmit": "Add",
     "hostname": "Domain",
     "empty": "No domain.",
@@ -492,7 +493,8 @@
     "states": {
       "pending": "Awaiting verification",
       "verified": "Verified",
-      "failed": "Not verified"
+      "failed": "Not verified",
+      "active": "Active"
     },
     "primary": "Primary",
     "isPrimary": "The storefront's primary address",
@@ -510,6 +512,36 @@
       "title": "Remove domain",
       "text": "{{host}} is taken off the shop's addresses.",
       "action": "Remove"
+    },
+    "failedText": "Not verified; the reason is below. If the record is in place, press Verify.",
+    "check": "Verify",
+    "checking": "Checking…",
+    "checkProved": "Domain verified.",
+    "checkNotYet": "Not verified yet; the reason is in the window.",
+    "lastChecked": "Last check",
+    "never": "Not checked yet",
+    "ssl": "SSL",
+    "sslLater": "Issued once the server is set up",
+    "dns": {
+      "title": "DNS records",
+      "txtText": "To show you own the domain, add this TXT record to your domain's DNS settings.",
+      "cnameText": "Then add this CNAME record to point the address at the platform.",
+      "aText": "Then add these A records to point the address at the platform.",
+      "routingLater": "The routing record appears here once the server is set up; for now the TXT record is enough.",
+      "type": "Type",
+      "name": "Name",
+      "value": "Value",
+      "copy": "Copy {{what}}",
+      "copied": "Copied."
+    },
+    "reasons": {
+      "txt_missing": "No TXT record found. If it was just added, DNS may take a few hours to spread.",
+      "txt_mismatch": "There is a TXT record but its value differs; enter the value above exactly.",
+      "dns_unavailable": "DNS did not answer; it will be tried again automatically.",
+      "expired": "It could not be verified within a week; automatic checks stopped.",
+      "txt_lost": "The TXT record was removed from DNS. If it is not back within two weeks and the address does not point at the platform, the domain loses its verification; if primary, the platform address becomes primary.",
+      "routing_missing": "The address does not point at the platform yet.",
+      "routing_mismatch": "The address points elsewhere; check the routing record."
     }
   },
   "plan": {
@@ -635,7 +667,8 @@
       "chargeVoided": "Charge voided",
       "chargeAmount": "Payment amount corrected",
       "grace": "Grace changed",
-      "other": "Change"
+      "other": "Change",
+      "supportGrant": "Shop panel entered"
     }
   },
   "packages": {
@@ -787,6 +820,7 @@
       "release_version_taken": "This version is already recorded.",
       "reset_self": "Renew your own verification from My account.",
       "run_unknown": "Run not found.",
+      "sample_catalog_unavailable": "The chosen sector pack has no sample products.",
       "sector_pack_unknown": "There is no such sector pack.",
       "session_required": "Your session ended. Sign in again.",
       "session_revoked": "Your session was ended. Sign in again.",
@@ -846,7 +880,11 @@
       "ai_route_no_key": "This service has no key; write its key first.",
       "ai_route_uncapped": "This service documents no output limit, so it cannot run on platform credits.",
       "ai_route_unverified": "This service is not verified yet; it cannot be routed on platform credits.",
-      "ai_service_unknown": "Unknown AI service."
+      "ai_service_unknown": "Unknown AI service.",
+      "support_no_panel": "The shop has no panel address yet; finish its setup or verify its domain first.",
+      "support_reason_required": "The reason must be at least 10 characters.",
+      "support_unavailable": "A shop being set up or closed cannot be entered.",
+      "preset_unknown": "This ready-made look is not in the chosen sector pack."
     },
     "ai_credits": {
       "pack_unknown": "Pack not found or not on sale.",
@@ -857,6 +895,12 @@
       "apply_pack_failed": "The sector pack could not be applied.",
       "apply_pack_result_invalid": "The shop did not report the sector pack's result in a readable form.",
       "apply_pack_timeout": "Applying the sector pack ran over its time limit.",
+      "apply_preset_failed": "The ready-made look could not be applied.",
+      "apply_preset_result_invalid": "The shop did not report the look's result in a readable form.",
+      "apply_preset_timeout": "Applying the ready-made look took too long.",
+      "apply_profile_failed": "The shop profile could not be handed over.",
+      "apply_profile_result_invalid": "The shop did not report the profile's result in a readable form.",
+      "apply_profile_timeout": "Handing over the shop profile took too long.",
       "backend_not_built": "The shop software is not built. Build it first.",
       "bootstrap_failed": "The shop's first settings could not be made.",
       "bootstrap_timeout": "The shop's first settings ran over their time limit.",
@@ -874,6 +918,10 @@
       "invite_owner_failed": "The owner invitation could not be made.",
       "invite_owner_timeout": "Making the owner invitation ran over its time limit.",
       "invite_token_invalid": "The invitation the shop gave is not valid.",
+      "load_samples_failed": "The sample products could not be loaded; the shop is set up. They can be loaded again from the Sample content card in the shop's panel.",
+      "load_samples_result_invalid": "The sample load's result could not be read; the shop is set up. Check the Sample content card in the shop's panel.",
+      "load_samples_timeout": "Loading the sample products ran over its time limit; the shop is set up. They can be loaded again from the Sample content card in the shop's panel.",
+      "load_samples_unknown": "The shop's release has no sample products for this sector pack; the shop was set up without them.",
       "local_database_elsewhere": "The local database is not on this computer.",
       "local_development_only": "Local setups happen in development only.",
       "mail_failed": "The invitation e-mail could not be sent.",
@@ -892,6 +940,7 @@
       "plan_import_refused": "The shop refused the plan document.",
       "plan_import_timeout": "Importing the plan document ran over its time limit.",
       "port_in_use": "The shop's port is used by another application.",
+      "preset_unknown": "This ready-made look is not in the shop's sector pack.",
       "repo_unknown": "The shop software could not be found.",
       "secrets_exposed": "The shop's secret values file is not safely permissioned; it was not used.",
       "secrets_lost": "The shop's secret values were not found; its keys must be renewed.",
@@ -1048,6 +1097,10 @@
         "title": "Sector pack",
         "description": "The shop's starting templates."
       },
+      "look": {
+        "title": "Look",
+        "description": "The ready-made look the storefront opens with."
+      },
       "review": {
         "title": "Review and set up",
         "description": "Check the details, then set the shop up."
@@ -1062,6 +1115,8 @@
     "contacts": {
       "ownerTitle": "Shop owner",
       "ownerText": "At the end of the setup the shop panel's owner invitation is sent to this e-mail address.",
+      "storefrontUse": "Use as the storefront's contact details",
+      "storefrontNote": "These details appear on the shop's storefront as its contact details.",
       "billingTitle": "Billing contact",
       "billingText": "Payment reminders go to this person. Without one they go to the shop owner.",
       "billingAdd": "Add a separate billing contact",
@@ -1092,6 +1147,22 @@
     "sector": {
       "title": "Sector pack",
       "text": "The shop opens with ready attribute templates, suggested categories, settings and search appearance templates. The setup adds only what the shop lacks; the shop can change all of it later."
+    },
+    "look": {
+      "title": "Ready-made look",
+      "text": "The {{pack}} pack's ready-made looks. The chosen look is applied to the storefront and published during setup; the owner can change it later in the panel.",
+      "none": "This sector pack has no ready-made look. The shop opens with the plain storefront; a look can be chosen later in the shop's panel.",
+      "noneShort": "None",
+      "default": "Default"
+    },
+    "samples": {
+      "title": "Sample products",
+      "use": "Start with sample products",
+      "note_one": "The {{pack}} pack's {{count}} sample product is loaded into the shop at the end of the setup, with its pictures and categories. It is marked as a sample; the owner removes it from the Sample content card in their panel.",
+      "note_other": "The {{pack}} pack's {{count}} sample products are loaded into the shop at the end of the setup, with their pictures and categories. All are marked as samples; the owner removes them in one go from the Sample content card in their panel.",
+      "yes_one": "Yes, {{count}} product",
+      "yes_other": "Yes, {{count}} products",
+      "no": "No"
     },
     "review": {
       "edit": "Edit",
@@ -1223,7 +1294,10 @@
       "database": "Database",
       "migrate": "Database schema",
       "bootstrap": "Shop's first settings",
+      "profile": "Shop profile",
       "sector_pack": "Sector pack",
+      "preset": "Ready-made look",
+      "sample_catalog": "Sample products",
       "plan_document": "Plan document",
       "start": "Starting the shop server",
       "health": "Health check",
@@ -1239,6 +1313,9 @@
       "latency": "Reply {{ms}} ms",
       "mailed": "E-mail sent",
       "notMailed": "E-mail not sent",
+      "samplesLoaded_one": "{{count}} sample product loaded",
+      "samplesLoaded_other": "{{count}} sample products loaded",
+      "samplesThere": "The sample products were already there",
       "sentBefore": "Sent in an earlier run",
       "ownerExists": "The shop already has an owner account",
       "notAvailableYet": "Sector packs are not offered yet",
@@ -1247,7 +1324,16 @@
       "packAdded_one": "{{count}} item added",
       "packAdded_other": "{{count}} items added",
       "packKept_one": "{{count}} item was already in the shop, kept",
-      "packKept_other": "{{count}} items were already in the shop, kept"
+      "packKept_other": "{{count}} items were already in the shop, kept",
+      "profileFilled_one": "{{count}} field filled",
+      "profileFilled_other": "{{count}} fields filled",
+      "profileKept_one": "{{count}} field was already filled in the shop, kept",
+      "profileKept_other": "{{count}} fields were already filled in the shop, kept",
+      "profileRefused_one": "{{count}} field did not fit the shop's format, not handed over",
+      "profileRefused_other": "{{count}} fields did not fit the shop's format, not handed over",
+      "presetPublished": "Published on the storefront",
+      "presetDraft": "Written to the draft, not published",
+      "presetApplied": "Applied before; the shop's design was left alone"
     },
     "columns": {
       "kind": "Run",
@@ -1258,11 +1344,12 @@
     },
     "local": {
       "title": "Shop panel (this computer)",
-      "text": "In a local setup the shop's panel opens on its server's port plus 1000.",
+      "text": "On this machine the shop's panel starts with the shop, on its server's port plus 1000.",
       "address": "Address",
-      "command": "Command that opens the panel",
       "copy": "Copy the command",
-      "copied": "Command copied."
+      "copied": "Command copied.",
+      "open": "Open the panel",
+      "commandFallback": "If the panel does not open, start it with this command"
     },
     "pack": {
       "title": "Sector pack",
@@ -1271,7 +1358,11 @@
       "applied": "Version applied",
       "notApplied": "Not applied yet",
       "appliedAt": "Applied on",
-      "newer": "A newer version of the pack is out (version {{version}}). Applying it again adds only the new items."
+      "newer": "A newer version of the pack is out (version {{version}}). Applying it again adds only the new items.",
+      "preset": "Ready-made look",
+      "presetNone": "Not chosen",
+      "presetPending": "Not applied yet",
+      "presetApplied": "{{name}} · version {{version}}"
     }
   },
   "sectorPacks": {
@@ -1840,5 +1931,46 @@
     "reasonHelp": "At least 3 characters; kept on the record.",
     "saved": "Target release saved.",
     "noReleases": "No release yet: add one on the Releases page first."
+  },
+  "supportAccess": {
+    "open": "Go to shop panel",
+    "title": "Go to the shop's panel",
+    "text": "Opens a time-limited \"Platform support\" session in the shop's panel. The shop owner is told by the bell and e-mail; staff, payment and integration settings, legal details and customer data exports stay closed.",
+    "reason": "Reason",
+    "reasonPlaceholder": "E.g. Setup help with product entry and storefront layout",
+    "reasonHelp": "Shown to the shop owner as written and saved to the shop's notes. One line, 10 to 500 characters.",
+    "minutes": "Length",
+    "minutesOption": "{{count}} minutes",
+    "submit": "Create grant",
+    "readyTitle": "Link ready",
+    "readyText": "The link works once and must be opened within 5 minutes. The session ends by itself at {{time}}.",
+    "openPanel": "Open the panel",
+    "ownerPending": "The shop's owner does not seem to have joined yet. Until the owner accepts the invitation, the shop refuses support sign-ins.",
+    "bearerNote": "This link signs in whoever opens it: never paste it into a chat, an e-mail or a ticket. It opens once."
+  },
+  "setupStatus": {
+    "title": "Setup status",
+    "text": "The setup steps in the shop's own panel, as of its last hourly report.",
+    "noReport": "No report yet. Once the shop runs connected to the control plane, its setup steps show here.",
+    "olderShop": "The shop's release does not send its setup steps; they show here once it is updated.",
+    "complete": "Ready",
+    "count": "{{done}}/{{total}} steps",
+    "missing": "Missing: {{list}}",
+    "listLabel": "Setup steps",
+    "done": "done",
+    "open": "missing",
+    "reportedAt": "Last report: {{relative}} · {{date}}",
+    "steps": {
+      "store_named": "Shop name",
+      "currency": "Currency",
+      "region": "Sales region",
+      "stock_location": "Warehouse",
+      "shipping": "Shipping option",
+      "payment": "Card payments",
+      "product_published": "Published product",
+      "look_published": "Look published",
+      "legal_published": "Legal texts",
+      "mail_sender": "E-mail sending"
+    }
   }
 }

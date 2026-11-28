@@ -21,7 +21,8 @@ const lira = (amount: number): string =>
 
 /**
  * What the shop's `{belirteç}`s stand for now (adr/0048): the store
- * details, the legal identity and the free shipping threshold, phones as
+ * details, the legal identity, the free shipping threshold, the shipping
+ * days and the withdrawal period as the legal texts say them, phones as
  * a Turkish reader writes them. The same names the legal texts use.
  */
 export async function shopInfoValues(container: Container): Promise<ShopInfoValues> {
@@ -39,5 +40,8 @@ export async function shopInfoValues(container: Container): Promise<ShopInfoValu
     adres: identity.address,
     whatsapp: identity.whatsapp_phone ? displayTrPhone(identity.whatsapp_phone) : null,
     ücretsiz_kargo_eşiği: threshold && threshold > 0 ? lira(threshold) : null,
+    hazırlama_süresi: legal.hazırlama_süresi,
+    kargo_süresi: legal.kargo_süresi,
+    iade_süresi: legal.iade_süresi,
   }
 }

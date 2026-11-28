@@ -1,11 +1,12 @@
 import type { Metadata } from "next"
 import { headers } from "next/headers"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { cache } from "react"
 import type { StoreBodyImage, StoreContentTerm } from "@qticaret/types"
 import { EditorBridgeLoader } from "@/components/editor-bridge/loader"
 import { panelOrigins, storefrontEnv } from "@/lib/env"
 import { t } from "@/lib/i18n"
+import { designPreview } from "@/lib/store-api/design-preview"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { productPreview } from "@/lib/store-api/product-preview"
 import { layoutPreview, layoutSession } from "@/lib/store-api/requests"
@@ -35,6 +36,8 @@ const TOKEN = /^cnt_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 // The theme editor's live session (adr/0065 §1): one address while the editor is open
 const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+// A saved look (adr/0064): the gallery's card picture and "Önizle"
+const DESIGN_TOKEN = /^sfd_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /** The entry a signed link opens; null for one malformed, changed or past its day. */
 const previewOf = cache(async (token: string): Promise<PreviewEntry | null> => {
@@ -60,9 +63,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     ? (await layoutSession(token)) && t("preview.design")
     : LAYOUT_TOKEN.test(token)
       ? (await layoutPreview(token)) && t("preview.design")
-      : isProductPreviewToken(token)
-        ? (await productPreview(token))?.product.title
-        : (await previewOf(token))?.title
+      : DESIGN_TOKEN.test(token)
+        ? (await designPreview(token)) && t("preview.look")
+        : isProductPreviewToken(token)
+          ? (await productPreview(token))?.product.title
+          : (await previewOf(token))?.title
   return {
     title: { absolute: found ? t("preview.title", { title: found }) : t("preview.gone") },
     // A preview is nobody's search result, nor a page to follow links from
@@ -80,6 +85,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * Or the theme editor's live session (adr/0065 §1): the same pages, the
  * draft as last saved, with the editor's bridge when framed by the panel.
  * Or a draft product's page as it will read (F18), `?variant=` chosen.
+ * Or a saved look (adr/0064) on the same pages, as applying it would make
+ * the draft; one that no longer opens sends the visitor to the live home.
  * Never indexed.
  */
 export default async function PreviewPage({
@@ -120,6 +127,23 @@ export default async function PreviewPage({
     }
     const { sayfa } = await searchParams
     return <DesignPreviewScreen layout={layout} target={previewPage(sayfa)} />
+  }
+  if (DESIGN_TOKEN.test(token)) {
+    const layout = await designPreview(token)
+    // An ended, renamed or removed look's link: the storefront as it is live (Shopify's
+    // `preview_theme_id` that no longer names a theme shows the live one)
+    if (!layout) {
+      redirect("/")
+    }
+    const { sayfa, gorsel } = await searchParams
+    return (
+      <DesignPreviewScreen
+        layout={layout}
+        target={previewPage(sayfa)}
+        // The gallery's card picture (`?gorsel=1`) shows the page alone, no preview band
+        notice={gorsel === "1" ? null : t("preview.look_notice")}
+      />
+    )
   }
   if (isProductPreviewToken(token)) {
     const preview = await productPreview(token)

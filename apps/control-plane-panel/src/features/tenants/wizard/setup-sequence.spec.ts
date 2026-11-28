@@ -75,6 +75,7 @@ describe("Kur: the record, its details, then the setup (C11)", () => {
       slug: "bicak-atolyesi",
       package_id: "pkg_pro",
       sector_pack: "general",
+      storefront_contact: true,
     })
     // The TCKN once, without spaces; a sole proprietor sends no VKN
     expect(bodies["saveCompany"]).toMatchObject({ kind: "sole_proprietor", tckn: "10000000146" })
@@ -82,6 +83,15 @@ describe("Kur: the record, its details, then the setup (C11)", () => {
     expect(bodies["contact:owner"]).toMatchObject({ role: "owner", is_primary_billing: false })
     expect(bodies["contact:billing"]).toMatchObject({ role: "billing", is_primary_billing: true })
     expect(bodies["addDomain"]).toBe("bicak.com")
+  })
+
+  it("asks for the pack's sample products only when chosen", async () => {
+    const draft: ShopDraft = { ...filledDraft(), sector_pack: "travel", sample_catalog: true }
+    const { calls, bodies } = fakeCalls()
+
+    await runSetup(draft, calls, plannedProgress(draft), () => undefined)
+
+    expect(bodies["createTenant"]).toMatchObject({ sector_pack: "travel", sample_catalog: true })
   })
 
   it("skips what was not asked for: no company sent for a blank one, the owner billed", async () => {

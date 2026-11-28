@@ -1,14 +1,17 @@
 import { useTranslation } from "react-i18next"
-import { NEWSLETTER_LIMITS, newsletterHasNote } from "@qticaret/types"
+import { NEWSLETTER_CONSENT_STYLES, NEWSLETTER_LIMITS, newsletterHasNote } from "@qticaret/types"
 import type { FooterNewsletter, NewsletterSection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { CONTENT_IDS } from "./content-registry"
 import { FIELD_IDS } from "./field-registry"
 import { TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
 import { useProblemText } from "./problem-text"
+import { withConsentStyle } from "./newsletter-band"
 import { PREVIEW_IDS } from "./preview-fields"
+import { StepChoice } from "./step-choice"
 import { TitleField } from "./simple-forms"
 
 const N = "storefront.editor.newsletter"
@@ -21,8 +24,9 @@ type Newsletter = NewsletterSection | FooterNewsletter
  * or in the footer: its heading; on the new variants the line under it,
  * on the split band and the picture card the promise line (shown unless
  * switched off) and on the card its picture; then the consent sentence
- * (`text`, the box's label, İYS), named for what it is. Each empty field
- * the storefront's own words.
+ * (`text`, the box's label, İYS), named for what it is, and how it is
+ * asked: the required box (as it was) or one small line under the form,
+ * the sentence then that line. Each empty field the storefront's own words.
  */
 export function NewsletterForm<T extends Newsletter>({
   section,
@@ -36,6 +40,8 @@ export function NewsletterForm<T extends Newsletter>({
   }
   const plain = section.variant === "standard"
   const promise = newsletterHasNote(section.variant)
+  const consentStyle = section.consent_style ?? "box"
+  const line = consentStyle === "line"
   return (
     <div className="flex flex-col gap-5">
       <TitleField
@@ -105,6 +111,20 @@ export function NewsletterForm<T extends Newsletter>({
           }}
         />
       ) : null}
+      <StepChoice
+        id={CONTENT_IDS.content(section.id, "news_consent")}
+        label={t(`${N}.consentStyle`)}
+        term={t(`${N}.consentStyleTerm`)}
+        hint={t(`${N}.consentStyleHint`)}
+        steps={NEWSLETTER_CONSENT_STYLES}
+        value={consentStyle}
+        fallback="box"
+        nameOf={(step) => t(`${N}.consentStyles.${step}`)}
+        onChange={(next) => {
+          // The box is the field's absence: a box saved before it reads as it did
+          onChange(withConsentStyle(section, next), "news_consent")
+        }}
+      />
       <TextField
         id={`${section.id}-text`}
         label={t(`${N}.consent`)}
@@ -113,8 +133,8 @@ export function NewsletterForm<T extends Newsletter>({
         max={L.text}
         tokens
         multiline
-        placeholder={t(`${D}.newsletterText`)}
-        hint={t(`${N}.consentHint`)}
+        placeholder={t(line ? `${D}.newsletterLine` : `${D}.newsletterText`)}
+        hint={t(line ? `${N}.consentLineHint` : `${N}.consentHint`)}
         error={problem(problems["text"], L.text)}
         onChange={(text) => {
           set({ text }, "text")

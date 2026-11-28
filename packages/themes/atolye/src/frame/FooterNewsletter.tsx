@@ -43,11 +43,12 @@ export function FooterNewsletterBox({
         note: news.note ?? null,
         image: news.image ?? null,
         tone: news.tone ?? "plain",
+        consentStyle: news.consentStyle ?? "box",
       }}
       title={news.title}
       headingId="bulten"
       formId="bulten-alt"
-      words={newsletterWords(t, news.text)}
+      words={newsletterWords(t, news.text, news.consentStyle)}
       privacyPath={shop.privacyPath}
       subscribe={subscribe}
       marks={Boolean(news.mark)}

@@ -11,6 +11,9 @@ export const SHOP_TOKENS = [
   "adres",
   "whatsapp",
   "ücretsiz_kargo_eşiği",
+  "hazırlama_süresi",
+  "kargo_süresi",
+  "iade_süresi",
 ] as const
 
 export type ShopToken = (typeof SHOP_TOKENS)[number]
@@ -23,6 +26,9 @@ export const SHOP_TOKEN_KEYS: Readonly<Record<ShopToken, string>> = {
   adres: "address",
   whatsapp: "whatsapp",
   ücretsiz_kargo_eşiği: "freeShippingThreshold",
+  hazırlama_süresi: "handlingDays",
+  kargo_süresi: "transitDays",
+  iade_süresi: "withdrawalDays",
 }
 
 /** What each detail shows now; null: the shop has not given it. */

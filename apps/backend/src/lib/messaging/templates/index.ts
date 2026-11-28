@@ -38,6 +38,7 @@ import {
 import { staffAccountChanged, staffEmailConfirm } from "./staff-account"
 import { staffPaymentIssue } from "./staff-payment-issue"
 import { staffSmtpRejections } from "./staff-smtp-rejections"
+import { staffSupportAccess } from "./staff-support-access"
 import { staffStockShort } from "./staff-stock-short"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
@@ -77,6 +78,7 @@ export type {
 export type { StaffAccountVars, StaffEmailConfirmVars } from "./staff-account"
 export type { StaffPaymentIssueVars } from "./staff-payment-issue"
 export type { StaffStockShortVars } from "./staff-stock-short"
+export type { StaffSupportAccessVars } from "./staff-support-access"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
@@ -128,6 +130,8 @@ export const MESSAGE_TEMPLATES = {
   "staff.invite": staffInvite,
   "staff.password_reset": staffPasswordReset,
   "staff.mfa_changed": staffMfaChanged,
+  // adr/0061 Ek "Destek erişimi": the platform's support opened a session in the panel
+  "staff.support_access": staffSupportAccess,
   // The owner, 2026-11-06: a staff member's own address confirmed, their password or address changed
   "staff.email_confirm": staffEmailConfirm,
   "staff.account_changed": staffAccountChanged,

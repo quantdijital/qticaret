@@ -5,6 +5,7 @@ import type { HomeSectionView } from "./content-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
+import type { TopSliderView } from "./top-slider-views"
 import type { NewsletterLookView } from "./newsletter-views"
 import type { ProductCardView } from "./product-views"
 
@@ -180,6 +181,13 @@ export interface TopStripView {
 export interface ShopView {
   name: string
   logo: ImageView | null
+  /**
+   * The store profile's dark-ground logo, for the header over the opening's
+   * photograph, only when it is a different file from `logo` (its `alt`
+   * empty, `logo`'s twin). Null or left out: over the photograph the theme
+   * lightens `logo` as before.
+   */
+  logoOnDark?: ImageView | null
   categories: NavCategoryView[]
   cartQuantity: number
   /** The open cart's lines for the drawer; null without one. */
@@ -197,11 +205,21 @@ export interface ShopView {
   /** The bar's small button beside its lines (the shop's link and words); absent: none. */
   announcementLink?: LinkView
   /**
+   * Each of the bar's lines' own link, by its place among `announcements`
+   * (null: words only); absent: none links (owner 2026-11-27).
+   */
+  announcementLineLinks?: (LinkView | null)[]
+  /**
    * The top strip as the shop set it (owner's decision 2026-11-27): its
    * design and which of its parts show. Absent: no strip section, nothing
    * drawn above the header.
    */
   topStrip?: TopStripView
+  /**
+   * The top image slider above the header (owner 2026-11-27): the shop's
+   * pictures one at a time; absent: none, or no slides yet.
+   */
+  topSlider?: TopSliderView
   /**
    * The announcement bar's section id, set only in the theme editor's live
    * preview (adr/0065 Faz 2b): the bar then carries its section mark and

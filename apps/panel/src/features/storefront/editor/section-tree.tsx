@@ -4,13 +4,7 @@ import { useTranslation } from "react-i18next"
 import type { AnySection, LayoutDocument, Placement } from "@/features/storefront/api/layout"
 import type { TreeContentPage } from "./editor-page"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
-import {
-  idsOf,
-  isScheduled,
-  newAnnouncementBar,
-  newHeaderMarquee,
-  newSectionId,
-} from "@/features/storefront/layout/sections"
+import { isScheduled } from "@/features/storefront/layout/sections"
 import { ContentPageSections } from "./content-page-sections"
 import type { EditorPage } from "./editor-page"
 import { footerAbove, footerTypesLeft } from "@/features/storefront/layout/footer-group"
@@ -46,9 +40,12 @@ interface SectionTreeProps {
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
   onRemove: (section: AnySection) => void
-  onAddSection: (placement?: Placement) => void
-  /** Opens the chooser for the footer group (adr/0070 §4). */
-  onAddFooterSection?: () => void
+  /** Opens the chooser for the page (a category page's side), aimed before a row (none: at the end). */
+  onAddSection: (placement?: Placement, before?: string | null) => void
+  /** Opens the chooser for the footer group (adr/0070 §4), aimed before a row (none: at the end). */
+  onAddFooterSection?: (before?: string | null) => void
+  /** Opens the top strip group's chooser (its own kinds). */
+  onAddTopStrip?: () => void
   onTheme: () => void
   /** A theme setting in the draft the server would refuse (adr/0063 §3). */
   themeProblem: boolean
@@ -82,6 +79,7 @@ export function SectionTree({
   onRemove,
   onAddSection,
   onAddFooterSection = () => undefined,
+  onAddTopStrip = () => undefined,
   onTheme,
   themeProblem,
   onLooks,
@@ -118,12 +116,6 @@ export function SectionTree({
       />
     )
   }
-  const add = (which: "announcement" | "marquee") => {
-    const id = newSectionId(idsOf(doc))
-    const section = which === "marquee" ? newHeaderMarquee(id) : newAnnouncementBar(id)
-    dispatch({ type: "add", group: "header", section })
-    onOpen(id)
-  }
   // The footer group's sections above its bar, in their order (adr/0070 §4); the bar stays last
   const above = footerAbove(doc)
   // The free rows footer opens its rows and blocks under its line (adr/0070 §7)
@@ -151,7 +143,7 @@ export function SectionTree({
   }
   return (
     <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
-      <TopStripGroup doc={doc} dispatch={dispatch} row={row} onAdd={add} />
+      <TopStripGroup doc={doc} dispatch={dispatch} row={row} onAdd={onAddTopStrip} />
       <TreeGroup title={t(`${T}.header`)}>
         <ul className="flex flex-col gap-0.5">
           {mainRow("header_bar")}
@@ -182,8 +174,8 @@ export function SectionTree({
             dispatch={dispatch}
             onOpen={onOpen}
             onRemove={onRemove}
-            onAdd={() => {
-              onAddSection()
+            onAdd={(before) => {
+              onAddSection(undefined, before)
             }}
             onSettings={onPageSettings}
           />
@@ -212,13 +204,16 @@ export function SectionTree({
                 dispatch={dispatch}
                 onOpen={onOpen}
                 onRemove={onRemove}
+                onInsert={footerTypesLeft(doc).length === 0 ? null : onAddFooterSection}
               />
             </li>
           ) : null}
           <AddRow
             label={t(`${T}.addFooterSection`)}
             full={footerTypesLeft(doc).length === 0 ? t(`${T}.footerFull`) : null}
-            onClick={onAddFooterSection}
+            onClick={() => {
+              onAddFooterSection()
+            }}
           />
           {mainRow("footer_bar")}
           {freeRows ? (

@@ -16,16 +16,25 @@ const report = (more: Partial<Report>): Report => ({
 const show = (value: Report) => render(<ApplyReport report={value} onClose={() => undefined} />)
 
 describe("the apply's note on content pages (adr/0073 Ek 2026-11-19 (2) K6)", () => {
-  it("says a page the look opened is a draft, and how to put it live", () => {
+  it("says how many pages the look opened as drafts, each a link to its settings", () => {
     show(
-      report({ made_pages: [{ ref: "page:hakkimizda", page_id: "cnt_about", name: "Hakkımızda" }] })
+      report({
+        made_pages: [
+          { ref: "page:hakkimizda", page_id: "cnt_about", name: "Hakkımızda" },
+          { ref: "page:kargo-ve-teslimat", page_id: "cnt_ship", name: "Kargo ve Teslimat" },
+        ],
+      })
     )
 
     expect(
       screen.getByText(
-        "Hakkımızda sayfası taslak olarak açıldı; yayına almak için sayfa ayarlarından Yayında'yı seçin."
+        "2 sayfa taslak olarak açıldı. Yayına almak için sayfayı açın ve sayfa ayarlarından Yayında'yı seçin:"
       )
     ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Kargo ve Teslimat" })).toHaveAttribute(
+      "href",
+      "/storefront/editor?icerik=cnt_ship&ayar=sayfa"
+    )
   })
 
   it("says the shop's own page text was kept, by the look's name or else the address", () => {
@@ -70,5 +79,18 @@ describe("the apply's note on content pages (adr/0073 Ek 2026-11-19 (2) K6)", ()
 
     expect(screen.getByText(/Hakkımızda sayfası olmadığı için/)).toBeInTheDocument()
     expect(screen.queryByText(/taslak olarak açıldı/)).toBeNull()
+  })
+})
+
+describe("the note of a look's style taken alone (owner, 2026-11-28)", () => {
+  it("says only the style came in and the sections stayed", () => {
+    show(report({ name: "Tezgâh", scope: "style" }))
+
+    expect(
+      screen.getByText(
+        "‘Tezgâh’ görünümünün stili taslağa uygulandı; bölümleriniz olduğu gibi kaldı."
+      )
+    ).toBeInTheDocument()
+    expect(screen.queryByText("‘Tezgâh’ taslağa uygulandı.")).toBeNull()
   })
 })

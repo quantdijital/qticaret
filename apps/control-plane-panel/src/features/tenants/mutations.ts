@@ -3,7 +3,7 @@ import type { LimitKey } from "@qticaret/types/control-plane"
 import { api } from "@/lib/api"
 import { withStepUp } from "@/lib/step-up"
 import { TENANTS_KEY, tenantKey, tenantPath } from "./api"
-import type { CompanyKind, ContactRole } from "./api"
+import type { CompanyKind, ContactRole, Domain } from "./api"
 
 /** A change to one shop: its page and the list are read again once it settles. */
 function useShopChange<I, O>(id: string, call: (input: I) => Promise<O>) {
@@ -27,6 +27,12 @@ export interface NewTenant {
   package_id: string | null
   /** The sector pack it is to be set up with (C11); C12 applies it. */
   sector_pack?: string
+  /** Its ready-made look (adr/0063 task 2.7); left out: the pack's first. */
+  preset?: string
+  /** The owner's e-mail and phone handed to the shop as its storefront contact (default: yes). */
+  storefront_contact?: boolean
+  /** Its pack's sample catalogue at setup (default: no); only a pack with samples. */
+  sample_catalog?: boolean
 }
 
 export const useRenameTenant = (id: string) =>
@@ -74,16 +80,37 @@ export const useRemoveContact = (id: string) =>
   )
 
 export const useAddDomain = (id: string) =>
-  useShopChange(id, (hostname: string) => post(tenantPath(id, "/domains"), { hostname }))
-
-export const useRemoveDomain = (id: string) =>
-  useShopChange(id, (domainId: string) =>
-    api(tenantPath(id, `/domains/${encodeURIComponent(domainId)}`), { method: "DELETE" })
+  useShopChange(id, (hostname: string) =>
+    post<{ domain: { id: string; hostname: string } }>(tenantPath(id, "/domains"), { hostname })
   )
 
+/** A domain removed: a live storefront's address may go, so a step-up (F16.7). */
+export const useRemoveDomain = (id: string) =>
+  useShopChange(id, (domainId: string) =>
+    withStepUp((headers) =>
+      api(tenantPath(id, `/domains/${encodeURIComponent(domainId)}`), {
+        method: "DELETE",
+        headers,
+      })
+    )
+  )
+
+/** The storefront's canonical address moved: a step-up (F16.7). */
 export const usePrimaryDomain = (id: string) =>
   useShopChange(id, (domainId: string) =>
-    post(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/primary`), {})
+    withStepUp((headers) =>
+      post(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/primary`), {}, headers)
+    )
+  )
+
+export interface DomainCheck {
+  domain: { id: string; verification: Domain["verification"]; verification_error: string | null }
+}
+
+/** "Doğrula": the domain's DNS asked now (F16.7). */
+export const useCheckDomain = (id: string) =>
+  useShopChange(id, (domainId: string) =>
+    post<DomainCheck>(tenantPath(id, `/domains/${encodeURIComponent(domainId)}/check`), {})
   )
 
 export const useSaveNote = (id: string) =>
@@ -149,4 +176,22 @@ export const useSetFeatureOverride = (id: string) =>
 export const useRemoveFeatureOverride = (id: string) =>
   useShopChange(id, (key: string) =>
     api(tenantPath(id, `/feature-overrides/${encodeURIComponent(key)}`), { method: "DELETE" })
+  )
+
+/** A support grant's answer: the link to open once, and when its session ends. */
+export interface SupportGrant {
+  url: string
+  grant_id: string
+  expires_at: string
+  /** The shop's owner has not joined yet: the shop will refuse the link. */
+  owner_pending?: boolean
+}
+
+/**
+ * A grant into the shop's panel (adr/0061 Ek 2026-11-28): proved again
+ * each time, a reason and a length; the link is shown once, never kept.
+ */
+export const useSupportGrant = (id: string) =>
+  useShopChange(id, (input: { reason: string; minutes: 15 | 30 | 60 }) =>
+    withStepUp((headers) => post<SupportGrant>(tenantPath(id, "/support-grants"), input, headers))
   )

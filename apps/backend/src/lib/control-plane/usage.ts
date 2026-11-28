@@ -5,7 +5,7 @@ import {
   usagePeriodOf,
   usageReportSchema,
 } from "@qticaret/types/control-plane"
-import type { UsageReport } from "@qticaret/types/control-plane"
+import type { UsageReport, UsageSetup } from "@qticaret/types/control-plane"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { MEDIA_MODULE } from "../../modules/media"
@@ -126,12 +126,14 @@ export async function readUsageCounts(container: Resolver, now: Date): Promise<U
  * The report as sent: built from the counts and checked against the
  * contract's strict schema before it leaves (a shape the control plane
  * would refuse is not sent). Throws on a report that does not pass.
+ * `setup`, the yes/no checklist (Ek C21), is left out when it could not be read.
  */
 export function buildUsageReport(
   tenantId: string,
   counts: UsageCounts,
   release: Release,
-  now: Date
+  now: Date,
+  setup: UsageSetup | null = null
 ): UsageReport {
   return usageReportSchema.parse({
     version: USAGE_REPORT_VERSION,
@@ -147,5 +149,6 @@ export function buildUsageReport(
     },
     last_order_at: counts.last_order_at ? counts.last_order_at.toISOString() : null,
     release: { version: release.version, commit: release.commit },
+    ...(setup ? { setup } : {}),
   })
 }

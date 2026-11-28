@@ -7,7 +7,12 @@ import { Alert, AlertDescription, AlertTitle } from "@qticaret/admin-ui/ui/alert
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { Plan } from "@/features/packages/api"
 import { priceText } from "@/features/packages/format"
-import { packName, sectorPacksQuery } from "@/features/sector-packs/api"
+import {
+  chosenPreset,
+  packName,
+  sampleProductsOf,
+  sectorPacksQuery,
+} from "@/features/sector-packs/api"
 import { compact } from "@/features/tenants/company-rules"
 import { domainOf, missingCompanyFields, slugOf } from "../draft"
 import type { ShopDraft, WizardStep } from "../draft"
@@ -69,6 +74,19 @@ export function ReviewStep({
   const { company } = draft
   const sole = company.kind === "sole_proprietor"
   const missing = missingCompanyFields(company)
+  // "Örnek ürünlerle başla": said only for a pack that offers it
+  const samples = sampleProductsOf(packs.data?.sector_packs, draft.sector_pack)
+  const samplesRow: [string, ReactNode][] =
+    samples > 0
+      ? [
+          [
+            t("wizard.samples.title"),
+            draft.sample_catalog
+              ? t("wizard.samples.yes", { count: samples })
+              : t("wizard.samples.no"),
+          ],
+        ]
+      : []
   const card = (step: WizardStep, children: ReactNode) => (
     <SectionCard
       title={t(`wizard.steps.${step}.title`)}
@@ -168,6 +186,12 @@ export function ReviewStep({
                 t("wizard.steps.sector.title"),
                 packName(packs.data?.sector_packs, draft.sector_pack),
               ],
+              [
+                t("wizard.steps.look.title"),
+                chosenPreset(packs.data?.sector_packs, draft.sector_pack, draft.preset)?.name ??
+                  t("wizard.look.noneShort"),
+              ],
+              ...samplesRow,
             ]}
           />
         )}

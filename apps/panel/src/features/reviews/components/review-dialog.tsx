@@ -88,6 +88,7 @@ export function ReviewDialog({ review, onClose }: { review: ReviewRow; onClose: 
           {review.title ? <p className="text-sm font-medium">{review.title}</p> : null}
           <p className="text-sm whitespace-pre-wrap">{review.body}</p>
           <ReviewPhotos photos={review.photos} author={review.author_name} />
+          <p className="text-xs text-muted-foreground">{t("reviews.customerText")}</p>
         </div>
         <Field
           label={t(`${R}.label`)}

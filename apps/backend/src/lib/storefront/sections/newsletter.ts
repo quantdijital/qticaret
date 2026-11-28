@@ -25,11 +25,24 @@ export const NEWSLETTER_TONES = ["plain", "tint"] as const
 /** Absent: `plain`, so a box saved before it reads and prints as it did. */
 const tone = { tone: z.enum(NEWSLETTER_TONES).optional() }
 
+/**
+ * How the box asks for the consent (İYS): the required box, its sentence
+ * the label (`box`, as it was), or one small line under the form saying
+ * that subscribing is consenting, with the privacy notice's link (`line`).
+ * The address's owner confirms by the e-mailed link either way. Mirrors
+ * `@qticaret/types`.
+ */
+export const NEWSLETTER_CONSENT_STYLES = ["box", "line"] as const
+
+/** Absent: `box`, so a box saved before it reads and prints as it did. Every variant's. */
+const consentStyle = { consent_style: z.enum(NEWSLETTER_CONSENT_STYLES).optional() }
+
 const words = {
   type: z.literal("newsletter"),
   title,
   text: optional(shopText(240)),
   description: optional(shopText(NEWSLETTER_LIMITS.description)),
+  ...consentStyle,
 }
 
 const promise = {
@@ -148,5 +161,7 @@ export function printedNewsletter<I>(
     ...("joined" in section && section.joined === true ? { joined: true } : {}),
     // The boxed bands' wash of the main colour, only when set
     ...("tone" in section && section.tone === "tint" ? { tone: "tint" as const } : {}),
+    // The consent asked by the small line, only when set
+    ...(section.consent_style === "line" ? { consent_style: "line" as const } : {}),
   }
 }

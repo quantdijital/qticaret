@@ -3,6 +3,7 @@ import { parseEnv } from "../../../../lib/env"
 import { listVersions } from "../../../../lib/fleet/release-views"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
+import { DEFAULT_SECTOR_PACK, defaultPresetOf } from "../../../../lib/tenants/sector-packs"
 import type { HealthTarget } from "../../../../modules/fleet/models/health"
 import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { createTenantWorkflow } from "../../../../workflows/tenants/create-tenant"
@@ -32,7 +33,7 @@ async function onPackage(req: AuthenticatedMedusaRequest, packageId: string | un
  * GET /admin/cp/tenants (all staff): the shops, newest first, by name or
  * slug, status and package, with each one's primary address and package,
  * and how many are in each status (the list's tabs), and its health
- * standing (Ek C13) and version (Ek C18). No contact here: the list
+ * standing (Ek C13), version (Ek C18) and setup checklist (Ek C21). No contact here: the list
  * reads no personal data.
  */
 export async function GET(
@@ -83,6 +84,8 @@ export async function GET(
     req.scope,
     rows.map((row) => row.id)
   )
+  // Ek C21: each one's setup checklist from its latest report (yes/no only)
+  const setups = await fleetIn(req.scope).latestSetups(rows.map((row) => row.id))
   const healthOf = (id: string, target: HealthTarget) =>
     standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
@@ -103,6 +106,7 @@ export async function GET(
           storefront: healthOf(row.id, "storefront"),
         },
         version: versions.get(row.id) ?? { reported: null, target: null, drift: false },
+        setup: setups.get(row.id)?.setup ?? null,
       }
     }),
     count,
@@ -115,14 +119,16 @@ export async function GET(
 /**
  * POST /admin/cp/tenants (owner, operator): a new shop as a record
  * (adr/0061 §2): `provisioning`, its subdomain under `PLATFORM_DOMAIN`,
- * optionally its package and sector pack (C11). Bringing it up is the
+ * optionally its package, sector pack (C11) and ready-made look (adr/0063
+ * task 2.7; not said: the pack's first). Bringing it up is the
  * setup's (C10); C11's wizard starts it once the record is filled in.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostTenantType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { name, slug, package_id, sector_pack } = req.validatedBody
+  const { name, slug, package_id, sector_pack, preset, storefront_contact, sample_catalog } =
+    req.validatedBody
   const { result: tenant } = await createTenantWorkflow(req.scope).run({
     input: {
       name,
@@ -131,10 +137,19 @@ export async function POST(
       created_by: actorOf(req),
       package_id: package_id ?? null,
       sector_pack: sector_pack ?? null,
+      // adr/0063 task 2.7: not said, the pack's first look; null, none
+      preset: preset === undefined ? defaultPresetOf(sector_pack ?? DEFAULT_SECTOR_PACK) : preset,
+      storefront_contact: storefront_contact ?? true,
+      sample_catalog: sample_catalog ?? false,
     },
   })
   noteAuditResource(req, tenant.id)
-  noteAuditChanges(req, { slug: { to: slug }, status: { to: tenant.status } })
+  noteAuditChanges(req, {
+    slug: { to: slug },
+    status: { to: tenant.status },
+    // Security review 2026-11-29 D1: the choice that writes sample products at setup
+    ...(sample_catalog ? { sample_catalog: { to: true } } : {}),
+  })
   if (package_id) {
     // Its first plan document, kept for its setup (C10) and its first pull (Ek C9)
     await reissuePlanDocuments(req.scope, [tenant.id])

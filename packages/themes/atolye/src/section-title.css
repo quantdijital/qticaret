@@ -29,3 +29,24 @@
   font-weight: 700;
   letter-spacing: -0.01em;
 }
+
+/*
+ * The style kit's S11 `title_accent` (adr/0067 Ek 2026-11-28,
+ * `data-title-accent` on the theme's root): the accent's words in the
+ * shop's main colour (`primary`) or its accent colour (`accent`), with
+ * either heading style. On a dark ground (the stage, the main colour's
+ * ground) the main colour would vanish: there the words keep the
+ * heading's ink. At the default (`none`) nothing here applies.
+ */
+[data-title-accent="primary"] h2 .gf-title-em {
+  color: var(--primary);
+}
+[data-title-accent="accent"] h2 .gf-title-em {
+  color: var(--highlight);
+}
+[data-title-accent="primary"]
+  :is(.gf-stage, [data-ground="stage"], [data-ground="primary"])
+  h2
+  .gf-title-em {
+  color: inherit;
+}

@@ -14,6 +14,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "async_job.unknown": "İş bulunamadı.",
   "async_job.type_unknown": "Böyle bir iş tipi yok.",
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
+  "sample_catalog.not_for_sale": "Bu bir örnek ürün; vitrinde görünür ama satın alınamaz.",
+  "sample_catalog.unknown": "Bu sektör paketinin örnek içeriği yok.",
+  "sample_catalog.pack_not_applied": "Bu sektör paketi mağazanıza uygulanmamış.",
+  "sample_catalog.already_loaded": "Bu örnek içerik zaten yüklü.",
+  "sample_catalog.loading": "Örnek içerik şu an yükleniyor; bitince yeniden deneyin.",
+  "sample_catalog.busy":
+    "Örnek içerik şu an yükleniyor ya da kaldırılıyor; birazdan yeniden deneyin.",
+  "sample_catalog.metadata_reserved": "Örnek içerik işaretlerini yalnızca mağaza sistemi yazar.",
+  "sample_catalog.booked_meanwhile":
+    "Bu arada bir örnek ürüne rezervasyon ya da sipariş geldi; listeyi yenileyip yeniden deneyin.",
   "billing_profile.unknown": "Bu müşterinin fatura bilgisi yok.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",
@@ -256,6 +266,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.too_large":
     "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
   "content.unknown": "İçerik bulunamadı.",
+  "content.changed_meanwhile": "İçerik bu arada değişti; yeniden açıp tekrar deneyin.",
   "content.page_text_in_editor":
     "Sayfanın metni tema düzenleyicide, sayfanın bölümlerinde düzenlenir; buradan yalnız başlık, adres, kapak ve durum kaydedilir.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
@@ -1335,6 +1346,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "Hazır görünümün tema ayarları bu mağazada kullanılamıyor.",
   "storefront_preset.layout_invalid": "Hazır görünümün sayfa düzeni bu mağazada kullanılamıyor.",
   "storefront_preset.demo_unavailable": "Demo içerik bu görünümde henüz sunulmuyor.",
+  "storefront_preset.draft_unreadable":
+    "Taslak bu sürümde açılamıyor; önce düzenleyicide taslağı geri alın, sonra stili yeniden uygulayın.",
   // adr/0064: saved looks
   "storefront_design.unknown": "Bu kayıtlı görünüm bulunamadı.",
   "storefront_design.limit_reached":
@@ -1492,8 +1505,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.product_gone": "Önceki taşımanın yaptığı ürün artık yok; açıklaması yenilenmedi.",
   "migration.description_refresh_empty":
     "Dışa aktarmada bu ürünün açıklaması yok; buradaki açıklaması olduğu gibi kaldı.",
+  "migration.export_busy":
+    "Eski adreslerin dışa aktarması sizin için zaten sürüyor; bitmesini bekleyin.",
   "migration.refresh_wordpress_only":
-    "Açıklama yenileme yalnızca WordPress dışa aktarmasıyla yapılır.",
+    "Yalnızca yenileme (açıklamalar, blog görselleri) WordPress dışa aktarmasıyla yapılır.",
+  "migration.post_gone": "Önceki taşımanın yaptığı yazı artık yok; görselleri eklenmedi.",
+  "migration.post_images_failed": "Yazının görselleri metnine eklenemedi; yazı olduğu gibi kaldı.",
   "migration.review_product_missing": "Yorumun ürünü taşınmadı; yorum da taşınmadı.",
   "migration.review_duplicate": "Bu müşterinin bu ürüne yorumu zaten var; ikinci yorum taşınmadı.",
   "migration.parcel_incomplete":
@@ -1601,7 +1618,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kısa açıklama 1.500 karakterden uzun; o noktada kesildi. Ürün sayfasında kısaltabilirsiniz.",
   "migration.wordpress_body_cut": "Metin çok uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_body_media":
-    "Metindeki görseller ya da ürün vitrini, galeri gibi bileşenler taşınmadı; yazı taşındı. Görselleri içerik düzenleyicide ekleyebilirsiniz.",
+    "Metindeki bazı görseller (başka siteden, liste ya da tablo içinde) ya da ürün vitrini gibi bileşenler taşınmadı; yazı taşındı. Eksikleri içerik düzenleyicide ekleyebilirsiniz.",
   "migration.wordpress_post_unread": "Yazının başlığı ya da kısa adı okunamadı; taşınmadı.",
   "migration.wordpress_path_reserved":
     "Bu adres vitrinin kendi sayfası (/blog, /sepet, /magaza gibi); içerik sayfası yapılmadı, eski adresi Eski adresler'de kararınızı bekliyor.",

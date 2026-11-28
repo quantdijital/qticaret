@@ -79,6 +79,7 @@ const BLOCKS: FooterBlockView[] = [
     consent: "E-posta almayı kabul ediyorum.",
     description: null,
     variant: "in_footer",
+    consentStyle: "box",
   },
   {
     ...at(6),

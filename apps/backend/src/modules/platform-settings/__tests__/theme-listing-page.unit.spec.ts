@@ -69,6 +69,8 @@ describe("theme section: the listing page", () => {
     expect(off({ view_switch: true })).toBe(false)
     expect(off({ breadcrumb_current: "none" })).toBe(false)
     expect(off({ crumbs_place: "left" })).toBe(false)
+    // Turned off is on the list (no visible trail, the BreadcrumbList data kept)
+    expect(off({ crumbs_place: "none" })).toBe(true)
     expect(off({ columns: 4 })).toBe(false)
   })
 

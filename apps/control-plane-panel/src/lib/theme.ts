@@ -17,6 +17,7 @@ export const CONTROL_PLANE_APPEARANCE: AppearanceSettings = {
   mode: "system",
   sidebar: "dark",
   sidebar_mode: "expanded",
+  surface: "brand",
   logo_light_url: null,
   logo_dark_url: null,
   favicon_url: null,

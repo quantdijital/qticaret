@@ -175,7 +175,12 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/webhooks/:id",
     "/admin/marketing-feeds/token",
   ]),
-  ...open(POST, ["/admin/api-access/:id/revoke", "/admin/staff/members/:id/reset-mfa"]),
+  ...open(POST, [
+    "/admin/api-access/:id/revoke",
+    "/admin/staff/members/:id/reset-mfa",
+    // The owner ending a platform support session (adr/0061 Ek "Destek erişimi")
+    "/admin/support-access/sessions/:grant_id/end",
+  ]),
   // ADR-0068 §9: a wholesaler closed (pays retail from the next request), a pending
   // invitation taken back (review L6: taking access away); reopening sells anew
   { methods: POST, path: "/admin/wholesale/accounts/:id/deactivate" },
@@ -212,6 +217,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/category-descriptions*",
   "/admin/category-restrictions*",
   "/admin/catalog*",
+  // A sector pack's sample catalogue writes products and categories
+  "/admin/sample-catalog*",
   // Dated products' departures (adr/0076); their settings are under /admin/products
   "/admin/booking-slots*",
   "/admin/media*",

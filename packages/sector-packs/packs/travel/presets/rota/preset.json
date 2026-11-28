@@ -1,7 +1,7 @@
 {
   "format": "quant-storefront-preset",
   "code": "rota",
-  "version": 1,
+  "version": 3,
   "theme": "atolye",
   "name": "Rota",
   "description": "Tur ve gezi mağazası için tam ekran manzara: fotoğrafın üstünde zeminsiz üst bilgi, üstte eğik tırnaklı vurgulu başlık, altta kısa metin ve tek düğme; popüler turlar kaydırıcısı, yaklaşan kalkışlar, koyu rakam şeridi, dört adımda yolculuk, gezgin yorumları, keşif kolajı, e-bültenli koyu alt bilgi ve tur sayfasında çizgili program. Menülere ve ürünlere dokunmaz.",

@@ -38,6 +38,7 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   page_width: saved.page_width,
   accent_ink: saved.accent_ink,
   section_title: saved.section_title,
+  title_accent: saved.title_accent,
 })
 
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */

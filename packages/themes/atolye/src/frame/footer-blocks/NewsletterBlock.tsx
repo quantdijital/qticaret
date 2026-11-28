@@ -49,7 +49,7 @@ export function NewsletterBlock({
         joined={joined}
         action={subscribe}
         privacyPath={shop.privacyPath}
-        words={newsletterWords(t, block.consent)}
+        words={newsletterWords(t, block.consent, block.consentStyle)}
         marks={editor}
         textKey={`blocks.${String(block.at)}.text`}
       />

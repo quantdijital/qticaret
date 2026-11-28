@@ -141,6 +141,8 @@ medusaIntegrationTestRunner({
           align: "auto",
           size: "medium",
           tone: "graphite",
+          transition: "fade",
+          arrows: "off",
         },
         {
           id: "mainheader",

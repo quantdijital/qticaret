@@ -3,6 +3,7 @@ import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { CatalogValues } from "./catalog-fields"
+import { SwitchName } from "./hint-parts"
 
 const B = "products.booking.mode"
 
@@ -15,17 +16,13 @@ export function BookingModeField({ form }: { form: UseFormReturn<CatalogValues> 
   const { t } = useTranslation()
   return (
     <div className="flex items-start justify-between gap-4">
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <div className="flex flex-wrap items-baseline gap-x-1.5">
-          <label htmlFor="catalog-booking" className="text-sm font-medium">
-            {t(`${B}.label`)}
-          </label>
-          <small className="text-[11px] text-muted-foreground">booking_mode</small>
-        </div>
-        <span id="catalog-booking-hint" className="text-[13px] text-muted-foreground">
-          {t(`${B}.hint`)}
-        </span>
-      </div>
+      <SwitchName
+        htmlFor="catalog-booking"
+        label={t(`${B}.label`)}
+        term="booking_mode"
+        hint={t(`${B}.hint`)}
+        hintId="catalog-booking-hint"
+      />
       <Controller
         control={form.control}
         name="booking"

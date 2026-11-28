@@ -56,6 +56,8 @@ export type Capability =
   | "looks"
   /** The wholesalers, their levels and prices (ADR-0068 §9): owner and admin. */
   | "wholesale"
+  /** The sector pack's sample catalogue loaded and removed (2026-11-28): owner and admin. */
+  | "samples"
 
 export interface StaffMe {
   user_id: string
@@ -69,6 +71,18 @@ export interface StaffMe {
    * `suspended` close most writes. Absent from an older backend: active.
    */
   plan?: { status: PlanStatus }
+  /**
+   * Present only in a "Platform desteği" session (adr/0061 Ek "Destek
+   * erişimi"): who came in, why, and when the session ends.
+   */
+  support?: SupportSessionInfo
+}
+
+export interface SupportSessionInfo {
+  operator_name: string
+  reason: string
+  started_at: string
+  expires_at: string
 }
 
 /** What the shop's status lets the panel do (adr/0061 §5.5). */
@@ -126,3 +140,6 @@ export function refreshStandingAfter(client: QueryClient, failure: unknown): voi
     void client.invalidateQueries({ queryKey: STAFF_KEY })
   }
 }
+
+/** The support session this panel is in, if it is one (adr/0061 Ek "Destek erişimi"). */
+export const useSupportSession = (): SupportSessionInfo | null => useStaff()?.support ?? null

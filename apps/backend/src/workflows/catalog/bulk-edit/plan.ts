@@ -13,6 +13,7 @@ import type { BulkChange } from "./change"
 import { planAddonTemplate } from "./plan-addon-template"
 import { altWrites } from "./plan-alt"
 import { planBackorder, planBrand, planSale, planTag } from "./plan-more"
+import { planKind } from "./plan-kind"
 import { UNCHANGED, skipped, writing } from "./plan-result"
 import type { BulkDiff, BulkPlan, PlanContext } from "./plan-result"
 import { planStock } from "./plan-stock"
@@ -220,5 +221,7 @@ export function planBulkChange(
       return planBackorder(product, change)
     case "sale":
       return planSale(product, change, context)
+    case "kind":
+      return planKind(product, change, context)
   }
 }

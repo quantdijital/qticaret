@@ -370,7 +370,8 @@
       "nextPayment": "Sonraki ödeme",
       "created": "Açılış",
       "health": "Sağlık",
-      "version": "Sürüm"
+      "version": "Sürüm",
+      "setup": "Kurulum"
     },
     "status": {
       "provisioning": "Kuruluyor",
@@ -476,7 +477,7 @@
     "title": "Alan adları",
     "text": "Mağazanın yanıt verdiği adresler; birincil olan vitrinin adresidir.",
     "add": "Alan adı ekle",
-    "addText": "Mağazanın kendi alan adı kaydedilir; DNS doğrulaması yayına çıkışta yapılır.",
+    "addText": "Kaydedince DNS'e eklenecek TXT kaydı gösterilir; doğrulama kendiliğinden denenir.",
     "addSubmit": "Ekle",
     "hostname": "Alan adı",
     "empty": "Alan adı yok.",
@@ -492,7 +493,8 @@
     "states": {
       "pending": "Doğrulama bekliyor",
       "verified": "Doğrulandı",
-      "failed": "Doğrulanamadı"
+      "failed": "Doğrulanamadı",
+      "active": "Etkin"
     },
     "primary": "Birincil",
     "isPrimary": "Vitrinin birincil adresi",
@@ -510,6 +512,36 @@
       "title": "Alan adını kaldır",
       "text": "{{host}} mağazanın adreslerinden çıkarılır.",
       "action": "Kaldır"
+    },
+    "failedText": "Doğrulanamadı; nedeni aşağıda yazıyor. Kayıt yerindeyse Doğrula'ya basın.",
+    "check": "Doğrula",
+    "checking": "Denetleniyor…",
+    "checkProved": "Alan adı doğrulandı.",
+    "checkNotYet": "Henüz doğrulanamadı; nedeni pencerede yazıyor.",
+    "lastChecked": "Son denetim",
+    "never": "Henüz denetlenmedi",
+    "ssl": "SSL",
+    "sslLater": "Sunucu kurulunca verilecek",
+    "dns": {
+      "title": "DNS kayıtları",
+      "txtText": "Alan adının sahibi olduğunuzu göstermek için bu TXT kaydını alan adınızın DNS ayarlarına ekleyin.",
+      "cnameText": "Ardından adresi platforma yönlendirmek için bu CNAME kaydını ekleyin.",
+      "aText": "Ardından adresi platforma yönlendirmek için bu A kayıtlarını ekleyin.",
+      "routingLater": "Yönlendirme kaydı sunucu kurulunca burada görünecek; şimdilik TXT kaydı yeterli.",
+      "type": "Tür",
+      "name": "Ad",
+      "value": "Değer",
+      "copy": "{{what}} kopyala",
+      "copied": "Kopyalandı."
+    },
+    "reasons": {
+      "txt_missing": "TXT kaydı bulunamadı. Kayıt yeni eklendiyse DNS'in yayılması birkaç saat sürebilir.",
+      "txt_mismatch": "TXT kaydı var ama değeri farklı; yukarıdaki değeri birebir girin.",
+      "dns_unavailable": "DNS yanıt vermedi; kendiliğinden yeniden denenecek.",
+      "expired": "Bir hafta içinde doğrulanamadı; otomatik denetim durdu.",
+      "txt_lost": "TXT kaydı DNS'ten kaldırılmış. İki hafta içinde geri eklenmez ve adres platforma yönlenmezse alan adı doğrulamadan düşer, birincilse platform adresi birincil olur.",
+      "routing_missing": "Adres henüz platforma yönlendirilmedi.",
+      "routing_mismatch": "Adres başka bir yere yönleniyor; yönlendirme kaydını denetleyin."
     }
   },
   "plan": {
@@ -635,7 +667,8 @@
       "chargeVoided": "Ödeme kaydı iptal edildi",
       "chargeAmount": "Ödeme tutarı düzeltildi",
       "grace": "Ek süre değişti",
-      "other": "Değişiklik"
+      "other": "Değişiklik",
+      "supportGrant": "Mağaza paneline geçildi"
     }
   },
   "packages": {
@@ -787,6 +820,7 @@
       "release_version_taken": "Bu sürüm numarası zaten kayıtlı.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
       "run_unknown": "Çalışma bulunamadı.",
+      "sample_catalog_unavailable": "Seçilen sektör paketinin örnek ürünleri yok.",
       "sector_pack_unknown": "Böyle bir sektör paketi yok.",
       "session_required": "Oturumunuz kapandı. Yeniden giriş yapın.",
       "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
@@ -846,7 +880,11 @@
       "ai_route_no_key": "Bu servisin anahtarı yok; önce anahtarını yazın.",
       "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
       "ai_route_unverified": "Bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez.",
-      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
+      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi.",
+      "support_no_panel": "Mağazanın panel adresi henüz yok; önce kurulumu tamamlayın ya da alan adını doğrulayın.",
+      "support_reason_required": "Gerekçe en az 10 karakter olmalı.",
+      "support_unavailable": "Kurulumu süren ya da kapanan mağazanın paneline geçilemez.",
+      "preset_unknown": "Bu hazır görünüm seçilen sektör paketinde yok."
     },
     "ai_credits": {
       "pack_unknown": "Paket bulunamadı ya da satışta değil.",
@@ -857,6 +895,12 @@
       "apply_pack_failed": "Sektör paketi uygulanamadı.",
       "apply_pack_result_invalid": "Mağaza sektör paketinin sonucunu okunabilir biçimde bildirmedi.",
       "apply_pack_timeout": "Sektör paketinin uygulanması süre sınırını aştı.",
+      "apply_preset_failed": "Hazır görünüm uygulanamadı.",
+      "apply_preset_result_invalid": "Mağaza hazır görünümün sonucunu okunabilir biçimde bildirmedi.",
+      "apply_preset_timeout": "Hazır görünümün uygulanması süre sınırını aştı.",
+      "apply_profile_failed": "Mağaza profili aktarılamadı.",
+      "apply_profile_result_invalid": "Mağaza profil aktarımının sonucunu okunabilir biçimde bildirmedi.",
+      "apply_profile_timeout": "Mağaza profilinin aktarımı süre sınırını aştı.",
       "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
       "bootstrap_failed": "Mağazanın ilk ayarları yapılamadı.",
       "bootstrap_timeout": "Mağazanın ilk ayarları süre sınırını aştı.",
@@ -874,6 +918,10 @@
       "invite_owner_failed": "Sahip daveti oluşturulamadı.",
       "invite_owner_timeout": "Sahip davetinin oluşturulması süre sınırını aştı.",
       "invite_token_invalid": "Mağazanın verdiği davet geçerli değil.",
+      "load_samples_failed": "Örnek ürünler yüklenemedi; mağaza kuruldu. Mağaza panelindeki Örnek içerik kartından yeniden yüklenebilir.",
+      "load_samples_result_invalid": "Örnek ürün yüklemesinin sonucu okunamadı; mağaza kuruldu. Mağaza panelindeki Örnek içerik kartından denetlenebilir.",
+      "load_samples_timeout": "Örnek ürünlerin yüklenmesi süre sınırını aştı; mağaza kuruldu. Mağaza panelindeki Örnek içerik kartından yeniden yüklenebilir.",
+      "load_samples_unknown": "Mağazanın sürümünde bu sektör paketinin örnek ürünleri yok; mağaza örneksiz kuruldu.",
       "local_database_elsewhere": "Yerel veritabanı bu bilgisayarda değil.",
       "local_development_only": "Yerel kurulum yalnızca geliştirme ortamında yapılır.",
       "mail_failed": "Davet e-postası gönderilemedi.",
@@ -892,6 +940,7 @@
       "plan_import_refused": "Mağaza plan belgesini kabul etmedi.",
       "plan_import_timeout": "Plan belgesinin aktarımı süre sınırını aştı.",
       "port_in_use": "Mağazanın portu başka bir uygulamada kullanılıyor.",
+      "preset_unknown": "Bu hazır görünüm mağazanın sektör paketinde yok.",
       "repo_unknown": "Mağaza yazılımının yeri bulunamadı.",
       "secrets_exposed": "Mağazanın gizli değer dosyasının izinleri güvenli değil; kullanılmadı.",
       "secrets_lost": "Mağazanın gizli değerleri bulunamadı; anahtar yenilemesi gerekir.",
@@ -1048,6 +1097,10 @@
         "title": "Sektör paketi",
         "description": "Mağazanın başlangıç şablonları."
       },
+      "look": {
+        "title": "Görünüm",
+        "description": "Vitrinin açılacağı hazır görünüm."
+      },
       "review": {
         "title": "Özet ve kur",
         "description": "Bilgileri gözden geçirin, sonra mağazayı kurun."
@@ -1062,6 +1115,8 @@
     "contacts": {
       "ownerTitle": "Mağaza sahibi",
       "ownerText": "Kurulumun sonunda mağaza panelinin sahip daveti bu e-posta adresine gönderilir.",
+      "storefrontUse": "Vitrinde iletişim bilgisi olarak kullan",
+      "storefrontNote": "Bu bilgiler mağazanın vitrininde iletişim bilgisi olarak görünür.",
       "billingTitle": "Faturalama kişisi",
       "billingText": "Ödeme hatırlatmaları bu kişiye gider. Eklenmezse mağaza sahibine gider.",
       "billingAdd": "Ayrı bir faturalama kişisi ekle",
@@ -1092,6 +1147,22 @@
     "sector": {
       "title": "Sektör paketi",
       "text": "Mağaza hazır özellik şablonları, önerilen kategoriler, ayarlar ve arama görünümü şablonlarıyla açılır. Kurulum yalnız mağazada olmayanı ekler; mağaza sonra hepsini değiştirebilir."
+    },
+    "look": {
+      "title": "Hazır görünüm",
+      "text": "{{pack}} paketinin hazır görünümleri. Seçilen görünüm kurulumda vitrine uygulanır ve yayımlanır; mağaza sahibi sonra panelden değiştirebilir.",
+      "none": "Bu sektör paketinin hazır görünümü yok. Mağaza sade vitrinle açılır; görünüm sonra mağaza panelinden seçilebilir.",
+      "noneShort": "Yok",
+      "default": "Varsayılan"
+    },
+    "samples": {
+      "title": "Örnek ürünler",
+      "use": "Örnek ürünlerle başla",
+      "note_one": "{{pack}} paketinin {{count}} örnek ürünü görselleri ve kategorileriyle kurulumun sonunda mağazaya yüklenir. Hepsi örnek olarak işaretlenir; mağaza sahibi panelindeki Örnek içerik kartından tek seferde kaldırabilir.",
+      "note_other": "{{pack}} paketinin {{count}} örnek ürünü görselleri ve kategorileriyle kurulumun sonunda mağazaya yüklenir. Hepsi örnek olarak işaretlenir; mağaza sahibi panelindeki Örnek içerik kartından tek seferde kaldırabilir.",
+      "yes_one": "Evet, {{count}} ürün",
+      "yes_other": "Evet, {{count}} ürün",
+      "no": "Hayır"
     },
     "review": {
       "edit": "Düzenle",
@@ -1223,7 +1294,10 @@
       "database": "Veritabanı",
       "migrate": "Veritabanı şeması",
       "bootstrap": "Mağazanın ilk ayarları",
+      "profile": "Mağaza profili",
       "sector_pack": "Sektör paketi",
+      "preset": "Hazır görünüm",
+      "sample_catalog": "Örnek ürünler",
       "plan_document": "Plan belgesi",
       "start": "Mağaza sunucusunun başlatılması",
       "health": "Sağlık denetimi",
@@ -1239,6 +1313,9 @@
       "latency": "Yanıt {{ms}} ms",
       "mailed": "E-posta gönderildi",
       "notMailed": "E-posta gönderilmedi",
+      "samplesLoaded_one": "{{count}} örnek ürün yüklendi",
+      "samplesLoaded_other": "{{count}} örnek ürün yüklendi",
+      "samplesThere": "Örnek ürünler zaten yüklüydü",
       "sentBefore": "Daha önceki bir çalışmada gönderildi",
       "ownerExists": "Mağazanın sahip hesabı zaten var",
       "notAvailableYet": "Sektör paketleri henüz sunulmuyor",
@@ -1247,7 +1324,16 @@
       "packAdded_one": "{{count}} öğe eklendi",
       "packAdded_other": "{{count}} öğe eklendi",
       "packKept_one": "{{count}} öğe mağazada zaten vardı, korundu",
-      "packKept_other": "{{count}} öğe mağazada zaten vardı, korundu"
+      "packKept_other": "{{count}} öğe mağazada zaten vardı, korundu",
+      "profileFilled_one": "{{count}} alan dolduruldu",
+      "profileFilled_other": "{{count}} alan dolduruldu",
+      "profileKept_one": "{{count}} alan mağazada zaten doluydu, korundu",
+      "profileKept_other": "{{count}} alan mağazada zaten doluydu, korundu",
+      "profileRefused_one": "{{count}} alan mağazanın biçimine uymadı, aktarılmadı",
+      "profileRefused_other": "{{count}} alan mağazanın biçimine uymadı, aktarılmadı",
+      "presetPublished": "Vitrinde yayımlandı",
+      "presetDraft": "Taslağa yazıldı, yayımlanmadı",
+      "presetApplied": "Daha önce uygulanmıştı; mağazanın tasarımına dokunulmadı"
     },
     "columns": {
       "kind": "Çalışma",
@@ -1258,11 +1344,12 @@
     },
     "local": {
       "title": "Mağaza paneli (bu bilgisayar)",
-      "text": "Yerel kurulumda mağazanın paneli sunucusunun portunun 1000 fazlasında açılır.",
+      "text": "Yerel kurulumda mağazanın paneli mağazayla birlikte, sunucusunun portunun 1000 fazlasında başlar.",
       "address": "Adres",
-      "command": "Paneli açan komut",
       "copy": "Komutu kopyala",
-      "copied": "Komut kopyalandı."
+      "copied": "Komut kopyalandı.",
+      "open": "Paneli aç",
+      "commandFallback": "Panel açılmazsa bu komutla başlatın"
     },
     "pack": {
       "title": "Sektör paketi",
@@ -1271,7 +1358,11 @@
       "applied": "Uygulanan sürüm",
       "notApplied": "Henüz uygulanmadı",
       "appliedAt": "Uygulandığı tarih",
-      "newer": "Paketin yeni sürümü var (sürüm {{version}}). Yeniden uygulayınca yalnız yeni öğeler eklenir."
+      "newer": "Paketin yeni sürümü var (sürüm {{version}}). Yeniden uygulayınca yalnız yeni öğeler eklenir.",
+      "preset": "Hazır görünüm",
+      "presetNone": "Seçilmedi",
+      "presetPending": "Henüz uygulanmadı",
+      "presetApplied": "{{name}} · sürüm {{version}}"
     }
   },
   "sectorPacks": {
@@ -1840,5 +1931,46 @@
     "reasonHelp": "En az 3 karakter; kayıtta kalır.",
     "saved": "Hedef sürüm kaydedildi.",
     "noReleases": "Henüz sürüm yok: önce Sürümler sayfasından ekleyin."
+  },
+  "supportAccess": {
+    "open": "Mağaza paneline geç",
+    "title": "Mağaza paneline geç",
+    "text": "Mağazanın panelinde süreli bir \"Platform desteği\" oturumu açılır. Mağaza sahibi zil ve e-postayla haberdar edilir; personel, ödeme ve entegrasyon ayarları, yasal bilgiler ve müşteri verisi dışa aktarımı kapalıdır.",
+    "reason": "Gerekçe",
+    "reasonPlaceholder": "Örn. Ürün girişi ve vitrin düzeni için kurulum desteği",
+    "reasonHelp": "Mağaza sahibine aynen gösterilir ve mağazanın notlarına yazılır. Tek satır, en az 10, en çok 500 karakter.",
+    "minutes": "Süre",
+    "minutesOption": "{{count}} dakika",
+    "submit": "İzin oluştur",
+    "readyTitle": "Bağlantı hazır",
+    "readyText": "Bağlantı tek kullanımlıktır ve 5 dakika içinde açılmalıdır. Oturum {{time}} saatinde kendiliğinden biter.",
+    "openPanel": "Paneli aç",
+    "ownerPending": "Mağaza sahibi henüz panele katılmamış görünüyor. Sahip davetini kabul etmeden mağaza destek girişini reddeder.",
+    "bearerNote": "Bu bağlantı açan kişiyi mağaza paneline sokar: sohbete, e-postaya ya da destek kaydına yapıştırmayın. Bir kez açılır."
+  },
+  "setupStatus": {
+    "title": "Kurulum durumu",
+    "text": "Mağazanın kendi panelindeki kurulum adımları, son saatlik rapora göre.",
+    "noReport": "Henüz rapor gelmedi. Mağaza üst panele bağlı çalışmaya başlayınca kurulum adımları burada görünür.",
+    "olderShop": "Mağazanın sürümü kurulum adımlarını göndermiyor; sürümü güncellenince burada görünür.",
+    "complete": "Hazır",
+    "count": "{{done}}/{{total}} adım",
+    "missing": "Eksik: {{list}}",
+    "listLabel": "Kurulum adımları",
+    "done": "tamamlandı",
+    "open": "eksik",
+    "reportedAt": "Son rapor: {{relative}} · {{date}}",
+    "steps": {
+      "store_named": "Mağaza adı",
+      "currency": "Para birimi",
+      "region": "Satış bölgesi",
+      "stock_location": "Depo",
+      "shipping": "Kargo seçeneği",
+      "payment": "Kart ile ödeme",
+      "product_published": "Yayında ürün",
+      "look_published": "Görünüm yayında",
+      "legal_published": "Yasal metinler",
+      "mail_sender": "E-posta gönderimi"
+    }
   }
 }

@@ -90,6 +90,8 @@ export const VARIANT_FIELDS: {
     panels: CATEGORY_PANELS_DEFAULTS,
     // The icon row starts with no icon picked: each disc its picture or initial
     icons: { ...CATEGORY_ICONS_DEFAULTS, category_icons: {} },
+    // The sliding cards start with the scroller kit's defaults
+    carousel: { scroller: SCROLLER_DEFAULTS },
   },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
@@ -151,7 +153,8 @@ export const VARIANT_FIELDS: {
   // adr/0077 Ek (Vadi): the panel's words and button empty (its button the blog's); title and count stay
   // adr/0073 Ek 2026-11-24 (2): the rows and switches are every variant's and stay as written
   faq: { standard: {}, page: {} },
-  posts: { grid: {}, intro_panel: { eyebrow: null, intro: null, link: null } },
+  // The upper line is every variant's since 2026-11-28 (a heading line, kept on switching)
+  posts: { grid: {}, intro_panel: { intro: null, link: null } },
   // adr/0077 Ek (Vadi): no upper line, a straight edge; the slides and the band's steps stay
   banner: { standard: {}, split: { eyebrow: null, edge: BANNER_SPLIT_EDGES[0], note: null } },
   product_main: { standard: {} },
@@ -169,8 +172,12 @@ const OPTIONAL_FIELDS: {
   >
 } = {
   hero: { category_list: ["slides", "scroller"] },
-  // A preset's icons by handle (adr/0077 §10 Ek): the icon row's, dropped with it
-  categories: { icons: ["category_icons_by_handle"] },
+  // A preset's handles and icons by handle (adr/0077 §10 Ek): the icon row's and the
+  // sliding cards', dropped with them (the tiles and cards hold none)
+  categories: {
+    icons: ["category_handles", "category_icons_by_handle"],
+    carousel: ["category_handles"],
+  },
   // The footer box's band on the footer's ground (adr/0070 §4 Ek): the bands' own, set by the shop
   newsletter: {
     split: ["joined", "tone"],

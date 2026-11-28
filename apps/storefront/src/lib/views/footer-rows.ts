@@ -29,6 +29,7 @@ import type {
 import type { FooterLogos } from "./footer-logo"
 import { imageView } from "./image"
 import { menuLink, menuLinks } from "./menus"
+import { consentStyleOf, consentWordsKey } from "./newsletter"
 
 /**
  * The free rows footer for the theme (adr/0070 §5, §2.3): the backend's
@@ -145,9 +146,12 @@ function bodyOf(
       return {
         type: "newsletter",
         title: title ?? parts.t("newsletter.title"),
-        consent: words(block.text) ?? parts.t("newsletter.text", { shop: parts.title }),
+        consent:
+          words(block.text) ??
+          parts.t(consentWordsKey(consentStyleOf(block)), { shop: parts.title }),
         description: words(block.description),
         variant: pick(FOOTER_NEWSLETTER_VARIANTS, block.variant, "standard"),
+        consentStyle: consentStyleOf(block),
       }
     case "contact": {
       const { contact } = parts

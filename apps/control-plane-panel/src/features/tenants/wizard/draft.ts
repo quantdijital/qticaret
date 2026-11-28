@@ -16,6 +16,7 @@ export const WIZARD_STEPS = [
   "package",
   "address",
   "sector",
+  "look",
   "review",
 ] as const
 export type WizardStep = (typeof WIZARD_STEPS)[number]
@@ -56,6 +57,19 @@ export interface ShopDraft {
   custom_domain: string
   /** A pack's code (C12: whatever the control plane offers; the general one first). */
   sector_pack: string
+  /**
+   * The ready-made look (adr/0063 task 2.7): a code of the pack's looks;
+   * "" or another pack's: the pack's first (the control plane's default).
+   */
+  preset: string
+  /** The owner's e-mail and phone as the storefront's contact details at setup (default: yes). */
+  storefront_contact: boolean
+  /**
+   * "Örnek ürünlerle başla": the pack's sample catalogue loaded at setup
+   * (default: no). Offered only for a pack with samples; another pack
+   * chosen turns it off.
+   */
+  sample_catalog: boolean
 }
 
 const person = (): PersonDraft => ({ name: "", email: "", phone: "" })
@@ -80,6 +94,9 @@ export const emptyDraft = (): ShopDraft => ({
   typed_slug: null,
   custom_domain: "",
   sector_pack: "general",
+  preset: "",
+  storefront_contact: true,
+  sample_catalog: false,
 })
 
 /** The slug the shop gets: the typed one, else the name's. */
@@ -202,6 +219,7 @@ export function stepProblems(step: WizardStep, draft: ShopDraft, checks: Address
       addressProblems(draft, checks, problems)
       break
     case "sector":
+    case "look":
     case "review":
       break
   }

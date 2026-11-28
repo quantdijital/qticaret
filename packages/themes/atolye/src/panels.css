@@ -70,9 +70,11 @@
 }
 
 /*
- * Wide, by screen: the words on the left at the panel's foot, the photo on
- * the right fading leftwards into the graphite (a tablet gives the wide
- * panel its own least height; from 1024 px the row does). On a phone the
+ * Wide, by screen: the words on the left at the panel's foot, the photo
+ * under the whole panel, fading leftwards into the graphite behind the
+ * words (a tablet gives the wide panel its own least height; from 1024 px
+ * the row does). The photo covers the panel edge to edge: a photo held to
+ * the right column left the panel's other half bare graphite. On a phone the
  * name and count stand beside the photo and the subcategories run across
  * the whole panel under them, so a narrow column does not stack them one
  * a line. Unlayered, as `collage.css`'s phone rows: these outrank the tall
@@ -124,11 +126,16 @@
   }
   .gf-panel[data-wide~="tablet"] > .gf-panel-photo {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 1 / -1;
     min-height: 0;
   }
   .gf-panel[data-wide~="tablet"] > .gf-panel-photo::after {
-    background: linear-gradient(to right, var(--color-stage), transparent 45%);
+    background: linear-gradient(
+      to right,
+      var(--color-stage),
+      color-mix(in oklab, var(--color-stage) 70%, transparent) 32%,
+      transparent 62%
+    );
   }
   .gf-panel[data-wide~="tablet"] > .gf-panel-words {
     grid-row: 1;
@@ -144,11 +151,16 @@
   }
   .gf-panel[data-wide~="lg"] > .gf-panel-photo {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 1 / -1;
     min-height: 0;
   }
   .gf-panel[data-wide~="lg"] > .gf-panel-photo::after {
-    background: linear-gradient(to right, var(--color-stage), transparent 40%);
+    background: linear-gradient(
+      to right,
+      var(--color-stage),
+      color-mix(in oklab, var(--color-stage) 70%, transparent) 32%,
+      transparent 62%
+    );
   }
   .gf-panel[data-wide~="lg"] > .gf-panel-words {
     grid-row: 1;
@@ -164,11 +176,16 @@
   }
   .gf-panel[data-wide~="xl"] > .gf-panel-photo {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 1 / -1;
     min-height: 0;
   }
   .gf-panel[data-wide~="xl"] > .gf-panel-photo::after {
-    background: linear-gradient(to right, var(--color-stage), transparent 40%);
+    background: linear-gradient(
+      to right,
+      var(--color-stage),
+      color-mix(in oklab, var(--color-stage) 70%, transparent) 32%,
+      transparent 62%
+    );
   }
   .gf-panel[data-wide~="xl"] > .gf-panel-words {
     grid-row: 1;

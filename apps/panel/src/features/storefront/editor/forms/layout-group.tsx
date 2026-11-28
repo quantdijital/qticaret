@@ -10,6 +10,7 @@ import { IconGroups } from "./icon-groups"
 import type { FieldGroupName } from "./field-registry"
 import { RelatedGroups } from "./related-groups"
 import { PointsGroups } from "./points-groups"
+import { CategoryCarouselGroups } from "./category-carousel-groups"
 import { CollageGroups, ReviewsGroups } from "./collage-groups"
 import { DeparturesGroups } from "./departures-groups"
 import { StripGalleryGroups } from "./strip-gallery-groups"
@@ -46,6 +47,10 @@ export function SectionLayoutGroup({
   }
   if (section.type === "reviews") {
     return <ReviewsGroups section={section} reveal={reveal} onChange={onChange} />
+  }
+  // The categories' sliding cards: the scroller kit's open settings, as a rail's
+  if (section.type === "categories" && section.variant === "carousel") {
+    return <CategoryCarouselGroups section={section} reveal={reveal} onChange={onChange} />
   }
   if (section.type === "stats" || section.type === "steps") {
     return <PointsGroups section={section} reveal={reveal} onChange={onChange} />

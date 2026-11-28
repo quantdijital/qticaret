@@ -92,6 +92,14 @@ Sahip: "Üst şerit ayrı bir şey… üst şeridin tasarımları olur, ayrı ay
 
 Karar: üst şerit üst bilgi grubunun kendi bölümüdür (`announcement_bar`, biçimleri `graphite` ve `light`), kayan yazı da öyle; üst bilgi biçimleri üstlerinde şerit çizmez. Yeni anlam yeni alanlarla gelir (biçim, `links`, `phone`, `account`; üst bilgide `top_strip: "separate"` işareti); eski alanların anlamı değişmez, eski kayıt bir kez okunurken eski çizimi koruyacak şekilde çevrilir. Hazır görünümler veri olarak yeni şekle yazıldı; görünüm kilidi değişmedi. Ayrıntı: docs/tema/bilesen-standardi.md §7.
 
+## Ek 2026-11-27: Ürün sayfasında tek güvence kutusu çizilmez (sahip kararı)
+
+Sahip: alım formunun altında ("WhatsApp'tan sorun" düğmesinin altı) "Kargo ve teslimat" kartı olan üründe mağazanın diğer güvenceleri (kargo, saat, iade simgeli olmayanlar) küçük kutular olarak çiziliyordu; tek kutu kalınca yalnız ve kötü duruyordu.
+
+Karar: bu kutu grubu en az iki kutu varken çizilir; tek kutu kalınca orada hiçbir şey çizilmez (güvence ana sayfa şeridinde, alt bilgide ve sepette görünmeye devam eder). Telefonda (`sm` altı, 640 px) kutular tek sütunda alçak satırlardır (solda simge, başlık ve açıklama birer satır, sığmazsa üç nokta; sahip iki sütunlu dikey kutuyu önizlemede denedi, beğenmedi); `sm`'den itibaren satırda ikişer dizilir; tek sayıda kutuda (3, 5…) son kutu satırın tamamını kaplar, böylece boş hücre kalmaz ve hiçbir güvence gizlenmez. başlık ve açıklama en çok iki satır; tek kutu satırını uzatamaz (sahip, dört rozetle telefonda 2×2 kutular şişiyordu). Kartı olmayan ürünün "Teslimat ve iade" kutusu değişmedi. Bu, yayımlanmış bir çizimin sahip kararıyla yerinde değişmesidir (ayar değil): görünüm kilidinde yedi hazır görünümün ürün sayfası değişti (fikstürde tek güvence kutusu kalıyordu), `pnpm lock:presets` ile yeniden yazıldı. Ayrıntı: docs/tema/bilesen-standardi.md §7.
+
+Aynı gün, tutarlılık düzeltmesi (sahip isteği): ürün sayfasındaki "Kargo ve teslimat" kartında her bilgi kalın başlık ve altında kısa satırdır; aynı gün kargo saati tek düz cümleydi ("Saat 15.00'e kadar verilen siparişler aynı gün kargoda"). Artık başlık "Aynı gün kargo", altında "Saat 15.00'e kadar verilen siparişlerde" (saat mağazanın ayarından). Bölüm biçimi ve tema çizimi değişmedi, yalnız vitrinin hazırladığı metin; görünüm kilidi değişmedi.
+
 ## Açık kararlar
 
 1. Stil takımının basamak listesi ve adları (yol haritası 2).

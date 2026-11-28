@@ -13,6 +13,7 @@ import { LinkField } from "./link-field"
 import { ProductSourceField } from "./product-source-field"
 import { NAMED, sourceOf } from "./product-sources"
 import type { SourceKind } from "./product-sources"
+import { HeadLinesFields } from "./head-lines-fields"
 
 const P = "storefront.editor.products"
 const SH = "storefront.editor.shelf"
@@ -106,6 +107,12 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
         onChange={(next, field) => {
           set(next, field)
         }}
+      />
+      <HeadLinesFields
+        section={section}
+        sectionId={section.id}
+        problems={problems}
+        onChange={onChange}
       />
       {section.variant === "grid" || section.variant === "carousel" ? (
         <div id={FIELD_IDS.content(section.id, "limit")}>

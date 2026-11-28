@@ -4,7 +4,7 @@ import { isHttpsUrl } from "../../security/https-url"
 import { isCleanText } from "../../security/text"
 import { base, device, image, optional, shopText, text } from "../layout-fields"
 import { storefrontLink } from "../menus"
-import { NEWSLETTER_LIMITS } from "./newsletter"
+import { NEWSLETTER_CONSENT_STYLES, NEWSLETTER_LIMITS } from "./newsletter"
 
 /**
  * The `free_rows` footer's blocks (adr/0070 §2): what a column holds, each
@@ -164,6 +164,13 @@ const newsletterBlock = z
     text: optional(shopText(L.newsletterText)),
     description: optional(shopText(NEWSLETTER_LIMITS.description)),
     variant: step(FOOTER_NEWSLETTER_VARIANTS),
+    // The box's consent setting under the same name; absent: the required box
+    consent_style: z
+      .custom<(typeof NEWSLETTER_CONSENT_STYLES)[number]>(
+        (value) => (NEWSLETTER_CONSENT_STYLES as readonly unknown[]).includes(value),
+        BLOCK_ERROR
+      )
+      .optional(),
   })
   .strict()
 

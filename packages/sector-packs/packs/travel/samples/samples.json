@@ -1,0 +1,1306 @@
+{
+  "format": "quant-sample-catalog",
+  "version": 1,
+  "name": "Örnek turlar",
+  "categories": [
+    {
+      "handle": "kapadokya-turlari",
+      "name": "Kapadokya Turları",
+      "parent": "yurt-ici-turlar",
+      "description": "Balon sabahları, vadiler ve mağara otellerle Kapadokya'nın her hâli."
+    },
+    {
+      "handle": "ege-ve-akdeniz-turlari",
+      "name": "Ege ve Akdeniz Turları",
+      "parent": "yurt-ici-turlar",
+      "description": "Koylar, antik kentler ve mavi yolculuklar."
+    }
+  ],
+  "products": [
+    {
+      "handle": "istanbul-tarihi-yarimada-sehir-turu",
+      "title": "İstanbul Tarihi Yarımada Şehir Turu",
+      "summary": "Tam gün: Ayasofya, Sultanahmet, Yerebatan ve Kapalıçarşı",
+      "description": "Bizans'tan Osmanlı'ya bin beş yüz yılı tek günde, yürüyerek. Ayasofya, Sultanahmet Camii, Hipodrom, Yerebatan Sarnıcı ve Kapalıçarşı; öğle yemeği Sultanahmet'te köfteci. Rehber yol boyunca anlatır, grup en çok 14 kişi.\n\nSüre tam gün; kalkış Sultanahmet Meydanı. Fiyata dahil: Rehberlik, öğle yemeği, kulaklık. Dahil değil: Müze girişleri, kişisel harcamalar.\n\nGrup en çok 14 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["kultur-turlari", "gunubirlik-turlar"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 1,
+        "kalkis_yeri": "Sultanahmet Meydanı",
+        "dahil_olanlar": "Rehberlik, öğle yemeği, kulaklık",
+        "dahil_olmayanlar": "Müze girişleri, kişisel harcamalar",
+        "gidilecek_yer": "marmara"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 1850
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 1110
+        }
+      ],
+      "images": [
+        "images/istanbul-tarihi-yarimada-sehir-turu-1.webp",
+        "images/istanbul-tarihi-yarimada-sehir-turu-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 5,
+            "capacity": 14
+          },
+          {
+            "in_days": 6,
+            "capacity": 14
+          },
+          {
+            "in_days": 8,
+            "capacity": 14
+          },
+          {
+            "in_days": 12,
+            "capacity": 14
+          },
+          {
+            "in_days": 15,
+            "capacity": 14
+          },
+          {
+            "in_days": 19,
+            "capacity": 14
+          }
+        ],
+        "program": {
+          "unit": "step",
+          "steps": [
+            {
+              "label": "09.00",
+              "title": "Sultanahmet Meydanı'nda buluşma",
+              "text": "Hipodrom ve Dikilitaş",
+              "tags": []
+            },
+            {
+              "label": "09.45",
+              "title": "Ayasofya ve Sultanahmet Camii",
+              "tags": []
+            },
+            {
+              "label": "12.30",
+              "title": "Öğle yemeği",
+              "tags": ["lunch"]
+            },
+            {
+              "label": "14.00",
+              "title": "Yerebatan Sarnıcı",
+              "tags": []
+            },
+            {
+              "label": "15.30",
+              "title": "Kapalıçarşı'da serbest zaman",
+              "tags": ["free_time"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Kalabalığa rağmen rehberimiz sırayı hiç bekletmedi, Yerebatan'ı ilk kez bu kadar sakin gördüm.",
+          "author": "Ece T.",
+          "days_ago": 12
+        },
+        {
+          "rating": 4,
+          "body": "Tek günde yarımadanın özünü gördük, yürüyüş temposu çocuklu aile için de uygundu.",
+          "author": "Hakan B.",
+          "days_ago": 29
+        },
+        {
+          "rating": 5,
+          "body": "Organizasyon kusursuzdu, her şey söylendiği saatte oldu.",
+          "author": "Ali V.",
+          "days_ago": 30
+        },
+        {
+          "rating": 5,
+          "body": "Rehberimiz bilgili ve güler yüzlüydü; grup da çok uyumluydu.",
+          "author": "Canan R.",
+          "days_ago": 53
+        }
+      ]
+    },
+    {
+      "handle": "efes-sirince-meryem-ana-gunubirlik",
+      "title": "Efes, Şirince ve Meryem Ana Günübirlik",
+      "summary": "Kuşadası ve İzmir otellerinden alışlı tam gün",
+      "description": "Efes antik kentinde Celsus Kütüphanesi, Büyük Tiyatro ve Kuretler Caddesi; ardından Meryem Ana Evi ve Şirince köyünde şarap tadımı. Otelden alış ve dönüş dahildir.\n\nSüre tam gün; kalkış Kuşadası / İzmir otelleri. Fiyata dahil: Otel transferi, rehberlik, öğle yemeği. Dahil değil: Ören yeri girişleri, içecekler.\n\nGrup en çok 30 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["gunubirlik-turlar", "ege-ve-akdeniz-turlari", "kultur-turlari"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 1,
+        "kalkis_yeri": "Kuşadası / İzmir otelleri",
+        "dahil_olanlar": "Otel transferi, rehberlik, öğle yemeği",
+        "dahil_olmayanlar": "Ören yeri girişleri, içecekler",
+        "gidilecek_yer": "ege"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 2350
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 1410
+        }
+      ],
+      "images": [
+        "images/efes-sirince-meryem-ana-gunubirlik-1.webp",
+        "images/efes-sirince-meryem-ana-gunubirlik-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 6,
+            "capacity": 30
+          },
+          {
+            "in_days": 7,
+            "capacity": 30
+          },
+          {
+            "in_days": 9,
+            "capacity": 30
+          },
+          {
+            "in_days": 13,
+            "capacity": 30
+          },
+          {
+            "in_days": 16,
+            "capacity": 30
+          },
+          {
+            "in_days": 20,
+            "capacity": 30
+          }
+        ],
+        "program": {
+          "unit": "step",
+          "steps": [
+            {
+              "label": "08.30",
+              "title": "Otelden alış",
+              "tags": ["transport"]
+            },
+            {
+              "label": "09.30",
+              "title": "Efes antik kenti",
+              "text": "Celsus Kütüphanesi ve Büyük Tiyatro, rehberle iki buçuk saat.",
+              "tags": []
+            },
+            {
+              "label": "12.30",
+              "title": "Öğle yemeği",
+              "tags": ["lunch"]
+            },
+            {
+              "label": "14.00",
+              "title": "Meryem Ana Evi",
+              "tags": []
+            },
+            {
+              "label": "15.30",
+              "title": "Şirince'de şarap tadımı ve serbest zaman",
+              "tags": ["free_time"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Efes'i rehberle gezmek bambaşka; Celsus'un önünde fotoğraf molası da verdik.",
+          "author": "Melis A.",
+          "days_ago": 21
+        },
+        {
+          "rating": 5,
+          "body": "Şirince kısa kaldı ama günün temposu iyiydi, otelden alış dakikasında.",
+          "author": "Burak Y.",
+          "days_ago": 38
+        },
+        {
+          "rating": 4,
+          "body": "Konaklama temiz ve merkeziydi. Bir sonraki turu da buradan alacağız.",
+          "author": "Tuba E.",
+          "days_ago": 37
+        },
+        {
+          "rating": 4,
+          "body": "Program biraz yoğun ama görmek istediğimiz her yeri gördük.",
+          "author": "Yusuf K.",
+          "days_ago": 60
+        }
+      ]
+    },
+    {
+      "handle": "mardin-midyat-gap-turu",
+      "title": "Mardin, Midyat ve GAP Turu",
+      "summary": "4 gün 3 gece: taş sokaklar, manastırlar ve Mezopotamya ovası",
+      "description": "Mardin'in taş evleri ve Mezopotamya manzarası, Deyrulzafaran Manastırı, Midyat'ta telkari atölyeleri, Hasankeyf ve Dara antik kenti. Konaklama Mardin'de butik taş otelde.\n\nSüre 4 gün 3 gece; kalkış Mardin Havalimanı. Fiyata dahil: 3 gece butik otel, kahvaltılar, 2 akşam yemeği, rehberlik, transferler. Dahil değil: Uçak bileti, öğle yemekleri.\n\nGrup en çok 18 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["kultur-turlari"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 4,
+        "kalkis_yeri": "Mardin Havalimanı",
+        "dahil_olanlar": "3 gece butik otel, kahvaltılar, 2 akşam yemeği, rehberlik, transferler",
+        "dahil_olmayanlar": "Uçak bileti, öğle yemekleri",
+        "gidilecek_yer": "guneydogu-anadolu"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 14900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 8940
+        }
+      ],
+      "images": ["images/mardin-midyat-gap-turu-1.webp", "images/mardin-midyat-gap-turu-2.webp"],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 11,
+            "capacity": 18
+          },
+          {
+            "in_days": 25,
+            "capacity": 18
+          },
+          {
+            "in_days": 39,
+            "capacity": 18
+          },
+          {
+            "in_days": 53,
+            "capacity": 18
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Mardin'e varış, eski çarşı",
+              "text": "Havalimanında karşılama, Zinciriye Medresesi ve çarşıda akşam yürüyüşü.",
+              "tags": ["transport", "dinner", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Deyrulzafaran ve Dara",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Midyat ve Hasankeyf",
+              "text": "Telkari atölyesi, Mor Gabriel Manastırı ve Dicle kıyısında Hasankeyf.",
+              "tags": ["breakfast", "dinner", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "Serbest sabah ve dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Mardin'de gün batımında ovaya bakmak tek başına yolculuğa değer. Otel çok güzeldi.",
+          "author": "Zeynep D.",
+          "days_ago": 30
+        },
+        {
+          "rating": 5,
+          "body": "Midyat'taki telkari ustasıyla sohbet etmek turun en güzel anıydı.",
+          "author": "Kemal S.",
+          "days_ago": 47
+        },
+        {
+          "rating": 5,
+          "body": "Küçük grup olması büyük avantaj, hiç kalabalık hissetmedik.",
+          "author": "Merve L.",
+          "days_ago": 44
+        },
+        {
+          "rating": 4,
+          "body": "Yemekler biraz sıradandı ama gezi kısmı harikaydı.",
+          "author": "Gökhan A.",
+          "days_ago": 67
+        }
+      ]
+    },
+    {
+      "handle": "kapadokya-hafta-sonu-turu",
+      "title": "Kapadokya Hafta Sonu Turu",
+      "summary": "2 gece: Uçhisar, Göreme ve Aşk Vadisi, otobüsle",
+      "description": "Cuma akşamı yola çıkıp pazar gece dönen kısa Kapadokya kaçamağı. Uçhisar Kalesi, Göreme Açık Hava Müzesi, Paşabağları ve Aşk Vadisi; mağara otelde konaklama.\n\nSüre 3 gün 2 gece; kalkış İstanbul / Ankara. Fiyata dahil: 2 gece mağara otel, kahvaltılar, otobüs, rehberlik. Dahil değil: Balon uçuşu, müze girişleri, yemekler.\n\nGrup en çok 40 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["kapadokya-turlari", "kultur-turlari"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 3,
+        "kalkis_yeri": "İstanbul / Ankara",
+        "dahil_olanlar": "2 gece mağara otel, kahvaltılar, otobüs, rehberlik",
+        "dahil_olmayanlar": "Balon uçuşu, müze girişleri, yemekler",
+        "gidilecek_yer": "kapadokya"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 6900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 4140
+        }
+      ],
+      "images": [
+        "images/kapadokya-hafta-sonu-turu-1.webp",
+        "images/kapadokya-hafta-sonu-turu-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 8,
+            "capacity": 40
+          },
+          {
+            "in_days": 15,
+            "capacity": 40
+          },
+          {
+            "in_days": 22,
+            "capacity": 40
+          },
+          {
+            "in_days": 29,
+            "capacity": 40
+          },
+          {
+            "in_days": 36,
+            "capacity": 40
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Gece yolculuğu ve Uçhisar",
+              "tags": ["transport", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Göreme, Paşabağları ve Aşk Vadisi",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Avanos ve dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Fiyatına göre çok dolu bir program; mağara otel beklediğimden güzeldi.",
+          "author": "Ceren A.",
+          "days_ago": 39
+        },
+        {
+          "rating": 4,
+          "body": "Otobüs yolculuğu uzun ama rehberimiz yol boyunca keyifli anlattı.",
+          "author": "Serkan U.",
+          "days_ago": 56
+        },
+        {
+          "rating": 5,
+          "body": "Rehberimiz bilgili ve güler yüzlüydü; grup da çok uyumluydu.",
+          "author": "Sibel O.",
+          "days_ago": 51
+        },
+        {
+          "rating": 5,
+          "body": "Fiyatına göre beklentimin üstündeydi, arkadaşlarıma da önerdim.",
+          "author": "Kerem F.",
+          "days_ago": 74
+        }
+      ]
+    },
+    {
+      "handle": "kapadokya-atv-gun-batimi",
+      "title": "Kapadokya ATV ve Gün Batımı Turu",
+      "summary": "3 saat: Kızıl ve Güllüdere vadilerinde ATV ile gün batımı",
+      "description": "Göreme'den hareketle Kızılçukur ve Güllüdere vadilerinde rehber eşliğinde ATV sürüşü; gün batımını vadiye bakan tepede izliyoruz. Ehliyet gerekmez, kısa eğitim verilir.\n\nSüre birkaç saat; kalkış Göreme. Fiyata dahil: ATV, kask, rehber, otel transferi. Dahil değil: Fotoğraf paketi.\n\nGrup en çok 12 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["kapadokya-turlari", "etkinlik-ve-atolyeler"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 1,
+        "kalkis_yeri": "Göreme",
+        "dahil_olanlar": "ATV, kask, rehber, otel transferi",
+        "dahil_olmayanlar": "Fotoğraf paketi",
+        "gidilecek_yer": "kapadokya"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 1600
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 960
+        }
+      ],
+      "images": [
+        "images/kapadokya-atv-gun-batimi-1.webp",
+        "images/kapadokya-atv-gun-batimi-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 4,
+            "capacity": 12
+          },
+          {
+            "in_days": 5,
+            "capacity": 12
+          },
+          {
+            "in_days": 6,
+            "capacity": 12
+          },
+          {
+            "in_days": 7,
+            "capacity": 12
+          },
+          {
+            "in_days": 8,
+            "capacity": 12
+          },
+          {
+            "in_days": 9,
+            "capacity": 12
+          }
+        ],
+        "program": {
+          "unit": "step",
+          "steps": [
+            {
+              "label": "16.00",
+              "title": "Otelden alış ve kısa eğitim",
+              "tags": ["transport"]
+            },
+            {
+              "label": "16.30",
+              "title": "Vadilerde sürüş",
+              "tags": []
+            },
+            {
+              "label": "18.15",
+              "title": "Tepede gün batımı",
+              "tags": []
+            },
+            {
+              "label": "19.00",
+              "title": "Otele dönüş",
+              "tags": ["transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Hayatımda ilk kez ATV kullandım, eğitim yeterliydi ve manzara inanılmazdı.",
+          "author": "İrem S.",
+          "days_ago": 48
+        },
+        {
+          "rating": 5,
+          "body": "Gün batımı noktası çok iyi seçilmiş; tozlanmaya hazırlıklı gelin!",
+          "author": "Mert Ç.",
+          "days_ago": 65
+        },
+        {
+          "rating": 4,
+          "body": "Program biraz yoğun ama görmek istediğimiz her yeri gördük.",
+          "author": "Dilek U.",
+          "days_ago": 58
+        },
+        {
+          "rating": 5,
+          "body": "Rezervasyondan dönüşe kadar iletişim çok iyiydi, sorularımıza hep hızlı yanıt geldi.",
+          "author": "Arda N.",
+          "days_ago": 81
+        }
+      ]
+    },
+    {
+      "handle": "bodrum-gokova-mavi-yolculuk",
+      "title": "Bodrum – Gökova Mavi Yolculuk",
+      "summary": "5 gün 4 gece: guletle Gökova Körfezi'nin koyları",
+      "description": "Bodrum'dan kalkan guletle Gökova Körfezi'nde dört gece: Kleopatra Adası (Sedir), İngiliz Limanı, Yedi Adalar ve Değirmen Bükü. Kabinler klimalı, tam pansiyon.\n\nSüre 5 gün 4 gece; kalkış Bodrum Marina. Fiyata dahil: 4 gece gulet kabini, tam pansiyon, kaptan ve mürettebat. Dahil değil: İçecekler, liman ücretleri, Sedir Adası girişi.\n\nGrup en çok 16 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["gemi-turlari", "ege-ve-akdeniz-turlari"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 5,
+        "kalkis_yeri": "Bodrum Marina",
+        "dahil_olanlar": "4 gece gulet kabini, tam pansiyon, kaptan ve mürettebat",
+        "dahil_olmayanlar": "İçecekler, liman ücretleri, Sedir Adası girişi",
+        "gidilecek_yer": "ege"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 21900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 13140
+        }
+      ],
+      "images": [
+        "images/bodrum-gokova-mavi-yolculuk-2.webp",
+        "images/bodrum-gokova-mavi-yolculuk-1.webp"
+      ],
+      "booking": {
+        "sale_mode": "both",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 17,
+            "capacity": 16
+          },
+          {
+            "in_days": 24,
+            "capacity": 16
+          },
+          {
+            "in_days": 31,
+            "capacity": 16
+          },
+          {
+            "in_days": 38,
+            "capacity": 16
+          },
+          {
+            "in_days": 45,
+            "capacity": 16
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Bodrum'dan hareket, Orak Adası",
+              "tags": ["lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Sedir Adası ve Kleopatra Plajı",
+              "tags": ["breakfast", "lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "İngiliz Limanı ve Yedi Adalar",
+              "tags": ["breakfast", "lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "Değirmen Bükü ve Çökertme",
+              "tags": ["breakfast", "lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "5. gün",
+              "title": "Bodrum'a dönüş",
+              "tags": ["breakfast"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Mürettebat ailemiz gibiydi, aşçının yemekleri ayrı bir tatil sebebi.",
+          "author": "Pınar G.",
+          "days_ago": 57
+        },
+        {
+          "rating": 5,
+          "body": "Yedi Adalar'da sabah yüzmek… Başka bir şey demeye gerek yok.",
+          "author": "Emre D.",
+          "days_ago": 74
+        },
+        {
+          "rating": 4,
+          "body": "Yemekler biraz sıradandı ama gezi kısmı harikaydı.",
+          "author": "Nur S.",
+          "days_ago": 65
+        },
+        {
+          "rating": 5,
+          "body": "Organizasyon kusursuzdu, her şey söylendiği saatte oldu.",
+          "author": "Halil İ.",
+          "days_ago": 88
+        }
+      ]
+    },
+    {
+      "handle": "kas-kalkan-kekova-turu",
+      "title": "Kaş, Kalkan ve Kekova Turu",
+      "summary": "4 gün 3 gece: batık şehir, Kaleköy ve Kaputaş",
+      "description": "Kaş'ta butik otel, Kekova'da batık şehir üzerinde tekne ve kano, Kaleköy (Simena) kalesi, Kalkan'ın beyaz evleri ve Kaputaş plajı.\n\nSüre 4 gün 3 gece; kalkış Dalaman / Antalya Havalimanı. Fiyata dahil: 3 gece butik otel, kahvaltılar, Kekova teknesi, rehberlik, transferler. Dahil değil: Uçak bileti, kano kiralama, yemekler.\n\nGrup en çok 16 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["ege-ve-akdeniz-turlari", "gemi-turlari"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 4,
+        "kalkis_yeri": "Dalaman / Antalya Havalimanı",
+        "dahil_olanlar": "3 gece butik otel, kahvaltılar, Kekova teknesi, rehberlik, transferler",
+        "dahil_olmayanlar": "Uçak bileti, kano kiralama, yemekler",
+        "gidilecek_yer": "akdeniz"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 13900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 8340
+        }
+      ],
+      "images": ["images/kas-kalkan-kekova-turu-1.webp", "images/kas-kalkan-kekova-turu-3.webp"],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 15,
+            "capacity": 16
+          },
+          {
+            "in_days": 29,
+            "capacity": 16
+          },
+          {
+            "in_days": 43,
+            "capacity": 16
+          },
+          {
+            "in_days": 57,
+            "capacity": 16
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Kaş'a varış",
+              "tags": ["transport", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Kekova tekne turu ve Kaleköy",
+              "tags": ["breakfast", "lunch", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Kalkan ve Kaputaş",
+              "tags": ["breakfast", "free_time", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "Dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Kekova'da batık şehrin üzerinden geçerken suyun berraklığına inanamadık.",
+          "author": "Elif N.",
+          "days_ago": 66
+        },
+        {
+          "rating": 4,
+          "body": "Kaş'ta otel konumu harikaydı, akşamları çarşıya yürüdük.",
+          "author": "Oğuz K.",
+          "days_ago": 83
+        },
+        {
+          "rating": 5,
+          "body": "Fiyatına göre beklentimin üstündeydi, arkadaşlarıma da önerdim.",
+          "author": "Ali V.",
+          "days_ago": 72
+        },
+        {
+          "rating": 4,
+          "body": "Konaklama temiz ve merkeziydi. Bir sonraki turu da buradan alacağız.",
+          "author": "Canan R.",
+          "days_ago": 95
+        }
+      ]
+    },
+    {
+      "handle": "firtina-vadisi-zil-kale-trekking",
+      "title": "Fırtına Vadisi ve Zil Kale Trekking",
+      "summary": "4 gün 3 gece: Kaçkarlar'da yayladan yaylaya",
+      "description": "Çamlıhemşin'den Zil Kale'ye, Pokut ve Sal yaylalarına yürüyüş. Konaklama yayla evlerinde; günde 10–14 km, orta zorlukta.\n\nSüre 4 gün 3 gece; kalkış Rize-Artvin Havalimanı. Fiyata dahil: 3 gece yayla evi, tam pansiyon, rehberlik, transferler. Dahil değil: Uçak bileti, kişisel ekipman.\n\nGrup en çok 12 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["doga-ve-trekking"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 4,
+        "kalkis_yeri": "Rize-Artvin Havalimanı",
+        "dahil_olanlar": "3 gece yayla evi, tam pansiyon, rehberlik, transferler",
+        "dahil_olmayanlar": "Uçak bileti, kişisel ekipman",
+        "gidilecek_yer": "karadeniz"
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 10900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 6540
+        }
+      ],
+      "images": [
+        "images/firtina-vadisi-zil-kale-trekking-1.webp",
+        "images/firtina-vadisi-zil-kale-trekking-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "min_participants": 4,
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 19,
+            "capacity": 12
+          },
+          {
+            "in_days": 33,
+            "capacity": 12
+          },
+          {
+            "in_days": 47,
+            "capacity": 12
+          },
+          {
+            "in_days": 61,
+            "capacity": 12
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Çamlıhemşin ve Fırtına Vadisi",
+              "tags": ["transport", "dinner", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Zil Kale yürüyüşü",
+              "tags": ["breakfast", "lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Pokut ve Sal yaylaları",
+              "tags": ["breakfast", "lunch", "dinner", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "İnişe geçiş ve dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Pokut'ta bulutların üstünde uyanmak… Rehberimiz çok deneyimliydi.",
+          "author": "Sena B.",
+          "days_ago": 75
+        },
+        {
+          "rating": 5,
+          "body": "Yollar zaman zaman çamurlu, iyi bot şart. Manzara her şeye değer.",
+          "author": "Barış Ö.",
+          "days_ago": 12
+        },
+        {
+          "rating": 5,
+          "body": "Rezervasyondan dönüşe kadar iletişim çok iyiydi, sorularımıza hep hızlı yanıt geldi.",
+          "author": "Tuba E.",
+          "days_ago": 79
+        },
+        {
+          "rating": 5,
+          "body": "Küçük grup olması büyük avantaj, hiç kalabalık hissetmedik.",
+          "author": "Yusuf K.",
+          "days_ago": 102
+        }
+      ]
+    },
+    {
+      "handle": "klasik-italya-roma-floransa-venedik",
+      "title": "Klasik İtalya: Roma, Floransa, Venedik",
+      "summary": "7 gün 6 gece: Kolezyum'dan Büyük Kanal'a",
+      "description": "Roma'da Kolezyum, Vatikan ve Trevi; Toskana yolunda Pisa; Floransa'da Duomo ve Uffizi; Venedik'te San Marco ve gondol. Hızlı trenle şehirler arası.\n\nSüre 7 gün 6 gece; kalkış İstanbul Havalimanı. Fiyata dahil: Uçak bileti, 6 gece otel, kahvaltılar, hızlı tren, rehberlik. Dahil değil: Schengen vizesi, müze girişleri, şehir vergileri.\n\nGrup en çok 24 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["avrupa-turlari", "yurt-disi-turlar"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 7,
+        "kalkis_yeri": "İstanbul Havalimanı",
+        "dahil_olanlar": "Uçak bileti, 6 gece otel, kahvaltılar, hızlı tren, rehberlik",
+        "dahil_olmayanlar": "Schengen vizesi, müze girişleri, şehir vergileri",
+        "gidilecek_yer": "yurt-disi",
+        "vize_pasaport_notu": "Schengen vizesi gerekir; başvuru belgeleri için kayıttan sonra size liste gönderiyoruz."
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 54900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 32940
+        }
+      ],
+      "images": [
+        "images/klasik-italya-roma-floransa-venedik-1.webp",
+        "images/klasik-italya-roma-floransa-venedik-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "both",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 33,
+            "capacity": 24
+          },
+          {
+            "in_days": 47,
+            "capacity": 24
+          },
+          {
+            "in_days": 61,
+            "capacity": 24
+          },
+          {
+            "in_days": 75,
+            "capacity": 24
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Roma'ya varış",
+              "tags": ["transport", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Kolezyum ve Forum",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Vatikan ve serbest zaman",
+              "tags": ["breakfast", "free_time", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "Pisa üzerinden Floransa",
+              "tags": ["breakfast", "transport", "accommodation"]
+            },
+            {
+              "label": "5. gün",
+              "title": "Floransa",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "6. gün",
+              "title": "Hızlı trenle Venedik",
+              "tags": ["breakfast", "transport", "accommodation"]
+            },
+            {
+              "label": "7. gün",
+              "title": "Dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Oteller merkezdeydi, her yere yürüdük. Floransa'da bir gün daha isterdim.",
+          "author": "Gizem H.",
+          "days_ago": 84
+        },
+        {
+          "rating": 5,
+          "body": "Vize sürecinde verdikleri destek çok iyiydi, tur kusursuzdu.",
+          "author": "Ahmet R.",
+          "days_ago": 21
+        },
+        {
+          "rating": 5,
+          "body": "Organizasyon kusursuzdu, her şey söylendiği saatte oldu.",
+          "author": "Merve L.",
+          "days_ago": 86
+        },
+        {
+          "rating": 5,
+          "body": "Rehberimiz bilgili ve güler yüzlüydü; grup da çok uyumluydu.",
+          "author": "Gökhan A.",
+          "days_ago": 109
+        }
+      ]
+    },
+    {
+      "handle": "gurcistan-batum-tiflis-kazbegi",
+      "title": "Gürcistan: Batum, Tiflis ve Kazbegi",
+      "summary": "5 gün 4 gece: kimlikle gidilen Kafkasya turu",
+      "description": "Batum sahili ve Avrupa Meydanı, Kutaisi üzerinden Tiflis'e; eski şehir, Narikala Kalesi ve hamamlar. Askeri Gürcü Yolu ile Kazbegi'deki Gergeti Kilisesi.\n\nSüre 5 gün 4 gece; kalkış Trabzon / Sarp sınır kapısı. Fiyata dahil: 4 gece otel, kahvaltılar, otobüs, rehberlik. Dahil değil: Yemekler, şarap tadımı.\n\nGrup en çok 30 kişidir. Çocuk fiyatı 2–11 yaş için geçerlidir; kalkıştan 14 gün öncesine kadar ücretsiz iptal edebilirsiniz.",
+      "categories": ["vizesiz-turlar", "yurt-disi-turlar"],
+      "template": "tur-bilgileri",
+      "attributes": {
+        "sure": 5,
+        "kalkis_yeri": "Trabzon / Sarp sınır kapısı",
+        "dahil_olanlar": "4 gece otel, kahvaltılar, otobüs, rehberlik",
+        "dahil_olmayanlar": "Yemekler, şarap tadımı",
+        "gidilecek_yer": "yurt-disi",
+        "vize_pasaport_notu": "Türk vatandaşları yeni tip kimlik kartıyla gidebilir, vize gerekmez."
+      },
+      "options": [
+        {
+          "title": "Kişi",
+          "values": ["Yetişkin", "Çocuk"]
+        }
+      ],
+      "variants": [
+        {
+          "options": {
+            "Kişi": "Yetişkin"
+          },
+          "price": 18900
+        },
+        {
+          "options": {
+            "Kişi": "Çocuk"
+          },
+          "price": 11340
+        }
+      ],
+      "images": [
+        "images/gurcistan-batum-tiflis-kazbegi-1.webp",
+        "images/gurcistan-batum-tiflis-kazbegi-2.webp"
+      ],
+      "booking": {
+        "sale_mode": "online",
+        "child_value": "Çocuk",
+        "departures": [
+          {
+            "in_days": 16,
+            "capacity": 30
+          },
+          {
+            "in_days": 30,
+            "capacity": 30
+          },
+          {
+            "in_days": 44,
+            "capacity": 30
+          },
+          {
+            "in_days": 58,
+            "capacity": 30
+          }
+        ],
+        "program": {
+          "unit": "day",
+          "steps": [
+            {
+              "label": "1. gün",
+              "title": "Sarp'tan Batum'a",
+              "tags": ["transport", "accommodation"]
+            },
+            {
+              "label": "2. gün",
+              "title": "Kutaisi üzerinden Tiflis",
+              "tags": ["breakfast", "transport", "accommodation"]
+            },
+            {
+              "label": "3. gün",
+              "title": "Tiflis eski şehir",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "4. gün",
+              "title": "Kazbegi ve Gergeti",
+              "tags": ["breakfast", "accommodation"]
+            },
+            {
+              "label": "5. gün",
+              "title": "Dönüş",
+              "tags": ["breakfast", "transport"]
+            }
+          ]
+        }
+      },
+      "reviews": [
+        {
+          "rating": 5,
+          "body": "Kimlikle yurt dışı tatili için harika seçenek; Kazbegi manzarası nefes kesiciydi.",
+          "author": "Seda Ç.",
+          "days_ago": 13
+        },
+        {
+          "rating": 4,
+          "body": "Tiflis'in eski şehri çok keyifliydi, yemekleri de öyle.",
+          "author": "Uğur M.",
+          "days_ago": 30
+        },
+        {
+          "rating": 4,
+          "body": "Konaklama temiz ve merkeziydi. Bir sonraki turu da buradan alacağız.",
+          "author": "Sibel O.",
+          "days_ago": 93
+        },
+        {
+          "rating": 4,
+          "body": "Program biraz yoğun ama görmek istediğimiz her yeri gördük.",
+          "author": "Kerem F.",
+          "days_ago": 116
+        }
+      ]
+    }
+  ],
+  "credits": [
+    {
+      "file": "images/istanbul-tarihi-yarimada-sehir-turu-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Hagia_Sophia_Mars_2013.jpg",
+      "license": "CC BY-SA 3.0, Arild Vågen (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/istanbul-tarihi-yarimada-sehir-turu-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Exterior_of_Sultan_Ahmed_I_Mosque_in_Istanbul,_Turkey_002.jpg",
+      "license": "CC BY-SA 3.0, Moonik (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/efes-sirince-meryem-ana-gunubirlik-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Ephesus_Celsus_Library_Fa%C3%A7ade.jpg",
+      "license": "CC BY-SA 3.0, Benh LIEU SONG (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/efes-sirince-meryem-ana-gunubirlik-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Ephesus_-_Ancient_Greek_theatre.jpg",
+      "license": "CC BY-SA 3.0, Bernard Gagnon (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/mardin-midyat-gap-turu-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Midyat_(2013)_old_town_3.jpg",
+      "license": "CC BY-SA 4.0, TobiasGr (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/mardin-midyat-gap-turu-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Mor_Hananyo_Monastery_3.jpg",
+      "license": "CC BY-SA 4.0, Izabela Miszczak (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kapadokya-hafta-sonu-turu-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Castle_U%C3%A7hisar_in_Cappadocia.jpg",
+      "license": "CC BY-SA 3.0, Wolfgang Moroder (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kapadokya-hafta-sonu-turu-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:G%C3%B6reme_01.jpg",
+      "license": "CC BY-SA 3.0, Bernard Gagnon (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kapadokya-atv-gun-batimi-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Cappadocia_Landscape_At_Sunset_(135658433).jpeg",
+      "license": "CC BY 3.0, James Farnham Long (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kapadokya-atv-gun-batimi-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Cappadocia_Aerial_View_Landscape.jpg",
+      "license": "CC BY-SA 4.0, Benh LIEU SONG (Flickr) (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bodrum-gokova-mavi-yolculuk-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Gokova_Bay_-_G%C3%B6kova_K%C3%B6rfezi_-_panoramio.jpg",
+      "license": "CC BY-SA 3.0, Semih Ekinci (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/bodrum-gokova-mavi-yolculuk-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Bodrum_Turkey_-_Castle_of_St._Peter_-_panoramio.jpg",
+      "license": "CC BY 3.0, David Broad (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kas-kalkan-kekova-turu-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Sunken_City_Ruins_in_Kekova.jpg",
+      "license": "CC BY-SA 4.0, JamesDavidShoots (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/kas-kalkan-kekova-turu-3.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Kalkan_habour_looking_up_to_Koyici.jpg",
+      "license": "CC BY-SA 2.0, Harry Luff (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/firtina-vadisi-zil-kale-trekking-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Zil_Kalesi.jpeg",
+      "license": "CC BY-SA 2.5, Ozgur13 (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/firtina-vadisi-zil-kale-trekking-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:F%C4%B1rt%C4%B1na_Deresi@Rize-Turkey.JPG",
+      "license": "CC BY-SA 3.0, Dr. Zeynel Cebeci (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/klasik-italya-roma-floransa-venedik-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Colosseum_in_Rome,_Italy_-_April_2007.jpg",
+      "license": "CC BY-SA 2.5, Diliff (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/klasik-italya-roma-floransa-venedik-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Florence_Cathedral_seen_from_Piazzale_Michelangelo_night_dllu.jpg",
+      "license": "CC BY-SA 4.0, Dllu (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/gurcistan-batum-tiflis-kazbegi-1.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:Gergeti_Trinity_Church,_Mountain_pasture,_Georgia.jpg",
+      "license": "CC BY 4.0, Vyacheslav Argenberg (küçültülüp WebP'ye çevrildi)"
+    },
+    {
+      "file": "images/gurcistan-batum-tiflis-kazbegi-2.webp",
+      "source": "https://commons.wikimedia.org/wiki/File:2014_Tbilisi,_Domy_na_Starym_Mie%C5%9Bcie_(04).jpg",
+      "license": "CC BY-SA 4.0, Marcin Konsek (küçültülüp WebP'ye çevrildi)"
+    }
+  ]
+}

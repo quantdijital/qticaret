@@ -109,12 +109,32 @@ export function ContactsStep({ draft, change, problems }: StepProps) {
         title={t("wizard.contacts.ownerTitle")}
         description={t("wizard.contacts.ownerText")}
       >
-        <PersonFields
-          who="owner"
-          person={draft.owner}
-          problems={problems}
-          onChange={set("owner")}
-        />
+        <div className="flex flex-col gap-4">
+          <PersonFields
+            who="owner"
+            person={draft.owner}
+            problems={problems}
+            onChange={set("owner")}
+          />
+          {/* Review L2: these go into the shop's settings, shown on its storefront */}
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="wizard-storefront-contact"
+                checked={draft.storefront_contact}
+                onCheckedChange={(checked) => {
+                  change((current) => ({ ...current, storefront_contact: checked === true }))
+                }}
+              />
+              <Label htmlFor="wizard-storefront-contact" className="font-normal">
+                {t("wizard.contacts.storefrontUse")}
+              </Label>
+            </div>
+            <p className="text-[13px] leading-5 text-muted-foreground">
+              {t("wizard.contacts.storefrontNote")}
+            </p>
+          </div>
+        </div>
       </SectionCard>
       {extra("billing")}
       {extra("technical")}

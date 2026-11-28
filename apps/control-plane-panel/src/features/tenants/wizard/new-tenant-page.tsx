@@ -25,6 +25,7 @@ import { CompanyStep } from "./steps/company-step"
 import { ContactsStep } from "./steps/contacts-step"
 import { PackageStep } from "./steps/package-step"
 import { ReviewStep } from "./steps/review-step"
+import { LookStep } from "./steps/look-step"
 import { SectorStep } from "./steps/sector-step"
 import { useAddressChecks } from "./use-address-checks"
 
@@ -34,7 +35,7 @@ const REVIEW = WIZARD_STEPS.length - 1
 
 /**
  * "Yeni mağaza" (C11, adr/0061 §8 F17.1; owner, operator): Firma →
- * Yetkililer → Paket → Adres → Sektör paketi → Özet ve kur, one question
+ * Yetkililer → Paket → Adres → Sektör paketi → Görünüm → Özet ve kur, one question
  * group at a time (docs/18 §7 Wizard). Back and forth keeps what was
  * typed; Next checks the step first and says what is missing beside the
  * field; leaving with something typed asks. "Kur" makes the record, saves
@@ -186,6 +187,7 @@ export function NewTenantPage({ calls = setupCalls }: { calls?: SetupCalls }) {
                 <AddressStep {...props} checks={checks} platformDomain={platformDomain} />
               ) : null}
               {step === "sector" ? <SectorStep {...props} /> : null}
+              {step === "look" ? <LookStep {...props} /> : null}
               {step === "review" ? (
                 <ReviewStep
                   draft={draft}

@@ -34,6 +34,7 @@ import {
   PostTenantPlan,
   PostTenantUpdate,
 } from "../admin/cp/tenants/validators"
+import { PostSupportGrant } from "../admin/cp/tenants/[id]/support-grants/validators"
 
 /**
  * What each shop and package route takes (C7), strictly: its body or
@@ -75,6 +76,7 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query(P, NoQuery),
   // C12: the sector packs this control plane offers
   query("/admin/cp/sector-packs", NoQuery),
+  query("/admin/cp/sector-packs/:pack/presets/:code/preview", NoQuery),
   ...[
     `${T}/:id/contacts/:contact_id`,
     `${T}/:id/domains/:domain_id`,
@@ -94,10 +96,28 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
       validateAndTransformBody(NoBody),
     ],
   },
+  {
+    matcher: `${T}/:id/support-grants`,
+    methods: ["POST"],
+    // adr/0061 Ek 2026-11-28: per staff member, every address together
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.support_grant, { identity: userIdOf }),
+      validateAndTransformBody(PostSupportGrant),
+    ],
+  },
   body(`${T}/:id/contacts`, PostContact),
   body(`${T}/:id/contacts/:contact_id`, PostContact),
   body(`${T}/:id/domains`, PostDomain),
   body(`${T}/:id/domains/:domain_id/primary`, NoBody),
+  {
+    matcher: `${T}/:id/domains/:domain_id/check`,
+    methods: ["POST"],
+    // F16.7 review L1: a check holds the request for DNS; bounded per staff member
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.domain_check, { identity: userIdOf }),
+      validateAndTransformBody(NoBody),
+    ],
+  },
   body(`${T}/:id/notes`, PostNote),
   body(`${T}/:id/notes/:note_id`, PostNoteUpdate),
   body(`${T}/:id/plan`, PostTenantPlan),

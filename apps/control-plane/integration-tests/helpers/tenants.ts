@@ -27,8 +27,8 @@ export function client(http: HttpClient) {
       member: Member,
       headers: Record<string, string> = member.headers
     ) => http.post(path, body, { ...anyStatus, headers }),
-    delete: (path: string, member: Member) =>
-      http.delete(path, { ...anyStatus, headers: member.headers }),
+    delete: (path: string, member: Member, headers: Record<string, string> = member.headers) =>
+      http.delete(path, { ...anyStatus, headers }),
   }
 }
 

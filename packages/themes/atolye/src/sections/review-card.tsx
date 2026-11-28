@@ -1,4 +1,4 @@
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, Star } from "lucide-react"
 import type { ReviewsProductImage } from "@qticaret/types/section-reviews"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
@@ -179,6 +179,89 @@ function PlainCard({ review, sizes, t }: { review: Review; sizes: string; t: Tra
   )
 }
 
+/**
+ * `compact` (owner 2026-11-28): no taller than today's card. A short
+ * picture of the product across its top, then its name and one star with
+ * the score in a row (picture and name one link), the quote in three
+ * lines at most, who and when under a rule.
+ */
+function CompactCard({ review, sizes, t }: { review: Review; sizes: string; t: Translate }) {
+  const product = review.product
+  const score = review.rating.toLocaleString("tr-TR", { minimumFractionDigits: 1 })
+  // One star and the score: on the picture's corner, else before the name
+  const rating = (
+    <span
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-paper/90 px-2.5 py-1 text-sm font-semibold text-text shadow-sm backdrop-blur-sm"
+      role="img"
+      aria-label={t("reviews.stars", { rating: review.rating })}
+    >
+      <Star className="size-4 fill-star text-star" aria-hidden="true" strokeWidth={1.5} />
+      {score}
+    </span>
+  )
+  const picture = product?.image ?? null
+  const head = (
+    <>
+      {picture && (
+        <span className="relative block aspect-[5/2] overflow-hidden bg-media">
+          <ResponsiveImage image={picture} sizes={sizes} className={ZOOM} />
+          <span className="absolute top-2.5 right-2.5">{rating}</span>
+        </span>
+      )}
+      <span className="flex items-start gap-2 px-4 pt-3 lg:px-5">
+        {!picture && rating}
+        {product && (
+          <span className="line-clamp-2 min-w-0 text-sm leading-snug font-semibold text-text">
+            {product.label}
+          </span>
+        )}
+      </span>
+    </>
+  )
+  // A breath of the shop's colour (owner 2026-11-28): the ground, its rule and the quote mark
+  return (
+    <article className="flex h-full flex-col overflow-hidden rounded-tile bg-[color-mix(in_oklab,var(--color-signal)_9%,var(--color-paper))]">
+      {product ? (
+        <a
+          href={product.path}
+          className="group block no-underline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-text"
+          aria-label={`${t("reviews.about")}: ${product.label}`}
+        >
+          {head}
+        </a>
+      ) : (
+        <span className="block">{head}</span>
+      )}
+      <div className="flex flex-1 flex-col gap-3 px-4 pt-2 pb-4 lg:px-5 lg:pb-5">
+        <blockquote className="flex-1 text-sm leading-relaxed text-text-2">
+          <p className="line-clamp-3">
+            <span
+              aria-hidden="true"
+              className="me-0.5 font-display text-lg leading-none text-signal"
+            >
+              “
+            </span>
+            {quoteOf(review.body)}”
+          </p>
+        </blockquote>
+        <footer className="flex items-center gap-1.5 border-t border-[color-mix(in_oklab,var(--color-signal)_18%,var(--color-rule))] pt-3 text-xs text-text-2">
+          <span className="font-semibold text-text">{review.author}</span>
+          {review.verified && (
+            <BadgeCheck
+              className="size-3.5 shrink-0 text-ok"
+              role="img"
+              aria-label={t("product.verified")}
+              strokeWidth={2}
+            />
+          )}
+          <span aria-hidden="true">·</span>
+          <span>{review.date}</span>
+        </footer>
+      </div>
+    </article>
+  )
+}
+
 /** The card the carousel's `product_image` asks for; `none` (or absent) is today's. */
 export function ReviewCard(props: {
   review: Review
@@ -186,6 +269,9 @@ export function ReviewCard(props: {
   t: Translate
   productImage: ReviewsProductImage
 }) {
+  if (props.productImage === "compact") {
+    return <CompactCard {...props} />
+  }
   if (props.productImage === "cover") {
     return <CoverCard {...props} />
   }

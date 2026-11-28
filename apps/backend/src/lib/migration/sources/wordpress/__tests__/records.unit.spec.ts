@@ -287,11 +287,21 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     ])
     expect(notesOf("migration.wordpress_term_unread")).toEqual(["post_tag:sss-item-x"])
     expect(notesOf("migration.wordpress_post_categories")).toEqual(["post:40"])
-    // The picture in the body is left out and named; the question a heading; old links paths here
-    expect(notesOf("migration.wordpress_body_media")).toEqual(["post:40"])
+    // The picture in the body an image block of the old file (the run stores it, adr/0042
+    // Ek 2026-11-27); the question a heading; old links paths here
+    expect(notesOf("migration.wordpress_body_media")).toEqual([])
     const body = post?.content.body
     expect(contentDoc.safeParse(body).success).toBe(true)
-    expect(body?.content.map((block) => block.type)).toEqual(["paragraph", "heading", "paragraph"])
+    expect(body?.content.map((block) => block.type)).toEqual([
+      "paragraph",
+      "image",
+      "heading",
+      "paragraph",
+    ])
+    expect(body?.content[1]).toEqual({
+      type: "image",
+      attrs: { src: "https://eski.example.com/wp-content/uploads/2026/01/x.png", alt: "x" },
+    })
     expect(JSON.stringify(body)).toContain('"href":"/urun/dokum-tava"')
   })
 

@@ -48,7 +48,7 @@ describe("a ready-made look's picture (adr/0063 §7)", () => {
     expect(mockPreset).toHaveBeenCalledWith("kahve", "kahve-1", undefined)
     expect(mockStat).toHaveBeenCalledWith(join(DIR, "preview.webp"))
     expect(mockRead).toHaveBeenCalledWith(join(DIR, "preview.webp"))
-    expect(list).toHaveBeenCalledWith({ pack: "kahve" }, { select: ["id"], take: 1 })
+    expect(list).not.toHaveBeenCalled()
   })
 
   it("serves general's looks without asking whether the pack is applied", async () => {
@@ -57,11 +57,10 @@ describe("a ready-made look's picture (adr/0063 §7)", () => {
     expect(list).not.toHaveBeenCalled()
   })
 
-  it("has none for a pack not applied here, never reading the pack", async () => {
-    const { container } = containerWith(["baska"])
-    await expect(presetPreview(container, "kahve", "kahve-1")).resolves.toBeNull()
-    expect(mockPreset).not.toHaveBeenCalled()
-    expect(mockRead).not.toHaveBeenCalled()
+  it("serves another sector's look too: the gallery lists every pack (owner, 2026-11-28)", async () => {
+    const { container, list } = containerWith(["baska"])
+    await expect(presetPreview(container, "kahve", "kahve-1")).resolves.toBe(IMAGE)
+    expect(list).not.toHaveBeenCalled()
   })
 
   it("has none for an unknown look, one the loader refuses, or one without a picture", async () => {

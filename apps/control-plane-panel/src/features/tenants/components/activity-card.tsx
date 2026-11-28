@@ -17,6 +17,8 @@ const ACTIONS: Record<string, string> = {
   [`POST ${T}`]: "renamed",
   [`POST ${T}/company`]: "company",
   [`POST ${T}/reveal-tckn`]: "tckn",
+  // adr/0061 Ek 2026-11-28: a grant into the shop's panel (its reason is the note beside it)
+  [`POST ${T}/support-grants`]: "supportGrant",
   [`POST ${T}/contacts`]: "contactAdded",
   [`POST ${T}/contacts/:contact_id`]: "contactChanged",
   [`DELETE ${T}/contacts/:contact_id`]: "contactRemoved",

@@ -170,17 +170,26 @@ medusaIntegrationTestRunner({
         throw new Error("no katalog preset")
       }
 
-      // Before the cutlery pack: its looks are neither listed nor applied
-      expect((await apply(LOOK.pack, LOOK.code)).status).toBe(400)
-      await withCutlery(container)
-      const gallery = await settle(
-        http.get<{ presets: { pack: string; code: string; in_draft: number | null }[] }>(
-          "/admin/storefront-presets",
-          asOwner
-        )
+      const listed = async () =>
+        (
+          await settle(
+            http.get<{ presets: { pack: string; code: string; own: boolean }[] }>(
+              "/admin/storefront-presets",
+              asOwner
+            )
+          )
+        ).data.presets
+      // Before the cutlery pack: its looks are listed as another sector's (owner, 2026-11-28)
+      expect(await listed()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pack: LOOK.pack, code: LOOK.code, own: false }),
+        ])
       )
-      expect(gallery.data.presets).toEqual(
-        expect.arrayContaining([expect.objectContaining({ pack: LOOK.pack, code: LOOK.code })])
+      await withCutlery(container)
+      expect(await listed()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ pack: LOOK.pack, code: LOOK.code, own: true }),
+        ])
       )
 
       // The shop's own design, live, with its own trust badges, an announcement bar, a
@@ -221,14 +230,13 @@ medusaIntegrationTestRunner({
         // Hakkımızda's picture, the page opened for the look (adr/0073 Ek 2026-11-19 (2) K6)
         images: { added: 1, kept: 0 },
         demo: { added: 0, kept: 0 },
-        // The shop had no Hakkımızda: opened as a draft, with the look's own text
-        made_pages: [
-          {
-            ref: "page:hakkimizda",
-            page_id: expect.stringMatching(/^cnt_/) as unknown,
-            name: "Hakkımızda",
-          },
-        ],
+        // The shop had none of the look's pages (Hakkımızda and the starter pages, adr/0073 Ek
+        // 2026-11-28): each opened as a draft, with the look's own text
+        made_pages: (katalog.layout.pages ?? []).map((page) => ({
+          ref: page.page_id.$handle,
+          page_id: expect.stringMatching(/^cnt_/) as unknown,
+          name: page.name,
+        })),
         texts_kept: [],
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },

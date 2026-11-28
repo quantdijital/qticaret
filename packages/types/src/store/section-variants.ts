@@ -26,9 +26,11 @@ export const SECTION_VARIANTS = {
    * photo-led cards filling each row, the first one wider while `lead` is on;
    * `panels` (Ek 2026-11-19): frameless graphite panels led by their photos,
    * the first tall beside the others stacked while `lead` is on; `icons`
-   * (adr/0077 §10 Ek): one row of round discs, each an icon over its name.
+   * (adr/0077 §10 Ek): one row of round discs, each an icon over its name;
+   * `carousel`: the categories as picture cards in one row that slides (the
+   * scroller kit, `section-scroller`).
    */
-  categories: ["tiles", "linked", "collage", "panels", "icons"],
+  categories: ["tiles", "linked", "collage", "panels", "icons", "carousel"],
   /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,

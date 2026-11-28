@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
@@ -31,10 +31,59 @@ const ITEMS = [
   { question: "Bulaşık makinesinde yıkanır mı?", answer: "Elde yıkanması önerilir." },
 ]
 
-function setup(options: { allowed?: boolean; addStatus?: number } = {}) {
-  sdkFetch.mockImplementation(() =>
-    Promise.resolve({ services: [], tasks: [task(options.allowed ?? true)], flags: {} })
-  )
+/** The product's questions as the panel lists them: the shop's own and a customer's waiting one. */
+const LISTED = [
+  {
+    id: "pq_9",
+    body: "Sapı ısınır mı?",
+    author_name: "Ayşe Y.",
+    by_shop: false,
+    status: "pending",
+    has_link: false,
+    created_at: "2026-11-26T10:00:00Z",
+    product: { id: "prod_1", title: "Termos" },
+    answers: [],
+  },
+  {
+    id: "pq_8",
+    body: "Garanti var mı?",
+    author_name: "Mağaza",
+    by_shop: true,
+    status: "approved",
+    has_link: false,
+    created_at: "2026-11-25T10:00:00Z",
+    product: { id: "prod_1", title: "Termos" },
+    answers: [
+      {
+        id: "pans_8",
+        body: "İki yıl garantilidir.",
+        author_name: "Mağaza",
+        by_shop: true,
+        status: "approved",
+        has_link: false,
+        created_at: "2026-11-25T10:00:00Z",
+      },
+    ],
+  },
+]
+
+function setup(
+  options: { allowed?: boolean; addStatus?: number; can?: boolean; listed?: unknown[] } = {}
+) {
+  sdkFetch.mockImplementation((path: string) => {
+    if (path === "/admin/staff/me") {
+      const can = options.can ?? true
+      return Promise.resolve({ role: "owner", can: { moderation: can, settings: can } })
+    }
+    if (path === "/admin/product-questions") {
+      const listed = options.listed ?? []
+      return Promise.resolve({ questions: listed, count: listed.length, limit: 50 })
+    }
+    if (path.startsWith("/admin/product-questions")) {
+      return Promise.resolve({ question: { id: "pq_new" } })
+    }
+    return Promise.resolve({ services: [], tasks: [task(options.allowed ?? true)], flags: {} })
+  })
   netFetch.mockImplementation((url: string) => {
     if (url.endsWith("/dismiss")) {
       return json(200, { suggestion: { id: "sug_1" } })
@@ -159,12 +208,134 @@ describe("FaqCard (adr/0074 §5 madde 4)", () => {
     expect(screen.queryByLabelText("Soru")).not.toBeInTheDocument()
   })
 
-  it("draws nothing for a role the task does not allow", async () => {
-    setup({ allowed: false })
+  it("offers no draft to a role the task does not allow, and still lists the questions", async () => {
+    const user = setup({ allowed: false, can: false, listed: LISTED })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
     await waitFor(() => {
       expect(sdkFetch).toHaveBeenCalledWith("/admin/ai/services")
     })
+
+    expect(await screen.findByText("Garanti var mı?")).toBeInTheDocument()
     expect(screen.queryByRole("button", { name: BUTTON })).not.toBeInTheDocument()
-    expect(screen.queryByText("Sık sorulan sorular")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Soru ekle" })).not.toBeInTheDocument()
+    // Read only: a row opens nothing
+    expect(screen.queryByRole("button", { name: /Soruyu aç/ })).not.toBeInTheDocument()
+  })
+})
+
+describe("FaqCard: the product's questions (owner 2026-11-27)", () => {
+  it("lists every question newest first with its state and answer", async () => {
+    const user = setup({ listed: LISTED })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+
+    const rows = await screen.findAllByRole("button", { name: /Soruyu aç/ })
+    expect(rows.map((row) => row.textContent)).toEqual([
+      expect.stringContaining("Sapı ısınır mı?Henüz yanıt yok"),
+      expect.stringContaining("Garanti var mı?İki yıl garantilidir."),
+    ])
+    expect(rows[0]).toHaveTextContent("Yanıt bekliyor")
+    expect(rows[1]).toHaveTextContent("Yayında")
+    expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions", {
+      query: { product_id: "prod_1" },
+    })
+  })
+
+  it("adds a question by hand and reads the list again", async () => {
+    const user = setup({ listed: [] })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    expect(await screen.findByText("Bu ürüne henüz soru yok.")).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Soru ekle" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.type(within(dialog).getByLabelText("Soru"), "Kapağı sızdırır mı?")
+    await user.type(within(dialog).getByLabelText("Mağazanın yanıtı"), "Hayır, contalıdır.")
+    await user.click(within(dialog).getByRole("button", { name: "Ekle" }))
+
+    await waitFor(() => {
+      expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions", {
+        method: "POST",
+        body: {
+          product_id: "prod_1",
+          question: "Kapağı sızdırır mı?",
+          answer: "Hayır, contalıdır.",
+        },
+      })
+    })
+    await waitFor(() => {
+      expect(
+        sdkFetch.mock.calls.filter(([path]) => path === "/admin/product-questions")
+      ).toHaveLength(3)
+    })
+  })
+
+  it("edits a question's words and removes the shop's answer from its dialog", async () => {
+    const user = setup({ listed: LISTED })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu aç: Garanti var mı?" }))
+    const dialog = await screen.findByRole("dialog")
+    const body = within(dialog).getByLabelText("Soru")
+    await user.clear(body)
+    await user.type(body, "Garantisi kaç yıl?")
+    await user.clear(within(dialog).getByLabelText("Mağazanın yanıtı"))
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions/pq_8/edit", {
+        method: "POST",
+        body: { body: "Garantisi kaç yıl?", answer: null },
+      })
+    })
+  })
+
+  it("says in the dialog, never on the storefront, that the shop changed a customer's words", async () => {
+    const edited = { ...LISTED[0], edited_at: "2026-11-27T09:00:00Z" }
+    const user = setup({ listed: [edited] })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu aç: Sapı ısınır mı?" }))
+
+    expect(
+      within(await screen.findByRole("dialog")).getByText(/Mağaza tarafından düzenlendi/)
+    ).toBeInTheDocument()
+  })
+
+  it("hides a published question", async () => {
+    const user = setup({ listed: LISTED })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu aç: Garanti var mı?" }))
+    await user.click(
+      within(await screen.findByRole("dialog")).getByRole("button", { name: "Gizle" })
+    )
+
+    await waitFor(() => {
+      expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions/moderate", {
+        method: "POST",
+        body: { ids: ["pq_8"], status: "rejected" },
+      })
+    })
+  })
+
+  it("deletes after asking, and offers Geri al", async () => {
+    const user = setup({ listed: LISTED })
+    await user.click(await screen.findByRole("button", { name: "Sık sorulan sorular" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu aç: Garanti var mı?" }))
+    await user.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Sil" }))
+    await user.click(await screen.findByRole("button", { name: "Soruyu sil" }))
+
+    await waitFor(() => {
+      expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions/pq_8", { method: "DELETE" })
+    })
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith("Soru silindi.", {
+        action: { label: "Geri al", onClick: expect.any(Function) as () => void },
+      })
+    })
+    const undo = vi.mocked(toast.success).mock.calls.at(-1)?.[1] as unknown as {
+      action: { onClick: () => void }
+    }
+    undo.action.onClick()
+    await waitFor(() => {
+      expect(sdkFetch).toHaveBeenCalledWith("/admin/product-questions/pq_8/restore", {
+        method: "POST",
+      })
+    })
   })
 })

@@ -95,6 +95,29 @@ export const applyPresetResultSchema = z.discriminatedUnion("status", [
 ])
 export type ApplyPresetResult = z.infer<typeof applyPresetResultSchema>
 
+/**
+ * `tenant:load-samples pack=`: the pack's sample catalogue loaded into the
+ * shop (the wizard's "Örnek ürünlerle başla"), every record marked as a
+ * sample: how many products and categories it made, how many of the pack's
+ * hidden categories it showed. `already_loaded`: the set is there already
+ * (exits 0). `unknown_samples`: this build has no samples for the pack, or
+ * the shop was not given the pack; it exits 0 too, so its reason is read.
+ */
+export const loadSamplesResultSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("loaded"),
+      pack: z.string().regex(/^[a-z][a-z0-9-]{1,39}$/),
+      products: count,
+      categories_made: count,
+      categories_opened: count,
+    })
+    .strict(),
+  z.object({ status: z.literal("already_loaded") }).strict(),
+  z.object({ status: z.literal("unknown_samples") }).strict(),
+])
+export type LoadSamplesResult = z.infer<typeof loadSamplesResultSchema>
+
 /** The line a command prints for `result`. */
 export const tenantResultLine = (result: object): string =>
   `${TENANT_RESULT_PREFIX}${JSON.stringify(result)}`
@@ -116,3 +139,54 @@ export function readTenantResult(stdout: string): unknown {
     return null
   }
 }
+
+/**
+ * `tenant:apply-profile` (stdin): the shop's details the control plane's
+ * wizard took (its company and its owner), handed to the shop at setup so
+ * the owner does not type them again. Only empty fields of the shop's
+ * settings are filled; never a TCKN (a sole trader's number stays in the
+ * control plane). Each field is optional; the shop checks each with its own
+ * settings schema and leaves out one it refuses.
+ */
+export const tenantProfileSchema = z
+  .object({
+    legal: z
+      .object({
+        company_title: z.string().min(1).max(200).optional(),
+        tax_office: z.string().min(1).max(100).optional(),
+        /** A VKN (10 digits) only. */
+        tax_number: z
+          .string()
+          .regex(/^\d{10}$/)
+          .optional(),
+        address: z.string().min(1).max(500).optional(),
+      })
+      .strict(),
+    store: z
+      .object({
+        contact_email: z.string().min(3).max(254).optional(),
+        contact_phone: z.string().min(3).max(32).optional(),
+      })
+      .strict(),
+  })
+  .strict()
+export type TenantProfile = z.infer<typeof tenantProfileSchema>
+
+/**
+ * `tenant:apply-profile`'s result: how many fields it filled, how many the
+ * shop already had (kept as they are) and how many its schemas refused.
+ * Counts only: no value crosses back.
+ */
+export const applyProfileResultSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("applied"),
+      filled: count,
+      kept: count,
+      refused: count,
+    })
+    .strict(),
+  // Not a profile: nothing changed, it exits 1
+  z.object({ status: z.literal("refused") }).strict(),
+])
+export type ApplyProfileResult = z.infer<typeof applyProfileResultSchema>

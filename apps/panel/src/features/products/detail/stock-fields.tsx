@@ -6,6 +6,7 @@ import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { SwitchName } from "./hint-parts"
 import { StockTrackingSwitch } from "./stock-tracking-switch"
 import type { StockFacts, VariantValues } from "./variant-values"
 
@@ -117,14 +118,12 @@ function TrackedFields({
       </div>
       {preorder ? (
         <div className="flex items-start justify-between gap-4 border-t pt-4">
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <label htmlFor={`${idPrefix}-backorder`} className="text-sm font-medium">
-              {t("products.detail.backorder")}
-            </label>
-            <span id={`${idPrefix}-backorder-hint`} className="text-[13px] text-muted-foreground">
-              {t(`${D}.backorderHint`)}
-            </span>
-          </div>
+          <SwitchName
+            htmlFor={`${idPrefix}-backorder`}
+            label={t("products.detail.backorder")}
+            hint={t(`${D}.backorderHint`)}
+            hintId={`${idPrefix}-backorder-hint`}
+          />
           <Controller
             control={form.control}
             name="backorder"

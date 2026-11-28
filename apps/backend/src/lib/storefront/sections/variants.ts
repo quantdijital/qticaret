@@ -23,7 +23,8 @@ export const SECTION_VARIANTS = {
   // `collage` photo-led cards filling each row, the first wider
   // `panels` (Ek 2026-11-19) frameless graphite panels, the first tall beside the others
   // `icons` (adr/0077 §10 Ek): one row of round discs, each an icon over its name
-  categories: ["tiles", "linked", "collage", "panels", "icons"],
+  // `carousel`: picture cards in one row that slides (the scroller kit)
+  categories: ["tiles", "linked", "collage", "panels", "icons", "carousel"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first; `strips`, `ranked`, `stage_list` Ek 2026-11-16
   products: [
     "grid",

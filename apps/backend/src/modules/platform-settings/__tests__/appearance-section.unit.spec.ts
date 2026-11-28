@@ -25,3 +25,17 @@ describe("appearance section: the brand pictures' addresses", () => {
     expect(patch.safeParse({ logo_dark_url: url }).success).toBe(false)
   })
 })
+
+describe("appearance section: the surfaces' tone", () => {
+  it("starts from the brand-tinted look a row saved before the choice keeps", () => {
+    expect(appearanceSection.defaults.surface).toBe("brand")
+  })
+
+  it.each(["brand", "neutral", "warm", "cool"])("takes %s", (surface) => {
+    expect(patch.safeParse({ surface }).success).toBe(true)
+  })
+
+  it("refuses a tone it does not know", () => {
+    expect(patch.safeParse({ surface: "red" }).success).toBe(false)
+  })
+})

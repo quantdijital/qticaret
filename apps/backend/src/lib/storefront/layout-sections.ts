@@ -12,6 +12,7 @@ import { heroSlider } from "./sections/hero-slider"
 import { categoryMain, footerBar, headerBar, productMain } from "./sections/main"
 import type { MainSectionType } from "./sections/main"
 import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
+import { topSlider } from "./sections/top-slider"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { program } from "./sections/program"
@@ -118,12 +119,13 @@ export const categorySection = z.discriminatedUnion(
 
 /**
  * On every page but the checkout's: the shop's header bar (`header_bar`),
- * and above it the announcement bar and the scrolling strip; each at most
- * once (adr/0049 Ek 2026-11-14 §5, §10 karar 9).
+ * and above it the top image slider (owner 2026-11-27), the announcement
+ * bar and the scrolling strip; each at most once (adr/0049 Ek 2026-11-14
+ * §5, §10 karar 9).
  */
 export const headerSection = z.discriminatedUnion(
   "type",
-  [announcementBar, headerMarquee, headerBar],
+  [announcementBar, headerMarquee, headerBar, topSlider],
   SECTION_TYPE
 )
 

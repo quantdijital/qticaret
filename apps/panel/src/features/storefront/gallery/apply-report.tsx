@@ -29,6 +29,13 @@ const refsOf = (skipped: readonly SkippedRef[]) =>
 /** `page:hakkimizda` → `hakkimizda`: the address the shop opens the page at. */
 const handleOf = (ref: string) => ref.slice(ref.indexOf(":") + 1)
 
+/**
+ * A page the look opened, at its settings in the editor (`?icerik=…&ayar=sayfa`),
+ * where Yayında puts it live; a full load, so the editor opens on it.
+ */
+const pageSettingsHref = (id: string) =>
+  `/storefront/editor?icerik=${encodeURIComponent(id)}&ayar=sayfa`
+
 const PAGE_NOTES = { limit: "pageLimit", taken: "pageTaken" } as const
 
 /**
@@ -49,7 +56,8 @@ function pageNote(t: TFunction, each: SkippedRef): string {
  * (PLAN §4.3): the look is in the draft, the draft before it was kept (and
  * under which name), sections left out for a record the shop lacks, a
  * content page's layout left out for a page the shop has not made (with
- * how to bring it in), a page opened as a draft for the look and a page
+ * how to bring it in), the pages opened as drafts for the look (how many,
+ * each a link to its settings to put it live) and a page
  * whose own text was kept (adr/0073 Ek 2026-11-19 (2) K6), sections left
  * out for a feature the shop has off (adr/0077 §8), the shop's own header
  * or footer and its own page layouts kept. Closed with "Kapat".
@@ -60,6 +68,7 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
   const featureOff = report.skipped.filter(isFeatureOff)
   const pages = report.skipped.filter(isMissingPage)
   const sections = new Set(skipped.map((each) => each.where)).size
+  const made = report.made_pages ?? []
   const keptPages = report.kept.some((each) => each.startsWith("pages."))
   const keptFrame = report.kept.some((each) => !each.startsWith("pages."))
   return (
@@ -70,7 +79,11 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
       <div className="flex items-start gap-2">
         <CircleCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
         <div className="flex flex-col gap-1">
-          <p className="font-medium">{t(`${R}.applied`, { name: report.name })}</p>
+          <p className="font-medium">
+            {t(report.scope === "style" ? `${R}.styleApplied` : `${R}.applied`, {
+              name: report.name,
+            })}
+          </p>
           {report.auto_saved ? (
             <p>
               {report.saved_name
@@ -89,9 +102,23 @@ export function ApplyReport({ report, onClose }: { report: Report; onClose: () =
               })}
             </p>
           ) : null}
-          {(report.made_pages ?? []).map((each) => (
-            <p key={each.page_id}>{t(`${R}.pageMade`, { name: each.name })}</p>
-          ))}
+          {made.length > 0 ? (
+            <div className="flex flex-col gap-0.5">
+              <p>{t(`${R}.pagesMade`, { count: made.length })}</p>
+              <ul className="flex flex-wrap gap-x-3 gap-y-0.5">
+                {made.map((each) => (
+                  <li key={each.page_id}>
+                    <a
+                      className="font-medium underline underline-offset-2"
+                      href={pageSettingsHref(each.page_id)}
+                    >
+                      {each.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {pages.map((each) => (
             <p key={each.ref}>{pageNote(t, each)}</p>
           ))}

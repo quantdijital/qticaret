@@ -7,8 +7,11 @@ import {
   STEPS_SETTINGS,
   DEPARTURES_SETTINGS,
   STRIP_GALLERY_SETTINGS,
+  TOP_SLIDER_SETTINGS,
+  TOP_SLIDER_SETTING_NAMES,
   newsletterHasNote,
 } from "@qticaret/types"
+import type { TopSliderSetting } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { heroFullFields } from "./hero-full-registry"
@@ -52,6 +55,7 @@ export type ContentField =
   | "show_note"
   | "joined"
   | "news_tone"
+  | "news_consent"
   | "image_side"
   | "outline"
   | "questions"
@@ -75,6 +79,7 @@ export type ContentField =
   | "collage_height"
   | "reviews_product_image"
   | "departures_layout"
+  | "departures_phone"
   | "action"
   | "search_position"
   | "show_trust"
@@ -106,6 +111,17 @@ const C = `${E}.heroCatalog`
 const PB = `${E}.priceBands`
 
 /** One entry: its label and term keys (`<label>Term` beside a flat label), its steps' names. */
+const T = "storefront.editor.topSlider"
+
+/** Where the top image slider's settings stand in its "Stil" tab (`top-slider-groups.tsx`). */
+const TOP_SLIDER_GROUPS: Readonly<Record<TopSliderSetting, FieldGroupName>> = {
+  height: "layout",
+  interval: "motion",
+  transition: "motion",
+  arrows: "controls",
+  dots: "controls",
+}
+
 const entry = (
   section: AnySection,
   field: ContentField,
@@ -285,6 +301,8 @@ export function contentFields(section: AnySection): RegistryField[] {
       return [
         entry(section, "show_count", `${E}.categories.showCount`),
         ...iconFields(section, CONTENT_IDS.content),
+        // The sliding cards' scroller, as a rail's
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
       ]
     case "hero":
       return section.variant === "category_list"
@@ -360,6 +378,21 @@ export function contentFields(section: AnySection): RegistryField[] {
           ),
           term: `${E}.departures.layout.term`,
         },
+        // The cards' phone row, only while the cards are drawn (as its field)
+        ...(section.layout === "cards"
+          ? [
+              {
+                ...entry(
+                  section,
+                  "departures_phone",
+                  `${E}.departures.phone.label`,
+                  DEPARTURES_SETTINGS.phone.map((step) => `${E}.departures.phone.${step}`),
+                  "layout"
+                ),
+                term: `${E}.departures.phone.term`,
+              },
+            ]
+          : []),
       ]
     // The box's fields are the theme's (adr/0077 §1), not the section's
     case "search_box":
@@ -390,6 +423,19 @@ export function contentFields(section: AnySection): RegistryField[] {
     // The card's lift (adr/0077 §10 Ek); the strip and the lined boxes have none
     case "trust_badges":
       return iconFields(section, CONTENT_IDS.content)
+    // The top image slider's steps and switches (owner 2026-11-27), in its form
+    case "top_slider":
+      return TOP_SLIDER_SETTING_NAMES.map((name) => {
+        const steps: readonly string[] = TOP_SLIDER_SETTINGS[name]
+        return {
+          key: `top_slider.${name}`,
+          group: TOP_SLIDER_GROUPS[name],
+          label: `${T}.${name}.label`,
+          term: `${T}.${name}.term`,
+          options: steps.map((step) => `${T}.${name}.${step}`),
+          target: `${section.id}-top-slider-${name}`,
+        }
+      })
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":

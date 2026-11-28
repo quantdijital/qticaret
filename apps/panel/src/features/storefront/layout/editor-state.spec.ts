@@ -86,6 +86,54 @@ describe("editorReducer", () => {
     expect(second.past).toEqual([])
   })
 
+  it('adds a section right before the one the tree\'s "+" stood above, else at the end', () => {
+    const banner = newHomeSection("banner", "kampanyabanner")
+    expect(
+      order(run([{ type: "add", group: "home", section: banner, before: "yeniurunler" }]))
+    ).toEqual(["girisbolumu", "kampanyabanner", "yeniurunler", "blogyazilari"])
+    expect(
+      order(run([{ type: "add", group: "home", section: banner, before: "girisbolumu" }]))
+    ).toEqual(["kampanyabanner", "girisbolumu", "yeniurunler", "blogyazilari"])
+    // A section no longer there (or another group's): at the end, as "+ Ekle" adds
+    expect(order(run([{ type: "add", group: "home", section: banner, before: "yok" }]))).toEqual([
+      "girisbolumu",
+      "yeniurunler",
+      "blogyazilari",
+      "kampanyabanner",
+    ])
+    // A product page's main section is never stepped before
+    const faq = newBodySection("product", "faq", "yenisss")
+    const main = { ...DOC, product: [{ id: "urunana", type: "product_main" }, related] }
+    const product = run(
+      [{ type: "add", group: "product", section: faq, before: "urunana" }],
+      initialEditorState(main as LayoutDocument)
+    )
+    expect(ids(product.doc.product)).toEqual(["urunana", "benzerurunler", "yenisss"])
+  })
+
+  it("adds a category page's section before one on its own side only", () => {
+    const top = newBodySection("category", "newsletter", "ustbulten", "top")
+    expect(
+      sides(run([{ type: "add", group: "category", section: top, before: "ustmetin" }]))
+    ).toEqual({
+      top: ["ustbanner", "ustbulten", "ustmetin"],
+      bottom: ["altsss", "altyardim"],
+    })
+    // Aimed at the other side's section: at the end of its own side
+    expect(
+      sides(run([{ type: "add", group: "category", section: top, before: "altsss" }]))
+    ).toEqual({
+      top: ["ustbanner", "ustmetin", "ustbulten"],
+      bottom: ["altsss", "altyardim"],
+    })
+  })
+
+  it("adds a footer group's section before one above its bar", () => {
+    const strip = newHomeSection("marquee", "altkayan")
+    const state = run([{ type: "add", group: "footer", section: strip, before: "ebultenkutusu" }])
+    expect(ids(state.doc.footer)).toEqual(["altkayan", "ebultenkutusu"])
+  })
+
   it("moves a section to a new place, and ignores a move to where it is", () => {
     const moved = run([{ type: "move", id: "blogyazilari", to: 0 }])
     expect(order(moved)).toEqual(["blogyazilari", "girisbolumu", "yeniurunler"])

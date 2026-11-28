@@ -5,6 +5,7 @@ import {
   THEME_MODES,
   THEME_RADII,
   THEME_SIDEBARS,
+  THEME_SURFACES,
 } from "@qticaret/types"
 import type { AppearanceSettings } from "@qticaret/types"
 import { useEffect, useMemo } from "react"
@@ -32,14 +33,17 @@ import type { AppearanceForm as FormValues } from "@/theme"
 const HEX = /^#[0-9a-f]{6}$/
 
 /**
- * The shop's choices (docs/18 §5): colours (brand, mode, the menu's ground)
- * and layout (how the menu behaves, corners, density) side by side, the
+ * The shop's choices (docs/18 §5): colours (brand, the surfaces' tone, mode)
+ * and the menu and layout (the menu's ground and behaviour, corners,
+ * density) side by side, the two cards about one height, the
  * panel in miniature under them. Every change repaints this screen at
  * once; leaving without saving paints the stored values back.
  */
 export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
   const { t } = useTranslation()
   const save = useSaveAppearance()
+  // A server not yet answering the field: the look it has always drawn
+  const savedSurface = (saved as Partial<AppearanceSettings>).surface ?? "brand"
   const form = useForm<FormValues>({
     resolver: zodResolver(appearanceSchema),
     defaultValues: {
@@ -49,6 +53,7 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       mode: saved.mode,
       sidebar: saved.sidebar,
       sidebar_mode: saved.sidebar_mode,
+      surface: savedSurface,
     },
   })
   // `useWatch`, not `form.watch()`: the React Compiler can follow it. It
@@ -62,6 +67,7 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       mode: watched.mode ?? saved.mode,
       sidebar: watched.sidebar ?? saved.sidebar,
       sidebar_mode: watched.sidebar_mode ?? saved.sidebar_mode,
+      surface: watched.surface ?? savedSurface,
     }),
     [
       watched.brand_color,
@@ -70,7 +76,9 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       watched.mode,
       watched.sidebar,
       watched.sidebar_mode,
+      watched.surface,
       saved,
+      savedSurface,
     ]
   )
   const { isDirty } = form.formState
@@ -139,7 +147,8 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
           description={t("settings.appearance.colorsHint")}
           className={spanOf(6)}
         >
-          <div className="flex flex-col gap-6">
+          {/* Side by side the two cards are one height: what is left spreads between the choices */}
+          <div className="flex flex-1 flex-col justify-between gap-6">
             <BrandColorField
               control={form.control}
               setValue={form.setValue}
@@ -148,16 +157,16 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
               adjusted={brandAdjusted}
             />
             <ChoiceField
+              name="surface"
+              control={form.control}
+              options={THEME_SURFACES}
+              optionLabel={(option) => t(`settings.appearance.surfaceOptions.${option}`)}
+            />
+            <ChoiceField
               name="mode"
               control={form.control}
               options={THEME_MODES}
               optionLabel={(option) => t(`settings.appearance.modeOptions.${option}`)}
-            />
-            <ChoiceField
-              name="sidebar"
-              control={form.control}
-              options={THEME_SIDEBARS}
-              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
             />
           </div>
         </SectionCard>
@@ -166,7 +175,13 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
           description={t("settings.appearance.layoutHint")}
           className={spanOf(6)}
         >
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-1 flex-col justify-between gap-6">
+            <ChoiceField
+              name="sidebar"
+              control={form.control}
+              options={THEME_SIDEBARS}
+              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
+            />
             <ChoiceField
               name="sidebar_mode"
               control={form.control}

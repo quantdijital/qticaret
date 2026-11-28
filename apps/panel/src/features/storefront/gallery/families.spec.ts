@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { hasNewVersion, isLook, presetFamilies, shownMember } from "./families"
+import { hasNewVersion, isLook, presetFamilies, sectorRuns, shownMember } from "./families"
 import { preset } from "./gallery.fixtures"
 
 const GECE = preset("tezgah-gece", { family: "tezgah", swatch: "Gece", name: "Tezgâh · Gece" })
@@ -46,6 +46,27 @@ describe("shownMember", () => {
     expect(shown()).toBe("tezgah")
     expect(shown([GECE, { ...OWN, live: 1 }, { ...KUM, in_draft: 1 }])).toBe("tezgah-kum")
     expect(shown([{ ...GECE, live: 1 }, OWN, KUM])).toBe("tezgah-gece")
+  })
+})
+
+describe("sectorRuns", () => {
+  it("puts the shop's own sector first, then each other sector under its name (owner, 2026-11-28)", () => {
+    const other = (code: string, sector: string, name: string) =>
+      preset(code, { pack: sector, own: false, sector: { code: sector, name } })
+    const runs = sectorRuns(
+      presetFamilies([
+        other("tezgah", "cutlery", "Bıçak ve çatal-bıçak"),
+        preset("vadi", { pack: "travel" }),
+        other("katalog", "cutlery", "Bıçak ve çatal-bıçak"),
+        other("cicek", "flowers", "Çiçek"),
+      ])
+    )
+
+    expect(runs.own.map((each) => each.key)).toEqual(["travel/vadi"])
+    expect(runs.others.map((run) => [run.code, run.name, run.families.map((f) => f.key)])).toEqual([
+      ["cutlery", "Bıçak ve çatal-bıçak", ["cutlery/tezgah", "cutlery/katalog"]],
+      ["flowers", "Çiçek", ["flowers/cicek"]],
+    ])
   })
 })
 

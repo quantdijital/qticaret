@@ -313,6 +313,426 @@
           "text": "Çelik, sap ya da bakım konusunda sorunuz varsa yazın; size uygun bıçağı birlikte seçelim."
         }
       ]
+    },
+    {
+      "page_id": { "$handle": "page:iletisim" },
+      "name": "İletişim",
+      "sections": [
+        {
+          "id": "iletisimform",
+          "type": "contact",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Sorularınız, siparişleriniz ya da iade talepleriniz için formu doldurarak bize yazabilirsiniz. Mesajlarınızı iş günlerinde en kısa sürede yanıtlıyoruz."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bir siparişiniz hakkında yazıyorsanız sipariş numaranızı da eklemeniz yanıtımızı hızlandırır."
+                  }
+                ]
+              }
+            ]
+          },
+          "form": "on",
+          "imprint": "on"
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:sik-sorulan-sorular" },
+      "name": "Sık Sorulan Sorular",
+      "sections": [
+        {
+          "id": "sssorular",
+          "type": "faq",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "page",
+          "title": null,
+          "items": [
+            { "heading": "Sipariş ve ödeme" },
+            {
+              "question": "Siparişimi nasıl veririm?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ürünü sepete ekleyin, sepetinizden ödeme adımına geçin ve teslimat ile ödeme bilgilerinizi girin. Siparişiniz tamamlandığında onay e-postası gönderilir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Hangi ödeme yöntemlerini kullanabilirim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Geçerli ödeme yöntemlerini ve kartınıza göre taksit seçeneklerini Ödeme Seçenekleri sayfamızda bulabilirsiniz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Kartla ödeme güvenli mi?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kart bilgileriniz ödeme kuruluşunun 3D Secure korumalı güvenli sayfasında işlenir; {mağaza_adı} kart bilgilerinizi görmez ve saklamaz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            { "heading": "Kargo ve teslimat" },
+            {
+              "question": "Siparişim ne zaman kargoya verilir?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Siparişiniz, ödemeniz onaylandıktan sonra {hazırlama_süresi} içinde hazırlanarak kargoya verilir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Siparişim ne zaman elimde olur?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kargoya verilen siparişler genellikle {kargo_süresi} içinde teslim edilir. Kargoya verildiğinde size e-postayla bildirilir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "Siparişimi nasıl takip ederim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Kargo bildirim e-postasındaki takip numarasıyla ya da hesabınızdaki siparişlerinizden siparişinizin durumunu izleyebilirsiniz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            { "heading": "İade ve değişim" },
+            {
+              "question": "Ürünü iade edebilir miyim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Teslim aldığınız ürünü {iade_süresi} gün içinde, cayma hakkınızı kullanarak iade edebilirsiniz. Kişiye özel hazırlanan ürünler gibi yasal istisnalar bu hakkın dışındadır."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "question": "İade ücretim ne zaman ödenir?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "İade ettiğiniz ürün bize ulaşıp incelendikten sonra ücretiniz ödeme yaptığınız yönteme iade edilir. Tutarın hesabınıza geçme süresi bankanıza göre değişir."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            { "heading": "Bize ulaşın" },
+            {
+              "question": "Size nasıl ulaşabilirim?",
+              "body": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "İletişim sayfamızdaki formdan bize yazabilirsiniz; mesajlarınızı iş günlerinde en kısa sürede yanıtlıyoruz."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "open_first": "on",
+          "single_open": "off"
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:odeme-secenekleri" },
+      "name": "Ödeme Seçenekleri",
+      "sections": [
+        {
+          "id": "odememetin",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "article",
+          "title": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Siparişinizi size uygun yöntemle güvenle ödeyebilirsiniz. Mağazamızda geçerli ödeme yöntemleri ve kart taksit seçenekleri bu sayfada güncel olarak yer alır."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Kredi ve banka kartı" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kartla ödemeleriniz, ödeme kuruluşunun 3D Secure korumalı güvenli sayfasında alınır. Kart bilgileriniz {mağaza_adı} tarafından görülmez ve saklanmaz."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Taksit seçenekleri kartınızın bankasına göre değişir. Ödeme adımında kartınız için geçerli taksitler ve ödeyeceğiniz toplam tutar, siparişi onaylamadan önce gösterilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Havale / EFT ve kapıda ödeme" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Bu yöntemler sunulduğunda ödeme adımında seçilebilir. Havale ya da EFT ile ödemede banka hesap bilgilerimiz sipariş onayınızla birlikte iletilir; açıklamaya sipariş numaranızı yazmanız yeterlidir. Siparişiniz, ödemeniz hesabımıza ulaştığında hazırlanmaya başlar."
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kapıda ödemede tutarı teslimat sırasında kargo görevlisine ödersiniz. Kapıda ödemeye ait bir hizmet bedeli varsa ödeme adımında ayrıca gösterilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Güvenli alışveriş" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Sitemizdeki tüm bağlantılar SSL ile şifrelenir. Ödemeniz onaylandığında sipariş özetiniz e-posta adresinize gönderilir."
+                  }
+                ]
+              }
+            ]
+          },
+          "outline": "auto",
+          "questions": "auto"
+        },
+        {
+          "id": "odemebilgileri",
+          "type": "payment_facts",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null
+        }
+      ]
+    },
+    {
+      "page_id": { "$handle": "page:kargo-ve-teslimat" },
+      "name": "Kargo ve Teslimat",
+      "sections": [
+        {
+          "id": "kargometin",
+          "type": "rich_text",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null,
+          "variant": "article",
+          "title": null,
+          "body": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Siparişlerinizi anlaşmalı kargo firmalarımızla adresinize gönderiyoruz. Bu sayfada siparişinizin ne zaman kargoya verileceğini, teslimat sürelerini ve takip adımlarını bulabilirsiniz."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Hazırlama süresi" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Siparişiniz, ödemeniz onaylandıktan sonra {hazırlama_süresi} içinde hazırlanarak kargoya verilir. Havale ya da EFT ile ödenen siparişlerde bu süre ödemenin hesabımıza ulaştığı günden başlar. Cumartesi, pazar ve resmî tatiller iş gününden sayılmaz."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Teslimat süresi" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kargoya verilen siparişler, teslimat adresine göre genellikle {kargo_süresi} içinde teslim edilir. Yoğun dönemler, hava koşulları ve kargo firmasından kaynaklanan gecikmeler bu süreyi uzatabilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Kargo ücreti" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kargo ücreti sepetinize ve gönderinin boyutuna göre ödeme adımında hesaplanır ve siparişi onaylamadan önce gösterilir. Ücretsiz kargo fırsatı olduğunda koşulları sepette belirtilir."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Sipariş takibi" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Siparişiniz kargoya verildiğinde size e-postayla bildirilir ve kargo takip numaranız iletilir. Siparişinizin durumunu hesabınızdaki siparişlerinizden de izleyebilirsiniz."
+                  }
+                ]
+              },
+              {
+                "type": "heading",
+                "attrs": { "level": 2 },
+                "content": [{ "type": "text", "text": "Teslim alırken" }]
+              },
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Paketi teslim alırken dış ambalajını kontrol edin. Ezik ya da yırtık bir paketi kargo görevlisine hasar tutanağı tutturarak teslim alın ve aynı gün bizimle iletişime geçin."
+                  }
+                ]
+              }
+            ]
+          },
+          "outline": "auto",
+          "questions": "auto"
+        },
+        {
+          "id": "kargobilgileri",
+          "type": "shipping_facts",
+          "visible": true,
+          "starts_at": null,
+          "ends_at": null
+        }
+      ]
     }
   ]
 }

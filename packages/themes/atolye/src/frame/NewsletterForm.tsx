@@ -23,6 +23,13 @@ import { useChallengeForm } from "./useChallengeForm"
  * newsletter.css), the privacy notice's link always under it on its own
  * line (the consent sentence then without it); the sending, the consent
  * box and the messages as above.
+ *
+ * `words.style` `line` (the box's consent setting): no consent box and
+ * nothing that opens on focus; one small line under the form, always
+ * shown, says that subscribing is consenting, with the privacy notice's
+ * link (the joined forms' own link line then not drawn). The form says so
+ * to the server (`consent` `line`), which names those words' version in
+ * the proof; the address's owner still confirms by the e-mailed link.
  */
 export function NewsletterForm({
   action,
@@ -70,10 +77,26 @@ export function NewsletterForm({
       {words.privacyLink}
     </a>
   )
+  const line = words.style === "line"
+  const status = (
+    // The line keeps no empty row for a message it has not said
+    <p
+      id={`${id}-durum`}
+      role="alert"
+      className={cn(!line && "min-h-[1lh]", "text-sm font-semibold")}
+    >
+      {error ? (words.errors[error] ?? words.fallback) : null}
+    </p>
+  )
   return (
     <form
       onSubmit={onSubmit}
-      className={cn("flex flex-col", joined ? "gap-2" : "gap-3", quiet && "gf-news", className)}
+      className={cn(
+        "flex flex-col",
+        joined ? "gap-2" : "gap-3",
+        quiet && !line && "gf-news",
+        className
+      )}
     >
       <label htmlFor={`${id}-eposta`} className={joined ? "sr-only" : "text-sm font-semibold"}>
         {words.email}
@@ -90,7 +113,7 @@ export function NewsletterForm({
           // `:placeholder-shown` also tells an empty field from a filled one
           placeholder={words.placeholder}
           aria-invalid={error ? true : undefined}
-          aria-describedby={`${id}-durum`}
+          aria-describedby={line ? `${id}-onay ${id}-durum` : `${id}-durum`}
           className="gf-field min-w-0 flex-1"
         />
         <button
@@ -102,27 +125,40 @@ export function NewsletterForm({
           {words.submit}
         </button>
       </div>
-      <div className="gf-news-more flex flex-col gap-3">
-        <label className="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-          <input
-            type="checkbox"
-            name="consent"
-            value="1"
-            required
-            className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-          />
-          <span {...fieldMark(marks, textKey)}>
-            {words.consent}
-            {joined ? null : " "}
-            {joined ? null : privacy}
-          </span>
-        </label>
-        {slot}
-        <p id={`${id}-durum`} role="alert" className="min-h-[1lh] text-sm font-semibold">
-          {error ? (words.errors[error] ?? words.fallback) : null}
-        </p>
-      </div>
-      {joined && privacy ? <p className="gf-news-privacy text-xs">{privacy}</p> : null}
+      {line ? (
+        <>
+          <input type="hidden" name="consent" value="line" />
+          <p id={`${id}-onay`} className="text-xs leading-relaxed">
+            <span {...fieldMark(marks, textKey)}>{words.consent}</span>
+            {privacy ? " " : null}
+            {privacy}
+          </p>
+          {slot}
+          {status}
+        </>
+      ) : (
+        <>
+          <div className="gf-news-more flex flex-col gap-3">
+            <label className="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+              <input
+                type="checkbox"
+                name="consent"
+                value="1"
+                required
+                className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+              />
+              <span {...fieldMark(marks, textKey)}>
+                {words.consent}
+                {joined ? null : " "}
+                {joined ? null : privacy}
+              </span>
+            </label>
+            {slot}
+            {status}
+          </div>
+          {joined && privacy ? <p className="gf-news-privacy text-xs">{privacy}</p> : null}
+        </>
+      )}
     </form>
   )
 }

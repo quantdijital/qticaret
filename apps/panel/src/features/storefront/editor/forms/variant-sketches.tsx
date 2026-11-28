@@ -1,6 +1,7 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import {
+  CategoriesCarousel,
   CategoriesCollage,
   CategoriesIcons,
   CategoriesLinked,
@@ -253,6 +254,7 @@ const SKETCHES: {
     collage: CategoriesCollage,
     panels: CategoriesPanels,
     icons: CategoriesIcons,
+    carousel: CategoriesCarousel,
   },
   header_bar: {
     standard: HeaderStandard,
@@ -288,13 +290,18 @@ const SKETCHES: {
   },
 }
 
-/** A variant in small, in the current colour; a variant without a sketch yet draws nothing. */
+/**
+ * A variant in small, in the current colour; a variant without a sketch
+ * yet draws `fallback` (nothing unless given: the chooser's cards, its icon).
+ */
 export function VariantSketch<T extends VariantSectionType>({
   type,
   variant,
+  fallback = null,
 }: {
   type: T
   variant: SectionVariant<T>
+  fallback?: ReactElement | null
 }) {
   const sketches: Readonly<Record<string, (() => ReactElement) | undefined>> = SKETCHES[type] ?? {}
   const Sketch = sketches[variant]
@@ -303,5 +310,7 @@ export function VariantSketch<T extends VariantSectionType>({
     <svg aria-hidden="true" viewBox="0 0 112 32" className="size-full h-8 max-w-28">
       <Sketch />
     </svg>
-  ) : null
+  ) : (
+    fallback
+  )
 }

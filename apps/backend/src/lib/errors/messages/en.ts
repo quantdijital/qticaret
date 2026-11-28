@@ -10,6 +10,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "async_job.unknown": "Job not found.",
   "async_job.type_unknown": "There is no such job type.",
   "audit_log.kind_invalid": "The entry kind is not valid.",
+  "sample_catalog.not_for_sale":
+    "This is a sample product; it shows in the store but cannot be bought.",
+  "sample_catalog.unknown": "This sector pack has no sample content.",
+  "sample_catalog.pack_not_applied": "This sector pack was not applied to your store.",
+  "sample_catalog.already_loaded": "This sample content is already loaded.",
+  "sample_catalog.loading": "The sample content is loading; try again once it is done.",
+  "sample_catalog.busy":
+    "The sample content is being loaded or removed right now; try again in a moment.",
+  "sample_catalog.metadata_reserved": "Sample content marks are set by the store only.",
+  "sample_catalog.booked_meanwhile":
+    "A sample product was booked or ordered meanwhile; refresh the list and try again.",
   "billing_profile.unknown": "This customer has no billing details.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",
@@ -251,6 +262,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.too_large":
     "The content is too long or too deeply nested; a page can hold at most 200,000 characters and a few levels of nested lists.",
   "content.unknown": "Content not found.",
+  "content.changed_meanwhile": "The content changed meanwhile; open it again and retry.",
   "content.page_text_in_editor":
     "A page's text is edited in the theme editor, in the page's sections; only its title, address, cover and status are saved here.",
   "errors.busy": "The record is being updated by another action; try again in a few seconds.",
@@ -1321,6 +1333,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_preset.theme_invalid": "The look's theme settings cannot be used in this shop.",
   "storefront_preset.layout_invalid": "The look's page design cannot be used in this shop.",
   "storefront_preset.demo_unavailable": "Demo content is not offered with this look yet.",
+  "storefront_preset.draft_unreadable":
+    "The draft cannot be opened in this version; discard it in the editor first, then apply the style again.",
   // adr/0064: saved looks
   "storefront_design.unknown": "This saved look was not found.",
   "storefront_design.limit_reached": "You can save up to 10 looks. Delete one to save another.",
@@ -1477,7 +1491,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The product an earlier run made is gone; its description was not refreshed.",
   "migration.description_refresh_empty":
     "The export has no description for this product; its description here was left as it is.",
-  "migration.refresh_wordpress_only": "Descriptions are refreshed from a WordPress export only.",
+  "migration.export_busy":
+    "An export of the old addresses is already running for you; wait for it to finish.",
+  "migration.refresh_wordpress_only":
+    "A refresh-only run (descriptions, blog pictures) takes a WordPress export only.",
+  "migration.post_gone": "The post an earlier run made is gone; its pictures were not added.",
+  "migration.post_images_failed":
+    "The post's pictures could not be added to its text; the post was left as it is.",
   "migration.review_product_missing":
     "The review's product did not move, so the review did not either.",
   "migration.review_duplicate":
@@ -1596,7 +1616,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The short description is longer than 1,500 characters; it was cut there. Shorten it on the product's page.",
   "migration.wordpress_body_cut": "The text is too long; it was cut at a section.",
   "migration.wordpress_body_media":
-    "Pictures or widgets in the text (a product grid, a gallery) were not moved; the text was. Add pictures in the content editor.",
+    "Some pictures in the text (from another site, inside a list or table) or widgets (a product grid) were not moved; the text was. Add what is missing in the content editor.",
   "migration.wordpress_post_unread":
     "The post's title or slug could not be read; it was not moved.",
   "migration.wordpress_path_reserved":

@@ -8,6 +8,12 @@ export interface SecuritySettings {
   fraud_review_score: number
   /** A first order at or above this (kuruş, the whole order) adds to its score. */
   fraud_high_amount: number
+  /**
+   * Whether the platform's support may open a time-limited session in the
+   * panel (adr/0061 Ek "Destek erişimi"): on by default, the owner's switch;
+   * turned off, new grants are refused and open sessions end at once.
+   */
+  support_access_enabled: boolean
 }
 
 /**
@@ -21,6 +27,12 @@ export const securitySection = defineSection<SecuritySettings>(
     staff_mfa_required: z.boolean(),
     fraud_review_score: z.number().int().min(10).max(200),
     fraud_high_amount: z.number().int().min(0).max(1_000_000_000),
+    support_access_enabled: z.boolean(),
   },
-  { staff_mfa_required: true, fraud_review_score: 50, fraud_high_amount: 500_000 }
+  {
+    staff_mfa_required: true,
+    fraud_review_score: 50,
+    fraud_high_amount: 500_000,
+    support_access_enabled: true,
+  }
 )

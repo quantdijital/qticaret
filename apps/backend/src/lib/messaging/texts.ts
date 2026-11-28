@@ -218,6 +218,13 @@ const TR: Readonly<Record<string, string>> = {
     "{{shop}} mağazasının sahibi, yönetim panelindeki hesabınızın iki adımlı doğrulamasını sıfırladı. Bir sonraki girişte yeniden kurmanız istenebilir.",
   "staff_mfa.not_you":
     "Bunu siz yapmadıysanız ya da istemediyseniz hemen şifrenizi yenileyin ve mağaza sahibine haber verin.",
+  "staff_support.subject": "{{shop}} paneline platform desteği giriş yaptı",
+  "staff_support.heading": "Platform desteği panelinizde",
+  "staff_support.intro":
+    "Platform desteği ({{operator}}) {{shop}} yönetim paneline giriş yaptı. Oturum {{ends_at}}'de kendiliğinden biter.",
+  "staff_support.reason": "Gerekçe: {{reason}}",
+  "staff_support.not_wanted":
+    "Bu girişi beklemiyorsanız Ayarlar > Güvenlik > Destek erişimi'nden oturumu hemen sonlandırabilir ya da destek erişimini kapatabilirsiniz.",
   "staff_invite.subject": "{{shop}} ekibine davet edildiniz",
   "staff_invite.preheader": "{{shop}} yönetim paneli için hesabınızı oluşturun.",
   "staff_invite.heading": "{{shop}} yönetim paneline davet",

@@ -2,6 +2,7 @@ import type { Block, ContentDoc, Inline, ListItem } from "../../../content/doc"
 import { contentDoc, isSafeHref } from "../../../content/doc"
 import { decodeEntities, withoutHidden } from "../../text"
 import { BlockBuilder } from "./blocks"
+import type { ImageOf } from "./body-images"
 import { expandShortcodes } from "./shortcodes"
 
 /**
@@ -10,9 +11,11 @@ import { expandShortcodes } from "./shortcodes"
  * paragraphs, lists, quotes and tables with bold, italic and safe links.
  * Its tags are read in one linear scan and only ever dropped or mapped to
  * the document's few nodes: nothing is parsed as markup a browser would
- * run. Pictures, frames, forms and styles are left out (a picture must be
- * the shop's own upload) and counted for the report; comments, scripts
- * and styles go with their contents.
+ * run. Frames, forms and styles are left out and counted for the report;
+ * comments, scripts and styles go with their contents. A picture is left
+ * out too (it must be the shop's own upload), unless the caller reads it
+ * (`image`): then it is an image block with the old file's address, which
+ * the run stores in the media library and swaps (adr/0042 Ek 2026-11-27).
  */
 
 export interface BodyOptions {
@@ -22,6 +25,8 @@ export interface BodyOptions {
   title?: string | null
   /** WordPress's shortcodes read (the default); another source's text keeps its brackets. */
   shortcodes?: boolean
+  /** Reads a picture's file and alt text: a post's or page's body keeps its pictures. */
+  image?: ImageOf | undefined
 }
 
 export interface Body {
@@ -46,6 +51,8 @@ const SKIPPED: ReadonlySet<string> = new Set(
 )
 const HREF = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i
 const START = /\bstart\s*=\s*["']?(\d{1,6})/i
+// Pictures a body keeps at most: each is a fetch from the old site
+const MAX_IMAGES = 200
 
 const bareHost = (host: string) => host.toLowerCase().replace(/^www\./, "")
 
@@ -74,9 +81,12 @@ export function bodyBlocks(html: string, options: BodyOptions = {}): Body {
   const siteHost = options.siteHost ?? null
   const visible = withoutHidden(html)
   const expanded =
-    options.shortcodes === false ? { html: visible, widgets: 0 } : expandShortcodes(visible)
+    options.shortcodes === false
+      ? { html: visible, widgets: 0 }
+      : expandShortcodes(visible, { galleries: Boolean(options.image) })
   const builder = new BlockBuilder(options.title ?? null)
   let images = 0
+  let kept = 0
   let skipping: { tag: string; depth: number } | null = null
   for (const [whole, closing, rawName, attributes = ""] of expanded.html.matchAll(TOKEN)) {
     const name = rawName?.toLowerCase()
@@ -96,6 +106,10 @@ export function bodyBlocks(html: string, options: BodyOptions = {}): Body {
       }
       continue
     }
+    if (name === "picture" && options.image) {
+      // Its `<img>` names the file; its `<source>`s are only other formats of it
+      continue
+    }
     if (SKIPPED.has(name)) {
       images += name === "picture" && open ? 1 : 0
       if (open && !whole.endsWith("/>")) {
@@ -113,9 +127,15 @@ export function bodyBlocks(html: string, options: BodyOptions = {}): Body {
       continue
     }
     switch (name) {
-      case "img":
-        images += 1
+      case "img": {
+        const image = kept < MAX_IMAGES ? options.image?.(attributes) : null
+        if (image && builder.image(image.src, image.alt)) {
+          kept += 1
+        } else {
+          images += 1
+        }
         break
+      }
       case "br":
         builder.lineBreak()
         break
@@ -190,7 +210,7 @@ function itemLines(items: readonly ListItem[], marker: string): string[] {
 }
 
 /** A block as plain paragraphs: list items and table rows each their own. */
-function plainOf(block: Block): string[] {
+export function plainOf(block: Block): string[] {
   switch (block.type) {
     case "paragraph":
     case "heading":

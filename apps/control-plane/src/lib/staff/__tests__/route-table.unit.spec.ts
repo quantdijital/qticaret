@@ -126,6 +126,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "DELETE /admin/cp/ai/providers/:service",
       "DELETE /admin/cp/me/mfa",
       "DELETE /admin/cp/me/sessions/:id",
+      "DELETE /admin/cp/tenants/:id/domains/:domain_id",
       "POST /admin/cp/ai/orders/:id/cancel",
       "POST /admin/cp/ai/orders/:id/paid",
       "POST /admin/cp/ai/providers/:service",
@@ -154,6 +155,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/charges/:charge_id/pay",
       "POST /admin/cp/tenants/:id/charges/:charge_id/void",
       "POST /admin/cp/tenants/:id/charges/:charge_id/waive",
+      "POST /admin/cp/tenants/:id/domains/:domain_id/primary",
       "POST /admin/cp/tenants/:id/plan",
       "POST /admin/cp/tenants/:id/provisioning",
       "POST /admin/cp/tenants/:id/provisioning/apply-pack",
@@ -163,6 +165,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/resume",
       "POST /admin/cp/tenants/:id/reveal-tckn",
       "POST /admin/cp/tenants/:id/subscription",
+      "POST /admin/cp/tenants/:id/support-grants",
       "POST /admin/cp/tenants/:id/suspend",
       "POST /admin/cp/tenants/:id/target-release",
     ])
@@ -181,12 +184,18 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     // C12: the sector packs are release data, read by all as the packages are
     expect(allowedRoles("GET", "/admin/cp/sector-packs")).toEqual([...CP_STAFF_ROLES])
     expect(matchRoute("GET", "/admin/cp/sector-packs")?.rule.stepUp).toBeUndefined()
+    // adr/0063 task 2.7: a look's picture, as the packs
+    expect(allowedRoles("GET", "/admin/cp/sector-packs/cutlery/presets/katalog/preview")).toEqual([
+      ...CP_STAFF_ROLES,
+    ])
     for (const [method, path] of [
       ["POST", "/admin/cp/tenants"],
       ["POST", "/admin/cp/tenants/ten_1"],
       ["POST", "/admin/cp/tenants/ten_1/contacts"],
       ["DELETE", "/admin/cp/tenants/ten_1/contacts/tenct_1"],
       ["POST", "/admin/cp/tenants/ten_1/domains/tendm_1/primary"],
+      ["POST", "/admin/cp/tenants/ten_1/domains/tendm_1/check"],
+      ["DELETE", "/admin/cp/tenants/ten_1/domains/tendm_1"],
       ["POST", "/admin/cp/tenants/ten_1/notes"],
       ["POST", "/admin/cp/tenants/ten_1/plan"],
       ["POST", "/admin/cp/tenants/ten_1/overrides"],

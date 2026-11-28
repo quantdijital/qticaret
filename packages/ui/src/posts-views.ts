@@ -1,6 +1,7 @@
 import type { PostsVariant } from "@qticaret/types"
 import type { PostCardView } from "./content-views"
 import type { LinkView } from "./views"
+import type { HeadLinesView } from "./hand-note-views"
 
 /**
  * The shop's newest posts as a theme draws them: today's tiles, or as
@@ -9,7 +10,7 @@ import type { LinkView } from "./views"
  * else the storefront's "every post") beside the first two or three cards.
  * A theme without that drawing draws the tiles (`drawnVariant`).
  */
-export interface PostsSectionView {
+export interface PostsSectionView extends HeadLinesView {
   id: string
   type: "posts"
   title: string
@@ -17,8 +18,6 @@ export interface PostsSectionView {
   more: LinkView
   /** Absent: the tiles. */
   variant?: PostsVariant
-  /** `intro_panel`: the line above the heading; null: none. */
-  eyebrow?: string | null
   /** `intro_panel`: the words under the heading; null: none. */
   intro?: string | null
   /** `intro_panel`: a light tint of the main colour over the ground; absent: the ground. */

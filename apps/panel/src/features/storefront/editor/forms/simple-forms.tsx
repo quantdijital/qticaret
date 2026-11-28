@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { POSTS_INTRO_LIMITS } from "@qticaret/types"
 import type {
   BrandsSection,
   CategoriesSection,
@@ -22,6 +23,7 @@ import { CategoryIconsField } from "./category-icons-field"
 import { iconsFor } from "./icon-registry"
 import { RecordListField } from "./record-fields"
 import { SwitchRow } from "../theme-fields"
+import { HeadLinesFields } from "./head-lines-fields"
 
 const D = "storefront.editor.defaults"
 const R = "storefront.editor.records"
@@ -82,6 +84,12 @@ export function CategoriesForm({
         onChange={(title) => {
           onChange({ ...section, title }, "title")
         }}
+      />
+      <HeadLinesFields
+        section={section}
+        sectionId={section.id}
+        problems={problems}
+        onChange={onChange}
       />
       <RecordListField
         kind="category"
@@ -178,6 +186,14 @@ export function CountedForm({ section, problems, onChange }: SectionFormProps<Co
         onChange={(title) => {
           onChange({ ...section, title }, "title")
         }}
+      />
+      <HeadLinesFields
+        section={section}
+        sectionId={section.id}
+        problems={problems}
+        // The posts keep the upper line they had, 40 characters
+        {...(section.type === "posts" ? { eyebrowMax: POSTS_INTRO_LIMITS.eyebrow } : {})}
+        onChange={onChange}
       />
       <div id={FIELD_IDS.content(section.id, "limit")}>
         <CountField

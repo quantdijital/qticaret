@@ -99,7 +99,8 @@ const TENANT_ROUTES: RouteRule[] = [
       "/contacts",
       "/contacts/:contact_id",
       "/domains",
-      "/domains/:domain_id/primary",
+      // F16.7: "Doğrula", DNS asked now (no step-up: it proves, it changes no address)
+      "/domains/:domain_id/check",
       "/notes",
       "/notes/:note_id",
       "/overrides",
@@ -118,15 +119,25 @@ const TENANT_ROUTES: RouteRule[] = [
   },
   ...shopRules(
     "DELETE",
-    [
-      "/contacts/:contact_id",
-      "/domains/:domain_id",
-      "/notes/:note_id",
-      "/overrides/:key",
-      "/feature-overrides/:key",
-    ],
+    ["/contacts/:contact_id", "/notes/:note_id", "/overrides/:key", "/feature-overrides/:key"],
     SHOPS
   ),
+  // F16.7: the storefront's canonical address chosen, or a domain removed: a live
+  // storefront's address moves or goes, so proved again
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/domains/:domain_id/primary",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
+  {
+    method: "DELETE",
+    path: "/admin/cp/tenants/:id/domains/:domain_id",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
   // Ek C15: a suspension and its end (adr/0061 §3.5 "askıya alma, geri açma"): who runs
   // shops, proved again; it darkens or opens a storefront
   ...["/suspend", "/resume"].map((action): RouteRule => ({
@@ -136,6 +147,15 @@ const TENANT_ROUTES: RouteRule[] = [
     stepUp: true,
     resource: TENANT,
   })),
+  // adr/0061 Ek "Destek erişimi" (2026-11-28) Karar 7: a signed, single-use grant into the
+  // shop's panel; proved again every time (a fresh sign-in does not stand in)
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/support-grants",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
   ...shopRules("POST", ["/company"], INVOICED),
   // A sole proprietor's TCKN: proved again, recorded before it is shown
   {
@@ -153,6 +173,8 @@ const PLAN_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/plans", access: ALL },
   // C12: the sector packs' manifests and counts, read by all as the packages are (no personal data)
   { method: "GET", path: "/admin/cp/sector-packs", access: ALL },
+  // adr/0063 task 2.7: a look's picture for the wizard's "Görünüm" step (release data)
+  { method: "GET", path: "/admin/cp/sector-packs/:pack/presets/:code/preview", access: ALL },
   // A new package sets a price: proved again, as a price change (review M1)
   {
     method: "POST",

@@ -15,7 +15,7 @@ export const ALERT_GROUPS = {
   stock: ["stock."],
   invoices: ["einvoice.", "accounting."],
   messages: ["contact_message.", "messaging.", "campaigns."],
-  system: ["webhooks.", "integration_credentials.", "migration."],
+  system: ["webhooks.", "integration_credentials.", "migration.", "support_access."],
 } as const satisfies Record<string, readonly string[]>
 
 export type AlertGroup = keyof typeof ALERT_GROUPS

@@ -40,6 +40,11 @@ describe("the storefront's draft-replacing routes", () => {
     }
   )
 
+  it("asks a person for a look's fit (owner, 2026-11-28), with no apply budget spent", () => {
+    const route = routeOf("GET", "/admin/storefront-presets/:pack/:code/fit")
+    expect(route?.middlewares).toEqual([requireUserActor])
+  })
+
   it("leaves publish and preview as they were: one body check, no actor rule of their own", () => {
     for (const path of ["/admin/storefront-layout/publish", "/admin/storefront-layout/preview"]) {
       const route = routeOf("POST", path)
@@ -64,6 +69,21 @@ describe("the storefront's draft-replacing routes", () => {
   it("limits a content page's signed design link read (security review 2026-11-19, I3)", () => {
     const page = routeOf("GET", "/store/storefront-layout/preview/:token/pages/:id")
     expect(page?.middlewares).toHaveLength(1)
+  })
+
+  it("makes a saved look's preview link for a person only, counted per staff member", () => {
+    const route = routeOf("GET", "/admin/storefront-designs/:id/preview")
+    expect(route?.middlewares[0]).toBe(requireUserActor)
+    expect(route?.middlewares).toHaveLength(2)
+  })
+
+  it("limits the storefront's reads through a saved look's link, its pages too", () => {
+    for (const path of [
+      "/store/storefront-layout/design/:token",
+      "/store/storefront-layout/design/:token/pages/:id",
+    ]) {
+      expect(routeOf("GET", path)?.middlewares).toHaveLength(1)
+    }
   })
 
   it("never lists discard twice (one middleware set per route)", () => {

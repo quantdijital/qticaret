@@ -21,6 +21,50 @@ export interface SectorPackSummary {
     /** Ready-made storefront looks (adr/0063). */
     presets: number
   }
+  /** Its ready-made looks (adr/0063 task 2.7), the first the default; none for most packs. */
+  presets: PresetSummary[]
+  /** How many products its sample catalogue holds; 0: "Örnek ürünlerle başla" is not offered. */
+  sample_products: number
+}
+
+/** The number of sample products a pack offers; 0 when it has none or the list lacks it. */
+export const sampleProductsOf = (
+  packs: readonly SectorPackSummary[] | undefined,
+  pack: string
+): number => packs?.find((each) => each.code === pack)?.sample_products ?? 0
+
+/** A ready-made look as the new-shop wizard shows it (its name and text are the pack's own). */
+export interface PresetSummary {
+  code: string
+  version: number
+  name: string
+  description: string
+  tone: "light" | "dark"
+  /** The control plane can show its picture (`presetPreviewPath`). */
+  preview: boolean
+}
+
+/** Where a look's picture is read (every staff role). */
+export const presetPreviewPath = (pack: string, code: string): string =>
+  `/admin/cp/sector-packs/${encodeURIComponent(pack)}/presets/${encodeURIComponent(code)}/preview`
+
+/** A pack's looks; none when the list does not have the pack. */
+export const presetsOf = (
+  packs: readonly SectorPackSummary[] | undefined,
+  pack: string
+): PresetSummary[] => packs?.find((each) => each.code === pack)?.presets ?? []
+
+/**
+ * The look a shop gets: the one chosen when it is the pack's, else the
+ * pack's first (the control plane's default too); null when it has none.
+ */
+export function chosenPreset(
+  packs: readonly SectorPackSummary[] | undefined,
+  pack: string,
+  chosen: string
+): PresetSummary | null {
+  const looks = presetsOf(packs, pack)
+  return looks.find((look) => look.code === chosen) ?? looks[0] ?? null
 }
 
 /** The pack a shop with none on its record is set up with. */

@@ -82,8 +82,10 @@ describe("SetupTab: the shop's setup (C11, Ek C10)", () => {
     expect(
       within(history).getByText("Mağaza sunucusu süresi içinde sağlıklı yanıt vermedi.")
     ).toBeInTheDocument()
-    // The shop's own panel on this machine: its port plus 1000
-    expect(screen.getByRole("link", { name: "http://localhost:10200" })).toBeInTheDocument()
+    // The shop's own panel on this machine, started with it: its port plus 1000
+    const open = screen.getByRole("link", { name: "Paneli aç" })
+    expect(open).toHaveAttribute("href", "http://localhost:10200")
+    expect(open).toHaveAttribute("rel", "noopener noreferrer")
     expect(
       screen.getByText(
         "PANEL_PORT=10200 PANEL_BACKEND_URL=http://localhost:9200 pnpm --filter panel dev"

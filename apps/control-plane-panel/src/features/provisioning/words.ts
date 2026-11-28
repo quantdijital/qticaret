@@ -17,7 +17,10 @@ export const STEP_NAMES = [
   "database",
   "migrate",
   "bootstrap",
+  "profile",
   "sector_pack",
+  "preset",
+  "sample_catalog",
   "plan_document",
   "start",
   "health",
@@ -108,6 +111,38 @@ export function outputText(t: TFunction, step: RunStep): string[] {
     }
     if (typeof output["kept"] === "number" && output["kept"] > 0) {
       lines.push(t("setup.output.packKept", { count: output["kept"] }))
+    }
+  }
+  // Audit 1.3: how many of the shop's empty fields the profile filled (counts only)
+  if (step.name === "profile") {
+    for (const [key, text] of [
+      ["filled", "setup.output.profileFilled"],
+      ["kept", "setup.output.profileKept"],
+      ["refused", "setup.output.profileRefused"],
+    ] as const) {
+      const count = output[key]
+      if (typeof count === "number" && (count > 0 || key === "filled")) {
+        lines.push(t(text, { count }))
+      }
+    }
+  }
+  // "Örnek ürünlerle başla": how many sample products the shop got, or that it had them
+  if (step.name === "sample_catalog") {
+    if (typeof output["products"] === "number") {
+      lines.push(t("setup.output.samplesLoaded", { count: output["products"] }))
+    } else if (output["loaded"] === true) {
+      lines.push(t("setup.output.samplesThere"))
+    }
+  }
+  // adr/0063 task 2.7: the look's version, and whether the storefront opened with it
+  if (step.name === "preset" && typeof output["version"] === "number") {
+    lines.push(t("setup.output.packVersion", { version: output["version"] }))
+    if (output["applied"] === true) {
+      lines.push(t("setup.output.presetApplied"))
+    } else if (typeof output["published"] === "boolean") {
+      lines.push(
+        t(output["published"] ? "setup.output.presetPublished" : "setup.output.presetDraft")
+      )
     }
   }
   if (output["reason"] === "not_available_yet") {

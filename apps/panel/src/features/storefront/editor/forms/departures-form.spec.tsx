@@ -106,6 +106,28 @@ describe("upcoming departures in the editor", () => {
     expect(changes.at(-1)).toMatchObject({ layout: "cards" })
     await user.click(layout.getByRole("button", { name: /Varsayılana dön/ }))
     expect(changes.at(-1)).toMatchObject({ layout: "list" })
+    // The phone row is the cards' alone
+    expect(document.getElementById(FIELD_IDS.content(ID, "departures_phone"))).toBeNull()
+  })
+
+  it("offers the cards stacked or swiped on a phone, set and reset", async () => {
+    const user = userEvent.setup()
+    const changes = renderPanel({ ...fresh(), layout: "cards" })
+    await openGroup(user, "Diziliş")
+
+    const found = document.getElementById(FIELD_IDS.content(ID, "departures_phone"))
+    if (!found) throw new Error("no phone field")
+    const phone = within(found)
+    expect(phone.getByRole("radio", { name: "Alt alta" })).toHaveAttribute("data-state", "on")
+    await user.click(phone.getByRole("radio", { name: "Yana kaydır" }))
+    expect(changes.at(-1)).toMatchObject({ phone: "scroll" })
+    await user.click(phone.getByRole("button", { name: /Varsayılana dön/ }))
+    expect(changes.at(-1)).toMatchObject({ phone: "stack" })
+    expect(contentFields({ ...fresh(), layout: "cards" }).map((each) => each.key)).toEqual([
+      "limit",
+      "departures_layout",
+      "departures_phone",
+    ])
   })
 
   it("is found by its count and layout in the settings search; its marks lead to fields", () => {

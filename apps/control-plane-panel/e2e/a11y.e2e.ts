@@ -104,6 +104,8 @@ async function walkWizard(page: Page) {
   await next()
   await issues("sector")
   await next()
+  await issues("look")
+  await next()
   await issues("review")
 }
 

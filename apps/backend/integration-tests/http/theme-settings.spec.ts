@@ -29,6 +29,7 @@ interface Frame {
     page_width: string
     accent_ink: string
     section_title: string
+    title_accent: string
     listing_text: { size: string; align: string; width: string; collapse: boolean }
     listing_page: {
       default_view: string
@@ -54,6 +55,7 @@ const KIT = {
   page_width: "standard",
   accent_ink: "auto",
   section_title: "plain",
+  title_accent: "none",
 }
 
 /** A listing page's own text at its foot, at its defaults (adr/0075). */

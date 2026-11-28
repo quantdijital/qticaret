@@ -86,7 +86,7 @@ describe("OrganizeCard's collection", () => {
     unmount()
 
     renderCard({ ...PRODUCT, collection: null })
-    expect(screen.getByText("Koleksiyon yok")).toBeInTheDocument()
+    expect(screen.getByText(/^Eklenmemiş: .*Koleksiyon/)).toBeInTheDocument()
   })
 
   it("moves the product to another collection through its own update, and only that", async () => {

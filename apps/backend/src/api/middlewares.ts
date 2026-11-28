@@ -81,6 +81,7 @@ import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
 import { CONTROL_PLANE_ROUTES } from "./http/control-plane-routes"
+import { SUPPORT_ROUTES } from "./http/support-routes"
 import { BIRFATURA_ROUTES } from "./http/birfatura-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
@@ -122,6 +123,7 @@ import { uploadValidator } from "./http/upload-validator"
 import { VIDEO_ROUTES } from "./http/video-routes"
 import { guardUploadStorage, registerUploads } from "./http/plan-limit-guards"
 import { PLAN_ROUTES } from "./http/plan-routes"
+import { SAMPLE_CATALOG_ROUTES } from "./http/sample-catalog-routes"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
@@ -380,10 +382,13 @@ export default defineMiddlewares({
     ...ALERT_ROUTES,
     // adr/0061 Ek C9: the control plane's signed plan document push
     ...CONTROL_PLANE_ROUTES,
+    // adr/0061 Ek "Destek erişimi": the platform's support sessions
+    ...SUPPORT_ROUTES,
     // adr/0072 §3: BirFatura pulling the shop's orders and writing invoices back
     ...BIRFATURA_ROUTES,
     // adr/0061 Ek C14: Settings > Abonelik's reading
     ...PLAN_ROUTES,
+    ...SAMPLE_CATALOG_ROUTES,
     ...ACCOUNT_ROUTES,
     // ADR-0068 Ek 2026-11-15 (2): a changed password ends every older sign-in on the Store
     ...SIGN_IN_EPOCH_ROUTES,

@@ -32,6 +32,7 @@ const CATALOG_ACTIONS = [
   "tag",
 ] as const
 const SEO_ACTIONS = ["seo_template", "alt_text"] as const
+const NON_PHYSICAL_FLAG = "catalog.non_physical"
 
 interface BulkBarProps {
   selected: ReadonlySet<string>
@@ -56,6 +57,7 @@ export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts 
   const canEdit = useCan("catalog")
   // adr/0052 Ek 2026-11-23: add-on templates while the shop's add-ons are on
   const addonsOn = useFeatureState(ADDONS_FLAG) === true
+  const kindsOn = useFeatureState(NON_PHYSICAL_FLAG) === true
   // Picked one by one across pages, past what a run takes
   const tooMany = selected.size > MAX_BULK_PRODUCTS
   const selectAll = async () => {
@@ -135,6 +137,8 @@ export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts 
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {CATALOG_ACTIONS.map(item)}
+            {/* F3.2: kinds other than physical while the shop sells them, as the product page */}
+            {kindsOn ? item("kind") : null}
             <DropdownMenuSeparator />
             {SEO_ACTIONS.map(item)}
             {addonsOn ? (

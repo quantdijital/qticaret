@@ -135,6 +135,9 @@ export const OWNER_ONLY: readonly Rule[] = [
   // draft, kept, renamed, deleted (the owner, 2026-11-23: "yalnızca sahiplere açık")
   { methods: "*", path: "/admin/storefront-designs*" },
   { methods: "*", path: "/admin/storefront-presets*" },
+  // Whether the platform's support may come in, its sessions and their history
+  // (adr/0061 Ek "Destek erişimi")
+  { methods: "*", path: "/admin/support-access*" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },
@@ -185,6 +188,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/ai/seo-fill*" },
   // Wholesalers, their levels and prices (ADR-0068 §9): owner and admin; operations sees orders
   { methods: "*", path: "/admin/wholesale*" },
+  // The sector pack's sample catalogue, loaded and removed (owner, 2026-11-28): owner and admin
+  { methods: "*", path: "/admin/sample-catalog*" },
 ]
 
 /**
@@ -256,6 +261,10 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
+  // The shop's own question added by hand, a question's words and the shop's answer edited;
+  // deleting one (and its "Geri al") is the admin's, as a contact message's is
+  { methods: ["POST"], path: "/admin/product-questions" },
+  { methods: ["POST"], path: "/admin/product-questions/:id/edit" },
   // The shop's reply under a review, as a question's answer
   { methods: ["POST", "DELETE"], path: "/admin/product-reviews/:id/reply" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's

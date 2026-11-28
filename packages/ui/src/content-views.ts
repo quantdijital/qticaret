@@ -22,6 +22,7 @@ import type {
 } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type { HeroFullView } from "./hero-full-views"
+import type { HeadLinesView } from "./hand-note-views"
 import type { ListingTextView } from "./listing-views"
 import type {
   FeaturedProductSectionView,
@@ -119,7 +120,7 @@ export type HomeSectionView = {
   | SearchBoxSectionView
   | PhotoCollageSectionView
   | DeparturesSectionView
-  | {
+  | (HeadLinesView & {
       id: string
       type: "categories"
       title: string
@@ -140,12 +141,14 @@ export type HomeSectionView = {
       panels?: CategoryPanelsView | null
       /** `icons`' settings and discs (adr/0077 §10 Ek); a theme without that drawing draws the tiles. */
       icons?: CategoryIconsView | null
-    }
+      /** `carousel`'s scroller settings: `categories` in one sliding row; a theme without it draws the tiles. */
+      scroller?: ScrollerSettings | null
+    })
   | ProductsSectionView
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: SectionBrandView[] }
   | PostsSectionView
-  | {
+  | (HeadLinesView & {
       id: string
       type: "reviews"
       title: string
@@ -164,7 +167,7 @@ export type HomeSectionView = {
       scroller?: ScrollerSettings
       /** `carousel` only (adr/0077 §10 Ek): the product's picture on each card; absent: none. */
       product_image?: ReviewsProductImage
-    }
+    })
   | {
       id: string
       type: "rich_text"

@@ -241,6 +241,54 @@ class ProductReviewsModuleService extends MedusaService({
     return approvedStarCounts(sharedContext.manager as EntityManager)
   }
 
+  /**
+   * Reviews taken away (soft-deleted), each product's rating counted
+   * again; the ids are what `restoreReviews` puts back on an undo.
+   */
+  @InjectTransactionManager()
+  async removeReviews(
+    ids: readonly string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string[]> {
+    if (ids.length === 0) {
+      return []
+    }
+    const rows = await this.listProductReviews(
+      { id: [...ids] },
+      { select: ["id", "product_id"], take: null },
+      sharedContext
+    )
+    await this.softDeleteProductReviews(
+      rows.map((row) => row.id),
+      {},
+      sharedContext
+    )
+    for (const productId of new Set(rows.map((row) => row.product_id))) {
+      await this.recountRating_(productId, sharedContext)
+    }
+    return rows.map((row) => row.id)
+  }
+
+  /** Reviews `removeReviews` took, put back, each product's rating counted again. */
+  @InjectTransactionManager()
+  async restoreReviews(
+    ids: readonly string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    if (ids.length === 0) {
+      return
+    }
+    await this.restoreProductReviews([...ids], {}, sharedContext)
+    const rows = await this.listProductReviews(
+      { id: [...ids] },
+      { select: ["product_id"], take: null },
+      sharedContext
+    )
+    for (const productId of new Set(rows.map((row) => row.product_id))) {
+      await this.recountRating_(productId, sharedContext)
+    }
+  }
+
   @InjectTransactionManager()
   protected async recountRating_(
     productId: string,

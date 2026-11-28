@@ -7,31 +7,21 @@ import {
   SectorPackError,
   storefrontPreset,
 } from "@qticaret/sector-packs"
-import { SECTOR_PACKS_MODULE } from "../../../modules/sector-packs"
-import type SectorPacksModuleService from "../../../modules/sector-packs/service"
-import { GENERAL_PACK } from "../../../workflows/storefront/preset-apply"
 
 /**
  * A ready-made look's picture (adr/0063 §7, `preview.webp`) for the
- * gallery the panel shows, or null: only a look the gallery lists (of
- * `general` or a pack applied here), only the file the loader found beside
- * it, by the loader's own folder and the fixed name; nothing of the path
- * comes from the request. Larger than the loader allows: none.
+ * gallery the panel shows, or null: only a look the gallery lists (any
+ * pack this build has: the shop's own sector's first, the others' after
+ * them, owner's decision 2026-11-28), only the file the loader found
+ * beside it, by the loader's own folder and the fixed name; nothing of the
+ * path comes from the request. Larger than the loader allows: none.
  */
 export async function presetPreview(
-  container: Pick<MedusaContainer, "resolve">,
+  _container: Pick<MedusaContainer, "resolve">,
   pack: string,
   code: string,
   dir?: string
 ): Promise<Buffer | null> {
-  if (pack !== GENERAL_PACK) {
-    const [applied] = await container
-      .resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
-      .listSectorPackApplications({ pack }, { select: ["id"], take: 1 })
-    if (!applied) {
-      return null
-    }
-  }
   let preset
   try {
     preset = storefrontPreset(pack, code, dir)

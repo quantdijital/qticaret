@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import type { UsageSetup } from "@qticaret/types/control-plane"
 import { tenantPath } from "@/features/tenants/api"
 import { api } from "@/lib/api"
 
@@ -60,6 +61,8 @@ export interface TargetHealth {
 
 export interface UsageHealth {
   usage: UsageSnapshot | null
+  /** Ek C21: its last reported setup checklist (yes/no) and when; null if it never sent one. */
+  setup: { setup: UsageSetup; received_at: string } | null
   report: { expected: boolean; missing: boolean; missing_after_hours: number }
   health: { unhealthy_after: number; backend: TargetHealth; storefront: TargetHealth }
 }

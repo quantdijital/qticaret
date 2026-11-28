@@ -11,6 +11,7 @@ import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CampaignSplit } from "./CampaignSplit"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
+import { CategoryCarousel } from "./CategoryCarousel"
 import { CategoryCollage } from "./CategoryCollage"
 import { CategoryIcons } from "./CategoryIcons"
 import { CategoryPanels } from "./CategoryPanels"
@@ -112,65 +113,36 @@ function BlockView({
     case "categories": {
       // The variant's drawing when the theme draws it and the view has it; else today's tiles
       const drawn = drawnVariant("categories", section.variant, CATEGORY_VARIANTS)
+      // What every drawing takes: the head's id, title, link and the preview's marks
+      const head = {
+        id: headingId(section.id),
+        title: section.title,
+        all: section.more ?? { label: t("home.all_categories"), path: "/kategoriler" },
+        ownAll: Boolean(section.more),
+        t,
+        marks: section.editor,
+        // The heading's upper line and hand note (sahip 2026-11-28)
+        lines: section,
+      }
       if (drawn === "collage" && section.collage) {
-        return (
-          <CategoryCollage
-            id={headingId(section.id)}
-            title={section.title}
-            view={section.collage}
-            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
-            ownAll={Boolean(section.more)}
-            t={t}
-            marks={section.editor}
-          />
-        )
+        return <CategoryCollage {...head} view={section.collage} />
       }
       if (drawn === "icons" && section.icons) {
-        return (
-          <CategoryIcons
-            id={headingId(section.id)}
-            title={section.title}
-            view={section.icons}
-            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
-            ownAll={Boolean(section.more)}
-            t={t}
-            marks={section.editor}
-          />
-        )
+        return <CategoryIcons {...head} view={section.icons} />
       }
       if (drawn === "panels" && section.panels) {
+        return <CategoryPanels {...head} view={section.panels} />
+      }
+      // The sliding picture cards: the tiles' own cards with the scroller kit
+      if (drawn === "carousel" && section.scroller) {
         return (
-          <CategoryPanels
-            id={headingId(section.id)}
-            title={section.title}
-            view={section.panels}
-            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
-            ownAll={Boolean(section.more)}
-            t={t}
-            marks={section.editor}
-          />
+          <CategoryCarousel {...head} categories={section.categories} scroller={section.scroller} />
         )
       }
       return drawn === "linked" && section.linked ? (
-        <CategoryCards
-          id={headingId(section.id)}
-          title={section.title}
-          view={section.linked}
-          all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
-          ownAll={Boolean(section.more)}
-          t={t}
-          marks={section.editor}
-        />
+        <CategoryCards {...head} view={section.linked} />
       ) : (
-        <Aisles
-          id={headingId(section.id)}
-          title={section.title}
-          categories={section.categories}
-          all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
-          ownAll={Boolean(section.more)}
-          t={t}
-          marks={section.editor}
-        />
+        <Aisles {...head} categories={section.categories} />
       )
     }
     case "banner": {

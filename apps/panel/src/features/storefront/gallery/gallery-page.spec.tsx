@@ -93,18 +93,17 @@ describe("GalleryPage", () => {
     serve(gallery([design("sfd_1"), auto]))
     renderPage()
 
+    const user = userEvent.setup()
     const looks = await screen.findByRole("region", { name: "Kayıtlı görünümlerim (1/10)" })
-    expect(within(looks).getAllByRole("article")).toHaveLength(2)
+    // The named look a card; the automatic saves folded into a list, closed at first
+    expect(within(looks).getAllByRole("article")).toHaveLength(1)
     expect(within(looks).getByRole("heading", { name: "Bayram vitrini" })).toBeInTheDocument()
-    expect(
-      within(looks).getByRole("heading", { name: "Sade, 17 Kas 2026 14:20" })
-    ).toBeInTheDocument()
-    expect(within(looks).getByText("Otomatik")).toBeInTheDocument()
-    expect(
-      within(looks).getByText(
-        "Otomatik kayıtların son 5 tanesi tutulur; adlı kayıt sınırına sayılmaz."
-      )
-    ).toBeInTheDocument()
+    const fold = within(looks).getByRole("button", { name: "Otomatik kayıtlar (1)" })
+    expect(fold).toHaveAttribute("aria-expanded", "false")
+    expect(within(looks).getByText("En yenisi: 17 Kas 2026 14:20")).toBeVisible()
+    expect(within(looks).queryByRole("listitem")).toBeNull()
+    await user.click(fold)
+    expect(within(looks).getByRole("listitem", { name: "Sade, 17 Kas 2026 14:20" })).toBeVisible()
 
     const presets = await screen.findByRole("heading", { name: "Tezgâh" })
     const ready = section("Hazır görünümler")
@@ -112,10 +111,30 @@ describe("GalleryPage", () => {
     expect(presets.closest("article")).toContainElement(
       screen.getByRole("radiogroup", { name: "Renk takımı" })
     )
+    // The ready-made looks come before the shop's own saves
+    expect(ready.compareDocumentPosition(looks) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
-    expect(screen.getByRole("heading", { name: "Şu anki görünüm" })).toBeInTheDocument()
-    expect(screen.getByText("Sade · 1 Kas 2026 12:00 tarihinde yayınlandı")).toBeInTheDocument()
-    expect(screen.getByText("Taslak yayındakiyle aynı")).toBeInTheDocument()
+    const current = screen.getByRole("region", { name: "Şu anki görünüm" })
+    // Where it stands, once: live since when
+    expect(within(current).getByText("Yayında")).toBeInTheDocument()
+    expect(within(current).getByText("1 Kas 2026 12:00 tarihinden beri")).toBeInTheDocument()
+    expect(
+      within(current).getByRole("button", { name: "Taslağı yeni sekmede önizle" })
+    ).toBeEnabled()
+  })
+
+  it("says the draft waits to be published and what is live meanwhile", async () => {
+    const full = gallery([])
+    serve({
+      ...full,
+      current: { ...full.current, draft: { ...full.current.draft, has_changes: true } },
+    })
+    renderPage()
+
+    const current = await screen.findByRole("region", { name: "Şu anki görünüm" })
+    expect(within(current).getByText("Taslakta yayınlanmamış değişiklik var")).toBeInTheDocument()
+    expect(within(current).getByText("Yayında: Sade · 1 Kas 2026 12:00")).toBeInTheDocument()
+    expect(within(current).queryByText("Yayında")).toBeNull()
   })
 
   it("offers to save the current look when nothing is saved yet", async () => {
@@ -173,6 +192,29 @@ describe("GalleryPage", () => {
     ).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Bu görünümü kaydet" })).toBeDisabled()
     expect(screen.getByText("Adlı kayıtlar dolu; yenisi için birini silin.")).toBeInTheDocument()
+  })
+
+  it("folds the other sectors' looks under their names, below the shop's own (owner, 2026-11-28)", async () => {
+    const cutlery = { code: "cutlery", name: "Bıçak ve çatal-bıçak" }
+    serve(gallery([]), [
+      ...PRESETS,
+      preset("katalog", { pack: "cutlery", name: "Katalog", own: false, sector: cutlery }),
+    ])
+    const user = userEvent.setup()
+    renderPage()
+
+    const toggle = await screen.findByRole("button", { name: "Diğer sektörler" })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(screen.getByText("Bıçak ve çatal-bıçak · 1 görünüm")).toBeVisible()
+    expect(screen.queryByRole("heading", { name: "Katalog" })).toBeNull()
+    // The shop's own looks carry their sector's tag too
+    expect(within(section("Hazır görünümler")).getAllByText("Genel")[0]).toBeVisible()
+
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute("aria-expanded", "true")
+    const run = screen.getByRole("region", { name: "Bıçak ve çatal-bıçak" })
+    expect(within(run).getByRole("heading", { name: "Katalog" })).toBeVisible()
+    expect(within(run).getByTitle("Bıçak ve çatal-bıçak için hazırlandı")).toBeVisible()
   })
 
   it("asks before a look goes into the draft, with the draft's unpublished changes named", async () => {

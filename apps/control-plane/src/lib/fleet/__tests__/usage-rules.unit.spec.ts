@@ -44,6 +44,38 @@ describe("checkUsageReport (adr/0061 §3.1, §5.4, Ek C13)", () => {
     expect(check(body)).toEqual({ ok: false, status: 400, message: "usage.invalid" })
   })
 
+  const setup = {
+    store_named: true,
+    currency: true,
+    region: true,
+    stock_location: true,
+    shipping: false,
+    payment: false,
+    product_published: true,
+    look_published: false,
+    legal_published: false,
+    mail_sender: false,
+  }
+
+  it("takes a report with the setup checklist and one without (an older shop), Ek C21", () => {
+    expect(check(report({ setup }))).toEqual({ ok: true, report: report({ setup }) })
+    expect(check(report())).toEqual({ ok: true, report: report() })
+  })
+
+  it.each([
+    ["a provider's name", { ...setup, payment: "paytr" }],
+    ["a count", { ...setup, product_published: 4 }],
+    ["an unknown step", { ...setup, owner_email: false }],
+    ["a missing step", { ...setup, mail_sender: undefined }],
+    ["not an object", "ready"],
+  ])("refuses a setup with %s: 400 usage.invalid", (_case, value) => {
+    expect(check(report({ setup: value }))).toEqual({
+      ok: false,
+      status: 400,
+      message: "usage.invalid",
+    })
+  })
+
   it("refuses another shop's id: 403", () => {
     expect(check(report({ tenant_id: "ten_01JOTHER0000000000000000" }))).toEqual({
       ok: false,

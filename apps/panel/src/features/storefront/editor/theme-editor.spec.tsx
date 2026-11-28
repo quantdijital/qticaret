@@ -234,7 +234,7 @@ describe("ThemeEditor", () => {
       expect(postsTo(fetchMock, `${PATH}/revisions/1/restore`)).toHaveLength(1)
     })
     // The restored version has no announcement bar
-    expect(await within(tree).findByRole("button", { name: "Üst şerit ekle" })).toBeVisible()
+    expect(await within(tree).findByRole("button", { name: "Üst şeride ekle" })).toBeVisible()
     // The draft it replaced was kept: the toast says so
     await waitFor(() => {
       expect(vi.mocked(toast.success)).toHaveBeenCalledWith("1. yayın taslağa yüklendi.", {
@@ -338,7 +338,7 @@ describe("ThemeEditor", () => {
     await opened()
 
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    const chooser = await screen.findByRole("region", { name: "Bölüm ekle" })
     await user.click(within(chooser).getByRole("button", { name: /Görsel bant/ }))
 
     expect(await screen.findByRole("heading", { name: "Görsel bant" })).toBeVisible()

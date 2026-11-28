@@ -2,8 +2,10 @@ import { z } from "@medusajs/framework/zod"
 import { SLUG_MAX_LENGTH, SLUG_SEGMENT } from "../../seo/slug"
 import { LAYOUT_LIMITS, optional, recordId, title } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { headLines } from "./head-lines"
 import { sectionIcon } from "./icons"
 import { bodyFields } from "./look"
+import { scroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
 
@@ -114,6 +116,8 @@ const common = {
   show_count: z.boolean().default(false),
   /** The link beside the title; none: the storefront's "every category". */
   more: optional(storefrontLink),
+  /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+  ...headLines,
 }
 
 /** Today's picture tiles. */
@@ -212,18 +216,32 @@ const icons = z
   })
   .strict()
 
+/**
+ * The categories as picture cards in one row that slides, driven by the
+ * scroller kit. Handles (a preset's) as the icon row's.
+ */
+const carousel = z
+  .object({
+    ...common,
+    variant: z.literal("carousel"),
+    scroller,
+    category_handles: z.array(categoryHandle).max(LAYOUT_LIMITS.items).optional(),
+  })
+  .strict()
+
 export const CATEGORIES_BRANCHES: Readonly<Record<SectionVariant<"categories">, VariantBranch>> = {
   tiles,
   linked,
   collage,
   panels,
   icons,
+  carousel,
 }
 
 /** The shop's categories as cards. */
 export const categories = z.discriminatedUnion(
   "variant",
-  [tiles, linked, collage, panels, icons],
+  [tiles, linked, collage, panels, icons, carousel],
   VARIANT_ERROR
 )
 

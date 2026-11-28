@@ -4,16 +4,19 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { StoreHeadLines } from "./section-head-lines.js"
 import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
+import type { StoreTopSliderSection } from "./section-top-slider.js"
 import type { FaqSettings, StoreFaqItem } from "./section-faq.js"
 import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type {
+  StoreCategoriesCarousel,
   StoreCategoriesCollage,
   StoreCategoriesIcons,
   StoreCategoriesLinked,
@@ -108,7 +111,8 @@ export interface StoreSectionLookPart {
  * backend before variants) or, as `linked` (adr/0049 Ek 2026-11-15), each
  * category a card with its first subcategories as links, or as `collage`,
  * photo-led cards filling each row, or as `panels`, frameless graphite
- * panels led by their photos. A reader takes a
+ * panels led by their photos, or as `carousel`, picture cards in one row
+ * that slides (with `scroller`). A reader takes a
  * variant it does not know as `tiles` and leaves the other's fields unread.
  */
 export type StoreCategoriesSection = {
@@ -120,13 +124,15 @@ export type StoreCategoriesSection = {
   show_count?: boolean
   /** The link beside the title; none (or absent): the storefront's "every category". */
   more?: StoreLayoutLink | null
-} & (
-  | { variant?: "tiles" }
-  | StoreCategoriesLinked
-  | StoreCategoriesCollage
-  | StoreCategoriesPanels
-  | StoreCategoriesIcons
-)
+} & StoreHeadLines &
+  (
+    | { variant?: "tiles" }
+    | StoreCategoriesLinked
+    | StoreCategoriesCollage
+    | StoreCategoriesPanels
+    | StoreCategoriesIcons
+    | StoreCategoriesCarousel
+  )
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (
@@ -170,7 +176,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
  * `carousel` (a grid prints as it did before variants); the storefront
  * reads an unknown variant as the grid (`variantOf`).
  */
-export interface StoreReviewsSection {
+export interface StoreReviewsSection extends StoreHeadLines {
   id: string
   type: "reviews"
   title: string | null
@@ -334,7 +340,7 @@ export type StoreFooterSection =
   | Extract<StoreLayoutSection, { type: "rich_text" | "trust_badges" | "marquee" }>
 
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
-export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
+export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection | StoreTopSliderSection
 
 /**
  * The announcement bar: its lines in the shop's words and how it shows more
@@ -362,6 +368,11 @@ export type StoreAnnouncementBar = {
   phone?: boolean
   /** The light strip's "Hesabım" (true); absent: not written. */
   account?: boolean
+  /**
+   * The dark bar's lines' own links, by each line's place (null: words
+   * only, or a link to a record since removed); absent: none.
+   */
+  line_links?: (StoreLayoutLink | null)[]
 } & Partial<AnnouncementSettings>
 
 export interface StoreLayout {

@@ -4,6 +4,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { PanelLeaves } from "./band-art"
 import { type Of, headingId } from "./plan"
+import { HeadNote } from "./head-lines"
 
 /** The posts' variants this theme draws beside today's tiles (`drawnVariant`). */
 export const GUIDE_VARIANTS = ["intro_panel"] as const
@@ -54,6 +55,7 @@ export function GuidesPanel({
             <h2 id={id} {...fieldMark(marks, "title")}>
               {section.title}
             </h2>
+            <HeadNote lines={section} marks={marks} />
             {section.intro && (
               <p className="text-text-2" {...fieldMark(marks, "intro")}>
                 {section.intro}

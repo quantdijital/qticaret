@@ -89,8 +89,8 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | ID | Kural | Önem | Oto |
 |---|---|---|---|
 | P-DATA-01 | Fiyat > 0 ve para birimi | K | |
-| P-DATA-02 | GTIN (EAN/UPC) veya MPN + marka (Merchant Center uygunluğu, `gtin13` kontrol basamağı doğrulanır) | Y | |
-| P-DATA-03 | Marka atanmış | O | |
+| P-DATA-02 | GTIN (EAN/UPC) veya MPN + marka (Merchant Center uygunluğu, `gtin13` kontrol basamağı doğrulanır). Hizmet (`kind=service`) ya da tarihli üründe (`booking_mode` ≠ `none`, ör. tur) sorulmaz (2026-11-28, kural sürümü 8) | Y | |
+| P-DATA-03 | Marka atanmış. Hizmet ya da tarihli üründe sorulmaz (P-DATA-02 ile aynı; kural sürümü 8) | O | |
 | P-DATA-04 | Kategori atanmış ve birincil kategori seçili | Y | En derin kategoriyi seç |
 | P-DATA-05 | Fiziksel üründe ağırlık/ölçü önerisi: "ölçü girilmezse kargo ücreti varsayılan pakete göre hesaplanır". Engel değil, yalnız öneri (ADR-0054, 2026-11-03; önceden Y). Kural sürümü 5 | D | |
 | P-DATA-06 | Ürün durumu (`itemCondition`) | D | Varsayılan "yeni" |

@@ -1,5 +1,5 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query"
-import type { LimitKey, TenantStatus } from "@qticaret/types/control-plane"
+import type { LimitKey, TenantStatus, UsageSetup } from "@qticaret/types/control-plane"
 import type { HealthState } from "@/features/monitoring/api"
 import type { Plan } from "@/features/packages/api"
 import type { RowVersion, ShopVersion } from "@/features/releases/api"
@@ -29,6 +29,8 @@ export interface TenantRow {
   health: { backend: HealthState | null; storefront: HealthState | null }
   /** Ek C18: what it reports running and whether that is its target. */
   version: RowVersion
+  /** Ek C21: its setup checklist from its latest report; null when none came. */
+  setup: UsageSetup | null
 }
 
 export interface TenantList {
@@ -63,14 +65,39 @@ export interface Contact {
   created_at: string
 }
 
+/** Why the last DNS check did not prove or route a domain (F16.7). */
+export type DomainCheckError =
+  | "txt_missing"
+  | "txt_mismatch"
+  | "dns_unavailable"
+  | "expired"
+  | "txt_lost"
+  | "routing_missing"
+  | "routing_mismatch"
+
+/** The records the shop's owner publishes: the proof, and where to point (null before the server). */
+export interface DomainDns {
+  txt: { name: string; value: string }
+  routing: { type: "CNAME" | "A"; name: string; values: string[] } | null
+}
+
 export interface Domain {
   id: string
   hostname: string
   kind: "platform_subdomain" | "custom"
-  verification: "pending" | "verified" | "failed"
+  verification: "pending" | "verified" | "active" | "failed"
+  verification_error?: DomainCheckError | null
+  verified_at?: string | null
+  last_checked_at?: string | null
   is_primary: boolean
+  /** A custom domain's records; null on the platform's subdomain. */
+  dns?: DomainDns | null
   created_at: string
 }
+
+/** Whether the shop's hold on the domain is proven (it may be primary). */
+export const isVerified = (domain: Pick<Domain, "verification">): boolean =>
+  domain.verification === "verified" || domain.verification === "active"
 
 export interface Note {
   id: string
@@ -146,6 +173,10 @@ export interface TenantDetail {
     /** C12: the pack's version the shop last applied, and when; null until it has. */
     sector_pack_version: number | null
     sector_pack_applied_at: string | null
+    /** adr/0063 task 2.7: its ready-made look, and the version applied and when; null until it has. */
+    preset: string | null
+    preset_version: number | null
+    preset_applied_at: string | null
     created_at: string
     created_by: string | null
     next_payment_on: string | null

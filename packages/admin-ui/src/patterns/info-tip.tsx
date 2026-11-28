@@ -1,5 +1,5 @@
 import { Info } from "lucide-react"
-import { useRef, useState } from "react"
+import { useId, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ADMIN_UI_NS } from "../i18n"
@@ -102,5 +102,28 @@ export function HiddenHint({ id, children }: { id?: string | undefined; children
     <p id={id} className="sr-only">
       {children}
     </p>
+  )
+}
+
+/**
+ * A card's one sentence on what it is for, behind an (i) beside its title
+ * (under `FieldHints style="tip"`): as tall as the title's line, its
+ * words kept hidden as the button's description.
+ */
+export function TitleTip({
+  title,
+  hint,
+  className,
+}: {
+  title: string
+  hint: ReactNode
+  className?: string
+}) {
+  const hintId = `${useId()}-about`
+  return (
+    <>
+      <InfoTip name={title} hint={hint} hintId={hintId} className={cn("h-6", className)} />
+      <HiddenHint id={hintId}>{hint}</HiddenHint>
+    </>
   )
 }

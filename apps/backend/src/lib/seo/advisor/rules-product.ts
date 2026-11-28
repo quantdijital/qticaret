@@ -151,8 +151,9 @@ const prices = forProduct((_facts, product) =>
     : null
 )
 
+// A service or a dated product (a tour) has no barcode, maker code or brand: Google asks them of goods
 const identifiers = forProduct((_facts, product) =>
-  product.unidentified > 0
+  product.unidentified > 0 && !product.service
     ? {
         ruleId: "P-DATA-02",
         severity: "high",
@@ -164,7 +165,7 @@ const identifiers = forProduct((_facts, product) =>
 )
 
 const brand = forProduct((_facts, product) =>
-  product.brand
+  product.brand || product.service
     ? null
     : {
         ruleId: "P-DATA-03",

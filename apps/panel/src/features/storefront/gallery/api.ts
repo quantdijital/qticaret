@@ -86,6 +86,10 @@ export interface PresetCard extends PresetRef {
   family: string
   /** Its colour set's short name; null: the family has one look. */
   swatch: string | null
+  /** The sector the look was made for: its pack's code and name (`Bıçak ve çatal-bıçak`). */
+  sector: { code: string; name: string }
+  /** One of the shop's own sector (or `general`); false: another sector's (owner, 2026-11-28). */
+  own: boolean
   summary: DesignSummary
   has_menus: boolean
   has_demo: boolean
@@ -132,10 +136,24 @@ export interface KeptText {
   name?: string
 }
 
+/** What of a ready-made look the draft takes: its style alone, or all of it (owner, 2026-11-28). */
+export type ApplyScope = "style" | "full"
+
+/** A section a look's full apply would leave out here (backend `storefront-presets/fit.ts`). */
+export interface UnfitSection {
+  where: string
+  type: string
+  title: string | null
+  refs: string[]
+  reason: "missing" | "feature_off"
+}
+
 /** What an apply did, for the editor's note. */
 export interface ApplyReport {
   /** The look's name as the shop knows it. */
   name: string
+  /** Its style alone was taken; absent: the whole look (or a saved one). */
+  scope?: ApplyScope
   auto_saved: DesignRef | null
   /** The name the panel showed the kept draft under. */
   saved_name: string | null
@@ -169,6 +187,18 @@ export const presetsQuery = () =>
     queryFn: async () => (await sdk.client.fetch<{ presets: PresetCard[] }>(PRESETS)).presets,
   })
 
+/** The sections applying the look whole would leave out in this shop, read before it is applied. */
+export const presetFitQuery = (preset: PresetRef) =>
+  queryOptions({
+    queryKey: [...PRESETS_KEY, "fit", preset.pack, preset.code, preset.version] as const,
+    queryFn: async () =>
+      (
+        await sdk.client.fetch<{ unfit: UnfitSection[] }>(
+          `${PRESETS}/${id(preset.pack)}/${id(preset.code)}/fit`
+        )
+      ).unfit,
+  })
+
 interface ApplyAnswer extends LayoutAnswer {
   result: {
     auto_saved: DesignRef | null
@@ -194,8 +224,20 @@ export function useApplyLook() {
   const client = useQueryClient()
   return useMutation({
     mutationKey: LAYOUT_ACTION_KEY,
-    mutationFn: async ({ target, saveAs }: { target: ApplyTarget; saveAs: string | null }) => {
-      const body = saveAs ? { save_as: saveAs } : {}
+    mutationFn: async ({
+      target,
+      saveAs,
+      scope = "full",
+    }: {
+      target: ApplyTarget
+      saveAs: string | null
+      /** A ready-made look's: its style alone; unset, the whole look as before. */
+      scope?: ApplyScope
+    }) => {
+      const body = {
+        ...(saveAs ? { save_as: saveAs } : {}),
+        ...(target.kind === "preset" && scope === "style" ? { scope } : {}),
+      }
       const path =
         target.kind === "preset"
           ? `${PRESETS}/${id(target.preset.pack)}/${id(target.preset.code)}/apply`
