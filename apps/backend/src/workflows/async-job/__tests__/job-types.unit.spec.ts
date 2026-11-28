@@ -36,6 +36,7 @@ describe("job types", () => {
       "order.export",
       "promotion.codes",
       "report.export",
+      "sample_catalog.load",
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",
@@ -100,9 +101,19 @@ describe("job types", () => {
     expect(MANAGER_JOB_TYPES).toEqual([
       "ai.image_edit",
       "ai.seo_fill",
+      "sample_catalog.load",
       "wholesale.carts",
       "wholesale.sync",
     ])
+  })
+
+  it("loads a sample catalogue one at a time, queued by its own route, seen by managers", () => {
+    expect(jobType("sample_catalog.load")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {

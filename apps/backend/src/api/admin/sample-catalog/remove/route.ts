@@ -1,4 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ConflictError } from "../../../../lib/errors"
+import { latestSampleLoad } from "../../../../lib/sample-catalog/load-job"
 import { planRemoval } from "../../../../lib/sample-catalog/plan"
 import { readSampleRows } from "../../../../lib/sample-catalog/read"
 import { sampleStatus } from "../../../../lib/sample-catalog/status"
@@ -16,6 +18,11 @@ export async function POST(
   res: MedusaResponse
 ): Promise<void> {
   const { parts, keep_product_ids, dry_run } = req.validatedBody
+  const loading = await latestSampleLoad(req.scope)
+  if (loading && (loading.status === "queued" || loading.status === "running")) {
+    // The load writes the records this would read: one after the other
+    throw new ConflictError("sample_catalog.loading")
+  }
   const choice = { parts, keep_product_ids }
   if (dry_run) {
     const plan = planRemoval(await readSampleRows(req.scope), choice)

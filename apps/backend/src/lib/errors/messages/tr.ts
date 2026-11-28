@@ -14,6 +14,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "async_job.unknown": "İş bulunamadı.",
   "async_job.type_unknown": "Böyle bir iş tipi yok.",
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
+  "sample_catalog.not_for_sale": "Bu bir örnek ürün; vitrinde görünür ama satın alınamaz.",
+  "sample_catalog.unknown": "Bu sektör paketinin örnek içeriği yok.",
+  "sample_catalog.pack_not_applied": "Bu sektör paketi mağazanıza uygulanmamış.",
+  "sample_catalog.already_loaded": "Bu örnek içerik zaten yüklü.",
+  "sample_catalog.loading": "Örnek içerik şu an yükleniyor; bitince yeniden deneyin.",
+  "sample_catalog.booked_meanwhile":
+    "Bu arada bir örnek ürüne rezervasyon ya da sipariş geldi; listeyi yenileyip yeniden deneyin.",
   "billing_profile.unknown": "Bu müşterinin fatura bilgisi yok.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",

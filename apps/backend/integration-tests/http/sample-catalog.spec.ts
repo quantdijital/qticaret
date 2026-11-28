@@ -30,6 +30,13 @@ interface Status {
   categories: number
   reviews: number
 }
+interface LoadJob {
+  status: string
+  progress: number
+  pack: string | null
+  summary: Record<string, unknown> | null
+  error_code: string | null
+}
 
 const found = sectorPack("travel")
 if (!found) {
@@ -60,6 +67,22 @@ medusaIntegrationTestRunner({
       })
       return data.sample_catalog
     }
+    // The load is a background job: queued (202), then polled on the status
+    const load = async (): Promise<LoadJob> => {
+      const queued = await post("/admin/sample-catalog/load", { pack: "travel" })
+      expect(queued.status).toBe(202)
+      for (let attempt = 0; attempt < 1200; attempt++) {
+        const { data } = await http.get<{ load_job: LoadJob | null }>("/admin/sample-catalog", {
+          headers: admin.headers,
+        })
+        const job = data.load_job
+        if (job && job.status !== "queued" && job.status !== "running") {
+          return job
+        }
+        await new Promise((resolve) => setTimeout(resolve, 200))
+      }
+      throw new Error("the sample load did not finish")
+    }
 
     beforeEach(async () => {
       shop = await stockShop(container())
@@ -82,9 +105,13 @@ medusaIntegrationTestRunner({
         expect.objectContaining({ pack: "travel", products: SET_SIZE, loaded: false }),
       ])
 
-      const loaded = await post("/admin/sample-catalog/load", { pack: "travel" })
-      expect(loaded.status).toBe(200)
-      expect(loaded.data["result"]).toMatchObject({ pack: "travel", products: SET_SIZE })
+      const loaded = await load()
+      expect(loaded).toMatchObject({
+        status: "succeeded",
+        progress: 100,
+        pack: "travel",
+        summary: { pack: "travel", products: SET_SIZE },
+      })
       const after = await status()
       expect(after.products).toHaveLength(SET_SIZE)
       expect(after.sets[0]?.loaded).toBe(true)
@@ -137,7 +164,7 @@ medusaIntegrationTestRunner({
     })
 
     it("removes by parts only what it made, and keeps a category holding the shop's product", async () => {
-      expect((await post("/admin/sample-catalog/load", { pack: "travel" })).status).toBe(200)
+      expect((await load()).status).toBe("succeeded")
       const products = container().resolve(Modules.PRODUCT)
       const [sampleCategory] = await products.listProductCategories(
         { handle: "kapadokya-turlari" },

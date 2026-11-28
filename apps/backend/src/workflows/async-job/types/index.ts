@@ -17,6 +17,7 @@ import { migrationUrls } from "./migration-urls"
 import { orderExport } from "./order-export"
 import { promotionCodes } from "./promotion-codes"
 import { reportExport } from "./report-export"
+import { sampleCatalogLoad } from "./sample-catalog-load"
 import { seoAudit } from "./seo-audit"
 import { seoSitemap } from "./seo-sitemap"
 import { seoUrlStyle } from "./seo-url-style"
@@ -52,6 +53,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "order.export": erase(orderExport),
   "promotion.codes": erase(promotionCodes),
   "report.export": erase(reportExport),
+  "sample_catalog.load": erase(sampleCatalogLoad),
   "seo.audit": erase(seoAudit),
   "seo.sitemap": erase(seoSitemap),
   "seo.url_style": erase(seoUrlStyle),

@@ -15,6 +15,8 @@ import {
 import { sectorPack } from "@qticaret/sector-packs"
 import type { SampleCatalog } from "@qticaret/sector-packs"
 import { logger } from "../../lib/logging"
+import { ASYNC_JOB_MODULE } from "../../modules/async-job"
+import type AsyncJobModuleService from "../../modules/async-job/service"
 import { planSampleLoad } from "../../lib/sample-catalog/load-plan"
 import type { SampleLoadPlan } from "../../lib/sample-catalog/load-plan"
 import { SAMPLE_KEY, sampleMark } from "../../lib/sample-catalog/mark"
@@ -29,6 +31,28 @@ const samplesOf = (pack: string): SampleCatalog => {
     throw new Error(`sample-catalog: ${pack} has no samples`)
   }
   return samples
+}
+
+/**
+ * How far the load is, written to its background job after each product
+ * (5–99 %, the categories before them counted as the first 5). A job
+ * cancelled or swept meanwhile stops the load: the step takes back what it made.
+ */
+export function progressReporter(
+  container: Pick<MedusaContainer, "resolve">,
+  jobId: string | undefined,
+  total: number
+): (done: number) => Promise<void> {
+  if (!jobId) {
+    return () => Promise.resolve()
+  }
+  const jobs = container.resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
+  return async (done) => {
+    const percent = 5 + Math.floor((done / Math.max(total, 1)) * 94)
+    if (!(await jobs.reportProgress(jobId, percent, null, true))) {
+      throw new Error("sample-catalog: the load's job was stopped")
+    }
+  }
 }
 
 /** What the load will do, read before any write; refuses an unknown, foreign or loaded set. */
@@ -116,10 +140,14 @@ export const makeSampleCategoriesStep = createStep(
  */
 export const writeSampleProductsStep = createStep(
   "sample-catalog-write-products",
-  async (input: { plan: SampleLoadPlan; category_ids: Record<string, string> }, { container }) => {
+  async (
+    input: { plan: SampleLoadPlan; category_ids: Record<string, string>; job_id?: string },
+    { container }
+  ) => {
     const { plan } = input
     const samples = samplesOf(plan.pack)
     const made: string[] = []
+    const report = progressReporter(container, input.job_id, samples.products.length)
     const context = {
       container,
       tag: plan.tag,
@@ -137,6 +165,7 @@ export const writeSampleProductsStep = createStep(
           plan.handles[product.handle] ?? product.handle,
           (id) => made.push(id)
         )
+        await report(made.length)
       }
     } catch (error) {
       await undoSampleProducts(container, made)
@@ -151,6 +180,12 @@ export const writeSampleProductsStep = createStep(
     await undoSampleProducts(container, await liveProductIds(container, made))
   }
 )
+
+export interface LoadSampleCatalogInput {
+  pack: string
+  /** The background job running the load (`sample_catalog.load`): told how far it is. */
+  job_id?: string
+}
 
 export interface LoadSampleCatalogResult {
   pack: string
@@ -167,14 +202,15 @@ export interface LoadSampleCatalogResult {
  */
 export const loadSampleCatalogWorkflow = createWorkflow(
   "sample-catalog-load",
-  (input: { pack: string }) => {
-    acquireLockStep({ key: SAMPLE_LOCK, timeout: 5, ttl: 600 })
-    const plan = planSampleLoadStep(input)
+  (input: LoadSampleCatalogInput) => {
+    acquireLockStep({ key: SAMPLE_LOCK, timeout: 5, ttl: 900 })
+    const plan = planSampleLoadStep(transform({ input }, ({ input }) => ({ pack: input.pack })))
     const categories = makeSampleCategoriesStep(plan)
     const products = writeSampleProductsStep(
-      transform({ plan, categories }, ({ plan, categories }) => ({
+      transform({ plan, categories, input }, ({ plan, categories, input }) => ({
         plan,
         category_ids: categories.category_ids,
+        ...(input.job_id ? { job_id: input.job_id } : {}),
       }))
     )
     releaseLockStep({ key: SAMPLE_LOCK })
