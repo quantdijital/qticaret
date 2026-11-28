@@ -7,6 +7,8 @@ import type { ProductListItem } from "@/features/products/api/products"
 import { ProductRowMenu } from "@/features/products/components/product-row-menu"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { publishScheduleOf } from "@/features/products/publish-schedule"
+import { isSampleProduct } from "@/features/sample-catalog/api"
+import { SampleBadge } from "@/features/sample-catalog/sample-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { availableStock, listSku, priceRange } from "@/features/products/product-math"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
@@ -89,6 +91,7 @@ export function useProductColumns(
               {t("products.giftCardBadge")}
             </Badge>
           ) : null}
+          {isSampleProduct(product) ? <SampleBadge /> : null}
         </div>
       ),
     },

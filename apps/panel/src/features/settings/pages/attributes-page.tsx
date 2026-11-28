@@ -16,6 +16,7 @@ import { TemplateDialog } from "@/features/attributes/components/template-dialog
 import { CatalogDefaultsCard } from "@/features/settings/components/catalog-defaults-card"
 import { ProductBadgesCard } from "@/features/settings/components/product-badges-card"
 import { OutOfStockCard } from "@/features/settings/components/out-of-stock-card"
+import { SampleCatalogCard } from "@/features/sample-catalog/sample-catalog-card"
 import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 
@@ -125,6 +126,8 @@ export function AttributesPage() {
       <ProductBadgesCard />
       {/* T1: sold-out products in listings and search, shown or left out */}
       <OutOfStockCard />
+      {/* The sector pack's sample products: loaded, followed while loading, removed by parts */}
+      <SampleCatalogCard />
       {walk.open ? (
         <TemplateDialog
           template={walk.open}

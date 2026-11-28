@@ -977,7 +977,8 @@
         "ai.alt_text": "Toplu alt metin önerisi",
         "ai.seo_fill": "Toplu SEO metni önerisi",
         "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme",
-        "order.export": "Sipariş dışa aktarımı"
+        "order.export": "Sipariş dışa aktarımı",
+        "sample_catalog.load": "Örnek içerik yükleme"
       }
     },
     "audit": {
@@ -15252,6 +15253,67 @@
         "submit": "Talep gönder",
         "refresh": "Listeyi yenile"
       }
+    }
+  },
+  "sampleCatalog": {
+    "badge": "Örnek",
+    "badgeHint": "Örnek içerikten geldi; vitrinde görünür, satın alınamaz.",
+    "productNote": "Örnek ürün; vitrinde görünür, satın alınamaz.",
+    "manage": "Örnek içeriği yönet",
+    "card": {
+      "title": "Örnek içerik",
+      "description": "Sektör paketinizin örnek ürünleri, mağaza ilk günden dolu görünsün diye. Vitrinde görünür, satın alınamaz; istediğiniz zaman kaldırırsınız.",
+      "set": "{{name}} · {{count}} ürün",
+      "none": "Yüklü değil",
+      "queued": "Sırada, birazdan başlıyor",
+      "running": "Yükleniyor… %{{percent}}",
+      "loaded_one": "{{count}} örnek ürün yüklü",
+      "loaded_other": "{{count}} örnek ürün yüklü",
+      "extras": "{{categories}} kategori, {{reviews}} yorum",
+      "failed": "Son yükleme tamamlanamadı; yapılanlar geri alındı. Yeniden deneyebilirsiniz.",
+      "load": "Yükle",
+      "remove": "Örnek içeriği kaldır",
+      "queuedToast": "Örnek içerik yükleniyor; birkaç dakika sürer. Bu sayfadan ayrılabilirsiniz.",
+      "loadedToast_one": "Örnek içerik yüklendi: {{count}} ürün.",
+      "loadedToast_other": "Örnek içerik yüklendi: {{count}} ürün.",
+      "noSets": "Mağazanızın sektör paketinde örnek içerik yok."
+    },
+    "offer": {
+      "title": "Örnek içerikle başlayın",
+      "text": "{{name}}: {{count}} örnek ürün tek tıkla yüklenir. Vitrinde görünür, satın alınamaz; istediğiniz zaman kaldırırsınız.",
+      "load": "Yükle"
+    },
+    "remove": {
+      "title": "Örnek içeriği kaldır",
+      "description": "Yalnız örnek içerikten gelen kayıtlar silinir; kendi ürünlerinize ve kategorilerinize dokunulmaz.",
+      "partsLabel": "Neler kaldırılsın",
+      "parts": {
+        "all": "Hepsi",
+        "products": "Örnek ürünler",
+        "productsHint": "Kalkış tarihleri, programları ve yorumlarıyla birlikte",
+        "categories": "Örnek kategoriler",
+        "categoriesHint": "Yalnız içinde kendi ürününüz olmayanlar",
+        "reviews": "Örnek yorumlar"
+      },
+      "counting": "Sayılıyor…",
+      "keepToggle": "Bazılarını tut",
+      "keepHint": "İşaretini kaldırdığınız ürün silinmez; örnek olarak kalır.",
+      "keepAria": "{{title}} silinsin",
+      "edited": "düzenlendi",
+      "staysTitle": "Silinmeyecekler",
+      "stays": {
+        "ordered": "{{title}}: siparişi var",
+        "booked": "{{title}}: satılmış ya da ayrılmış yeri var",
+        "own_products": "{{name}} kategorisi: içinde kendi ürününüz var",
+        "samples_left": "{{name}} kategorisi: içinde tuttuğunuz örnek ürün var",
+        "children": "{{name}} kategorisi: alt kategorisi kalıyor"
+      },
+      "nothing": "Seçtiğiniz parçalarda silinecek bir şey yok.",
+      "confirm": "Kaldır",
+      "doneTitle": "Örnek içerik kaldırıldı",
+      "done": "{{products}} ürün, {{categories}} kategori, {{reviews}} yorum silindi.",
+      "hidden_one": "{{count}} paket kategorisi yeniden gizlendi.",
+      "hidden_other": "{{count}} paket kategorisi yeniden gizlendi."
     }
   }
 }
