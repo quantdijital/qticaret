@@ -13,6 +13,7 @@ import {
   useMarkCutover,
   useStartInvites,
 } from "@/features/settings/api/migration"
+import { stepTitle } from "@/features/settings/components/migration/step-title"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatDate } from "@qticaret/admin-ui/lib/format"
 
@@ -20,14 +21,14 @@ const C = "settings.migration.cutover"
 const I = "settings.migration.invites"
 
 /** The day the domain moved here: from it, thirty days of the storefront's 404s watched (F14.7). */
-export function CutoverCard({ className }: { className?: string }) {
+export function CutoverCard({ className, step }: { className?: string; step?: number }) {
   const { t } = useTranslation()
   const cutover = useQuery(cutoverQuery())
   const mark = useMarkCutover()
   const [confirming, setConfirming] = useState(false)
   return (
     <SectionCard
-      title={t(`${C}.title`)}
+      title={stepTitle(t, t(`${C}.title`), step)}
       description={t(`${C}.description`)}
       {...(className ? { className } : {})}
     >
@@ -74,14 +75,14 @@ export function CutoverCard({ className }: { className?: string }) {
 const COUNTS = ["queued", "invited", "waiting", "today"] as const
 
 /** Moved customers asked to open their accounts (F14.5): where the queue stands, and its start. */
-export function InvitesCard({ className }: { className?: string }) {
+export function InvitesCard({ className, step }: { className?: string; step?: number }) {
   const { t } = useTranslation()
   const status = useQuery(inviteStatusQuery())
   const start = useStartInvites()
   const [confirming, setConfirming] = useState(false)
   return (
     <SectionCard
-      title={t(`${I}.title`)}
+      title={stepTitle(t, t(`${I}.title`), step)}
       description={t(`${I}.description`)}
       {...(className ? { className } : {})}
     >

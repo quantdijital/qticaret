@@ -81,7 +81,7 @@ function LastRun({ job }: { job: LinkJob | null }) {
  * sites untouched; what answers nothing is listed in the report for the
  * shop to fix. A check first counts; the fix asks once.
  */
-export function LinksCard() {
+export function LinksCard({ className }: { className?: string }) {
   const { t } = useTranslation()
   const last = useQuery(lastLinkJobQuery())
   const start = useStartLinkRewrite()
@@ -94,6 +94,8 @@ export function LinksCard() {
     <SectionCard
       title={t(`${L}.title`)}
       description={t(`${L}.description`)}
+      flush
+      {...(className ? { className } : {})}
       action={
         <>
           <Button

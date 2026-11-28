@@ -1505,6 +1505,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.product_gone": "Önceki taşımanın yaptığı ürün artık yok; açıklaması yenilenmedi.",
   "migration.description_refresh_empty":
     "Dışa aktarmada bu ürünün açıklaması yok; buradaki açıklaması olduğu gibi kaldı.",
+  "migration.export_busy":
+    "Eski adreslerin dışa aktarması sizin için zaten sürüyor; bitmesini bekleyin.",
   "migration.refresh_wordpress_only":
     "Yalnızca yenileme (açıklamalar, blog görselleri) WordPress dışa aktarmasıyla yapılır.",
   "migration.post_gone": "Önceki taşımanın yaptığı yazı artık yok; görselleri eklenmedi.",

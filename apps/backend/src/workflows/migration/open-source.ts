@@ -10,6 +10,9 @@ import { customerSheetSource } from "../../lib/migration/sources/customer-sheet"
 import { MAX_FEED_BYTES, feedSource } from "../../lib/migration/sources/merchant-feed"
 import { recordsSource, wordpressRecords, wxrText } from "../../lib/migration/sources/wordpress"
 import type { WordpressSummary } from "../../lib/migration/sources/wordpress"
+import { legacySummaries } from "../../lib/migration/sources/wordpress/legacy-summary"
+import { readWxr } from "../../lib/migration/sources/wordpress/reader"
+import type { SummaryDoc } from "../../lib/catalog/summary"
 import type { MigrationSource } from "../../lib/migration/types"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -35,12 +38,20 @@ export async function openSource(
   container: Container,
   input: SourceInput,
   beat: () => Promise<void>
-): Promise<{ source: MigrationSource; digest: string | null; wordpress?: WordpressSummary }> {
+): Promise<{
+  source: MigrationSource
+  digest: string | null
+  wordpress?: WordpressSummary
+  /** What the 2026-11-05 build wrote as short descriptions (summaries.ts); a WordPress export's only. */
+  legacy: () => ReadonlyMap<string, SummaryDoc>
+}> {
+  const none = () => new Map<string, SummaryDoc>()
   if (input.source === "bundle" || input.source === "customers") {
     const buffer = await container.resolve(Modules.FILE).getAsBuffer(input.source_file_id)
     return {
       source: input.source === "bundle" ? bundleSource(buffer) : await customerSheetSource(buffer),
       digest: createHash("sha256").update(buffer).digest("hex"),
+      legacy: none,
     }
   }
   if (input.source === "wordpress") {
@@ -52,6 +63,7 @@ export async function openSource(
       source: recordsSource(records),
       digest: createHash("sha256").update(buffer).digest("hex"),
       wordpress: records.summary,
+      legacy: () => legacySummaries(readWxr(text)),
     }
   }
   if (input.source === "feed") {
@@ -66,6 +78,7 @@ export async function openSource(
     return {
       source: feedSource(bytes.toString("utf8"), `feed:${new URL(input.feed_url).hostname}`),
       digest: null,
+      legacy: none,
     }
   }
   const account = await container
@@ -80,5 +93,6 @@ export async function openSource(
       beat,
     }),
     digest: null,
+    legacy: none,
   }
 }
