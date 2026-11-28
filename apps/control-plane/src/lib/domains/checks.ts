@@ -13,6 +13,7 @@ export const DOMAIN_CHECKS_LOCK = "cp-domain-checks"
 // A run's share: more wait for the next run (their time has come; they keep it)
 const PER_RUN = 50
 const CONCURRENCY = 4
+const HOUR = 60 * 60_000
 
 export interface DomainCheckRun {
   checked: number
@@ -55,6 +56,10 @@ export async function checkDueDomains(
         changed.add(domain.tenant_id)
       }
     } catch (error) {
+      // Its turn moves on an hour (review L3): one failing domain never holds the queue
+      await tenantsIn(container)
+        .updateTenantDomains({ id: domain.id, next_check_at: new Date(now.getTime() + HOUR) })
+        .catch(() => undefined)
       logger.warn(
         `cp.domain_check_failed ${JSON.stringify({ domain_id: domain.id, err: codeSummary(error) })}`
       )

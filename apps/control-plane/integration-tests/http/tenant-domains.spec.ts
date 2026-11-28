@@ -218,6 +218,35 @@ medusaIntegrationTestRunner({
       ).toMatchObject({ domain: { verification: "verified" } })
     })
 
+    it("takes back a primary domain whose proof is gone two weeks; the subdomain is primary again", async () => {
+      const { tenant, host, domainId } = await shopWithDomain()
+      const path = `/admin/cp/tenants/${tenant.id}/domains/${domainId}`
+      const value = (await domainsOf(tenant.id)).find((each) => each.id === domainId)?.dns?.txt
+        .value
+      answer({ [`_qticaret-verify.${host}`]: { txt: [[value ?? ""]] } })
+      await call.post(`${path}/check`, {}, owner)
+      await call.post(`${path}/primary`, {}, owner, await proved(http, owner))
+      const service = getContainer().resolve<TenantsModuleService>(TENANTS_MODULE)
+      await service.updateTenantDomains({
+        id: domainId,
+        txt_lost_since: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+        next_check_at: new Date(Date.now() - 1000),
+      })
+      answer({})
+
+      await checkDueDomains(getContainer())
+
+      const domains = await domainsOf(tenant.id)
+      expect(domains.find((each) => each.id === domainId)).toMatchObject({
+        verification: "failed",
+        verification_error: "txt_lost",
+        is_primary: false,
+      })
+      expect(domains.find((each) => each.kind === "platform_subdomain")?.is_primary).toBe(true)
+      const document = await fleetOf(getContainer()).latestPlanDocument(tenant.id)
+      expect(document?.document).not.toHaveProperty("domains")
+    })
+
     it("refuses to check the platform subdomain or another shop's domain", async () => {
       const { tenant } = await shopWithDomain()
       const other = await shopWithDomain()

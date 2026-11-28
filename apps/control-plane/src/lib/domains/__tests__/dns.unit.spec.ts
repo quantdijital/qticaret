@@ -79,6 +79,10 @@ describe("a domain's DNS check (F16.7)", () => {
       routing: "unavailable",
     })
     expect(Date.now() - started).toBeLessThan(2_000)
+    // The questions still out are abandoned
+    const cancel = jest.fn()
+    await checkDomainDns(HOST, TOKEN, NO_TARGET, { ...lookup({ hang: true }), cancel }, 20)
+    expect(cancel).toHaveBeenCalledTimes(1)
   })
 
   it("routes by CNAME to the target, or by addresses that are all the platform's", async () => {

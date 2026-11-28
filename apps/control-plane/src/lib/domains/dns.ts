@@ -15,6 +15,8 @@ export interface DnsLookup {
   txt: (name: string) => Promise<string[][]>
   cname: (name: string) => Promise<string[]>
   addresses: (name: string) => Promise<string[]>
+  /** Questions still out abandoned once the check is over (review L2). */
+  cancel?: () => void
 }
 
 const PUBLIC_RESOLVERS = ["1.1.1.1", "8.8.8.8", "9.9.9.9"]
@@ -50,6 +52,9 @@ export function defaultDnsLookup(): DnsLookup {
   const resolver = new Resolver({ timeout: QUERY_TIMEOUT_MS, tries: QUERY_TRIES })
   resolver.setServers(PUBLIC_RESOLVERS)
   return {
+    cancel: () => {
+      resolver.cancel()
+    },
     txt: (name) => resolver.resolveTxt(name),
     cname: (name) => resolver.resolveCname(name),
     addresses: async (name) => {
@@ -179,5 +184,7 @@ export async function checkDomainDns(
     return { txt, routing }
   } finally {
     clearTimeout(timer)
+    // Nothing keeps asking after the deadline: the next domain gets the resolvers
+    lookup.cancel?.()
   }
 }

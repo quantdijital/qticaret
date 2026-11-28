@@ -1,8 +1,10 @@
 import {
+  LOST_GRACE_MS,
   PENDING_MAX_AGE_MS,
   PENDING_MAX_GAP_MS,
   PROVED_GAP_MS,
   dnsInstructions,
+  isApex,
   newVerificationToken,
   nextCheckState,
   parseRoutingTarget,
@@ -19,6 +21,7 @@ const state = (changes: Partial<CheckState> = {}): CheckState => ({
   verification: "pending",
   verification_error: null,
   verified_at: null,
+  txt_lost_since: null,
   check_attempts: 0,
   created_at: new Date(NOW.getTime() - 10 * MINUTE),
   ...changes,
@@ -60,6 +63,19 @@ describe("a custom domain's proof (F16.7)", () => {
       dnsInstructions("atolye.com", "t1", { cname: "edge.quantticaret.com", addresses: [] }).routing
     ).toMatchObject({ type: "CNAME" })
     expect(dnsInstructions("atolye.com", "t1", { cname: null, addresses: [] }).routing).toBeNull()
+  })
+
+  it("knows a Turkish registered name is an apex, its www is not", () => {
+    expect(isApex("atolye.com.tr")).toBe(true)
+    expect(isApex("www.atolye.com.tr")).toBe(false)
+    expect(isApex("atolye.com")).toBe(true)
+    expect(isApex("magaza.atolye.com")).toBe(false)
+    expect(
+      dnsInstructions("atolye.com.tr", "t1", {
+        cname: "edge.example.net",
+        addresses: ["203.0.113.7"],
+      }).routing?.type
+    ).toBe("A")
   })
 })
 
@@ -145,5 +161,35 @@ describe("a check's next state (F16.7)", () => {
       verification: "verified",
       verification_error: "routing_missing",
     })
+  })
+
+  it("takes a proved domain back after two weeks without its proof and not pointing here", () => {
+    const at = new Date("2026-11-01T00:00:00Z")
+    const lostAt = new Date(NOW.getTime() - LOST_GRACE_MS)
+    const active = state({ verification: "active", verified_at: at })
+
+    // First sight of the loss: noted, nothing taken
+    expect(nextCheckState(active, { txt: "missing", routing: "mismatch" }, NOW)).toMatchObject({
+      verification: "active",
+      txt_lost_since: NOW,
+    })
+    const lost = state({ verification: "verified", verified_at: at, txt_lost_since: lostAt })
+    expect(nextCheckState(lost, { txt: "missing", routing: "mismatch" }, NOW)).toMatchObject({
+      verification: "failed",
+      verification_error: "txt_lost",
+      verified_at: null,
+      next_check_at: null,
+    })
+    // Still pointing at the platform, or DNS silent: kept
+    expect(nextCheckState(lost, { txt: "missing", routing: "match" }, NOW).verification).toBe(
+      "verified"
+    )
+    expect(nextCheckState(lost, { txt: "unavailable", routing: "unavailable" }, NOW)).toMatchObject(
+      { verification: "verified", txt_lost_since: lostAt }
+    )
+    // The proof back: the clock is cleared
+    expect(
+      nextCheckState(lost, { txt: "match", routing: "unknown" }, NOW).txt_lost_since
+    ).toBeNull()
   })
 })

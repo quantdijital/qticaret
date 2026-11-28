@@ -513,7 +513,7 @@
       "text": "{{host}} is taken off the shop's addresses.",
       "action": "Remove"
     },
-    "failedText": "It could not be verified within a week. If the record is in place, press Verify.",
+    "failedText": "Not verified; the reason is below. If the record is in place, press Verify.",
     "check": "Verify",
     "checking": "Checking…",
     "checkProved": "Domain verified.",
@@ -539,7 +539,7 @@
       "txt_mismatch": "There is a TXT record but its value differs; enter the value above exactly.",
       "dns_unavailable": "DNS did not answer; it will be tried again automatically.",
       "expired": "It could not be verified within a week; automatic checks stopped.",
-      "txt_lost": "The TXT record was removed from DNS. The domain stays verified; adding it back is advised.",
+      "txt_lost": "The TXT record was removed from DNS. If it is not back within two weeks and the address does not point at the platform, the domain loses its verification; if primary, the platform address becomes primary.",
       "routing_missing": "The address does not point at the platform yet.",
       "routing_mismatch": "The address points elsewhere; check the routing record."
     }

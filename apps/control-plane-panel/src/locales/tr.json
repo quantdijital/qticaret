@@ -513,7 +513,7 @@
       "text": "{{host}} mağazanın adreslerinden çıkarılır.",
       "action": "Kaldır"
     },
-    "failedText": "Bir hafta içinde doğrulanamadı. Kayıt eklendiyse Doğrula'ya basın.",
+    "failedText": "Doğrulanamadı; nedeni aşağıda yazıyor. Kayıt yerindeyse Doğrula'ya basın.",
     "check": "Doğrula",
     "checking": "Denetleniyor…",
     "checkProved": "Alan adı doğrulandı.",
@@ -539,7 +539,7 @@
       "txt_mismatch": "TXT kaydı var ama değeri farklı; yukarıdaki değeri birebir girin.",
       "dns_unavailable": "DNS yanıt vermedi; kendiliğinden yeniden denenecek.",
       "expired": "Bir hafta içinde doğrulanamadı; otomatik denetim durdu.",
-      "txt_lost": "TXT kaydı DNS'ten kaldırılmış. Alan adı doğrulanmış kalır; kaydı geri eklemeniz önerilir.",
+      "txt_lost": "TXT kaydı DNS'ten kaldırılmış. İki hafta içinde geri eklenmez ve adres platforma yönlenmezse alan adı doğrulamadan düşer, birincilse platform adresi birincil olur.",
       "routing_missing": "Adres henüz platforma yönlendirilmedi.",
       "routing_mismatch": "Adres başka bir yere yönleniyor; yönlendirme kaydını denetleyin."
     }

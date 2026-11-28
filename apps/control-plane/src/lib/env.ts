@@ -82,6 +82,8 @@ const envSchema = z.object({
     .max(253)
     .refine((value) => routingTargetValid(value, undefined), "must be a host name")
     .optional(),
+  // The HTTP tests' DNS answers (lib/domains/dns.ts); test only
+  CP_DNS_FAKE: z.string().max(20_000).optional(),
   CP_DOMAIN_A_TARGETS: z
     .string()
     .max(1000)
@@ -257,6 +259,10 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   provisionerIssues(env, (path, message) => {
     ctx.addIssue({ code: "custom", path: [path], message })
   })
+  // F16.7 review L6: the tests' fake DNS is read under NODE_ENV=test only; refused elsewhere too
+  if (env.CP_DNS_FAKE !== undefined && env.NODE_ENV !== "test") {
+    ctx.addIssue({ code: "custom", path: ["CP_DNS_FAKE"], message: "is allowed on test only" })
+  }
   if (env.LOAD_TEST === "on" && !(isLocalEnv(env) || env.NODE_ENV === "staging")) {
     ctx.addIssue({
       code: "custom",

@@ -74,6 +74,7 @@ export interface DomainRecord {
   verification_token: string | null
   verification_error: DomainCheckError | null
   verified_at: Date | null
+  txt_lost_since: Date | null
   last_checked_at: Date | null
   next_check_at: Date | null
   check_attempts: number
@@ -125,6 +126,7 @@ export const DOMAIN_FIELDS = [
   "verification_token",
   "verification_error",
   "verified_at",
+  "txt_lost_since",
   "last_checked_at",
   "next_check_at",
   "check_attempts",

@@ -201,6 +201,9 @@ describe("parseEnv", () => {
     expect(problems({ ...valid, CP_DOMAIN_A_TARGETS: "edge.example.com" })).toContain(
       "CP_DOMAIN_A_TARGETS"
     )
+    // The tests' fake DNS is refused anywhere else
+    expect(problems({ ...valid, CP_DNS_FAKE: "{}" })).toContain("CP_DNS_FAKE")
+    expect(parseEnv({ ...valid, NODE_ENV: "test", CP_DNS_FAKE: "{}" })).toBeTruthy()
   })
 
   it("keeps the local provisioner to this machine and the fake one to tests (Ek C10)", () => {

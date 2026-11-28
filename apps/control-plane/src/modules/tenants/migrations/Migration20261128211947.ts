@@ -14,7 +14,7 @@ export class Migration20261128211947 extends Migration {
       `alter table if exists "tenant_domain" add constraint "tenant_domain_verification_check" check ("verification" in ('pending', 'verified', 'active', 'failed'));`
     )
     this.addSql(
-      `alter table if exists "tenant_domain" add column if not exists "verification_token" text null, add column if not exists "verification_error" text check ("verification_error" in ('txt_missing', 'txt_mismatch', 'dns_unavailable', 'expired', 'txt_lost', 'routing_missing', 'routing_mismatch')) null, add column if not exists "verified_at" timestamptz null, add column if not exists "last_checked_at" timestamptz null, add column if not exists "next_check_at" timestamptz null, add column if not exists "check_attempts" integer not null default 0;`
+      `alter table if exists "tenant_domain" add column if not exists "verification_token" text null, add column if not exists "verification_error" text check ("verification_error" in ('txt_missing', 'txt_mismatch', 'dns_unavailable', 'expired', 'txt_lost', 'routing_missing', 'routing_mismatch')) null, add column if not exists "verified_at" timestamptz null, add column if not exists "txt_lost_since" timestamptz null, add column if not exists "last_checked_at" timestamptz null, add column if not exists "next_check_at" timestamptz null, add column if not exists "check_attempts" integer not null default 0;`
     )
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_tenant_domain_next_check_at" ON "tenant_domain" ("next_check_at") WHERE next_check_at IS NOT NULL AND deleted_at IS NULL;`
@@ -27,7 +27,7 @@ export class Migration20261128211947 extends Migration {
   override async down(): Promise<void> {
     this.addSql(`drop index if exists "IDX_tenant_domain_next_check_at";`)
     this.addSql(
-      `alter table if exists "tenant_domain" drop column if exists "verification_token", drop column if exists "verification_error", drop column if exists "verified_at", drop column if exists "last_checked_at", drop column if exists "next_check_at", drop column if exists "check_attempts";`
+      `alter table if exists "tenant_domain" drop column if exists "verification_token", drop column if exists "verification_error", drop column if exists "verified_at", drop column if exists "txt_lost_since", drop column if exists "last_checked_at", drop column if exists "next_check_at", drop column if exists "check_attempts";`
     )
     this.addSql(
       `update "tenant_domain" set "verification" = 'verified' where "verification" = 'active';`

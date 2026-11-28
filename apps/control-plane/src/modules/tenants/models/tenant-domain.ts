@@ -19,6 +19,8 @@ export const TenantDomain = model
     verification_token: model.text().nullable(),
     verification_error: model.enum([...DOMAIN_CHECK_ERRORS]).nullable(),
     verified_at: model.dateTime().nullable(),
+    /** Since when a proved domain's TXT proof has been missing (F16.7 review M1). */
+    txt_lost_since: model.dateTime().nullable(),
     last_checked_at: model.dateTime().nullable(),
     /** When the job checks it again; null: not again (failed, or the subdomain). */
     next_check_at: model.dateTime().nullable(),

@@ -63,6 +63,8 @@ export const CP_RATE_LIMIT_PROFILES = {
   // A support grant into a shop's panel (adr/0061 Ek 2026-11-28): per staff member, every address;
   // each also costs a fresh step-up (single use), so this only bounds a session gone wrong
   support_grant: { name: "cp_support_grant", perIdentityAnyIp: { max: 30, windowMs: HOUR } },
+  // F16.7 "Doğrula": each holds a request for seconds of DNS; per staff member, every address
+  domain_check: { name: "cp_domain_check", perIdentityAnyIp: { max: 20, windowMs: MINUTE } },
 } as const satisfies Record<string, RateLimitProfile>
 
 /**

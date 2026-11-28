@@ -57,7 +57,8 @@ export function customHostnameProblem(
     labels.every((label) => LABEL.test(label)) &&
     /^[a-z][a-z0-9-]*$/.test(labels[labels.length - 1] ?? "") &&
     !hostname.endsWith(".localhost")
-  if (!valid) {
+  // Names that never resolve publicly are no shop's address (F16.7 review L8)
+  if (!valid || PRIVATE_SUFFIXES.includes(labels[labels.length - 1] ?? "")) {
     return "cp.domain_invalid"
   }
   return hostname === platformDomain || hostname.endsWith(`.${platformDomain}`)

@@ -3,7 +3,11 @@ import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { omit } from "../../lib/omit"
 import { newVerificationToken } from "../../lib/domains/verification"
-import { MAX_CUSTOM_DOMAINS, isVerifiedDomain } from "../../lib/tenants/kinds"
+import {
+  MAX_CUSTOM_DOMAINS,
+  MAX_CUSTOM_DOMAIN_CHARS,
+  isVerifiedDomain,
+} from "../../lib/tenants/kinds"
 import type { DomainRecord } from "../../modules/tenants/types"
 import { tenantsIn } from "../modules"
 import { undoableStep } from "../undoable"
@@ -38,7 +42,8 @@ const addDomainStep = undoableStep(
   async (input: { tenant_id: string; hostname: string }, container) => {
     const service = tenantsIn(container)
     const own = (await service.domainsOf(input.tenant_id)).filter((each) => each.kind === "custom")
-    if (own.length >= MAX_CUSTOM_DOMAINS) {
+    const chars = own.reduce((sum, each) => sum + each.hostname.length, input.hostname.length)
+    if (own.length >= MAX_CUSTOM_DOMAINS || chars > MAX_CUSTOM_DOMAIN_CHARS) {
       throw refused("cp.domains_full")
     }
     await service.refuseTakenHost(input.hostname)

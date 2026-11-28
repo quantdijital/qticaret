@@ -33,6 +33,7 @@ type Undo = Pick<
   | "verification"
   | "verification_error"
   | "verified_at"
+  | "txt_lost_since"
   | "last_checked_at"
   | "next_check_at"
   | "check_attempts"
@@ -57,6 +58,7 @@ const checkStep = undoableStep(
       verification: domain.verification,
       verification_error: domain.verification_error,
       verified_at: domain.verified_at,
+      txt_lost_since: domain.txt_lost_since,
       last_checked_at: domain.last_checked_at,
       next_check_at: domain.next_check_at,
       check_attempts: domain.check_attempts,
@@ -71,6 +73,18 @@ const checkStep = undoableStep(
       manual: input.manual === true,
     })
     await service.updateTenantDomains({ id: domain.id, verification_token: token, ...outcome })
+    // A domain taken back (its proof long gone, F16.7 review M1) is no longer the shop's
+    // address: the platform's subdomain is primary again
+    const dropped = domain.is_primary && !isVerifiedDomain(outcome.verification)
+    if (dropped) {
+      await service.updateTenantDomains({ id: domain.id, is_primary: false })
+      const platform = (await service.domainsOf(input.tenant_id)).find(
+        (each) => each.kind === "platform_subdomain"
+      )
+      if (platform) {
+        await service.updateTenantDomains({ id: platform.id, is_primary: true })
+      }
+    }
     const result: DomainCheckResult = {
       id: domain.id,
       hostname: domain.hostname,
@@ -80,10 +94,20 @@ const checkStep = undoableStep(
       proof_changed:
         isVerifiedDomain(domain.verification) !== isVerifiedDomain(outcome.verification),
     }
-    return { output: result, undo }
+    return { output: result, undo: { row: undo, tenant_id: input.tenant_id, was_primary: dropped } }
   },
-  async (undo: Undo, container) => {
-    await tenantsIn(container).updateTenantDomains({ ...undo })
+  async (back: { row: Undo; tenant_id: string; was_primary: boolean }, container) => {
+    const service = tenantsIn(container)
+    if (back.was_primary) {
+      await service.updateTenantDomains({
+        selector: { tenant_id: back.tenant_id, is_primary: true },
+        data: { is_primary: false },
+      })
+    }
+    await service.updateTenantDomains({
+      ...back.row,
+      ...(back.was_primary ? { is_primary: true } : {}),
+    })
   }
 )
 

@@ -1002,6 +1002,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "txt_lost_since": {
+          "name": "txt_lost_since",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "last_checked_at": {
           "name": "last_checked_at",
           "type": "timestamptz",

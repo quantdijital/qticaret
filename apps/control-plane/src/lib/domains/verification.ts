@@ -45,8 +45,48 @@ export function parseRoutingTarget(cname?: string, addresses?: string): RoutingT
   return { cname: host, addresses: list }
 }
 
-/** Whether a host is a zone's apex (two labels; a CNAME is not allowed there). */
-export const isApex = (hostname: string): boolean => hostname.split(".").length === 2
+/**
+ * Second-level suffixes under which names are registered (review L7): the
+ * Turkish ones (`com.tr`, nic.tr's list) and a few common elsewhere. Not a
+ * full public suffix list: a miss only shows a CNAME where an A record was
+ * needed, and the owner's DNS host says so.
+ */
+const SECOND_LEVEL = new Set([
+  ...[
+    "com",
+    "net",
+    "org",
+    "gen",
+    "web",
+    "biz",
+    "info",
+    "av",
+    "bel",
+    "dr",
+    "edu",
+    "gov",
+    "k12",
+    "name",
+    "pol",
+    "tel",
+    "tsk",
+    "tv",
+    "bbs",
+  ].map((label) => `${label}.tr`),
+  "co.uk",
+  "org.uk",
+  "com.au",
+  "com.cy",
+  "co.at",
+  "com.de",
+])
+
+/** Whether a host is a zone's apex (a CNAME is not allowed there): `x.com`, `x.com.tr`. */
+export function isApex(hostname: string): boolean {
+  const labels = hostname.split(".")
+  const suffix = labels.slice(-2).join(".")
+  return labels.length === (SECOND_LEVEL.has(suffix) ? 3 : 2)
+}
 
 /** The records the panel shows the shop's owner: the proof, then where to point. */
 export interface DnsInstructions {
@@ -84,6 +124,8 @@ export interface CheckState {
   verification: DomainVerification
   verification_error: DomainCheckError | null
   verified_at: Date | null
+  /** Since when a proved domain's TXT proof has been gone (null: it is there). */
+  txt_lost_since: Date | null
   check_attempts: number
   created_at: Date
 }
@@ -92,6 +134,7 @@ export interface CheckOutcome {
   verification: DomainVerification
   verification_error: DomainCheckError | null
   verified_at: Date | null
+  txt_lost_since: Date | null
   last_checked_at: Date
   next_check_at: Date | null
   check_attempts: number
@@ -104,6 +147,12 @@ export const PENDING_MAX_AGE_MS = 7 * 24 * 60 * MINUTE
 export const PENDING_MAX_GAP_MS = 60 * MINUTE
 /** A proved domain is checked again once a day: its routing, and that the proof is still there. */
 export const PROVED_GAP_MS = 24 * 60 * MINUTE
+/**
+ * A proved domain whose proof has been gone this long while it does not
+ * point at the platform is taken back (F16.7 review M1): the domain has
+ * most likely changed hands, and the shop's links must not lead there.
+ */
+export const LOST_GRACE_MS = 14 * 24 * 60 * MINUTE
 
 export function pendingGap(attempts: number): number {
   return Math.min(2 ** Math.min(Math.max(attempts - 1, 0), 16) * MINUTE, PENDING_MAX_GAP_MS)
@@ -126,8 +175,10 @@ function routingError(routing: RoutingFinding): DomainCheckError | null {
  * The domain's next state after a check (pure; the rules F16.7 sets):
  * - the proof found: `active` when it points at the platform, else `verified`
  *   (with why it is not active, when the target is known);
- * - a proved domain whose proof is gone stays proved, warned (`txt_lost`):
- *   taking a live storefront's address away is not the check's to do;
+ * - a proved domain whose proof is gone stays proved, warned (`txt_lost`);
+ *   only after `LOST_GRACE_MS` without the proof and without pointing at
+ *   the platform is it `failed` (`txt_lost`): a domain that changed hands
+ *   must not stay the shop's address (the caller drops it as primary);
  * - DNS not answering changes no state, only the reason;
  * - a pending domain unproved past its week is `failed` (`expired`); the
  *   job stops, a manual check (`manual`) may still prove it.
@@ -154,16 +205,33 @@ export function nextCheckState(
       verification: routing === "match" ? "active" : "verified",
       verification_error: routingError(routing),
       verified_at: state.verified_at ?? now,
+      txt_lost_since: null,
       next_check_at: new Date(now.getTime() + PROVED_GAP_MS),
     }
   }
   if (proved) {
+    if (finding.txt === "unavailable") {
+      return {
+        ...base,
+        verification: state.verification,
+        verification_error: "dns_unavailable",
+        verified_at: state.verified_at,
+        txt_lost_since: state.txt_lost_since,
+        next_check_at: new Date(now.getTime() + PROVED_GAP_MS),
+      }
+    }
+    const since = state.txt_lost_since ?? now
+    const gone =
+      finding.routing !== "match" &&
+      finding.routing !== "unavailable" &&
+      now.getTime() - new Date(since).getTime() >= LOST_GRACE_MS
     return {
       ...base,
-      verification: state.verification,
-      verification_error: finding.txt === "unavailable" ? "dns_unavailable" : "txt_lost",
-      verified_at: state.verified_at,
-      next_check_at: new Date(now.getTime() + PROVED_GAP_MS),
+      verification: gone ? "failed" : state.verification,
+      verification_error: "txt_lost",
+      verified_at: gone ? null : state.verified_at,
+      txt_lost_since: since,
+      next_check_at: gone ? null : new Date(now.getTime() + PROVED_GAP_MS),
     }
   }
   const error = txtError[finding.txt]
@@ -174,6 +242,7 @@ export function nextCheckState(
       verification: "failed",
       verification_error: state.verification === "failed" ? error : "expired",
       verified_at: null,
+      txt_lost_since: null,
       next_check_at: null,
     }
   }
@@ -182,6 +251,7 @@ export function nextCheckState(
     verification: "pending",
     verification_error: error,
     verified_at: null,
+    txt_lost_since: null,
     next_check_at: new Date(now.getTime() + pendingGap(attempts)),
   }
 }

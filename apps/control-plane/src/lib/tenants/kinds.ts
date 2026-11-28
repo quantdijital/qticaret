@@ -50,3 +50,8 @@ export const NOTE_MAX = 2000
  */
 export const MAX_CONTACTS = 50
 export const MAX_CUSTOM_DOMAINS = 50
+/**
+ * Their names together (F16.7 review L4): the proved ones travel in the
+ * signed plan document, held to 16 KiB; this keeps room for the rest.
+ */
+export const MAX_CUSTOM_DOMAIN_CHARS = 4000
