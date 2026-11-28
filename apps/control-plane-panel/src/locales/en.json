@@ -370,7 +370,8 @@
       "nextPayment": "Next payment",
       "created": "Opened",
       "health": "Health",
-      "version": "Release"
+      "version": "Release",
+      "setup": "Setup"
     },
     "status": {
       "provisioning": "Setting up",
@@ -1897,5 +1898,30 @@
     "openPanel": "Open the panel",
     "ownerPending": "The shop's owner does not seem to have joined yet. Until the owner accepts the invitation, the shop refuses support sign-ins.",
     "bearerNote": "This link signs in whoever opens it: never paste it into a chat, an e-mail or a ticket. It opens once."
+  },
+  "setupStatus": {
+    "title": "Setup status",
+    "text": "The setup steps in the shop's own panel, as of its last hourly report.",
+    "noReport": "No report yet. Once the shop runs connected to the control plane, its setup steps show here.",
+    "olderShop": "The shop's release does not send its setup steps; they show here once it is updated.",
+    "complete": "Ready",
+    "count": "{{done}}/{{total}} steps",
+    "missing": "Missing: {{list}}",
+    "listLabel": "Setup steps",
+    "done": "done",
+    "open": "missing",
+    "reportedAt": "Last report: {{relative}} · {{date}}",
+    "steps": {
+      "store_named": "Shop name",
+      "currency": "Currency",
+      "region": "Sales region",
+      "stock_location": "Warehouse",
+      "shipping": "Shipping option",
+      "payment": "Card payments",
+      "product_published": "Published product",
+      "look_published": "Look published",
+      "legal_published": "Legal texts",
+      "mail_sender": "E-mail sending"
+    }
   }
 }

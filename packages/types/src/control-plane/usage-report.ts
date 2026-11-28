@@ -14,6 +14,64 @@ export const USAGE_REPORT_VERSION = 1
 export const USAGE_COUNT_MAX = 2_147_483_647
 const count = z.int().min(0).max(USAGE_COUNT_MAX)
 
+/**
+ * The shop's own setup checklist as yes/no facts (the shop panel's setup
+ * steps, docs/17, plus what makes it ready to sell): never a provider's
+ * name, an account, a count or a person. Every key is required, so a
+ * report says "no" rather than leaving a step out; an unknown one fails.
+ * A new key is a contract change: the control plane takes it first.
+ */
+export const SETUP_FACT_KEYS = [
+  "store_named",
+  "currency",
+  "region",
+  "stock_location",
+  "shipping",
+  "payment",
+  "product_published",
+  "look_published",
+  "legal_published",
+  "mail_sender",
+] as const
+export type SetupFactKey = (typeof SETUP_FACT_KEYS)[number]
+
+/**
+ * One rule for the setup's account steps, the shop panel's checklist and
+ * the report alike (Ek C21): the payment step means taking card payments
+ * ("Kartla ödeme alın"), so only the card providers count; the mail step
+ * is the SMTP account. An account counts once saved and checked, or saved
+ * while the provider could not be reached; never one that is not saved,
+ * was rejected, or cannot be opened (`unreadable`).
+ */
+export const SETUP_PAYMENT_PROVIDERS = ["paytr", "iyzico"] as const
+export const SETUP_MAIL_PROVIDER = "smtp"
+const USABLE_ACCOUNT_STATES: readonly string[] = ["connected", "unverified"]
+
+export const isUsableSetupAccount = (account: { state: string }): boolean =>
+  USABLE_ACCOUNT_STATES.includes(account.state)
+
+/** Whether any of the accounts is a usable card provider account. */
+export const hasSetupPayment = (accounts: readonly { provider: string; state: string }[]) =>
+  accounts.some(
+    (account) =>
+      (SETUP_PAYMENT_PROVIDERS as readonly string[]).includes(account.provider) &&
+      isUsableSetupAccount(account)
+  )
+
+export const usageSetupSchema = z.strictObject({
+  store_named: z.boolean(),
+  currency: z.boolean(),
+  region: z.boolean(),
+  stock_location: z.boolean(),
+  shipping: z.boolean(),
+  payment: z.boolean(),
+  product_published: z.boolean(),
+  look_published: z.boolean(),
+  legal_published: z.boolean(),
+  mail_sender: z.boolean(),
+})
+export type UsageSetup = z.infer<typeof usageSetupSchema>
+
 export const usageReportSchema = z.strictObject({
   version: z.literal(USAGE_REPORT_VERSION),
   tenant_id: tenantIdSchema,
@@ -35,6 +93,12 @@ export const usageReportSchema = z.strictObject({
       .regex(/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/, "must be a semver version"),
     commit: z.string().regex(/^[0-9a-f]{7,40}$/, "must be a commit hash"),
   }),
+  /**
+   * The setup checklist (optional: a shop on an older release sends none,
+   * and the control plane takes its report all the same). Rollout: the
+   * control plane first (it accepts the field), then the shops.
+   */
+  setup: usageSetupSchema.optional(),
 })
 export type UsageReport = z.infer<typeof usageReportSchema>
 

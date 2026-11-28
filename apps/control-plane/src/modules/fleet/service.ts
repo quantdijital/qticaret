@@ -6,6 +6,7 @@ import {
   MedusaError,
 } from "@medusajs/framework/utils"
 import { ed25519KeyId, publicKeyFromRaw } from "@qticaret/server-kit"
+import type { UsageSetup } from "@qticaret/types/control-plane"
 import type { TenantKeyStatus } from "./models/tenant-key"
 import { FleetReleases } from "./service-releases"
 
@@ -21,6 +22,12 @@ export interface TenantKeyView {
   status: TenantKeyStatus
   retired_at: Date | null
   created_at: Date
+}
+
+/** A shop's setup checklist as last reported (Ek C21) and when that report arrived. */
+export interface SetupSeen {
+  setup: UsageSetup
+  received_at: Date
 }
 
 const PUBLIC_KEY = /^[A-Za-z0-9_-]{43}$/
@@ -144,6 +151,35 @@ class FleetModuleService extends FleetReleases {
       [next.id]
     )
     return { from: active?.kid ?? null, to: next.kid }
+  }
+
+  /**
+   * Ek C21: each shop's setup checklist from its latest report that carried
+   * one (review L3: an hour whose read failed does not hide the last known
+   * state), with that report's arrival. One page of the list (at most 100)
+   * or one shop. A shop that never sent one is absent.
+   */
+  @InjectManager()
+  async latestSetups(
+    tenantIds: readonly string[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Map<string, SetupSeen>> {
+    if (tenantIds.length === 0) {
+      return new Map()
+    }
+    const rows = (await (sharedContext.manager as Executor).execute(
+      `SELECT t.id AS tenant_id, u.setup, u.received_at
+         FROM unnest(ARRAY[${tenantIds.map(() => "?").join(", ")}]::text[]) AS t(id)
+         CROSS JOIN LATERAL (
+           SELECT setup, received_at FROM usage_snapshot
+            WHERE tenant_id = t.id AND deleted_at IS NULL AND setup IS NOT NULL
+            ORDER BY reported_at DESC LIMIT 1
+         ) u`,
+      [...tenantIds]
+    )) as ({ tenant_id: string } & SetupSeen)[]
+    return new Map(
+      rows.map(({ tenant_id, setup, received_at }) => [tenant_id, { setup, received_at }])
+    )
   }
 
   /** The undo of `registerTenantKey` in a failed issue. */

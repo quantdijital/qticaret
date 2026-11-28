@@ -1,7 +1,9 @@
 /**
  * The setup checklist (docs/17): which steps a new shop needs before it
  * can sell, and how each is judged done. No React or SDK here, so the
- * rules are unit-tested on their own.
+ * rules are unit-tested on their own. The shop's usage report sends the
+ * same steps to the control plane as yes/no (adr/0061 Ek C21,
+ * `apps/backend/src/lib/control-plane/setup-facts.ts`): change both together.
  */
 
 /** The name Medusa's store model starts with; bootstrap refuses it (docs/17). */
@@ -13,8 +15,8 @@ export interface SetupFacts {
   regionCount: number
   locationCount: number
   shippingOptionCount: number
-  /** Card provider accounts connected in Settings > Payment (F5). */
-  paymentAccountCount: number
+  /** A card provider account (PayTR, iyzico) usable in Settings > Payment (F5). */
+  paymentConnected: boolean
   publishedProductCount: number
 }
 
@@ -51,7 +53,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
   {
     key: "payment",
     panelPath: "/settings/payments",
-    isDone: (facts) => facts.paymentAccountCount > 0,
+    isDone: (facts) => facts.paymentConnected,
   },
   {
     key: "product",

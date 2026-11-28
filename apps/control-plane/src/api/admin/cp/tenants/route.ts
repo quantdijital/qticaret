@@ -33,7 +33,7 @@ async function onPackage(req: AuthenticatedMedusaRequest, packageId: string | un
  * GET /admin/cp/tenants (all staff): the shops, newest first, by name or
  * slug, status and package, with each one's primary address and package,
  * and how many are in each status (the list's tabs), and its health
- * standing (Ek C13) and version (Ek C18). No contact here: the list
+ * standing (Ek C13), version (Ek C18) and setup checklist (Ek C21). No contact here: the list
  * reads no personal data.
  */
 export async function GET(
@@ -84,6 +84,8 @@ export async function GET(
     req.scope,
     rows.map((row) => row.id)
   )
+  // Ek C21: each one's setup checklist from its latest report (yes/no only)
+  const setups = await fleetIn(req.scope).latestSetups(rows.map((row) => row.id))
   const healthOf = (id: string, target: HealthTarget) =>
     standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
@@ -104,6 +106,7 @@ export async function GET(
           storefront: healthOf(row.id, "storefront"),
         },
         version: versions.get(row.id) ?? { reported: null, target: null, drift: false },
+        setup: setups.get(row.id)?.setup ?? null,
       }
     }),
     count,

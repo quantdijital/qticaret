@@ -1,6 +1,6 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
-import type { UsageReport } from "@qticaret/types/control-plane"
+import type { UsageReport, UsageSetup } from "@qticaret/types/control-plane"
 import { nextStanding } from "../../lib/fleet/health-rules"
 import type { HealthStanding, ProbeResult } from "../../lib/fleet/health-rules"
 import type { HealthState, HealthTarget } from "./models/health"
@@ -31,6 +31,7 @@ export interface UsageSnapshotRow {
   last_order_at: Date | null
   release_version: string
   release_commit: string
+  setup: UsageSetup | null
 }
 
 export interface HealthStatusRow extends HealthStanding {
@@ -118,6 +119,7 @@ export class FleetMonitoring extends FleetDocuments {
           last_order_at: report.last_order_at ? new Date(report.last_order_at) : null,
           release_version: report.release.version,
           release_commit: report.release.commit,
+          setup: report.setup ?? null,
         },
       ],
       sharedContext

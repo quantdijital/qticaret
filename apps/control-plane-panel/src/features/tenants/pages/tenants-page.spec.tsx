@@ -50,6 +50,13 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
         .find((row) => row.textContent.includes(name)) ?? document.body
     expect(within(rowOf("My L'arte")).getByText("Yanıt vermiyor")).toBeInTheDocument()
     expect(within(rowOf("Kahve Durağı")).queryByText(/Sağlıklı|Yanıt/)).toBeNull()
+    // Ek C21: its setup steps done, what is missing in words; a dash without a report
+    expect(within(table).getByRole("columnheader", { name: "Kurulum" })).toBeInTheDocument()
+    expect(within(rowOf("My L'arte")).getByText("8/10 adım")).toBeInTheDocument()
+    expect(
+      within(rowOf("My L'arte")).getByText("Eksik: Kargo seçeneği, Kart ile ödeme")
+    ).toBeInTheDocument()
+    expect(within(rowOf("Kahve Durağı")).queryByText(/adım/)).toBeNull()
     expect(screen.getByRole("tab", { name: /Tümü/ })).toHaveTextContent("2")
     expect(sent[0]?.path).toBe("/admin/cp/tenants?limit=20&offset=0")
     // A reading role is offered no new shop

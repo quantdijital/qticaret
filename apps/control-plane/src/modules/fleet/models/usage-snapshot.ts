@@ -24,6 +24,8 @@ export const UsageSnapshot = model
     last_order_at: model.dateTime().nullable(),
     release_version: model.text(),
     release_commit: model.text(),
+    /** Ek C21: the shop's setup checklist, yes/no per step; null when its report carried none. */
+    setup: model.json().nullable(),
   })
   .indexes([
     { on: ["tenant_id", "reported_at"], unique: true, where: "deleted_at IS NULL" },
