@@ -71,6 +71,21 @@ describe("the storefront's draft-replacing routes", () => {
     expect(page?.middlewares).toHaveLength(1)
   })
 
+  it("makes a saved look's preview link for a person only, counted per staff member", () => {
+    const route = routeOf("GET", "/admin/storefront-designs/:id/preview")
+    expect(route?.middlewares[0]).toBe(requireUserActor)
+    expect(route?.middlewares).toHaveLength(2)
+  })
+
+  it("limits the storefront's reads through a saved look's link, its pages too", () => {
+    for (const path of [
+      "/store/storefront-layout/design/:token",
+      "/store/storefront-layout/design/:token/pages/:id",
+    ]) {
+      expect(routeOf("GET", path)?.middlewares).toHaveLength(1)
+    }
+  })
+
   it("never lists discard twice (one middleware set per route)", () => {
     const discards = ROUTES.filter((route) => route.matcher === "/admin/storefront-layout/discard")
     expect(discards).toHaveLength(1)

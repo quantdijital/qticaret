@@ -82,6 +82,20 @@ export const previewOpens = contentPreview.opens
 /** The storefront's design as last saved (adr/0049): its own context, `sfl_` ids. */
 export const layoutPreview = previewSigner("layout-preview:v1", "sfl_[0-9A-Za-z]{1,40}")
 
+/** How long a saved look's preview link lasts: the gallery asks again before it ends. */
+export const DESIGN_PREVIEW_HOURS = 1
+
+/**
+ * A saved look drawn on the storefront (adr/0064, as Shopify's
+ * `preview_theme_id`): its own context, `sfd_` ids, an hour, ended by a
+ * rename (its save mark moves) or its removal. Opens that look only.
+ */
+export const designPreview = previewSigner(
+  "design-preview:v1",
+  "sfd_[0-9A-Za-z]{1,40}",
+  DESIGN_PREVIEW_HOURS
+)
+
 /**
  * A draft product's page as last saved (F18): its own context, `prod_` ids;
  * a later save of the product ends the link, as with content entries.

@@ -158,6 +158,7 @@ exports[`every admin route decided for a support session reaches only the listed
   "GET /admin/stock-locations",
   "GET /admin/stock-locations/:id",
   "GET /admin/storefront-designs",
+  "GET /admin/storefront-designs/:id/preview",
   "GET /admin/storefront-layout",
   "GET /admin/storefront-menus",
   "GET /admin/storefront-presets",
