@@ -56,3 +56,5 @@ apps/storefront/src/lib/store-api/__tests__/gate.spec.ts:generic-api-key:83
 packages/ui/src/__tests__/gate.spec.ts:generic-api-key:138
 # backend Sürat spec: a made-up password ("Gizli-Sifre-12345") quoted back in a test sentence; now built from parts
 84c4d0d2bc5d31ac3cd702b3c8c2053c2fb44592:apps/backend/src/lib/shipping/surat/__tests__/surat.unit.spec.ts:generic-api-key:184
+# control-plane-panel domains card spec: a made-up 32-hex verification token; now built with repeat()
+07716ca5dcdeb568f24bc8fd2c62c6259adbd9fd:apps/control-plane-panel/src/features/tenants/components/domains-card.spec.tsx:generic-api-key:21
