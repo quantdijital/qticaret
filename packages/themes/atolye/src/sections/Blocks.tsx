@@ -121,6 +121,8 @@ function BlockView({
         ownAll: Boolean(section.more),
         t,
         marks: section.editor,
+        // The heading's upper line and hand note (sahip 2026-11-28)
+        lines: section,
       }
       if (drawn === "collage" && section.collage) {
         return <CategoryCollage {...head} view={section.collage} />

@@ -44,11 +44,15 @@ describe("the posts' intro panel", () => {
       variant: "intro_panel",
       title: "Gezi yazıları",
       limit: 3,
-      eyebrow: null,
       intro: null,
       link: null,
     })
-    expect(switchVariant({ ...panel, eyebrow: "İlham" }, "grid")).toEqual(guides())
+    // The upper line is every variant's since 2026-11-28: it stays on the tiles
+    expect(switchVariant({ ...panel, eyebrow: "İlham" }, "grid")).toEqual({
+      ...guides(),
+      eyebrow: "İlham",
+    })
+    expect(switchVariant({ ...panel, intro: "Giriş" }, "grid")).toEqual(guides())
   })
 
   it("is picked in Biçim, drawn small, and shows its words and button under İçerik", async () => {
@@ -60,14 +64,14 @@ describe("the posts' intro panel", () => {
     const panel = within(variants).getByRole("radio", { name: /Tanıtım paneli/ })
     expect(panel.querySelector("svg")).not.toBeNull()
     await user.click(panel)
-    expect(changes.at(-1)).toMatchObject({ variant: "intro_panel", eyebrow: null })
+    expect(changes.at(-1)).toMatchObject({ variant: "intro_panel", intro: null })
   })
 
   it("shows the upper line, intro and button on the panel only", async () => {
     const user = userEvent.setup()
     const { changes } = renderPanel(switchVariant(guides(), "intro_panel"), "home")
     await openGroup(user, "İçerik")
-    await user.type(screen.getByLabelText(/Üst satır/), "İ")
+    await user.type(screen.getByRole("textbox", { name: /^Üst satır/ }), "İ")
     expect(changes.at(-1)).toMatchObject({ eyebrow: "İ", title: "Gezi yazıları" })
     expect(screen.getByLabelText(/Giriş/)).toBeInTheDocument()
     expect(screen.getByText("Düğme")).toBeInTheDocument()
@@ -87,11 +91,11 @@ describe("the posts' intro panel", () => {
     expect(changes.at(-1)).toMatchObject({ cover_ratio: "wide" })
   })
 
-  it("shows none of them on the tiles", async () => {
+  it("shows none of the panel's own on the tiles, the upper line every variant's", async () => {
     const user = userEvent.setup()
     renderPanel(guides(), "home")
     await openGroup(user, "İçerik")
-    expect(screen.queryByLabelText(/Üst satır/)).toBeNull()
+    expect(screen.getByRole("textbox", { name: /^Üst satır/ })).toBeInTheDocument()
     expect(screen.queryByLabelText(/Giriş/)).toBeNull()
   })
 
@@ -105,7 +109,12 @@ describe("the posts' intro panel", () => {
       group: "content",
     })
     expect(previewField(panel, "link")).toMatchObject({ target: "yazilar01-link" })
-    expect(previewField(guides(), "eyebrow")).toBeNull()
+    expect(previewField(guides(), "intro")).toBeNull()
+    // The upper line (2026-11-28) lands on the tiles too
+    expect(previewField(guides(), "eyebrow")).toEqual({
+      target: "yazilar01-eyebrow",
+      group: "content",
+    })
   })
 })
 

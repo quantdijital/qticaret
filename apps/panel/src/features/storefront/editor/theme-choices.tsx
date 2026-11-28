@@ -152,6 +152,7 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
           hint={t(`${C}.accentFontHint`)}
         />
         <KitChoice field="section_title" {...kit} />
+        <KitChoice field="title_accent" {...kit} />
       </PanelGroup>
       <PanelGroup name="shapes" title={t(THEME_GROUP_TITLES.shapes)} reveal={reveal("shapes")}>
         <Pair>

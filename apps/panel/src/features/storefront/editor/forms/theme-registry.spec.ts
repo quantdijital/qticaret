@@ -44,7 +44,8 @@ describe("the theme panel's register", () => {
 
 describe("the settings search over the theme", () => {
   it("finds the colours, faces, corners and section spacing by their names", () => {
-    expect(keys("ana renk")).toEqual(["colors.primary"])
+    // The heading accent's "Ana renk" step names the main colour too (adr/0067 S11)
+    expect(keys("ana renk")).toEqual(["colors.primary", "title_accent"])
     // The photo ground's "Sayfa" step is the page's own ground too (adr/0067 S4)
     expect(keys("sayfa zemini")).toEqual(["colors.background", "media_ground"])
     expect(keys("yazı tipleri font")).toEqual([
@@ -80,7 +81,7 @@ describe("the settings search over the theme", () => {
   })
 
   it("narrows with the panel's or the group's name", () => {
-    expect(keys("tema ana renk")).toEqual(["colors.primary"])
+    expect(keys("tema ana renk")).toEqual(["colors.primary", "title_accent"])
     expect(keys("ürün kartı biçimi")).toEqual(["product_card.variant"])
   })
 

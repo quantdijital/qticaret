@@ -11,6 +11,7 @@ import type { ProductSource, ShelfColumns, StoreLayoutLink } from "./layout.js"
 import type { ScrollerSettings } from "./section-scroller.js"
 import type { ShelfStripsSettings } from "./section-strips.js"
 import type { CardVariant, ProductsVariant } from "./section-variants.js"
+import type { StoreHeadLines } from "./section-head-lines.js"
 
 export const SHELF_LIMITS = {
   /** One large card and two rows of three small ones beside it. */
@@ -213,7 +214,7 @@ export interface StoreShelfList extends ShelfPick {
  * present with that variant only; a backend before variants sends none
  * and `columns` (read as `grid`).
  */
-export interface StoreProductsSection extends ShelfPick {
+export interface StoreProductsSection extends ShelfPick, StoreHeadLines {
   id: string
   type: "products"
   /** Absent from a backend before variants; one this build does not know reads as `grid`. */

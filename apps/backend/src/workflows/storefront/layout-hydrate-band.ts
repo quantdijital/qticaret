@@ -1,3 +1,4 @@
+import { printedHeadLines } from "../../lib/storefront/sections/head-lines"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { BannerSection } from "../../lib/storefront/sections/banner"
 import type { PostsSection } from "../../lib/storefront/sections/posts"
@@ -65,7 +66,13 @@ export function hydrateBanner(section: BannerSection, at: BandContext) {
  */
 export function hydratePosts(section: PostsSection, at: BandContext) {
   const { id, type } = section
-  const printed = { id, type, title: section.title, limit: section.limit }
+  const printed = {
+    id,
+    type,
+    title: section.title,
+    limit: section.limit,
+    ...printedHeadLines(section, at.fill),
+  }
   return section.variant === "intro_panel"
     ? {
         ...printed,

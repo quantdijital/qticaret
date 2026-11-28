@@ -6,6 +6,7 @@ import { Container } from "../parts/Container"
 import { Price } from "../parts/Price"
 import { BandPicture } from "./BandPicture"
 import { type Of, headingId } from "./plan"
+import { HeadEyebrow, HeadNote } from "./head-lines"
 
 /** A card's photograph: a third of the row from 1024 px, half from 768 px. */
 const CARD_SIZES = "(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw"
@@ -69,18 +70,31 @@ const Left = ({ text }: { text: string | null }) =>
  * when few, then the price and "İncele" at the row's end (on a phone
  * under the name, beside the date box, the row kept tight). `cards`: a card each, the tour's photograph in its well
  * with the date box on it, the name, the places left, the price and
- * "İncele". Its ground and alignment are the section's look (`Look`).
+ * "İncele"; on a phone one under another (`stack`) or swiped sideways in
+ * one row (`phone: scroll`). Its ground and alignment are the section's look (`Look`).
  */
 export function Departures({ section, t }: { section: Of<"departures">; t: Translate }) {
   const id = headingId(section.id)
   const cards = section.layout === "cards"
+  const swipe = cards && section.phone === "scroll"
   return (
     <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-(--head-gap)">
         <div className="flex max-w-2xl flex-col gap-2 group-data-[align=center]/look:mx-auto group-data-[align=center]/look:items-center group-data-[align=center]/look:text-center">
-          <h2 id={id} {...fieldMark(section.editor, "title")}>
-            <TitleText text={section.title} />
-          </h2>
+          <HeadEyebrow lines={section} marks={section.editor} />
+          {section.note ? (
+            // The hand note right after the heading (under it on a narrow screen)
+            <div className="flex flex-wrap items-end gap-x-6 gap-y-1 group-data-[align=center]/look:justify-center">
+              <h2 id={id} {...fieldMark(section.editor, "title")}>
+                <TitleText text={section.title} />
+              </h2>
+              <HeadNote lines={section} marks={section.editor} />
+            </div>
+          ) : (
+            <h2 id={id} {...fieldMark(section.editor, "title")}>
+              <TitleText text={section.title} />
+            </h2>
+          )}
           {section.intro && (
             <p className="text-text-2" {...fieldMark(section.editor, "intro")}>
               {section.intro}
@@ -90,7 +104,12 @@ export function Departures({ section, t }: { section: Of<"departures">; t: Trans
         {cards ? (
           <ul
             role="list"
-            className="grid gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-3"
+            className={cn(
+              "grid gap-x-(--gap-columns) gap-y-(--gap-rows) md:grid-cols-2 lg:grid-cols-3",
+              // `scroll`: below 768 px one row swiped sideways, the next card peeking (as the reviews' rail)
+              swipe &&
+                "gf-rail max-md:-mx-(--gutter) max-md:auto-cols-[82%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1"
+            )}
           >
             {section.rows.map((row) => (
               <li key={row.key} className="flex flex-col overflow-hidden rounded-tile gf-pane">

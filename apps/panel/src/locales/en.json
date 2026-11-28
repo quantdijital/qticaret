@@ -10952,6 +10952,16 @@
               "serif_accent": "Large, italic accent"
             },
             "hint": "The home sections' headings. Plain is the theme's own. Large, italic accent sets them large and light; the words you put between asterisks (\"Our *favourite* tours\") come in the accent face's italic."
+          },
+          "title_accent": {
+            "label": "Heading accent",
+            "term": "title_accent",
+            "steps": {
+              "none": "None",
+              "primary": "Main colour",
+              "accent": "Accent colour"
+            },
+            "hint": "The words you put between asterisks in a heading (\"Our *favourite* tours\"). None drops the asterisks and the words read as the heading's own. Main colour or Accent colour sets those words in that colour; a light accent reads poorly on a light ground, so pick Main colour then."
           }
         },
         "card": "Product card",
@@ -12695,6 +12705,13 @@
           "hint": "List: date box, tour name, places left and price row by row. Cards: with the tour's photo.",
           "list": "List",
           "cards": "Cards"
+        },
+        "phone": {
+          "label": "On a phone",
+          "term": "mobile",
+          "hint": "On a narrow screen the cards stack or slide sideways in one row.",
+          "stack": "Stacked",
+          "scroll": "Slide sideways"
         }
       },
       "reviewsCard": {
@@ -12738,6 +12755,16 @@
           "hint": "The shape of the post cards' cover pictures.",
           "standard": "16:10",
           "wide": "Wide (2:1)"
+        }
+      },
+      "headLines": {
+        "eyebrowHint": "A small upper-case line over the heading (e.g. Popular routes). Empty: not drawn.",
+        "eyebrowPlaceholder": "E.g. Popular routes",
+        "note": {
+          "label": "Hand note",
+          "term": "note",
+          "placeholder": "E.g. The road is calling",
+          "hint": "A short tilted note beside the heading, a brush stroke under it. In handwriting while the accent face is on. Empty: not drawn."
         }
       },
       "heroFull": {

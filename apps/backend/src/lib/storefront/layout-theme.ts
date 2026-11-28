@@ -95,6 +95,7 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   page_width: theme.page_width,
   accent_ink: theme.accent_ink,
   section_title: theme.section_title,
+  title_accent: theme.title_accent,
 })
 
 /**

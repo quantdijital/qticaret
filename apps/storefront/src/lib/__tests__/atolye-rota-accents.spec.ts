@@ -58,6 +58,27 @@ describe("a section heading's accent words", () => {
       "data-section-title": "serif_accent",
     })
   })
+
+  it("colours the accent words only under the kit's S11 step, never at its default", () => {
+    expect(styleKitAttributes({ title_accent: "none" })).toEqual({})
+    expect(styleKitAttributes({ title_accent: "primary" })).toEqual({
+      "data-title-accent": "primary",
+    })
+    const css = atolyeCss("section-title.css").replace(/\/\*[\s\S]*?\*\//g, "")
+    // Every rule that colours the words names a step off the default
+    const colouring = css.match(/[^{}]+\{[^{}]*color:[^{}]*\}/g) ?? []
+    expect(colouring.length).toBe(3)
+    for (const rule of colouring) {
+      expect(rule).toMatch(/\[data-title-accent="(primary|accent)"\]/)
+    }
+    expect(css).not.toContain('data-title-accent="none"')
+    expect(css).toMatch(
+      /\[data-title-accent="primary"\] h2 \.gf-title-em \{\s*color: var\(--primary\);/
+    )
+    expect(css).toMatch(
+      /\[data-title-accent="accent"\] h2 \.gf-title-em \{\s*color: var\(--highlight\);/
+    )
+  })
 })
 
 describe("the steps' dotted line and the scroller's centre focus", () => {

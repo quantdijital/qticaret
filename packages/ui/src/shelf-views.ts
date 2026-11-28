@@ -12,13 +12,14 @@ import type {
 } from "@qticaret/types"
 import type { ProductCardView } from "./product-views"
 import type { LinkView } from "./views"
+import type { HeadLinesView } from "./hand-note-views"
 
 /**
  * A product rail as a theme draws it (adr/0049 Ek 2026-11-05, Ek
  * 2026-11-15): its cards and how they stand. A theme draws a variant it
  * does not have as `grid`; a view without one is a grid too.
  */
-export interface ProductsSectionView {
+export interface ProductsSectionView extends HeadLinesView {
   id: string
   type: "products"
   title: string

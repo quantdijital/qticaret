@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { SLUG_MAX_LENGTH, SLUG_SEGMENT } from "../../seo/slug"
 import { LAYOUT_LIMITS, optional, recordId, title } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { headLines } from "./head-lines"
 import { sectionIcon } from "./icons"
 import { bodyFields } from "./look"
 import { scroller } from "./scroller"
@@ -115,6 +116,8 @@ const common = {
   show_count: z.boolean().default(false),
   /** The link beside the title; none: the storefront's "every category". */
   more: optional(storefrontLink),
+  /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+  ...headLines,
 }
 
 /** Today's picture tiles. */

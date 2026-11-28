@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { optional, recordId, shopText, title } from "../layout-fields"
+import { headLines } from "./head-lines"
 import { bodyFields } from "./look"
 import { collectionSource } from "./sources"
 
@@ -21,6 +22,7 @@ export const DEPARTURES_LIMITS = {
 
 export const DEPARTURES_SETTINGS = {
   layout: ["list", "cards"],
+  phone: ["stack", "scroll"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof DEPARTURES_SETTINGS
@@ -28,6 +30,7 @@ type Step<S extends Setting> = (typeof DEPARTURES_SETTINGS)[S][number]
 
 export const DEPARTURES_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   layout: "list",
+  phone: "stack",
 }
 
 const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
@@ -62,6 +65,10 @@ export const departures = z
       .max(DEPARTURES_LIMITS.limit.max)
       .default(DEPARTURES_LIMITS.limit.default),
     layout: setting("layout"),
+    /** The cards on a phone: one under another or one row swiped sideways. */
+    phone: setting("phone"),
+    /** The line over the heading and the hand note beside it (`head-lines.ts`). */
+    ...headLines,
   })
   .strict()
 

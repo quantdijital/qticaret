@@ -67,5 +67,6 @@
   "menu_style": "plain",
   "chip_style": "lined",
   "density": "airy",
-  "motion": "lively"
+  "motion": "lively",
+  "title_accent": "primary"
 }

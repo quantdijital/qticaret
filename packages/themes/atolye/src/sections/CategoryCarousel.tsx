@@ -1,5 +1,5 @@
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
-import type { CategoryCardView, LinkView, Translate } from "@qticaret/ui"
+import type { HeadLinesView, CategoryCardView, LinkView, Translate } from "@qticaret/ui"
 import { CategoryTile } from "../parts/CategoryTile"
 import { Container } from "../parts/Container"
 import { Scroller } from "../parts/Scroller"
@@ -22,6 +22,7 @@ export function CategoryCarousel({
   t,
   marks,
   ownAll = false,
+  lines,
 }: {
   id: string
   title: string
@@ -35,6 +36,8 @@ export function CategoryCarousel({
   marks?: boolean | undefined
   /** `all` is the shop's own link (`more`): in the preview it is marked too. */
   ownAll?: boolean
+  /** The heading's upper line and hand note (sahip 2026-11-28); absent: none. */
+  lines?: HeadLinesView | undefined
 }) {
   if (categories.length === 0) {
     return null
@@ -55,7 +58,16 @@ export function CategoryCarousel({
             page: t("scroller.page", { n: "{n}" }),
             pages: t("scroller.pages"),
           }}
-          head={<SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />}
+          head={
+            <SectionHead
+              id={id}
+              title={title}
+              more={all}
+              marks={marks}
+              ownMore={ownAll}
+              lines={lines}
+            />
+          }
         >
           {categories.map((category) => (
             <CategoryTile

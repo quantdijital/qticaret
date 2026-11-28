@@ -159,7 +159,8 @@
         "kind": "all"
       },
       "limit": 3,
-      "layout": "cards"
+      "layout": "cards",
+      "phone": "scroll"
     },
     {
       "id": "vadidoga",

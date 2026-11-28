@@ -40,7 +40,13 @@ export function ReviewsCarousel({ section, t }: { section: Of<"reviews">; t: Tra
             pages: t("scroller.pages"),
           }}
           head={
-            <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
+            <SectionHead
+              id={id}
+              title={section.title}
+              more={section.more}
+              marks={section.editor}
+              lines={section}
+            />
           }
         >
           {section.reviews.map((review, index) => (
