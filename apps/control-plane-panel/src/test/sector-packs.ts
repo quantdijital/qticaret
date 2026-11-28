@@ -15,6 +15,7 @@ export const GENERAL: SectorPackSummary = {
     presets: 0,
   },
   presets: [],
+  sample_products: 0,
 }
 
 export const CUTLERY: SectorPackSummary = {
@@ -48,6 +49,7 @@ export const CUTLERY: SectorPackSummary = {
       preview: false,
     },
   ],
+  sample_products: 0,
 }
 
 export const SECTOR_PACKS = { sector_packs: [GENERAL, CUTLERY] }

@@ -64,6 +64,12 @@ export interface ShopDraft {
   preset: string
   /** The owner's e-mail and phone as the storefront's contact details at setup (default: yes). */
   storefront_contact: boolean
+  /**
+   * "Örnek ürünlerle başla": the pack's sample catalogue loaded at setup
+   * (default: no). Offered only for a pack with samples; another pack
+   * chosen turns it off.
+   */
+  sample_catalog: boolean
 }
 
 const person = (): PersonDraft => ({ name: "", email: "", phone: "" })
@@ -90,6 +96,7 @@ export const emptyDraft = (): ShopDraft => ({
   sector_pack: "general",
   preset: "",
   storefront_contact: true,
+  sample_catalog: false,
 })
 
 /** The slug the shop gets: the typed one, else the name's. */

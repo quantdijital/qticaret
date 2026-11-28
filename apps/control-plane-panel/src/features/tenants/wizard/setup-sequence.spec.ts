@@ -85,6 +85,15 @@ describe("Kur: the record, its details, then the setup (C11)", () => {
     expect(bodies["addDomain"]).toBe("bicak.com")
   })
 
+  it("asks for the pack's sample products only when chosen", async () => {
+    const draft: ShopDraft = { ...filledDraft(), sector_pack: "travel", sample_catalog: true }
+    const { calls, bodies } = fakeCalls()
+
+    await runSetup(draft, calls, plannedProgress(draft), () => undefined)
+
+    expect(bodies["createTenant"]).toMatchObject({ sector_pack: "travel", sample_catalog: true })
+  })
+
   it("skips what was not asked for: no company sent for a blank one, the owner billed", async () => {
     const draft = filledDraft()
     const blank: ShopDraft = { ...draft, company: { ...emptyCompany(draft) } }

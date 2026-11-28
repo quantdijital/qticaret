@@ -31,6 +31,8 @@ export interface NewTenant {
   preset?: string
   /** The owner's e-mail and phone handed to the shop as its storefront contact (default: yes). */
   storefront_contact?: boolean
+  /** Its pack's sample catalogue at setup (default: no); only a pack with samples. */
+  sample_catalog?: boolean
 }
 
 export const useRenameTenant = (id: string) =>

@@ -11,11 +11,13 @@ import {
   packName,
   presetPreviewPath,
   presetsOf,
+  sampleProductsOf,
   sectorPacksQuery,
 } from "@/features/sector-packs/api"
 import type { PresetSummary } from "@/features/sector-packs/api"
 import { errorText } from "@/lib/errors"
 import type { StepProps } from "../field"
+import { SamplesChoice } from "./samples-choice"
 
 /** The look's picture, or a plain frame of the same size when it has none or it cannot be read. */
 function Preview({ pack, look }: { pack: string; look: PresetSummary }) {
@@ -48,6 +50,7 @@ function Preview({ pack, look }: { pack: string; look: PresetSummary }) {
  * writes it into the shop's design and, the shop being new, publishes it,
  * so the storefront opens with it; the owner fine-tunes it in the shop's
  * panel. A pack with no looks says so: the shop opens with the plain one.
+ * Under the looks, "Örnek ürünlerle başla" when the pack has samples.
  */
 export function LookStep({ draft, change }: StepProps) {
   const { t } = useTranslation()
@@ -56,61 +59,69 @@ export function LookStep({ draft, change }: StepProps) {
   const looks = presetsOf(list, draft.sector_pack)
   const chosen = chosenPreset(list, draft.sector_pack, draft.preset)
   return (
-    <SectionCard
-      title={t("wizard.look.title")}
-      description={t("wizard.look.text", { pack: packName(list, draft.sector_pack) })}
-    >
-      {packs.isError ? (
-        <ErrorState text={errorText(t, packs.error)} onRetry={() => void packs.refetch()} />
-      ) : packs.isPending ? (
-        <LoadingRows rows={2} />
-      ) : looks.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("wizard.look.none")}</p>
-      ) : (
-        <RadioGroup
-          aria-label={t("wizard.look.title")}
-          value={chosen?.code ?? ""}
-          onValueChange={(value) => {
-            change((current) => ({ ...current, preset: value }))
-          }}
-          className="grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-3"
-        >
-          {looks.map((look, index) => (
-            <label
-              key={look.code}
-              htmlFor={`wizard-look-${look.code}`}
-              className={cn(
-                "flex h-full cursor-pointer flex-col gap-3 rounded-lg border p-3 transition-colors",
-                chosen?.code === look.code
-                  ? "border-primary bg-primary/5"
-                  : "hover:border-foreground/30"
-              )}
-            >
-              <Preview pack={draft.sector_pack} look={look} />
-              <span className="flex items-start gap-3">
-                <RadioGroupItem
-                  id={`wizard-look-${look.code}`}
-                  value={look.code}
-                  className="mt-0.5"
-                />
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <span className="font-semibold">{look.name}</span>
-                    {index === 0 ? (
-                      <span className="text-[13px] text-muted-foreground">
-                        {t("wizard.look.default")}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="line-clamp-4 text-[13px] leading-5 text-muted-foreground">
-                    {look.description}
+    <>
+      <SectionCard
+        title={t("wizard.look.title")}
+        description={t("wizard.look.text", { pack: packName(list, draft.sector_pack) })}
+      >
+        {packs.isError ? (
+          <ErrorState text={errorText(t, packs.error)} onRetry={() => void packs.refetch()} />
+        ) : packs.isPending ? (
+          <LoadingRows rows={2} />
+        ) : looks.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("wizard.look.none")}</p>
+        ) : (
+          <RadioGroup
+            aria-label={t("wizard.look.title")}
+            value={chosen?.code ?? ""}
+            onValueChange={(value) => {
+              change((current) => ({ ...current, preset: value }))
+            }}
+            className="grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-3"
+          >
+            {looks.map((look, index) => (
+              <label
+                key={look.code}
+                htmlFor={`wizard-look-${look.code}`}
+                className={cn(
+                  "flex h-full cursor-pointer flex-col gap-3 rounded-lg border p-3 transition-colors",
+                  chosen?.code === look.code
+                    ? "border-primary bg-primary/5"
+                    : "hover:border-foreground/30"
+                )}
+              >
+                <Preview pack={draft.sector_pack} look={look} />
+                <span className="flex items-start gap-3">
+                  <RadioGroupItem
+                    id={`wizard-look-${look.code}`}
+                    value={look.code}
+                    className="mt-0.5"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="flex flex-wrap items-baseline justify-between gap-x-3">
+                      <span className="font-semibold">{look.name}</span>
+                      {index === 0 ? (
+                        <span className="text-[13px] text-muted-foreground">
+                          {t("wizard.look.default")}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="line-clamp-4 text-[13px] leading-5 text-muted-foreground">
+                      {look.description}
+                    </span>
                   </span>
                 </span>
-              </span>
-            </label>
-          ))}
-        </RadioGroup>
-      )}
-    </SectionCard>
+              </label>
+            ))}
+          </RadioGroup>
+        )}
+      </SectionCard>
+      <SamplesChoice
+        draft={draft}
+        change={change}
+        packName={packName(list, draft.sector_pack)}
+        products={sampleProductsOf(list, draft.sector_pack)}
+      />
+    </>
   )
 }

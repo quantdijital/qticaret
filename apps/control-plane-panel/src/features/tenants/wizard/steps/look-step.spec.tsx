@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { stubApi } from "@/test/api"
 import { renderAs } from "@/test/member"
-import { SECTOR_PACKS } from "@/test/sector-packs"
+import { CUTLERY, GENERAL, SECTOR_PACKS } from "@/test/sector-packs"
 import { filledDraft } from "@/test/wizard"
 import type { ShopDraft } from "../draft"
 import { LookStep } from "./look-step"
@@ -44,6 +44,39 @@ describe("LookStep: the chosen pack's ready-made looks (adr/0063 task 2.7)", () 
 
     await userEvent.click(screen.getByRole("radio", { name: /^Tezgâh/ }))
     expect(draft.preset).toBe("tezgah")
+  })
+
+  it("offers the sample products only for a pack that has them, off by default", async () => {
+    const withSamples = { ...CUTLERY, sample_products: 12 }
+    stubApi((call) =>
+      call.path === "/admin/cp/sector-packs"
+        ? { status: 200, body: { sector_packs: [GENERAL, withSamples] } }
+        : { status: 404, body: {} }
+    )
+    let draft: ShopDraft = { ...filledDraft(), sector_pack: "cutlery" }
+    const change = vi.fn((next: (current: ShopDraft) => ShopDraft) => {
+      draft = next(draft)
+    })
+    const view = renderAs(<LookStep draft={draft} change={change} problems={{}} />, "operator")
+
+    const box = await screen.findByRole("checkbox", { name: "Örnek ürünlerle başla" })
+    expect(box).not.toBeChecked()
+    expect(screen.getByText(/12 örnek ürünü/)).toBeInTheDocument()
+    await userEvent.click(box)
+    expect(draft.sample_catalog).toBe(true)
+
+    // The general pack has none: nothing offered
+    view.unmount()
+    renderAs(
+      <LookStep
+        draft={{ ...filledDraft(), sector_pack: "general" }}
+        change={vi.fn()}
+        problems={{}}
+      />,
+      "operator"
+    )
+    expect(await screen.findByText(/hazır görünümü yok/)).toBeInTheDocument()
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
   })
 
   it("says the pack has no looks", async () => {

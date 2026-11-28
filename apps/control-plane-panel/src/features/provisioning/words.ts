@@ -20,6 +20,7 @@ export const STEP_NAMES = [
   "profile",
   "sector_pack",
   "preset",
+  "sample_catalog",
   "plan_document",
   "start",
   "health",
@@ -123,6 +124,14 @@ export function outputText(t: TFunction, step: RunStep): string[] {
       if (typeof count === "number" && (count > 0 || key === "filled")) {
         lines.push(t(text, { count }))
       }
+    }
+  }
+  // "Örnek ürünlerle başla": how many sample products the shop got, or that it had them
+  if (step.name === "sample_catalog") {
+    if (typeof output["products"] === "number") {
+      lines.push(t("setup.output.samplesLoaded", { count: output["products"] }))
+    } else if (output["loaded"] === true) {
+      lines.push(t("setup.output.samplesThere"))
     }
   }
   // adr/0063 task 2.7: the look's version, and whether the storefront opened with it
