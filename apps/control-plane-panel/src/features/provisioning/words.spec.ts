@@ -59,4 +59,33 @@ describe("a run in words (Ek C10)", () => {
     ).toEqual(["Sürüm 1", "0 öğe eklendi"])
     expect(codeText(t, "provisioning.sector_pack_unknown")).toBe("Bu sektör paketi bu sürümde yok.")
   })
+
+  it("says the profile's counts and the look's outcome (adr/0063 task 2.7)", () => {
+    expect(stepName(t, "profile")).toBe("Mağaza profili")
+    expect(stepName(t, "preset")).toBe("Hazır görünüm")
+    expect(
+      outputText(t, step("profile", { output: { filled: 4, kept: 2, refused: 0, duration_ms: 9 } }))
+    ).toEqual(["4 alan dolduruldu", "2 alan mağazada zaten doluydu, korundu"])
+    expect(outputText(t, step("profile", { output: { filled: 0 } }))).toEqual(["0 alan dolduruldu"])
+    expect(
+      outputText(
+        t,
+        step("preset", {
+          output: { pack: "cutlery", preset: "katalog", version: 5, published: true },
+        })
+      )
+    ).toEqual(["Sürüm 5", "Vitrinde yayımlandı"])
+    expect(
+      outputText(
+        t,
+        step("preset", {
+          output: { pack: "cutlery", preset: "katalog", version: 5, applied: true },
+        })
+      )
+    ).toEqual(["Sürüm 5", "Daha önce uygulanmıştı; mağazanın tasarımına dokunulmadı"])
+    expect(outputText(t, step("preset", { output: { preset: null } }))).toEqual([])
+    expect(codeText(t, "provisioning.apply_preset_timeout")).toBe(
+      "Hazır görünümün uygulanması süre sınırını aştı."
+    )
+  })
 })

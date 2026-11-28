@@ -148,6 +148,10 @@ export interface TenantDetail {
     /** C12: the pack's version the shop last applied, and when; null until it has. */
     sector_pack_version: number | null
     sector_pack_applied_at: string | null
+    /** adr/0063 task 2.7: its ready-made look, and the version applied and when; null until it has. */
+    preset: string | null
+    preset_version: number | null
+    preset_applied_at: string | null
     created_at: string
     created_by: string | null
     next_payment_on: string | null

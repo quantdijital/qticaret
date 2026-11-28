@@ -83,6 +83,12 @@ export const MIGRATION_ROUTES = [
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetMigrations, {})],
   },
+  // adr/0042 Ek 2026-11-27: what moved and what each completion would take
+  {
+    matcher: "/admin/migrations/overview",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
   // A run that stopped half-way, started again from its stored file
   {
     matcher: "/admin/migrations/:id/restart",
@@ -139,6 +145,21 @@ export const MIGRATION_ROUTES = [
   // F14.5: it mails the shop's customers
   {
     matcher: "/admin/migrations/invites",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(z.object({}).strict()),
+      requireReauth(),
+    ],
+  },
+  // adr/0042 Ek 2026-11-27: the old addresses as a list, and their 301s made again
+  {
+    matcher: "/admin/migrations/urls/export",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
+  {
+    matcher: "/admin/migrations/urls/rebuild",
     methods: ["POST" as const],
     middlewares: [
       requireUserActor,

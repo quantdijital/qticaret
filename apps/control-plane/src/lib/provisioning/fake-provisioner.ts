@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import { sectorPack, summaryOf } from "@qticaret/sector-packs"
+import { sectorPack, storefrontPreset, summaryOf } from "@qticaret/sector-packs"
 import type { RuntimeSecrets } from "../vault/tenant-secrets"
 import { ProvisioningError } from "./provisioner"
 import type {
@@ -29,6 +29,11 @@ export interface FakeShop {
   imported: number[]
   /** C12: the packs applied, by code: the version, as the shop's own record of them. */
   packs: Record<string, number>
+  /** adr/0063 task 2.7: the looks applied (`pack/code`), and whether a design was published. */
+  presets: string[]
+  published: boolean
+  /** The profiles handed over (the documents, as sent on stdin). */
+  profiles: string[]
 }
 
 export interface FakeState {
@@ -75,6 +80,9 @@ export class FakeProvisioner implements TenantProvisioner {
         invites: [],
         imported: [],
         packs: {},
+        presets: [],
+        published: false,
+        profiles: [],
       }
       shops.set(t.tenant_id, shop)
     }
@@ -162,6 +170,47 @@ export class FakeProvisioner implements TenantProvisioner {
             added,
             kept: 0,
             skipped: 0,
+          })
+        )
+      }
+      case "apply-preset": {
+        // As the shop's: a look this build has, of a pack the shop was given
+        const preset = storefrontPreset(cmd.pack, cmd.preset)
+        if (!preset || !Object.hasOwn(shop.packs, cmd.pack)) {
+          return await Promise.resolve({
+            ...ok({ status: "unknown_preset" }),
+            ok: false,
+            exit_code: 1,
+          })
+        }
+        const published = !shop.published
+        shop.published = true
+        shop.presets.push(`${cmd.pack}/${cmd.preset}`)
+        return await Promise.resolve(
+          ok({
+            status: "applied",
+            pack: cmd.pack,
+            preset: cmd.preset,
+            version: preset.version,
+            skipped: 0,
+            dropped: 0,
+            published,
+          })
+        )
+      }
+      case "apply-profile": {
+        // Every field the first time, none again (the shop fills only empty ones)
+        const fields = Object.values(
+          JSON.parse(cmd.document) as Record<string, Record<string, string>>
+        ).reduce((sum, section) => sum + Object.keys(section).length, 0)
+        const first = shop.profiles.length === 0
+        shop.profiles.push(cmd.document)
+        return await Promise.resolve(
+          ok({
+            status: "applied",
+            filled: first ? fields : 0,
+            kept: first ? 0 : fields,
+            refused: 0,
           })
         )
       }

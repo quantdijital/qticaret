@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { Modules } from "@medusajs/framework/utils"
 import { z } from "@medusajs/framework/zod"
+import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
 import { XLSX_MIME, writeXlsx } from "../../../lib/sheets"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
@@ -9,9 +10,9 @@ import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
 import { openSource } from "../../migration/open-source"
 import { reportSheets } from "../../migration/report"
-import { runDescriptionRefresh } from "../../migration/descriptions"
-import { runPostImageRefresh } from "../../migration/post-images"
 import { linkCounts, migrationLinkSheet, settleMigratedLinks } from "../../migration/links"
+import { RUN_KINDS, addedKinds, groupProblems, withDependencies } from "../../migration/kinds"
+import { ANY_SOURCE_REFRESH, REFRESH_KINDS, runRefresh } from "../../migration/refresh"
 import { runMigration } from "../../migration/run"
 import type { JobType } from "./types"
 
@@ -23,13 +24,10 @@ export const CUSTOMER_FILE_PREFIX = "migration-customers-"
 export const WORDPRESS_FILE_PREFIX = "migration-wordpress-"
 /** A product category address base the owner names (`/urun-kategori/`): a path of one segment or none. */
 export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
-/**
- * What a WordPress run may refresh alone: `descriptions` (adr/0055), the
- * documents and their plain text of the products a run moved before;
- * `post_images` (adr/0042 Ek 2026-11-27), the pictures in the texts of
- * the blog posts a run moved before.
- */
-export const REFRESH_KINDS = ["descriptions", "post_images"] as const
+/** What a run may refresh alone of what runs moved before (refresh.ts). */
+export { REFRESH_KINDS }
+// The completions that write texts: their links to the old site are pointed here after
+const TEXT_REFRESH: ReadonlySet<string> = new Set(["descriptions", "post_images"])
 
 const shared = {
   mode: z.enum(["check", "apply"]),
@@ -44,9 +42,13 @@ const shared = {
     .strict()
     .nullable()
     .default(null),
+  // adr/0042 Ek 2026-11-27: what to move; none named, everything (what they need is added)
+  kinds: z.array(z.enum(RUN_KINDS)).max(RUN_KINDS.length).default([]),
+  // adr/0055, adr/0042 Ek 2026-11-27: only this one completion of what runs moved before
+  refresh: z.array(z.enum(REFRESH_KINDS)).max(1).default([]),
 }
 
-const input = z.discriminatedUnion("source", [
+const sources = z.discriminatedUnion("source", [
   z
     .object({
       source: z.literal("bundle"),
@@ -82,8 +84,6 @@ const input = z.discriminatedUnion("source", [
         .max(512)
         .refine((id) => id.includes(WORDPRESS_FILE_PREFIX)),
       category_base: z.string().max(64).regex(CATEGORY_BASE).nullable().default(null),
-      // adr/0055: only this, and nothing else, of what a run moved before
-      refresh: z.array(z.enum(REFRESH_KINDS)).max(REFRESH_KINDS.length).default([]),
       ...shared,
     })
     .strict(),
@@ -96,6 +96,18 @@ const input = z.discriminatedUnion("source", [
     })
     .strict(),
 ])
+
+/** A completion other than the products' pictures needs a WordPress export (refresh.ts). */
+const input = sources.superRefine((values, ctx) => {
+  const [only] = values.refresh
+  if (
+    only &&
+    !(ANY_SOURCE_REFRESH as readonly string[]).includes(only) &&
+    values.source !== "wordpress"
+  ) {
+    ctx.addIssue({ code: "custom", path: ["refresh"], message: "migration.refresh_wordpress_only" })
+  }
+})
 
 /** What a `migration.run` job is asked: kept with it, so a run stopped half-way can start again. */
 export type MigrationRunInput = z.infer<typeof input>
@@ -123,12 +135,32 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
     const { mode, defaults } = values
     const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
     const audit = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
-    const run = await migration.createMigrationRuns({
-      source: values.source,
-      mode,
-      job_id: job.id,
-      started_by: job.requested_by,
-    })
+    // A file holds the shop's customers: gone however the run ends, even before it begins
+    const dropSource = async () => {
+      if (
+        values.source === "bundle" ||
+        values.source === "customers" ||
+        values.source === "wordpress"
+      ) {
+        await container
+          .resolve(Modules.FILE)
+          .deleteFiles(values.source_file_id)
+          .catch((error: unknown) => {
+            logger.warn({ event: "migration.source_kept", jobId: job.id, err: errorSummary(error) })
+          })
+      }
+    }
+    const run = await migration
+      .createMigrationRuns({
+        source: values.source,
+        mode,
+        job_id: job.id,
+        started_by: job.requested_by,
+      })
+      .catch(async (error: unknown) => {
+        await dropSource()
+        throw error
+      })
     // The last progress, told again while a source works out of sight: the heartbeat
     let last = 0
     const report = (percent: number) => {
@@ -136,7 +168,7 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       return progress(percent)
     }
     try {
-      const { source, digest, wordpress } = await openSource(container, values, () =>
+      const { source, digest, wordpress, legacy } = await openSource(container, values, () =>
         progress(last)
       )
       const record = async (action: string, changes: Record<string, unknown>) => {
@@ -150,26 +182,40 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
           changes: { ...changes, source: source.id, ...(digest ? { file_sha256: digest } : {}) },
         })
       }
-      // adr/0055: a refresh run rewrites the moved products' descriptions and nothing else
-      const refresh = values.source === "wordpress" ? values.refresh : []
+      // A completion takes one part of what moved and nothing else (refresh.ts)
+      const { refresh } = values
       if (mode === "apply") {
-        await record("started", { run_id: run.id, ...(refresh.length > 0 ? { refresh } : {}) })
+        await record("started", {
+          run_id: run.id,
+          ...(refresh.length > 0 ? { refresh } : { kinds: withDependencies(values.kinds) }),
+        })
       }
-      const { counts, productRows, problems } = refresh.includes("descriptions")
-        ? await runDescriptionRefresh(container, source, run.id, mode, report)
-        : refresh.includes("post_images")
-          ? await runPostImageRefresh(container, source, run.id, mode, report)
-          : await runMigration(container, source, run.id, mode, defaults, {
+      const kinds = withDependencies(values.kinds)
+      const [only] = refresh
+      const { counts, productRows, problems } = only
+        ? await runRefresh(container, source, run.id, mode, only, report, legacy)
+        : await runMigration(
+            container,
+            source,
+            run.id,
+            mode,
+            defaults,
+            {
               progress: report,
               origin: { job_id: job.id, actor_id: job.requested_by },
               audit: (action, changes) =>
                 mode === "apply" ? record(action, changes) : Promise.resolve(),
-            })
+            },
+            kinds
+          )
       // adr/0042 Ek 2026-11-05: the records' old paths answer at once, the moved texts' links
       // to the old site point here (a refresh rewrote descriptions from the source again)
       // Not the run's to fail: what moved stays, and the content link job can be run later
       const links =
-        mode === "apply"
+        mode === "apply" &&
+        (refresh.length > 0
+          ? refresh.some((kind) => TEXT_REFRESH.has(kind))
+          : kinds.includes("url"))
           ? await settleMigratedLinks(container, source.id).catch((error: unknown) => {
               logger.warn({
                 event: "migration.links_failed",
@@ -205,7 +251,15 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
           mode,
           counts,
           ...(links ? { links: linkCounts(links) } : {}),
-          ...(refresh.length > 0 ? { refresh } : wordpress ? { wordpress } : {}),
+          ...(refresh.length > 0
+            ? { refresh }
+            : { kinds, added_kinds: addedKinds(values.kinds, kinds) }),
+          ...(refresh.length === 0 && wordpress ? { wordpress } : {}),
+          // adr/0042 Ek 2026-11-27: the problems by reason, for the panel; every row is in the report
+          problems: groupProblems(problems).map((group) => ({
+            ...group,
+            message: serverErrorMessage(group.key, "tr"),
+          })),
         },
       }
     } catch (error) {
@@ -214,19 +268,7 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
         .catch(() => undefined)
       throw error
     } finally {
-      // A file holds the shop's customers: gone however the run ended
-      if (
-        values.source === "bundle" ||
-        values.source === "customers" ||
-        values.source === "wordpress"
-      ) {
-        await container
-          .resolve(Modules.FILE)
-          .deleteFiles(values.source_file_id)
-          .catch((error: unknown) => {
-            logger.warn({ event: "migration.source_kept", jobId: job.id, err: errorSummary(error) })
-          })
-      }
+      await dropSource()
     }
   },
 }

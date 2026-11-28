@@ -29,6 +29,15 @@ interface Applied {
 
 const SCHEDULE = { visible: true, starts_at: null, ends_at: null }
 
+/** The starter pages every look lays out (adr/0073 Ek 2026-11-28), in Katalog's order. */
+const STARTERS = [
+  { ref: "page:hakkimizda", name: "Hakkımızda" },
+  { ref: "page:iletisim", name: "İletişim" },
+  { ref: "page:sik-sorulan-sorular", name: "Sık Sorulan Sorular" },
+  { ref: "page:odeme-secenekleri", name: "Ödeme Seçenekleri" },
+  { ref: "page:kargo-ve-teslimat", name: "Kargo ve Teslimat" },
+]
+
 /**
  * A `general` pack whose one look lays out Hakkımızda with a text naming
  * a `{belirteç}` no shop has: the design's schema takes it, the draft's
@@ -112,13 +121,46 @@ medusaIntegrationTestRunner({
 
       expect(first.status).toBe(200)
       const [made] = first.data.result.made_pages
-      expect(first.data.result.made_pages).toEqual([
-        {
-          ref: "page:hakkimizda",
-          page_id: expect.stringMatching(/^cnt_/) as unknown,
-          name: "Hakkımızda",
-        },
-      ])
+      expect(first.data.result.made_pages).toEqual(
+        STARTERS.map((page) => ({ ...page, page_id: expect.stringMatching(/^cnt_/) as unknown }))
+      )
+      // Every page opened is a draft under the look's name, at the handle's address (K6)
+      const opened = await container
+        .resolve<ContentModuleService>(CONTENT_MODULE)
+        .listContentEntries(
+          { id: first.data.result.made_pages.map((page) => page.page_id) },
+          { select: ["title", "handle", "status", "published_at"] }
+        )
+      expect(
+        opened
+          .map(({ title, handle, status, published_at }) => ({
+            title,
+            handle,
+            status,
+            published_at,
+          }))
+          .sort((a, b) => a.handle.localeCompare(b.handle))
+      ).toEqual(
+        STARTERS.map((page) => ({
+          title: page.name,
+          handle: page.ref.slice("page:".length),
+          status: "draft",
+          published_at: null,
+        })).sort((a, b) => a.handle.localeCompare(b.handle))
+      )
+      // The role pages laid out with their live facts, the contact page with its form
+      const typesOf = (ref: string) =>
+        first.data.layout.draft.pages
+          .find(
+            (page) =>
+              page.page_id ===
+              first.data.result.made_pages.find((each) => each.ref === ref)?.page_id
+          )
+          ?.sections.map((section) => section.type)
+      expect(typesOf("page:odeme-secenekleri")).toEqual(["rich_text", "payment_facts"])
+      expect(typesOf("page:kargo-ve-teslimat")).toEqual(["rich_text", "shipping_facts"])
+      expect(typesOf("page:iletisim")).toEqual(["contact"])
+      expect(typesOf("page:sik-sorulan-sorular")).toEqual(["faq"])
       expect(first.data.result.skipped.filter((each) => each.where === "pages")).toEqual([])
       expect(first.data.result.texts_kept).toEqual([])
       const entry = await settle(
@@ -133,8 +175,8 @@ medusaIntegrationTestRunner({
         status: "draft",
       })
       // The look's own layout and text on it (K9)
-      const [page] = first.data.layout.draft.pages
-      expect(page?.page_id).toBe(made?.page_id)
+      const page = first.data.layout.draft.pages.find((each) => each.page_id === made?.page_id)
+      expect(page).toBeDefined()
       expect(page?.sections.map((section) => section.id)).toEqual(
         katalog?.layout.pages?.[0]?.sections.map((section) => section.id)
       )
@@ -171,14 +213,19 @@ medusaIntegrationTestRunner({
 
       // Warn, don't block: the look is applied, the page's layout left out and named
       expect(applied.status).toBe(200)
-      expect(applied.data.result.made_pages).toEqual([])
+      // The other starter pages opened as drafts
+      expect(applied.data.result.made_pages.map((page) => page.ref)).toEqual(
+        STARTERS.slice(1).map((page) => page.ref)
+      )
       expect(applied.data.result.skipped).toContainEqual({
         where: "pages",
         ref: "page:hakkimizda",
         name: "Hakkımızda",
         reason: "taken",
       })
-      expect(applied.data.layout.draft.pages).toEqual([])
+      expect(applied.data.layout.draft.pages.map((page) => page.page_id)).toEqual(
+        applied.data.result.made_pages.map((page) => page.page_id)
+      )
     })
 
     it("deletes the page it opened when a later step fails, the draft untouched", async () => {

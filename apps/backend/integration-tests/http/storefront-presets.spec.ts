@@ -230,14 +230,13 @@ medusaIntegrationTestRunner({
         // Hakkımızda's picture, the page opened for the look (adr/0073 Ek 2026-11-19 (2) K6)
         images: { added: 1, kept: 0 },
         demo: { added: 0, kept: 0 },
-        // The shop had no Hakkımızda: opened as a draft, with the look's own text
-        made_pages: [
-          {
-            ref: "page:hakkimizda",
-            page_id: expect.stringMatching(/^cnt_/) as unknown,
-            name: "Hakkımızda",
-          },
-        ],
+        // The shop had none of the look's pages (Hakkımızda and the starter pages, adr/0073 Ek
+        // 2026-11-28): each opened as a draft, with the look's own text
+        made_pages: (katalog.layout.pages ?? []).map((page) => ({
+          ref: page.page_id.$handle,
+          page_id: expect.stringMatching(/^cnt_/) as unknown,
+          name: page.name,
+        })),
         texts_kept: [],
         // The shop's own draft kept first (adr/0064 Ek 2026-11-17)
         auto_saved: { id: expect.stringMatching(/^sfd_/) as unknown, kind: "auto", name: null },

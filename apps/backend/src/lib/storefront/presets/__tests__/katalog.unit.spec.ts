@@ -23,7 +23,11 @@ const everything: PresetLookups = {
   records: new Map(
     [...katalog.handles].map((ref, index) => [
       ref,
-      ref === "page:hakkimizda" ? ABOUT : `pcat_${String(index)}`,
+      ref === "page:hakkimizda"
+        ? ABOUT
+        : ref.startsWith("page:")
+          ? `cnt_page${String(index)}`
+          : `pcat_${String(index)}`,
     ])
   ),
   links: new Map([
@@ -130,7 +134,19 @@ describe("the katalog preset's Hakkımızda page (adr/0073 §4)", () => {
     const doc = presetDocument(resolved, presetTheme(katalog.theme_settings), APPLIED, KEPT)
 
     expect(resolved.images).toEqual(["images/acilis-bileme.webp"])
-    expect(doc.pages.map((page) => page.page_id)).toEqual([ABOUT])
+    // Hakkımızda first, then the starter pages every look lays out (adr/0073 Ek 2026-11-28)
+    expect(doc.pages.map((page) => page.page_id)).toEqual([
+      ABOUT,
+      ...["iletisim", "sik-sorulan-sorular", "odeme-secenekleri", "kargo-ve-teslimat"].map(
+        (handle) => everything.records.get(`page:${handle}`)
+      ),
+    ])
+    expect(doc.pages.slice(1).map((page) => page.sections.map((section) => section.type))).toEqual([
+      ["contact"],
+      ["faq"],
+      ["rich_text", "payment_facts"],
+      ["rich_text", "shipping_facts"],
+    ])
     const sections = doc.pages[0]?.sections ?? []
     // One list (adr/0073 Ek 2026-11-19 (2) K9): the look's own text first, then its six sections
     expect(sections.map((section) => section.type)).toEqual([

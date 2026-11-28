@@ -847,7 +847,8 @@
       "ai_route_no_key": "Bu servisin anahtarı yok; önce anahtarını yazın.",
       "ai_route_uncapped": "Bu serviste çıktı sınırı belgelenmediği için platform kredisinde kullanılamaz.",
       "ai_route_unverified": "Bu servis henüz doğrulanmadı; platform kredisinde yönlendirilemez.",
-      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi."
+      "ai_service_unknown": "Bilinmeyen yapay zekâ servisi.",
+      "preset_unknown": "Bu hazır görünüm seçilen sektör paketinde yok."
     },
     "ai_credits": {
       "pack_unknown": "Paket bulunamadı ya da satışta değil.",
@@ -858,6 +859,12 @@
       "apply_pack_failed": "Sektör paketi uygulanamadı.",
       "apply_pack_result_invalid": "Mağaza sektör paketinin sonucunu okunabilir biçimde bildirmedi.",
       "apply_pack_timeout": "Sektör paketinin uygulanması süre sınırını aştı.",
+      "apply_preset_failed": "Hazır görünüm uygulanamadı.",
+      "apply_preset_result_invalid": "Mağaza hazır görünümün sonucunu okunabilir biçimde bildirmedi.",
+      "apply_preset_timeout": "Hazır görünümün uygulanması süre sınırını aştı.",
+      "apply_profile_failed": "Mağaza profili aktarılamadı.",
+      "apply_profile_result_invalid": "Mağaza profil aktarımının sonucunu okunabilir biçimde bildirmedi.",
+      "apply_profile_timeout": "Mağaza profilinin aktarımı süre sınırını aştı.",
       "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
       "bootstrap_failed": "Mağazanın ilk ayarları yapılamadı.",
       "bootstrap_timeout": "Mağazanın ilk ayarları süre sınırını aştı.",
@@ -893,6 +900,7 @@
       "plan_import_refused": "Mağaza plan belgesini kabul etmedi.",
       "plan_import_timeout": "Plan belgesinin aktarımı süre sınırını aştı.",
       "port_in_use": "Mağazanın portu başka bir uygulamada kullanılıyor.",
+      "preset_unknown": "Bu hazır görünüm mağazanın sektör paketinde yok.",
       "repo_unknown": "Mağaza yazılımının yeri bulunamadı.",
       "secrets_exposed": "Mağazanın gizli değer dosyasının izinleri güvenli değil; kullanılmadı.",
       "secrets_lost": "Mağazanın gizli değerleri bulunamadı; anahtar yenilemesi gerekir.",
@@ -1049,6 +1057,10 @@
         "title": "Sektör paketi",
         "description": "Mağazanın başlangıç şablonları."
       },
+      "look": {
+        "title": "Görünüm",
+        "description": "Vitrinin açılacağı hazır görünüm."
+      },
       "review": {
         "title": "Özet ve kur",
         "description": "Bilgileri gözden geçirin, sonra mağazayı kurun."
@@ -1063,6 +1075,8 @@
     "contacts": {
       "ownerTitle": "Mağaza sahibi",
       "ownerText": "Kurulumun sonunda mağaza panelinin sahip daveti bu e-posta adresine gönderilir.",
+      "storefrontUse": "Vitrinde iletişim bilgisi olarak kullan",
+      "storefrontNote": "Bu bilgiler mağazanın vitrininde iletişim bilgisi olarak görünür.",
       "billingTitle": "Faturalama kişisi",
       "billingText": "Ödeme hatırlatmaları bu kişiye gider. Eklenmezse mağaza sahibine gider.",
       "billingAdd": "Ayrı bir faturalama kişisi ekle",
@@ -1093,6 +1107,13 @@
     "sector": {
       "title": "Sektör paketi",
       "text": "Mağaza hazır özellik şablonları, önerilen kategoriler, ayarlar ve arama görünümü şablonlarıyla açılır. Kurulum yalnız mağazada olmayanı ekler; mağaza sonra hepsini değiştirebilir."
+    },
+    "look": {
+      "title": "Hazır görünüm",
+      "text": "{{pack}} paketinin hazır görünümleri. Seçilen görünüm kurulumda vitrine uygulanır ve yayımlanır; mağaza sahibi sonra panelden değiştirebilir.",
+      "none": "Bu sektör paketinin hazır görünümü yok. Mağaza sade vitrinle açılır; görünüm sonra mağaza panelinden seçilebilir.",
+      "noneShort": "Yok",
+      "default": "Varsayılan"
     },
     "review": {
       "edit": "Düzenle",
@@ -1224,7 +1245,9 @@
       "database": "Veritabanı",
       "migrate": "Veritabanı şeması",
       "bootstrap": "Mağazanın ilk ayarları",
+      "profile": "Mağaza profili",
       "sector_pack": "Sektör paketi",
+      "preset": "Hazır görünüm",
       "plan_document": "Plan belgesi",
       "start": "Mağaza sunucusunun başlatılması",
       "health": "Sağlık denetimi",
@@ -1248,7 +1271,16 @@
       "packAdded_one": "{{count}} öğe eklendi",
       "packAdded_other": "{{count}} öğe eklendi",
       "packKept_one": "{{count}} öğe mağazada zaten vardı, korundu",
-      "packKept_other": "{{count}} öğe mağazada zaten vardı, korundu"
+      "packKept_other": "{{count}} öğe mağazada zaten vardı, korundu",
+      "profileFilled_one": "{{count}} alan dolduruldu",
+      "profileFilled_other": "{{count}} alan dolduruldu",
+      "profileKept_one": "{{count}} alan mağazada zaten doluydu, korundu",
+      "profileKept_other": "{{count}} alan mağazada zaten doluydu, korundu",
+      "profileRefused_one": "{{count}} alan mağazanın biçimine uymadı, aktarılmadı",
+      "profileRefused_other": "{{count}} alan mağazanın biçimine uymadı, aktarılmadı",
+      "presetPublished": "Vitrinde yayımlandı",
+      "presetDraft": "Taslağa yazıldı, yayımlanmadı",
+      "presetApplied": "Daha önce uygulanmıştı; mağazanın tasarımına dokunulmadı"
     },
     "columns": {
       "kind": "Çalışma",
@@ -1272,7 +1304,11 @@
       "applied": "Uygulanan sürüm",
       "notApplied": "Henüz uygulanmadı",
       "appliedAt": "Uygulandığı tarih",
-      "newer": "Paketin yeni sürümü var (sürüm {{version}}). Yeniden uygulayınca yalnız yeni öğeler eklenir."
+      "newer": "Paketin yeni sürümü var (sürüm {{version}}). Yeniden uygulayınca yalnız yeni öğeler eklenir.",
+      "preset": "Hazır görünüm",
+      "presetNone": "Seçilmedi",
+      "presetPending": "Henüz uygulanmadı",
+      "presetApplied": "{{name}} · sürüm {{version}}"
     }
   },
   "sectorPacks": {

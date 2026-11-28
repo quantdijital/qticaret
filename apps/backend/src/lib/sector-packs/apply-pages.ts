@@ -3,7 +3,10 @@ import type { SectorPack } from "@qticaret/sector-packs"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import { openDraftPage } from "../../workflows/content/draft-page"
+import { convertFaqTexts } from "../../workflows/storefront/faq-convert"
 import { contentDoc, docStats } from "../content"
+import type { ContentDoc } from "../content"
+import { readsAsQuestions } from "../storefront/faq-text"
 import { isCleanText } from "../security/text"
 import { unknownDocTokens } from "../shop/tokens"
 import type { ApplyContext } from "./context"
@@ -44,10 +47,13 @@ export function pageProblems(pack: Pick<SectorPack, "pages">): string[] {
  * the page saved, its text written into the design and its mirror, as one
  * workflow. The shop reads the template, fills it in and publishes it. A
  * page of the same handle is the shop's, kept; an address another record
- * holds is skipped.
+ * holds is skipped. A page of questions (the starter "Sık Sorulan Sorular",
+ * adr/0073 Ek 2026-11-28) is then turned into its FAQ section, as the
+ * questions texts were (Ek 2026-11-24 (2) §8; drawn the same).
  */
 export async function applyPages(context: ApplyContext): Promise<void> {
   const content = context.container.resolve<ContentModuleService>(CONTENT_MODULE)
+  let questions = false
   for (const page of context.pack.pages ?? []) {
     const key = packItemKey.page(page.handle)
     if (context.offered.has(key)) {
@@ -73,5 +79,9 @@ export async function applyPages(context: ApplyContext): Promise<void> {
       outcome: made ? "added" : "skipped",
       record_id: made,
     })
+    questions ||= made !== null && readsAsQuestions(page.body as unknown as ContentDoc)
+  }
+  if (questions) {
+    await convertFaqTexts(context.container)
   }
 }

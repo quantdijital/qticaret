@@ -9,7 +9,11 @@ import {
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { COMPANY_KINDS, CONTACT_ROLES, NOTE_MAX } from "../../../../lib/tenants/kinds"
 import { normalizePhone } from "../../../../lib/tenants/phone"
-import { isKnownSectorPack } from "../../../../lib/tenants/sector-packs"
+import {
+  DEFAULT_SECTOR_PACK,
+  isKnownSectorPack,
+  isPresetOf,
+} from "../../../../lib/tenants/sector-packs"
 import { slugProblem } from "../../../../lib/tenants/slug"
 
 // Control and invisible format characters never make a name or an address
@@ -74,8 +78,17 @@ export const PostTenant = z
       .refine(isKnownSectorPack, "cp.sector_pack_unknown")
       .nullable()
       .optional(),
+    // adr/0063 task 2.7: one of the chosen pack's looks (none: no look applied)
+    preset: z.string().min(1).max(40).nullable().optional(),
+    // Review L2: the owner's e-mail and phone as the storefront contact (default: yes)
+    storefront_contact: z.boolean().optional(),
   })
   .strict()
+  .superRefine((value, ctx) => {
+    if (value.preset && !isPresetOf(value.sector_pack ?? DEFAULT_SECTOR_PACK, value.preset)) {
+      ctx.addIssue({ code: "custom", path: ["preset"], message: "cp.preset_unknown" })
+    }
+  })
 export type PostTenantType = z.infer<typeof PostTenant>
 
 /**

@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { OldAddress } from "@/features/settings/api/migration-addresses"
 import { AddressesCard } from "@/features/settings/components/migration/addresses-card"
-import { RunCard } from "@/features/settings/components/migration/run-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -58,9 +57,6 @@ const answers: Record<string, unknown> = {
     count: 2,
     limit: 50,
   },
-  "/admin/integrations/credentials": { key_configured: true, accounts: [] },
-  "/admin/migrations/feed": { async_job: { id: "job_1", status: "queued", progress: 0 } },
-  "/admin/async-jobs/job_1": { async_job: { id: "job_1", status: "running", progress: 40 } },
 }
 
 const renderWith = (element: React.ReactNode) => {
@@ -68,14 +64,14 @@ const renderWith = (element: React.ReactNode) => {
   return render(<QueryClientProvider client={new QueryClient()}>{element}</QueryClientProvider>)
 }
 
-describe("Settings > Migration", () => {
+describe("Settings > Migration > Old addresses", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })
 
   it("says the cutover is not ready and takes the owner's 301 for an address", async () => {
     renderWith(<AddressesCard />)
-    expect(await screen.findByText("Kesime hazır değil")).toBeInTheDocument()
+    expect(await screen.findByText("Alan adını bağlamaya henüz hazır değil")).toBeInTheDocument()
     expect(screen.getByText(/1 tanesi henüz yanıt vermiyor/)).toBeInTheDocument()
     const row = (await screen.findByText("/eski-kampanya")).closest("tr") as HTMLElement
     // An address that answers already takes no decision
@@ -83,7 +79,7 @@ describe("Settings > Migration", () => {
     expect(within(covered).queryByRole("combobox")).not.toBeInTheDocument()
 
     await userEvent.click(within(row).getByRole("combobox"))
-    await userEvent.click(await screen.findByRole("option", { name: "Yönlendir" }))
+    await userEvent.click(await screen.findByRole("option", { name: "Yönlendir (301)" }))
     await userEvent.type(within(row).getByRole("textbox"), "/urun/yeni")
     await userEvent.click(within(row).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
@@ -130,34 +126,7 @@ describe("Settings > Migration", () => {
 
   it("says nothing of the category URL style when the current one keeps the most", async () => {
     renderWith(<AddressesCard />)
-    expect(await screen.findByText("Kesime hazır değil")).toBeInTheDocument()
+    expect(await screen.findByText("Alan adını bağlamaya henüz hazır değil")).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "Adres biçimini aç" })).toBeNull()
-  })
-
-  it("checks a feed with the owner's parcel and shows the run going", async () => {
-    renderWith(<RunCard />)
-    await userEvent.click(await screen.findByRole("combobox", { name: "Kaynak" }))
-    await userEvent.click(await screen.findByRole("option", { name: /Ürün akışı/ }))
-    await userEvent.type(screen.getByLabelText("Akış adresi"), "https://eski.example/google.xml")
-    for (const [label, value] of [
-      ["Ağırlık (g)", "500"],
-      ["Uzunluk (cm)", "30"],
-      ["Genişlik (cm)", "20"],
-      ["Yükseklik (cm)", "10"],
-    ] as const) {
-      await userEvent.type(screen.getByLabelText(label), value)
-    }
-    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith("/admin/migrations/feed", {
-        method: "POST",
-        body: {
-          mode: "check",
-          defaults: { weight: 500, length: 30, width: 20, height: 10 },
-          url: "https://eski.example/google.xml",
-        },
-      })
-    })
-    expect(await screen.findByText(/Çalışıyor… %40/)).toBeInTheDocument()
   })
 })

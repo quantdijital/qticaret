@@ -75,6 +75,7 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query(P, NoQuery),
   // C12: the sector packs this control plane offers
   query("/admin/cp/sector-packs", NoQuery),
+  query("/admin/cp/sector-packs/:pack/presets/:code/preview", NoQuery),
   ...[
     `${T}/:id/contacts/:contact_id`,
     `${T}/:id/domains/:domain_id`,
