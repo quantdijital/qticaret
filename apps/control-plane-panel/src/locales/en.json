@@ -871,6 +871,8 @@
       "apply_profile_timeout": "Handing over the shop profile took too long.",
       "backend_not_built": "The shop software is not built. Build it first.",
       "backup_age_missing": "The backup encryption tool age is not installed on this machine (sudo apt install age).",
+      "backup_busy": "Another shop's backup is running; try again when it ends.",
+      "backup_disk_full": "Not enough disk space for a backup (at least twice the last one).",
       "backup_failed": "The backup failed; see the shop's backup log.",
       "backup_no_manifest": "The backup finished but its summary could not be read.",
       "backup_no_recipients": "No public key is set to encrypt backups to.",

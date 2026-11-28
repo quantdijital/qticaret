@@ -871,6 +871,8 @@
       "apply_profile_timeout": "Mağaza profilinin aktarımı süre sınırını aştı.",
       "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
       "backup_age_missing": "Yedek şifreleme aracı age bu makinede kurulu değil (sudo apt install age).",
+      "backup_busy": "Başka bir mağazanın yedeği alınıyor; bitince yeniden deneyin.",
+      "backup_disk_full": "Diskte yedek için yeterli yer yok (son yedeğin en az iki katı gerekir).",
       "backup_failed": "Yedek alınamadı; ayrıntı mağazanın yedek günlüğünde.",
       "backup_no_manifest": "Yedek tamamlandı ama özet dosyası okunamadı.",
       "backup_no_recipients": "Yedeklerin şifreleneceği açık anahtar tanımlı değil.",

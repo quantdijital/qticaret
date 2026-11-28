@@ -160,6 +160,8 @@ export const PROVISIONING_CODES = [
   "apply_profile_timeout",
   "backend_not_built",
   "backup_age_missing",
+  "backup_busy",
+  "backup_disk_full",
   "backup_failed",
   "backup_no_manifest",
   "backup_no_recipients",

@@ -13,7 +13,7 @@ import type {
   TenantProvisioner,
 } from "../provisioner"
 import { localAdminUrlProblem } from "./admin-url"
-import { runBackup } from "./backup"
+import { runBackup, sweepStalePassDirs } from "./backup"
 import { assertFreshBuilds } from "./build-check"
 import { COMMAND_TIMEOUT_MS, argvOf, runCommand } from "./commands"
 import * as database from "./database"
@@ -73,6 +73,8 @@ export class LocalProvisioner implements TenantProvisioner {
       throw new ProvisioningError("provisioning.local_database_elsewhere")
     }
     this.root = options.root ?? repoRoot()
+    // Review L1: a crash's leftover password files, at the control plane's start
+    void sweepStalePassDirs().catch(() => undefined)
     this.settings = {
       pg_host: new URL(options.adminUrl).host,
       redis_url: options.redisUrl ? shopRedisUrl(options.redisUrl) : null,

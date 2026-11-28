@@ -1,7 +1,25 @@
-import { chmod, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
+import {
+  chmod,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  stat,
+  utimes,
+  writeFile,
+} from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
-import { DEV_PG_EXEC, postgresEnv, readNewestManifest, runBackup } from "../local/backup"
+import { dirname, join } from "node:path"
+import {
+  BACKUPS_KEPT,
+  DEV_PG_EXEC,
+  PASS_DIR_PREFIX,
+  postgresEnv,
+  readNewestManifest,
+  runBackup,
+  sweepStalePassDirs,
+} from "../local/backup"
 import type { BackupPlan } from "../local/backup"
 import { repoRoot } from "../local/layout"
 import { ProvisioningError } from "../provisioner"
@@ -165,15 +183,75 @@ describe("a local shop's backup (audit 3.2)", () => {
     expect((await stat(pass)).mode & 0o077).toBe(0)
   })
 
-  it("leaves no .pgpass behind after a run", async () => {
-    const pg = await stubs()
+  it("keeps the password file in a run's own temporary folder and removes it", async () => {
+    await stubs()
     process.env["PATH"] = `${bin}:${path ?? ""}`
     await tool("pg_dump", "exit 0")
-    await tool("psql", "exit 3")
-    const plan = planOf()
-    expect(await codeOf(runBackup(plan))).toBe("provisioning.backup_failed")
+    // psql writes where PGPASSFILE points, so the test sees the folder it was in
+    await tool(
+      "psql",
+      `cp "$PGPASSFILE" "${dir}/seen-pass" ; echo "$PGPASSFILE" > "${dir}/seen-path"; exit 3`
+    )
+    const before = new Set(await readdir(tmpdir()))
+    expect(await codeOf(runBackup(planOf()))).toBe("provisioning.backup_failed")
+    const used = (await readFile(join(dir, "seen-path"), "utf8")).trim()
+    expect(used.startsWith(join(tmpdir(), PASS_DIR_PREFIX))).toBe(true)
+    expect(used.startsWith(join(dir, "backups"))).toBe(false)
+    const after = (await readdir(tmpdir())).filter(
+      (name) => name.startsWith(PASS_DIR_PREFIX) && !before.has(name)
+    )
+    expect(after).toEqual([])
     expect(await readdir(join(dir, "backups"))).not.toContain(".pgpass")
-    expect(pg).toBeTruthy()
+  })
+
+  it("sweeps only stale password folders", async () => {
+    const root = join(dir, "tmp")
+    await mkdir(join(root, `${PASS_DIR_PREFIX}old`), { recursive: true })
+    await mkdir(join(root, `${PASS_DIR_PREFIX}new`))
+    await mkdir(join(root, "other-old"))
+    const old = new Date(Date.now() - 3 * 3600_000)
+    await utimes(join(root, `${PASS_DIR_PREFIX}old`), old, old)
+    await utimes(join(root, "other-old"), old, old)
+    await sweepStalePassDirs(root)
+    expect((await readdir(root)).sort()).toEqual(["other-old", `${PASS_DIR_PREFIX}new`])
+  })
+
+  it("keeps the last backups, drops a crash's .part files, needs room, runs one at a time", async () => {
+    const pg = await stubs()
+    process.env["PATH"] = `${bin}:${path ?? ""}`
+    const plan = planOf({ pgExec: pg })
+    await mkdir(plan.outDir, { recursive: true })
+    // Eight older backups and a crash's leftover
+    for (let n = 0; n < BACKUPS_KEPT + 1; n++) {
+      const base = `${DATABASE}-2026010${String(n)}T000000Z`
+      await writeFile(join(plan.outDir, `${base}.dump.age`), "x")
+      await writeFile(join(plan.outDir, `${base}.manifest.json`), "{}")
+    }
+    await writeFile(join(plan.outDir, `${DATABASE}-20260109T000000Z.dump.age.part`), "x")
+    const summary = await runBackup(plan)
+    const left = await readdir(plan.outDir)
+    expect(left.filter((name) => name.endsWith(".manifest.json"))).toHaveLength(BACKUPS_KEPT)
+    expect(left).toContain(summary.manifest)
+    expect(left.some((name) => name.endsWith(".part"))).toBe(false)
+    expect(left).not.toContain(`${DATABASE}-20260100T000000Z.dump.age`)
+
+    expect(await codeOf(runBackup({ ...plan, minFreeBytes: Number.MAX_SAFE_INTEGER }))).toBe(
+      "provisioning.backup_disk_full"
+    )
+    // Another live process holds the lock; one left by a gone process is taken over
+    const lock = join(dirname(plan.recipientsFile), ".lock")
+    await writeFile(lock, String(process.ppid))
+    expect(await codeOf(runBackup(plan))).toBe("provisioning.backup_busy")
+    await writeFile(lock, "999999999")
+    expect((await runBackup(plan)).files).toBe(false)
+    expect(await readdir(dirname(lock))).not.toContain(".lock")
+  })
+
+  it("says a backup that ran past coreutils' timeout timed out", async () => {
+    const pg = await stubs()
+    await tool("timeout", "exit 124")
+    process.env["PATH"] = `${bin}:${path ?? ""}`
+    expect(await codeOf(runBackup(planOf({ pgExec: pg })))).toBe("provisioning.backup_timeout")
   })
 
   it("reads only this database's manifest written since the run began", async () => {

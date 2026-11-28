@@ -1,9 +1,18 @@
 import { constants, existsSync } from "node:fs"
-import { access, readFile, readdir, rm, stat } from "node:fs/promises"
+import { access, mkdtemp, readFile, readdir, rm, stat, statfs } from "node:fs/promises"
+import { tmpdir } from "node:os"
 import { delimiter, dirname, join } from "node:path"
 import { z } from "@medusajs/framework/zod"
 import { ProvisioningError } from "../provisioner"
 import type { BackupSummary } from "../provisioner"
+import {
+  PASS_DIR_PREFIX,
+  manifestsOf,
+  pruneOld,
+  pruneParts,
+  sweepStalePassDirs,
+  takeLock,
+} from "./backup-housekeeping"
 import { runCommand } from "./commands"
 import { writePrivateFile } from "./private-files"
 
@@ -24,6 +33,12 @@ export const DEV_PG_EXEC = "docker exec -i -e PGUSER=postgres qticaret-dev-postg
 
 // A large shop's dump through age: well past any step's usual time
 export const BACKUP_TIMEOUT_MS = 60 * 60 * 1000
+// The script's own limit (coreutils `timeout`), inside the run's, and its grace after SIGTERM
+const SCRIPT_LIMIT_S = BACKUP_TIMEOUT_MS / 1000 - 120
+const SCRIPT_GRACE_S = 30
+/** Free space a backup needs at least: twice the shop's last one, never under this. */
+export { BACKUPS_KEPT, PASS_DIR_PREFIX, sweepStalePassDirs } from "./backup-housekeeping"
+export const MIN_FREE_BYTES = 512 * 1024 * 1024
 
 export interface BackupPlan {
   /** `infra/backup/backup.sh`. */
@@ -41,6 +56,8 @@ export interface BackupPlan {
   adminUrl: string
   /** `CP_LOCAL_PG_EXEC`, when set. */
   pgExec: string | null
+  /** Tests only: the free space a backup needs at least (default `MIN_FREE_BYTES`). */
+  minFreeBytes?: number
   logFile: string
 }
 
@@ -150,6 +167,26 @@ export async function readNewestManifest(
   }
 }
 
+/** Room for this backup (review L2): twice the shop's last one, at least `MIN_FREE_BYTES`. */
+async function assertRoom(plan: BackupPlan): Promise<void> {
+  const [last] = await manifestsOf(plan.outDir, plan.database)
+  let lastBytes = 0
+  if (last) {
+    try {
+      const parsed = manifestSchema.parse(
+        JSON.parse(await readFile(join(plan.outDir, last), "utf8"))
+      )
+      lastBytes = parsed.dump.bytes + (parsed.files?.bytes ?? 0)
+    } catch {
+      lastBytes = 0
+    }
+  }
+  const disk = await statfs(dirname(plan.recipientsFile))
+  if (disk.bavail * disk.bsize < Math.max(2 * lastBytes, plan.minFreeBytes ?? MIN_FREE_BYTES)) {
+    throw new ProvisioningError("provisioning.backup_disk_full")
+  }
+}
+
 /** One backup of a local shop; its failure as a code, never the script's output. */
 export async function runBackup(plan: BackupPlan): Promise<BackupSummary> {
   if (!existsSync(plan.script)) {
@@ -167,40 +204,59 @@ export async function runBackup(plan: BackupPlan): Promise<BackupSummary> {
   }
   // Public keys only: the script itself refuses a file that holds a secret key
   await writePrivateFile(plan.recipientsFile, `${plan.recipients.join("\n")}\n`)
-  const started = Date.now()
-  const passFile = join(dirname(plan.recipientsFile), ".pgpass")
-  let result
+  const release = await takeLock(join(dirname(plan.recipientsFile), ".lock"))
   try {
-    result = await runCommand({
-      cli: "",
-      program: bash,
-      args: [
-        plan.script,
-        "--db",
-        plan.database,
-        "--recipients",
-        plan.recipientsFile,
-        "--out",
-        plan.outDir,
-        ...(plan.filesDir ? ["--files", plan.filesDir] : []),
-      ],
-      // The backups' folder, made with the recipients file above
-      cwd: dirname(plan.recipientsFile),
-      env: {
-        PATH: process.env["PATH"] ?? "/usr/bin:/bin",
-        HOME: process.env["HOME"] ?? plan.outDir,
-        ...(await postgresEnv(plan, passFile)),
-      },
-      timeoutMs: BACKUP_TIMEOUT_MS,
-      logFile: plan.logFile,
-    })
+    await sweepStalePassDirs()
+    await pruneParts(plan.outDir)
+    await assertRoom(plan)
+    const started = Date.now()
+    // Review L1: the password's file in a folder of this run's own (0700), never in the backups'
+    const passDir = await mkdtemp(join(tmpdir(), PASS_DIR_PREFIX))
+    // Review L3: the script under coreutils' `timeout` too, SIGKILL after its grace
+    const limit = await onPath("timeout")
+    const script = [
+      bash,
+      plan.script,
+      "--db",
+      plan.database,
+      "--recipients",
+      plan.recipientsFile,
+      "--out",
+      plan.outDir,
+      ...(plan.filesDir ? ["--files", plan.filesDir] : []),
+    ]
+    let result
+    try {
+      result = await runCommand({
+        cli: "",
+        program: limit ?? bash,
+        args: limit
+          ? [`--kill-after=${String(SCRIPT_GRACE_S)}`, String(SCRIPT_LIMIT_S), ...script]
+          : script.slice(1),
+        // The backups' folder, made with the recipients file above
+        cwd: dirname(plan.recipientsFile),
+        env: {
+          PATH: process.env["PATH"] ?? "/usr/bin:/bin",
+          HOME: process.env["HOME"] ?? plan.outDir,
+          ...(await postgresEnv(plan, join(passDir, ".pgpass"))),
+        },
+        timeoutMs: BACKUP_TIMEOUT_MS,
+        logFile: plan.logFile,
+      })
+    } finally {
+      await rm(passDir, { recursive: true, force: true })
+    }
+    // 124: `timeout`'s limit; 137: its SIGKILL after the grace
+    if (result.timed_out || (limit && (result.exit_code === 124 || result.exit_code === 137))) {
+      throw new ProvisioningError("provisioning.backup_timeout")
+    }
+    if (!result.ok) {
+      throw new ProvisioningError("provisioning.backup_failed")
+    }
+    const summary = await readNewestManifest(plan.outDir, plan.database, started)
+    await pruneOld(plan.outDir, plan.database)
+    return summary
   } finally {
-    await rm(passFile, { force: true })
+    await release()
   }
-  if (!result.ok) {
-    throw new ProvisioningError(
-      result.timed_out ? "provisioning.backup_timeout" : "provisioning.backup_failed"
-    )
-  }
-  return await readNewestManifest(plan.outDir, plan.database, started)
 }

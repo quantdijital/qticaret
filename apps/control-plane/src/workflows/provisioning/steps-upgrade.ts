@@ -3,10 +3,10 @@ import { compareVersions, sameRelease } from "../../lib/fleet/releases"
 import { ProvisioningError } from "../../lib/provisioning/provisioner"
 import { provisioner } from "../../lib/provisioning/provider"
 import { fleetIn, provisioningIn } from "../modules"
-
-const HEARTBEAT_MS = 60_000
 import { provisionStep } from "./step"
 import { contextOf } from "./target"
+
+const HEARTBEAT_MS = 60_000
 
 /**
  * A shop's backup and its move to its target release (audit 3.1, 3.2).

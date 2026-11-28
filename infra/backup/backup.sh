@@ -8,6 +8,7 @@
 #                    recipients' age public keys while it is read: the
 #                    plain dump never touches the disk
 #   .files.tar.age   with --files: that directory, the same way
+#   (each written as `<file>.part` first, renamed once whole; the manifest last)
 #   .manifest.json   in the clear, no personal data: what was taken, when,
 #                    each encrypted file's sha256 and every table's row count
 #                    (restore.sh checks the restored copy against them)
@@ -57,8 +58,13 @@ name="$db-$(date -u +%Y%m%dT%H%M%SZ)"
 taken_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 started=$(date -u +%s)
 
-# A backup that failed halfway is no backup: nothing of it is left behind
-discard() { rm -f "$out/$name.dump.age" "$out/$name.files.tar.age" "$out/$name.manifest.json"; }
+# A backup that failed halfway is no backup: nothing of it is left behind.
+# Each file is written as `.part` and renamed only once whole, the manifest
+# last: a backup with a manifest is complete; a `.part` is a crash's leftover
+discard() {
+  rm -f "$out/$name.dump.age" "$out/$name.files.tar.age" "$out/$name.manifest.json" \
+    "$out/$name.dump.age.part" "$out/$name.files.tar.age.part" "$out/$name.manifest.json.part"
+}
 trap 'discard; exit 1' ERR INT TERM
 
 # Row counts first: a quiet database's counts match the dump exactly; a
@@ -76,11 +82,13 @@ counts=$(pg psql -X -At -v ON_ERROR_STOP=1 -d "$db" -c "
 server=$(pg psql -X -At -d "$db" -c "show server_version")
 
 pg pg_dump --format=custom --no-owner --no-acl --dbname="$db" \
-  | age --encrypt --recipients-file "$recipients" --output "$out/$name.dump.age"
+  | age --encrypt --recipients-file "$recipients" --output "$out/$name.dump.age.part"
+mv "$out/$name.dump.age.part" "$out/$name.dump.age"
 
 if [ -n "$files" ]; then
   tar -C "$files" -cf - . \
-    | age --encrypt --recipients-file "$recipients" --output "$out/$name.files.tar.age"
+    | age --encrypt --recipients-file "$recipients" --output "$out/$name.files.tar.age.part"
+  mv "$out/$name.files.tar.age.part" "$out/$name.files.tar.age"
 fi
 
 sha() {
@@ -93,7 +101,7 @@ if [ -n "$files" ]; then
   files_entry="{\"file\": \"$name.files.tar.age\", \"sha256\": \"$(sha "$out/$name.files.tar.age")\", \"bytes\": $(size "$out/$name.files.tar.age")}"
 fi
 
-cat > "$out/$name.manifest.json" <<JSON
+cat > "$out/$name.manifest.json.part" <<JSON
 {
   "database": "$db",
   "taken_at": "$taken_at",
@@ -104,5 +112,6 @@ cat > "$out/$name.manifest.json" <<JSON
   "rows": $counts
 }
 JSON
+mv "$out/$name.manifest.json.part" "$out/$name.manifest.json"
 
 echo "$out/$name.manifest.json"
