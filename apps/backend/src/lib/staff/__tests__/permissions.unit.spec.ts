@@ -548,6 +548,7 @@ describe("staff roles", () => {
         ["POST", "/admin/storefront-designs/sfd_1"],
         ["DELETE", "/admin/storefront-designs/sfd_1"],
         ["POST", "/admin/storefront-designs/sfd_1/apply"],
+        ["GET", "/admin/storefront-designs/sfd_1/preview"],
         ["GET", "/admin/storefront-presets"],
         ["GET", "/admin/storefront-presets/cutlery/katalog/preview"],
         ["POST", "/admin/storefront-presets/cutlery/katalog/apply"],

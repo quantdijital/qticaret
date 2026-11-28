@@ -42,6 +42,10 @@ export async function openedDesign(req: MedusaStoreRequest): Promise<OpenedDesig
   if (!stored) {
     throw unknown()
   }
+  // Drawn as applying the look would leave the draft: the shop-wide settings a
+  // look never carries (trust badges, colour names, low stock) come from the
+  // current draft. Accepted: the link is the owner's, short-lived, and a draft
+  // preview link (sfl_) already shows the whole draft.
   const kept = await keptShopSettings(req.scope)
   return {
     document: { ...stored, settings: { ...stored.settings, ...kept, menus: null } },
