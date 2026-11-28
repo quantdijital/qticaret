@@ -42,7 +42,7 @@ describe("a domain's DNS check (F16.7)", () => {
   it("finds its token in the TXT record, joining a record's chunks", async () => {
     const dns = lookup({
       txt: {
-        [txtName]: [["v=spf1 -all"], ["qticaret-verify=0123456789abcdef", "0123456789abcdef"]],
+        [txtName]: [["v=spf1 -all"], ["qticaret-verify=abababababababab", "abababababababab"]],
       },
     })
 
