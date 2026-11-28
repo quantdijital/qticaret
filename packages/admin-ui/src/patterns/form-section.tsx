@@ -2,7 +2,7 @@ import { useId, useLayoutEffect, useRef } from "react"
 import type { ReactNode, RefObject } from "react"
 import { cn } from "../lib/utils"
 import { useFieldHintStyle } from "../hooks/use-field-hints"
-import { HiddenHint, InfoTip } from "./info-tip"
+import { HiddenHint, InfoTip, TitleTip } from "./info-tip"
 
 interface FormSectionProps {
   title: string
@@ -16,13 +16,22 @@ interface FormSectionProps {
  * on wide screens, the fields on a card on the right; stacked on phones.
  */
 export function FormSection({ title, description, children, className }: FormSectionProps) {
+  // Under `FieldHints style="tip"` the sentence folds into an (i) beside the title
+  const tip = useFieldHintStyle() === "tip" && Boolean(description)
   return (
     <section
       className={cn("grid gap-4 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:gap-8", className)}
     >
       <div className="flex flex-col gap-1">
-        <h2 className="text-[15px] font-semibold">{title}</h2>
-        {description ? (
+        {tip ? (
+          <div className="flex min-w-0 items-start gap-1.5">
+            <h2 className="text-[15px] leading-6 font-semibold">{title}</h2>
+            <TitleTip title={title} hint={description} />
+          </div>
+        ) : (
+          <h2 className="text-[15px] font-semibold">{title}</h2>
+        )}
+        {description && !tip ? (
           <p className="text-[13px] leading-5 text-muted-foreground">{description}</p>
         ) : null}
       </div>

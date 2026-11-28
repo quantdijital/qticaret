@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next"
 import { ADMIN_UI_NS } from "../i18n"
 import { cn } from "../lib/utils"
 import { useSectionOpen } from "../hooks/use-section-open"
+import { useFieldHintStyle } from "../hooks/use-field-hints"
+import { TitleTip } from "./info-tip"
 
 export interface CollapseOptions {
   /** The section's element id: the advisor's jumps land on it (`revealSection`). */
@@ -68,7 +70,9 @@ export function CollapsibleSection({
   const body = `${base}-body`
   const note = `${base}-note`
   const unsaved = dirty && !open
-  const line = open ? description : unsaved ? t("common.unsaved") : summary
+  // Under `FieldHints style="tip"` the open sentence folds into an (i) beside the title
+  const tip = useFieldHintStyle() === "tip" && Boolean(description)
+  const line = open ? (tip ? undefined : description) : unsaved ? t("common.unsaved") : summary
   return (
     <section
       id={id}
@@ -82,18 +86,22 @@ export function CollapsibleSection({
           an action that does not fit beside the title goes under it (a phone) */}
       <header className="group relative flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
         <div className="flex min-w-0 flex-[1_1_12rem] flex-col gap-0.5">
-          <h2 className="text-[15px] leading-6 font-semibold">
-            <button
-              type="button"
-              aria-expanded={open}
-              aria-controls={body}
-              aria-describedby={line ? note : undefined}
-              onClick={toggle}
-              className="text-left outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring focus-visible:after:outline-solid [html[data-input=pointer]_&]:after:outline-none"
-            >
-              {title}
-            </button>
-          </h2>
+          <div className="flex min-w-0 items-start gap-1.5">
+            <h2 className="text-[15px] leading-6 font-semibold">
+              <button
+                type="button"
+                aria-expanded={open}
+                aria-controls={body}
+                aria-describedby={line ? note : undefined}
+                onClick={toggle}
+                className="text-left outline-none after:absolute after:inset-0 after:rounded-lg focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring focus-visible:after:outline-solid [html[data-input=pointer]_&]:after:outline-none"
+              >
+                {title}
+              </button>
+            </h2>
+            {/* Over the title button's whole-header cover: a tap opens the words, not the card */}
+            {tip ? <TitleTip title={title} hint={description} className="z-10" /> : null}
+          </div>
           {line ? (
             <p
               id={note}
