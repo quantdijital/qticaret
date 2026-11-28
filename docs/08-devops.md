@@ -104,3 +104,4 @@ F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--
 - Obje depolama: versiyonlama
 - Aylık geri yükleme provası
 - Betikler ve anahtar yönetimi: `infra/backup/` (`age` ile şifreli döküm, manifestle doğrulanan geri yükleme), `docs/runbooks/yedek-ve-geri-yukleme.md`. İlk prova 2026-10-31 (`docs/runbooks/tatbikatlar/2026-10-31-yedek-geri-yukleme.md`).
+- Üst panelden mağaza başına yedek (adr/0061 Ek "sürüm yükseltme ve mağaza yedeği"): mağaza sayfasında "Şimdi yedekle" aynı `backup.sh`'yi çalıştırır; "Son yedek" mağaza sayfasında ve listede. Sürüm yükseltme her zaman önce yedek alır. Geri yükleme yalnız komut satırından (runbook).
