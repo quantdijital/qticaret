@@ -25,6 +25,14 @@ export default async function applyProfile({ container }: ExecArgs): Promise<voi
     process.exitCode = 1
     return
   }
-  const result = await fillProfile(container, profile)
+  let result: ApplyProfileResult
+  try {
+    result = await fillProfile(container, profile)
+  } catch {
+    // Only a fixed code: nothing of the error (or the values) reaches the command's log
+    process.stdout.write(`${tenantResultLine({ status: "refused" })}\n`)
+    process.exitCode = 1
+    return
+  }
   process.stdout.write(`${tenantResultLine(result)}\n`)
 }

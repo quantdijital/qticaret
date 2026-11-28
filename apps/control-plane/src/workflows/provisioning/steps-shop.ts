@@ -11,12 +11,18 @@ import { command } from "./steps-setup"
  * title, tax office, VKN and address, the owner's e-mail and phone) into
  * the shop's settings with `tenant:apply-profile`, the document on stdin.
  * The shop fills only fields it has nothing in, so a run again changes
- * nothing and the owner's own edits stay. Only counts come back and are
+ * nothing and the owner's own edits stay. Only before the shop is active
+ * (its first setup and that setup's retries, before the owner is
+ * invited): on an active shop a field the owner emptied on purpose stays
+ * empty (security review L1). Only counts come back and are
  * kept. Nothing to undo: it only fills empty fields, and a failed setup's
  * database goes with its own compensation.
  */
 export const profileStep = provisionStep("profile", async (input, container) => {
   const tenants = tenantsIn(container)
+  if ((await tenants.tenantOf(input.tenant_id)).status === "active") {
+    return { status: "skipped", created: false, output: { active: true } }
+  }
   const profile = profileOf(
     await tenants.companyOf(input.tenant_id),
     await tenants.contactsOf(input.tenant_id)
