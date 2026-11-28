@@ -923,6 +923,7 @@
       "secrets_orphaned": "Anahtarı olmayan bir gizli değer dosyası var; üzerine yazılmadı.",
       "sector_pack_unknown": "Bu sektör paketi bu sürümde yok.",
       "shop_exited": "Mağaza sunucusu başladıktan sonra kapandı.",
+      "shop_not_running": "Mağaza çalışmıyor. Bilerek durdurulmuş bir mağaza yükseltmeyle başlatılmaz; önce Kurulum sekmesinden başlatın.",
       "shop_running": "Mağaza sunucusu zaten çalışıyor.",
       "slug_invalid": "Mağazanın platform adresi geçerli değil.",
       "start_failed": "Mağaza sunucusu başlatılamadı.",
@@ -1979,6 +1980,6 @@
     "onTarget": "Mağaza hedef sürümü çalıştırıyor.",
     "steps": "Adımlar Kurulum sekmesinde izlenir.",
     "confirmTitle": "Sürüm yükseltilsin mi?",
-    "confirmText": "Mağaza {{to}} sürümüne geçecek. Yedek alındıktan sonra birkaç dakika kapalı kalır. Bir adım başarısız olursa çalışma durur ve mağaza önceki hâliyle yeniden başlatılır."
+    "confirmText": "Mağaza {{to}} sürümüne geçecek. Yedek alındıktan sonra birkaç dakika kapalı kalır. Bir adım başarısız olursa çalışma durur, nedeni yazılır ve mağaza kapalı kalır; alınan yedekten geri dönülebilir ya da mağaza Kurulum sekmesinden başlatılır."
   }
 }

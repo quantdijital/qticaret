@@ -126,25 +126,54 @@ describe("a local shop's backup (audit 3.2)", () => {
 
   it("reaches Postgres by PG_EXEC, this machine's tools, else the dev container", async () => {
     process.env["PATH"] = bin
-    expect(await postgresEnv({ adminUrl: planOf().adminUrl, pgExec: "docker exec -i x" })).toEqual({
+    const pass = join(dir, "pass", ".pgpass")
+    const admin = planOf().adminUrl
+    expect(await postgresEnv({ adminUrl: admin, pgExec: "docker exec -i x" }, pass)).toEqual({
       PG_EXEC: "docker exec -i x",
     })
-    expect(await codeOf(postgresEnv({ adminUrl: planOf().adminUrl, pgExec: null }))).toBe(
+    expect(await codeOf(postgresEnv({ adminUrl: admin, pgExec: null }, pass))).toBe(
       "provisioning.backup_pg_dump_missing"
     )
     await tool("docker", "exit 0")
-    expect(await postgresEnv({ adminUrl: planOf().adminUrl, pgExec: null })).toEqual({
+    expect(await postgresEnv({ adminUrl: admin, pgExec: null }, pass)).toEqual({
       PG_EXEC: DEV_PG_EXEC,
     })
+    // Review L5: the dev container only for the dev compose's port
+    expect(
+      await codeOf(
+        postgresEnv(
+          { adminUrl: "postgres://postgres:x@localhost:5432/postgres", pgExec: null },
+          pass
+        )
+      )
+    ).toBe("provisioning.backup_pg_dump_missing")
     await tool("pg_dump", "exit 0")
     await tool("psql", "exit 0")
-    // The login in libpq's variables (the child's environment), never an argument
-    expect(await postgresEnv({ adminUrl: planOf().adminUrl, pgExec: null })).toEqual({
+    // Review L4: the password in a 0600 .pgpass, never an argument or an environment value
+    const env = await postgresEnv(
+      { adminUrl: "postgres://postgres:s%3Ai%5Cre@localhost:55432/postgres", pgExec: null },
+      pass
+    )
+    expect(env).toEqual({
       PGHOST: "localhost",
       PGPORT: "55432",
       PGUSER: "postgres",
-      PGPASSWORD: "sifre",
+      PGPASSFILE: pass,
     })
+    expect(JSON.stringify(env)).not.toContain("s:i")
+    expect(await readFile(pass, "utf8")).toBe("localhost:55432:*:postgres:s\\:i\\\\re\n")
+    expect((await stat(pass)).mode & 0o077).toBe(0)
+  })
+
+  it("leaves no .pgpass behind after a run", async () => {
+    const pg = await stubs()
+    process.env["PATH"] = `${bin}:${path ?? ""}`
+    await tool("pg_dump", "exit 0")
+    await tool("psql", "exit 3")
+    const plan = planOf()
+    expect(await codeOf(runBackup(plan))).toBe("provisioning.backup_failed")
+    expect(await readdir(join(dir, "backups"))).not.toContain(".pgpass")
+    expect(pg).toBeTruthy()
   })
 
   it("reads only this database's manifest written since the run began", async () => {

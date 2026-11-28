@@ -212,6 +212,7 @@ export const PROVISIONING_CODES = [
   "secrets_orphaned",
   "sector_pack_unknown",
   "shop_exited",
+  "shop_not_running",
   "shop_running",
   "slug_invalid",
   "start_failed",

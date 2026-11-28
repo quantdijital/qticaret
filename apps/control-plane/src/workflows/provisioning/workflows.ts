@@ -139,8 +139,8 @@ export const backupShopWorkflow = createWorkflow(
 
 /**
  * Audit 3.1: the shop moved to its target release. Backup first; a
- * failure stops the run at its step, the shop started again as it was
- * (the stop's undo) and the backup kept.
+ * failure stops the run at its step with its code, nothing undone (the
+ * backup is the way back; see steps-upgrade.ts).
  */
 export const upgradeShopWorkflow = createWorkflow(
   { name: "cp-provisioning-upgrade", store: false },

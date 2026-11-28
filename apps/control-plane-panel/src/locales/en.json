@@ -923,6 +923,7 @@
       "secrets_orphaned": "A secret values file without a key exists; it was not overwritten.",
       "sector_pack_unknown": "This release has no such sector pack.",
       "shop_exited": "The shop server stopped after starting.",
+      "shop_not_running": "The shop is not running. A shop stopped on purpose is not started by an upgrade; start it from the Setup tab first.",
       "shop_running": "The shop server is already running.",
       "slug_invalid": "The shop's platform address is not valid.",
       "start_failed": "The shop server could not be started.",
@@ -1979,6 +1980,6 @@
     "onTarget": "The shop runs its target version.",
     "steps": "Follow the steps on the Setup tab.",
     "confirmTitle": "Upgrade the version?",
-    "confirmText": "The shop moves to version {{to}}. After the backup it is down for a few minutes. If a step fails the run stops and the shop is started again as it was."
+    "confirmText": "The shop moves to version {{to}}. After the backup it is down for a few minutes. If a step fails the run stops, says why and the shop stays stopped; restore the backup taken or start the shop from the Setup tab."
   }
 }

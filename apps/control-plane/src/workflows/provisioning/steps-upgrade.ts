@@ -1,9 +1,10 @@
 import { controlPlaneVersion } from "../../lib/fleet/control-plane-release"
 import { compareVersions, sameRelease } from "../../lib/fleet/releases"
 import { ProvisioningError } from "../../lib/provisioning/provisioner"
-import type { ProvisionTarget } from "../../lib/provisioning/provisioner"
 import { provisioner } from "../../lib/provisioning/provider"
-import { fleetIn } from "../modules"
+import { fleetIn, provisioningIn } from "../modules"
+
+const HEARTBEAT_MS = 60_000
 import { provisionStep } from "./step"
 import { contextOf } from "./target"
 
@@ -17,7 +18,18 @@ import { contextOf } from "./target"
 /** "Şimdi yedekle", and the upgrade's first act: never undone (a backup harms nothing). */
 export const backupStep = provisionStep("backup", async (input, container) => {
   const { target } = await contextOf(container, input.tenant_id)
-  const taken = await provisioner().backup(target)
+  // Review M1: a long backup keeps its run alive, so no second run opens beside it
+  const beat = setInterval(() => {
+    void provisioningIn(container)
+      .heartbeat(input.run_id)
+      .catch(() => undefined)
+  }, HEARTBEAT_MS)
+  let taken
+  try {
+    taken = await provisioner().backup(target)
+  } finally {
+    clearInterval(beat)
+  }
   return {
     status: "succeeded",
     created: false,
@@ -43,6 +55,8 @@ export const backupStep = provisionStep("backup", async (input, container) => {
  *   audit 4.8): upgrading a shop is always that order's first half.
  * - this provisioner can start the shop on it (local: the compiled
  *   backend's stamp is the target; `provisioning.release_not_built`)
+ * - the shop runs (`provisioning.shop_not_running`): one stopped on
+ *   purpose is started by hand, never by an upgrade
  */
 export const releaseStep = provisionStep("release", async (input, container) => {
   const { target } = await contextOf(container, input.tenant_id)
@@ -62,6 +76,10 @@ export const releaseStep = provisionStep("release", async (input, container) => 
   if (compareVersions(wanted.version, own) > 0) {
     throw new ProvisioningError("provisioning.release_ahead_of_control_plane")
   }
+  // Review L3: a shop stopped on purpose is not brought up by an upgrade
+  if (!(await provisioner().probe(target)).running) {
+    throw new ProvisioningError("provisioning.shop_not_running")
+  }
   const built = await provisioner().availableRelease(target)
   if (!built || !sameRelease(built, wanted)) {
     throw new ProvisioningError("provisioning.release_not_built")
@@ -80,13 +98,14 @@ export const releaseStep = provisionStep("release", async (input, container) => 
 })
 
 /**
- * 3. The shop stopped for its migrations. Undone (a later step failed):
- * started again, so a failed upgrade leaves the shop serving as before;
- * the migrations are backward compatible (docs/08: expand → migrate →
- * contract), so the old code runs on them.
+ * 3. The shop stopped for its migrations. Not undone (review M2): locally
+ * every shop runs the one build, already the target, so a start after a
+ * failed migration would run the new code on a half-migrated database. A
+ * failure leaves the shop stopped with the failed step's code; the backup
+ * taken just before is the way back (runbook), "Başlat" the way forward.
  */
-export const upgradeStopStep = provisionStep<ProvisionTarget>(
-  // Its own name: the stop run's step has no undo
+export const upgradeStopStep = provisionStep(
+  // Its own name: the run kinds' steps are told apart on the run's page
   "upgrade_stop",
   async (input, container) => {
     const { target } = await contextOf(container, input.tenant_id)
@@ -94,14 +113,11 @@ export const upgradeStopStep = provisionStep<ProvisionTarget>(
       return { status: "skipped", created: false, output: { running: false } }
     }
     await provisioner().stop(target)
-    return { status: "succeeded", created: true, output: { running: false }, undo: target }
-  },
-  async (target) => {
-    await provisioner().start(target)
+    return { status: "succeeded", created: false, output: { running: false } }
   }
 )
 
-/** 5. Started on the new release; not undone here (the stop's undo keeps it up). */
+/** 5. Started on the new release; not undone (a failed health check leaves it up, said why). */
 export const upgradeStartStep = provisionStep("upgrade_start", async (input, container) => {
   const { target } = await contextOf(container, input.tenant_id)
   if ((await provisioner().probe(target)).running) {

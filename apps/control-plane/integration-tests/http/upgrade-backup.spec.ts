@@ -235,7 +235,7 @@ medusaIntegrationTestRunner({
       expect(fakeState().shops.get(shop.id)).toMatchObject({ running: true, backups: [] })
     })
 
-    it("stops at a failed migration, starts the shop again and keeps the backup", async () => {
+    it("stops at a failed migration, leaves the shop stopped and keeps the backup", async () => {
       const shop = await liveShop()
       await target(shop.id, "0.0.0")
       fakeState().failOn = "runTenantCommand:migrate"
@@ -244,13 +244,23 @@ medusaIntegrationTestRunner({
       expect(statusOf(run)).toEqual({
         release: "succeeded",
         backup: "succeeded",
-        upgrade_stop: "compensated",
+        upgrade_stop: "succeeded",
         migrate: "failed",
         upgrade_start: "pending",
         health: "pending",
       })
-      expect(fakeState().shops.get(shop.id)).toMatchObject({ running: true })
+      // Review M2: never the new code on a half-migrated database
+      expect(fakeState().shops.get(shop.id)).toMatchObject({ running: false })
       expect(fakeState().shops.get(shop.id)?.backups).toHaveLength(1)
+    })
+
+    it("never brings up a shop stopped on purpose", async () => {
+      const shop = await liveShop()
+      await target(shop.id, "0.0.0")
+      expect((await start(shop.id, "/stop")).status).toBe("succeeded")
+      const run = await start(shop.id, "/upgrade")
+      expect(run.error_code).toBe("provisioning.shop_not_running")
+      expect(fakeState().shops.get(shop.id)).toMatchObject({ running: false, backups: [] })
     })
 
     it("upgrades only a shop that sells or keeps running; backs up a suspended one", async () => {

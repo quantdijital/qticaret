@@ -1,5 +1,5 @@
 import { constants, existsSync } from "node:fs"
-import { access, readFile, readdir, stat } from "node:fs/promises"
+import { access, readFile, readdir, rm, stat } from "node:fs/promises"
 import { delimiter, dirname, join } from "node:path"
 import { z } from "@medusajs/framework/zod"
 import { ProvisioningError } from "../provisioner"
@@ -58,26 +58,39 @@ export async function onPath(name: string, path: string = process.env["PATH"] ??
   return null
 }
 
+/** The dev compose's Postgres port on this machine (infra/docker/compose.dev.yml). */
+export const DEV_PG_PORT = "55432"
+
+/** A `.pgpass` field: `:` and `\\` escaped (libpq). */
+const passField = (value: string) => value.replace(/[\\:]/g, (char) => `\\${char}`)
+
 /**
  * How the script reaches Postgres: `CP_LOCAL_PG_EXEC` when set; else this
- * machine's `pg_dump` with the administrative login in libpq's variables
- * (the child's environment only, never an argument); else the dev
- * container, as the runbook says.
+ * machine's `pg_dump` with the administrative login (the password in a
+ * 0600 `.pgpass` beside the backups, `PGPASSFILE`, removed after the run:
+ * never an argument or an environment value every child inherits); else
+ * the dev container, only when the administrative URL is that container's
+ * port (review L5: never another server's database by mistake).
  */
-export async function postgresEnv(plan: Pick<BackupPlan, "adminUrl" | "pgExec">) {
+export async function postgresEnv(
+  plan: Pick<BackupPlan, "adminUrl" | "pgExec">,
+  passFile: string
+): Promise<Record<string, string>> {
   if (plan.pgExec) {
     return { PG_EXEC: plan.pgExec }
   }
+  const url = new URL(plan.adminUrl)
   if ((await onPath("pg_dump")) && (await onPath("psql"))) {
-    const url = new URL(plan.adminUrl)
-    return {
-      PGHOST: url.hostname.replace(/^\[|\]$/g, ""),
-      PGPORT: url.port || "5432",
-      PGUSER: decodeURIComponent(url.username),
-      PGPASSWORD: decodeURIComponent(url.password),
-    }
+    const host = url.hostname.replace(/^\[|\]$/g, "")
+    const port = url.port || "5432"
+    const user = decodeURIComponent(url.username)
+    await writePrivateFile(
+      passFile,
+      `${[host, port, "*", user, decodeURIComponent(url.password)].map(passField).join(":")}\n`
+    )
+    return { PGHOST: host, PGPORT: port, PGUSER: user, PGPASSFILE: passFile }
   }
-  if (await onPath("docker")) {
+  if (url.port === DEV_PG_PORT && (await onPath("docker"))) {
     return { PG_EXEC: DEV_PG_EXEC }
   }
   throw new ProvisioningError("provisioning.backup_pg_dump_missing")
@@ -155,29 +168,35 @@ export async function runBackup(plan: BackupPlan): Promise<BackupSummary> {
   // Public keys only: the script itself refuses a file that holds a secret key
   await writePrivateFile(plan.recipientsFile, `${plan.recipients.join("\n")}\n`)
   const started = Date.now()
-  const result = await runCommand({
-    cli: "",
-    program: bash,
-    args: [
-      plan.script,
-      "--db",
-      plan.database,
-      "--recipients",
-      plan.recipientsFile,
-      "--out",
-      plan.outDir,
-      ...(plan.filesDir ? ["--files", plan.filesDir] : []),
-    ],
-    // The backups' folder, made with the recipients file above
-    cwd: dirname(plan.recipientsFile),
-    env: {
-      PATH: process.env["PATH"] ?? "/usr/bin:/bin",
-      HOME: process.env["HOME"] ?? plan.outDir,
-      ...(await postgresEnv(plan)),
-    },
-    timeoutMs: BACKUP_TIMEOUT_MS,
-    logFile: plan.logFile,
-  })
+  const passFile = join(dirname(plan.recipientsFile), ".pgpass")
+  let result
+  try {
+    result = await runCommand({
+      cli: "",
+      program: bash,
+      args: [
+        plan.script,
+        "--db",
+        plan.database,
+        "--recipients",
+        plan.recipientsFile,
+        "--out",
+        plan.outDir,
+        ...(plan.filesDir ? ["--files", plan.filesDir] : []),
+      ],
+      // The backups' folder, made with the recipients file above
+      cwd: dirname(plan.recipientsFile),
+      env: {
+        PATH: process.env["PATH"] ?? "/usr/bin:/bin",
+        HOME: process.env["HOME"] ?? plan.outDir,
+        ...(await postgresEnv(plan, passFile)),
+      },
+      timeoutMs: BACKUP_TIMEOUT_MS,
+      logFile: plan.logFile,
+    })
+  } finally {
+    await rm(passFile, { force: true })
+  }
   if (!result.ok) {
     throw new ProvisioningError(
       result.timed_out ? "provisioning.backup_timeout" : "provisioning.backup_failed"
