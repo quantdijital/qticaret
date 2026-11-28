@@ -101,7 +101,7 @@ export type ApplyPresetResult = z.infer<typeof applyPresetResultSchema>
  * sample: how many products and categories it made, how many of the pack's
  * hidden categories it showed. `already_loaded`: the set is there already
  * (exits 0). `unknown_samples`: this build has no samples for the pack, or
- * the shop was not given the pack; it exits 1.
+ * the shop was not given the pack; it exits 0 too, so its reason is read.
  */
 export const loadSamplesResultSchema = z.discriminatedUnion("status", [
   z

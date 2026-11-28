@@ -144,7 +144,12 @@ export async function POST(
     },
   })
   noteAuditResource(req, tenant.id)
-  noteAuditChanges(req, { slug: { to: slug }, status: { to: tenant.status } })
+  noteAuditChanges(req, {
+    slug: { to: slug },
+    status: { to: tenant.status },
+    // Security review 2026-11-29 D1: the choice that writes sample products at setup
+    ...(sample_catalog ? { sample_catalog: { to: true } } : {}),
+  })
   if (package_id) {
     // Its first plan document, kept for its setup (C10) and its first pull (Ek C9)
     await reissuePlanDocuments(req.scope, [tenant.id])

@@ -153,6 +153,16 @@ medusaIntegrationTestRunner({
       expect(tenant.status).toBe("active")
       expect(tenant.sample_catalog_loaded_at).toBeNull()
       expect(fakeSamples().get(made.id)).toBeUndefined()
+
+      // Security review D2: the shop's own reason is read (a pack whose samples this build lacks)
+      const other = await shop({ sector_pack: WITHOUT.code })
+      await tenants().updateTenants({ id: other.id, sample_catalog: true })
+      const unknown = await create(other.id)
+      expect(unknown.status).toBe("succeeded")
+      expect(stepOf(unknown)).toMatchObject({
+        status: "skipped",
+        error_code: "provisioning.load_samples_unknown",
+      })
     })
 
     it("forgets the load with a failed run, and the retry counts it loaded", async () => {

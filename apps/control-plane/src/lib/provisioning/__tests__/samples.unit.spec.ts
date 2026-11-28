@@ -48,11 +48,11 @@ describe("the wizard's sample products", () => {
     }
     const given = { [WITH.code]: WITH.version, [WITHOUT.code]: WITHOUT.version }
     expect(loadFakeSamples("ten_a", WITH.code, {})).toMatchObject({
-      ok: false,
+      ok: true,
       result: { status: "unknown_samples" },
     })
     expect(loadFakeSamples("ten_a", WITHOUT.code, given)).toMatchObject({
-      ok: false,
+      ok: true,
       result: { status: "unknown_samples" },
     })
     expect(loadFakeSamples("ten_a", WITH.code, given)).toMatchObject({

@@ -5,7 +5,7 @@ import type { CommandResult } from "./provisioner"
  * The tests' shop for `load-samples` (beside `fake-provisioner.ts`): which
  * shops have which pack's samples, on `globalThis` as the fake's own state.
  * As the shop's script: no samples for the pack, or a pack the shop was not
- * given, prints `unknown_samples` and exits 1; a set already there prints
+ * given, prints `unknown_samples` (exit 0); a set already there prints
  * `already_loaded`; otherwise the set's counts.
  */
 
@@ -18,9 +18,9 @@ export function fakeSamples(): Map<string, Set<string>> {
   return holder[KEY]
 }
 
-const answer = (result: unknown, ok = true): CommandResult => ({
-  ok,
-  exit_code: ok ? 0 : 1,
+const answer = (result: unknown): CommandResult => ({
+  ok: true,
+  exit_code: 0,
   timed_out: false,
   duration_ms: 1,
   result,
@@ -33,7 +33,7 @@ export function loadFakeSamples(
 ): CommandResult {
   const samples = sectorPack(pack)?.samples
   if (!samples || !Object.hasOwn(packsApplied, pack)) {
-    return answer({ status: "unknown_samples" }, false)
+    return answer({ status: "unknown_samples" })
   }
   const loaded = fakeSamples().get(tenantId) ?? new Set<string>()
   if (loaded.has(pack)) {

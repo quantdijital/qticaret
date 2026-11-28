@@ -54,8 +54,9 @@ const print = (result: LoadSamplesResult): void => {
  * record is marked as a sample, so the owner removes them from that card.
  * A failure part way takes back what it made. Prints one result line
  * (`QT_TENANT_RESULT {...}`); no samples for the pack prints
- * `unknown_samples` and exits 1; a set already here prints
- * `already_loaded`. Recorded in the audit log as the system's.
+ * `unknown_samples`, a set already here `already_loaded`, both exiting 0
+ * (any other failure exits non-zero). Recorded in the audit log as the
+ * system's.
  */
 export default async function loadSamples({ container, args }: ExecArgs): Promise<void> {
   const pack = samplesPackArg(args)
@@ -66,10 +67,8 @@ export default async function loadSamples({ container, args }: ExecArgs): Promis
     if (!refusal) {
       throw error
     }
+    // An answer, not a crash: exits 0 so the provisioner reads why (security review D2)
     print({ status: refusal })
-    if (refusal === "unknown_samples") {
-      process.exitCode = 1
-    }
     return
   }
   const { result } = await loadSampleCatalogWorkflow(container).run({ input: { pack } })
