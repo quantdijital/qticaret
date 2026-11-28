@@ -49,6 +49,14 @@ export const STYLE_KIT = {
    * between asterisks in the accent face's italic (Rota's reference).
    */
   section_title: ["plain", "serif_accent"],
+  /**
+   * S11 (adr/0067 Ek 2026-11-28): the words the shop put between asterisks
+   * in a home section's heading; `none` today's (the asterisks go, the
+   * words read as the heading's own), `primary` in the shop's main colour,
+   * `accent` in its accent colour (with either `section_title`; on a dark
+   * ground the main colour gives way to the heading's own ink).
+   */
+  title_accent: ["none", "primary", "accent"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type StyleKitField = keyof typeof STYLE_KIT
@@ -71,6 +79,7 @@ export const STYLE_KIT_DEFAULTS: Readonly<StyleKit> = {
   page_width: "standard",
   accent_ink: "auto",
   section_title: "plain",
+  title_accent: "none",
 }
 
 /** The attribute a step off the default is marked with on the theme's root element. */

@@ -87,7 +87,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": "İlham veren rotalar",
+      "title": "İlham veren *rotalar*",
       "intro": null,
       "eyebrow": "Popüler rotalar",
       "more": {
@@ -163,7 +163,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "carousel",
-      "title": "Bu sezon en çok seçilenler",
+      "title": "Bu sezon *en çok seçilenler*",
       "source": {
         "kind": "best_sellers",
         "days": 90
@@ -291,7 +291,7 @@
         "align": null,
         "width": null
       },
-      "title": "Yakında yola çıkıyoruz",
+      "title": "Yakında *yola çıkıyoruz*",
       "intro": "Önümüzdeki haftaların kalkışları; yeri azalanlar işaretli. Tarihinizi seçip yerinizi ayırtın.",
       "source": {
         "kind": "all"
@@ -565,7 +565,7 @@
       "starts_at": null,
       "ends_at": null,
       "variant": "grid",
-      "title": "Yol notları",
+      "title": "Yol *notları*",
       "limit": 3
     }
   ],

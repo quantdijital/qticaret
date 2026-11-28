@@ -112,6 +112,7 @@ describe("theme section", () => {
       page_width: "standard",
       accent_ink: "auto",
       section_title: "plain",
+      title_accent: "none",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)

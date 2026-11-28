@@ -20,6 +20,7 @@ describe("the style kit", () => {
       page_width: ["standard", "narrow"],
       accent_ink: ["auto", "light"],
       section_title: ["plain", "serif_accent"],
+      title_accent: ["none", "primary", "accent"],
     })
     expect(STYLE_KIT_FIELDS).toEqual([
       "menu_style",
@@ -31,6 +32,7 @@ describe("the style kit", () => {
       "page_width",
       "accent_ink",
       "section_title",
+      "title_accent",
     ])
   })
 
@@ -53,6 +55,7 @@ describe("the style kit", () => {
       "data-page-width",
       "data-accent-ink",
       "data-section-title",
+      "data-title-accent",
     ])
   })
 

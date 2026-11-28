@@ -26,4 +26,5 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   page_width: true,
   accent_ink: true,
   section_title: true,
+  title_accent: true,
 }

@@ -29,4 +29,5 @@ export const styleKitView = (settings: StyleKit): StyleKit => ({
   page_width: settings.page_width,
   accent_ink: settings.accent_ink,
   section_title: settings.section_title,
+  title_accent: settings.title_accent,
 })

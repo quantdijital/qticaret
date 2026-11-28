@@ -10949,6 +10949,16 @@
               "serif_accent": "Büyük, eğik vurgulu"
             },
             "hint": "Ana sayfa bölümlerinin başlıkları. Standart, temanın kendi başlığıdır. Büyük, eğik vurgulu'da başlık büyük ve ince yazılır; başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\") vurgu yazı tipinin eğik hâliyle gelir."
+          },
+          "title_accent": {
+            "label": "Başlık vurgusu",
+            "term": "title_accent",
+            "steps": {
+              "none": "Yok",
+              "primary": "Ana renk",
+              "accent": "Vurgu rengi"
+            },
+            "hint": "Başlıkta yıldız arasına aldığınız kelimeler (\"En *sevilen* turlar\"). Yok'ta yıldızlar silinir, kelimeler başlığın kendisi gibi görünür. Ana renk ya da Vurgu rengi'nde bu kelimeler o renkle yazılır; açık bir vurgu rengi açık zeminde zor okunur, o zaman Ana renk'i seçin."
           }
         },
         "card": "Ürün kartı",

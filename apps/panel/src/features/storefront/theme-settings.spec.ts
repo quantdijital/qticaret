@@ -81,6 +81,7 @@ const SAVED: ThemeSettings = {
   page_width: "standard",
   accent_ink: "auto",
   section_title: "plain",
+  title_accent: "none",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -113,6 +114,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       page_width: "standard",
       accent_ink: "auto",
       section_title: "plain",
+      title_accent: "none",
     })
   })
 })
@@ -187,6 +189,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       page_width: "standard",
       accent_ink: "auto",
       section_title: "plain",
+      title_accent: "none",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })

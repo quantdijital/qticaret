@@ -10949,6 +10949,16 @@
               "serif_accent": "Large, italic accent"
             },
             "hint": "The home sections' headings. Plain is the theme's own. Large, italic accent sets them large and light; the words you put between asterisks (\"Our *favourite* tours\") come in the accent face's italic."
+          },
+          "title_accent": {
+            "label": "Heading accent",
+            "term": "title_accent",
+            "steps": {
+              "none": "None",
+              "primary": "Main colour",
+              "accent": "Accent colour"
+            },
+            "hint": "The words you put between asterisks in a heading (\"Our *favourite* tours\"). None drops the asterisks and the words read as the heading's own. Main colour or Accent colour sets those words in that colour; a light accent reads poorly on a light ground, so pick Main colour then."
           }
         },
         "card": "Product card",

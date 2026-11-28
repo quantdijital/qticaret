@@ -103,6 +103,7 @@ describe("themeSettings", () => {
       page_width: "narrow",
       accent_ink: "light",
       section_title: "serif_accent",
+      title_accent: "primary",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -187,6 +188,7 @@ describe("themeSettings", () => {
       page_width: "standard",
       accent_ink: "auto",
       section_title: "plain",
+      title_accent: "none",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -429,6 +431,7 @@ describe("themeView", () => {
         page_width: "standard",
         accent_ink: "auto",
         section_title: "plain",
+        title_accent: "none",
       },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")
