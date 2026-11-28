@@ -69,6 +69,22 @@ describe("the proxy on a preview page", () => {
     expect((await visit(`/onizleme/${session}/baska`)).headers.get(header)).toBeNull()
   })
 
+  it("passes a saved look's link on (adr/0064): framed by the panel only, noindex, never stored", async () => {
+    const look = `sfd_01JLOOK.to51q5.${"c".repeat(43)}`
+    const header = "x-middleware-request-x-qt-layout-preview"
+    const response = await visit(`/onizleme/${look}?gorsel=1`)
+    expect(response.headers.get(header)).toBe(look)
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow")
+    expect(response.headers.get("cache-control")).toBe("private, no-store")
+    expect(response.headers.get("content-security-policy")).toContain(
+      "frame-ancestors http://localhost:5173"
+    )
+    expect((await visit(`/onizleme/${look}/hizli-bakis?id=prod_01`)).headers.get(header)).toBe(look)
+    // Another form of id is no look's: no design header
+    const forged = await visit(`/onizleme/sfd_01J-LOOK.to51q5.${"c".repeat(43)}`)
+    expect(forged.headers.get(header)).toBeNull()
+  })
+
   it("drops a preview header a visitor sends itself", async () => {
     const forged = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
     // The shop's own quick view answers and a product page: neither reads a draft

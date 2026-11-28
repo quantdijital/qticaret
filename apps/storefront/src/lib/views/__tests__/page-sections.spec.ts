@@ -13,6 +13,8 @@ const reads = vi.hoisted(() => ({
   sessionPage: vi.fn(),
 }))
 vi.mock("@/lib/store-api/page-layout", () => reads)
+const designs = vi.hoisted(() => ({ designPreview: vi.fn(), designPageLayout: vi.fn() }))
+vi.mock("@/lib/store-api/design-preview", () => designs)
 const views = vi.hoisted(() => ({
   sectionViews: vi.fn((sections: { id: string }[]) =>
     Promise.resolve(sections.map((section) => ({ id: section.id, type: "help" })))
@@ -35,6 +37,7 @@ const { contentSections, draftContentPage, pageLayoutOf } = await import("../pag
 
 const LINK = `sfl_01ABC.to51q5.${"a".repeat(43)}`
 const SESSION = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+const LOOK = `sfd_01JLOOK.to51q5.${"c".repeat(43)}`
 const ID = "cnt_01KABC"
 // One list since adr/0073 Ek 2026-11-19 (2) K1, the page's text among its sections
 const LAYOUT = {
@@ -90,6 +93,15 @@ describe("a content page's layout", () => {
     reads.sessionPage.mockResolvedValue({ page: LAYOUT, entry: ENTRY })
     expect(await pageLayoutOf(ID)).toBe(LAYOUT)
     expect(reads.sessionPage).toHaveBeenCalledWith(SESSION, ID)
+    expect(reads.publishedPageLayout).not.toHaveBeenCalled()
+  })
+
+  it("reads a saved look's page through its own link (adr/0064)", async () => {
+    on(LOOK)
+    designs.designPageLayout.mockResolvedValue(LAYOUT)
+    expect(await pageLayoutOf(ID)).toBe(LAYOUT)
+    expect(designs.designPageLayout).toHaveBeenCalledWith(LOOK, ID)
+    expect(reads.previewPageLayout).not.toHaveBeenCalled()
     expect(reads.publishedPageLayout).not.toHaveBeenCalled()
   })
 
@@ -200,7 +212,7 @@ describe("a content page in draft (`?icerik=`)", () => {
   })
 
   it("never opens on a signed design link or a live page", async () => {
-    for (const token of [LINK, null]) {
+    for (const token of [LINK, LOOK, null]) {
       on(token)
       expect(await draftContentPage(ID)).toBeNull()
     }

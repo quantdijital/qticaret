@@ -10,6 +10,8 @@ const requests = vi.hoisted(() => ({
   storefrontSettings: vi.fn(),
 }))
 vi.mock("@/lib/store-api/requests", () => requests)
+const designs = vi.hoisted(() => ({ designPreview: vi.fn(), designPageLayout: vi.fn() }))
+vi.mock("@/lib/store-api/design-preview", () => designs)
 
 const { currentLayout, layoutPreviewToken, previewLayoutOf } = await import("../layout")
 
@@ -62,5 +64,21 @@ describe("the preview's design", () => {
 
     requests.layoutSession.mockResolvedValue({ layout: DRAFT, edition: null })
     expect(await currentLayout()).toBe(DRAFT)
+  })
+
+  it("opens a saved look's link (adr/0064) and falls back to what is live once it ends", async () => {
+    const LOOK = `sfd_01JLOOK.to51q5.${"c".repeat(43)}`
+    const SAVED = { id: "look" }
+    on(LOOK)
+    expect(await layoutPreviewToken()).toBe(LOOK)
+    designs.designPreview.mockResolvedValue(SAVED)
+    expect(await currentLayout()).toBe(SAVED)
+    expect(designs.designPreview).toHaveBeenCalledWith(LOOK)
+    expect(requests.layoutPreview).not.toHaveBeenCalled()
+    designs.designPreview.mockResolvedValue(null)
+    expect(await currentLayout()).toBe(LIVE)
+    // An id of another form is no look's
+    on(`sfd_01J-LOOK.to51q5.${"c".repeat(43)}`)
+    expect(await layoutPreviewToken()).toBeNull()
   })
 })
