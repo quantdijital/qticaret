@@ -127,7 +127,8 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostTenantType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { name, slug, package_id, sector_pack, preset, storefront_contact } = req.validatedBody
+  const { name, slug, package_id, sector_pack, preset, storefront_contact, sample_catalog } =
+    req.validatedBody
   const { result: tenant } = await createTenantWorkflow(req.scope).run({
     input: {
       name,
@@ -139,10 +140,16 @@ export async function POST(
       // adr/0063 task 2.7: not said, the pack's first look; null, none
       preset: preset === undefined ? defaultPresetOf(sector_pack ?? DEFAULT_SECTOR_PACK) : preset,
       storefront_contact: storefront_contact ?? true,
+      sample_catalog: sample_catalog ?? false,
     },
   })
   noteAuditResource(req, tenant.id)
-  noteAuditChanges(req, { slug: { to: slug }, status: { to: tenant.status } })
+  noteAuditChanges(req, {
+    slug: { to: slug },
+    status: { to: tenant.status },
+    // Security review 2026-11-29 D1: the choice that writes sample products at setup
+    ...(sample_catalog ? { sample_catalog: { to: true } } : {}),
+  })
   if (package_id) {
     // Its first plan document, kept for its setup (C10) and its first pull (Ek C9)
     await reissuePlanDocuments(req.scope, [tenant.id])

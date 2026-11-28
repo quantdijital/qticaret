@@ -27,6 +27,7 @@
     "tenant:apply-pack": "medusa exec ./src/scripts/apply-pack.ts",
     "tenant:apply-preset": "medusa exec ./src/scripts/apply-preset.ts",
     "tenant:apply-profile": "medusa exec ./src/scripts/apply-profile.ts",
+    "tenant:load-samples": "medusa exec ./src/scripts/load-samples.ts",
     "seed:demo": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo.ts",
     "seed:demo-orders": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo-orders.ts",
     "demo:remove": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/remove-demo.ts",

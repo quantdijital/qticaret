@@ -23,7 +23,8 @@ export interface ProvisionTarget {
  * (the profile holds the company's details: never on a command line);
  * `invite-owner`'s result carries the owner's link, which the caller uses
  * and forgets. `apply-preset` writes a ready-made look into the shop's
- * design (adr/0063 §7, task 2.7), never its demo content.
+ * design (adr/0063 §7, task 2.7), never its demo content. `load-samples`
+ * loads its pack's sample catalogue, every record marked as a sample.
  */
 export type TenantCommand =
   | { name: "migrate" }
@@ -33,6 +34,7 @@ export type TenantCommand =
   | { name: "plan-import"; document: string }
   | { name: "apply-preset"; pack: string; preset: string }
   | { name: "apply-profile"; document: string }
+  | { name: "load-samples"; pack: string }
 
 export const TENANT_COMMANDS = [
   "migrate",
@@ -42,6 +44,7 @@ export const TENANT_COMMANDS = [
   "plan-import",
   "apply-preset",
   "apply-profile",
+  "load-samples",
 ] as const satisfies readonly TenantCommand["name"][]
 
 /**

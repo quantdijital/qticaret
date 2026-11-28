@@ -23,6 +23,8 @@ export const COMMAND_TIMEOUT_MS: Readonly<Record<TenantCommand["name"], number>>
   // Uploads the look's pictures through the media pipeline
   "apply-preset": 10 * MINUTE,
   "apply-profile": 2 * MINUTE,
+  // Every sample product's pictures through the media pipeline
+  "load-samples": 20 * MINUTE,
 }
 
 // The result line comes last; what came before it is the command's log
@@ -77,6 +79,11 @@ export function argvOf(cmd: TenantCommand): string[] {
       ]
     case "apply-profile":
       return ["exec", "./src/scripts/apply-profile.js"]
+    case "load-samples":
+      if (!PACK.test(cmd.pack)) {
+        throw new ProvisioningError("provisioning.sector_pack_unknown")
+      }
+      return ["exec", "./src/scripts/load-samples.js", `pack=${cmd.pack}`]
   }
 }
 

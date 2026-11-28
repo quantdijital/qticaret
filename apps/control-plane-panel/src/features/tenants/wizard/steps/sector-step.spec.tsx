@@ -20,7 +20,7 @@ describe("SectorStep: the packs the control plane offers (C12)", () => {
         ? { status: 200, body: SECTOR_PACKS }
         : { status: 404, body: {} }
     )
-    let draft: ShopDraft = { ...filledDraft(), preset: "tezgah" }
+    let draft: ShopDraft = { ...filledDraft(), preset: "tezgah", sample_catalog: true }
     const change = vi.fn((next: (current: ShopDraft) => ShopDraft) => {
       draft = next(draft)
     })
@@ -42,6 +42,8 @@ describe("SectorStep: the packs the control plane offers (C12)", () => {
     expect(draft.sector_pack).toBe("cutlery")
     // Another pack: its own first look until one is chosen (adr/0063 task 2.7)
     expect(draft.preset).toBe("")
+    // Samples are the pack's own: asked for again under the new pack's looks
+    expect(draft.sample_catalog).toBe(false)
     expect(sent.filter((call) => call.path === "/admin/cp/sector-packs")).toHaveLength(1)
   })
 

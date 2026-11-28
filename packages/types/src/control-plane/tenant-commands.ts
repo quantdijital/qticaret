@@ -95,6 +95,29 @@ export const applyPresetResultSchema = z.discriminatedUnion("status", [
 ])
 export type ApplyPresetResult = z.infer<typeof applyPresetResultSchema>
 
+/**
+ * `tenant:load-samples pack=`: the pack's sample catalogue loaded into the
+ * shop (the wizard's "Örnek ürünlerle başla"), every record marked as a
+ * sample: how many products and categories it made, how many of the pack's
+ * hidden categories it showed. `already_loaded`: the set is there already
+ * (exits 0). `unknown_samples`: this build has no samples for the pack, or
+ * the shop was not given the pack; it exits 0 too, so its reason is read.
+ */
+export const loadSamplesResultSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("loaded"),
+      pack: z.string().regex(/^[a-z][a-z0-9-]{1,39}$/),
+      products: count,
+      categories_made: count,
+      categories_opened: count,
+    })
+    .strict(),
+  z.object({ status: z.literal("already_loaded") }).strict(),
+  z.object({ status: z.literal("unknown_samples") }).strict(),
+])
+export type LoadSamplesResult = z.infer<typeof loadSamplesResultSchema>
+
 /** The line a command prints for `result`. */
 export const tenantResultLine = (result: object): string =>
   `${TENANT_RESULT_PREFIX}${JSON.stringify(result)}`

@@ -124,7 +124,12 @@ medusaIntegrationTestRunner({
         expect(cutlery?.description).toContain("namlu çeliği")
         expect(cutlery?.name).toBe("Bıçak ve çatal-bıçak")
         // adr/0063 task 2.7: with its looks for the wizard's "Görünüm" step (presets.spec.ts)
-        expect(cutlery).toEqual({ ...CUTLERY, presets: expect.any(Array) as unknown[] })
+        expect(cutlery).toEqual({
+          ...CUTLERY,
+          presets: expect.any(Array) as unknown[],
+          // The wizard offers "Örnek ürünlerle başla" only for a pack with samples
+          sample_products: 0,
+        })
         for (const n of Object.values(cutlery?.counts ?? {})) {
           expect(n).toBeGreaterThan(0)
         }

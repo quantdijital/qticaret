@@ -13,6 +13,7 @@ import {
   DEFAULT_SECTOR_PACK,
   isKnownSectorPack,
   isPresetOf,
+  sampleProductsOf,
 } from "../../../../lib/tenants/sector-packs"
 import { slugProblem } from "../../../../lib/tenants/slug"
 
@@ -82,11 +83,20 @@ export const PostTenant = z
     preset: z.string().min(1).max(40).nullable().optional(),
     // Review L2: the owner's e-mail and phone as the storefront contact (default: yes)
     storefront_contact: z.boolean().optional(),
+    // The pack's sample catalogue at setup (default: no); only a pack with samples
+    sample_catalog: z.boolean().optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
     if (value.preset && !isPresetOf(value.sector_pack ?? DEFAULT_SECTOR_PACK, value.preset)) {
       ctx.addIssue({ code: "custom", path: ["preset"], message: "cp.preset_unknown" })
+    }
+    if (value.sample_catalog && sampleProductsOf(value.sector_pack ?? DEFAULT_SECTOR_PACK) === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["sample_catalog"],
+        message: "cp.sample_catalog_unavailable",
+      })
     }
   })
 export type PostTenantType = z.infer<typeof PostTenant>

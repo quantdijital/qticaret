@@ -1555,6 +1555,15 @@ Sihirbazın "Görünüm" adımı küçük resimleri üst panelin kendi paket kop
 
 Açık: Kurulum sekmesinde "Görünümü yeniden uygula" (yalnız yayında düzen yokken) bu ekte yok; ayrı iş.
 
+## Ek: kurulumda örnek ürünler (2026-11-29)
+
+Sihirbazın "Görünüm" adımında **"Örnek ürünlerle başla"** seçeneği: yalnız örnek kataloğu (`packages/sector-packs/packs/<kod>/samples/`) olan pakette görünür, varsayılan kapalı. `GET /admin/cp/sector-packs` her paket için `sample_products` (örnek ürün sayısı) döner; paket adı kodda geçmez.
+
+- **Kayıt:** `tenant.sample_catalog` (istendi mi, varsayılan `false`) ve `sample_catalog_loaded_at` (migration `Migration20261129090000`). `POST /admin/cp/tenants` örneksiz pakette `sample_catalog: true`'yu 400 `cp.sample_catalog_unavailable` ile reddeder.
+- **Komut:** §3.4'ün kapalı listesine **`load-samples pack=`** → `tenant:load-samples pack=<kod>`. Kod `argvOf`'ta paket kalıbıyla denetlenir. Mağaza, panelin "Örnek içerik" kartıyla aynı denetimi (`planSampleLoad`) ve aynı workflow'u (`sample-catalog-load`) arka plan işi olmadan çalıştırır (mağaza henüz hizmette değil); her kayıt örnek olarak işaretlenir. Sonuç `loadSamplesResultSchema` ile okunur: `loaded` (sayılar), `already_loaded`, `unknown_samples` (ikisi de çıkış 0: neden okunur). Süre sınırı 20 dk.
+- **Adım:** `preset → sample_catalog → plan_document …`. İstenmediyse, mağaza etkinse (görünüm gibi, inceleme L1) ya da daha önce yüklendiyse atlanır. Yükleme başarısızsa (red, süre aşımı, okunamayan sonuç) kurulum **bozulmaz**: adım `skipped` olur, hata kodu uyarı olarak kaydedilir (`provisioning.load_samples_*`); kurulum sekmesi uyarıyı gösterir. Yeniden deneme: bitmemiş kurulumun yeniden denenmesi ya da mağaza sahibinin "Örnek içerik" kartı. `already_loaded` yüklenmiş sayılır. Telafi yalnız `sample_catalog_loaded_at`'i siler (yeni veritabanı kendi telafisiyle düşer; düşmediyse yeniden deneme `already_loaded` alır).
+- Yeni çalışma türü eklenmedi (`provisioning_run.kind` kısıtına dokunulmaz); etkin mağazaya üst panelden örnek yükleme bu ekte yok.
+
 ## Ek: C21 kurulum durumu kullanım raporunda (2026-11-28)
 
 Denetim maddesi 1.2: operatör "mağaza satışa hazır mı, nerede takıldı" sorusunu üst panelden görsün. Mağazanın kurulum ilerlemesi bugüne kadar üst panele hiç gelmiyordu.

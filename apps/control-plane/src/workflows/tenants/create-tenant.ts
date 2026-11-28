@@ -16,6 +16,8 @@ export interface CreateTenantInput {
   preset?: string | null
   /** The owner's e-mail and phone as the storefront contact at setup (default: yes). */
   storefront_contact?: boolean
+  /** Its pack's sample catalogue at setup (loaded by the setup's `sample_catalog` step). */
+  sample_catalog?: boolean
 }
 
 /** The record, its subdomain and first status row; undone, it is gone again, children too. */

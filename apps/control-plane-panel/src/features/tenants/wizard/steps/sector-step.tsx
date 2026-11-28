@@ -32,7 +32,12 @@ export function SectorStep({ draft, change }: StepProps) {
           value={draft.sector_pack}
           onValueChange={(value) => {
             // Another pack, its own looks: its first until one is chosen
-            change((current) => ({ ...current, sector_pack: value, preset: "" }))
+            change((current) => ({
+              ...current,
+              sector_pack: value,
+              preset: "",
+              sample_catalog: false,
+            }))
           }}
           className="grid items-stretch gap-3 md:grid-cols-2"
         >

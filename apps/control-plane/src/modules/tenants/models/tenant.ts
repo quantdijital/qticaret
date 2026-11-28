@@ -43,6 +43,15 @@ export const Tenant = model
      * off: only the company's details are handed over.
      */
     storefront_contact: model.boolean().default(true),
+    /**
+     * Whether the shop starts with its pack's sample catalogue (the
+     * wizard's "Örnek ürünlerle başla", off by default; only a pack with
+     * samples), loaded by the setup's `sample_catalog` step after the look,
+     * and when the shop loaded it (null until it has). A load that fails
+     * is a warning, never the setup's failure.
+     */
+    sample_catalog: model.boolean().default(false),
+    sample_catalog_loaded_at: model.dateTime().nullable(),
     /** The staff member who made the record; null for the system (a script). */
     created_by: model.text().nullable(),
     /**

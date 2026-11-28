@@ -23,7 +23,15 @@ export interface SectorPackSummary {
   }
   /** Its ready-made looks (adr/0063 task 2.7), the first the default; none for most packs. */
   presets: PresetSummary[]
+  /** How many products its sample catalogue holds; 0: "Örnek ürünlerle başla" is not offered. */
+  sample_products: number
 }
+
+/** The number of sample products a pack offers; 0 when it has none or the list lacks it. */
+export const sampleProductsOf = (
+  packs: readonly SectorPackSummary[] | undefined,
+  pack: string
+): number => packs?.find((each) => each.code === pack)?.sample_products ?? 0
 
 /** A ready-made look as the new-shop wizard shows it (its name and text are the pack's own). */
 export interface PresetSummary {
