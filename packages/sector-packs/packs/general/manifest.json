@@ -1,7 +1,7 @@
 {
   "format": "quant-sector-pack",
   "code": "general",
-  "version": 2,
+  "version": 3,
   "name": "Genel",
   "description": "Her sektöre uyan sade bir başlangıç: ürünün malzemesi, ölçüleri, ağırlığı, üretim yeri ve garantisi için tek bir özellik şablonu. Kategori, ayar ve SEO şablonlarına dokunmaz."
 }

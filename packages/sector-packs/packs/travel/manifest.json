@@ -1,7 +1,7 @@
 {
   "format": "quant-sector-pack",
   "code": "travel",
-  "version": 2,
+  "version": 3,
   "name": "Tur ve seyahat",
   "description": "Tarihli tur, gezi ve etkinlik satan mağazalar için: tarihli satış (kalkış ve kontenjan) ayarları açılır, yeni ürün tarihli hizmet olarak başlar; süre, kalkış yeri, filtrelenebilir gidilecek yer ve dahil olanlarla bir özellik şablonu, önerilen kategori iskeleti (dört ana tur türü vitrinde açık, alt türler gizli), taslak iptal koşulları sayfası ve üç hazır görünüm (Rota, Vadi, Patika)."
 }
