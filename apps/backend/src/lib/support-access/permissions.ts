@@ -43,7 +43,6 @@ export const SUPPORT_JOB_TYPES: ReadonlySet<string> = new Set([
   "catalog.export",
   "catalog.import",
   "content.link_rewrite",
-  "promotion.codes",
   "sample_catalog.load",
   "seo.audit",
   "seo.sitemap",
@@ -140,6 +139,9 @@ export const SUPPORT_DENIED: readonly Rule[] = [
   { methods: "*", path: "/admin/products/imports*" },
 ]
 
+/** Lists read a page at a time (`SUPPORT_PAGE_MAX`). */
+const PAGED = /^\/admin\/(customers|customer-groups|orders|order-board)(\/|$)/
+
 /** Settings sections it writes: only those `allowed.ts` names, the deny list's never. */
 const SECTION_WRITE = /^\/admin\/platform-settings\/([^/]+)$/
 
@@ -153,6 +155,8 @@ export type SupportDecision =
 export interface SupportFacts extends RequestFacts {
   /** A list's `limit`, when the request asks one. */
   pageSize?: number | undefined
+  /** The `fields` the request asks to expand, lower-cased. */
+  fields?: string | undefined
 }
 
 const decodedPath = (path: string): string =>
@@ -197,12 +201,16 @@ export function decideSupport(
       ? { allowed: true }
       : { allowed: false, reason: "support_denied" }
   }
-  // Customers a page at a time, never the whole list in one answer
+  // Customers and orders a page at a time, never the whole list in one answer (re-review N-2)
   if (
-    decoded.startsWith("/admin/customers") &&
+    PAGED.test(decoded) &&
     facts.pageSize !== undefined &&
     !(facts.pageSize <= SUPPORT_PAGE_MAX)
   ) {
+    return { allowed: false, reason: "support_denied" }
+  }
+  // A customer group's members are customers: never expanded through `fields`
+  if (decoded.startsWith("/admin/customer-groups") && (facts.fields ?? "").includes('customer')) {
     return { allowed: false, reason: "support_denied" }
   }
   return matches(SUPPORT_ALLOWED, verb, path, facts)

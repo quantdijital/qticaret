@@ -98,6 +98,17 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     expect(allowed(method, path)).toBe(false)
   })
 
+  it("reads orders and customer groups a page at a time, never a group's customers (re-review N-2)", () => {
+    for (const path of ["/admin/orders", "/admin/order-board", "/admin/customer-groups"]) {
+      expect(decideSupport("GET", path, { pageSize: 50 }).allowed).toBe(true)
+      expect(decideSupport("GET", path, { pageSize: 500 }).allowed).toBe(false)
+    }
+    expect(decideSupport("GET", "/admin/customer-groups", { fields: "id,name" }).allowed).toBe(true)
+    expect(
+      decideSupport("GET", "/admin/customer-groups/cusgroup_1", { fields: "*customers" }).allowed
+    ).toBe(false)
+  })
+
   it("reads customers a page at a time (security review L3)", () => {
     expect(decideSupport("GET", "/admin/customers", { pageSize: 50 }).allowed).toBe(true)
     expect(decideSupport("GET", "/admin/customers", {}).allowed).toBe(true)
@@ -112,6 +123,8 @@ describe("decideSupport (adr/0061 Ek Destek erişimi, Karar 5)", () => {
     expect(allowed("POST", "/admin/async-jobs", "order.export")).toBe(false)
     expect(allowed("POST", "/admin/async-jobs", "report.export")).toBe(false)
     expect(allowed("POST", "/admin/async-jobs", "a.new_kind")).toBe(false)
+    // Codes handed out in bulk are a discount in the shop's name (re-review N-3)
+    expect(allowed("POST", "/admin/async-jobs", "promotion.codes")).toBe(false)
     expect(allowed("POST", "/admin/async-jobs")).toBe(false)
   })
 

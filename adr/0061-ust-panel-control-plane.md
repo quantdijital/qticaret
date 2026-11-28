@@ -1433,9 +1433,9 @@ Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPL
 | --- | --- |
 | Personel, sahiplik, roller | `/admin/users*`, `/admin/invites*`, `/admin/staff*` (`GET /admin/staff/me` hariç), kendi hesabı uçları (`/admin/staff/me/*`), `/admin/alerts/read` |
 | Ödeme ve entegrasyon sırları | `/admin/integrations/credentials*`, `/admin/api-access*`, `/admin/api-keys*`, `/admin/webhooks*`, `/admin/messaging/smtp*`, `/admin/einvoice/parasut*`, `/admin/einvoice/birfatura*`, `/admin/google/connect`, `DELETE /admin/google` |
-| Ayar bölümleri (yazma) | `accounting`, `invoicing`, `bank_transfer`, `payments`, `payment_links`, `security`, `maintenance`, `legal` (yasal kimlik: unvan, vergi no, MERSİS, KEP) |
+| Ayar bölümleri (yazma) | `accounting`, `invoicing`, `bank_transfer`, `payments`, `payment_links`, `security`, `maintenance`, `legal` (yasal kimlik: unvan, vergi no, MERSİS, KEP), `store` (iletişim alanları), `notifications` (personel e-posta listesi); izin listesi ayrıca yalnız görünüm ve katalog bölümlerini yazdırır, `seo` içinde `canonical_host` hariç |
 | Para ve vergi | `/admin/vat-rates*` yazma, `/admin/ai/credits/orders`, `/admin/plan*` |
-| Müşteri kişisel verisi toplu çıkışı | `/admin/order-board/export`, `/admin/customer-export`, `/admin/customers/:id/billing-profile/reveal`, `/admin/booking-travelers/:id/reveal`, `/admin/booking-travelers/search`, `/admin/customers/:id/privacy-requests`, `/admin/privacy-requests*` yazma, `/admin/invoices/:id/pdf`, `/admin/invoices/:id/draft`; iş kuyruğunda yalnız izin listesi (`catalog.*`, `seo.*`, `content.link_rewrite`, `promotion.codes`, `sample_catalog.load`, `ai.alt_text`, `ai.image_edit`, `ai.seo_fill`) |
+| Müşteri kişisel verisi toplu çıkışı | `/admin/order-board/export`, `/admin/customer-export`, `/admin/customers/:id/billing-profile/reveal`, `/admin/booking-travelers/:id/reveal`, `/admin/booking-travelers/search`, `/admin/customers/:id/privacy-requests`, `/admin/privacy-requests*` yazma, `/admin/invoices/:id/pdf`, `/admin/invoices/:id/draft`; iş kuyruğunda yalnız izin listesi (`catalog.*`, `seo.*`, `content.link_rewrite`, `sample_catalog.load`, `ai.alt_text`, `ai.image_edit`, `ai.seo_fill`) |
 | Mağazanın dışa açılması | `/admin/migrations*` (müşteri içe aktarımı dahil), `/admin/features/ai.reviews`, `ai.assistant`, `ai.storefront_search` yazma |
 | Denetim ve iç kayıtlar | `/admin/audit-log*`, `/admin/workflows-executions*`, `/admin/notifications*` |
 | Medusa Admin | `/admin/layouts*`, `/admin/views*` yazma |
@@ -1510,7 +1510,7 @@ Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPL
 - **M2 (kapatıldı):** iade, tahsilat, hediye kartı, mağaza kredisi, ödeme bağlantısı, toplu ileti ve yasal metin yazmaları kapalı; destek oturumu görünüm ve katalog içindir.
 - **L1, L2 (kapatıldı):** oturum dizininin kendi ömrü kaldırıldı (kısa oturum uzun olanın kaydını silmiyordu); Redis işlem içi hatası artık atılır (sahip "bitti" görüp oturum açık kalamaz).
 - **L3 (kabul edildi):** `/support` bağlantısı tarayıcıdaki mevcut oturumun yerine geçer. Bağlantıyı yalnız üst panel personeli üretir, izin bu mağazaya bağlıdır ve sahibe bildirim gider; onay adımı eklenmedi.
-- **Bilgi:** anahtar varsayılan açık (Karar 4, sahibin onayına sunuldu); yeniden doğrulama kanıtı geçerlilik süresi içinde tekrar kullanılabilir (üst panelin genel kuralı).
+- **Bilgi:** anahtar varsayılan açık (Karar 4, sahibin onayına sunuldu). ~~Yeniden doğrulama kanıtı geçerlilik süresi içinde tekrar kullanılabilir (üst panelin genel kuralı).~~ Geçersiz: ikinci incelemenin L1 düzeltmesiyle destek izni için kanıt tek kullanımlık.
 
 ### Ek: Destek erişimi ikinci güvenlik incelemesi (2026-11-28)
 
@@ -1532,3 +1532,10 @@ Adı geçmeyen her uç (yenisi dahil) 403 `support.forbidden` alır. Önce `REPL
 - **L2 (belgelendi):** bağlantı taşıyıcı bağlantıdır; açan kişiyi mağazaya sokar. Sohbete, e-postaya ya da destek kaydına yapıştırılmaz. Üst panel penceresi bunu yazar. Bağlantı bir kez açılır ve 5 dakika içinde kullanılmalıdır.
 - **L3 (kapatıldı):** müşteri listesi sayfa başına en çok 50 kayıt.
 - **Sonuç:** destek oturumunda Ayarlar menüsü (`settings` yeteneği) görünmez. Görünüm ve katalog ayarları API'de açıktır; menüye ayrı yetenek eklenmesi sahip isterse yapılır.
+
+### Ek: Destek erişimi üçüncü inceleme düzeltmeleri (2026-11-28)
+
+- **N-1 (kapatıldı):** destek oturumu `seo` bölümünü yazabilir, ama `canonical_host`'u değiştiremez. Bu alan e-posta bağlantılarını, e-fatura web adresini, yasal metin adreslerini, Turnstile host'unu ve site haritasını yönetir. Saklı değerden farklı bir host gönderilirse 403 `support.canonical_host` döner; aynı değer geçer (URL biçimi kuralı gibi). Birim testi var.
+- **N-2 (kapatıldı):** sayfa sınırı (en çok 50) müşterilerle birlikte siparişler, sipariş panosu ve müşteri gruplarına da uygulanır. Müşteri gruplarında `fields` ile müşteri açılması reddedilir. Testli.
+- **N-3 (kapatıldı):** `promotion.codes` destek iş türleri listesinden çıktı (toplu indirim kodu mağaza adına indirimdir).
+- **N-4:** Karar 5 tablosuna `store` ve `notifications` bölümleri eklendi. İkinci incelemedeki "kanıt tekrar kullanılabilir" bilgisi geçersiz olarak işaretlendi.
