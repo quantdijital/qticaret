@@ -259,6 +259,12 @@
         },
         {
           "$handle": "category:doga-ve-trekking"
+        },
+        {
+          "$handle": "category:gunubirlik-turlar"
+        },
+        {
+          "$handle": "category:gemi-turlari"
         }
       ],
       "show_count": true,
